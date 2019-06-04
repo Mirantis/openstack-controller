@@ -1,0 +1,86 @@
+apiVersion: lcm.mirantis.com/v1alpha1
+kind: OpenStackDeployment
+metadata:
+  name: osh-dev
+  labels: {}
+  annotations: {}
+spec:
+  # base set of values to base on
+  base: null
+  # common values to pass into all charts and services
+  common:
+    charts:
+      repo:
+      version:
+    images:
+      repo:
+    openstack:
+      version: rocky
+      values: {}
+    infra:
+      values: {}
+  features:
+    keystone:
+      iam:
+        enabled: True
+    glance:
+      direct_upload: False
+      backend: ceph
+    cinder:
+      volume:
+        backend: ceph
+      backup:
+        backend: radosgw
+    neutron:
+      backend: ovs
+    nova:
+      image_backend: ceph
+  services:
+    database:
+      enabled: True
+      chart:
+        repo: ""
+        version: ""
+      values: {}
+    messaging:
+      enabled: True
+      chart:
+        repo: ""
+        version: ""
+      values: {}
+    keystone:
+      enabled: True
+      chart:
+        repo: ""
+        version: ""
+      values: {}
+    glance:
+      enabled: True
+      chart:
+        repo: ""
+        version: ""
+      values: {}
+    cinder:
+      enabled: True
+      chart:
+        repo: ""
+        version: ""
+      values: {}
+    neutron:
+      chart:
+        repo: ""
+        version: ""
+      values: {}
+      enabled: True
+    nova:
+      chart:
+        repo: ""
+        version: ""
+      values: {}
+      enabled: True
+    horizon:
+      chart:
+        repo: ""
+        version: ""
+      values: {}
+      enabled: True

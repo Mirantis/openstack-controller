@@ -1,2 +1,3 @@
 # koshkaas
-Kopf-based operator for OpenStack-Helm deployment in KaaS
+
+**K**opf-based operator to deploy **O**pen**S**tack-**H**elm charts onto **KaaS**.
