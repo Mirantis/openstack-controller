@@ -11,7 +11,7 @@ spec:
   common:
     charts:
       repositories:
-        name: oscore
+      - name: oscore
         url: "https://artifactory.mcp.mirantis.net/artifactory/helm-dev-virtual/"
       version:
     images:
