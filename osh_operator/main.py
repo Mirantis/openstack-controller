@@ -1,11 +1,18 @@
 import kopf
 import kubernetes
+import os
+import pathlib
 import yaml
 
 
 @kopf.on.create('lcm.mirantis.com', 'v1alpha1', 'openstackdeployments')
 async def create(body, spec, logger, **kwargs):
-    with open('/opt/operator/osh_operator/templates/stein/ingress.yaml') as f:
+    root_templates = '/opt/osh_operator'
+    if os.getenv('OSH_OPERATOR_DEV', None):
+        root_templates = __file__
+    p = pathlib.Path(
+        root_templates).parent / 'templates' / 'stein' / 'ingress.yaml'
+    with p.open() as f:
         data = yaml.safe_load(f)
     data['spec']['repositories'] = spec['common']['charts']['repositories']
 
