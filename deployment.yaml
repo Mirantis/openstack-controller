@@ -1,19 +1,21 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: koshkaas-operator
+  name: osh-operator
 spec:
   replicas: 1
   selector:
     matchLabels:
-      application: koshkaas-operator
+      application: osh-operator
   template:
     metadata:
       labels:
-        application: koshkaas-operator
+        application: osh-operator
     spec:
-      serviceAccountName: koshkaas-account
+      serviceAccountName: osh-operator-account
       containers:
       - name: the-only-one
-        image: pshchelo/koshkaas:latest
-        command: ['kopf', 'run', '--standalone', '-m', 'koshkaas.main']
+        # image: pshchelo/osh-operator:latest
+        image: localhost:32000/osh-operator:registry
+        imagePullPolicy: Always
+        command: ['kopf', 'run', '--standalone', '-m', 'osh_operator.main']

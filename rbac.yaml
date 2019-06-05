@@ -3,12 +3,12 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   namespace: default
-  name: koshkaas-account
+  name: osh-operator-account
 ---
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: ClusterRole
 metadata:
-  name: koshkaas-role-cluster
+  name: osh-operator-role-cluster
 rules:
 
   # NOTE(pas-ha) do not need it for now, running single instance
@@ -21,12 +21,16 @@ rules:
   - apiGroups: [lcm.mirantis.com]
     resources: [openstackdeployments]
     verbs: [list, watch]
+
+  - apiGroups: [lcm.mirantis.com]
+    resources: [helmbundles]
+    verbs: [list, watch]
 ---
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: Role
 metadata:
   namespace: default
-  name: koshkaas-role-namespaced
+  name: osh-operator-role-namespaced
 rules:
 
   # NOTE(pas-ha) do not need it for now, running single instance
@@ -46,37 +50,33 @@ rules:
     verbs: [list, watch, patch]
 
   # Application: other resources it produces and manipulates.
-  # Here, we create Jobs+PVCs+Pods, but we do not patch/update/delete them ever.
-  - apiGroups: [batch, extensions]
-    resources: [jobs]
-    verbs: [create]
-  - apiGroups: [""]
-    resources: [pods, persistentvolumeclaims]
-    verbs: [create]
+  - apiGroups: [lcm.mirantis.com]
+    resources: [helmbundles]
+    verbs: [create, get, list, watch, patch, delete]
 ---
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: ClusterRoleBinding
 metadata:
-  name: koshkaas-rolebinding-cluster
+  name: osh-operator-rolebinding-cluster
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: koshkaas-role-cluster
+  name: osh-operator-role-cluster
 subjects:
   - kind: ServiceAccount
-    name: koshkaas-account
+    name: osh-operator-account
     namespace: kubesystem
 ---
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: RoleBinding
 metadata:
   namespace: default
-  name: koshkaas-rolebinding-namespaced
+  name: osh-operator-rolebinding-namespaced
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
-  name: koshkaas-role-namespaced
+  name: osh-operator-role-namespaced
 subjects:
   - kind: ServiceAccount
-    name: koshkaas-account
+    name: osh-operator-account
 ...

@@ -10,7 +10,9 @@ spec:
   # common values to pass into all charts and services
   common:
     charts:
-      repo:
+      repositories:
+        name: oscore
+        url: "https://artifactory.mcp.mirantis.net/artifactory/helm-dev-virtual/"
       version:
     images:
       repo:
