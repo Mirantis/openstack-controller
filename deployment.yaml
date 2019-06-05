@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: koshkaas-operator
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      application: koshkaas-operator
+  template:
+    metadata:
+      labels:
+        application: koshkaas-operator
+    spec:
+      serviceAccountName: koshkaas-account
+      containers:
+      - name: the-only-one
+        image: pshchelo/koshkaas:latest
+        command: ['kopf', 'run', '--standalone', '-m', 'koshkaas.main']
