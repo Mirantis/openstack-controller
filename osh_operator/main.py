@@ -8,12 +8,16 @@ async def create(body, spec, logger, **kwargs):
     with open('/opt/operator/osh_operator/templates/stein/ingress.yaml') as f:
         data = yaml.safe_load(f)
     data['spec']['repositories'] = spec['common']['charts']['repositories']
+
+    kopf.adopt(data, body)
+
     api = kubernetes.client.CustomObjectsApi()
     obj = api.create_namespaced_custom_object('lcm.mirantis.com',
                                               'v1alpha1', 'default',
                                               'helmbundles',
                                               body=data)
-    kopf.adopt(obj, body)
+
+    logger.info(f"HelmBundle child is created: %s", obj)
     return {'message': 'created!'}
 
 
@@ -24,6 +28,6 @@ async def update(body, spec, **kwargs):
 
 
 @kopf.on.delete('lcm.mirantis.com', 'v1alpha1', 'openstackdeployments')
-async def delete(body, spec, **kwargs):
-    print(f"And here we are! Creating: {spec}")
-    return {'message': 'by world'}  # will be the new status
+async def delete(meta, logger, **kwargs):
+    logger.info(f"deleting {meta['name']}")
+    return {'message': 'by world'}
