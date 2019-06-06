@@ -1,0 +1,19 @@
+apiVersion: lcm.mirantis.com/v1alpha1
+kind: HelmBundle
+metadata:
+  name: openstack-messaging
+spec:
+  repositories:
+  - name: oscore
+    url: ""
+  releases:
+  - name: openstack-rabbitmq
+    chart: oscore/rabbitmq
+    version: 0.1.0
+    namespace: default
+    values:
+      pod:
+        replicas:
+          server: 1
+      manifests:
+        network_policy: false

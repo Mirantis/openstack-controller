@@ -17,10 +17,11 @@ spec:
     images:
       repo:
     openstack:
-      version: rocky
+      version: stein
       values: {}
     infra:
       values: {}
+  # features that would enable coordinated changes to values of several charts
   features:
     keystone:
       iam:
@@ -37,52 +38,24 @@ spec:
       backend: ovs
     nova:
       image_backend: ceph
+  # enabled services and their specific configuration
   services:
-    database:
+    ingress:
+      enabled: True
+      chart:
+        repo: ""
+        version: ""
+    memcached:
+      enabled: True
+    mariadb:
       enabled: True
       chart:
         repo: ""
         version: ""
       values: {}
-    messaging:
+    rabbitmq:
       enabled: True
       chart:
         repo: ""
         version: ""
       values: {}
-    keystone:
-      enabled: True
-      chart:
-        repo: ""
-        version: ""
-      values: {}
-    glance:
-      enabled: True
-      chart:
-        repo: ""
-        version: ""
-      values: {}
-    cinder:
-      enabled: True
-      chart:
-        repo: ""
-        version: ""
-      values: {}
-    neutron:
-      chart:
-        repo: ""
-        version: ""
-      values: {}
-      enabled: True
-    nova:
-      chart:
-        repo: ""
-        version: ""
-      values: {}
-      enabled: True
-    horizon:
-      chart:
-        repo: ""
-        version: ""
-      values: {}
-      enabled: True
