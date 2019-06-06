@@ -1,3 +1,4 @@
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -18,4 +19,5 @@ spec:
         # image: pshchelo/osh-operator:latest
         image: localhost:32000/osh-operator:registry
         imagePullPolicy: Always
-        command: ['kopf', 'run', '--standalone', '-m', 'osh_operator.main']
+        command: ['kopf', 'run', '-m', 'osh_operator.main']
+...

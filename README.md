@@ -2,7 +2,7 @@
 
 Operator to deploy **O**pen**S**tack-**H**elm charts onto KaaS
 
-## Example
+## Usage
 
 deploy CustomResourceDefinition
 
@@ -12,11 +12,15 @@ configure RBAC
 
 `kubectl apply -f rbac.yaml`
 
+configure peering objects
+
+`kubectl apply -f peering.yaml`
+
 deploy operator
 
 `kubectl apply -f deployment.yaml`
 
-instantiate custom resource
+instantiate example custom resource
 
 `kubeclt apply -f res.yaml`
 
