@@ -5,36 +5,40 @@ import pathlib
 import yaml
 
 
-@kopf.on.create('lcm.mirantis.com', 'v1alpha1', 'openstackdeployments')
+@kopf.on.create("lcm.mirantis.com", "v1alpha1", "openstackdeployments")
 async def create(body, spec, logger, **kwargs):
-    root_templates = '/opt/osh_operator'
-    if os.getenv('OSH_OPERATOR_DEV', None):
+    root_templates = "/opt/osh_operator"
+    if os.getenv("OSH_OPERATOR_DEV", None):
         root_templates = __file__
-    p = pathlib.Path(
-        root_templates).parent / 'templates' / 'stein' / 'ingress.yaml'
+    p = (
+        pathlib.Path(root_templates).parent
+        / "templates"
+        / "stein"
+        / "ingress.yaml"
+    )
     with p.open() as f:
         data = yaml.safe_load(f)
-    data['spec']['repositories'] = spec['common']['charts']['repositories']
+    data["spec"]["repositories"] = spec["common"]["charts"]["repositories"]
 
     kopf.adopt(data, body)
 
     api = kubernetes.client.CustomObjectsApi()
-    obj = api.create_namespaced_custom_object('lcm.mirantis.com',
-                                              'v1alpha1', 'default',
-                                              'helmbundles',
-                                              body=data)
+    obj = api.create_namespaced_custom_object(
+        "lcm.mirantis.com", "v1alpha1", "default", "helmbundles", body=data
+    )
 
     logger.info(f"HelmBundle child is created: %s", obj)
-    return {'message': 'created!'}
+    return {"message": "created!"}
 
 
-@kopf.on.update('lcm.mirantis.com', 'v1alpha1', 'openstackdeployments')
-async def update(body, spec, **kwargs):
-    print(f"And here we are! Creating: {spec}")
-    return {'message': 'new world'}  # will be the new status
+@kopf.on.update("lcm.mirantis.com", "v1alpha1", "openstackdeployments")
+async def update(body, spec, logger, diff, patch, **kwargs):
+    logger.info(f"Update DIFF is {diff}")
+    logger.info(f"Update PATCH is {patch}")
+    return {"message": "update called"}
 
 
-@kopf.on.delete('lcm.mirantis.com', 'v1alpha1', 'openstackdeployments')
+@kopf.on.delete("lcm.mirantis.com", "v1alpha1", "openstackdeployments")
 async def delete(meta, logger, **kwargs):
     logger.info(f"deleting {meta['name']}")
-    return {'message': 'by world'}
+    return {"message": "by world"}
