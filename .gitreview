@@ -1,0 +1,6 @@
+[gerrit]
+host=gerrit.mcp.mirantis.com
+port=29418
+project=mcp/osh-operator.git
+defaultremote=origin
+defaultbranch=master
