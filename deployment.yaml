@@ -15,7 +15,7 @@ spec:
     spec:
       serviceAccountName: osh-operator-account
       containers:
-      - name: the-only-one
+      - name: osh-controller
         # image: pshchelo/osh-operator:latest
         image: localhost:32000/osh-operator:registry
         imagePullPolicy: Always
