@@ -1,0 +1,48 @@
+apiVersion: lcm.mirantis.com/v1alpha1
+kind: HelmBundle
+metadata:
+  name: openstack-networking
+spec:
+  repositories:
+  - name: oscore
+    url: 'https://artifactory.mcp.mirantis.net/artifactory/helm-dev-virtual/'
+  releases:
+  - name: openstack-openvswitch
+    chart: oscore/openvswitch
+    version: 0.1.0
+    namespace: default
+    values:
+      images:
+        tags:
+          openvswitch_db_server: docker.io/openstackhelm/openvswitch:latest-debian
+          openvswitch_vswitchd: docker.io/openstackhelm/openvswitch:latest-debian
+  - name: openstack-neutron
+    chart: oscore/neutron
+    version: 0.1.0
+    namespace: default
+    values:
+      network:
+        interface:
+          tunnel: ens3
+      conf:
+        paste:
+          app:neutronversions:
+            paste.app_factory: neutron.pecan_wsgi.app:versions_factory
+        neutron:
+          DEFAULT:
+            l3_ha: False
+            max_l3_agents_per_router: 1
+            l3_ha_network_type: vxlan
+            dhcp_agents_per_network: 1
+        plugins:
+          ml2_conf:
+            ml2_type_flat:
+              flat_networks: public
+          openvswitch_agent:
+            agent:
+              tunnel_types: vxlan
+            ovs:
+              bridge_mappings: public:br-ex
+          linuxbridge_agent:
+            linux_bridge:
+              bridge_mappings: public:br-ex

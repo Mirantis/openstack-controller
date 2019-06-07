@@ -1,0 +1,16 @@
+apiVersion: lcm.mirantis.com/v1alpha1
+kind: HelmBundle
+metadata:
+  name: openstack-dahsboard
+spec:
+  repositories:
+  - name: oscore
+    url: 'https://artifactory.mcp.mirantis.net/artifactory/helm-dev-virtual/'
+  releases:
+  - name: openstack-horizon
+    chart: oscore/horizon
+    version: 0.1.0
+    namespace: default
+    values:
+      manifests:
+        network_policy: false

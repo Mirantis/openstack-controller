@@ -1,0 +1,34 @@
+apiVersion: lcm.mirantis.com/v1alpha1
+kind: HelmBundle
+metadata:
+  name: openstack-image
+spec:
+  repositories:
+  - name: oscore
+    url: 'https://artifactory.mcp.mirantis.net/artifactory/helm-dev-virtual/'
+  releases:
+  - name: openstack-glance
+    chart: oscore/glance
+    version: 0.1.0
+    namespace: default
+    values:
+      pod:
+        replicas:
+          api: 1
+          registry: 1
+      storage: rbd
+      conf:
+        glance:
+          DEFAULT:
+            enable_v1_api: True
+            enable_v2_registry: True
+          glance_store:
+            rbd_store_crush_rule: replicated_ruleset
+      volume:
+        class_name: rook-ceph-block
+        size: 2Gi
+      ceph_client:
+        configmap: rook-ceph-config
+        user_secret_name: rook-ceph-admin-keyring
+      manifests:
+        network_policy: false
