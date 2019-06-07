@@ -1,8 +1,14 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: osh-system
+---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
   name: tiller
-  namespace: kube-system
+  namespace: osh-system
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
@@ -10,13 +16,13 @@ roleRef:
 subjects:
 - kind: ServiceAccount
   name: tiller
-  namespace: kube-system
+  namespace: osh-system
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: helm-controller-service
-  namespace: kube-system
+  namespace: osh-system
   labels:
     app: helm-controller
 spec:
@@ -30,7 +36,7 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: tiller
-  namespace: kube-system
+  namespace: osh-system
 ---
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
@@ -134,7 +140,7 @@ metadata:
   labels:
     app: helm-controller
   name: helm-controller
-  namespace: kube-system
+  namespace: osh-system
 spec:
   replicas: 1
   selector:
@@ -159,7 +165,7 @@ spec:
         - /tiller
         env:
         - name: TILLER_NAMESPACE
-          value: kube-system
+          value: helmbundle
         - name: TILLER_HISTORY_MAX
           value: "0"
         image: gcr.io/kubernetes-helm/tiller:v2.13.1
