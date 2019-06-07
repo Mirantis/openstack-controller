@@ -17,3 +17,5 @@ spec:
       pod:
         replicas:
           server: 1
+      volume:
+        class_name: rook-ceph-block

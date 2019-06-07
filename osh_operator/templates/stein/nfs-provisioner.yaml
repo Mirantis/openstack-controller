@@ -1,21 +1,18 @@
 apiVersion: lcm.mirantis.com/v1alpha1
 kind: HelmBundle
 metadata:
-  name: openstack-messaging
+  name: openstack-nfs-provisioner
 spec:
   repositories:
-  - name: oscore
+  - name: ""
     url: ""
   releases:
-  - name: openstack-rabbitmq
-    chart: oscore/rabbitmq
+  - name: nfs-provisioner
+    chart: oscore/nfs-provisioner
     version: 0.1.0
     namespace: default
     values:
-      pod:
-        replicas:
-          server: 1
+      storageclass:
+        name: general
       manifests:
         network_policy: false
-      volume:
-        class_name: rook-ceph-block
