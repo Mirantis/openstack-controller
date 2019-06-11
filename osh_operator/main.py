@@ -5,8 +5,23 @@ import kopf
 import kubernetes
 import yaml
 
+from osh_operator import utils
+
 
 ENV = jinja2.Environment(loader=jinja2.PackageLoader("osh_operator"))
+
+CHART_GROUP_MAPPING = {
+    "openstack": [
+        "cinder",
+        "glance",
+        "heat",
+        "horizon",
+        "keystone",
+        "neutron",
+        "nova",
+    ],
+    "infra": ["rabbitmq", "mariadb", "memcached", "openvswitch", "libvirt"],
+}
 
 
 def handle_service(service, *, body, meta, spec, logger, **kwargs):
@@ -20,6 +35,26 @@ def handle_service(service, *, body, meta, spec, logger, **kwargs):
     # or move to the templates themselves
     data["spec"]["repositories"] = spec["common"]["charts"]["repositories"]
     kopf.adopt(data, body)
+
+    # We have 4 level of hierarhy:
+    # 1. helm values.yaml - which is default
+    # 2. osh-operator crd charts section
+    # 3. osh-operator crd common/group section
+    # 4. osh_operator/<openstack_version>/<chart>.yaml
+
+    # The values are merged in this specific order.
+    for release in data["spec"]["releases"]:
+        chart_name = release["chart"].split("/")[-1]
+        for group, charts in CHART_GROUP_MAPPING.items():
+            if chart_name in charts:
+                utils.dict_merge(
+                    release["values"],
+                    spec["common"].get(group, {}).get("values", {}),
+                )
+        utils.dict_merge(
+            release["values"],
+            spec["services"].get(service, {}).get("values", {}),
+        )
 
     api = kubernetes.client.CustomObjectsApi()
     obj = api.create_namespaced_custom_object(
