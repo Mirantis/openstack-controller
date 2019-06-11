@@ -1,14 +1,26 @@
 import functools
 
+import deepmerge
 import jinja2
 import kopf
 import kubernetes
 import yaml
 
-from osh_operator import utils
-
 
 ENV = jinja2.Environment(loader=jinja2.PackageLoader("osh_operator"))
+
+merger = deepmerge.Merger(
+    # pass in a list of tuple, with the strategies you are looking to apply
+    # to each type.
+    # NOTE(pas-ha) We are handling results of yaml.safe_load and k8s api
+    # exclusively, thus only standard json-compatible collection data types
+    # will be present, so not botherting with collections.abc for now.
+    [(list, ["append"]), (dict, ["merge"])],
+    # next, choose the fallback strategies, applied to all other types:
+    ["override"],
+    # finally, choose the strategies in the case where the types conflict:
+    ["override"],
+)
 
 CHART_GROUP_MAPPING = {
     "openstack": [
@@ -34,18 +46,13 @@ def handle_service(service, *, body, meta, spec, logger, **kwargs):
     base_file = ENV.get_template(f"{os_release}/base.yaml").filename
     with open(base_file) as f:
         base = yaml.safe_load(f)
-    new_spec = {}
-    utils.dict_merge(new_spec, base)
-    utils.dict_merge(new_spec, spec)
-    spec = new_spec
-
+    spec = merger.merge(base, spec)
     text = tpl.render(body=body, meta=meta, spec=spec)
     data = yaml.safe_load(text)
 
     # FIXME(pas-ha) either move to dict merging stage before,
     # or move to the templates themselves
     data["spec"]["repositories"] = spec["common"]["charts"]["repositories"]
-    kopf.adopt(data, body)
 
     # We have 4 level of hierarhy:
     # 1. helm values.yaml - which is default
@@ -56,25 +63,26 @@ def handle_service(service, *, body, meta, spec, logger, **kwargs):
     # The values are merged in this specific order.
     for release in data["spec"]["releases"]:
         chart_name = release["chart"].split("/")[-1]
-        utils.dict_merge(
+        merger.merge(
             release, spec["common"].get("charts", {}).get("releases", {})
         )
         for group, charts in CHART_GROUP_MAPPING.items():
             if chart_name in charts:
-                utils.dict_merge(
+                merger.merge(
                     release, spec["common"].get(group, {}).get("releases", {})
                 )
-                utils.dict_merge(
+                merger.merge(
                     release["values"],
                     spec["common"].get(group, {}).get("values", {}),
                 )
 
-        utils.dict_merge(
+        merger.merge(
             release["values"],
             spec["services"].get(chart_name, {}).get("values", {}),
         )
 
-    logger.info(f"Creating HelmBUndle object: %s", data)
+    kopf.adopt(data, body)
+    logger.info(f"Creating HelmBundle object: %s", data)
     api = kubernetes.client.CustomObjectsApi()
     obj = api.create_namespaced_custom_object(
         "lcm.mirantis.com",

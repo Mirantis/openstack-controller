@@ -1,2 +1,3 @@
 kopf
 Jinja2>2.10
+deepmerge>=0.0.5
