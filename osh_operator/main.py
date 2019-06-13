@@ -6,6 +6,7 @@ import kopf
 import kubernetes
 import yaml
 
+# TODO(pas-ha) enable debug logging
 
 ENV = jinja2.Environment(loader=jinja2.PackageLoader("osh_operator"))
 
@@ -36,11 +37,11 @@ CHART_GROUP_MAPPING = {
     "infra": ["rabbitmq", "mariadb", "memcached", "openvswitch", "libvirt"],
 }
 
-
+# FIXME(pas-ha) combine apply and delete? use 'event' to drive the logic
 def apply_helmbundle_state(data):
     api = kubernetes.client.CustomObjectsApi()
     name = data["metadata"]["name"]
-    namespace = data["metadata"].get("namespace", "default")
+    namespace = data["metadata"]["namespace"]
 
     args = dict(
         group="lcm.mirantis.com",
@@ -64,11 +65,52 @@ def apply_helmbundle_state(data):
     return hb
 
 
-def handle_service(service, *, body, meta, spec, logger, **kwargs):
-    logger.info(f"found templates {ENV.list_templates()}")
+def delete_helmbundle(data):
+    api = kubernetes.client.CustomObjectsApi()
+    name = data["metadata"]["name"]
+    namespace = data["metadata"]["namespace"]
+
+    args = dict(
+        group="lcm.mirantis.com",
+        version="v1alpha1",
+        plural="helmbundles",
+        namespace=namespace,
+    )
+    current = None
+    try:
+        current = api.get_namespaced_custom_object(name=name, **args)
+    except Exception:  # FIXME(pas-ha) use more narrow exception for 404
+        pass
+    if current:
+        delete_options = {"propagation_policy": "Foreground"}
+        api.delete_namespaced_custom_object(
+            name=name, body=delete_options, **args
+        )
+
+
+def delete_service(service, *, body, meta, spec, logger, **kwargs):
+    logger.debug(f"found templates {ENV.list_templates()}")
     os_release = spec["common"]["openstack"]["version"]
     tpl = ENV.get_template(f"{os_release}/{service}.yaml")
-    logger.info(f"template file is {tpl.filename}")
+    logger.info(f"using template {tpl.filename}")
+
+    # NOTE(pas-ha) not merging anything as we only need correct name
+    # (hardcoded in the template) and namespace (will be populated by adopt)
+    # to delete the resource
+    text = tpl.render(body=body, meta=meta, spec=spec)
+    data = yaml.safe_load(text)
+    kopf.adopt(data, body)
+    delete_helmbundle(data)
+    # TODO(pas-ha) poll/retry for children to be deleted
+    kopf.info(body, reason="Delete", message=f"deleted {service}")
+
+
+def apply_service(service, *, body, meta, spec, logger, **kwargs):
+    logger.info(f"Applying config for {service}")
+    logger.debug(f"found templates {ENV.list_templates()}")
+    os_release = spec["common"]["openstack"]["version"]
+    tpl = ENV.get_template(f"{os_release}/{service}.yaml")
+    logger.info(f"Using template {tpl.filename}")
 
     # Merge operator defaults with user context.
     base_file = ENV.get_template(f"{os_release}/base.yaml").filename
@@ -115,40 +157,49 @@ def handle_service(service, *, body, meta, spec, logger, **kwargs):
     # NOTE(pas-ha) this sets the parent refs in child to point to our resource
     # so that cascading delete is handled by K8S itself
     kopf.adopt(data, body)
-    logger.info(f"Creating HelmBundle object: %s", data)
+    logger.debug(f"Creating HelmBundle object: %s", data)
     obj = apply_helmbundle_state(data)
     # TODO(pas-ha) poll/retry for children to be created/updated
-    logger.info(f"HelmBundle child is created: %s", obj)
+    logger.debug(f"HelmBundle child is created: %s", obj)
+    if kwargs["event"] == "create":
+        kopf.info(body, reason="Create", message=f"created {service}")
+    elif kwargs["event"] == "update":
+        kopf.info(body, reason="Update", message=f"updated {service}")
 
 
 @kopf.on.create("lcm.mirantis.com", "v1alpha1", "openstackdeployments")
-async def create(body, meta, spec, logger, **kwargs):
+async def create(body, meta, spec, **kwargs):
     # TODO(pas-ha) remember children in CRD
     service_fns = {}
     for service in spec.get("features", {}).get("services", []):
         service_fns[service] = functools.partial(
-            handle_service, service=service
+            apply_service, service=service
         )
     await kopf.execute(fns=service_fns)
-    return {"message": "created!"}
+    return {"message": "created"}
 
 
 @kopf.on.update("lcm.mirantis.com", "v1alpha1", "openstackdeployments")
 async def update(body, meta, spec, logger, **kwargs):
-    # TODO(pas-ha) handle deleted services
     logger.debug(f"event is {kwargs['event']}")
     logger.debug(f"status is {kwargs['status']}")
     logger.debug(f"patch is {kwargs['patch']}")
 
-    # NOTE(pas-ha) each diff is (op, (path, parts), old, new)
+    # NOTE(pas-ha) each diff is (op, (path, parts, ...), old, new)
     # we react only on metadata and spec changes,
     # anything else should be out of control of API user
     accept_update = ("metadata", "spec")
+    deleted_services = []
     needs_update = False
     for op, path, old, new in kwargs["diff"]:
         if path[0] in accept_update:
             logger.info(f"{op} {'.'.join(path)} from {old} to {new}")
             needs_update = True
+            if path == ("spec", "features", "services"):
+                # NOTE(pas-ha) something changed in services, check for deleted
+                # we expect services to be a list with unique items
+                deleted_services = set(old) - set(new)
+                logger.info(f"deleted services {' '.join(deleted_services)}")
     if not needs_update:
         logger.info(
             f"no {' or '.join(accept_update)} changes for {meta['name']}, "
@@ -159,11 +210,14 @@ async def update(body, meta, spec, logger, **kwargs):
     service_fns = {}
     for service in spec.get("features", {}).get("services", []):
         service_fns[service] = functools.partial(
-            handle_service, service=service
+            apply_service, service=service
+        )
+    for service in deleted_services:
+        service_fns[service + "_delete"] = functools.partial(
+            delete_service, service=service
         )
     await kopf.execute(fns=service_fns)
-    kopf.info(body, reason="Update", message=f"updated {meta['name']}")
-    return {"message": "success"}
+    return {"message": "updated"}
 
 
 @kopf.on.delete("lcm.mirantis.com", "v1alpha1", "openstackdeployments")
