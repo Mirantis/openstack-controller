@@ -165,7 +165,7 @@ spec:
         - /tiller
         env:
         - name: TILLER_NAMESPACE
-          value: helmbundle
+          value: osh-system
         - name: TILLER_HISTORY_MAX
           value: "0"
         image: gcr.io/kubernetes-helm/tiller:v2.13.1
