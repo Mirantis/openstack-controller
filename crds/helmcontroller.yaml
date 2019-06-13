@@ -189,8 +189,7 @@ spec:
         env:
         - name: TMPDIR
           value: /helm
-#        image: docker-prod-local.artifactory.mirantis.com/mirantis/kubernetes/lcm/lcm-controller:latest
-        image: docker-dev-local.docker.mirantis.net/mirantis/kubernetes/lcm/lcm-controller:v0.1.2-8_1559131276762
+        image: docker-prod-local.artifactory.mirantis.com/mirantis/kubernetes/lcm/lcm-controller:latest
         securityContext:
           readOnlyRootFilesystem: true
         volumeMounts:
