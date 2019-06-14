@@ -3,14 +3,10 @@ kind: HelmBundle
 metadata:
   name: openstack-compute
 spec:
-  repositories:
-  - name: oscore
-    url: 'https://artifactory.mcp.mirantis.net/artifactory/helm-dev-virtual/'
   releases:
   - name: openstack-libvirt
-    chart: oscore/libvirt
-    version: 0.1.0
-    namespace: default
+    chart: {{spec.common.charts.repo}}/libvirt
+    version: {{spec.common.charts.version}}
     values:
       images:
         tags:
@@ -21,9 +17,8 @@ spec:
         ceph:
           enabled: false
   - name: openstack-nova
-    chart: oscore/nova
-    version: 0.1.0
-    namespace: default
+    chart: {{spec.common.charts.repo}}/nova
+    version: {{spec.common.charts.version}}
     values:
       manifests:
         network_policy: false

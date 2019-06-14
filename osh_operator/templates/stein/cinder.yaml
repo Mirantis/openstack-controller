@@ -3,14 +3,10 @@ kind: HelmBundle
 metadata:
   name: openstack-block-storage
 spec:
-  repositories:
-  - name: oscore
-    url: 'https://artifactory.mcp.mirantis.net/artifactory/helm-dev-virtual/'
   releases:
   - name: openstack-cinder
-    chart: oscore/cinder
-    version: 0.1.0
-    namespace: default
+    chart: {{spec.common.charts.repo}}/cinder
+    version: {{spec.common.charts.version}}
     values:
       pod:
         replicas:

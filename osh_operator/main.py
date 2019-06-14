@@ -45,6 +45,7 @@ def handle_service(service, *, body, meta, spec, logger, **kwargs):
     # The values are merged in this specific order.
     for release in data["spec"]["releases"]:
         chart_name = release["chart"].split("/")[-1]
+        release["namespace"] = spec["common"]["charts"]["namespace"]
         for group, charts in CHART_GROUP_MAPPING.items():
             if chart_name in charts:
                 utils.dict_merge(

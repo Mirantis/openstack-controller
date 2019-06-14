@@ -3,14 +3,10 @@ kind: HelmBundle
 metadata:
   name: openstack-messaging
 spec:
-  repositories:
-  - name: oscore
-    url: ""
   releases:
   - name: openstack-rabbitmq
-    chart: oscore/rabbitmq
-    version: 0.1.0
-    namespace: default
+    chart: {{spec.common.charts.repo}}/rabbitmq
+    version: {{spec.common.charts.version}}
     values:
       pod:
         replicas:

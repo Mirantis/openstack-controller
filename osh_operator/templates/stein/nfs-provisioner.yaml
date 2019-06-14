@@ -3,14 +3,10 @@ kind: HelmBundle
 metadata:
   name: openstack-nfs-provisioner
 spec:
-  repositories:
-  - name: ""
-    url: ""
   releases:
   - name: nfs-provisioner
-    chart: oscore/nfs-provisioner
-    version: 0.1.0
-    namespace: default
+    chart: {{spec.common.charts.repo}}/nfs-provisioner
+    version: {{spec.common.charts.version}}
     values:
       storageclass:
         name: general

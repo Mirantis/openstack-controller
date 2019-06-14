@@ -11,9 +11,11 @@ spec:
   common:
     charts:
       repositories:
-      - name: oscore
+      - name: osh
         url: "https://artifactory.mcp.mirantis.net/artifactory/helm-dev-virtual/"
-      version:
+      version: 0.1.0
+      repo: osh
+      namespace: openstack
     images:
       repo:
     openstack:

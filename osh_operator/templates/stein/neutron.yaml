@@ -3,23 +3,18 @@ kind: HelmBundle
 metadata:
   name: openstack-networking
 spec:
-  repositories:
-  - name: oscore
-    url: 'https://artifactory.mcp.mirantis.net/artifactory/helm-dev-virtual/'
   releases:
   - name: openstack-openvswitch
-    chart: oscore/openvswitch
-    version: 0.1.0
-    namespace: default
+    chart: {{spec.common.charts.repo}}/openvswitch
+    version: {{spec.common.charts.version}}
     values:
       images:
         tags:
           openvswitch_db_server: docker.io/openstackhelm/openvswitch:latest-debian
           openvswitch_vswitchd: docker.io/openstackhelm/openvswitch:latest-debian
   - name: openstack-neutron
-    chart: oscore/neutron
-    version: 0.1.0
-    namespace: default
+    chart: {{spec.common.charts.repo}}/neutron
+    version: {{spec.common.charts.version}}
     values:
       network:
         interface:

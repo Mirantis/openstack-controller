@@ -3,14 +3,10 @@ kind: HelmBundle
 metadata:
   name: openstack-image
 spec:
-  repositories:
-  - name: oscore
-    url: 'https://artifactory.mcp.mirantis.net/artifactory/helm-dev-virtual/'
   releases:
   - name: openstack-glance
-    chart: oscore/glance
-    version: 0.1.0
-    namespace: default
+    chart: {{spec.common.charts.repo}}/glance
+    version: {{spec.common.charts.version}}
     values:
       pod:
         replicas:
