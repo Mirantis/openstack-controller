@@ -5,8 +5,7 @@ metadata:
 spec:
   releases:
   - name: openstack-libvirt
-    chart: {{spec.common.charts.repo}}/libvirt
-    version: {{spec.common.charts.version}}
+    chart: {{spec.common.infra.get('repo', spec.common.charts.repo)}}/libvirt
     values:
       images:
         tags:
@@ -17,8 +16,7 @@ spec:
         ceph:
           enabled: false
   - name: openstack-nova
-    chart: {{spec.common.charts.repo}}/nova
-    version: {{spec.common.charts.version}}
+    chart: {{spec.common.openstack.get('repo', spec.common.charts.repo)}}/nova
     values:
       manifests:
         network_policy: false

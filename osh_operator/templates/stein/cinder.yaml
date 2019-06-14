@@ -5,8 +5,7 @@ metadata:
 spec:
   releases:
   - name: openstack-cinder
-    chart: {{spec.common.charts.repo}}/cinder
-    version: {{spec.common.charts.version}}
+    chart: {{spec.common.openstack.get('repo', spec.common.charts.repo)}}/cinder
     values:
       pod:
         replicas:

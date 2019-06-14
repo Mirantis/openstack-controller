@@ -45,21 +45,29 @@ def handle_service(service, *, body, meta, spec, logger, **kwargs):
     # The values are merged in this specific order.
     for release in data["spec"]["releases"]:
         chart_name = release["chart"].split("/")[-1]
-        release["namespace"] = spec["common"]["charts"]["namespace"]
+        utils.dict_merge(
+            release, spec["common"].get("charts", {}).get("releases", {})
+        )
         for group, charts in CHART_GROUP_MAPPING.items():
             if chart_name in charts:
                 utils.dict_merge(
-                    release["values"],
-                    spec["common"].get(group, {}).get("values", {}),
+                    release,
+                    spec["common"].get("group", {}).get("releases", {}),
                 )
+
         utils.dict_merge(
             release["values"],
             spec["services"].get(service, {}).get("values", {}),
         )
 
+    logger.info(f"Creating HelmBUndle object: %s", data)
     api = kubernetes.client.CustomObjectsApi()
     obj = api.create_namespaced_custom_object(
-        "lcm.mirantis.com", "v1alpha1", "default", "helmbundles", body=data
+        "lcm.mirantis.com",
+        "v1alpha1",
+        meta.get("namespace", "default"),
+        "helmbundles",
+        body=data,
     )
     logger.info(f"HelmBundle child is created: %s", obj)
 

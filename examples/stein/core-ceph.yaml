@@ -2,6 +2,7 @@ apiVersion: lcm.mirantis.com/v1alpha1
 kind: OpenStackDeployment
 metadata:
   name: osh-dev
+  namespace: openstack
   labels: {}
   annotations: {}
 spec:
@@ -9,24 +10,27 @@ spec:
   base: null
   # common values to pass into all charts and services
   common:
-    charts:
-      repositories:
-      - name: osh
-        url: "https://artifactory.mcp.mirantis.net/artifactory/helm-dev-virtual/"
-      version: 0.1.0
-      repo: osh
-      namespace: openstack
     images:
       repo:
+    # Common data among all charts
+    charts:
+      releases:
+        version: 0.1.0
+        namespace: openstack
+        values:
+          endpoints:
+            cluster_domain_suffix: kaas-kubernetes-3af5ae538cf411e9a6c7fa163e5a4837
+      repositories:
+      - name: osh
+        url: "https://harbor.mcp.mirantis.net/chartrepo/mcp-openstack-helm-20190611103255"
+      - name: osh-infra
+        url: "https://harbor.mcp.mirantis.net/chartrepo/mcp-openstack-helm-infra-20190611103603"
+    # Common data among all chart groups
     openstack:
+      repo: osh
       version: stein
-      values:
-        endpoints:
-          cluster_domain_suffix: kaas-kubernetes-3af5ae538cf411e9a6c7fa163e5a4837
     infra:
-      values:
-        endpoints:
-          cluster_domain_suffix: kaas-kubernetes-3af5ae538cf411e9a6c7fa163e5a4837
+      repo: osh-infra
   # features that would enable coordinated changes to values of several charts
   features:
     keystone:
@@ -47,63 +51,24 @@ spec:
   # enabled services and their specific configuration
   services:
     ingress:
-      enabled: True
-      chart:
-        repo: ""
-        version: ""
+      values: {}
     memcached:
-      enabled: True
+      values: {}
     mariadb:
-      enabled: True
-      chart:
-        repo: ""
-        version: ""
       values: {}
     rabbitmq:
-      enabled: True
-      chart:
-        repo: ""
-        version: ""
       values: {}
     keystone:
-      enabled: True
-      chart:
-        repo: ""
-        version: ""
       values: {}
     glance:
-      enabled: True
-      chart:
-        repo: ""
-        version: ""
       values: {}
     cinder:
-      enabled: True
-      chart:
-        repo: ""
-        version: ""
       values: {}
     neutron:
-      chart:
-        repo: ""
-        version: ""
       values: {}
-      enabled: True
     nova:
-      chart:
-        repo: ""
-        version: ""
       values: {}
-      enabled: True
     heat:
-      chart:
-        repo: ""
-        version: ""
       values: {}
-      enabled: True
     horizon:
-      chart:
-        repo: ""
-        version: ""
       values: {}
-      enabled: True

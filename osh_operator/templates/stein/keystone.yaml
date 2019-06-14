@@ -5,8 +5,7 @@ metadata:
 spec:
   releases:
   - name: openstack-keystone
-    chart: {{spec.common.charts.repo}}/keystone
-    version: {{spec.common.charts.version}}
+    chart: {{spec.common.openstack.get('repo', spec.common.charts.repo)}}/keystone
     values:
       manifests:
         network_policy: false
