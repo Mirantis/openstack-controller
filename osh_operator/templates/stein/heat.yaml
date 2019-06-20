@@ -4,8 +4,30 @@ metadata:
   name: openstack-orchestration
 spec:
   releases:
+{%- if spec.get('features', {}).get('messaging', {}).get('dedicated_rabbitmq', {}).get('enabled', True) %}
+  - name: openstack-heat-rabbitmq
+    chart: {{spec.common.infra.get('repo', spec.common.charts.repo)}}/rabbitmq
+    values:
+      pod:
+        replicas:
+          server: 1
+      manifests:
+        network_policy: false
+      volume:
+        class_name: rook-ceph-block
+      endpoints:
+        oslo_messaging: &heat_endpoints_oslo_messaging
+          hosts:
+            default: rabbitmq-heat
+            path: /heat
+{%- endif %}
   - name: openstack-heat
     chart: {{spec.common.openstack.get('repo', spec.common.charts.repo)}}/heat
     values:
       manifests:
         network_policy: false
+{%- if spec.get('features', {}).get('messaging', {}).get('dedicated_rabbitmq', {}).get('enabled', True) %}
+      endpoints:
+        oslo_messaging:
+          <<: *heat_endpoints_oslo_messaging
+{%- endif %}

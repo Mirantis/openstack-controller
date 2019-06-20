@@ -4,6 +4,23 @@ metadata:
   name: openstack-networking
 spec:
   releases:
+{%- if spec.get('features', {}).get('messaging', {}).get('dedicated_rabbitmq', {}).get('enabled', True) %}
+  - name: openstack-neutron-rabbitmq
+    chart: {{spec.common.infra.get('repo', spec.common.charts.repo)}}/rabbitmq
+    values:
+      pod:
+        replicas:
+          server: 1
+      manifests:
+        network_policy: false
+      volume:
+        class_name: rook-ceph-block
+      endpoints:
+        oslo_messaging: &neutron_endpoints_oslo_messaging
+          hosts:
+            default: rabbitmq-neutron
+          path: /neutron
+{%- endif %}
   - name: openstack-openvswitch
     chart: {{spec.common.infra.get('repo', spec.common.charts.repo)}}/openvswitch
     values:
@@ -14,6 +31,11 @@ spec:
   - name: openstack-neutron
     chart: {{spec.common.openstack.get('repo', spec.common.charts.repo)}}/neutron
     values:
+{%- if spec.get('features', {}).get('messaging', {}).get('dedicated_rabbitmq', {}).get('enabled', True) %}
+      endpoints:
+        oslo_messaging:
+          <<: *neutron_endpoints_oslo_messaging
+{%- endif %}
       network:
         interface:
           tunnel: ens3

@@ -4,6 +4,23 @@ metadata:
   name: openstack-compute
 spec:
   releases:
+{%- if spec.get('features', {}).get('messaging', {}).get('dedicated_rabbitmq', {}).get('enabled', True) %}
+  - name: openstack-nova-rabbitmq
+    chart: {{spec.common.infra.get('repo', spec.common.charts.repo)}}/rabbitmq
+    values:
+      pod:
+        replicas:
+          server: 1
+      manifests:
+        network_policy: false
+      volume:
+        class_name: rook-ceph-block
+      endpoints:
+        oslo_messaging: &nova_endpoints_oslo_messaging
+          hosts:
+            default: rabbitmq-nova
+          path: /nova
+{%- endif %}
   - name: openstack-libvirt
     chart: {{spec.common.infra.get('repo', spec.common.charts.repo)}}/libvirt
     values:
@@ -15,11 +32,26 @@ spec:
       conf:
         ceph:
           enabled: false
+  - name: openstack-nova-rabbitmq
+    chart: {{spec.common.infra.get('repo', spec.common.charts.repo)}}/rabbitmq
+    values:
+      pod:
+        replicas:
+          server: 1
+      manifests:
+        network_policy: false
+      volume:
+        class_name: rook-ceph-block
   - name: openstack-nova
     chart: {{spec.common.openstack.get('repo', spec.common.charts.repo)}}/nova
     values:
       manifests:
         network_policy: false
+{%- if spec.get('features', {}).get('messaging', {}).get('dedicated_rabbitmq', {}).get('enabled', True) %}
+      endpoints:
+        oslo_messaging:
+          <<: *nova_endpoints_oslo_messaging
+{%- endif %}
 #      ceph_client:
 #        configmap: rook-ceph-config
 #        user_secret_name: rook-ceph-admin-keyring

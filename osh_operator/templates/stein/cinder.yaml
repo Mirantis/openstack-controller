@@ -4,6 +4,23 @@ metadata:
   name: openstack-block-storage
 spec:
   releases:
+{%- if spec.get('features', {}).get('messaging', {}).get('dedicated_rabbitmq', {}).get('enabled', True) %}
+  - name: openstack-cinder-rabbitmq
+    chart: {{spec.common.infra.get('repo', spec.common.charts.repo)}}/rabbitmq
+    values:
+      pod:
+        replicas:
+          server: 1
+      manifests:
+        network_policy: false
+      volume:
+        class_name: rook-ceph-block
+      endpoints:
+        oslo_messaging: &cinder_endpoints_oslo_messaging
+          hosts:
+            default: rabbitmq-cinder
+          path: /cinder
+{%- endif %}
   - name: openstack-cinder
     chart: {{spec.common.openstack.get('repo', spec.common.charts.repo)}}/cinder
     values:
@@ -28,3 +45,8 @@ spec:
               chunk_size: 8
       manifests:
         network_policy: false
+{%- if spec.get('features', {}).get('messaging', {}).get('dedicated_rabbitmq', {}).get('enabled', True) %}
+      endpoints:
+        oslo_messaging:
+          <<: *cinder_endpoints_oslo_messaging
+{%- endif %}

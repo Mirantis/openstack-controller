@@ -4,8 +4,30 @@ metadata:
   name: openstack-identity
 spec:
   releases:
+{%- if spec.get('features', {}).get('messaging', {}).get('dedicated_rabbitmq', {}).get('enabled', True) %}
+  - name: openstack-keystone-rabbitmq
+    chart: {{spec.common.infra.get('repo', spec.common.charts.repo)}}/rabbitmq
+    values:
+      pod:
+        replicas:
+          server: 1
+      manifests:
+        network_policy: false
+      volume:
+        class_name: rook-ceph-block
+      endpoints:
+        oslo_messaging: &keystone_endpoints_oslo_messaging
+          hosts:
+            default: rabbitmq-keystone
+          path: /keystone
+{%- endif %}
   - name: openstack-keystone
     chart: {{spec.common.openstack.get('repo', spec.common.charts.repo)}}/keystone
     values:
       manifests:
         network_policy: false
+{%- if spec.get('features', {}).get('messaging', {}).get('dedicated_rabbitmq', {}).get('enabled', True) %}
+      endpoints:
+        oslo_messaging:
+          <<: *keystone_endpoints_oslo_messaging
+{%- endif %}

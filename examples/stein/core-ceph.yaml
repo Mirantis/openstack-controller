@@ -33,6 +33,9 @@ spec:
       repo: osh-infra
   # features that would enable coordinated changes to values of several charts
   features:
+    messaging:
+      dedicated_rabbitmq:
+        enabled: True
     keystone:
       iam:
         enabled: True

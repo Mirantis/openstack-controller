@@ -4,6 +4,23 @@ metadata:
   name: openstack-image
 spec:
   releases:
+{%- if spec.get('features', {}).get('messaging', {}).get('dedicated_rabbitmq', {}).get('enabled', True) %}
+  - name: openstack-glance-rabbitmq
+    chart: {{spec.common.infra.get('repo', spec.common.charts.repo)}}/rabbitmq
+    values:
+      pod:
+        replicas:
+          server: 1
+      manifests:
+        network_policy: false
+      volume:
+        class_name: rook-ceph-block
+      endpoints:
+        oslo_messaging: &glance_endpoints_oslo_messaging
+          hosts:
+            default: rabbitmq-glance
+          path: /glance
+{%- endif %}
   - name: openstack-glance
     chart: {{spec.common.openstack.get('repo', spec.common.charts.repo)}}/glance
     values:
@@ -27,3 +44,8 @@ spec:
         user_secret_name: rook-ceph-admin-keyring
       manifests:
         network_policy: false
+{%- if spec.get('features', {}).get('messaging', {}).get('dedicated_rabbitmq', {}).get('enabled', True) %}
+      endpoints:
+        oslo_messaging:
+          <<: *glance_endpoints_oslo_messaging
+{%- endif %}
