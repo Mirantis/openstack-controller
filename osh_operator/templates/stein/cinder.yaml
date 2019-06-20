@@ -17,6 +17,9 @@ spec:
         class_name: rook-ceph-block
       endpoints:
         oslo_messaging: &cinder_endpoints_oslo_messaging
+          statefulset:
+            replicas: 1
+            name: openstack-cinder-rabbitmq-rabbitmq
           hosts:
             default: rabbitmq-cinder
           path: /cinder

@@ -17,6 +17,9 @@ spec:
         class_name: rook-ceph-block
       endpoints:
         oslo_messaging: &nova_endpoints_oslo_messaging
+          statefulset:
+            replicas: 1
+            name: openstack-nova-rabbitmq-rabbitmq
           hosts:
             default: rabbitmq-nova
           path: /nova

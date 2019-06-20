@@ -17,6 +17,9 @@ spec:
         class_name: rook-ceph-block
       endpoints:
         oslo_messaging: &neutron_endpoints_oslo_messaging
+          statefulset:
+            replicas: 1
+            name: openstack-neutron-rabbitmq-rabbitmq
           hosts:
             default: rabbitmq-neutron
           path: /neutron

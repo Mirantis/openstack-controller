@@ -17,6 +17,9 @@ spec:
         class_name: rook-ceph-block
       endpoints:
         oslo_messaging: &heat_endpoints_oslo_messaging
+          statefulset:
+            replicas: 1
+            name: openstack-heat-rabbitmq-rabbitmq
           hosts:
             default: rabbitmq-heat
             path: /heat

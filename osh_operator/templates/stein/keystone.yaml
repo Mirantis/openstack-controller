@@ -17,6 +17,9 @@ spec:
         class_name: rook-ceph-block
       endpoints:
         oslo_messaging: &keystone_endpoints_oslo_messaging
+          statefulset:
+            replicas: 1
+            name: openstack-keystone-rabbitmq-rabbitmq
           hosts:
             default: rabbitmq-keystone
           path: /keystone
