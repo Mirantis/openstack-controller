@@ -15,99 +15,20 @@ spec:
     # Common data among all charts
     charts:
       releases:
-        version: 0.1.0
-        namespace: openstack
         values:
           endpoints:
             cluster_domain_suffix: kaas-kubernetes-3af5ae538cf411e9a6c7fa163e5a4837
-          images:
-            tags:
-              bootstrap: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/heat:stein-bionic-20190619193013
-              cinder_api: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/cinder:stein-bionic-20190619193013
-              cinder_backup: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/cinder:stein-bionic-20190619193013
-              cinder_backup_storage_init: docker.io/port/ceph-config-helper:v1.10.3
-              cinder_db_sync: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/cinder:stein-bionic-20190619193013
-              cinder_scheduler: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/cinder:stein-bionic-20190619193013
-              cinder_storage_init: docker.io/port/ceph-config-helper:v1.10.3
-              cinder_volume: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/cinder:stein-bionic-20190619193013
-              cinder_volume_usage_audit: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/cinder:stein-bionic-20190619193013
-              db_drop: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/heat:stein-bionic-20190619193013
-              db_init: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/heat:stein-bionic-20190619193013
-              dep_check: quay.io/stackanetes/kubernetes-entrypoint:v0.3.1
-              glance_api: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/glance:stein-bionic-20190619193013
-              glance_db_sync: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/glance:stein-bionic-20190619193013
-              glance_registry: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/glance:stein-bionic-20190619193013
-              glance_storage_init: docker.io/port/ceph-config-helper:v1.10.3
-              heat_api: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/heat:stein-bionic-20190619193013
-              heat_cfn: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/heat:stein-bionic-20190619193013
-              heat_cloudwatch: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/heat:stein-bionic-20190619193013
-              heat_db_sync: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/heat:stein-bionic-20190619193013
-              heat_engine: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/heat:stein-bionic-20190619193013
-              heat_engine_cleaner: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/heat:stein-bionic-20190619193013
-              heat_purge_deleted: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/heat:stein-bionic-20190619193013
-              horizon: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/horizon:stein-bionic-20190619193013
-              horizon_db_sync: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/horizon:stein-bionic-20190619193013
-              image_repo_sync: docker.io/docker:17.07.0
-              keystone_api: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/keystone:stein-bionic-20190619193013
-              keystone_credential_cleanup: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/heat:stein-bionic-20190619193013
-              keystone_credential_rotate: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/keystone:stein-bionic-20190619193013
-              keystone_credential_setup: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/keystone:stein-bionic-20190619193013
-              keystone_db_sync: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/keystone:stein-bionic-20190619193013
-              keystone_domain_manage: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/keystone:stein-bionic-20190619193013
-              keystone_fernet_rotate: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/keystone:stein-bionic-20190619193013
-              keystone_fernet_setup: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/keystone:stein-bionic-20190619193013
-              ks_endpoints: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/heat:stein-bionic-20190619193013
-              ks_service: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/heat:stein-bionic-20190619193013
-              ks_user: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/heat:stein-bionic-20190619193013
-              neutron_db_sync: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/neutron:stein-bionic-20190619193013
-              neutron_dhcp: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/neutron:stein-bionic-20190619193013
-              neutron_l3: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/neutron:stein-bionic-20190619193013
-              neutron_linuxbridge_agent: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/neutron:stein-bionic-20190619193013
-              neutron_metadata: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/neutron:stein-bionic-20190619193013
-              neutron_openvswitch_agent: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/neutron:stein-bionic-20190619193013
-              neutron_server: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/neutron:stein-bionic-20190619193013
-              #    neutron_sriov_agent: docker.io/openstackhelm/neutron:ocata-18.04-sriov
-              #    neutron_sriov_agent_init: docker.io/openstackhelm/neutron:ocata-18.04-sriov
-              nova_api: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/nova:stein-bionic-20190619193013
-              nova_cell_setup: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/nova:stein-bionic-20190619193013
-              nova_cell_setup_init: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/heat:stein-bionic-20190619193013
-              nova_compute: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/nova:stein-bionic-20190619193013
-              nova_compute_ironic: 'docker.io/kolla/ubuntu-source-nova-compute-ironic:ocata'
-              nova_compute_ssh: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/nova:stein-bionic-20190619193013
-              nova_conductor: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/nova:stein-bionic-20190619193013
-              nova_consoleauth: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/nova:stein-bionic-20190619193013
-              nova_db_sync: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/nova:stein-bionic-20190619193013
-              nova_novncproxy: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/nova:stein-bionic-20190619193013
-              nova_novncproxy_assets: 'docker.io/kolla/ubuntu-source-nova-novncproxy:ocata'
-              nova_placement: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/nova:stein-bionic-20190619193013
-              nova_scheduler: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/nova:stein-bionic-20190619193013
-              nova_service_cleaner: 'docker.io/port/ceph-config-helper:v1.10.3'
-              #    nova_spiceproxy: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/nova:stein-bionic-20190619193013
-              #    nova_spiceproxy_assets: 'docker.io/kolla/ubuntu-source-nova-spicehtml5proxy:ocata'
-              rabbit_init: docker.io/rabbitmq:3.7-management
-              prometheus_rabbitmq_exporter: docker.io/kbudde/rabbitmq-exporter:v0.21.0
-              prometheus_rabbitmq_exporter_helm_tests: docker.io/openstackhelm/heat:ocata-ubuntu_xenial
-              rabbitmq_init: docker.io/openstackhelm/heat:ocata-ubuntu_xenial
-              rabbitmq: docker.io/rabbitmq:3.7.13
-              dep_check: quay.io/stackanetes/kubernetes-entrypoint:v0.3.1
-              scripted_test: docker.io/rabbitmq:3.7.13-management
-              image_repo_sync: docker.io/docker:17.07.0
-      repositories:
-      - name: osh
-        url: "https://harbor.mcp.mirantis.net/chartrepo/mcp-openstack-helm-20190620133329"
-      - name: osh-infra
-        url: "https://harbor.mcp.mirantis.net/chartrepo/mcp-openstack-helm-infra-20190620125953"
     # Common data among all chart groups
     openstack:
-      repo: osh
+            #      repo: osh
       version: stein
-    infra:
-      repo: osh-infra
+            #    infra:
+            #      repo: osh-infra
   # features that would enable coordinated changes to values of several charts
   features:
-    messaging:
-      dedicated_rabbitmq:
-        enabled: True
+          #    messaging:
+          #      dedicated_rabbitmq:
+          #        enabled: True
     keystone:
       iam:
         enabled: True

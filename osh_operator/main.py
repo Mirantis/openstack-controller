@@ -29,8 +29,15 @@ def handle_service(service, *, body, meta, spec, logger, **kwargs):
     os_release = spec["common"]["openstack"]["version"]
     tpl = ENV.get_template(f"{os_release}/{service}.yaml")
     logger.info(f"template file is {tpl.filename}")
+
+    # Merge operator defaults with user context.
+    with open(f"osh_operator/templates/{os_release}/base.yaml") as f:
+        base = yaml.safe_load(f)
+    utils.dict_merge(spec, base)
+
     text = tpl.render(body=body, meta=meta, spec=spec)
     data = yaml.safe_load(text)
+
     # FIXME(pas-ha) either move to dict merging stage before,
     # or move to the templates themselves
     data["spec"]["repositories"] = spec["common"]["charts"]["repositories"]
