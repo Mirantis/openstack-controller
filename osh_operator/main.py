@@ -31,7 +31,8 @@ def handle_service(service, *, body, meta, spec, logger, **kwargs):
     logger.info(f"template file is {tpl.filename}")
 
     # Merge operator defaults with user context.
-    with open(f"osh_operator/templates/{os_release}/base.yaml") as f:
+    base_file = ENV.get_template(f"{os_release}/base.yaml").filename
+    with open(base_file) as f:
         base = yaml.safe_load(f)
     utils.dict_merge(spec, base)
 
