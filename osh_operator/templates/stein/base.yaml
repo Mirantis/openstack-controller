@@ -85,6 +85,10 @@ common:
   openstack:
     repo: osh
     version: stein
+    values:
+      pod:
+       replicas:
+         api: 3
   infra:
     repo: osh-infra
 # features that would enable coordinated changes to values of several charts
