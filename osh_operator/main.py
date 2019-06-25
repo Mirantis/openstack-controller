@@ -59,13 +59,16 @@ def handle_service(service, *, body, meta, spec, logger, **kwargs):
         for group, charts in CHART_GROUP_MAPPING.items():
             if chart_name in charts:
                 utils.dict_merge(
-                    release,
-                    spec["common"].get("group", {}).get("releases", {}),
+                    release, spec["common"].get(group, {}).get("releases", {})
+                )
+                utils.dict_merge(
+                    release["values"],
+                    spec["common"].get(group, {}).get("values", {}),
                 )
 
         utils.dict_merge(
             release["values"],
-            spec["services"].get(service, {}).get("values", {}),
+            spec["services"].get(chart_name, {}).get("values", {}),
         )
 
     logger.info(f"Creating HelmBUndle object: %s", data)
