@@ -34,7 +34,10 @@ def handle_service(service, *, body, meta, spec, logger, **kwargs):
     base_file = ENV.get_template(f"{os_release}/base.yaml").filename
     with open(base_file) as f:
         base = yaml.safe_load(f)
-    utils.dict_merge(spec, base)
+    new_spec = {}
+    utils.dict_merge(new_spec, base)
+    utils.dict_merge(new_spec, spec)
+    spec = new_spec
 
     text = tpl.render(body=body, meta=meta, spec=spec)
     data = yaml.safe_load(text)
