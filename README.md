@@ -55,3 +55,33 @@ Update host OS dns to point to kubernetes coredns
 
 `sed -i 's/#DNS=/DNS=10.233.0.3/g' /etc/systemd/resolved.conf`
 `systemctl restart systemd-resolved`
+
+## Validate OpenStack
+
+    mkdir /etc/openstack
+    tee /etc/openstack/clouds.yaml << EOF
+    clouds:
+      openstack_helm:
+        region_name: RegionOne
+        identity_api_version: 3
+        auth:
+          username: 'admin'
+          password: 'password'
+          project_name: 'admin'
+          project_domain_name: 'default'
+          user_domain_name: 'default'
+          auth_url: 'http://keystone.openstack.svc.$(kubectl get configmap -n kube-system coredns -o jsonpath='{.data.Corefile}' |grep -oh kaas-kubernetes-[[:alnum:]]*)/v3'
+    EOF
+
+    export OS_CLOUD=openstack_helm
+
+    apt-get install virtualenv build-essential python-dev
+    virtualenv osclient
+    source osclient/bin/activate
+    pip install python-openstackclient
+
+    wget http://download.cirros-cloud.net/0.4.0/cirros-0.4.0-x86_64-disk.img
+    openstack image create cirros-0.4.0-x86_64-disk --file cirros-0.4.0-x86_64-disk.img --disk-format qcow2 --container-format bare
+    openstack network create demoNetwork
+    openstack subnet create demoSubnet --network demoNetwork --subnet-range 10.11.12.0/24
+    openstack server create --image cirros-0.4.0-x86_64-disk --flavor m1.tiny --nic net-id=demoNetwork DemoVM
