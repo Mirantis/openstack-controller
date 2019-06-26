@@ -26,9 +26,21 @@ spec:
             #      repo: osh-infra
   # features that would enable coordinated changes to values of several charts
   features:
-          #    messaging:
-          #      dedicated_rabbitmq:
-          #        enabled: True
+    services:
+     - block_storage
+     - compute
+     - identity
+     - dashboard
+     - image
+     - ingress
+     - mariadb
+     - memcached
+     - networking
+     - orchestration
+     - rabbitmq
+#    messaging:
+#      dedicated_rabbitmq:
+#        enabled: True
     keystone:
       iam:
         enabled: True
@@ -47,24 +59,39 @@ spec:
   # enabled services and their specific configuration
   services:
     ingress:
-      values: {}
+      ingress:
+        values: {}
     memcached:
-      values: {}
+      memcached:
+        values: {}
     mariadb:
-      values: {}
+      mariadb:
+        values: {}
     rabbitmq:
-      values: {}
-    keystone:
-      values: {}
-    glance:
-      values: {}
-    cinder:
-      values: {}
-    neutron:
-      values: {}
-    nova:
-      values: {}
-    heat:
-      values: {}
-    horizon:
-      values: {}
+      rabbitmq:
+        values: {}
+    identity:
+      keystone:
+        values:
+          conf:
+            keystone:
+              DEFAULT:
+               mykey: myvalue
+    image:
+      glance:
+        values: {}
+    block-storage:
+      cinder:
+        values: {}
+    networking:
+      neutron:
+        values: {}
+    compute:
+      nova:
+        values: {}
+    orchestration:
+      heat:
+        values: {}
+    dashboard:
+      horizon:
+        values: {}

@@ -78,7 +78,10 @@ def handle_service(service, *, body, meta, spec, logger, **kwargs):
 
         merger.merge(
             release["values"],
-            spec["services"].get(chart_name, {}).get("values", {}),
+            spec["services"]
+            .get(service, {})
+            .get(chart_name, {})
+            .get("values", {}),
         )
 
     kopf.adopt(data, body)
@@ -97,7 +100,7 @@ def handle_service(service, *, body, meta, spec, logger, **kwargs):
 @kopf.on.create("lcm.mirantis.com", "v1alpha1", "openstackdeployments")
 async def create(body, meta, spec, logger, **kwargs):
     service_fns = {}
-    for service in spec.get("services", {}).keys():
+    for service in spec.get("features", {}).get("services", []):
         service_fns[service] = functools.partial(
             handle_service, service=service
         )
