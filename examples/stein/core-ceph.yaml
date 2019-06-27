@@ -27,7 +27,7 @@ spec:
   # features that would enable coordinated changes to values of several charts
   features:
     services:
-     - block_storage
+     - block-storage
      - compute
      - identity
      - dashboard
