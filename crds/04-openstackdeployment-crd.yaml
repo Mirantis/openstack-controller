@@ -31,6 +31,9 @@ spec:
     - name: Age
       type: date
       JSONPath: .metadata.creationTimestamp
+    - name: Deployed
+      type: boolean
+      JSONPath: .status.deployed
   validation:
     openAPIV3Schema:
       properties:

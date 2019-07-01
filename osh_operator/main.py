@@ -1,3 +1,4 @@
+import copy
 import functools
 
 import deepmerge
@@ -77,6 +78,14 @@ async def delete_service(service, *, body, meta, spec, logger, **kwargs):
     obj = make_kube_class(data)(api, data)
     obj.delete(propagation_policy="Foreground")
     logger.info(f"{obj.kind} {obj.namespace}/{obj.name} deleted")
+    # remove child reference from status
+    osdpl = (
+        OpenStackDeployment.objects(api)
+        .filter(namespace=meta["namespace"])
+        .get(name=meta["name"])
+    )
+    status_patch = {"children": {obj.name: None}}
+    osdpl.patch({"status": status_patch})
     kopf.info(
         body, reason="Delete", message=f"deleted {obj.kind} for {service}"
     )
@@ -142,12 +151,42 @@ async def apply_service(service, *, body, meta, spec, logger, event, **kwargs):
     else:
         obj.create()
         logger.debug(f"{obj.kind} child is created: %s", obj.obj)
-
+    # ensure child ref exists in the status
+    osdpl = (
+        OpenStackDeployment.objects(api)
+        .filter(namespace=meta["namespace"])
+        .get(name=meta["name"])
+    )
+    if obj.name not in osdpl.obj.get("status", {}).get("children", {}):
+        status_patch = {"children": {obj.name: "Unknown"}}
+        osdpl.patch({"status": status_patch})
     kopf.info(
         body,
         reason=event.capitalize(),
         message=f"{event}d {obj.kind} for {service}",
     )
+
+
+async def update_status(owner, meta, status):
+    osdpl = (
+        OpenStackDeployment.objects(api)
+        .filter(namespace=meta["namespace"])
+        .get(name=owner)
+    )
+    child_status = {
+        meta["name"]: all(
+            s["success"] is True for n, s in status["releaseStatuses"].items()
+        )
+    }
+    status_patch = {"children": child_status}
+    new_children_status = copy.deepcopy(
+        osdpl.obj["status"].get("children", {})
+    )
+    new_children_status.update(child_status)
+    status_patch["deployed"] = all(
+        s is True for c, s in new_children_status.items()
+    )
+    osdpl.patch({"status": status_patch})
 
 
 @kopf.on.create("lcm.mirantis.com", "v1alpha1", "openstackdeployments")
@@ -200,3 +239,25 @@ async def update(body, meta, spec, logger, **kwargs):
 async def delete(meta, logger, **kwargs):
     # TODO(pas-ha) wait for children to be deleted
     logger.info(f"deleting {meta['name']}")
+
+
+@kopf.on.field("lcm.mirantis.com", "v1alpha1", "helmbundles", field="status")
+async def status(body, meta, status, logger, diff, **kwargs):
+    namespace = meta["namespace"]
+    owners = [
+        o["name"]
+        for o in meta["ownerReferences"]
+        if o["kind"] == OpenStackDeployment.kind
+        and o["apiVersion"] == OpenStackDeployment.version
+    ]
+    if not owners:
+        logger.info("not managed by osh-operator, ignoring")
+        return
+    elif len(owners) > 1:
+        logger.error(
+            f"several owners of kind OpenStackDeployment "
+            f"for {body['kind']} {namespace}/{meta['name']}!"
+        )
+        raise NotImplementedError
+    await update_status(owners[0], meta, status)
+    logger.info(f"Updated {meta['name']} status in {owners[0]}")
