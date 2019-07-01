@@ -1,0 +1,18 @@
+apiVersion: lcm.mirantis.com/v1alpha1
+kind: HelmBundle
+metadata:
+  name: openstack-tempest
+spec:
+  releases:
+  - name: openstack-tempest
+    chart: {{spec.common.openstack.get('repo', spec.common.charts.repo)}}/tempest
+    values:
+      manifests:
+        network_policy: false
+      pod:
+        replicas:
+          server: 1
+      pvc:
+        storage_class: rook-ceph-block
+      conf:
+        tempest: {{ spec | generate_tempest_config(helmbundles_body) }}

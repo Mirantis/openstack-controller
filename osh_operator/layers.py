@@ -4,11 +4,14 @@ import deepmerge
 import jinja2
 import yaml
 
+from osh_operator.filters.tempest import generate_tempest_config
+
 LOG = logging.getLogger(__name__)
 
 ENV = jinja2.Environment(loader=jinja2.PackageLoader(__name__.split(".")[0]))
 LOG.info(f"found templates {ENV.list_templates()}")
 
+ENV.filters["generate_tempest_config"] = generate_tempest_config
 
 merger = deepmerge.Merger(
     # pass in a list of tuple, with the strategies you are looking to apply
@@ -54,17 +57,24 @@ def services(spec, logger, event, **kwargs):
     return to_apply, to_delete
 
 
-def render_all(service, body, meta, spec, logger):
-    # logger.debug(f"found templates {ENV.list_templates()}")
+def render_service_template(
+    service, body, meta, spec, logger, **template_args
+):
     os_release = spec["common"]["openstack"]["version"]
+    # logger.debug(f"found templates {ENV.list_templates()}")
     tpl = ENV.get_template(f"{os_release}/{service}.yaml")
     logger.debug(f"Using template {tpl.filename}")
 
-    base = yaml.safe_load(ENV.get_template(f"{os_release}/base.yaml").render())
-    # Merge operator defaults with user context.
-    spec = merger.merge(base, spec)
-    text = tpl.render(body=body, meta=meta, spec=spec)
+    text = tpl.render(body=body, meta=meta, spec=spec, **template_args)
     data = yaml.safe_load(text)
+    return data
+
+
+def merge_all_layers(service, body, meta, spec, logger, **template_args):
+
+    data = render_service_template(
+        service, body, meta, spec, logger, **template_args
+    )
 
     # FIXME(pas-ha) either move to dict merging stage before,
     # or move to the templates themselves
@@ -99,4 +109,26 @@ def render_all(service, body, meta, spec, logger):
             .get(chart_name, {})
             .get("values", {}),
         )
+    return data
+
+
+def render_all(service, body, meta, spec, logger):
+    # logger.debug(f"found templates {ENV.list_templates()}")
+    os_release = spec["common"]["openstack"]["version"]
+    tpl = ENV.get_template(f"{os_release}/{service}.yaml")
+    logger.debug(f"Using template {tpl.filename}")
+
+    base = yaml.safe_load(ENV.get_template(f"{os_release}/base.yaml").render())
+    # Merge operator defaults with user context.
+    spec = merger.merge(base, spec)
+
+    template_args = {}
+    if service == "tempest":
+        helmbundles_body = {}
+        for s in set(spec["features"]["services"]) - set(["tempest"]):
+            helmbundles_body[s] = merge_all_layers(s, body, meta, spec, logger)
+        template_args["helmbundles_body"] = helmbundles_body
+
+    data = merge_all_layers(service, body, meta, spec, logger, **template_args)
+
     return data

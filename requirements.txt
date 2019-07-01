@@ -1,4 +1,5 @@
 kopf>=0.18
 Jinja2>2.10
+jsonpath-rw
 deepmerge>=0.0.5
 pykube-ng>=0.24

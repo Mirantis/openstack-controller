@@ -126,5 +126,6 @@ spec:
                       - networking
                       - orchestration
                       - rabbitmq
+                      - tempest
             services:
               type: object

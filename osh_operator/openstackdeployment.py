@@ -30,6 +30,7 @@ async def delete_service(service, *, body, meta, spec, logger, **kwargs):
 async def apply_service(service, *, body, meta, spec, logger, event, **kwargs):
     logger.info(f"Applying config for {service}")
     data = layers.render_all(service, body, meta, spec, logger)
+
     # NOTE(pas-ha) this sets the parent refs in child to point to our resource
     # so that cascading delete is handled by K8s itself
     kopf.adopt(data, body)

@@ -36,6 +36,7 @@ spec:
      - networking
      - orchestration
      - rabbitmq
+     - tempest
 #    messaging:
 #      dedicated_rabbitmq:
 #        enabled: True
@@ -93,3 +94,8 @@ spec:
     dashboard:
       horizon:
         values: {}
+    tempest:
+      tempest:
+        values:
+          manifests:
+            job_run_tests: false
