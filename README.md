@@ -92,3 +92,20 @@ openstack network create demoNetwork
 openstack subnet create demoSubnet --network demoNetwork --subnet-range 10.11.12.0/24
 openstack server create --image cirros-0.4.0-x86_64-disk --flavor m1.tiny --nic net-id=demoNetwork DemoVM
 ```
+
+## Advanced Usage
+
+### Connect to helm directly
+
+ - Download helm client with your version:
+   wget https://get.helm.sh/helm-v2.13.1-linux-amd64.tar.gz
+   tar -xf helm-v2.13.1-linux-amd64.tar.gz
+   mv linux-amd64/helm /usr/local/bin/helm
+ - Setup port forwarding to tiller service
+   kubectl port-forward -n osh-system helm-controller-0 44134:44134
+ - Setup alias for bas command, or add `--host=localhost:44134` to each command
+   alias helm="helm --host=localhost:44134"
+ - Init helm
+   helm init
+ - Use helm as always :)
+   helm list
