@@ -96,3 +96,7 @@ features:
   messaging:
     dedicated_rabbitmq:
       enabled: True
+  database:
+    local_volumes:
+      enabled: True
+      storage_class_name: 'local-provisioner'

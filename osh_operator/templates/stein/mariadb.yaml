@@ -13,4 +13,8 @@ spec:
         replicas:
           server: 1
       volume:
+{%- if spec.get('features', {}).get('database', {}).get('local_volumes', {}).get('enabled', False) %}
+        class_name: {{ spec.features.database.local_volumes.storage_class_name }}
+{%- else %}
         class_name: rook-ceph-block
+{%- endif %}
