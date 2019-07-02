@@ -35,10 +35,4 @@ apiVersion: zalando.org/v1
 kind: ClusterKopfPeering
 metadata:
   name: default
----
-apiVersion: zalando.org/v1
-kind: KopfPeering
-metadata:
-  namespace: default
-  name: default
 ...
