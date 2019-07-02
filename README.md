@@ -87,7 +87,7 @@ source osclient/bin/activate
 pip install python-openstackclient
 
 wget http://download.cirros-cloud.net/0.4.0/cirros-0.4.0-x86_64-disk.img
-openstack image create cirros-0.4.0-x86_64-disk --file cirros-0.4.0-x86_64-disk.img --disk-format qcow2 --container-format bare
+openstack image create cirros-0.4.0-x86_64-disk --file cirros-0.4.0-x86_64-disk.img --disk-format qcow2 --container-format bare --public
 openstack network create demoNetwork
 openstack subnet create demoSubnet --network demoNetwork --subnet-range 10.11.12.0/24
 openstack server create --image cirros-0.4.0-x86_64-disk --flavor m1.tiny --nic net-id=demoNetwork DemoVM
