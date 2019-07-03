@@ -39,6 +39,7 @@ CHART_GROUP_MAPPING = {
         "keystone",
         "neutron",
         "nova",
+        "octavia",
     ],
     "infra": ["rabbitmq", "mariadb", "memcached", "openvswitch", "libvirt"],
 }

@@ -23,6 +23,8 @@ spec:
      - networking
      - orchestration
      - rabbitmq
+     # unless https://mirantis.jira.com/browse/PROD-32699 fixed
+     # - load-balancer
     ssl:
       public_endpoints:
         enabled: True
@@ -154,3 +156,9 @@ spec:
                 image_ref_alt: 00000000-0000-0000-0000-000000000001
                 flavor_ref: 00000000-0000-0000-0000-000000000000
                 flavor_ref_alt: 00000000-0000-0000-0000-000000000001
+    load-balancer:
+      octavia:
+        values:
+          octavia:
+            settings:
+              amphora_image_url: "http://images.mcp.mirantis.net/octavia/amphora-x64-haproxy-stein-testing.qcow2"

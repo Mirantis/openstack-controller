@@ -92,6 +92,18 @@ spec:
                 username: nova
                 password: password
             path: /openstack
+          octavia_service:
+            auth:
+              octavia:
+                username: octavia
+                password: password
+            path: /octavia
+          octavia_service_notifications:
+            auth:
+              octavia:
+                username: octavia
+                password: password
+            path: /openstack
 {%- endif %}
       endpoints:
         cluster_domain_suffix: {{ spec.domain_name }}

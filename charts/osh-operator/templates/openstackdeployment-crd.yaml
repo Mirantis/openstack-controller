@@ -153,6 +153,7 @@ spec:
                       - orchestration
                       - rabbitmq
                       - tempest
+                      - load-balancer
                 keystone:
                   type: object
                   required:
