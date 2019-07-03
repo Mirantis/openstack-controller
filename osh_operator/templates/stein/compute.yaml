@@ -35,6 +35,8 @@ spec:
       conf:
         ceph:
           enabled: false
+        libvirt:
+          listen_addr: 0.0.0.0
   - name: openstack-nova
     chart: {{spec.common.openstack.get('repo', spec.common.charts.repo)}}/nova
     values:
@@ -62,3 +64,6 @@ spec:
             cpu_mode: custom
             cpu_model: kvm64
             virt_type: kvm
+        # TODO(vsaienko): unhardcode this interface
+        libvirt:
+          live_migration_interface: ens3
