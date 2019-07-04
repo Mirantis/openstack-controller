@@ -94,10 +94,13 @@ def delete_service(service, *, body, meta, spec, logger, **kwargs):
     tpl = ENV.get_template(f"{os_release}/{service}.yaml")
     logger.info(f"using template {tpl.filename}")
 
-    # NOTE(pas-ha) not merging anything as we only need correct name
+    # NOTE(pas-ha) not merging spec as we only need correct name
     # (hardcoded in the template) and namespace (will be populated by adopt)
     # to delete the resource
-    text = tpl.render(body=body, meta=meta, spec=spec)
+    base_file = ENV.get_template(f"{os_release}/base.yaml").filename
+    with open(base_file) as f:
+        base = yaml.safe_load(f)
+    text = tpl.render(body=base, meta=base["meta"], spec=base["spec"])
     data = yaml.safe_load(text)
     kopf.adopt(data, body)
     delete_helmbundle(data)
