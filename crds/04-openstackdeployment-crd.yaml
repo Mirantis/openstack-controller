@@ -24,26 +24,102 @@ spec:
     kind: OpenStackDeployment
     # shortNames allow shorter string to match your resource on the CLI
     shortNames:
-    - osdpl
-    - osdpls
+      - osdpl
+    categories:
+      - all
   additionalPrinterColumns:
     - name: Age
-      type: string
-      priority: 0
-      JSONPath: .status.updated_at
-      description: time since last change
-    - name: Children
-      type: string
-      priority: 0
-      JSONPath: .status.children
-      description: The children pods created.
-    - name: Message
-      type: string
-      priority: 0
-      JSONPath: .status.message
-      description: As returned from the handler (sometimes).
+      type: date
+      JSONPath: .metadata.creationTimestamp
   validation:
     openAPIV3Schema:
       properties:
+        apiVersion:
+          type: string
+        kind:
+          type: string
+        metadata:
+          type: object
         spec:
           properties:
+            common:
+              type: object
+              properties:
+                charts:
+                  type: object
+                  description: settings passed to every helm chart
+                  properties:
+                    releases:
+                      type: object
+                      properties:
+                        values:
+                          type: object
+                    repositories:
+                      type: array
+                      description: list of helm chart repositories
+                      items:
+                        type: object
+                        properties:
+                          name:
+                            type: sring
+                            description: symbolic name to reference this repo
+                          url:
+                            type: string
+                            description: helm charts repo url
+                        required:
+                          - name
+                          - url
+                    values:
+                      type: object
+                infra:
+                  type: object
+                openstack:
+                  type: object
+                  properties:
+                    repo:
+                      type: string
+                    version:
+                      type: string
+                      description: version of OpenStack to deploy
+                      enum:
+                        - stein
+                    values:
+                      type: object
+                  # FIXME(pas-ha) currently rendering logic requires
+                  # this to be present in CR
+                  required:
+                    - version
+            features:
+              type: object
+              properties:
+                messaging:
+                  type: object
+                  properties:
+                    dedicated_rabbitmq:
+                      type: object
+                      properties:
+                        enabled:
+                          description: >
+                            enable deployment of each openstack service
+                            with dedicated instance of rabbitmq
+                            for intra-service communications
+                          type: boolean
+                services:
+                  type: array
+                  description: List of enabled openstack and auxiliary services
+                  items:
+                    type: string
+                    enum:
+                      - block-storage
+                      - compute
+                      - identity
+                      - dashboard
+                      - image
+                      - ingress
+                      - mariadb
+                      - memcached
+                      - networking
+                      - orchestration
+                      - rabbitmq
+            services:
+              type: object
