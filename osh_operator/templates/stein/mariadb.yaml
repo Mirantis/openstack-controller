@@ -12,6 +12,14 @@ spec:
       pod:
         replicas:
           server: 1
+{%- if spec.get('features', {}).get('database', {}).get('local_volumes', {}).get('enabled', False) %}
+        # To have higher level of data redundency in case of local volumes - ensure pods are spread
+        # across volumes placed on different nodes
+        affinity:
+          anti:
+            type:
+              default: requiredDuringSchedulingIgnoredDuringExecution
+{%- endif %}
       volume:
 {%- if spec.get('features', {}).get('database', {}).get('local_volumes', {}).get('enabled', False) %}
         class_name: {{ spec.features.database.local_volumes.storage_class_name }}
