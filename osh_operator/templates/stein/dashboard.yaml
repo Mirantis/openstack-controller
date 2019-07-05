@@ -1,7 +1,7 @@
 apiVersion: lcm.mirantis.com/v1alpha1
 kind: HelmBundle
 metadata:
-  name: openstack-dahsboard
+  name: openstack-dashboard
 spec:
   releases:
   - name: openstack-horizon
