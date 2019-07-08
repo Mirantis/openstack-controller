@@ -37,8 +37,8 @@ CHART_GROUP_MAPPING = {
     "infra": ["rabbitmq", "mariadb", "memcached", "openvswitch", "libvirt"],
 }
 
-# FIXME(pas-ha) combine apply and delete? use 'event' to drive the logic
-def apply_helmbundle_state(data):
+
+def helmbundle(data, logger, delete=False):
     api = kubernetes.client.CustomObjectsApi()
     name = data["metadata"]["name"]
     namespace = data["metadata"]["namespace"]
@@ -49,63 +49,60 @@ def apply_helmbundle_state(data):
         plural="helmbundles",
         namespace=namespace,
     )
-    current = None
     try:
         current = api.get_namespaced_custom_object(name=name, **args)
-    except Exception:  # FIXME(pas-ha) use more narrow exception for 404
-        pass
+    except kubernetes.client.rest.ApiException as e:
+        if e.status == 404:
+            current = None
+        else:
+            raise e
 
-    if current:
-        data["metadata"]["resourceVersion"] = current["metadata"][
-            "resourceVersion"
-        ]
-        hb = api.replace_namespaced_custom_object(name=name, body=data, **args)
+    if delete:
+        hb = None
+        if current:
+            delete_options = {"propagation_policy": "Foreground"}
+            # TODO(pas-ha) handle api exceptions - are there any retriable ones?
+            api.delete_namespaced_custom_object(
+                name=name, body=delete_options, **args
+            )
+        else:
+            logger.info(f"HelmBundle {namespace}/{name} is already gone")
     else:
-        hb = api.create_namespaced_custom_object(body=data, **args)
+        if current:
+            data["metadata"]["resourceVersion"] = current["metadata"][
+                "resourceVersion"
+            ]
+            # TODO(pas-ha) handle api exceptions - are there any retriable ones?
+            hb = api.replace_namespaced_custom_object(
+                name=name, body=data, **args
+            )
+            logger.debug(f"HelmBundle child is updated: %s", hb)
+        else:
+            # TODO(pas-ha) handle api exceptions - are there any retriable ones?
+            hb = api.create_namespaced_custom_object(body=data, **args)
+            logger.debug(f"HelmBundle child is created: %s", hb)
     return hb
 
 
-def delete_helmbundle(data):
-    api = kubernetes.client.CustomObjectsApi()
-    name = data["metadata"]["name"]
-    namespace = data["metadata"]["namespace"]
-
-    args = dict(
-        group="lcm.mirantis.com",
-        version="v1alpha1",
-        plural="helmbundles",
-        namespace=namespace,
-    )
-    current = None
-    try:
-        current = api.get_namespaced_custom_object(name=name, **args)
-    except Exception:  # FIXME(pas-ha) use more narrow exception for 404
-        pass
-    if current:
-        delete_options = {"propagation_policy": "Foreground"}
-        api.delete_namespaced_custom_object(
-            name=name, body=delete_options, **args
-        )
-
-
 def delete_service(service, *, body, meta, spec, logger, **kwargs):
+    logger.info(f"Deleting config for {service}")
     logger.debug(f"found templates {ENV.list_templates()}")
     os_release = spec["common"]["openstack"]["version"]
     tpl = ENV.get_template(f"{os_release}/{service}.yaml")
     logger.info(f"using template {tpl.filename}")
 
+    base = yaml.safe_load(ENV.get_template(f"{os_release}/base.yaml").render())
     # NOTE(pas-ha) not merging spec as we only need correct name
     # (hardcoded in the template) and namespace (will be populated by adopt)
     # to delete the resource
-    base_file = ENV.get_template(f"{os_release}/base.yaml").filename
-    with open(base_file) as f:
-        base = yaml.safe_load(f)
-    text = tpl.render(body=base, meta=base["meta"], spec=base["spec"])
+    text = tpl.render(body=base, meta=meta, spec=spec)
     data = yaml.safe_load(text)
     kopf.adopt(data, body)
-    delete_helmbundle(data)
+    helmbundle(data, logger, delete=True)
     # TODO(pas-ha) poll/retry for children to be deleted
-    kopf.info(body, reason="Delete", message=f"deleted {service}")
+    kopf.info(
+        body, reason="Delete", message=f"deleted HelmBundle for {service}"
+    )
 
 
 def apply_service(service, *, body, meta, spec, logger, **kwargs):
@@ -115,10 +112,8 @@ def apply_service(service, *, body, meta, spec, logger, **kwargs):
     tpl = ENV.get_template(f"{os_release}/{service}.yaml")
     logger.info(f"Using template {tpl.filename}")
 
+    base = yaml.safe_load(ENV.get_template(f"{os_release}/base.yaml").render())
     # Merge operator defaults with user context.
-    base_file = ENV.get_template(f"{os_release}/base.yaml").filename
-    with open(base_file) as f:
-        base = yaml.safe_load(f)
     spec = merger.merge(base, spec)
     text = tpl.render(body=body, meta=meta, spec=spec)
     data = yaml.safe_load(text)
@@ -160,14 +155,16 @@ def apply_service(service, *, body, meta, spec, logger, **kwargs):
     # NOTE(pas-ha) this sets the parent refs in child to point to our resource
     # so that cascading delete is handled by K8S itself
     kopf.adopt(data, body)
-    logger.debug(f"Creating HelmBundle object: %s", data)
-    obj = apply_helmbundle_state(data)
+    helmbundle(data, logger)
     # TODO(pas-ha) poll/retry for children to be created/updated
-    logger.debug(f"HelmBundle child is created: %s", obj)
     if kwargs["event"] == "create":
-        kopf.info(body, reason="Create", message=f"created {service}")
+        kopf.info(
+            body, reason="Create", message=f"created HelmBundle for {service}"
+        )
     elif kwargs["event"] == "update":
-        kopf.info(body, reason="Update", message=f"updated {service}")
+        kopf.info(
+            body, reason="Update", message=f"updated HelmBundle for {service}"
+        )
 
 
 @kopf.on.create("lcm.mirantis.com", "v1alpha1", "openstackdeployments")
