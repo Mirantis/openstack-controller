@@ -51,7 +51,7 @@ spec:
       volume:
         backend: ceph
       backup:
-        backend: radosgw
+        backend: ceph
     neutron:
       backend: ovs
     nova:

@@ -46,6 +46,11 @@ spec:
               replication: 1
               crush_rule: replicated_ruleset
               chunk_size: 8
+        cinder:
+{%- if spec.get('features', {}).get('cinder', {}).get('backup', {}).get('backend') == 'ceph' %}
+          DEFAULT:
+            backup_driver: cinder.backup.drivers.ceph.CephBackupDriver
+{%- endif %}
       manifests:
         network_policy: false
 {%- if spec.get('features', {}).get('messaging', {}).get('dedicated_rabbitmq', {}).get('enabled', True) %}
