@@ -61,7 +61,7 @@ spec:
                         type: object
                         properties:
                           name:
-                            type: sring
+                            type: string
                             description: symbolic name to reference this repo
                           url:
                             type: string
