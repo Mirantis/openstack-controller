@@ -6,8 +6,6 @@ metadata:
   labels: {}
   annotations: {}
 spec:
-  # base set of values to base on
-  base: null
   # common values to pass into all charts and services
   common:
     images:
