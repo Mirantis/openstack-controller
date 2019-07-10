@@ -92,10 +92,11 @@ def delete_service(service, *, body, meta, spec, logger, **kwargs):
     logger.info(f"using template {tpl.filename}")
 
     base = yaml.safe_load(ENV.get_template(f"{os_release}/base.yaml").render())
-    # NOTE(pas-ha) not merging spec as we only need correct name
+    # NOTE(pas-ha) not merging common and services as we only need correct name
     # (hardcoded in the template) and namespace (will be populated by adopt)
-    # to delete the resource
-    text = tpl.render(body=base, meta=meta, spec=spec)
+    # to delete the resource, base must be enough for that
+    spec = merger.merge(base, spec)
+    text = tpl.render(body=body, meta=meta, spec=spec)
     data = yaml.safe_load(text)
     kopf.adopt(data, body)
     helmbundle(data, logger, delete=True)
@@ -146,7 +147,7 @@ def apply_service(service, *, body, meta, spec, logger, **kwargs):
 
         merger.merge(
             release["values"],
-            spec["services"]
+            spec.get("services", {})
             .get(service, {})
             .get(chart_name, {})
             .get("values", {}),
@@ -175,8 +176,11 @@ async def create(body, meta, spec, **kwargs):
         service_fns[service] = functools.partial(
             apply_service, service=service
         )
-    await kopf.execute(fns=service_fns)
-    return {"message": "created"}
+    if service_fns:
+        await kopf.execute(fns=service_fns)
+        return {"message": "created"}
+    else:
+        return {"message": "skipped"}
 
 
 @kopf.on.update("lcm.mirantis.com", "v1alpha1", "openstackdeployments")
@@ -205,7 +209,7 @@ async def update(body, meta, spec, logger, **kwargs):
             f"no {' or '.join(accept_update)} changes for {meta['name']}, "
             f"ignoring update"
         )
-        return
+        return {"message": "skipped"}
 
     service_fns = {}
     for service in spec.get("features", {}).get("services", []):
@@ -216,8 +220,11 @@ async def update(body, meta, spec, logger, **kwargs):
         service_fns[service + "_delete"] = functools.partial(
             delete_service, service=service
         )
-    await kopf.execute(fns=service_fns)
-    return {"message": "updated"}
+    if service_fns:
+        await kopf.execute(fns=service_fns)
+        return {"message": "updated"}
+    else:
+        return {"message": "skipped"}
 
 
 @kopf.on.delete("lcm.mirantis.com", "v1alpha1", "openstackdeployments")
