@@ -71,4 +71,11 @@ spec:
       endpoints:
         oslo_messaging:
           <<: *glance_endpoints_oslo_messaging
+        oslo_messaging_notifications:
+          statefulset:
+            replicas: 1
+            name: openstack-rabbitmq-rabbitmq
+          hosts:
+            default: rabbitmq-notifications
+          path: /openstack
 {%- endif %}
