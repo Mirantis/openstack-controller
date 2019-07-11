@@ -1,0 +1,12 @@
+{{ if .Values.helmbundle.enabled }}
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: osh-system
+{{ end }}
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: openstack

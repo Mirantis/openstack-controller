@@ -1,0 +1,18 @@
+apiVersion: lcm.mirantis.com/v1alpha1
+kind: HelmBundle
+metadata:
+  name: openstack-operator
+  namespace: osh-system
+spec:
+  repositories:
+  - name: osh-operator
+    url: 'https://harbor.mcp.mirantis.net/chartrepo/cr-45574'
+  releases:
+  - name: openstack-osh-operator
+    chart: osh-operator/osh-operator
+    version: 0.1.0
+    namespace: osh-system
+    values:
+      image:
+        repository: docker-prod-local.docker.mirantis.net/mcp/osh-operator
+        tag: nightly

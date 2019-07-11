@@ -1,0 +1,130 @@
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  # name must match the spec fields below, and be in the form: <plural>.<group>
+  name: openstackdeployments.lcm.mirantis.com
+  annotations:
+    "helm.sh/hook": crd-install
+spec:
+  # group name to use for REST API: /apis/<group>/<version>
+  group: lcm.mirantis.com
+  # list of versions supported by this CustomResourceDefinition
+  versions:
+    - name: v1alpha1
+      # Each version can be enabled/disabled by Served flag.
+      served: true
+      # One and only one version must be marked as the storage version.
+      storage: true
+  # either Namespaced or Cluster
+  scope: Namespaced
+  names:
+    # plural name to be used in the URL: /apis/<group>/<version>/<plural>
+    plural: openstackdeployments
+    # singular name to be used as an alias on the CLI and for display
+    singular: openstackdeployment
+    # kind is normally the CamelCased singular type. Your resource manifests use this.
+    kind: OpenStackDeployment
+    # shortNames allow shorter string to match your resource on the CLI
+    shortNames:
+      - osdpl
+    categories:
+      - all
+  additionalPrinterColumns:
+    - name: Age
+      type: date
+      JSONPath: .metadata.creationTimestamp
+    - name: Deployed
+      type: boolean
+      JSONPath: .status.deployed
+  validation:
+    openAPIV3Schema:
+      properties:
+        apiVersion:
+          type: string
+        kind:
+          type: string
+        metadata:
+          type: object
+        spec:
+          properties:
+            common:
+              type: object
+              properties:
+                charts:
+                  type: object
+                  description: settings passed to every helm chart
+                  properties:
+                    releases:
+                      type: object
+                      properties:
+                        values:
+                          type: object
+                    repositories:
+                      type: array
+                      description: list of helm chart repositories
+                      items:
+                        type: object
+                        properties:
+                          name:
+                            type: string
+                            description: symbolic name to reference this repo
+                          url:
+                            type: string
+                            description: helm charts repo url
+                        required:
+                          - name
+                          - url
+                    values:
+                      type: object
+                infra:
+                  type: object
+                openstack:
+                  type: object
+                  properties:
+                    repo:
+                      type: string
+                    version:
+                      type: string
+                      description: version of OpenStack to deploy
+                      enum:
+                        - stein
+                    values:
+                      type: object
+                  # FIXME(pas-ha) currently rendering logic requires
+                  # this to be present in CR
+                  required:
+                    - version
+            features:
+              type: object
+              properties:
+                messaging:
+                  type: object
+                  properties:
+                    dedicated_rabbitmq:
+                      type: object
+                      properties:
+                        enabled:
+                          description: >
+                            enable deployment of each openstack service
+                            with dedicated instance of rabbitmq
+                            for intra-service communications
+                          type: boolean
+                services:
+                  type: array
+                  description: List of enabled openstack and auxiliary services
+                  items:
+                    type: string
+                    enum:
+                      - block-storage
+                      - compute
+                      - identity
+                      - dashboard
+                      - image
+                      - ingress
+                      - mariadb
+                      - memcached
+                      - networking
+                      - orchestration
+                      - rabbitmq
+            services:
+              type: object
