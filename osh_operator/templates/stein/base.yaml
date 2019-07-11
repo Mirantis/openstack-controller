@@ -78,9 +78,9 @@ common:
             image_repo_sync: docker.io/docker:17.07.0
     repositories:
     - name: osh
-      url: "https://harbor.mcp.mirantis.net/chartrepo/mcp-openstack-helm-20190626144233"
+      url: "https://harbor.mcp.mirantis.net/chartrepo/mcp-openstack-helm-20190709081513"
     - name: osh-infra
-      url: "https://harbor.mcp.mirantis.net/chartrepo/mcp-openstack-helm-infra-20190620125953"
+      url: "https://harbor.mcp.mirantis.net/chartrepo/mcp-openstack-helm-infra-20190711124502"
     # Common data among all chart groups
   openstack:
     repo: osh
