@@ -24,6 +24,9 @@ rules:
   - apiGroups: [lcm.mirantis.com]
     resources: [openstackdeployments]
     verbs: [list, get, watch]
+  - apiGroups: [lcm.mirantis.com]
+    resources: [helmbundles]
+    verbs: [list, get, watch]
 ---
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: Role
