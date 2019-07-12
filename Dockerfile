@@ -4,4 +4,3 @@ ADD . /opt/operator
 RUN apk update && apk add --no-cache --virtual build_deps git
 RUN pip install --no-cache-dir /opt/operator
 RUN apk del build_deps
-CMD kopf run -m osh_operator.main

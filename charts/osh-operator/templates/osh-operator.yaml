@@ -130,7 +130,13 @@ spec:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          command: ['kopf', 'run', '-m', 'osh_operator.main']
+          command:
+            - kopf
+            - run
+            - '-m'
+            - osh_operator.openstackdeployment
+            - '-m'
+            - osh_operator.helmbundle
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       {{- with .Values.nodeSelector }}

@@ -130,5 +130,11 @@ spec:
         # image: pshchelo/osh-operator:latest
         image: docker-prod-local.docker.mirantis.net/mcp/osh-operator:nightly
         imagePullPolicy: Always
-        command: ['kopf', 'run', '-m', 'osh_operator.main']
+        command:
+          - kopf
+          - run
+          - '-m'
+          - osh_operator.openstackdeployment
+          - '-m'
+          - osh_operator.helmbundle
 ...
