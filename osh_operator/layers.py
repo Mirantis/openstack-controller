@@ -1,0 +1,102 @@
+import logging
+
+import deepmerge
+import jinja2
+import yaml
+
+LOG = logging.getLogger(__name__)
+
+ENV = jinja2.Environment(loader=jinja2.PackageLoader(__name__.split(".")[0]))
+LOG.info(f"found templates {ENV.list_templates()}")
+
+
+merger = deepmerge.Merger(
+    # pass in a list of tuple, with the strategies you are looking to apply
+    # to each type.
+    # NOTE(pas-ha) We are handling results of yaml.safe_load and k8s api
+    # exclusively, thus only standard json-compatible collection data types
+    # will be present, so not botherting with collections.abc for now.
+    [(list, ["append"]), (dict, ["merge"])],
+    # next, choose the fallback strategies, applied to all other types:
+    ["override"],
+    # finally, choose the strategies in the case where the types conflict:
+    # TODO(pas-ha) write own merger filter to FAIL merging of different types
+    ["override"],
+)
+
+CHART_GROUP_MAPPING = {
+    "openstack": [
+        "cinder",
+        "glance",
+        "heat",
+        "horizon",
+        "keystone",
+        "neutron",
+        "nova",
+    ],
+    "infra": ["rabbitmq", "mariadb", "memcached", "openvswitch", "libvirt"],
+}
+
+
+def services(spec, logger, event, **kwargs):
+    to_apply = set(spec.get("features", {}).get("services", []))
+    to_delete = {}
+    # NOTE(pas-ha) each diff is (op, (path, parts, ...), old, new)
+    # kopf ignores changes to status except its own internal fields
+    # and metadata except labels and annotations
+    # (kind and apiVersion and namespace are de-facto immutable)
+    for op, path, old, new in kwargs.get("diff", []):
+        logger.debug(f"{op} {'.'.join(path)} from {old} to {new}")
+        if path == ("spec", "features", "services"):
+            # NOTE(pas-ha) something changed in services,
+            # need to check if any were deleted
+            to_delete = set(old) - set(new)
+    return to_apply, to_delete
+
+
+def render_all(service, body, meta, spec, logger):
+    # logger.debug(f"found templates {ENV.list_templates()}")
+    os_release = spec["common"]["openstack"]["version"]
+    tpl = ENV.get_template(f"{os_release}/{service}.yaml")
+    logger.debug(f"Using template {tpl.filename}")
+
+    base = yaml.safe_load(ENV.get_template(f"{os_release}/base.yaml").render())
+    # Merge operator defaults with user context.
+    spec = merger.merge(base, spec)
+    text = tpl.render(body=body, meta=meta, spec=spec)
+    data = yaml.safe_load(text)
+
+    # FIXME(pas-ha) either move to dict merging stage before,
+    # or move to the templates themselves
+    data["spec"]["repositories"] = spec["common"]["charts"]["repositories"]
+
+    # We have 4 level of hierarhy:
+    # 1. helm values.yaml - which is default
+    # 2. osh-operator crd charts section
+    # 3. osh-operator crd common/group section
+    # 4. osh_operator/<openstack_version>/<chart>.yaml
+
+    # The values are merged in this specific order.
+    for release in data["spec"]["releases"]:
+        chart_name = release["chart"].split("/")[-1]
+        merger.merge(
+            release, spec["common"].get("charts", {}).get("releases", {})
+        )
+        for group, charts in CHART_GROUP_MAPPING.items():
+            if chart_name in charts:
+                merger.merge(
+                    release, spec["common"].get(group, {}).get("releases", {})
+                )
+                merger.merge(
+                    release["values"],
+                    spec["common"].get(group, {}).get("values", {}),
+                )
+
+        merger.merge(
+            release["values"],
+            spec.get("services", {})
+            .get(service, {})
+            .get(chart_name, {})
+            .get("values", {}),
+        )
+    return data
