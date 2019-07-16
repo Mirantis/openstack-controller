@@ -14,7 +14,11 @@ spec:
       manifests:
         network_policy: false
       volume:
+{%- if spec.get('features', {}).get('messaging', {}).get('local_volumes', {}).get('enabled', False) %}
+        class_name: local-provisioner
+{%- else %}
         class_name: rook-ceph-block
+{%- endif %}
       endpoints:
         oslo_messaging: &cinder_endpoints_oslo_messaging
           statefulset:
