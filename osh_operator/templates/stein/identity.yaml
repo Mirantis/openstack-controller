@@ -13,6 +13,9 @@ spec:
           server: 1
       manifests:
         network_policy: false
+{%- if spec.get('features', {}).get('messaging', {}).get('create_user_credentials', False) %}
+        job_users_create: true
+{%- endif %}
       volume:
 {%- if spec.get('features', {}).get('messaging', {}).get('local_volumes', {}).get('enabled', False) %}
         class_name: local-provisioner
@@ -27,12 +30,25 @@ spec:
           hosts:
             default: rabbitmq-keystone
           path: /keystone
+{%- if spec.get('features', {}).get('messaging', {}).get('create_user_credentials', False) %}
+      conf:
+        users:
+          keystone:
+            auth:
+              service_user:
+                username: keystone
+                password: password
+            path: /keystone
+{%- endif %}
 {%- endif %}
   - name: openstack-keystone
     chart: {{spec.common.openstack.repo}}/keystone
     values:
       manifests:
         network_policy: false
+{%- if spec.get('features', {}).get('messaging', {}).get('create_user_credentials', False) %}
+        job_rabbit_init: false
+{%- endif %}
 {%- if spec.get('features', {}).get('messaging', {}).get('dedicated_rabbitmq', {}).get('enabled', True) %}
       endpoints:
         oslo_messaging:

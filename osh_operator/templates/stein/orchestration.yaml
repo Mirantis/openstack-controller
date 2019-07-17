@@ -13,6 +13,9 @@ spec:
           server: 1
       manifests:
         network_policy: false
+{%- if spec.get('features', {}).get('messaging', {}).get('create_user_credentials', False) %}
+        job_users_create: true
+{%- endif %}
       volume:
 {%- if spec.get('features', {}).get('messaging', {}).get('local_volumes', {}).get('enabled', False) %}
         class_name: local-provisioner
@@ -27,12 +30,25 @@ spec:
           hosts:
             default: rabbitmq-heat
             path: /heat
+{%- if spec.get('features', {}).get('messaging', {}).get('create_user_credentials', False) %}
+      conf:
+        users:
+          heat:
+            auth:
+              service_user:
+                username: heat
+                password: password
+            path: /heat
+{%- endif %}
 {%- endif %}
   - name: openstack-heat
     chart: {{spec.common.openstack.repo}}/heat
     values:
       manifests:
         network_policy: false
+{%- if spec.get('features', {}).get('messaging', {}).get('create_user_credentials', False) %}
+        job_rabbit_init: false
+{%- endif %}
 {%- if spec.get('features', {}).get('messaging', {}).get('dedicated_rabbitmq', {}).get('enabled', True) %}
       endpoints:
         oslo_messaging:

@@ -5,16 +5,60 @@ metadata:
 spec:
   releases:
   - name: openstack-rabbitmq
-    chart: {{spec.common.infra.repo}}/rabbitmq
+    chart: {{spec.common.infra.get('repo', spec.common.charts.repo)}}/rabbitmq
     values:
       pod:
         replicas:
           server: 1
       manifests:
         network_policy: false
+{%- if spec.get('features', {}).get('messaging', {}).get('create_user_credentials', False) %}
+        job_users_create: true
+{%- endif %}
       volume:
 {%- if spec.get('features', {}).get('messaging', {}).get('local_volumes', {}).get('enabled', False) %}
         class_name: local-provisioner
 {%- else %}
         class_name: rook-ceph-block
+{%- endif %}
+{# TODO (ohryhorov): change path according to rabbit dedicated policy (rabbit per service) #}
+{%- if spec.get('features', {}).get('messaging', {}).get('create_user_credentials', False) %}
+      conf:
+        users:
+          keystone_service:
+            auth:
+              keystone_username:
+                username: keystone
+                password: password
+            path: /keystone
+          glance_service:
+            auth:
+              glance_username:
+                username: glance
+                password: password
+            path: /glance
+          cinder:
+            auth:
+              cinder:
+                username: cinder
+                password: password
+            path: /cinder
+          heat:
+            auth:
+              heat:
+                username: heat
+                password: password
+            path: /heat
+          neutron:
+            auth:
+              neutron:
+                username: neutron
+                password: password
+            path: /neutron
+          nova:
+            auth:
+              nova:
+                username: nova
+                password: password
+            path: /nova
 {%- endif %}

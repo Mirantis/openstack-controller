@@ -13,6 +13,9 @@ spec:
           server: 1
       manifests:
         network_policy: false
+{%- if spec.get('features', {}).get('messaging', {}).get('create_user_credentials', False) %}
+        job_users_create: true
+{%- endif %}
       volume:
 {%- if spec.get('features', {}).get('messaging', {}).get('local_volumes', {}).get('enabled', False) %}
         class_name: local-provisioner
@@ -27,6 +30,16 @@ spec:
           hosts:
             default: rabbitmq-neutron
           path: /neutron
+{%- if spec.get('features', {}).get('messaging', {}).get('create_user_credentials', False) %}
+      conf:
+        users:
+          neutron:
+            auth:
+              service_user:
+                username: neutron
+                password: password
+            path: /neutron
+{%- endif %}
 {%- endif %}
   - name: openstack-openvswitch
     chart: {{spec.common.infra.repo}}/openvswitch
@@ -42,6 +55,10 @@ spec:
       endpoints:
         oslo_messaging:
           <<: *neutron_endpoints_oslo_messaging
+{%- endif %}
+      manifests:
+{%- if spec.get('features', {}).get('messaging', {}).get('create_user_credentials', False) %}
+        job_rabbit_init: false
 {%- endif %}
       network:
         interface:

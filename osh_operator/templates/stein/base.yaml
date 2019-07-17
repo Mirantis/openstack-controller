@@ -99,6 +99,7 @@ features:
       enabled: True
     dedicated_rabbitmq:
       enabled: True
+    create_user_credentials: True
   database:
     local_volumes:
       enabled: True
