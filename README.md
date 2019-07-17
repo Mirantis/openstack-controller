@@ -59,7 +59,7 @@ Update DNS to match currently configured by kaas
 
 Update host OS dns to point to kubernetes coredns
 
-`sed -i 's/#DNS=/DNS=10.233.0.3/g' /etc/systemd/resolved.conf`
+`sed -i "s/#DNS=/DNS=$(kubectl get svc coredns -n kube-system -ojsonpath='{.spec.clusterIP}')/g" /etc/systemd/resolved.conf`
 `systemctl restart systemd-resolved`
 
 ## Validate OpenStack
