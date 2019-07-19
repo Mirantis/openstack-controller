@@ -36,6 +36,9 @@ spec:
      - networking
      - orchestration
      - rabbitmq
+    ssl:
+      public_endpoints:
+        enabled: False
 #    messaging:
 #      dedicated_rabbitmq:
 #        enabled: True

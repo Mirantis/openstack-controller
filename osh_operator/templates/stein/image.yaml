@@ -67,8 +67,8 @@ spec:
 {%- if spec.get('features', {}).get('messaging', {}).get('create_user_credentials', False) %}
         job_rabbit_init: false
 {%- endif %}
-{%- if spec.get('features', {}).get('messaging', {}).get('dedicated_rabbitmq', {}).get('enabled', True) %}
       endpoints:
+{%- if spec.get('features', {}).get('messaging', {}).get('dedicated_rabbitmq', {}).get('enabled', True) %}
         oslo_messaging:
           <<: *glance_endpoints_oslo_messaging
         oslo_messaging_notifications:
@@ -78,4 +78,39 @@ spec:
           hosts:
             default: rabbitmq-notifications
           path: /openstack
+{%- endif %}
+{%- if spec.get('features', {}).get('ssl', {}).get('public_endpoints', {}).get('enabled', True) %}
+        image:
+          host_fqdn_override:
+            public:
+              tls:
+                ca: |
+{{ spec.features.ssl.public_endpoints.ca_cert | indent( width=18, indentfirst=True) }}
+                crt: |
+{{ spec.features.ssl.public_endpoints.api_cert | indent( width=18, indentfirst=True) }}
+                key: |
+{{ spec.features.ssl.public_endpoints.api_key | indent( width=18, indentfirst=True) }}
+          hosts:
+            admin:
+              host: glance-api
+            default: glance
+            internal: glance-api
+            public:
+              host: glance
+              tls:
+                ca: |
+{{ spec.features.ssl.public_endpoints.ca_cert | indent( width=18, indentfirst=True) }}
+                crt: |
+{{ spec.features.ssl.public_endpoints.api_cert | indent( width=18, indentfirst=True) }}
+                key: |
+{{ spec.features.ssl.public_endpoints.api_key | indent( width=18, indentfirst=True) }}
+          port:
+            api:
+              admin: 9292
+              default: 80
+              internal: 9292
+              public: 443
+          scheme:
+            default: http
+            public: https
 {%- endif %}

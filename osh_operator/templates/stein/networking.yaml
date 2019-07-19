@@ -51,8 +51,8 @@ spec:
   - name: openstack-neutron
     chart: {{spec.common.openstack.repo}}/neutron
     values:
-{%- if spec.get('features', {}).get('messaging', {}).get('dedicated_rabbitmq', {}).get('enabled', True) %}
       endpoints:
+{%- if spec.get('features', {}).get('messaging', {}).get('dedicated_rabbitmq', {}).get('enabled', True) %}
         oslo_messaging:
           <<: *neutron_endpoints_oslo_messaging
         oslo_messaging_notifications:
@@ -62,6 +62,41 @@ spec:
           hosts:
             default: rabbitmq-notifications
           path: /openstack
+{%- endif %}
+{%- if spec.get('features', {}).get('ssl', {}).get('public_endpoints', {}).get('enabled', True) %}
+        network:
+          host_fqdn_override:
+            public:
+              tls:
+                ca: |
+{{ spec.features.ssl.public_endpoints.ca_cert | indent( width=18, indentfirst=True) }}
+                crt: |
+{{ spec.features.ssl.public_endpoints.api_cert | indent( width=18, indentfirst=True) }}
+                key: |
+{{ spec.features.ssl.public_endpoints.api_key | indent( width=18, indentfirst=True) }}
+          hosts:
+            admin:
+              host: neutron-server
+            default: neutron
+            internal: neutron-server
+            public:
+              host: neutron
+              tls:
+                ca: |
+{{ spec.features.ssl.public_endpoints.ca_cert | indent( width=18, indentfirst=True) }}
+                crt: |
+{{ spec.features.ssl.public_endpoints.api_cert | indent( width=18, indentfirst=True) }}
+                key: |
+{{ spec.features.ssl.public_endpoints.api_key | indent( width=18, indentfirst=True) }}
+          port:
+            api:
+              admin: 9696
+              default: 80
+              internal: 9696
+              public: 443
+          scheme:
+            default: http
+            public: https
 {%- endif %}
       manifests:
 {%- if spec.get('features', {}).get('messaging', {}).get('create_user_credentials', False) %}

@@ -104,3 +104,6 @@ features:
     local_volumes:
       enabled: True
       storage_class_name: 'local-provisioner'
+  ssl:
+    public_endpoints:
+      enabled: False

@@ -62,8 +62,8 @@ spec:
 {%- if spec.get('features', {}).get('messaging', {}).get('create_user_credentials', False) %}
         job_rabbit_init: false
 {%- endif %}
-{%- if spec.get('features', {}).get('messaging', {}).get('dedicated_rabbitmq', {}).get('enabled', True) %}
       endpoints:
+{%- if spec.get('features', {}).get('messaging', {}).get('dedicated_rabbitmq', {}).get('enabled', True) %}
         oslo_messaging:
           <<: *nova_endpoints_oslo_messaging
         oslo_messaging_notifications:
@@ -73,6 +73,74 @@ spec:
           hosts:
             default: rabbitmq-notifications
           path: /openstack
+{%- endif %}
+{%- if spec.get('features', {}).get('ssl', {}).get('public_endpoints', {}).get('enabled', True) %}
+        compute:
+          host_fqdn_override:
+            public:
+              tls:
+                ca: |
+{{ spec.features.ssl.public_endpoints.ca_cert | indent( width=18, indentfirst=True) }}
+                crt: |
+{{ spec.features.ssl.public_endpoints.api_cert | indent( width=18, indentfirst=True) }}
+                key: |
+{{ spec.features.ssl.public_endpoints.api_key | indent( width=18, indentfirst=True) }}
+          hosts:
+            admin:
+              host: nova-api
+            default: nova
+            internal: nova-api
+            public:
+              host: nova
+              tls:
+                ca: |
+{{ spec.features.ssl.public_endpoints.ca_cert | indent( width=18, indentfirst=True) }}
+                crt: |
+{{ spec.features.ssl.public_endpoints.api_cert | indent( width=18, indentfirst=True) }}
+                key: |
+{{ spec.features.ssl.public_endpoints.api_key | indent( width=18, indentfirst=True) }}
+          port:
+            api:
+              admin: 8774
+              default: 80
+              internal: 8774
+              public: 443
+          scheme:
+            default: http
+            public: https
+        placement:
+          host_fqdn_override:
+            public:
+              tls:
+                ca: |
+{{ spec.features.ssl.public_endpoints.ca_cert | indent( width=18, indentfirst=True) }}
+                crt: |
+{{ spec.features.ssl.public_endpoints.api_cert | indent( width=18, indentfirst=True) }}
+                key: |
+{{ spec.features.ssl.public_endpoints.api_key | indent( width=18, indentfirst=True) }}
+          hosts:
+            admin:
+              host: placement-api
+            default: placement
+            internal: placement-api
+            public:
+              host: placement
+              tls:
+                ca: |
+{{ spec.features.ssl.public_endpoints.ca_cert | indent( width=18, indentfirst=True) }}
+                crt: |
+{{ spec.features.ssl.public_endpoints.api_cert | indent( width=18, indentfirst=True) }}
+                key: |
+{{ spec.features.ssl.public_endpoints.api_key | indent( width=18, indentfirst=True) }}
+          port:
+            api:
+              admin: 8778
+              default: 80
+              internal: 8778
+              public: 443
+          scheme:
+            default: http
+            public: https
 {%- endif %}
 #      ceph_client:
 #        configmap: rook-ceph-config

@@ -109,6 +109,28 @@ spec:
                             with dedicated instance of rabbitmq
                             for intra-service communications
                           type: boolean
+                ssl:
+                  type: object
+                  properties:
+                    public_endpoints:
+                      type: object
+                      properties:
+                        enabled:
+                          description: >
+                            enable ssl on public endpoints
+                          type: boolean
+                        ca_cert:
+                          description: >
+                            CA certificate
+                          type: string
+                        api_cert:
+                          description: >
+                            API server certificate
+                          type: string
+                        api_key:
+                          description: >
+                            API server private key
+                          type: string
                 services:
                   type: array
                   description: List of enabled openstack and auxiliary services
