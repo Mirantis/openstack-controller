@@ -5,7 +5,7 @@ metadata:
 spec:
   releases:
   - name: openstack-rabbitmq
-    chart: {{spec.common.infra.get('repo', spec.common.charts.repo)}}/rabbitmq
+    chart: {{spec.common.infra.repo}}/rabbitmq
     values:
       pod:
         replicas:

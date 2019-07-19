@@ -6,7 +6,7 @@ spec:
   releases:
 {%- if spec.get('features', {}).get('messaging', {}).get('dedicated_rabbitmq', {}).get('enabled', True) %}
   - name: openstack-nova-rabbitmq
-    chart: {{spec.common.infra.get('repo', spec.common.charts.repo)}}/rabbitmq
+    chart: {{spec.common.infra.repo}}/rabbitmq
     values:
       pod:
         replicas:
@@ -29,7 +29,7 @@ spec:
           path: /nova
 {%- endif %}
   - name: openstack-libvirt
-    chart: {{spec.common.infra.get('repo', spec.common.charts.repo)}}/libvirt
+    chart: {{spec.common.infra.repo}}/libvirt
     values:
       images:
         tags:
@@ -42,7 +42,7 @@ spec:
         libvirt:
           listen_addr: 0.0.0.0
   - name: openstack-nova
-    chart: {{spec.common.openstack.get('repo', spec.common.charts.repo)}}/nova
+    chart: {{spec.common.openstack.repo}}/nova
     values:
       manifests:
         network_policy: false

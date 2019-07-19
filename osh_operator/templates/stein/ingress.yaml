@@ -5,7 +5,7 @@ metadata:
 spec:
   releases:
   - name: ingress-openstack
-    chart: {{spec.common.infra.get('repo', spec.common.charts.repo)}}/ingress
+    chart: {{spec.common.infra.repo}}/ingress
     values:
       manifests:
         network_policy: false

@@ -5,7 +5,7 @@ metadata:
 spec:
   releases:
   - name: openstack-horizon
-    chart: {{spec.common.openstack.get('repo', spec.common.charts.repo)}}/horizon
+    chart: {{spec.common.openstack.repo}}/horizon
     values:
       manifests:
         network_policy: false

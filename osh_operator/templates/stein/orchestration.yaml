@@ -6,7 +6,7 @@ spec:
   releases:
 {%- if spec.get('features', {}).get('messaging', {}).get('dedicated_rabbitmq', {}).get('enabled', True) %}
   - name: openstack-heat-rabbitmq
-    chart: {{spec.common.infra.get('repo', spec.common.charts.repo)}}/rabbitmq
+    chart: {{spec.common.infra.repo}}/rabbitmq
     values:
       pod:
         replicas:
@@ -29,7 +29,7 @@ spec:
             path: /heat
 {%- endif %}
   - name: openstack-heat
-    chart: {{spec.common.openstack.get('repo', spec.common.charts.repo)}}/heat
+    chart: {{spec.common.openstack.repo}}/heat
     values:
       manifests:
         network_policy: false

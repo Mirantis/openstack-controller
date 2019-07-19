@@ -6,7 +6,7 @@ spec:
   releases:
 {%- if spec.get('features', {}).get('messaging', {}).get('dedicated_rabbitmq', {}).get('enabled', True) %}
   - name: openstack-glance-rabbitmq
-    chart: {{spec.common.infra.get('repo', spec.common.charts.repo)}}/rabbitmq
+    chart: {{spec.common.infra.repo}}/rabbitmq
     values:
       pod:
         replicas:
@@ -29,7 +29,7 @@ spec:
           path: /glance
 {%- endif %}
   - name: openstack-glance
-    chart: {{spec.common.openstack.get('repo', spec.common.charts.repo)}}/glance
+    chart: {{spec.common.openstack.repo}}/glance
     values:
       pod:
         replicas:

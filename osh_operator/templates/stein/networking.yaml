@@ -6,7 +6,7 @@ spec:
   releases:
 {%- if spec.get('features', {}).get('messaging', {}).get('dedicated_rabbitmq', {}).get('enabled', True) %}
   - name: openstack-neutron-rabbitmq
-    chart: {{spec.common.infra.get('repo', spec.common.charts.repo)}}/rabbitmq
+    chart: {{spec.common.infra.repo}}/rabbitmq
     values:
       pod:
         replicas:
@@ -29,14 +29,14 @@ spec:
           path: /neutron
 {%- endif %}
   - name: openstack-openvswitch
-    chart: {{spec.common.infra.get('repo', spec.common.charts.repo)}}/openvswitch
+    chart: {{spec.common.infra.repo}}/openvswitch
     values:
       images:
         tags:
           openvswitch_db_server: docker.io/openstackhelm/openvswitch:latest-debian
           openvswitch_vswitchd: docker.io/openstackhelm/openvswitch:latest-debian
   - name: openstack-neutron
-    chart: {{spec.common.openstack.get('repo', spec.common.charts.repo)}}/neutron
+    chart: {{spec.common.openstack.repo}}/neutron
     values:
 {%- if spec.get('features', {}).get('messaging', {}).get('dedicated_rabbitmq', {}).get('enabled', True) %}
       endpoints:

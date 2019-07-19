@@ -5,7 +5,7 @@ metadata:
 spec:
   releases:
   - name: openstack-mariadb
-    chart: {{spec.common.infra.get('repo', spec.common.charts.repo)}}/mariadb
+    chart: {{spec.common.infra.repo}}/mariadb
     values:
       manifests:
         network_policy: false

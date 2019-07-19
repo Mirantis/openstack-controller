@@ -6,7 +6,7 @@ spec:
   releases:
 {%- if spec.get('features', {}).get('messaging', {}).get('dedicated_rabbitmq', {}).get('enabled', True) %}
   - name: openstack-keystone-rabbitmq
-    chart: {{spec.common.infra.get('repo', spec.common.charts.repo)}}/rabbitmq
+    chart: {{spec.common.infra.repo}}/rabbitmq
     values:
       pod:
         replicas:
@@ -29,7 +29,7 @@ spec:
           path: /keystone
 {%- endif %}
   - name: openstack-keystone
-    chart: {{spec.common.openstack.get('repo', spec.common.charts.repo)}}/keystone
+    chart: {{spec.common.openstack.repo}}/keystone
     values:
       manifests:
         network_policy: false

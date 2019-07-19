@@ -5,7 +5,7 @@ metadata:
 spec:
   releases:
   - name: nfs-provisioner
-    chart: {{spec.common.infra.get('repo', spec.common.charts.repo)}}/nfs-provisioner
+    chart: {{spec.common.infra.repo}}/nfs-provisioner
     values:
       storageclass:
         name: general
