@@ -76,6 +76,7 @@ common:
             dep_check: quay.io/stackanetes/kubernetes-entrypoint:v0.3.1
             scripted_test: docker.io/rabbitmq:3.7.13-management
             image_repo_sync: docker.io/docker:17.07.0
+            tempest_run_tests: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/tempest:stein-bionic-20190718193016
     repositories:
     - name: osh
       url: "https://harbor.mcp.mirantis.net/chartrepo/mcp-openstack-helm-20190715144419"
