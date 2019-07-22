@@ -36,7 +36,6 @@ spec:
      - networking
      - orchestration
      - rabbitmq
-     - tempest
 #    messaging:
 #      dedicated_rabbitmq:
 #        enabled: True
@@ -97,5 +96,21 @@ spec:
     tempest:
       tempest:
         values:
-          manifests:
-            job_run_tests: false
+          conf:
+            blacklist:
+            # TODO(sandrichenko) create a bugs for each of failures/group of failures and assign to appropriate team.
+            - (?:tempest\.scenario\.test_server_basic_ops\.TestServerBasicOps\.test_server_basic_ops)
+            - (?:tempest\.api\.volume\.test_volumes_actions\.VolumesActionsTest)
+            - (?:tempest\.api\.volume\.test_volumes_get\.VolumesGetTest\.test_volume_create_get_update_delete_from_image)
+            - (?:tempest\.api\.volume\.test_volumes_get\.VolumesGetTest\.test_volume_create_get_update_delete)
+            - (?:tempest\.api\.volume\.test_volumes_list\.VolumesListTestJSON)
+            - (?:tempest\.api\.compute\.servers\.test_server_actions\.ServerActionsTestJSON)
+            - (?:tempest\.api\.compute\.servers\.test_create_server\.ServersTestManualDisk)
+            - (?:tempest\.api\.compute\.servers\.test_attach_interfaces\.AttachInterfacesUnderV243Test\.test_add_remove_fixed_ip)
+            - (?:tempest\.api\.compute\.servers\.test_server_addresses\.ServerAddressesTestJSON)
+            - (?:tempest\.api\.compute\.servers\.test_create_server\.ServersTestBootFromVolume)
+            - (?:tempest\.api\.compute\.servers\.test_create_server\.ServersTestJSON)
+            - (?:tempest\.api\.compute\.flavors\.test_flavors\.FlavorsV2TestJSON\.test_list_flavors)
+            - (?:tempest\.api\.compute\.flavors\.test_flavors\.FlavorsV2TestJSON\.test_get_flavor)
+            script: |
+              tempest run --config-file /etc/tempest/tempest.conf -w 4 --smoke --blacklist-file  /etc/tempest/test-blacklist
