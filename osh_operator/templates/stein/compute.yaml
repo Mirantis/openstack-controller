@@ -49,9 +49,18 @@ spec:
           libvirt: docker-prod-virtual.docker.mirantis.net/mcp/libvirt:4.0.0-bionic-1554881274591
       manifests:
         network_policy: false
+{%- if (spec.get('features', {}).get('nova', {}).get('images', {}).get('backend') == 'ceph') or (spec.get('features', {}).get('cinder', {}).get('volume', {}).get('backend') == 'ceph') %}
+      ceph_client:
+        configmap: rook-ceph-config
+        user_secret_name: rook-ceph-admin-keyring
+{%- endif %}
       conf:
         ceph:
+{%- if (spec.get('features', {}).get('nova', {}).get('images', {}).get('backend') == 'ceph') or (spec.get('features', {}).get('cinder', {}).get('volume', {}).get('backend') == 'ceph') %}
+          enabled: true
+{%- else %}
           enabled: false
+{%- endif %}
         libvirt:
           listen_addr: 0.0.0.0
   - name: openstack-nova
@@ -142,18 +151,18 @@ spec:
             default: http
             public: https
 {%- endif %}
-#      ceph_client:
-#        configmap: rook-ceph-config
-#        user_secret_name: rook-ceph-admin-keyring
+{%- if spec.get('features', {}).get('nova', {}).get('images', {}).get('backend') == 'ceph' %}
+      ceph_client:
+        configmap: rook-ceph-config
+        user_secret_name: rook-ceph-admin-keyring
+{%- endif %}
       conf:
         ceph:
+{%- if spec.get('features', {}).get('nova', {}).get('images', {}).get('backend') == 'ceph' %}
+          enabled: true
+{%- elif spec.get('features', {}).get('nova', {}).get('images', {}).get('backend') == 'local' %}
           enabled: false
-#          admin_keyring:
-#          cinder:
-#            user: "cinder"
-      #      keyring: AQAHkNFcy0NJLhAAgirzRZJTb35tbwhbMkrIAw==
-      #      keyring: null
-#            secret_uuid: 457eb676-33da-42ec-9a8c-9293d545c337
+{%- endif %}
         nova:
           libvirt:
             cpu_mode: custom

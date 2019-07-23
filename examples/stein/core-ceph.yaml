@@ -56,7 +56,8 @@ spec:
     neutron:
       backend: ovs
     nova:
-      image_backend: ceph
+      images:
+        backend: local
   # enabled services and their specific configuration
   services:
     ingress:

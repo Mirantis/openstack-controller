@@ -147,5 +147,18 @@ spec:
                       - orchestration
                       - rabbitmq
                       - tempest
+                nova:
+                  type: object
+                  properties:
+                    images:
+                      type: object
+                      properties:
+                        backend:
+                          description: >
+                            backend for nova images can be ceph or local
+                          type: string
+                          enum:
+                            - local
+                            - ceph
             services:
               type: object
