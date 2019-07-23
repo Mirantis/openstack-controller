@@ -94,7 +94,23 @@ spec:
         values: {}
     compute:
       nova:
-        values: {}
+        values:
+          bootstrap:
+            structured:
+              flavors:
+                options:
+                  m1.extra_tiny_test:
+                    disk: 1
+                    id: "1"
+                    name: m1.extra_tiny_test
+                    ram: 256
+                    vcpus: 1
+                  m1_tiny_test:
+                    disk: 1
+                    id: "2"
+                    name: m1.tiny
+                    ram: 512
+                    vcpus: 1
     orchestration:
       heat:
         values: {}
@@ -118,7 +134,5 @@ spec:
             - (?:tempest\.api\.compute\.servers\.test_server_addresses\.ServerAddressesTestJSON)
             - (?:tempest\.api\.compute\.servers\.test_create_server\.ServersTestBootFromVolume)
             - (?:tempest\.api\.compute\.servers\.test_create_server\.ServersTestJSON)
-            - (?:tempest\.api\.compute\.flavors\.test_flavors\.FlavorsV2TestJSON\.test_list_flavors)
-            - (?:tempest\.api\.compute\.flavors\.test_flavors\.FlavorsV2TestJSON\.test_get_flavor)
             script: |
               tempest run --config-file /etc/tempest/tempest.conf -w 4 --smoke --blacklist-file  /etc/tempest/test-blacklist
