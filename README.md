@@ -72,8 +72,8 @@ clouds:
     region_name: RegionOne
     identity_api_version: 3
     auth:
-      username: 'admin'
-      password: 'password'
+      username: '$(kubectl -n openstack get secrets keystone-keystone-admin -o jsonpath='{.data.OS_USERNAME}' | base64 -d)'
+      password: '$(kubectl -n openstack get secrets keystone-keystone-admin -o jsonpath='{.data.OS_PASSWORD}' | base64 -d)'
       project_name: 'admin'
       project_domain_name: 'default'
       user_domain_name: 'default'

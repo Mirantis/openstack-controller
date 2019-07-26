@@ -160,5 +160,25 @@ spec:
                           enum:
                             - local
                             - ceph
+                keystone:
+                  type: object
+                  properties:
+                    users:
+                      type: object
+                      properties:
+                        admin:
+                          type: object
+                          required:
+                          - username
+                          - password
+                          properties:
+                            username:
+                              description: >
+                                Username for admin of Openstack deployment
+                              type: string
+                            password:
+                              description: >
+                                Password for admin of Openstack deployment
+                              type: string
             services:
               type: object

@@ -74,6 +74,16 @@ spec:
         job_rabbit_init: false
 {%- endif %}
       endpoints:
+        identity:
+          auth:
+            admin:
+              region_name: {{ spec.features.keystone.users.admin.get('region_name', 'RegionOne') }}
+              username: {{ spec.features.keystone.users.admin.username }}
+              password: {{ spec.features.keystone.users.admin.password }}
+              project_name: {{ spec.features.keystone.users.admin.get('project_name', 'admin') }}
+              user_domain_name: {{ spec.features.keystone.users.admin.get('user_domain_name', 'default') }}
+              project_domain_name: {{ spec.features.keystone.users.admin.get('project_domain_name', 'default') }}
+              default_domain_id: {{ spec.features.keystone.users.admin.get('default_domain_id', 'default') }}
 {%- if spec.get('features', {}).get('messaging', {}).get('dedicated_rabbitmq', {}).get('enabled', True) %}
         oslo_messaging:
           <<: *cinder_endpoints_oslo_messaging

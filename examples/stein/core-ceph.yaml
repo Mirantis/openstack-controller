@@ -45,6 +45,10 @@ spec:
     keystone:
       iam:
         enabled: True
+      users:
+        admin:
+          username: admin
+          password: workshop
     glance:
       direct_upload: False
       backend: ceph
