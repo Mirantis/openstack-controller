@@ -22,7 +22,7 @@ spec:
 {%- endif %}
       volume:
 {%- if spec.get('features', {}).get('database', {}).get('local_volumes', {}).get('enabled', False) %}
-        class_name: {{ spec.features.database.local_volumes.storage_class_name }}
+        class_name: local-provisioner
 {%- else %}
         class_name: rook-ceph-block
 {%- endif %}

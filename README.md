@@ -37,7 +37,7 @@ Deploy ceph cluster
 
 `kubectl apply -f https://raw.githubusercontent.com/jumpojoy/os-k8s/master/crds/ceph/cluster.yaml`
 
-Create storageclass
+Create Ceph storageclass
 
 `kubectl apply -f https://raw.githubusercontent.com/jumpojoy/os-k8s/master/crds/ceph/storageclass.yaml`
 
@@ -46,6 +46,31 @@ Share metadata with openstack
 `kubectl get secret rook-ceph-admin-keyring -n rook-ceph --export -o yaml | sed -e 's/keyring:/key:/' | kubectl apply -n openstack -f-`
 
 `kubectl cp rook-ceph/$(kubectl -n rook-ceph get pod -l "app=rook-ceph-operator" -o jsonpath='{.items[0].metadata.name}'):/etc/ceph/ceph.conf /tmp/ceph.conf && sed -i 's/[a-z]1\+://g' /tmp/ceph.conf; sed -i '/^\[client.admin\]/d' /tmp/ceph.conf; sed -i '/^keyring =/d' /tmp/ceph.conf; sed -i '/^$/d' /tmp/ceph.conf; kubectl create configmap rook-ceph-config -n openstack --from-file=/tmp/ceph.conf`
+
+
+In case local volumes are used for Mariadb and/or Rabbitmq configure local volumes provisioner as follows.
+Setup mount points for local volumes provisioner (1 mount point - 1 volume) (Workaround for https://mirantis.jira.com/browse/PROD-31627)
+
+```
+nodeVolumesCount=3
+volDirPrefix='vol'
+sshUser='ubuntu'
+for node in $(sudo kubectl --kubeconfig=/root/.kube/config get nodes -o NAME -l openstack-control-plane=enabled); do
+  ip=$(sudo kubectl --kubeconfig=/root/.kube/config describe ${node} | grep InternalIP | cut -d' ' -f5;)
+  for i in $(seq 1 $nodeVolumesCount); do
+    volDir="${volDirPrefix}-${i}"
+    ssh -o "StrictHostKeyChecking=no" ${sshUser}@${ip} "sudo mkdir -p /mnt/local-provisioner/${volDir} && sudo mkdir -p /mnt/${volDir}"
+    ssh -o "StrictHostKeyChecking=no" ${sshUser}@${ip} "sudo mount --bind /mnt/${volDir} /mnt/local-provisioner/${volDir}"
+    ssh -o "StrictHostKeyChecking=no" ${sshUser}@${ip} "echo '/mnt/${volDir} /mnt/local-provisioner/${volDir} none defaults,bind 0 0' | sudo tee -a /etc/fstab"
+  done;
+done;
+```
+
+Setup provisioner for local volumes and related storage class (workaround for https://mirantis.jira.com/browse/PROD-31681)
+
+`git clone https://<username>@gerrit.mcp.mirantis.com/a/mcp/mcp-pipelines.git`
+kubectl apply -f mcp-pipelines/tools/openstack-local-volume-provisoner.yaml
+
 
 ### Deploy OpenStack
 
