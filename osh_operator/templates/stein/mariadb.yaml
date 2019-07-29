@@ -13,7 +13,7 @@ spec:
         cluster_domain_suffix: {{ spec.domain_name }}
       pod:
         replicas:
-          server: 1
+          server: 3
 {%- if spec.get('features', {}).get('database', {}).get('local_volumes', {}).get('enabled', False) %}
         # To have higher level of data redundency in case of local volumes - ensure pods are spread
         # across volumes placed on different nodes
