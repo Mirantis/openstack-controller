@@ -53,6 +53,11 @@ rules:
     resources: [events]
     verbs: [create]
 
+  # Application: manage ceph access data(secrets,configmaps)
+  - apiGroups: [""]
+    resources: [secrets,configmaps]
+    verbs: [list, get, create]
+
   # Application: watching & handling for the custom resource we declare.
   - apiGroups: [lcm.mirantis.com]
     resources: [openstackdeployments]
@@ -62,6 +67,18 @@ rules:
   - apiGroups: [lcm.mirantis.com]
     resources: [helmbundles]
     verbs: [list, get, watch, create, update, patch, delete]
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: Role
+metadata:
+  namespace: "ceph-lcm-mirantis"
+  name: "osh-operator-role-ceph-lcm-mirantis"
+rules:
+
+  # Application: read ceph access data from shared namespace.
+  - apiGroups: [""]
+    resources: [secrets,configmaps]
+    verbs: [list, get]
 ---
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: ClusterRoleBinding
@@ -103,12 +120,26 @@ subjects:
     name: osh-operator-account
     namespace: osh-system
 ---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: RoleBinding
+metadata:
+  namespace: "ceph-lcm-mirantis"
+  name: "osh-operator-rolebinding-ceph-lcm-mirantis"
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: "osh-operator-role-ceph-lcm-mirantis"
+subjects:
+  - kind: ServiceAccount
+    name: osh-operator-account
+    namespace: osh-system
+---
 apiVersion: zalando.org/v1
 kind: KopfPeering
 metadata:
   namespace: osh-system
   name: default
----
+----
 apiVersion: apps/v1
 kind: Deployment
 metadata:

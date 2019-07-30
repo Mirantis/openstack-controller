@@ -2,6 +2,8 @@ apiVersion: lcm.mirantis.com/v1alpha1
 kind: HelmBundle
 metadata:
   name: openstack-image
+  annotations:
+    lcm.mirantis.com/ceph_required: 'True'
 spec:
   releases:
 {%- if spec.get('features', {}).get('messaging', {}).get('dedicated_rabbitmq', {}).get('enabled', True) %}

@@ -2,6 +2,11 @@ apiVersion: lcm.mirantis.com/v1alpha1
 kind: HelmBundle
 metadata:
   name: openstack-compute
+{%- if spec.get('features', {}).get('nova', {}).get('images', {}).get('backend') == 'ceph' %}
+    metadata:
+      annotations:
+        lcm.mirantis.com/ceph_required: True
+{%- endif %}
 spec:
   releases:
 {%- if spec.get('features', {}).get('messaging', {}).get('dedicated_rabbitmq', {}).get('enabled', True) %}

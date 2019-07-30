@@ -7,6 +7,11 @@ spec:
 {%- if spec.get('features', {}).get('messaging', {}).get('dedicated_rabbitmq', {}).get('enabled', True) %}
   - name: openstack-cinder-rabbitmq
     chart: {{spec.common.infra.repo}}/rabbitmq
+{%- if spec.get('features', {}).get('cinder', {}).get('backup', {}).get('backend') == 'ceph' %}
+    metadata:
+      annotations:
+        lcm.mirantis.com/ceph_required: True
+{%- endif %}
     values:
       pod:
         replicas:
