@@ -38,7 +38,7 @@ spec:
      - rabbitmq
     ssl:
       public_endpoints:
-        enabled: False
+        enabled: True
 #    messaging:
 #      dedicated_rabbitmq:
 #        enabled: True

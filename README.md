@@ -81,6 +81,114 @@ Update DNS to match currently configured by kaas
 
 `sed -i "s/kaas-kubernetes-3af5ae538cf411e9a6c7fa163e5a4837/$(kubectl get configmap -n kube-system coredns -o jsonpath='{.data.Corefile}' |grep -oh kaas-kubernetes-[[:alnum:]]*)/g" examples/stein/core-ceph.yaml`
 
+#### In case SSL on public endpoints is enabled before applying context need to generate certificates and set them in context yaml.
+```
+mkdir cert
+cd cert
+curl -L https://pkg.cfssl.org/R1.2/cfssl_linux-amd64 -o cfssl
+chmod +x cfssl
+curl -L https://pkg.cfssl.org/R1.2/cfssljson_linux-amd64 -o cfssljson
+chmod +x cfssljson
+
+tee ./ca-config.json << EOF
+{
+  "signing": {
+    "default": {
+      "expiry": "8760h"
+    },
+    "profiles": {
+      "kubernetes": {
+        "usages": [
+          "signing",
+          "key encipherment",
+          "server auth",
+          "client auth"
+        ],
+        "expiry": "8760h"
+      }
+    }
+  }
+}
+EOF
+
+tee ./ca-csr.json << EOF
+{
+  "CN": "kubernetes",
+  "key": {
+    "algo": "rsa",
+    "size": 2048
+  },
+  "names":[{
+    "C": "<country>",
+    "ST": "<state>",
+    "L": "<city>",
+    "O": "<organization>",
+    "OU": "<organization unit>"
+  }]
+}
+EOF
+
+./cfssl gencert -initca ca-csr.json | ./cfssljson -bare ca
+
+tee ./server-csr.json << EOF
+{
+    "CN": "*.openstack.svc.kaas-kubernetes-3af5ae538cf411e9a6c7fa163e5a4838",
+    "hosts":     [
+        "keystone",
+        "keystone.openstack",
+        "glance",
+        "glance.openstack",
+        "cinder",
+        "cinder.openstack",
+        "cloudformation",
+        "cloudformation.openstack",
+        "glance-reg",
+        "glance-reg.openstack",
+        "heat",
+        "heat.openstack",
+        "horizon",
+        "horizon.openstack",
+        "metadata",
+        "metadata.openstack",
+        "neutron",
+        "neutron.openstack",
+        "nova",
+        "nova.openstack",
+        "novncproxy",
+        "novncproxy.openstack",
+        "placement",
+        "placement.openstack",
+        "*.openstack.svc.kaas-kubernetes-3af5ae538cf411e9a6c7fa163e5a4838"
+    ],
+    "key":     {
+        "algo": "rsa",
+        "size": 2048
+    },
+    "names": [    {
+        "C": "US",
+        "L": "CA",
+        "ST": "San Francisco"
+    }]
+}
+EOF
+sed -i "s/kaas-kubernetes-3af5ae538cf411e9a6c7fa163e5a4838/$(kubectl get configmap -n kube-system coredns -o jsonpath='{.data.Corefile}' |grep -oh kaas-kubernetes-[[:alnum:]]*)/g" ./*
+./cfssl gencert -ca=ca.pem -ca-key=ca-key.pem --config=ca-config.json -profile=kubernetes server-csr.json | ./cfssljson -bare server
+```
+Add certificates to context:
+```
+spec:
+  features:
+    ssl:
+      public_endpoints:
+        enabled: true
+        ca_cert: |
+          CA certificate content
+        api_cert: |
+          server certificate content
+        api_key:
+          server private key
+```
+
 `kubectl apply -f examples/stein/core-ceph.yaml`
 
 ### Post deployment hacks
@@ -107,7 +215,29 @@ clouds:
       user_domain_name: 'default'
       auth_url: 'http://keystone.openstack.svc.$(kubectl get configmap -n kube-system coredns -o jsonpath='{.data.Corefile}' |grep -oh kaas-kubernetes-[[:alnum:]]*)/v3'
 EOF
-
+```
+### In case ssl is enabled on public endpoints use another clouds.yml and put ca cert to the system:
+```
+tee /etc/openstack/clouds.yaml << EOF
+clouds:
+  openstack_helm:
+    region_name: RegionOne
+    identity_api_version: 3
+    auth:
+      username: '$(kubectl -n openstack get secrets keystone-keystone-admin -o jsonpath='{.data.OS_USERNAME}' | base64 -d)'
+      password: '$(kubectl -n openstack get secrets keystone-keystone-admin -o jsonpath='{.data.OS_PASSWORD}' | base64 -d)'
+      project_name: 'admin'
+      project_domain_name: 'default'
+      user_domain_name: 'default'
+      auth_url: 'https://keystone.openstack.svc.$(kubectl get configmap -n kube-system coredns -o jsonpath='{.data.Corefile}' |grep -oh kaas-kubernetes-[[:alnum:]]*):443/v3'
+EOF
+cd cert
+mkdir /usr/local/share/ca-certificates/openstack
+cp ca.pem /usr/local/share/ca-certificates/openstack
+update-ca-certificates
+export OS_CACERT=/etc/ssl/certs/
+```
+```
 export OS_CLOUD=openstack_helm
 
 apt-get install virtualenv build-essential python-dev
