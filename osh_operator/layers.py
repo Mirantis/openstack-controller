@@ -55,7 +55,7 @@ CHART_GROUP_MAPPING = {
 }
 
 
-def services(spec, logger, event, **kwargs):
+def services(spec, logger, **kwargs):
     to_apply = set(spec.get("features", {}).get("services", []))
     to_delete = {}
     # NOTE(pas-ha) each diff is (op, (path, parts, ...), old, new)
@@ -85,23 +85,27 @@ def render_service_template(
 
 
 def merge_all_layers(service, body, meta, spec, logger, **template_args):
+    """Merge releases and values from OpenstackDeployment crd into service HelmBundle"""
 
-    data = render_service_template(
+    service_helmbundle = render_service_template(
         service, body, meta, spec, logger, **template_args
     )
 
     # FIXME(pas-ha) either move to dict merging stage before,
     # or move to the templates themselves
-    data["spec"]["repositories"] = spec["common"]["charts"]["repositories"]
+    service_helmbundle["spec"]["repositories"] = spec["common"]["charts"][
+        "repositories"
+    ]
 
     # We have 4 level of hierarchy:
     # 1. helm values.yaml - which is default
-    # 2. osh-operator crd charts section
-    # 3. osh-operator crd common/group section
-    # 4. osh_operator/<openstack_version>/<chart>.yaml
+    # 2. OpenstackDeployment crd charts section
+    # 3. OpenstackDeployment crd common/group (like openstack and infra)
+    #    section
+    # 4. osh_operator/templates/<openstack_version>/<chart>.yaml
 
     # The values are merged in this specific order.
-    for release in data["spec"]["releases"]:
+    for release in service_helmbundle["spec"]["releases"]:
         chart_name = release["chart"].split("/")[-1]
         merger.merge(
             release, spec["common"].get("charts", {}).get("releases", {})
@@ -123,16 +127,13 @@ def merge_all_layers(service, body, meta, spec, logger, **template_args):
             .get(chart_name, {})
             .get("values", {}),
         )
-    return data
+    return service_helmbundle
 
 
 def render_all(service, body, meta, spec, credentials, logger):
-    # logger.debug(f"found templates {ENV.list_templates()}")
     os_release = spec["openstack_version"]
-    tpl = ENV.get_template(f"{os_release}/{service}.yaml")
     profile = spec["profile"]
-    logger.debug(f"Using profile {profile}")
-    logger.debug(f"Using template {tpl.filename}")
+    logger.debug(f"Using profile {os_release}/{profile}")
 
     base = yaml.safe_load(
         ENV.get_template(f"{os_release}/{profile}.yaml").render()
@@ -154,6 +155,4 @@ def render_all(service, body, meta, spec, credentials, logger):
 
     template_args["credentials"] = credentials
 
-    data = merge_all_layers(service, body, meta, spec, logger, **template_args)
-
-    return data
+    return merge_all_layers(service, body, meta, spec, logger, **template_args)

@@ -20,7 +20,7 @@ osdpl:
 
 
 helmbundle:
-  # unless we deply it via kaas management cluster
+  # unless we deploy it via kaas management cluster
   enabled: false
   image:
     repository: docker-prod-local.artifactory.mirantis.com/mirantis/kubernetes/lcm/lcm-controller
