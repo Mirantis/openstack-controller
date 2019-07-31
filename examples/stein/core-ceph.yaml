@@ -52,6 +52,25 @@ spec:
             keystone:
               DEFAULT:
                mykey: myvalue
+    image:
+      glance:
+        values:
+          bootstrap:
+            enabled: true
+            ks_user: admin
+            structured:
+              images:
+                cirros:
+                  container_format: bare
+                  id: 00000000-0000-0000-0000-000000000000
+                  image_file: cirros-0.4.0-x86_64-disk.img
+                  image_type: qcow2
+                  min_disk: 1
+                  name: Cirros-4.0
+                  private: false
+                  properties:
+                    os_distro: cirros
+                  source_url: https://artifactory.mcp.mirantis.net/artifactory/test-images/
     compute:
       nova:
         values:
@@ -90,3 +109,6 @@ spec:
             - (?:tempest\.api\.compute\.servers\.test_create_server\.ServersTestJSON)
             script: |
               tempest run --config-file /etc/tempest/tempest.conf -w 4 --smoke --blacklist-file  /etc/tempest/test-blacklist
+            tempest:
+              compute:
+                image_ref: 00000000-0000-0000-0000-0000000000
