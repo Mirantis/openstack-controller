@@ -78,6 +78,58 @@ spec:
   - name: openstack-neutron
     chart: {{spec.common.openstack.repo}}/neutron
     values:
+      {%- if spec.get('features', {}).get('neutron', {}).get('dvr', {}).get('enabled', False) %}
+      labels:
+        agent:
+          l3:
+            node_affinity:
+              preferredDuringSchedulingIgnoredDuringExecution:
+              - weight: 2
+                preference:
+                  matchExpressions:
+                  - key: openstack-gateway
+                    operator: In
+                    values:
+                    - enabled
+              - weight: 2
+                preference:
+                  matchExpressions:
+                  - key: openstack-compute-node
+                    operator: In
+                    values:
+                    - enabled
+              - weight: 1
+                preference:
+                  matchExpressions:
+                  - key: openstack-control-plane
+                    operator: In
+                    values:
+                    - enabled
+          metadata:
+            node_affinity:
+              preferredDuringSchedulingIgnoredDuringExecution:
+              - weight: 2
+                preference:
+                  matchExpressions:
+                  - key: openstack-gateway
+                    operator: In
+                    values:
+                    - enabled
+              - weight: 2
+                preference:
+                  matchExpressions:
+                  - key: openstack-compute-node
+                    operator: In
+                    values:
+                    - enabled
+              - weight: 1
+                preference:
+                  matchExpressions:
+                  - key: openstack-control-plane
+                    operator: In
+                    values:
+                    - enabled
+      {%- endif %}
       dependencies:
         static:
           db_init:
@@ -178,6 +230,9 @@ spec:
             {%- if 'dns' in spec.features.services %}
             external_dns_driver: designate
             {%- endif %}
+            {%- if spec.get('features', {}).get('neutron', {}).get('dvr', {}).get('enabled', False) %}
+            router_distributed: True
+            {%- endif %}
           oslo_messaging_notifications:
             topics: {{ notification_topics|join(',') }}
         logging:
@@ -207,6 +262,9 @@ spec:
           openvswitch_agent:
             agent:
               tunnel_types: vxlan
+              {%- if spec.get('features', {}).get('neutron', {}).get('dvr', {}).get('enabled', False) %}
+              enable_distributed_routing: True
+              {%- endif %}
             ovs:
               bridge_mappings: {{ ','.join(bridge_mappings) }}
           linuxbridge_agent:
@@ -216,3 +274,32 @@ spec:
 {%- for network in spec.features.neutron.external_networks %}
           {{ network.bridge }}: {{ network.interface }}
 {%- endfor %}
+        {%- if spec.get('features', {}).get('neutron', {}).get('dvr', {}).get('enabled', False) %}
+        overrides:
+          neutron_l3-agent:
+            labels:
+            - label:
+                key: openstack-compute-node
+                values:
+                - "enabled"
+              conf:
+                l3_agent:
+                  DEFAULT:
+                    agent_mode: dvr
+            - label:
+                key: openstack-control-plane
+                values:
+                - "enabled"
+              conf:
+                l3_agent:
+                  DEFAULT:
+                    agent_mode: dvr_snat
+            - label:
+                key: openstack-gateway
+                values:
+                - "enabled"
+              conf:
+                l3_agent:
+                  DEFAULT:
+                    agent_mode: dvr_snat
+        {%- endif %}
