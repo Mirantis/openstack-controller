@@ -35,6 +35,12 @@ spec:
           enabled: True
           kek: 'YWJjZGVmZ2hpamtsbW5vcHFyc3R1dnd4eXoxMjM0NTY='
     keystone:
+      keycloak:
+        oidc:
+          # SSL validation have to be disabled until upstream bug
+          # https://github.com/zmartzone/mod_auth_openidc/issues/329 is not
+          # fixed and CA is custom.
+          OIDCSSLValidateServer: false
       users:
         admin:
           username: admin

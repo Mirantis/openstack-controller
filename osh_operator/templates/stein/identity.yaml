@@ -164,6 +164,7 @@ spec:
               OIDCProviderMetadataURL {{ keystone_keycloak.get('oidc', {}).get('OIDCProviderMetadataURL', keystone_keycloak.url + "/auth/realms/iam/.well-known/openid-configuration")}}
               OIDCClientID "os"
               OIDCCryptoPassphrase {{ keystone_keycloak.get('oidc', {}).get('OIDCCryptoPassphrase', 'OIDCCryptoPassphrase') }}
+              OIDCSSLValidateServer {% if keystone_keycloak.get('oidc',{}).get('OIDCSSLValidateServer', true) %}On{%- else %}Off{%- endif %}
               {%- if keystone_keycloak.get('oidc', {}).get('OIDCRedirectURI', []) %}
               {%- for uri in keystone_keycloak.oidc.OIDCRedirectURI %}
               OIDCRedirectURI {{ uri }}

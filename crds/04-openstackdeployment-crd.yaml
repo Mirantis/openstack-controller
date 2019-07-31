@@ -220,7 +220,7 @@ spec:
                           type: string
                           description: Url for keycloak
                         oidc:
-                          type: array
+                          type: object
                           items:
                             type: object
                             properties:
@@ -232,6 +232,9 @@ spec:
                                 description: The redirect_uri for this OpenID Connect client
                                 items:
                                   type: string
+                              OIDCSSLValidateServer:
+                                type: boolean
+                                description: Require a valid SSL server certificate when communicating with the OP
                 neutron:
                   type: object
                   properties:
