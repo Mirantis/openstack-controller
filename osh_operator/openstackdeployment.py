@@ -170,6 +170,7 @@ async def apply_service(service, *, body, meta, spec, logger, event, **kwargs):
     else:
         obj.create()
         logger.debug(f"{obj.kind} child is created: %s", obj.obj)
+    # ensure child ref exists in the status
     if obj.name not in osdpl.obj.get("status", {}).get("children", {}):
         status_patch = {"children": {obj.name: "Unknown"}}
         osdpl.patch({"status": status_patch})
