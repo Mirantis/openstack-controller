@@ -25,7 +25,7 @@ Apply all the required labels to all the nodes except of master k8s node
 
 ### Create shared namespace with ceph secrets
 
-`kubectl crate ns ceph-lcm-mirantis`
+`kubectl create ns ceph-lcm-mirantis`
 
 ### Deploy osh-operator (crds, operator, helmbundlecontroller)
 

@@ -31,19 +31,6 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: Role
 metadata:
-  namespace: osh-system
-  name: osh-operator-role-system
-rules:
-
-  # NOTE(pas-ha) needed for multi-instance, including dev override
-  # Framework: knowing which other operators are running (i.e. peering).
-  - apiGroups: [zalando.org]
-    resources: [kopfpeerings]
-    verbs: [list, get, watch, patch]
----
-apiVersion: rbac.authorization.k8s.io/v1beta1
-kind: Role
-metadata:
   namespace: "{{ .Values.osdpl.namespace }}"
   name: "osh-operator-role-{{ .Values.osdpl.namespace }}"
 rules:
@@ -52,6 +39,11 @@ rules:
   - apiGroups: [""]
     resources: [events]
     verbs: [create]
+  # NOTE(pas-ha) needed for multi-instance, including dev override
+  # Framework: knowing which other operators are running (i.e. peering).
+  - apiGroups: [zalando.org]
+    resources: [kopfpeerings]
+    verbs: [list, get, watch, patch]
 
   # Application: manage ceph access data(secrets,configmaps)
   - apiGroups: [""]
@@ -92,19 +84,6 @@ subjects:
   - kind: ServiceAccount
     name: osh-operator-account
     namespace: osh-system
----
-apiVersion: rbac.authorization.k8s.io/v1beta1
-kind: RoleBinding
-metadata:
-  namespace: osh-system
-  name: osh-operator-rolebinding-system
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: Role
-  name: osh-operator-role-system
-subjects:
-  - kind: ServiceAccount
-    name: osh-operator-account
 ---
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: RoleBinding
@@ -174,6 +153,8 @@ spec:
             - osh_operator.openstackdeployment
             - '-m'
             - osh_operator.helmbundle
+            - '-n'
+            - openstack
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       {{- with .Values.nodeSelector }}
