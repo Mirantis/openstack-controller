@@ -97,11 +97,22 @@ spec:
 {%- if spec.get('features', {}).get('messaging', {}).get('dedicated_rabbitmq', {}).get('enabled', True) %}
         oslo_messaging:
           <<: *keystone_endpoints_oslo_messaging
-        oslo_messaging_notifications:
-          statefulset:
-            replicas: 1
-            name: openstack-rabbitmq-rabbitmq
-          hosts:
-            default: rabbitmq-notifications
-          path: /openstack
 {%- endif %}
+        oslo_messaging_notifications:
+          auth:
+            keystone:
+              password: password
+              username: keystone
+          host_fqdn_override: {}
+          hosts:
+            default: rabbitmq
+          path: /openstack
+          port:
+            amqp:
+              default: 5672
+            http:
+              default: 15672
+          scheme: rabbit
+          statefulset:
+            name: openstack-rabbitmq-rabbitmq
+            replicas: 1

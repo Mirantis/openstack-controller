@@ -21,7 +21,6 @@ spec:
 {%- else %}
         class_name: rook-ceph-block
 {%- endif %}
-{# TODO (ohryhorov): change path according to rabbit dedicated policy (rabbit per service) #}
 {%- if spec.get('features', {}).get('messaging', {}).get('create_user_credentials', False) %}
       conf:
         users:
@@ -31,38 +30,73 @@ spec:
                 username: keystone
                 password: password
             path: /keystone
+          keystone_service_notifications:
+            auth:
+              keystone_username:
+                username: keystone
+                password: password
+            path: /openstack
           glance_service:
             auth:
               glance_username:
                 username: glance
                 password: password
             path: /glance
-          cinder:
+          glance_service_notifications:
+            auth:
+              glance_username:
+                username: glance
+                password: password
+            path: /openstack
+          cinder_service:
             auth:
               cinder:
                 username: cinder
                 password: password
             path: /cinder
-          heat:
+          cinder_service_notifications:
+            auth:
+              cinder:
+                username: cinder
+                password: password
+            path: /openstack
+          heat_service:
             auth:
               heat:
                 username: heat
                 password: password
             path: /heat
-          neutron:
+          heat_service_notifications:
+            auth:
+              heat:
+                username: heat
+                password: password
+            path: /openstack
+          neutron_service:
             auth:
               neutron:
                 username: neutron
                 password: password
             path: /neutron
-          nova:
+          neutron_service_notifications:
+            auth:
+              neutron:
+                username: neutron
+                password: password
+            path: /openstack
+          nova_service:
             auth:
               nova:
                 username: nova
                 password: password
             path: /nova
+          nova_service_notifications:
+            auth:
+              nova:
+                username: nova
+                password: password
+            path: /openstack
 {%- endif %}
-{%- if spec.get('features', {}).get('messaging', {}).get('dedicated_rabbitmq', {}).get('enabled', True) %}
       endpoints:
         oslo_messaging:
           statefulset:
@@ -71,4 +105,3 @@ spec:
           hosts:
             default: rabbitmq
           path: /openstack
-{%- endif %}
