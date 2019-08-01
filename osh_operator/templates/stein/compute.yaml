@@ -3,9 +3,8 @@ kind: HelmBundle
 metadata:
   name: openstack-compute
 {%- if spec.get('features', {}).get('nova', {}).get('images', {}).get('backend') == 'ceph' %}
-    metadata:
-      annotations:
-        lcm.mirantis.com/ceph_required: True
+  annotations:
+    lcm.mirantis.com/ceph_required: 'True'
 {%- endif %}
 spec:
   releases:
