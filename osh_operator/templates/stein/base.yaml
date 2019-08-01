@@ -95,8 +95,6 @@ common:
 # features that would enable coordinated changes to values of several charts
 features:
   messaging:
-    local_volumes:
-      enabled: True
     dedicated_rabbitmq:
       enabled: True
     create_user_credentials: True

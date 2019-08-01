@@ -19,11 +19,7 @@ spec:
         job_users_create: true
 {%- endif %}
       volume:
-{%- if spec.get('features', {}).get('messaging', {}).get('local_volumes', {}).get('enabled', False) %}
-        class_name: local-provisioner
-{%- else %}
-        class_name: rook-ceph-block
-{%- endif %}
+        enabled: false
       endpoints:
         oslo_messaging: &glance_endpoints_oslo_messaging
           statefulset:
