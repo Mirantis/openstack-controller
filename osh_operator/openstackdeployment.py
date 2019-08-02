@@ -77,6 +77,16 @@ def check_ceph_required(service, meta):
     )
 
 
+def check_ceph_resources_present(osdpl):
+    status = []
+    for resource in ["configmap", "secret"]:
+        status.append(
+            osdpl.obj.get("status", {}).get("ceph", {}).get(resource)
+            == "created"
+        )
+    return all(status)
+
+
 def save_ceph_secret(name, namespace, params: ceph.OSCephParams):
     key_data = f"""
 [{params.admin_user}]
@@ -123,7 +133,9 @@ async def apply_service(service, *, body, meta, spec, logger, event, **kwargs):
     namespace = meta["namespace"]
     # ensure child ref exists in the status
     osdpl = kube.find_osdpl(meta["name"], namespace=namespace)
-    if check_ceph_required(service, data["metadata"]):
+    if check_ceph_required(
+        service, data["metadata"]
+    ) and not check_ceph_resources_present(osdpl):
         try:
             kube.find(
                 pykube.Secret, ceph.CEPH_OPENSTACK_TARGET_SECRET, namespace
