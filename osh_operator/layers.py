@@ -60,7 +60,7 @@ def services(spec, logger, event, **kwargs):
 def render_service_template(
     service, body, meta, spec, logger, **template_args
 ):
-    os_release = spec["common"]["openstack"]["version"]
+    os_release = spec["openstack_version"]
     # logger.debug(f"found templates {ENV.list_templates()}")
     tpl = ENV.get_template(f"{os_release}/{service}.yaml")
     logger.debug(f"Using template {tpl.filename}")
@@ -114,11 +114,15 @@ def merge_all_layers(service, body, meta, spec, logger, **template_args):
 
 def render_all(service, body, meta, spec, logger):
     # logger.debug(f"found templates {ENV.list_templates()}")
-    os_release = spec["common"]["openstack"]["version"]
+    os_release = spec["openstack_version"]
     tpl = ENV.get_template(f"{os_release}/{service}.yaml")
+    profile = spec["profile"]
+    logger.debug(f"Using profile {profile}")
     logger.debug(f"Using template {tpl.filename}")
 
-    base = yaml.safe_load(ENV.get_template(f"{os_release}/base.yaml").render())
+    base = yaml.safe_load(
+        ENV.get_template(f"{os_release}/{profile}.yaml").render()
+    )
     # Merge operator defaults with user context.
     spec = merger.merge(base, spec)
 

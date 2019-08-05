@@ -45,6 +45,16 @@ spec:
           type: object
         spec:
           properties:
+            openstack_version:
+              description: version of OpenStack to deploy
+              type: string
+              enum:
+                - stein
+            profile:
+              description: profile to use
+              type: string
+              enum:
+                - base
             common:
               type: object
               properties:
@@ -81,17 +91,6 @@ spec:
                   properties:
                     repo:
                       type: string
-                    version:
-                      type: string
-                      description: version of OpenStack to deploy
-                      enum:
-                        - stein
-                    values:
-                      type: object
-                  # FIXME(pas-ha) currently rendering logic requires
-                  # this to be present in CR
-                  required:
-                    - version
             features:
               type: object
               properties:
@@ -182,3 +181,6 @@ spec:
                               type: string
             services:
               type: object
+          required:
+            - openstack_version
+            - profile

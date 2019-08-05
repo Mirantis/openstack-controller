@@ -6,10 +6,12 @@ metadata:
   labels: {}
   annotations: {}
 spec:
+  openstack_version: stein
+  profile: base
   # common values to pass into all charts and services
   common:
     images:
-      repo:
+      repo: {}
     # Common data among all charts
     charts:
       releases:
@@ -17,11 +19,9 @@ spec:
           endpoints:
             cluster_domain_suffix: kaas-kubernetes-3af5ae538cf411e9a6c7fa163e5a4837
     # Common data among all chart groups
-    openstack:
-            #      repo: osh
-      version: stein
-            #    infra:
-            #      repo: osh-infra
+    openstack: {}
+#      infra:
+#      repo: osh-infra
   # features that would enable coordinated changes to values of several charts
   features:
     services:

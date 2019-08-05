@@ -85,7 +85,6 @@ common:
     # Common data among all chart groups
   openstack:
     repo: osh
-    version: stein
     values:
       pod:
        replicas:
