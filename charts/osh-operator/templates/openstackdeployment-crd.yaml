@@ -57,6 +57,8 @@ spec:
               type: string
               enum:
                 - base
+            domain_name:
+              type: string
             common:
               type: object
               properties:
@@ -173,3 +175,4 @@ spec:
           required:
             - openstack_version
             - profile
+            - domain_name

@@ -94,6 +94,7 @@ spec:
             path: /openstack
 {%- endif %}
       endpoints:
+        cluster_domain_suffix: {{ spec.domain_name }}
         oslo_messaging:
           statefulset:
             replicas: 1

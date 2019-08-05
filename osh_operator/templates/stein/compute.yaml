@@ -23,6 +23,7 @@ spec:
       volume:
         enabled: false
       endpoints:
+        cluster_domain_suffix: {{ spec.domain_name }}
         oslo_messaging: &nova_endpoints_oslo_messaging
           statefulset:
             replicas: 1
@@ -72,6 +73,7 @@ spec:
         job_rabbit_init: false
 {%- endif %}
       endpoints:
+        cluster_domain_suffix: {{ spec.domain_name }}
         identity:
           auth:
             admin:

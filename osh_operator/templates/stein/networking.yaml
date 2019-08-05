@@ -19,6 +19,7 @@ spec:
       volume:
         enabled: false
       endpoints:
+        cluster_domain_suffix: {{ spec.domain_name }}
         oslo_messaging: &neutron_endpoints_oslo_messaging
           statefulset:
             replicas: 1
@@ -44,10 +45,13 @@ spec:
         tags:
           openvswitch_db_server: docker.io/openstackhelm/openvswitch:latest-debian
           openvswitch_vswitchd: docker.io/openstackhelm/openvswitch:latest-debian
+      endpoints:
+        cluster_domain_suffix: {{ spec.domain_name }}
   - name: openstack-neutron
     chart: {{spec.common.openstack.repo}}/neutron
     values:
       endpoints:
+        cluster_domain_suffix: {{ spec.domain_name }}
         identity:
           auth:
             admin:

@@ -15,6 +15,7 @@ spec:
       pvc:
         storage_class: rook-ceph-block
       endpoints:
+        cluster_domain_suffix: {{ spec.domain_name }}
         identity:
           auth:
             admin:
