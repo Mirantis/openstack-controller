@@ -181,6 +181,28 @@ spec:
                               description: >
                                 Password for admin of Openstack deployment
                               type: string
+                    keycloak:
+                      type: object
+                      properties:
+                        enabled:
+                          description: Trigger to enable keycloak integration
+                          type: boolean
+                        url:
+                          type: string
+                          description: Url for keycloak
+                        oidc:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              OIDCProviderMetadataURL:
+                                type: string
+                                description: Override for URL where OpenID Connect Provider metadata can be found
+                              OIDCRedirectURI:
+                                type: array
+                                description: The redirect_uri for this OpenID Connect client
+                                items:
+                                  type: string
             services:
               type: object
           required:

@@ -11,3 +11,26 @@ spec:
         network_policy: false
       endpoints:
         cluster_domain_suffix: {{ spec.domain_name }}
+{%- if spec.get('features', {}).get('keystone', {}).get('keycloak', {}).get('enabled', False) %}
+        identity:
+          hosts:
+            internal: keystone
+          path:
+            default: /v3
+          port:
+            api:
+              internal: 80
+      conf:
+        horizon:
+          local_settings:
+            config:
+              auth:
+                idp_mapping:
+                - idp: keycloak
+                  label: External Authentication Service
+                  name: mapped
+                  protocol: mapped
+                sso:
+                  enabled: true
+                  initial_choice: mapped
+{%- endif %}

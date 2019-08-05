@@ -41,6 +41,72 @@ spec:
   - name: openstack-keystone
     chart: {{spec.common.openstack.repo}}/keystone
     values:
+{%- if spec.get('features', {}).get('keystone', {}).get('keycloak', {}).get('enabled', True) %}
+{%- set keycloak = spec.features.keystone.keycloak %}
+      conf:
+        keystone:
+          federation:
+            # TODO: move this logic to keystone helm chart
+            trusted_dashboard: "http://horizon.openstack.svc.{{ spec.domain_name }}/auth/websso/"
+          mapped:
+            remote_id_attribute: HTTP_OIDC_ISS
+        wsgi_keystone: |
+          {%- raw %}
+          {{- $portInt := tuple "identity" "internal" "api" $ | include "helm-toolkit.endpoints.endpoint_port_lookup" }}
+          {{- $keystoneHost := tuple "identity" "public" . | include "helm-toolkit.endpoints.hostname_fqdn_endpoint_lookup" }}
+          {{- $keystoneProtocol := tuple "identity" "public" "api" . | include "helm-toolkit.endpoints.keystone_endpoint_scheme_lookup" }}
+          Listen 0.0.0.0:{{ $portInt }}
+          {%- endraw %}
+          LogFormat "%h %l %u %t \"%r\" %>s %b \"%{Referer}i\" \"%{User-Agent}i\"" combined
+          LogFormat "%{X-Forwarded-For}i %l %u %t \"%r\" %>s %b \"%{Referer}i\" \"%{User-Agent}i\"" proxy
+          SetEnvIf X-Forwarded-For "^.*\..*\..*\..*" forwarded
+          CustomLog /dev/stdout combined env=!forwarded
+          CustomLog /dev/stdout proxy env=forwarded
+          <VirtualHost *:{% raw %}{{ $portInt }}{% endraw %}>
+              WSGIDaemonProcess keystone-public processes=1 threads=1 user=keystone group=keystone display-name=%{GROUP}
+              WSGIProcessGroup keystone-public
+              WSGIScriptAlias / /var/www/cgi-bin/keystone/keystone-wsgi-public
+              WSGIApplicationGroup %{GLOBAL}
+              WSGIPassAuthorization On
+              <IfVersion >= 2.4>
+                 ErrorLogFormat "%{cu}t %M"
+              </IfVersion>
+              ErrorLog /dev/stdout
+              SetEnvIf X-Forwarded-For "^.*\..*\..*\..*" forwarded proxy env=forwarded
+              OIDCClaimPrefix "OIDC-"
+              OIDCResponseType "id_token"
+              OIDCScope "openid email profile"
+              OIDCProviderMetadataURL {{ keycloak.get('oidc', {}).get('OIDCProviderMetadataURL', keycloak.url + "/auth/realms/iam/.well-known/openid-configuration")}}
+              OIDCClientID "os"
+              OIDCCryptoPassphrase {{ keycloak.get('oidc', {}).get('OIDCCryptoPassphrase', 'OIDCCryptoPassphrase') }}
+              {%- if keycloak.get('oidc', {}).get('OIDCRedirectURI', []) %}
+              {%- for uri in keycloak.oidc.OIDCRedirectURI %}
+              OIDCRedirectURI {{ uri }}
+              {%- endfor %}
+              {%- else %}
+              {%- raw %}
+              OIDCRedirectURI {{ $keystoneProtocol }}://{{ $keystoneHost }}/v3/OS-FEDERATION/identity_providers/keycloak/protocols/mapped/auth
+              OIDCRedirectURI {{ $keystoneProtocol }}://{{ $keystoneHost }}/v3/auth/OS-FEDERATION/websso/
+              OIDCRedirectURI {{ $keystoneProtocol }}://{{ $keystoneHost }}/v3/auth/OS-FEDERATION/identity_providers/keycloak/protocols/mapped/websso/
+              {%- endraw %}
+              {%- endif %}
+              <LocationMatch /v3/OS-FEDERATION/identity_providers/.*?/protocols/.*?/auth>
+                  AuthType oauth20
+                  Require valid-user
+                  LogLevel debug
+              </LocationMatch>
+              <Location ~ "/v3/auth/OS-FEDERATION/websso/mapped">
+                  AuthType openid-connect
+                  Require valid-user
+                  LogLevel debug
+              </Location>
+              <Location ~ "/v3/auth/OS-FEDERATION/identity_providers/keycloak/protocols/mapped/websso">
+                  AuthType openid-connect
+                  Require valid-user
+                  LogLevel debug
+              </Location>
+              </VirtualHost>
+{%- endif %}
       manifests:
         network_policy: false
 {%- if spec.get('features', {}).get('messaging', {}).get('create_user_credentials', False) %}
