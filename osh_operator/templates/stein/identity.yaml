@@ -42,6 +42,14 @@ spec:
     chart: {{spec.common.openstack.repo}}/keystone
     values:
 {%- if spec.get('features', {}).get('keystone', {}).get('keycloak', {}).get('enabled', False) %}
+      network:
+        api:
+          ingress:
+            annotations:
+              nginx.ingress.kubernetes.io/affinity: cookie
+              nginx.ingress.kubernetes.io/session-cookie-expires: "1800"
+              nginx.ingress.kubernetes.io/session-cookie-max-age: "1800"
+              nginx.ingress.kubernetes.io/session-cookie-name: os-keycloak-sso
 {%- set keycloak = spec.features.keystone.keycloak %}
       conf:
         keystone:
