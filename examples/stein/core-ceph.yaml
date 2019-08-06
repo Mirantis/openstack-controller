@@ -9,17 +9,6 @@ spec:
   openstack_version: stein
   profile: base
   domain_name: kaas-kubernetes-3af5ae538cf411e9a6c7fa163e5a4837
-  # common values to pass into all charts and services
-  common:
-    images:
-      repo: {}
-    # Common data among all charts
-    charts:
-      releases:
-        values: {}
-    # Common data among all chart groups
-    openstack: {}
-    infra: {}
   # features that would enable coordinated changes to values of several charts
   features:
     services:
@@ -37,18 +26,12 @@ spec:
     ssl:
       public_endpoints:
         enabled: True
-#    messaging:
-#      dedicated_rabbitmq:
-#        enabled: True
     keystone:
-      iam:
-        enabled: True
       users:
         admin:
           username: admin
           password: workshop
     glance:
-      direct_upload: False
       backend: ceph
     cinder:
       volume:
@@ -62,18 +45,6 @@ spec:
         backend: local
   # enabled services and their specific configuration
   services:
-    ingress:
-      ingress:
-        values: {}
-    memcached:
-      memcached:
-        values: {}
-    mariadb:
-      mariadb:
-        values: {}
-    rabbitmq:
-      rabbitmq:
-        values: {}
     identity:
       keystone:
         values:
@@ -81,15 +52,6 @@ spec:
             keystone:
               DEFAULT:
                mykey: myvalue
-    image:
-      glance:
-        values: {}
-    block-storage:
-      cinder:
-        values: {}
-    networking:
-      neutron:
-        values: {}
     compute:
       nova:
         values:
@@ -109,12 +71,6 @@ spec:
                     name: m1.tiny
                     ram: 512
                     vcpus: 1
-    orchestration:
-      heat:
-        values: {}
-    dashboard:
-      horizon:
-        values: {}
     tempest:
       tempest:
         values:
