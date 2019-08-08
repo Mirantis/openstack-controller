@@ -7,6 +7,8 @@ __pycache__/
 *.so
 
 # Distribution / packaging
+AUTHORS
+ChangeLog
 .Python
 build/
 develop-eggs/
@@ -103,3 +105,6 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
+#local libraries
+data/
