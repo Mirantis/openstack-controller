@@ -73,7 +73,7 @@ common:
             tempest_run_tests: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/tempest:stein-bionic-20190805193015
     repositories:
     - name: osh
-      url: https://harbor.mcp.mirantis.net/chartrepo/mcp-openstack-helm-20190725140200
+      url: https://harbor.mcp.mirantis.net/chartrepo/mcp-openstack-helm-20190807111407
     - name: osh-infra
       url: https://harbor.mcp.mirantis.net/chartrepo/mcp-openstack-helm-infra-20190722145554
   openstack:
