@@ -52,6 +52,37 @@ spec:
               nginx.ingress.kubernetes.io/session-cookie-name: os-keycloak-sso
 {%- set keycloak = spec.features.keystone.keycloak %}
       conf:
+        ks_federations:
+          oidc:
+            domain:
+              name: keycloak
+            identity_provider:
+              remote_ids:
+                - "{{ keycloak.get('oidc', {}).get('OIDCProviderMetadataURL', keycloak.url + "/auth/realms/iam")}}
+              id: keycloak
+              domain_id: keycloak
+            mapping:
+              id: "keycloak_mapping"
+              rules:
+                - local:
+                    - user:
+                        name: "{0}"
+                        email: "{1}"
+                        domain:
+                          name: "Default"
+                    - groups: "{2}"
+                      domain:
+                         name: "Default"
+                    - domain:
+                         name: "Default"
+                  remote:
+                    - type: "OIDC-iam_username"
+                    - type: "OIDC-email"
+                    - type: "OIDC-iam_roles"
+            protocol:
+              mapped:
+                idp_id: "keycloak"
+                mapping_id: "keycloak_mapping"
         keystone:
           federation:
             # TODO: move this logic to keystone helm chart
@@ -117,6 +148,9 @@ spec:
 {%- endif %}
       manifests:
         network_policy: false
+{%- if spec.get('features', {}).get('keystone', {}).get('keycloak', {}).get('enabled', False) %}
+        job_federations_create: true
+{%- endif %}
 {%- if spec.get('features', {}).get('messaging', {}).get('create_user_credentials', False) %}
         job_rabbit_init: false
 {%- endif %}
