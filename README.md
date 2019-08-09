@@ -25,7 +25,7 @@ Apply all the required labels to all the nodes except of master k8s node
 
 ### Create shared namespace with ceph secrets
 
-`kubectl create ns ceph-lcm-mirantis`
+`kubectl create ns openstack-ceph-shared`
 
 ### Deploy osh-operator (crds, operator, helmbundlecontroller)
 
@@ -47,8 +47,8 @@ Create Ceph storageclass
 
 Share metadata with openstack
 
-`kubectl -n rook-ceph get secret rook-ceph-admin-keyring -o yaml  --export | kubectl apply -n ceph-lcm-mirantis -f-`
-`kubectl -n rook-ceph get configmaps rook-ceph-mon-endpoints -o yaml --export | kubectl apply -n ceph-lcm-mirantis -f-`
+`kubectl -n rook-ceph get secret rook-ceph-admin-keyring -o yaml  --export | kubectl apply -n openstack-ceph-shared -f-`
+`kubectl -n rook-ceph get configmaps rook-ceph-mon-endpoints -o yaml --export | kubectl apply -n openstack-ceph-shared -f-`
 
 
 In case local volumes are used for Mariadb and/or Rabbitmq configure local volumes provisioner as follows.

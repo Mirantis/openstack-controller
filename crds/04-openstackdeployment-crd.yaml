@@ -149,6 +149,7 @@ spec:
                       - memcached
                       - networking
                       - orchestration
+                      - object-storage
                       - rabbitmq
                       - tempest
                       - load-balancer

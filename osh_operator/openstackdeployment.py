@@ -8,7 +8,7 @@ import re
 from ipaddress import IPv4Address
 
 
-from . import ceph
+from mcp_k8s_lib import ceph_api
 from . import kube
 from . import layers
 
@@ -38,7 +38,7 @@ def wait_for_rook_secret(namespace, name):
     kube.wait_for_resource(pykube.Secret, name, namespace)
 
 
-def get_rook_ceph_data(namespace=ceph.OPENSTACK_SECRET_NAMESPACE):
+def get_rook_ceph_data(namespace=ceph_api.SHARED_SECRET_NAMESPACE):
     # TODO: switch to kaas ceph operator data
     secret = kube.find(pykube.Secret, "rook-ceph-admin-keyring", namespace)
     keyring = base64.b64decode(secret.obj["data"]["keyring"]).decode()
@@ -50,12 +50,13 @@ def get_rook_ceph_data(namespace=ceph.OPENSTACK_SECRET_NAMESPACE):
     endp_mapping = endpoints_obj["data"]["data"]
     endpoints = [x.split("=")[1] for x in endp_mapping.split(",")]
     mon_endpoints = []
+    rgw_params = ceph_api.RGWParams(internal_url="", external_url="")
     for endpoint in endpoints:
         address = endpoint.split(":")[0]
         port = endpoint.split(":")[1]
         mon_endpoints.append((IPv4Address(address), port))
-    oscp = ceph.OSCephParams(
-        admin_key=key, mon_endpoints=mon_endpoints, services=[]
+    oscp = ceph_api.OSCephParams(
+        admin_key=key, mon_endpoints=mon_endpoints, services=[], rgw=rgw_params
     )
     return oscp
 
@@ -87,7 +88,7 @@ def check_ceph_resources_present(osdpl):
     return all(status)
 
 
-def save_ceph_secret(name, namespace, params: ceph.OSCephParams):
+def save_ceph_secret(name, namespace, params: ceph_api.OSCephParams):
     key_data = f"""
 [{params.admin_user}]
          key = {params.admin_key}
@@ -103,7 +104,7 @@ def save_ceph_secret(name, namespace, params: ceph.OSCephParams):
         pass
 
 
-def save_ceph_configmap(name, namespace, params: ceph.OSCephParams):
+def save_ceph_configmap(name, namespace, params: ceph_api.OSCephParams):
     mon_host = ",".join([f"{ip}:{port}" for ip, port in params.mon_endpoints])
     ceph_conf = f"""
 [global]
@@ -131,18 +132,17 @@ async def apply_service(service, *, body, meta, spec, logger, event, **kwargs):
     # apply state of the object
     obj = kube.resource(data)
     namespace = meta["namespace"]
-    # ensure child ref exists in the status
     osdpl = kube.find_osdpl(meta["name"], namespace=namespace)
     if check_ceph_required(
         service, data["metadata"]
     ) and not check_ceph_resources_present(osdpl):
         try:
             kube.find(
-                pykube.Secret, ceph.CEPH_OPENSTACK_TARGET_SECRET, namespace
+                pykube.Secret, ceph_api.CEPH_OPENSTACK_TARGET_SECRET, namespace
             )
             kube.find(
                 pykube.ConfigMap,
-                ceph.CEPH_OPENSTACK_TARGET_CONFIGMAP,
+                ceph_api.CEPH_OPENSTACK_TARGET_CONFIGMAP,
                 namespace,
             )
             logger.info("Secret and Configmap are present.")
@@ -150,25 +150,25 @@ async def apply_service(service, *, body, meta, spec, logger, event, **kwargs):
             logger.info("Waiting for ceph resources.")
             status_patch = {
                 "ceph": {
-                    "secret": ceph.CephStatus.waiting,
-                    "configmap": ceph.CephStatus.waiting,
+                    "secret": ceph_api.CephStatus.waiting,
+                    "configmap": ceph_api.CephStatus.waiting,
                 }
             }
             osdpl.patch({"status": status_patch})
             wait_for_rook_secret(
-                ceph.OPENSTACK_SECRET_NAMESPACE, "rook-ceph-admin-keyring"
+                ceph_api.SHARED_SECRET_NAMESPACE, "rook-ceph-admin-keyring"
             )
             oscp = get_rook_ceph_data()
             save_ceph_secret(
-                ceph.CEPH_OPENSTACK_TARGET_SECRET, namespace, oscp
+                ceph_api.CEPH_OPENSTACK_TARGET_SECRET, namespace, oscp
             )
             save_ceph_configmap(
-                ceph.CEPH_OPENSTACK_TARGET_CONFIGMAP, namespace, oscp
+                ceph_api.CEPH_OPENSTACK_TARGET_CONFIGMAP, namespace, oscp
             )
             status_patch = {
                 "ceph": {
-                    "secret": ceph.CephStatus.created,
-                    "configmap": ceph.CephStatus.created,
+                    "secret": ceph_api.CephStatus.created,
+                    "configmap": ceph_api.CephStatus.created,
                 }
             }
             osdpl.patch({"status": status_patch})

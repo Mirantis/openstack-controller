@@ -3,6 +3,7 @@ import logging
 
 import kopf
 import pykube
+from typing import Dict
 
 log = logging.getLogger(__name__)
 
@@ -51,6 +52,15 @@ def wait_for_resource(klass, name, namespace=None, delay=60):
             f"Unknown error occured while getting object: {klass.kind}.",
             delay=delay,
         )
+
+
+def save_secret_data(namespace: str, name: str, data: Dict[str, str]):
+    secret = {"metadata": {"name": name, "namespace": namespace}, "data": data}
+    try:
+        find(pykube.Secret, name, namespace)
+    except pykube.exceptions.ObjectDoesNotExist:
+        pykube.Secret(api, secret).create()
+    pykube.Secret(api, secret).update()
 
 
 find_osdpl = functools.partial(find, OpenStackDeployment)

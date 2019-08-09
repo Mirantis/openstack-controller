@@ -40,6 +40,7 @@ CHART_GROUP_MAPPING = {
         "neutron",
         "nova",
         "octavia",
+        "ceph-rgw",
     ],
     "infra": ["rabbitmq", "mariadb", "memcached", "openvswitch", "libvirt"],
 }
