@@ -6,6 +6,7 @@ metadata:
     lcm.mirantis.com/ceph_required: 'True'
 spec:
   releases:
+{%- set create_user_credentials = spec.get('features', {}).get('messaging', {}).get('create_user_credentials', False) %}
 {%- if spec.get('features', {}).get('messaging', {}).get('dedicated_rabbitmq', {}).get('enabled', True) %}
   - name: openstack-glance-rabbitmq
     chart: {{spec.common.infra.repo}}/rabbitmq
@@ -15,9 +16,9 @@ spec:
           server: 1
       manifests:
         network_policy: false
-{%- if spec.get('features', {}).get('messaging', {}).get('create_user_credentials', False) %}
+  {%- if create_user_credentials %}
         job_users_create: true
-{%- endif %}
+  {%- endif %}
       volume:
         enabled: false
       endpoints:
@@ -29,7 +30,7 @@ spec:
           hosts:
             default: rabbitmq-glance
           path: /glance
-{%- if spec.get('features', {}).get('messaging', {}).get('create_user_credentials', False) %}
+  {%- if create_user_credentials %}
       conf:
         users:
           glance:
@@ -38,7 +39,26 @@ spec:
                 username: glance
                 password: password
             path: /glance
-{%- endif %}
+        aux_conf:
+          policies:
+          - vhost: glance
+            name: default-policy
+            pattern: '^(?!amq\.).*'
+            definition:
+              message-ttl: 120000
+          - vhost: glance
+            name: results_expire
+            pattern: '^results\.'
+            definition:
+              expires: 3600000
+            priority: 1
+          - vhost: glance
+            name: tasks_expire
+            pattern: '^tasks\.'
+            definition:
+              expires: 3600000
+            priority: 1
+  {%- endif %}
 {%- endif %}
   - name: openstack-glance
     chart: {{spec.common.openstack.repo}}/glance
@@ -68,7 +88,7 @@ spec:
         user_secret_name: rook-ceph-admin-keyring
       manifests:
         network_policy: false
-{%- if spec.get('features', {}).get('messaging', {}).get('create_user_credentials', False) %}
+{%- if create_user_credentials %}
         job_rabbit_init: false
 {%- endif %}
 {%- if spec.get('features', {}).get('ssl', {}).get('public_endpoints', {}).get('enabled', True) %}

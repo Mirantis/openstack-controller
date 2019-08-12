@@ -242,7 +242,7 @@ export OS_CACERT=/etc/ssl/certs/
 ```
 export OS_CLOUD=openstack_helm
 
-apt-get install virtualenv build-essential python-dev
+apt-get install virtualenv build-essential python-dev -y
 virtualenv osclient
 source osclient/bin/activate
 pip install python-openstackclient

@@ -4,6 +4,7 @@ metadata:
   name: openstack-loadbalancer
 spec:
   releases:
+{%- set create_user_credentials = spec.get('features', {}).get('messaging', {}).get('create_user_credentials', False) %}
 {%- if spec.get('features', {}).get('messaging', {}).get('dedicated_rabbitmq', {}).get('enabled', True) %}
   - name: openstack-octavia-rabbitmq
     chart: {{spec.common.infra.repo}}/rabbitmq
@@ -13,9 +14,9 @@ spec:
           server: 1
       manifests:
         network_policy: false
-{%- if spec.get('features', {}).get('messaging', {}).get('create_user_credentials', False) %}
+  {%- if create_user_credentials %}
         job_users_create: true
-{%- endif %}
+  {%- endif %}
       volume:
         enabled: false
       endpoints:
@@ -27,7 +28,7 @@ spec:
           hosts:
             default: rabbitmq-octavia
           path: /octavia
-{%- if spec.get('features', {}).get('messaging', {}).get('create_user_credentials', False) %}
+  {%- if create_user_credentials %}
       conf:
         users:
           octavia:
@@ -36,7 +37,26 @@ spec:
                 username: octavia
                 password: password
             path: /octavia
-{%- endif %}
+        aux_conf:
+          policies:
+          - vhost: octavia
+            name: default-policy
+            pattern: '^(?!amq\.).*'
+            definition:
+              message-ttl: 120000
+          - vhost: octavia
+            name: results_expire
+            pattern: '^results\.'
+            definition:
+              expires: 3600000
+            priority: 1
+          - vhost: octavia
+            name: tasks_expire
+            pattern: '^tasks\.'
+            definition:
+              expires: 3600000
+            priority: 1
+  {%- endif %}
 {%- endif %}
   - name: openstack-octavia
     chart: {{spec.common.openstack.get('repo', spec.common.charts.repo)}}/octavia
@@ -63,6 +83,9 @@ spec:
           health_manager: 3
       manifests:
         network_policy: false
+{%- if create_user_credentials %}
+        job_rabbit_init: false
+{%- endif %}
         # for testing purposes only
         generate_secret_octavia_certs: true
         secret_amphora_ssh_key: true
@@ -83,10 +106,6 @@ spec:
         amphora_ssh_key:
           private: LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0tLQpNSUlFcEFJQkFBS0NBUUVBdGpuUERKc1FUb0hCdG9xSW8xNW1kU1lwZmk4ejZERk1pOEdibzBLQ04zM09VbjV1Ck9jdGJkdGpVZmV1aHZJNnB4MVNDbnZ5V2kwOUZ0OGVXd3ErS3dMQ0dLYlV4THZxS2x0dUo3SzNMSXJHWGt0K20KcVpONE85WEtlVktmWkgrbVFXa2t4UldnWDJyOFJLTlYzR2tkTnRkNzRWamhQK1I2WFNLSlExWjhiN2VITTEwdgo2SWpUWS9qUGN6aksrZXlDZUVqNHFiU25WOGVLbHFMaGhxdXVTUVJtVU8yRFJTakxWZHBkZjJCQjQvQmRXRnNECllPbVg3bWI4a3BFcjl2UStjMUpLTVhEd0Q2ZWh6eVU4a0UrMWtWbTV6T2VFeTRIZFlJTXB2VWZONDlQMWFuUlYKMklTUTFaRStyMjJJQU1LbDB0ZWtyR0gwZS8xTlAxREY1cklOTXdJREFRQUJBb0lCQVFDa1AvY2dwYVJOSHlnOApJU0tJSHM2N1NXcWRFbTczRzNpamdCK0pTS21XMnc3ZHpKZ04vLzZ4WVVBblAvekl1TTdQbkowZ01ReUJCVE1TCk5CVHY1c3BxWkxLSlpZaXZqNlRiMVlhOGp1cEttMGpFV2xNZkJvMlpZVnJmZ0ZtcmZHT2ZFZWJTdm11UGxoOU0KdnV6bGZ0bVdWU1NVT2tqT0RtTTlENlFwemdyYnBrdEJ1QS9XcFgrNmVzTVR3SnBPY1E1eFpXRW5IWG5WenVUYwpTbmNvZFZ3ZUU0Z3o2RjFxb3JicUlKejhVQVVRNVQwT1pUZEh6SVMxSWJhbUFDSFdheFFmaXhBTzJzNCtCb1VLCkFOR0daV2tmbmVDeHg3bHRodlk4RGlLbjdNNWNTUm5xRnlEVG9HcWFMZXpka01ObEdDN3YzVTExRkY1YmxTRVcKZkwxby9Id0JBb0dCQU9hdmhUcjhlcWV6VGNocVp2YXJvckZJcTdIRldrL2wwdmd1SW90dTYvd2xoMVYvS2RGKwphTExIZ1BnSjVqK1JyQ012VEJvS3FNZWVIZlZHclMydWRFeThMMW1LNmIzbWVHK3RNeFUwNU9BNTVhYm1oWW43Cjd2RjBxOFhKbVlJSElYbXVDZ0Y5MFI4UGlzY2IwZWFNbG1IVzl1bktUS284RU9zNWorRDgrQU1KQW9HQkFNbzQKOFdXK0QzWGlEN2ZzeW1zZlhhbGY3VnBBdC9IODM0UVRiTlpKd2VVV2hnMTFlTHV0eWFoeXlmampIVjIwMG5OWgpjblUwOURXS3BCYkxnN2QxcHlUNjlDTkxYcE5ueHVXQ3Q4b2lVamhXQ1VwTnFWbTJuREpiVWRsUkZUelliMmZTClpDNHIwb1FhUEQ1a01MU2lwamN3ek1XZTBQbml5U3hOdktYS0luRmJBb0dCQUt4VzJxRDd1S0tLdVFTT1FVZnQKYUFrc01tRUlBSFdLVERkdk9BMlZHNlh2WDVESEJMWG15MDhzN3JQZnFXMDZaakNQQ0RxNFZlbHp2Z3ZjOWtvWApkL2xQNmN2cWxMOXphK3g2cDV3alBRNHJFdC9DZm1kY21PRTRlWSsxRWdMclV0MzE0TEhHampHM1NjV0FpaXJFClF5RHJHT0lHYVlvUWY4OUwzS3FJTXIwSkFvR0FSWUFrbHc4blNTQ1V2bVhIZStHZjB5S0E5TS9oYUcyOGRDd28KNzgwUnNxWjNGQkVYbVlrMUVZdkNGcVFYNTZqSjI1TVdYMm4vdEpjZHBpZno4UTJpa0hjZmlUSFNJMTg3WUkzNApsS1FQRmdXYjA4bTFObndvV3JZLy95eDYzQnFXejF2anltcU5RNUd3dXRDOFhKaTUvNlhwK3RHR2lSdUVnSkdICkVJUFVLcGtDZ1lBakJJVk1rcE5pTENSRVo2YitxanJQVjk2ZWQzaVRVdDdUcVA3eUdsRkkvT2tPUkZTMzh4cUMKaEJQNkZrOGlOV3VPV1FEK29oTS92TU1udkloazVqd2xjd24ra0YwcmEwNGdpNUtCRldTaC9kZFdNSnhVdFBDMQoyaHR2bEVjNnpRQVI2UWZxWEhtd2hnMWhQODFKY3BxcGljUXpDTWhrekxvUjFEQzZzdFhkTGc9PQotLS0tLUVORCBSU0EgUFJJVkFURSBLRVktLS0tLQo=
           public: c3NoLXJzYSBBQUFBQjNOemFDMXljMkVBQUFBREFRQUJBQUFCQVFDMk9jOE1teEJPZ2NHMmlvaWpYbVoxSmlsK0x6UG9NVXlMd1p1alFvSTNmYzVTZm00NXkxdDIyTlI5NjZHOGpxbkhWSUtlL0phTFQwVzN4NWJDcjRyQXNJWXB0VEV1K29xVzI0bnNyY3Npc1plUzM2YXBrM2c3MWNwNVVwOWtmNlpCYVNURkZhQmZhdnhFbzFYY2FSMDIxM3ZoV09FLzVIcGRJb2xEVm54dnQ0Y3pYUy9vaU5OaitNOXpPTXI1N0lKNFNQaXB0S2RYeDRxV291R0dxNjVKQkdaUTdZTkZLTXRWMmwxL1lFSGo4RjFZV3dOZzZaZnVadnlTa1N2MjlENXpVa294Y1BBUHA2SFBKVHlRVDdXUldibk01NFRMZ2QxZ2d5bTlSODNqMC9WcWRGWFloSkRWa1Q2dmJZZ0F3cVhTMTZTc1lmUjcvVTAvVU1YbXNnMHo=
-
-{%- if spec.get('features', {}).get('messaging', {}).get('create_user_credentials', False) %}
-        job_rabbit_init: false
-{%- endif %}
       endpoints:
         cluster_domain_suffix: {{ spec.domain_name }}
         identity:

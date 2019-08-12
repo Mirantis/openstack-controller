@@ -8,6 +8,7 @@ metadata:
 {%- endif %}
 spec:
   releases:
+{%- set create_user_credentials = spec.get('features', {}).get('messaging', {}).get('create_user_credentials', False) %}
 {%- if spec.get('features', {}).get('messaging', {}).get('dedicated_rabbitmq', {}).get('enabled', True) %}
   - name: openstack-nova-rabbitmq
     chart: {{spec.common.infra.repo}}/rabbitmq
@@ -17,9 +18,9 @@ spec:
           server: 1
       manifests:
         network_policy: false
-{%- if spec.get('features', {}).get('messaging', {}).get('create_user_credentials', False) %}
+  {%- if create_user_credentials %}
         job_users_create: true
-{%- endif %}
+  {%- endif %}
       volume:
         enabled: false
       endpoints:
@@ -31,7 +32,7 @@ spec:
           hosts:
             default: rabbitmq-nova
           path: /nova
-{%- if spec.get('features', {}).get('messaging', {}).get('create_user_credentials', False) %}
+  {%- if create_user_credentials %}
       conf:
         users:
           nova:
@@ -40,7 +41,26 @@ spec:
                 username: nova
                 password: password
             path: /nova
-{%- endif %}
+        aux_conf:
+          policies:
+          - vhost: nova
+            name: default-policy
+            pattern: '^(?!amq\.).*'
+            definition:
+              message-ttl: 120000
+          - vhost: nova
+            name: results_expire
+            pattern: '^results\.'
+            definition:
+              expires: 3600000
+            priority: 1
+          - vhost: nova
+            name: tasks_expire
+            pattern: '^tasks\.'
+            definition:
+              expires: 3600000
+            priority: 1
+  {%- endif %}
 {%- endif %}
   - name: openstack-libvirt
     chart: {{spec.common.infra.repo}}/libvirt
@@ -77,7 +97,7 @@ spec:
               - openstack-mariadb-cluster-wait
       manifests:
         network_policy: false
-{%- if spec.get('features', {}).get('messaging', {}).get('create_user_credentials', False) %}
+{%- if create_user_credentials %}
         job_rabbit_init: false
 {%- endif %}
 {%- if spec.get('features', {}).get('ssl', {}).get('public_endpoints', {}).get('enabled', True) %}
