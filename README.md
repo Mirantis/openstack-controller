@@ -53,11 +53,9 @@ Share metadata with openstack
 
 In case local volumes are used for Mariadb and/or Rabbitmq configure local volumes provisioner as follows.
 Setup mount points for local volumes provisioner (1 mount point - 1 volume) (Workaround for https://mirantis.jira.com/browse/PROD-31627)
-nodeVolumesCount - number of local volumes per openstack control plane node, choose it according to
-number of openstack control plane nodes in environment e.g. for mariadb (3 replicas) we need 3 local volumes.
 
 ```
-nodeVolumesCount=1
+nodeVolumesCount=3
 volDirPrefix='vol'
 sshUser='ubuntu'
 for node in $(sudo kubectl --kubeconfig=/root/.kube/config get nodes -o NAME -l openstack-control-plane=enabled); do
