@@ -71,6 +71,17 @@ spec:
                   properties:
                     os_distro: cirros
                   source_url: https://artifactory.mcp.mirantis.net/artifactory/test-images/
+                fedora:
+                  container_format: bare
+                  id: 00000000-0000-0000-0000-000000000001
+                  image_file: Fedora-Cloud-Base-27-1.6.x86_64.qcow2
+                  image_type: qcow2
+                  min_disk: 1
+                  name: Fedora-27-1.6
+                  private: false
+                  properties:
+                    os_distro: fedora
+                  source_url: https://artifactory.mcp.mirantis.net/artifactory/test-images/
     compute:
       nova:
         values:
@@ -80,14 +91,14 @@ spec:
                 options:
                   m1.extra_tiny_test:
                     disk: 1
-                    id: "1"
+                    id: 00000000-0000-0000-0000-000000000000
                     name: m1.extra_tiny_test
                     ram: 256
                     vcpus: 1
                   m1_tiny_test:
                     disk: 1
-                    id: "2"
-                    name: m1.tiny
+                    id: 00000000-0000-0000-0000-000000000001
+                    name: m1.tiny_test
                     ram: 512
                     vcpus: 1
     tempest:
@@ -112,4 +123,7 @@ spec:
               tempest run --config-file /etc/tempest/tempest.conf -w 4 --smoke --blacklist-file  /etc/tempest/test-blacklist
             tempest:
               compute:
-                image_ref: 00000000-0000-0000-0000-0000000000
+                image_ref: 00000000-0000-0000-0000-000000000000
+                image_ref_alt: 00000000-0000-0000-0000-000000000001
+                flavor_ref: 00000000-0000-0000-0000-000000000000
+                flavor_ref_alt: 00000000-0000-0000-0000-000000000001
