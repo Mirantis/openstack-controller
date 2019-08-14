@@ -40,6 +40,15 @@ spec:
         backend: ceph
     neutron:
       backend: ovs
+      external_networks:
+        - physnet: external
+          interface: veth-phy
+          bridge: br-ex
+          network_types:
+           - flat
+          vlan_ranges: null
+          mtu: null
+
     nova:
       images:
         backend: local

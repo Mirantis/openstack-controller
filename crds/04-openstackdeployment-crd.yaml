@@ -95,6 +95,9 @@ spec:
                       type: string
             features:
               type: object
+              required:
+                - services
+                - keystone
               properties:
                 messaging:
                   type: object
@@ -163,9 +166,13 @@ spec:
                             - ceph
                 keystone:
                   type: object
+                  required:
+                    - users
                   properties:
                     users:
                       type: object
+                      required:
+                        - admin
                       properties:
                         admin:
                           type: object
@@ -203,6 +210,47 @@ spec:
                                 description: The redirect_uri for this OpenID Connect client
                                 items:
                                   type: string
+                neutron:
+                  type: object
+                  properties:
+                    backend:
+                      type: string
+                      description: Neutron backend
+                      enum:
+                        - ovs
+                    external_networks:
+                      type: array
+                      items:
+                        type: object
+                        required:
+                          - physnet
+                          - bridge
+                          - network_types
+                        properties:
+                          physnet:
+                            type: string
+                            description: Neutron physnet name
+                          interface:
+                            type: string
+                            description: Physical interface mapped with physnet
+                          bridge:
+                            type: string
+                            description: OVS bridge name to map with physnet.
+                          network_types:
+                            type: array
+                            description: Network types allowed on particular physnet
+                            items:
+                              type: string
+                              enum:
+                                - flat
+                                - vlan
+                          vlan_ranges:
+                            type: string
+                            nullable: true
+                            description: Range of vlans allowed on physnet
+                          mtu:
+                            type: integer
+                            nullable: true
             services:
               type: object
           required:

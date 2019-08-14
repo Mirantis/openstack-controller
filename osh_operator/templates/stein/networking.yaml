@@ -136,15 +136,36 @@ spec:
             max_l3_agents_per_router: 1
             l3_ha_network_type: vxlan
             dhcp_agents_per_network: 1
+# TODO: make other networks types configurable
+{%- set networks = {'flat': [], 'vlan': []} %}
+{%- set bridge_mappings = [] %}
+{%- set physnet_mtus = [] %}
+{%- for network in spec.features.neutron.external_networks %}
+    {%- for network_type in network.network_types %}
+        {%- do networks[network_type].append(network.physnet) %}
+    {%- endfor %}
+    {%- do bridge_mappings.append(network.physnet + ':' + network.bridge) %}
+    {%- if network.get('mtu') %}
+        {%- do physnet_mtus.append(network.physnet + ':' + network.mtu|string) %}
+    {%- endif %}
+{%- endfor %}
         plugins:
           ml2_conf:
             ml2_type_flat:
-              flat_networks: public
+              flat_networks: {{ ','.join(networks.flat) }}
+              {%- if physnet_mtus %}
+            ml2:
+              physical_network_mtus: {{ physnet_mtus }}
+              {%- endif %}
           openvswitch_agent:
             agent:
               tunnel_types: vxlan
             ovs:
-              bridge_mappings: public:br-ex
+              bridge_mappings: {{ ','.join(bridge_mappings) }}
           linuxbridge_agent:
             linux_bridge:
-              bridge_mappings: public:br-ex
+              bridge_mappings: {{ ','.join(bridge_mappings) }}
+        auto_bridge_add:
+{%- for network in spec.features.neutron.external_networks %}
+          {{ network.bridge }}: {{ network.interface }}
+{%- endfor %}

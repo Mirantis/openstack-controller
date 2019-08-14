@@ -8,7 +8,10 @@ from osh_operator.filters.tempest import generate_tempest_config
 
 LOG = logging.getLogger(__name__)
 
-ENV = jinja2.Environment(loader=jinja2.PackageLoader(__name__.split(".")[0]))
+ENV = jinja2.Environment(
+    loader=jinja2.PackageLoader(__name__.split(".")[0]),
+    extensions=["jinja2.ext.do"],
+)
 LOG.info(f"found templates {ENV.list_templates()}")
 
 ENV.filters["generate_tempest_config"] = generate_tempest_config
