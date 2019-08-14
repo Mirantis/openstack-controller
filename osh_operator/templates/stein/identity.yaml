@@ -41,6 +41,11 @@ spec:
   - name: openstack-keystone
     chart: {{spec.common.openstack.repo}}/keystone
     values:
+      dependencies:
+        static:
+          db_init:
+            jobs:
+              - openstack-mariadb-cluster-wait
 {%- if spec.get('features', {}).get('keystone', {}).get('keycloak', {}).get('enabled', False) %}
       network:
         api:

@@ -50,6 +50,11 @@ spec:
   - name: openstack-neutron
     chart: {{spec.common.openstack.repo}}/neutron
     values:
+      dependencies:
+        static:
+          db_init:
+            jobs:
+              - openstack-mariadb-cluster-wait
       endpoints:
         cluster_domain_suffix: {{ spec.domain_name }}
         identity:

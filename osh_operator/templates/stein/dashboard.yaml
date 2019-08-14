@@ -7,6 +7,11 @@ spec:
   - name: openstack-horizon
     chart: {{spec.common.openstack.repo}}/horizon
     values:
+      dependencies:
+        static:
+          db_init:
+            jobs:
+              - openstack-mariadb-cluster-wait
       manifests:
         network_policy: false
       endpoints:

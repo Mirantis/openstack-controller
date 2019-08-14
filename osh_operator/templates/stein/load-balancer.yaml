@@ -41,6 +41,11 @@ spec:
   - name: openstack-octavia
     chart: {{spec.common.openstack.get('repo', spec.common.charts.repo)}}/octavia
     values:
+      dependencies:
+        static:
+          db_init:
+            jobs:
+              - openstack-mariadb-cluster-wait
       labels:
         worker:
           node_selector_key: openvswitch

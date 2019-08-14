@@ -45,6 +45,11 @@ spec:
   - name: openstack-cinder
     chart: {{spec.common.openstack.repo}}/cinder
     values:
+      dependencies:
+        static:
+          db_init:
+            jobs:
+              - openstack-mariadb-cluster-wait
       pod:
         replicas:
           api: 1

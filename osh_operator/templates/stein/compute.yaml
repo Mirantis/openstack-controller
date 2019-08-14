@@ -70,6 +70,11 @@ spec:
   - name: openstack-nova
     chart: {{spec.common.openstack.repo}}/nova
     values:
+      dependencies:
+        static:
+          db_init:
+            jobs:
+              - openstack-mariadb-cluster-wait
       manifests:
         network_policy: false
 {%- if spec.get('features', {}).get('messaging', {}).get('create_user_credentials', False) %}
