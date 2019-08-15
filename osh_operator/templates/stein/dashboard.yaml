@@ -20,10 +20,36 @@ spec:
           port:
             api:
               internal: 80
+{%- endif %}
+{%- if spec.get('features', {}).get('ssl', {}).get('public_endpoints', {}).get('enabled', True) %}
+        dashboard:
+          host_fqdn_override:
+            public:
+              tls:
+                ca: |
+{{ spec.features.ssl.public_endpoints.ca_cert | indent( width=18, indentfirst=True) }}
+                crt: |
+{{ spec.features.ssl.public_endpoints.api_cert | indent( width=18, indentfirst=True) }}
+                key: |
+{{ spec.features.ssl.public_endpoints.api_key | indent( width=18, indentfirst=True) }}
+          hosts:
+            default: horizon-int
+            public:
+              host: horizon
+              tls:
+                ca: |
+{{ spec.features.ssl.public_endpoints.ca_cert | indent( width=18, indentfirst=True) }}
+                crt: |
+{{ spec.features.ssl.public_endpoints.api_cert | indent( width=18, indentfirst=True) }}
+                key: |
+{{ spec.features.ssl.public_endpoints.api_key | indent( width=18, indentfirst=True) }}
+{%- endif %}
+{%- if spec.get('features', {}).get('keystone', {}).get('keycloak', {}).get('enabled', False) or spec.get('features', {}).get('ssl', {}).get('public_endpoints', {}).get('enabled', True) %}
       conf:
         horizon:
           local_settings:
             config:
+{%- if spec.get('features', {}).get('keystone', {}).get('keycloak', {}).get('enabled', False) %}
               auth:
                 idp_mapping:
                 - idp: keycloak
@@ -33,4 +59,11 @@ spec:
                 sso:
                   enabled: true
                   initial_choice: mapped
+{%- endif %}
+{%- if spec.get('features', {}).get('ssl', {}).get('public_endpoints', {}).get('enabled', True) %}
+              secure_proxy_ssl_header: true
+              ssl_features:
+                openstack_ssl_cacert:
+                  enabled: True
+{%- endif %}
 {%- endif %}
