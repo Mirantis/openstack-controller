@@ -62,6 +62,9 @@ spec:
 {%- else %}
           enabled: false
 {%- endif %}
+        nova:
+          cinder:
+            catalog_info: volumev3::internalURL
         libvirt:
           listen_addr: 0.0.0.0
   - name: openstack-nova
