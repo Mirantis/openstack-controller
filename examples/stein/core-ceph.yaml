@@ -110,6 +110,23 @@ spec:
                     name: m1.tiny_test
                     ram: 512
                     vcpus: 1
+    networking:
+      neutron:
+        values:
+          bootstrap:
+            enabled: true
+            script: |
+              openstack network create \
+                --provider-network-type flat \
+                --provider-physical-network external \
+                --external \
+                public
+              openstack subnet create public-subnet \
+                --no-dhcp --subnet-range 10.11.12.0/24 \
+                --allocation-pool start=10.11.12.100,end=10.11.12.200 \
+                --network public
+              openstack router create r1
+              openstack router add subnet r1 public-subnet
     tempest:
       tempest:
         values:
