@@ -60,7 +60,7 @@ spec:
               replication: 1
               crush_rule: replicated_ruleset
               chunk_size: 8
-            volume:
+            cinder.volumes:
               replication: 1
               crush_rule: replicated_ruleset
               chunk_size: 8
