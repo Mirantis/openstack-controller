@@ -37,6 +37,11 @@ spec:
             api:
               internal: 80
 {%- endif %}
+        oslo_db:
+          auth:
+            horizon:
+              username: {{ credentials.database.user.username }}
+              password: {{ credentials.database.user.password }}
 {%- if ssl_public_endpoints_enabled %}
         dashboard:
           host_fqdn_override:

@@ -5,6 +5,7 @@ import jinja2
 import yaml
 
 from osh_operator.filters.tempest import generate_tempest_config
+from . import openstack
 
 LOG = logging.getLogger(__name__)
 
@@ -93,7 +94,7 @@ def merge_all_layers(service, body, meta, spec, logger, **template_args):
     # or move to the templates themselves
     data["spec"]["repositories"] = spec["common"]["charts"]["repositories"]
 
-    # We have 4 level of hierarhy:
+    # We have 4 level of hierarchy:
     # 1. helm values.yaml - which is default
     # 2. osh-operator crd charts section
     # 3. osh-operator crd common/group section
@@ -125,7 +126,7 @@ def merge_all_layers(service, body, meta, spec, logger, **template_args):
     return data
 
 
-def render_all(service, body, meta, spec, logger):
+def render_all(service, body, meta, spec, credentials, logger):
     # logger.debug(f"found templates {ENV.list_templates()}")
     os_release = spec["openstack_version"]
     tpl = ENV.get_template(f"{os_release}/{service}.yaml")
@@ -143,8 +144,15 @@ def render_all(service, body, meta, spec, logger):
     if service == "tempest":
         helmbundles_body = {}
         for s in set(spec["features"]["services"]) - set(["tempest"]):
-            helmbundles_body[s] = merge_all_layers(s, body, meta, spec, logger)
+            service_creds = openstack.get_or_create_os_credentials(
+                s, meta["namespace"]
+            )
+            helmbundles_body[s] = merge_all_layers(
+                s, body, meta, spec, logger, credentials=service_creds
+            )
         template_args["helmbundles_body"] = helmbundles_body
+
+    template_args["credentials"] = credentials
 
     data = merge_all_layers(service, body, meta, spec, logger, **template_args)
 

@@ -238,6 +238,11 @@ spec:
             default: http
             public: https
 {%- endif %}
+        oslo_db:
+          auth:
+            keystone:
+              username: {{ credentials.database.user.username }}
+              password: {{ credentials.database.user.password }}
 {%- if messaging.get('dedicated_rabbitmq', {}).get('enabled', True) %}
         oslo_messaging:
           <<: *keystone_endpoints_oslo_messaging
