@@ -1,3 +1,10 @@
+{%- set keystone_keycloak_enabled = spec.get('features', {}).get('keystone', {}).get('keycloak', {}).get('enabled', False) %}
+{%- set ssl_public_endpoints_enabled = spec.get('features', {}).get('ssl', {}).get('public_endpoints', {}).get('enabled', True) %}
+{%- set horizon_extra_panels = [] %}
+{%- if 'load-balancer' in spec.features.services %}
+  {%- do horizon_extra_panels.append('octavia_dashboard') %}
+{%- endif %}
+
 apiVersion: lcm.mirantis.com/v1alpha1
 kind: HelmBundle
 metadata:
@@ -16,7 +23,7 @@ spec:
         network_policy: false
       endpoints:
         cluster_domain_suffix: {{ spec.domain_name }}
-{%- if spec.get('features', {}).get('keystone', {}).get('keycloak', {}).get('enabled', False) %}
+{%- if keystone_keycloak_enabled %}
         identity:
           hosts:
             internal: keystone
@@ -26,7 +33,7 @@ spec:
             api:
               internal: 80
 {%- endif %}
-{%- if spec.get('features', {}).get('ssl', {}).get('public_endpoints', {}).get('enabled', True) %}
+{%- if ssl_public_endpoints_enabled %}
         dashboard:
           host_fqdn_override:
             public:
@@ -49,13 +56,13 @@ spec:
                 key: |
 {{ spec.features.ssl.public_endpoints.api_key | indent( width=18, indentfirst=True) }}
 {%- endif %}
-{%- if spec.get('features', {}).get('keystone', {}).get('keycloak', {}).get('enabled', False) or spec.get('features', {}).get('ssl', {}).get('public_endpoints', {}).get('enabled', True) %}
       conf:
         horizon:
           local_settings:
             config:
               horizon_images_upload_mode: 'direct'
-{%- if spec.get('features', {}).get('keystone', {}).get('keycloak', {}).get('enabled', False) %}
+              extra_panels: {{ horizon_extra_panels }}
+{%- if keystone_keycloak_enabled %}
               auth:
                 idp_mapping:
                 - idp: keycloak
@@ -66,10 +73,9 @@ spec:
                   enabled: true
                   initial_choice: mapped
 {%- endif %}
-{%- if spec.get('features', {}).get('ssl', {}).get('public_endpoints', {}).get('enabled', True) %}
+{%- if ssl_public_endpoints_enabled %}
               secure_proxy_ssl_header: true
               ssl_features:
                 openstack_ssl_cacert:
                   enabled: True
-{%- endif %}
 {%- endif %}
