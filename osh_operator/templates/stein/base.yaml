@@ -64,6 +64,11 @@ common:
             nova_placement: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/nova:stein-bionic-20190816193016
             nova_scheduler: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/nova:stein-bionic-20190816193016
             nova_service_cleaner: docker-prod-local.docker.mirantis.net/mcp/ceph-config-helper:nightly
+            mariadb: docker-prod-local.docker.mirantis.net/mcp/mariadb:10.2.23-bionic-1557188198369
+            prometheus_create_mysql_user: docker-prod-local.docker.mirantis.net/mcp/mariadb:10.2.23-bionic-1557188198369
+            prometheus_mysql_exporter: docker.io/prom/mysqld-exporter:v0.10.0
+            prometheus_mysql_exporter_helm_tests: docker.io/openstackhelm/heat:newton-ubuntu_xenial
+            mariadb_backup: docker.io/openstackhelm/mariadb:latest-ubuntu_xenial
             rabbit_init: docker.io/rabbitmq:3.7-management
             prometheus_rabbitmq_exporter: docker.io/kbudde/rabbitmq-exporter:v0.21.0
             prometheus_rabbitmq_exporter_helm_tests: docker.io/openstackhelm/heat:ocata-ubuntu_xenial
