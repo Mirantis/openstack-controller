@@ -153,6 +153,7 @@ spec:
                       - rabbitmq
                       - tempest
                       - load-balancer
+                      - dns
                 nova:
                   type: object
                   properties:

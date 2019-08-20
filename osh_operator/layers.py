@@ -41,8 +41,16 @@ CHART_GROUP_MAPPING = {
         "nova",
         "octavia",
         "ceph-rgw",
+        "designate",
     ],
-    "infra": ["rabbitmq", "mariadb", "memcached", "openvswitch", "libvirt"],
+    "infra": [
+        "rabbitmq",
+        "mariadb",
+        "memcached",
+        "openvswitch",
+        "libvirt",
+        "powerdns",
+    ],
 }
 
 
