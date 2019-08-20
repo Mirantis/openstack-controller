@@ -54,6 +54,7 @@ spec:
         horizon:
           local_settings:
             config:
+              horizon_images_upload_mode: 'direct'
 {%- if spec.get('features', {}).get('keystone', {}).get('keycloak', {}).get('enabled', False) %}
               auth:
                 idp_mapping:
