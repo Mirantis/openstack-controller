@@ -77,12 +77,13 @@ common:
             prometheus_mysql_exporter: docker.io/prom/mysqld-exporter:v0.10.0
             prometheus_mysql_exporter_helm_tests: docker.io/openstackhelm/heat:newton-ubuntu_xenial
             mariadb_backup: docker.io/openstackhelm/mariadb:latest-ubuntu_xenial
+            mariadb_scripted_test: docker-prod-local.docker.mirantis.net/mcp/mariadb:10.2.23-bionic-1557188198369
             rabbit_init: docker.io/rabbitmq:3.7-management
             prometheus_rabbitmq_exporter: docker.io/kbudde/rabbitmq-exporter:v0.21.0
             prometheus_rabbitmq_exporter_helm_tests: docker.io/openstackhelm/heat:ocata-ubuntu_xenial
             rabbitmq_init: docker.io/openstackhelm/heat:ocata-ubuntu_xenial
             rabbitmq: docker.io/rabbitmq:3.7.13
-            scripted_test: docker.io/rabbitmq:3.7.13-management
+            rabbitmq_scripted_test: docker.io/rabbitmq:3.7.13-management
             tempest_run_tests: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/tempest:stein-bionic-20190818193013
     repositories:
     - name: osh
