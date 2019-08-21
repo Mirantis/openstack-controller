@@ -23,8 +23,7 @@ spec:
      - networking
      - orchestration
      - rabbitmq
-     # unless https://mirantis.jira.com/browse/PROD-32699 fixed
-     # - load-balancer
+     - load-balancer
     ssl:
       public_endpoints:
         enabled: True
