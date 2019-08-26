@@ -1,4 +1,7 @@
 {%- set messaging = spec.get('features', {}).get('messaging', {}) %}
+{%- set stacklight_enabled = spec.get('features', {}).get('stacklight', {}).get('enabled', False) %}
+{%- set notification_topics = ['notifications'] %}
+{%- do notification_topics.append('stacklight_notifications') if stacklight_enabled %}
 
 apiVersion: lcm.mirantis.com/v1alpha1
 kind: HelmBundle
@@ -67,6 +70,10 @@ spec:
           db_init:
             jobs:
               - openstack-mariadb-cluster-wait
+      conf:
+        designate:
+          oslo_messaging_notifications:
+            topics: {{ notification_topics|join(',') }}
       manifests:
         network_policy: false
 {%- if messaging.get('create_user_credentials', False) %}

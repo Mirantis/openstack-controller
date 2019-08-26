@@ -54,6 +54,8 @@ spec:
     nova:
       images:
         backend: local
+    stacklight:
+      enabled: false
   # enabled services and their specific configuration
   services:
     identity:

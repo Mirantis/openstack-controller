@@ -1,3 +1,8 @@
+{%- set messaging = spec.get('features', {}).get('messaging', {}) %}
+{%- set stacklight_enabled = spec.get('features', {}).get('stacklight', {}).get('enabled', False) %}
+{%- set notification_topics = ['notifications'] %}
+{%- do notification_topics.append('stacklight_notifications') if stacklight_enabled %}
+
 apiVersion: lcm.mirantis.com/v1alpha1
 kind: HelmBundle
 metadata:
@@ -8,8 +13,7 @@ metadata:
 {%- endif %}
 spec:
   releases:
-{%- set create_user_credentials = spec.get('features', {}).get('messaging', {}).get('create_user_credentials', False) %}
-{%- if spec.get('features', {}).get('messaging', {}).get('dedicated_rabbitmq', {}).get('enabled', True) %}
+{%- if messaging.get('dedicated_rabbitmq', {}).get('enabled', True) %}
   - name: openstack-nova-rabbitmq
     chart: {{spec.common.infra.repo}}/rabbitmq
     values:
@@ -18,7 +22,7 @@ spec:
           server: 1
       manifests:
         network_policy: false
-  {%- if create_user_credentials %}
+  {%- if messaging.get('create_user_credentials', False) %}
         job_users_create: true
   {%- endif %}
       volume:
@@ -32,7 +36,7 @@ spec:
           hosts:
             default: rabbitmq-nova
           path: /nova
-  {%- if create_user_credentials %}
+  {%- if messaging.get('create_user_credentials', False) %}
       conf:
         users:
           nova:
@@ -97,7 +101,7 @@ spec:
               - openstack-mariadb-cluster-wait
       manifests:
         network_policy: false
-{%- if create_user_credentials %}
+{%- if messaging.get('create_user_credentials', False) %}
         job_rabbit_init: false
 {%- endif %}
 {%- if spec.get('features', {}).get('ssl', {}).get('public_endpoints', {}).get('enabled', True) %}
@@ -115,7 +119,7 @@ spec:
               user_domain_name: {{ spec.features.keystone.users.admin.get('user_domain_name', 'default') }}
               project_domain_name: {{ spec.features.keystone.users.admin.get('project_domain_name', 'default') }}
               default_domain_id: {{ spec.features.keystone.users.admin.get('default_domain_id', 'default') }}
-{%- if spec.get('features', {}).get('messaging', {}).get('dedicated_rabbitmq', {}).get('enabled', True) %}
+{%- if messaging.get('dedicated_rabbitmq', {}).get('enabled', True) %}
         oslo_messaging:
           <<: *nova_endpoints_oslo_messaging
 {%- endif %}
@@ -222,6 +226,8 @@ spec:
             cpu_mode: custom
             cpu_model: kvm64
             virt_type: kvm
+          oslo_messaging_notifications:
+            topics: {{ notification_topics|join(',') }}
         # TODO(vsaienko): unhardcode this interface
         libvirt:
           live_migration_interface: ens3

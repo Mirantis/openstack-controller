@@ -1,11 +1,16 @@
+{%- set messaging = spec.get('features', {}).get('messaging', {}) %}
+{%- set keystone_keycloak = spec.get('features', {}).get('keystone', {}).get('keycloak', {}) %}
+{%- set stacklight_enabled = spec.get('features', {}).get('stacklight', {}).get('enabled', False) %}
+{%- set notification_topics = ['notifications'] %}
+{%- do notification_topics.append('stacklight_notifications') if stacklight_enabled %}
+
 apiVersion: lcm.mirantis.com/v1alpha1
 kind: HelmBundle
 metadata:
   name: openstack-identity
 spec:
   releases:
-{%- set create_user_credentials = spec.get('features', {}).get('messaging', {}).get('create_user_credentials', False) %}
-{%- if spec.get('features', {}).get('messaging', {}).get('dedicated_rabbitmq', {}).get('enabled', True) %}
+{%- if messaging.get('dedicated_rabbitmq', {}).get('enabled', True) %}
   - name: openstack-keystone-rabbitmq
     chart: {{spec.common.infra.repo}}/rabbitmq
     values:
@@ -14,7 +19,7 @@ spec:
           server: 1
       manifests:
         network_policy: false
-  {%- if create_user_credentials %}
+  {%- if messaging.get('create_user_credentials', False) %}
         job_users_create: true
   {%- endif %}
       volume:
@@ -28,7 +33,7 @@ spec:
           hosts:
             default: rabbitmq-keystone
           path: /keystone
-  {%- if create_user_credentials %}
+  {%- if messaging.get('create_user_credentials', False) %}
       conf:
         users:
           keystone:
@@ -66,7 +71,7 @@ spec:
           db_init:
             jobs:
               - openstack-mariadb-cluster-wait
-{%- if spec.get('features', {}).get('keystone', {}).get('keycloak', {}).get('enabled', False) %}
+{%- if keystone_keycloak.get('enabled', False) %}
       network:
         api:
           ingress:
@@ -75,15 +80,16 @@ spec:
               nginx.ingress.kubernetes.io/session-cookie-expires: "1800"
               nginx.ingress.kubernetes.io/session-cookie-max-age: "1800"
               nginx.ingress.kubernetes.io/session-cookie-name: os-keycloak-sso
-{%- set keycloak = spec.features.keystone.keycloak %}
+{%- endif %}
       conf:
+{%- if keystone_keycloak.get('enabled', False) %}
         ks_federations:
           oidc:
             domain:
               name: keycloak
             identity_provider:
               remote_ids:
-                - "{{ keycloak.get('oidc', {}).get('OIDCProviderMetadataURL', keycloak.url + "/auth/realms/iam")}}"
+                - "{{ keystone_keycloak.get('oidc', {}).get('OIDCProviderMetadataURL', keystone_keycloak.url + "/auth/realms/iam")}}
               id: keycloak
               domain_id: keycloak
             mapping:
@@ -108,7 +114,11 @@ spec:
               mapped:
                 idp_id: "keycloak"
                 mapping_id: "keycloak_mapping"
+{%- endif %}
         keystone:
+          oslo_messaging_notifications:
+            topics: {{ notification_topics|join(',') }}
+{%- if keystone_keycloak.get('enabled', False) %}
           federation:
             # TODO: move this logic to keystone helm chart
             trusted_dashboard: "http://horizon.openstack.svc.{{ spec.domain_name }}/auth/websso/"
@@ -140,11 +150,11 @@ spec:
               OIDCClaimPrefix "OIDC-"
               OIDCResponseType "id_token"
               OIDCScope "openid email profile"
-              OIDCProviderMetadataURL {{ keycloak.get('oidc', {}).get('OIDCProviderMetadataURL', keycloak.url + "/auth/realms/iam/.well-known/openid-configuration")}}
+              OIDCProviderMetadataURL {{ keystone_keycloak.get('oidc', {}).get('OIDCProviderMetadataURL', keystone_keycloak.url + "/auth/realms/iam/.well-known/openid-configuration")}}
               OIDCClientID "os"
-              OIDCCryptoPassphrase {{ keycloak.get('oidc', {}).get('OIDCCryptoPassphrase', 'OIDCCryptoPassphrase') }}
-              {%- if keycloak.get('oidc', {}).get('OIDCRedirectURI', []) %}
-              {%- for uri in keycloak.oidc.OIDCRedirectURI %}
+              OIDCCryptoPassphrase {{ keystone_keycloak.get('oidc', {}).get('OIDCCryptoPassphrase', 'OIDCCryptoPassphrase') }}
+              {%- if keystone_keycloak.get('oidc', {}).get('OIDCRedirectURI', []) %}
+              {%- for uri in keystone_keycloak.oidc.OIDCRedirectURI %}
               OIDCRedirectURI {{ uri }}
               {%- endfor %}
               {%- else %}
@@ -173,10 +183,10 @@ spec:
 {%- endif %}
       manifests:
         network_policy: false
-{%- if spec.get('features', {}).get('keystone', {}).get('keycloak', {}).get('enabled', False) %}
+{%- if keystone_keycloak.get('enabled', False) %}
         job_federations_create: true
 {%- endif %}
-{%- if create_user_credentials %}
+{%- if messaging.get('create_user_credentials', False) %}
         job_rabbit_init: false
 {%- endif %}
 {%- if spec.get('features', {}).get('ssl', {}).get('public_endpoints', {}).get('enabled', True) %}
@@ -228,7 +238,7 @@ spec:
             default: http
             public: https
 {%- endif %}
-{%- if spec.get('features', {}).get('messaging', {}).get('dedicated_rabbitmq', {}).get('enabled', True) %}
+{%- if messaging.get('dedicated_rabbitmq', {}).get('enabled', True) %}
         oslo_messaging:
           <<: *keystone_endpoints_oslo_messaging
 {%- endif %}

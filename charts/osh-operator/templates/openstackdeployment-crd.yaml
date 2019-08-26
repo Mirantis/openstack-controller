@@ -243,6 +243,13 @@ spec:
                           mtu:
                             type: integer
                             nullable: true
+                stacklight:
+                  type: object
+                  properties:
+                    enabled:
+                      description: >
+                        enable StackLight operations support system
+                      type: boolean
             services:
               type: object
           required:
