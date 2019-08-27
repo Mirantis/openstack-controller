@@ -9,6 +9,9 @@ spec:
     values:
       manifests:
         network_policy: false
+{%- if spec.get('features', {}).get('ssl', {}).get('public_endpoints', {}).get('enabled', True) %}
+        secret_ca_bundle: true
+{%- endif %}
       pod:
         replicas:
           server: 1

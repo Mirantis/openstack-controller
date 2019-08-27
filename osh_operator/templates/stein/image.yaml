@@ -71,6 +71,9 @@ spec:
 {%- if spec.get('features', {}).get('messaging', {}).get('create_user_credentials', False) %}
         job_rabbit_init: false
 {%- endif %}
+{%- if spec.get('features', {}).get('ssl', {}).get('public_endpoints', {}).get('enabled', True) %}
+        secret_ca_bundle: true
+{%- endif %}
       endpoints:
         cluster_domain_suffix: {{ spec.domain_name }}
         identity:

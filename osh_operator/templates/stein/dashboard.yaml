@@ -21,6 +21,9 @@ spec:
               - openstack-mariadb-cluster-wait
       manifests:
         network_policy: false
+{%- if ssl_public_endpoints_enabled %}
+        secret_ca_bundle: true
+{%- endif %}
       endpoints:
         cluster_domain_suffix: {{ spec.domain_name }}
 {%- if keystone_keycloak_enabled %}

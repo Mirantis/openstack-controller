@@ -66,6 +66,9 @@ spec:
         # for testing purposes only
         generate_secret_octavia_certs: true
         secret_amphora_ssh_key: true
+{%- if spec.get('features', {}).get('ssl', {}).get('public_endpoints', {}).get('enabled', True) %}
+        secret_ca_bundle: true
+{%- endif %}
       conf:
         octavia:
           certificates:
