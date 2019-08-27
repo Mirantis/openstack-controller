@@ -100,13 +100,13 @@ spec:
               flavors:
                 options:
                   m1.extra_tiny_test:
-                    disk: 1
+                    disk: 5
                     id: 00000000-0000-0000-0000-000000000000
                     name: m1.extra_tiny_test
                     ram: 256
                     vcpus: 1
-                  m1_tiny_test:
-                    disk: 1
+                  m1.tiny_test:
+                    disk: 5
                     id: 00000000-0000-0000-0000-000000000001
                     name: m1.tiny_test
                     ram: 512
@@ -152,7 +152,7 @@ spec:
                 disable_ssl_certificate_validation: true
               compute:
                 image_ref: 00000000-0000-0000-0000-000000000000
-                image_ref_alt: 00000000-0000-0000-0000-000000000001
+                image_ref_alt: 00000000-0000-0000-0000-000000000000
                 flavor_ref: 00000000-0000-0000-0000-000000000000
                 flavor_ref_alt: 00000000-0000-0000-0000-000000000001
     load-balancer:
