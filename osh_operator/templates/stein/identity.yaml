@@ -83,7 +83,7 @@ spec:
               name: keycloak
             identity_provider:
               remote_ids:
-                - "{{ keycloak.get('oidc', {}).get('OIDCProviderMetadataURL', keycloak.url + "/auth/realms/iam")}}
+                - "{{ keycloak.get('oidc', {}).get('OIDCProviderMetadataURL', keycloak.url + "/auth/realms/iam")}}"
               id: keycloak
               domain_id: keycloak
             mapping:
