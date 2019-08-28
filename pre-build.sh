@@ -2,7 +2,6 @@
 
 set -ex
 
-GERRIT_NAME=${GERRIT_NAME:-mcp-jenkins}
 GERRIT_SCHEME=${GERRIT_SCHEME:-$(git remote -v | sed -n -e 's|^origin[[:space:]]\+\([[:alpha:]]\+\)://\([a-z0-9\-]\+\)@\([a-z.:0-9]\+\)/.*(fetch)$|\1|p')}
 GERRIT_NAME=${GERRIT_NAME:-$(git remote -v | sed -n -e 's|^origin[[:space:]]\+\([[:alpha:]]\+\)://\([a-z0-9\-]\+\)@\([a-z.:0-9]\+\)/.*(fetch)$|\2|p')}
 GERRIT_HOST_PORT=${GERRIT_HOST_PORT:-$(git remote -v | sed -n -e 's|^origin[[:space:]]\+\([[:alpha:]]\+\)://\([a-z0-9\-]\+\)@\([a-z.:0-9]\+\)/.*(fetch)$|\3|p')}
