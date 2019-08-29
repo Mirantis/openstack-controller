@@ -85,6 +85,7 @@ common:
             rabbitmq: docker.io/rabbitmq:3.7.13
             rabbitmq_scripted_test: docker.io/rabbitmq:3.7.13-management
             tempest_run_tests: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/tempest:stein-bionic-20190828170014
+            tempest-uuids-init: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/heat:stein-bionic-20190828170014
             designate_api: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/designate:stein-bionic-20190828170014
             designate_central: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/designate:stein-bionic-20190828170014
             designate_db_sync: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/designate:stein-bionic-20190828170014
