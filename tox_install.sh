@@ -1,20 +1,12 @@
 #!/bin/bash
 
-# Many of neutron's repos suffer from the problem of depending on neutron,
-# but it not existing on pypi. This ensures its installed into the test environment.
 set -ex
 
 WORKDIR=$(dirname $0)
-
-install_cmd="pip install"
-
-${WORKDIR}/pre-build.sh
-
-if [ -z "$@" ]; then
-  echo "No packages to be installed."
-  exit 0
+# this is for local test runs only,
+# as pre-build.sh is called in CI before tox
+DATA_DIR=${WORKDIR}/data
+if [[ ! -d ${DATA_DIR} ]]; then
+    ${WORKDIR}/pre-build.sh
 fi
-
-$install_cmd  $*
-
-exit $?
+${WORKDIR}/install.sh $@
