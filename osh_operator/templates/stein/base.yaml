@@ -94,7 +94,7 @@ common:
             designate_worker: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/designate:stein-bionic-20190828170014
     repositories:
     - name: osh
-      url: https://harbor.mcp.mirantis.net/chartrepo/mcp-openstack-helm-20190828164243
+      url: https://harbor.mcp.mirantis.net/chartrepo/mcp-openstack-helm-20190829125706
     - name: osh-infra
       url: https://harbor.mcp.mirantis.net/chartrepo/mcp-openstack-helm-infra-20190827075122
   openstack:
