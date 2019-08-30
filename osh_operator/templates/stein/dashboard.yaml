@@ -1,6 +1,7 @@
 {%- set keystone_keycloak_enabled = spec.get('features', {}).get('keystone', {}).get('keycloak', {}).get('enabled', False) %}
 {%- set ssl_public_endpoints_enabled = spec.get('features', {}).get('ssl', {}).get('public_endpoints', {}).get('enabled', True) %}
-{%- set horizon_extra_panels = [] %}
+#The list of extra panels in Horizon helm-chart is overwritten in case 'extra_panels' is defined in osh-operator.
+{%- set horizon_extra_panels = ['neutron_taas_dashboard', 'heat_dashboard'] %}
 {%- if 'load-balancer' in spec.features.services %}
   {%- do horizon_extra_panels.append('octavia_dashboard') %}
 {%- endif %}
@@ -61,10 +62,10 @@ spec:
 {%- endif %}
       conf:
         horizon:
+          extra_panels: {{ horizon_extra_panels }}
           local_settings:
             config:
               horizon_images_upload_mode: 'direct'
-              extra_panels: {{ horizon_extra_panels }}
 {%- if keystone_keycloak_enabled %}
               auth:
                 idp_mapping:
