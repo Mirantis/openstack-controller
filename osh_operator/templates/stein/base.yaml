@@ -96,9 +96,9 @@ common:
             tempest-uuids-init: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/heat:stein-bionic-20190828170014
     repositories:
     - name: osh
-      url: https://harbor.mcp.mirantis.net/chartrepo/mcp-openstack-helm-20190829125706
+      url: https://harbor.mcp.mirantis.net/chartrepo/mcp-openstack-helm-20190830120640
     - name: osh-infra
-      url: https://harbor.mcp.mirantis.net/chartrepo/mcp-openstack-helm-infra-20190827075122
+      url: https://harbor.mcp.mirantis.net/chartrepo/mcp-openstack-helm-infra-20190829150539
   openstack:
     repo: osh
     values:

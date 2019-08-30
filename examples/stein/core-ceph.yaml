@@ -135,18 +135,15 @@ spec:
         values:
           conf:
             blacklist:
-            # TODO(sandrichenko) create a bugs for each of failures/group of failures and assign to appropriate team.
-            - (?:tempest\.scenario\.test_server_basic_ops\.TestServerBasicOps\.test_server_basic_ops)
-            - (?:tempest\.api\.volume\.test_volumes_actions\.VolumesActionsTest)
-            - (?:tempest\.api\.volume\.test_volumes_get\.VolumesGetTest\.test_volume_create_get_update_delete_from_image)
-            - (?:tempest\.api\.volume\.test_volumes_get\.VolumesGetTest\.test_volume_create_get_update_delete)
-            - (?:tempest\.api\.volume\.test_volumes_list\.VolumesListTestJSON)
-            - (?:tempest\.api\.compute\.servers\.test_server_actions\.ServerActionsTestJSON)
-            - (?:tempest\.api\.compute\.servers\.test_create_server\.ServersTestManualDisk)
-            - (?:tempest\.api\.compute\.servers\.test_attach_interfaces\.AttachInterfacesUnderV243Test\.test_add_remove_fixed_ip)
-            - (?:tempest\.api\.compute\.servers\.test_server_addresses\.ServerAddressesTestJSON)
-            - (?:tempest\.api\.compute\.servers\.test_create_server\.ServersTestBootFromVolume)
-            - (?:tempest\.api\.compute\.servers\.test_create_server\.ServersTestJSON)
+              - (?:tempest\.api.network\.test_floating_ips\.FloatingIPTestJSON)
+              - (?:tempest\.api\.compute\.servers\.test_create_server\.ServersTestManualDisk)
+              - (?:tempest\.scenario\.test_network_basic_ops\.TestNetworkBasicOps\.test_network_basic_ops)
+              - (?:tempest\.api\.compute\.servers\.test_server_actions\.ServerActionsTestJSON)
+              - (?:designate_tempest_plugin\.tests\.api\.v2.test_recordset\.RecordsetsTest)
+              - (?:designate_tempest_plugin\.tests\.api\.v2\.test_zones_imports\.ZonesImportTest\.test_show_zone_import)
+              - (?:designate_tempest_plugin\.tests\.api\.v2\.test_zones\.ZonesTest\.test_delete_zone)
+              - (?:designate_tempest_plugin\.tests\.api\.v2\.test_zones_exports\.ZonesExportTest\.test_show_zone_export)
+              - (?:designate_tempest_plugin\.tests\.scenario\.v2\.test_zones.ZonesTest\.test_create_and_delete_zone)
             script: |
               tempest run --config-file /etc/tempest/tempest.conf -w 4 --smoke --blacklist-file  /etc/tempest/test-blacklist
             tempest:
@@ -162,6 +159,7 @@ spec:
                 image_ssh_user: cirros
               network:
                 shared_physical_network: false
+                floating_network_name: public
     load-balancer:
       octavia:
         values:
