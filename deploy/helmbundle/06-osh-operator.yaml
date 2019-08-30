@@ -6,7 +6,7 @@ metadata:
 spec:
   repositories:
   - name: osh-operator
-    url: 'https://harbor.mcp.mirantis.net/chartrepo/master-osh-operator-20190821130803'
+    url: 'https://harbor.mcp.mirantis.net/chartrepo/master-osh-operator-20190830120746'
   releases:
   - name: openstack-osh-operator
     chart: osh-operator/osh-operator
