@@ -1,7 +1,10 @@
 import logging
 
 import deepmerge
+import deepmerge.exception
+import deepmerge.strategy.type_conflict
 import jinja2
+import kopf
 import yaml
 
 from osh_operator.filters.tempest import generate_tempest_config
@@ -17,7 +20,34 @@ LOG.info(f"found templates {ENV.list_templates()}")
 
 ENV.filters["generate_tempest_config"] = generate_tempest_config
 
-merger = deepmerge.Merger(
+
+class TypeConflictFail(
+    deepmerge.strategy.type_conflict.TypeConflictStrategies
+):
+    @staticmethod
+    def strategy_fail(config, path, base, nxt):
+        raise deepmerge.exception.InvalidMerge(
+            f"Trying to merge different types of objects, {type(base)} and "
+            f"{type(nxt)}"
+        )
+
+
+class CustomMerger(deepmerge.Merger):
+    def __init__(
+        self, type_strategies, fallback_strategies, type_conflict_strategies
+    ):
+        super(CustomMerger, self).__init__(
+            type_strategies, fallback_strategies, []
+        )
+        self._type_conflict_strategy_with_fail = TypeConflictFail(
+            type_conflict_strategies
+        )
+
+    def type_conflict_strategy(self, *args):
+        return self._type_conflict_strategy_with_fail(self, *args)
+
+
+merger = CustomMerger(
     # pass in a list of tuple, with the strategies you are looking to apply
     # to each type.
     # NOTE(pas-ha) We are handling results of yaml.safe_load and k8s api
@@ -27,9 +57,9 @@ merger = deepmerge.Merger(
     # next, choose the fallback strategies, applied to all other types:
     ["override"],
     # finally, choose the strategies in the case where the types conflict:
-    # TODO(pas-ha) write own merger filter to FAIL merging of different types
-    ["override"],
+    ["fail"],
 )
+
 
 CHART_GROUP_MAPPING = {
     "openstack": [
@@ -97,12 +127,11 @@ def merge_all_layers(service, body, meta, spec, logger, **template_args):
         "repositories"
     ]
 
-    # We have 4 level of hierarchy:
+    # We have 4 level of hierarchy, in increasing priority order:
     # 1. helm values.yaml - which is default
-    # 2. OpenstackDeployment crd charts section
-    # 3. OpenstackDeployment crd common/group (like openstack and infra)
-    #    section
-    # 4. osh_operator/templates/<openstack_version>/<chart>.yaml
+    # 2. osh_operator/templates/<openstack_version>/<helmbundle>.yaml
+    # 3. OpenstackDeployment or profile charts section
+    # 4. OpenstackDeployment or profile common/group section
 
     # The values are merged in this specific order.
     for release in service_helmbundle["spec"]["releases"]:
@@ -135,24 +164,27 @@ def render_all(service, body, meta, spec, credentials, logger):
     profile = spec["profile"]
     logger.debug(f"Using profile {os_release}/{profile}")
 
-    base = yaml.safe_load(
-        ENV.get_template(f"{os_release}/{profile}.yaml").render()
-    )
-    # Merge operator defaults with user context.
-    spec = merger.merge(base, spec)
+    try:
+        base = yaml.safe_load(
+            ENV.get_template(f"{os_release}/{profile}.yaml").render()
+        )
+        # Merge operator defaults with user context.
+        spec = merger.merge(base, spec)
 
-    template_args = {}
-    if service == "tempest":
-        helmbundles_body = {}
-        for s in set(spec["features"]["services"]) - set(["tempest"]):
-            service_creds = openstack.get_or_create_os_credentials(
-                s, meta["namespace"]
-            )
-            helmbundles_body[s] = merge_all_layers(
-                s, body, meta, spec, logger, credentials=service_creds
-            )
-        template_args["helmbundles_body"] = helmbundles_body
-
-    template_args["credentials"] = credentials
-
-    return merge_all_layers(service, body, meta, spec, logger, **template_args)
+        template_args = {}
+        if service == "tempest":
+            helmbundles_body = {}
+            for s in set(spec["features"]["services"]) - {"tempest"}:
+                service_creds = openstack.get_or_create_os_credentials(
+                    s, meta["namespace"]
+                )
+                helmbundles_body[s] = merge_all_layers(
+                    s, body, meta, spec, logger, credentials=service_creds
+                )
+            template_args["helmbundles_body"] = helmbundles_body
+        template_args["credentials"] = credentials
+        return merge_all_layers(
+            service, body, meta, spec, logger, **template_args
+        )
+    except Exception as e:
+        raise kopf.HandlerFatalError(str(e))
