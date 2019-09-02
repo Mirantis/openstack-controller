@@ -13,6 +13,11 @@ spec:
   - name: openstack-neutron-rabbitmq
     chart: {{spec.common.infra.repo}}/rabbitmq
     values:
+  {%- if stacklight_enabled %}
+      monitoring:
+        prometheus:
+          enabled: true
+  {%- endif %}
       pod:
         replicas:
           server: 1
@@ -32,6 +37,9 @@ spec:
           hosts:
             default: rabbitmq-neutron
           path: /neutron
+        prometheus_rabbitmq_exporter:
+          hosts:
+            default: rabbitmq-exporter-neutron
   {%- if messaging.get('create_user_credentials', False) %}
       conf:
         users:

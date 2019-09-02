@@ -13,6 +13,11 @@ spec:
   - name: openstack-designate-rabbitmq
     chart: {{spec.common.infra.repo}}/rabbitmq
     values:
+  {%- if stacklight_enabled %}
+      monitoring:
+        prometheus:
+          enabled: true
+  {%- endif %}
       pod:
         replicas:
           server: 1
@@ -32,6 +37,9 @@ spec:
           hosts:
             default: rabbitmq-designate
             path: /designate
+        prometheus_rabbitmq_exporter:
+          hosts:
+            default: rabbitmq-exporter-designate
   {%- if messaging.get('create_user_credentials', False) %}
       conf:
         users:
@@ -187,6 +195,10 @@ spec:
           scheme:
             default: http
             public: https
+      conf:
+        designate:
+          oslo_messaging_notifications:
+            topics: {{ notification_topics|join(',') }}
 {%- endif %}
   - name: openstack-powerdns
     chart: {{spec.common.infra.repo}}/powerdns

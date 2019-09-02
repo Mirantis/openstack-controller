@@ -17,6 +17,11 @@ spec:
   - name: openstack-nova-rabbitmq
     chart: {{spec.common.infra.repo}}/rabbitmq
     values:
+  {%- if stacklight_enabled %}
+      monitoring:
+        prometheus:
+          enabled: true
+  {%- endif %}
       pod:
         replicas:
           server: 1
@@ -36,6 +41,9 @@ spec:
           hosts:
             default: rabbitmq-nova
           path: /nova
+        prometheus_rabbitmq_exporter:
+          hosts:
+            default: rabbitmq-exporter-nova
   {%- if messaging.get('create_user_credentials', False) %}
       conf:
         users:

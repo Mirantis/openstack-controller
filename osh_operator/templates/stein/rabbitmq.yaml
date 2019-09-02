@@ -1,3 +1,4 @@
+{%- set stacklight_enabled = spec.get('features', {}).get('stacklight', {}).get('enabled', False) %}
 apiVersion: lcm.mirantis.com/v1alpha1
 kind: HelmBundle
 metadata:
@@ -7,6 +8,11 @@ spec:
   - name: openstack-rabbitmq
     chart: {{spec.common.infra.get('repo', spec.common.charts.repo)}}/rabbitmq
     values:
+  {%- if stacklight_enabled %}
+      monitoring:
+        prometheus:
+          enabled: true
+  {%- endif %}
       pod:
         replicas:
           server: 1

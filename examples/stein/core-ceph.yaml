@@ -55,7 +55,7 @@ spec:
       images:
         backend: local
     stacklight:
-      enabled: false
+      enabled: true
   # enabled services and their specific configuration
   services:
     identity:
