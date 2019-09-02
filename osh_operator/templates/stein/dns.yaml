@@ -1,10 +1,12 @@
+{%- set messaging = spec.get('features', {}).get('messaging', {}) %}
+
 apiVersion: lcm.mirantis.com/v1alpha1
 kind: HelmBundle
 metadata:
   name: openstack-dns
 spec:
   releases:
-{%- if spec.get('features', {}).get('messaging', {}).get('dedicated_rabbitmq', {}).get('enabled', True) %}
+{%- if messaging.get('dedicated_rabbitmq', {}).get('enabled', True) %}
   - name: openstack-designate-rabbitmq
     chart: {{spec.common.infra.repo}}/rabbitmq
     values:
@@ -13,9 +15,9 @@ spec:
           server: 1
       manifests:
         network_policy: false
-{%- if spec.get('features', {}).get('messaging', {}).get('create_user_credentials', False) %}
+  {%- if messaging.get('create_user_credentials', False) %}
         job_users_create: true
-{%- endif %}
+  {%- endif %}
       volume:
         enabled: false
       endpoints:
@@ -27,7 +29,7 @@ spec:
           hosts:
             default: rabbitmq-designate
             path: /designate
-{%- if spec.get('features', {}).get('messaging', {}).get('create_user_credentials', False) %}
+  {%- if messaging.get('create_user_credentials', False) %}
       conf:
         users:
           designate:
@@ -36,7 +38,26 @@ spec:
                 username: designate
                 password: password
             path: /designate
-{%- endif %}
+        aux_conf:
+          policies:
+          - vhost: designate
+            name: default-policy
+            pattern: '^(?!amq\.).*'
+            definition:
+              message-ttl: 120000
+          - vhost: designate
+            name: results_expire
+            pattern: '^results\.'
+            definition:
+              expires: 3600000
+            priority: 1
+          - vhost: designate
+            name: tasks_expire
+            pattern: '^tasks\.'
+            definition:
+              expires: 3600000
+            priority: 1
+  {%- endif %}
 {%- endif %}
   - name: openstack-designate
     chart: {{spec.common.openstack.repo}}/designate
@@ -48,7 +69,7 @@ spec:
               - openstack-mariadb-cluster-wait
       manifests:
         network_policy: false
-{%- if spec.get('features', {}).get('messaging', {}).get('create_user_credentials', False) %}
+{%- if messaging.get('create_user_credentials', False) %}
         job_rabbit_init: false
 {%- endif %}
 {%- if spec.get('features', {}).get('ssl', {}).get('public_endpoints', {}).get('enabled', True) %}
@@ -66,7 +87,7 @@ spec:
               user_domain_name: {{ spec.features.keystone.users.admin.get('user_domain_name', 'default') }}
               project_domain_name: {{ spec.features.keystone.users.admin.get('project_domain_name', 'default') }}
               default_domain_id: {{ spec.features.keystone.users.admin.get('default_domain_id', 'default') }}
-{%- if spec.get('features', {}).get('messaging', {}).get('dedicated_rabbitmq', {}).get('enabled', True) %}
+{%- if messaging.get('dedicated_rabbitmq', {}).get('enabled', True) %}
         oslo_messaging:
           <<: *designate_endpoints_oslo_messaging
 {%- endif %}
