@@ -139,11 +139,6 @@ spec:
               - (?:tempest\.api\.compute\.servers\.test_create_server\.ServersTestManualDisk)
               - (?:tempest\.scenario\.test_network_basic_ops\.TestNetworkBasicOps\.test_network_basic_ops)
               - (?:tempest\.api\.compute\.servers\.test_server_actions\.ServerActionsTestJSON)
-              - (?:designate_tempest_plugin\.tests\.api\.v2.test_recordset\.RecordsetsTest)
-              - (?:designate_tempest_plugin\.tests\.api\.v2\.test_zones_imports\.ZonesImportTest\.test_show_zone_import)
-              - (?:designate_tempest_plugin\.tests\.api\.v2\.test_zones\.ZonesTest\.test_delete_zone)
-              - (?:designate_tempest_plugin\.tests\.api\.v2\.test_zones_exports\.ZonesExportTest\.test_show_zone_export)
-              - (?:designate_tempest_plugin\.tests\.scenario\.v2\.test_zones.ZonesTest\.test_create_and_delete_zone)
             script: |
               tempest run --config-file /etc/tempest/tempest.conf -w 4 --smoke --blacklist-file  /etc/tempest/test-blacklist
             tempest:
