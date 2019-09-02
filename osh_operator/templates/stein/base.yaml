@@ -6,79 +6,79 @@ common:
       values:
         images:
           tags:
-            bootstrap: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/heat:stein-bionic-20190831180017
-            cinder_api: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/cinder:stein-bionic-20190831180017
-            cinder_backup: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/cinder:stein-bionic-20190831180017
+            bootstrap: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/heat:stein-bionic-20190901180016
+            cinder_api: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/cinder:stein-bionic-20190901180016
+            cinder_backup: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/cinder:stein-bionic-20190901180016
             cinder_backup_storage_init: docker-prod-local.docker.mirantis.net/mcp/ceph-config-helper:nightly
-            cinder_db_sync: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/cinder:stein-bionic-20190831180017
-            cinder_scheduler: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/cinder:stein-bionic-20190831180017
+            cinder_db_sync: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/cinder:stein-bionic-20190901180016
+            cinder_scheduler: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/cinder:stein-bionic-20190901180016
             cinder_storage_init: docker-prod-local.docker.mirantis.net/mcp/ceph-config-helper:nightly
-            cinder_volume: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/cinder:stein-bionic-20190831180017
-            cinder_volume_usage_audit: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/cinder:stein-bionic-20190831180017
-            db_drop: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/heat:stein-bionic-20190831180017
-            db_init: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/heat:stein-bionic-20190831180017
+            cinder_volume: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/cinder:stein-bionic-20190901180016
+            cinder_volume_usage_audit: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/cinder:stein-bionic-20190901180016
+            db_drop: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/heat:stein-bionic-20190901180016
+            db_init: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/heat:stein-bionic-20190901180016
             dep_check: quay.io/stackanetes/kubernetes-entrypoint:v0.3.1
-            designate_api: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/designate:stein-bionic-20190831180017
-            designate_central: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/designate:stein-bionic-20190831180017
-            designate_db_sync: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/designate:stein-bionic-20190831180017
-            designate_mdns: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/designate:stein-bionic-20190831180017
-            designate_producer: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/designate:stein-bionic-20190831180017
-            designate_sink: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/designate:stein-bionic-20190831180017
-            designate_worker: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/designate:stein-bionic-20190831180017
-            glance_api: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/glance:stein-bionic-20190831180017
-            glance_db_sync: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/glance:stein-bionic-20190831180017
-            glance_registry: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/glance:stein-bionic-20190831180017
+            designate_api: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/designate:stein-bionic-20190901180016
+            designate_central: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/designate:stein-bionic-20190901180016
+            designate_db_sync: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/designate:stein-bionic-20190901180016
+            designate_mdns: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/designate:stein-bionic-20190901180016
+            designate_producer: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/designate:stein-bionic-20190901180016
+            designate_sink: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/designate:stein-bionic-20190901180016
+            designate_worker: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/designate:stein-bionic-20190901180016
+            glance_api: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/glance:stein-bionic-20190901180016
+            glance_db_sync: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/glance:stein-bionic-20190901180016
+            glance_registry: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/glance:stein-bionic-20190901180016
             glance_storage_init: docker-prod-local.docker.mirantis.net/mcp/ceph-config-helper:nightly
-            heat_api: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/heat:stein-bionic-20190831180017
-            heat_cfn: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/heat:stein-bionic-20190831180017
-            heat_cloudwatch: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/heat:stein-bionic-20190831180017
-            heat_db_sync: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/heat:stein-bionic-20190831180017
-            heat_engine: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/heat:stein-bionic-20190831180017
-            heat_engine_cleaner: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/heat:stein-bionic-20190831180017
-            heat_purge_deleted: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/heat:stein-bionic-20190831180017
-            horizon: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/horizon:stein-bionic-20190831180017
-            horizon_db_sync: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/horizon:stein-bionic-20190831180017
+            heat_api: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/heat:stein-bionic-20190901180016
+            heat_cfn: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/heat:stein-bionic-20190901180016
+            heat_cloudwatch: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/heat:stein-bionic-20190901180016
+            heat_db_sync: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/heat:stein-bionic-20190901180016
+            heat_engine: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/heat:stein-bionic-20190901180016
+            heat_engine_cleaner: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/heat:stein-bionic-20190901180016
+            heat_purge_deleted: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/heat:stein-bionic-20190901180016
+            horizon: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/horizon:stein-bionic-20190901180016
+            horizon_db_sync: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/horizon:stein-bionic-20190901180016
             image_repo_sync: docker.io/docker:17.07.0
-            keystone_api: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/keystone:stein-bionic-20190831180017
-            keystone_credential_cleanup: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/heat:stein-bionic-20190831180017
-            keystone_credential_rotate: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/keystone:stein-bionic-20190831180017
-            keystone_credential_setup: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/keystone:stein-bionic-20190831180017
-            keystone_db_sync: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/keystone:stein-bionic-20190831180017
-            keystone_domain_manage: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/keystone:stein-bionic-20190831180017
-            keystone_fernet_rotate: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/keystone:stein-bionic-20190831180017
-            keystone_fernet_setup: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/keystone:stein-bionic-20190831180017
-            ks_endpoints: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/heat:stein-bionic-20190831180017
-            ks_service: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/heat:stein-bionic-20190831180017
-            ks_user: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/heat:stein-bionic-20190831180017
-            keystone_federations_create: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/heat:stein-bionic-20190831180017
-            neutron_db_sync: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/neutron:stein-bionic-20190831180017
-            neutron_dhcp: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/neutron:stein-bionic-20190831180017
-            neutron_l3: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/neutron:stein-bionic-20190831180017
-            neutron_linuxbridge_agent: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/neutron:stein-bionic-20190831180017
-            neutron_metadata: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/neutron:stein-bionic-20190831180017
-            neutron_openvswitch_agent: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/neutron:stein-bionic-20190831180017
-            neutron_server: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/neutron:stein-bionic-20190831180017
-            nova_api: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/nova:stein-bionic-20190831180017
-            nova_cell_setup: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/nova:stein-bionic-20190831180017
-            nova_cell_setup_init: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/heat:stein-bionic-20190831180017
-            nova_compute: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/nova:stein-bionic-20190831180017
+            keystone_api: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/keystone:stein-bionic-20190901180016
+            keystone_credential_cleanup: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/heat:stein-bionic-20190901180016
+            keystone_credential_rotate: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/keystone:stein-bionic-20190901180016
+            keystone_credential_setup: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/keystone:stein-bionic-20190901180016
+            keystone_db_sync: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/keystone:stein-bionic-20190901180016
+            keystone_domain_manage: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/keystone:stein-bionic-20190901180016
+            keystone_fernet_rotate: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/keystone:stein-bionic-20190901180016
+            keystone_fernet_setup: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/keystone:stein-bionic-20190901180016
+            ks_endpoints: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/heat:stein-bionic-20190901180016
+            ks_service: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/heat:stein-bionic-20190901180016
+            ks_user: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/heat:stein-bionic-20190901180016
+            keystone_federations_create: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/heat:stein-bionic-20190901180016
+            neutron_db_sync: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/neutron:stein-bionic-20190901180016
+            neutron_dhcp: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/neutron:stein-bionic-20190901180016
+            neutron_l3: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/neutron:stein-bionic-20190901180016
+            neutron_linuxbridge_agent: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/neutron:stein-bionic-20190901180016
+            neutron_metadata: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/neutron:stein-bionic-20190901180016
+            neutron_openvswitch_agent: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/neutron:stein-bionic-20190901180016
+            neutron_server: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/neutron:stein-bionic-20190901180016
+            nova_api: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/nova:stein-bionic-20190901180016
+            nova_cell_setup: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/nova:stein-bionic-20190901180016
+            nova_cell_setup_init: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/heat:stein-bionic-20190901180016
+            nova_compute: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/nova:stein-bionic-20190901180016
             nova_compute_ironic: docker.io/kolla/ubuntu-source-nova-compute-ironic:ocata
-            nova_compute_ssh: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/nova:stein-bionic-20190831180017
-            nova_conductor: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/nova:stein-bionic-20190831180017
-            nova_consoleauth: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/nova:stein-bionic-20190831180017
-            nova_db_sync: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/nova:stein-bionic-20190831180017
-            nova_novncproxy: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/nova:stein-bionic-20190831180017
+            nova_compute_ssh: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/nova:stein-bionic-20190901180016
+            nova_conductor: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/nova:stein-bionic-20190901180016
+            nova_consoleauth: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/nova:stein-bionic-20190901180016
+            nova_db_sync: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/nova:stein-bionic-20190901180016
+            nova_novncproxy: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/nova:stein-bionic-20190901180016
             nova_novncproxy_assets: docker.io/kolla/ubuntu-source-nova-novncproxy:ocata
-            nova_placement: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/nova:stein-bionic-20190831180017
-            nova_scheduler: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/nova:stein-bionic-20190831180017
+            nova_placement: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/nova:stein-bionic-20190901180016
+            nova_scheduler: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/nova:stein-bionic-20190901180016
             nova_service_cleaner: docker-prod-local.docker.mirantis.net/mcp/ceph-config-helper:nightly
-            octavia_api: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/octavia:stein-bionic-20190831180017
-            octavia_db_sync: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/octavia:stein-bionic-20190831180017
-            octavia_health_manager: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/octavia:stein-bionic-20190831180017
+            octavia_api: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/octavia:stein-bionic-20190901180016
+            octavia_db_sync: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/octavia:stein-bionic-20190901180016
+            octavia_health_manager: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/octavia:stein-bionic-20190901180016
             octavia_hm_port: docker-prod-local.docker.mirantis.net/mcp/octavia-hm:nightly
-            octavia_housekeeping: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/octavia:stein-bionic-20190831180017
-            create_resources: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/heat:stein-bionic-20190831180017
-            octavia_worker: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/octavia:stein-bionic-20190831180017
+            octavia_housekeeping: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/octavia:stein-bionic-20190901180016
+            create_resources: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/heat:stein-bionic-20190901180016
+            octavia_worker: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/octavia:stein-bionic-20190901180016
             mariadb: docker-prod-local.docker.mirantis.net/mcp/mariadb:10.2.23-bionic-1557188198369
             prometheus_create_mysql_user: docker-prod-local.docker.mirantis.net/mcp/mariadb:10.2.23-bionic-1557188198369
             prometheus_mysql_exporter: docker.io/prom/mysqld-exporter:v0.10.0
@@ -92,11 +92,11 @@ common:
             rabbitmq_init: docker.io/openstackhelm/heat:ocata-ubuntu_xenial
             rabbitmq: docker.io/rabbitmq:3.7.13
             rabbitmq_scripted_test: docker.io/rabbitmq:3.7.13-management
-            tempest_run_tests: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/tempest:stein-bionic-20190831180017
-            tempest-uuids-init: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/heat:stein-bionic-20190831180017
+            tempest_run_tests: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/tempest:stein-bionic-20190901180016
+            tempest-uuids-init: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/heat:stein-bionic-20190901180016
     repositories:
     - name: osh
-      url: https://harbor.mcp.mirantis.net/chartrepo/mcp-openstack-helm-20190830120640
+      url: https://harbor.mcp.mirantis.net/chartrepo/mcp-openstack-helm-20190901163520
     - name: osh-infra
       url: https://harbor.mcp.mirantis.net/chartrepo/mcp-openstack-helm-infra-20190829150539
   openstack:
