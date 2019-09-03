@@ -27,9 +27,7 @@ spec:
           server: 1
       manifests:
         network_policy: false
-  {%- if messaging.get('create_user_credentials', False) %}
         job_users_create: true
-  {%- endif %}
       volume:
         enabled: false
       endpoints:
@@ -44,7 +42,6 @@ spec:
         prometheus_rabbitmq_exporter:
           hosts:
             default: rabbitmq-exporter-cinder
-  {%- if messaging.get('create_user_credentials', False) %}
       conf:
         users:
           cinder:
@@ -72,7 +69,6 @@ spec:
             definition:
               expires: 3600000
             priority: 1
-  {%- endif %}
 {%- endif %}
   - name: openstack-cinder
     chart: {{spec.common.openstack.repo}}/cinder
@@ -110,9 +106,7 @@ spec:
             topics: {{ notification_topics|join(',') }}
       manifests:
         network_policy: false
-{%- if messaging.get('create_user_credentials', False) %}
         job_rabbit_init: false
-{%- endif %}
 {%- if spec.get('features', {}).get('ssl', {}).get('public_endpoints', {}).get('enabled', True) %}
         secret_ca_bundle: true
 {%- endif %}

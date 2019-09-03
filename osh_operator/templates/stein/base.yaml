@@ -111,7 +111,6 @@ features:
   messaging:
     dedicated_rabbitmq:
       enabled: true
-    create_user_credentials: true
   database:
     local_volumes:
       enabled: true

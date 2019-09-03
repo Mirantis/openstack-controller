@@ -18,13 +18,9 @@ spec:
           server: 1
       manifests:
         network_policy: false
-{%- set create_user_credentials = spec.get('features', {}).get('messaging', {}).get('create_user_credentials', False) %}
-{%- if create_user_credentials %}
         job_users_create: true
-{%- endif %}
       volume:
         enabled: false
-{%- if create_user_credentials %}
       conf:
         users:
           keystone_service:
@@ -156,7 +152,6 @@ spec:
               expires: 3600000
             priority: 1
   {%- endfor %}
-{%- endif %}
       endpoints:
         cluster_domain_suffix: {{ spec.domain_name }}
         oslo_messaging:

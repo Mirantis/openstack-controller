@@ -23,9 +23,7 @@ spec:
           server: 1
       manifests:
         network_policy: false
-  {%- if messaging.get('create_user_credentials', False) %}
         job_users_create: true
-  {%- endif %}
       volume:
         enabled: false
       endpoints:
@@ -40,7 +38,6 @@ spec:
         prometheus_rabbitmq_exporter:
           hosts:
             default: rabbitmq-exporter-heat
-  {%- if messaging.get('create_user_credentials', False) %}
       conf:
         users:
           heat:
@@ -80,7 +77,6 @@ spec:
             pattern: '^(?!amq\.).*'
             definition:
               message-ttl: 120000
-  {%- endif %}
 {%- endif %}
   - name: openstack-heat
     chart: {{spec.common.openstack.repo}}/heat
@@ -92,9 +88,7 @@ spec:
               - openstack-mariadb-cluster-wait
       manifests:
         network_policy: false
-{%- if messaging.get('create_user_credentials', False) %}
         job_rabbit_init: false
-{%- endif %}
 {%- if spec.get('features', {}).get('ssl', {}).get('public_endpoints', {}).get('enabled', True) %}
         secret_ca_bundle: true
 {%- endif %}
