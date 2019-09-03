@@ -12,7 +12,8 @@ image:
 nameOverride: ""
 fullnameOverride: ""
 
-kopf: {}
+kopf:
+  enabled: true
 
 osdpl:
   namespace: openstack
