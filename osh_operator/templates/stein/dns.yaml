@@ -189,10 +189,6 @@ spec:
           scheme:
             default: http
             public: https
-      conf:
-        designate:
-          oslo_messaging_notifications:
-            topics: {{ notification_topics|join(',') }}
 {%- endif %}
   - name: openstack-powerdns
     chart: {{spec.common.infra.repo}}/powerdns
