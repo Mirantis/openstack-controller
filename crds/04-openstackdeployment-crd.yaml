@@ -261,6 +261,35 @@ spec:
                       description: >
                         enable StackLight operations support system
                       type: boolean
+                logging:
+                  type: object
+                  properties:
+                    cinder: &logging_level
+                      type: object
+                      properties:
+                        level:
+                          type: string
+                          description: Service logging level
+                          enum:
+                            - DEBUG
+                            - INFO
+                            - WARNING
+                            - ERROR
+                            - CRITICAL
+                    designate:
+                      <<: *logging_level
+                    glance:
+                      <<: *logging_level
+                    heat:
+                      <<: *logging_level
+                    keystone:
+                      <<: *logging_level
+                    neutron:
+                      <<: *logging_level
+                    nova:
+                      <<: *logging_level
+                    octavia:
+                      <<: *logging_level
             services:
               type: object
           required:

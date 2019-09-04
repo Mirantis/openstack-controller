@@ -104,6 +104,9 @@ spec:
 {%- endif %}
           oslo_messaging_notifications:
             topics: {{ notification_topics|join(',') }}
+        logging:
+          logger_cinder:
+            level: {{ spec.get('features', {}).get('logging', {}).get('cinder', {}).get('level', 'INFO') }}
       manifests:
         network_policy: false
         job_rabbit_init: false

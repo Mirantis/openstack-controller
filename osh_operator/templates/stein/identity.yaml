@@ -122,6 +122,9 @@ spec:
         keystone:
           oslo_messaging_notifications:
             topics: {{ notification_topics|join(',') }}
+        logging:
+          logger_keystone:
+            level: {{ spec.get('features', {}).get('logging', {}).get('keystone', {}).get('level', 'INFO') }}
 {%- if keystone_keycloak.get('enabled', False) %}
           federation:
             # TODO: move this logic to keystone helm chart

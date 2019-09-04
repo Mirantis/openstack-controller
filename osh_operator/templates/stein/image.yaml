@@ -90,6 +90,9 @@ spec:
             rbd_store_crush_rule: replicated_ruleset
           oslo_messaging_notifications:
             topics: {{ notification_topics|join(',') }}
+        logging:
+          logger_glance:
+            level: {{ spec.get('features', {}).get('logging', {}).get('glance', {}).get('level', 'INFO') }}
       volume:
         class_name: rook-ceph-block
         size: 2Gi

@@ -245,6 +245,9 @@ spec:
             virt_type: kvm
           oslo_messaging_notifications:
             topics: {{ notification_topics|join(',') }}
+        logging:
+          logger_nova:
+            level: {{ spec.get('features', {}).get('logging', {}).get('nova', {}).get('level', 'INFO') }}
         # TODO(vsaienko): unhardcode this interface
         libvirt:
           live_migration_interface: ens3

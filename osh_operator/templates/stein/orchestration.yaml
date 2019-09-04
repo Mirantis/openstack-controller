@@ -96,6 +96,9 @@ spec:
         heat:
           oslo_messaging_notifications:
             topics: {{ notification_topics|join(',') }}
+        logging:
+          logger_heat:
+            level: {{ spec.get('features', {}).get('logging', {}).get('heat', {}).get('level', 'INFO') }}
       endpoints:
         cluster_domain_suffix: {{ spec.domain_name }}
         identity:

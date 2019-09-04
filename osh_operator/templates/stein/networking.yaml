@@ -177,6 +177,9 @@ spec:
             dhcp_agents_per_network: 1
           oslo_messaging_notifications:
             topics: {{ notification_topics|join(',') }}
+        logging:
+          logger_neutron:
+            level: {{ spec.get('features', {}).get('logging', {}).get('neutron', {}).get('level', 'INFO') }}
 # TODO: make other networks types configurable
 {%- set networks = {'flat': [], 'vlan': []} %}
 {%- set bridge_mappings = [] %}
