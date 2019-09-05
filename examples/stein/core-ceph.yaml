@@ -138,6 +138,7 @@ spec:
           conf:
             blacklist:
               - (?:tempest.fake.test)
+              - (?:heat_tempest_plugin\.)
               #- (?:tempest\.api\.compute\.servers\.test_server_actions\.ServerActionsTestJSON)
             script: |
               tempest run --config-file /etc/tempest/tempest.conf -w 4 --smoke --blacklist-file  /etc/tempest/test-blacklist
