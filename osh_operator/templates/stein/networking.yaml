@@ -69,10 +69,6 @@ spec:
   - name: openstack-openvswitch
     chart: {{spec.common.infra.repo}}/openvswitch
     values:
-      images:
-        tags:
-          openvswitch_db_server: docker.io/openstackhelm/openvswitch:latest-debian
-          openvswitch_vswitchd: docker.io/openstackhelm/openvswitch:latest-debian
       endpoints:
         cluster_domain_suffix: {{ spec.domain_name }}
   - name: openstack-neutron

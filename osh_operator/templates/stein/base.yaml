@@ -77,6 +77,8 @@ common:
             octavia_health_manager: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/octavia:stein-bionic-20190904180017
             octavia_hm_port: docker-prod-local.docker.mirantis.net/mcp/octavia-hm:nightly
             octavia_housekeeping: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/octavia:stein-bionic-20190904180017
+            openvswitch_db_server: docker-prod-local.docker.mirantis.net/mcp/openvswitch:2.11-bionic-1561381942782
+            openvswitch_vswitchd: docker-prod-local.docker.mirantis.net/mcp/openvswitch:2.11-bionic-1561381942782
             create_resources: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/heat:stein-bionic-20190904180017
             octavia_worker: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/octavia:stein-bionic-20190904180017
             mariadb: docker-prod-local.docker.mirantis.net/mcp/mariadb:10.2.23-bionic-1557188198369
