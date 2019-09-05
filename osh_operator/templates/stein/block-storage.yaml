@@ -33,6 +33,10 @@ spec:
       endpoints:
         cluster_domain_suffix: {{ spec.domain_name }}
         oslo_messaging: &cinder_endpoints_oslo_messaging
+          auth:
+            cinder:
+              username: {{ credentials.messaging.user.username }}
+              password: {{ credentials.messaging.user.password }}
           statefulset:
             replicas: 1
             name: openstack-cinder-rabbitmq-rabbitmq
@@ -47,8 +51,8 @@ spec:
           cinder:
             auth:
               service_user:
-                username: cinder
-                password: password
+                username: {{ credentials.messaging.user.username }}
+                password: {{ credentials.messaging.user.password }}
             path: /cinder
         aux_conf:
           policies:

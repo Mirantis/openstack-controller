@@ -29,6 +29,10 @@ spec:
       endpoints:
         cluster_domain_suffix: {{ spec.domain_name }}
         oslo_messaging: &neutron_endpoints_oslo_messaging
+          auth:
+            neutron:
+              username: {{ credentials.messaging.user.username }}
+              password: {{ credentials.messaging.user.password }}
           statefulset:
             replicas: 1
             name: openstack-neutron-rabbitmq-rabbitmq
@@ -43,8 +47,8 @@ spec:
           neutron:
             auth:
               service_user:
-                username: neutron
-                password: password
+                username: {{ credentials.messaging.user.username }}
+                password: {{ credentials.messaging.user.password }}
             path: /neutron
         aux_conf:
           policies:

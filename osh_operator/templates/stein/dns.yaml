@@ -29,6 +29,10 @@ spec:
       endpoints:
         cluster_domain_suffix: {{ spec.domain_name }}
         oslo_messaging: &designate_endpoints_oslo_messaging
+          auth:
+            designate:
+              username: {{ credentials.messaging.user.username }}
+              password: {{ credentials.messaging.user.password }}
           statefulset:
             replicas: 1
             name: openstack-designate-rabbitmq-rabbitmq
@@ -43,8 +47,8 @@ spec:
           designate:
             auth:
               service_user:
-                username: designate
-                password: password
+                username: {{ credentials.messaging.user.username }}
+                password: {{ credentials.messaging.user.password }}
             path: /designate
         aux_conf:
           policies:

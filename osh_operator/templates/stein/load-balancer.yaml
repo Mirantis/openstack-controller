@@ -29,6 +29,10 @@ spec:
       endpoints:
         cluster_domain_suffix: {{ spec.domain_name }}
         oslo_messaging: &octavia_endpoints_oslo_messaging
+          auth:
+            octavia:
+              username: {{ credentials.messaging.user.username }}
+              password: {{ credentials.messaging.user.password }}
           statefulset:
             replicas: 1
             name: openstack-octavia-rabbitmq-rabbitmq
@@ -43,8 +47,8 @@ spec:
           octavia:
             auth:
               service_user:
-                username: octavia
-                password: password
+                username: {{ credentials.messaging.user.username }}
+                password: {{ credentials.messaging.user.password }}
             path: /octavia
         aux_conf:
           policies:

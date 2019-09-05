@@ -33,6 +33,10 @@ spec:
       endpoints:
         cluster_domain_suffix: {{ spec.domain_name }}
         oslo_messaging: &nova_endpoints_oslo_messaging
+          auth:
+            nova:
+              username: {{ credentials.messaging.user.username }}
+              password: {{ credentials.messaging.user.password }}
           statefulset:
             replicas: 1
             name: openstack-nova-rabbitmq-rabbitmq
@@ -47,8 +51,8 @@ spec:
           nova:
             auth:
               service_user:
-                username: nova
-                password: password
+                username: {{ credentials.messaging.user.username }}
+                password: {{ credentials.messaging.user.password }}
             path: /nova
         aux_conf:
           policies:

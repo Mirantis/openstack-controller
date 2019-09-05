@@ -29,6 +29,10 @@ spec:
       endpoints:
         cluster_domain_suffix: {{ spec.domain_name }}
         oslo_messaging: &heat_endpoints_oslo_messaging
+          auth:
+            heat:
+              username: {{ credentials.messaging.user.username }}
+              password: {{ credentials.messaging.user.password }}
           statefulset:
             replicas: 1
             name: openstack-heat-rabbitmq-rabbitmq
@@ -43,8 +47,8 @@ spec:
           heat:
             auth:
               service_user:
-                username: heat
-                password: password
+                username: {{ credentials.messaging.user.username }}
+                password: {{ credentials.messaging.user.password }}
             path: /heat
         aux_conf:
           policies:

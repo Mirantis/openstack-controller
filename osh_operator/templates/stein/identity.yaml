@@ -30,6 +30,10 @@ spec:
       endpoints:
         cluster_domain_suffix: {{ spec.domain_name }}
         oslo_messaging: &keystone_endpoints_oslo_messaging
+          auth:
+            keystone:
+              username: {{ credentials.messaging.user.username }}
+              password: {{ credentials.messaging.user.password }}
           statefulset:
             replicas: 1
             name: openstack-keystone-rabbitmq-rabbitmq
@@ -44,8 +48,8 @@ spec:
           keystone:
             auth:
               service_user:
-                username: keystone
-                password: password
+                username: {{ credentials.messaging.user.username }}
+                password: {{ credentials.messaging.user.password }}
             path: /keystone
         aux_conf:
           policies:

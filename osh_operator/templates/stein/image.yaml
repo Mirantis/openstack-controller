@@ -31,6 +31,10 @@ spec:
       endpoints:
         cluster_domain_suffix: {{ spec.domain_name }}
         oslo_messaging: &glance_endpoints_oslo_messaging
+          auth:
+            glance:
+              username: {{ credentials.messaging.user.username }}
+              password: {{ credentials.messaging.user.password }}
           statefulset:
             replicas: 1
             name: openstack-glance-rabbitmq-rabbitmq
@@ -45,8 +49,8 @@ spec:
           glance:
             auth:
               service_user:
-                username: glance
-                password: password
+                username: {{ credentials.messaging.user.username }}
+                password: {{ credentials.messaging.user.password }}
             path: /glance
         aux_conf:
           policies:
