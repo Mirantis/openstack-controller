@@ -1,0 +1,208 @@
+{%- set messaging = spec.get('features', {}).get('messaging', {}) %}
+{%- set stacklight_enabled = spec.get('features', {}).get('stacklight', {}).get('enabled', False) %}
+{%- set notification_topics = ['notifications'] %}
+{%- do notification_topics.append('stacklight_notifications') if stacklight_enabled %}
+
+apiVersion: lcm.mirantis.com/v1alpha1
+kind: HelmBundle
+metadata:
+  name: openstack-orchestration
+spec:
+  releases:
+{%- if messaging.get('dedicated_rabbitmq', {}).get('enabled', True) %}
+  - name: openstack-heat-rabbitmq
+    chart: {{spec.common.infra.repo}}/rabbitmq
+    values:
+  {%- if stacklight_enabled %}
+      monitoring:
+        prometheus:
+          enabled: true
+  {%- endif %}
+      pod:
+        replicas:
+          server: 1
+      manifests:
+        network_policy: false
+        job_users_create: true
+      volume:
+        enabled: false
+      endpoints:
+        cluster_domain_suffix: {{ spec.domain_name }}
+        oslo_messaging: &heat_endpoints_oslo_messaging
+          statefulset:
+            replicas: 1
+            name: openstack-heat-rabbitmq-rabbitmq
+          hosts:
+            default: rabbitmq-heat
+            path: /heat
+        prometheus_rabbitmq_exporter:
+          hosts:
+            default: rabbitmq-exporter-heat
+      conf:
+        users:
+          heat:
+            auth:
+              service_user:
+                username: heat
+                password: password
+            path: /heat
+        aux_conf:
+          policies:
+          - vhost: heat
+            name: heat_engine_rpc_expire
+            pattern: '^heat-engine-listener\.'
+            definition:
+              expires: 3600000
+            priority: 1
+          - vhost: heat
+            name: heat_worker_rpc_expire
+            pattern: '^engine_worker\.'
+            definition:
+              expires: 3600000
+            priority: 1
+          - vhost: heat
+            name: results_expire
+            pattern: '^results\.'
+            definition:
+              expires: 3600000
+            priority: 1
+          - vhost: heat
+            name: tasks_expire
+            pattern: '^tasks\.'
+            definition:
+              expires: 3600000
+            priority: 1
+          - vhost: heat
+            name: default-policy
+            pattern: '^(?!amq\.).*'
+            definition:
+              message-ttl: 120000
+{%- endif %}
+  - name: openstack-heat
+    chart: {{spec.common.openstack.repo}}/heat
+    values:
+      dependencies:
+        static:
+          db_init:
+            jobs:
+              - openstack-mariadb-cluster-wait
+      manifests:
+        network_policy: false
+        job_rabbit_init: false
+{%- if spec.get('features', {}).get('ssl', {}).get('public_endpoints', {}).get('enabled', True) %}
+        secret_ca_bundle: true
+{%- endif %}
+      conf:
+        heat:
+          oslo_messaging_notifications:
+            topics: {{ notification_topics|join(',') }}
+        logging:
+          logger_heat:
+            level: {{ spec.get('features', {}).get('logging', {}).get('heat', {}).get('level', 'INFO') }}
+      endpoints:
+        cluster_domain_suffix: {{ spec.domain_name }}
+        identity:
+          auth:
+            admin:
+              region_name: {{ spec.features.keystone.users.admin.get('region_name', 'RegionOne') }}
+              username: {{ spec.features.keystone.users.admin.username }}
+              password: {{ spec.features.keystone.users.admin.password }}
+              project_name: {{ spec.features.keystone.users.admin.get('project_name', 'admin') }}
+              user_domain_name: {{ spec.features.keystone.users.admin.get('user_domain_name', 'default') }}
+              project_domain_name: {{ spec.features.keystone.users.admin.get('project_domain_name', 'default') }}
+              default_domain_id: {{ spec.features.keystone.users.admin.get('default_domain_id', 'default') }}
+        oslo_db:
+          auth:
+            heat:
+              username: {{ credentials.database.user.username }}
+              password: {{ credentials.database.user.password }}
+{%- if messaging.get('dedicated_rabbitmq', {}).get('enabled', True) %}
+        oslo_messaging:
+          <<: *heat_endpoints_oslo_messaging
+{%- endif %}
+        oslo_messaging_notifications:
+          auth:
+            heat:
+              password: password
+              username: heat
+          host_fqdn_override: {}
+          hosts:
+            default: rabbitmq
+          path: /openstack
+          port:
+            amqp:
+              default: 5672
+            http:
+              default: 15672
+          scheme: rabbit
+          statefulset:
+            name: openstack-rabbitmq-rabbitmq
+            replicas: 1
+{%- if spec.get('features', {}).get('ssl', {}).get('public_endpoints', {}).get('enabled', True) %}
+        orchestration:
+          host_fqdn_override:
+            public:
+              tls:
+                ca: |
+{{ spec.features.ssl.public_endpoints.ca_cert | indent( width=18, indentfirst=True) }}
+                crt: |
+{{ spec.features.ssl.public_endpoints.api_cert | indent( width=18, indentfirst=True) }}
+                key: |
+{{ spec.features.ssl.public_endpoints.api_key | indent( width=18, indentfirst=True) }}
+          hosts:
+            admin:
+              host: heat-api
+            default: heat
+            internal: heat-api
+            public:
+              host: heat
+              tls:
+                ca: |
+{{ spec.features.ssl.public_endpoints.ca_cert | indent( width=18, indentfirst=True) }}
+                crt: |
+{{ spec.features.ssl.public_endpoints.api_cert | indent( width=18, indentfirst=True) }}
+                key: |
+{{ spec.features.ssl.public_endpoints.api_key | indent( width=18, indentfirst=True) }}
+          port:
+            api:
+              admin: 8004
+              default: 80
+              internal: 8004
+              public: 443
+          scheme:
+            default: http
+            public: https
+        cloudformation:
+          host_fqdn_override:
+            public:
+              tls:
+                ca: |
+{{ spec.features.ssl.public_endpoints.ca_cert | indent( width=18, indentfirst=True) }}
+                crt: |
+{{ spec.features.ssl.public_endpoints.api_cert | indent( width=18, indentfirst=True) }}
+                key: |
+{{ spec.features.ssl.public_endpoints.api_key | indent( width=18, indentfirst=True) }}
+          hosts:
+            admin:
+              host: heat-cfn
+            default: cloudformation
+            internal: heat-cfn
+            public:
+              host: cloudformation
+              tls:
+                ca: |
+{{ spec.features.ssl.public_endpoints.ca_cert | indent( width=18, indentfirst=True) }}
+                crt: |
+{{ spec.features.ssl.public_endpoints.api_cert | indent( width=18, indentfirst=True) }}
+                key: |
+{{ spec.features.ssl.public_endpoints.api_key | indent( width=18, indentfirst=True) }}
+          port:
+            api:
+              admin: 8000
+              default: 80
+              internal: 8000
+              public: 443
+          scheme:
+            default: http
+            public: https
+{%- endif %}

@@ -1,0 +1,272 @@
+{%- set messaging = spec.get('features', {}).get('messaging', {}) %}
+{%- set keystone_keycloak = spec.get('features', {}).get('keystone', {}).get('keycloak', {}) %}
+{%- set stacklight_enabled = spec.get('features', {}).get('stacklight', {}).get('enabled', False) %}
+{%- set notification_topics = ['notifications'] %}
+{%- do notification_topics.append('stacklight_notifications') if stacklight_enabled %}
+
+apiVersion: lcm.mirantis.com/v1alpha1
+kind: HelmBundle
+metadata:
+  name: openstack-identity
+spec:
+  releases:
+{%- if messaging.get('dedicated_rabbitmq', {}).get('enabled', True) %}
+  - name: openstack-keystone-rabbitmq
+    chart: {{spec.common.infra.repo}}/rabbitmq
+    values:
+  {%- if stacklight_enabled %}
+      monitoring:
+        prometheus:
+          enabled: true
+  {%- endif %}
+      pod:
+        replicas:
+          server: 1
+      manifests:
+        network_policy: false
+        job_users_create: true
+      volume:
+        enabled: false
+      endpoints:
+        cluster_domain_suffix: {{ spec.domain_name }}
+        oslo_messaging: &keystone_endpoints_oslo_messaging
+          statefulset:
+            replicas: 1
+            name: openstack-keystone-rabbitmq-rabbitmq
+          hosts:
+            default: rabbitmq-keystone
+          path: /keystone
+        prometheus_rabbitmq_exporter:
+          hosts:
+            default: rabbitmq-exporter-keystone
+      conf:
+        users:
+          keystone:
+            auth:
+              service_user:
+                username: keystone
+                password: password
+            path: /keystone
+        aux_conf:
+          policies:
+          - vhost: keystone
+            name: default-policy
+            pattern: '^(?!amq\.).*'
+            definition:
+              message-ttl: 120000
+          - vhost: keystone
+            name: results_expire
+            pattern: '^results\.'
+            definition:
+              expires: 3600000
+            priority: 1
+          - vhost: keystone
+            name: tasks_expire
+            pattern: '^tasks\.'
+            definition:
+              expires: 3600000
+            priority: 1
+{%- endif %}
+  - name: openstack-keystone
+    chart: {{spec.common.openstack.repo}}/keystone
+    values:
+      dependencies:
+        static:
+          db_init:
+            jobs:
+              - openstack-mariadb-cluster-wait
+{%- if keystone_keycloak.get('enabled', False) %}
+      network:
+        api:
+          ingress:
+            annotations:
+              nginx.ingress.kubernetes.io/affinity: cookie
+              nginx.ingress.kubernetes.io/session-cookie-expires: "1800"
+              nginx.ingress.kubernetes.io/session-cookie-max-age: "1800"
+              nginx.ingress.kubernetes.io/session-cookie-name: os-keycloak-sso
+{%- endif %}
+      conf:
+{%- if keystone_keycloak.get('enabled', False) %}
+        ks_federations:
+          oidc:
+            domain:
+              name: keycloak
+            identity_provider:
+              remote_ids:
+                - "{{ keystone_keycloak.get('oidc', {}).get('OIDCProviderMetadataURL', keystone_keycloak.url + "/auth/realms/iam")}}
+              id: keycloak
+              domain_id: keycloak
+            mapping:
+              id: "keycloak_mapping"
+              rules:
+                - local:
+                    - user:
+                        name: "{0}"
+                        email: "{1}"
+                        domain:
+                          name: "Default"
+                    - groups: "{2}"
+                      domain:
+                         name: "Default"
+                    - domain:
+                         name: "Default"
+                  remote:
+                    - type: "OIDC-iam_username"
+                    - type: "OIDC-email"
+                    - type: "OIDC-iam_roles"
+            protocol:
+              mapped:
+                idp_id: "keycloak"
+                mapping_id: "keycloak_mapping"
+{%- endif %}
+        keystone:
+          oslo_messaging_notifications:
+            topics: {{ notification_topics|join(',') }}
+        logging:
+          logger_keystone:
+            level: {{ spec.get('features', {}).get('logging', {}).get('keystone', {}).get('level', 'INFO') }}
+{%- if keystone_keycloak.get('enabled', False) %}
+          federation:
+            # TODO: move this logic to keystone helm chart
+            trusted_dashboard: "http://horizon.openstack.svc.{{ spec.domain_name }}/auth/websso/"
+          mapped:
+            remote_id_attribute: HTTP_OIDC_ISS
+        wsgi_keystone: |
+          {%- raw %}
+          {{- $portInt := tuple "identity" "internal" "api" $ | include "helm-toolkit.endpoints.endpoint_port_lookup" }}
+          {{- $keystoneHost := tuple "identity" "public" . | include "helm-toolkit.endpoints.hostname_fqdn_endpoint_lookup" }}
+          {{- $keystoneProtocol := tuple "identity" "public" "api" . | include "helm-toolkit.endpoints.keystone_endpoint_scheme_lookup" }}
+          Listen 0.0.0.0:{{ $portInt }}
+          {%- endraw %}
+          LogFormat "%h %l %u %t \"%r\" %>s %b \"%{Referer}i\" \"%{User-Agent}i\"" combined
+          LogFormat "%{X-Forwarded-For}i %l %u %t \"%r\" %>s %b \"%{Referer}i\" \"%{User-Agent}i\"" proxy
+          SetEnvIf X-Forwarded-For "^.*\..*\..*\..*" forwarded
+          CustomLog /dev/stdout combined env=!forwarded
+          CustomLog /dev/stdout proxy env=forwarded
+          <VirtualHost *:{% raw %}{{ $portInt }}{% endraw %}>
+              WSGIDaemonProcess keystone-public processes=1 threads=1 user=keystone group=keystone display-name=%{GROUP}
+              WSGIProcessGroup keystone-public
+              WSGIScriptAlias / /var/www/cgi-bin/keystone/keystone-wsgi-public
+              WSGIApplicationGroup %{GLOBAL}
+              WSGIPassAuthorization On
+              <IfVersion >= 2.4>
+                 ErrorLogFormat "%{cu}t %M"
+              </IfVersion>
+              ErrorLog /dev/stdout
+              SetEnvIf X-Forwarded-For "^.*\..*\..*\..*" forwarded proxy env=forwarded
+              OIDCClaimPrefix "OIDC-"
+              OIDCResponseType "id_token"
+              OIDCScope "openid email profile"
+              OIDCProviderMetadataURL {{ keystone_keycloak.get('oidc', {}).get('OIDCProviderMetadataURL', keystone_keycloak.url + "/auth/realms/iam/.well-known/openid-configuration")}}
+              OIDCClientID "os"
+              OIDCCryptoPassphrase {{ keystone_keycloak.get('oidc', {}).get('OIDCCryptoPassphrase', 'OIDCCryptoPassphrase') }}
+              {%- if keystone_keycloak.get('oidc', {}).get('OIDCRedirectURI', []) %}
+              {%- for uri in keystone_keycloak.oidc.OIDCRedirectURI %}
+              OIDCRedirectURI {{ uri }}
+              {%- endfor %}
+              {%- else %}
+              {%- raw %}
+              OIDCRedirectURI {{ $keystoneProtocol }}://{{ $keystoneHost }}/v3/OS-FEDERATION/identity_providers/keycloak/protocols/mapped/auth
+              OIDCRedirectURI {{ $keystoneProtocol }}://{{ $keystoneHost }}/v3/auth/OS-FEDERATION/websso/
+              OIDCRedirectURI {{ $keystoneProtocol }}://{{ $keystoneHost }}/v3/auth/OS-FEDERATION/identity_providers/keycloak/protocols/mapped/websso/
+              {%- endraw %}
+              {%- endif %}
+              <LocationMatch /v3/OS-FEDERATION/identity_providers/.*?/protocols/.*?/auth>
+                  AuthType oauth20
+                  Require valid-user
+                  LogLevel debug
+              </LocationMatch>
+              <Location ~ "/v3/auth/OS-FEDERATION/websso/mapped">
+                  AuthType openid-connect
+                  Require valid-user
+                  LogLevel debug
+              </Location>
+              <Location ~ "/v3/auth/OS-FEDERATION/identity_providers/keycloak/protocols/mapped/websso">
+                  AuthType openid-connect
+                  Require valid-user
+                  LogLevel debug
+              </Location>
+              </VirtualHost>
+{%- endif %}
+      manifests:
+        network_policy: false
+{%- if keystone_keycloak.get('enabled', False) %}
+        job_federations_create: true
+{%- endif %}
+        job_rabbit_init: false
+{%- if spec.get('features', {}).get('ssl', {}).get('public_endpoints', {}).get('enabled', True) %}
+        secret_ca_bundle: true
+{%- endif %}
+      endpoints:
+        cluster_domain_suffix: {{ spec.domain_name }}
+        identity:
+          auth:
+            admin:
+              region_name: {{ spec.features.keystone.users.admin.get('region_name', 'RegionOne') }}
+              username: {{ spec.features.keystone.users.admin.username }}
+              password: {{ spec.features.keystone.users.admin.password }}
+              project_name: {{ spec.features.keystone.users.admin.get('project_name', 'admin') }}
+              user_domain_name: {{ spec.features.keystone.users.admin.get('user_domain_name', 'default') }}
+              project_domain_name: {{ spec.features.keystone.users.admin.get('project_domain_name', 'default') }}
+              default_domain_id: {{ spec.features.keystone.users.admin.get('default_domain_id', 'default') }}
+{%- if spec.get('features', {}).get('ssl', {}).get('public_endpoints', {}).get('enabled', True) %}
+          host_fqdn_override:
+            public:
+              tls:
+                ca: |
+{{ spec.features.ssl.public_endpoints.ca_cert | indent( width=18, indentfirst=True) }}
+                crt: |
+{{ spec.features.ssl.public_endpoints.api_cert | indent( width=18, indentfirst=True) }}
+                key: |
+{{ spec.features.ssl.public_endpoints.api_key | indent( width=18, indentfirst=True) }}
+          hosts:
+            admin:
+              host: keystone-api
+            default: keystone
+            internal: keystone-api
+            public:
+              host: keystone
+              tls:
+                ca: |
+{{ spec.features.ssl.public_endpoints.ca_cert | indent( width=18, indentfirst=True) }}
+                crt: |
+{{ spec.features.ssl.public_endpoints.api_cert | indent( width=18, indentfirst=True) }}
+                key: |
+{{ spec.features.ssl.public_endpoints.api_key | indent( width=18, indentfirst=True) }}
+          port:
+            api:
+              admin: 5000
+              default: 80
+              internal: 5000
+              public: 443
+          scheme:
+            default: http
+            public: https
+{%- endif %}
+        oslo_db:
+          auth:
+            keystone:
+              username: {{ credentials.database.user.username }}
+              password: {{ credentials.database.user.password }}
+{%- if messaging.get('dedicated_rabbitmq', {}).get('enabled', True) %}
+        oslo_messaging:
+          <<: *keystone_endpoints_oslo_messaging
+{%- endif %}
+        oslo_messaging_notifications:
+          auth:
+            keystone:
+              password: password
+              username: keystone
+          host_fqdn_override: {}
+          hosts:
+            default: rabbitmq
+          path: /openstack
+          port:
+            amqp:
+              default: 5672
+            http:
+              default: 15672
+          scheme: rabbit
+          statefulset:
+            name: openstack-rabbitmq-rabbitmq
+            replicas: 1

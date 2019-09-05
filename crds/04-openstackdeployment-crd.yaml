@@ -50,6 +50,7 @@ spec:
               type: string
               enum:
                 - stein
+                - master
             profile:
               description: profile to use
               type: string

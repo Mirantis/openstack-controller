@@ -1,0 +1,19 @@
+{%- set stacklight_enabled = spec.get('features', {}).get('stacklight', {}).get('enabled', False) %}
+apiVersion: lcm.mirantis.com/v1alpha1
+kind: HelmBundle
+metadata:
+  name: openstack-memcached
+spec:
+  releases:
+  - name: openstack-memcached
+    chart: {{spec.common.infra.repo}}/memcached
+    values:
+  {%- if stacklight_enabled %}
+      monitoring:
+        prometheus:
+          enabled: true
+  {%- endif %}
+      manifests:
+        network_policy: false
+      endpoints:
+        cluster_domain_suffix: {{ spec.domain_name }}

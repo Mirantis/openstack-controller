@@ -1,0 +1,13 @@
+apiVersion: lcm.mirantis.com/v1alpha1
+kind: HelmBundle
+metadata:
+  name: openstack-ingress
+spec:
+  releases:
+  - name: ingress-openstack
+    chart: {{spec.common.infra.repo}}/ingress
+    values:
+      manifests:
+        network_policy: false
+      endpoints:
+        cluster_domain_suffix: {{ spec.domain_name }}

@@ -52,6 +52,7 @@ spec:
               type: string
               enum:
                 - stein
+                - master
             profile:
               description: profile to deploy
               type: string
