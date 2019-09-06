@@ -7,14 +7,14 @@ master_doc = 'index'
 source_suffix = '.rst'
 
 # General information about the project.
-project = u'osh-operator'
+project = u'OSH-operator Release Notes'
 copyright = u'2005-{} Mirantis, Inc.'.format(time.strftime("%Y"))
 
 latex_documents = [
     (
         'index',
         '%s.tex' % project,
-        u'%s Documentation' % project,
+        u'%s Release Notes Documentation' % project,
         u'Mirantis',
         'manual'
     ),
