@@ -33,8 +33,8 @@ spec:
           keystone_service_notifications:
             auth:
               keystone_username:
-                username: keystone
-                password: password
+                username: {{ credentials['identity'].notifications.user.username }}
+                password: {{ credentials['identity'].notifications.user.password }}
             path: /openstack
           {%- endif %}
           {%- if 'image' in services %}
@@ -47,8 +47,8 @@ spec:
           glance_service_notifications:
             auth:
               glance_username:
-                username: glance
-                password: password
+                username: {{ credentials['image'].notifications.user.username }}
+                password: {{ credentials['image'].notifications.user.password }}
             path: /openstack
           {%- endif %}
           {%- if 'block-storage' in services %}
@@ -61,8 +61,8 @@ spec:
           cinder_service_notifications:
             auth:
               cinder:
-                username: cinder
-                password: password
+                username: {{ credentials['block-storage'].notifications.user.username }}
+                password: {{ credentials['block-storage'].notifications.user.password }}
             path: /openstack
           {%- endif %}
           {%- if 'orchestration' in services %}
@@ -75,8 +75,8 @@ spec:
           heat_service_notifications:
             auth:
               heat:
-                username: heat
-                password: password
+                username: {{ credentials['orchestration'].notifications.user.username }}
+                password: {{ credentials['orchestration'].notifications.user.password }}
             path: /openstack
           {%- endif %}
           {%- if 'networking' in services %}
@@ -89,8 +89,8 @@ spec:
           neutron_service_notifications:
             auth:
               neutron:
-                username: neutron
-                password: password
+                username: {{ credentials['networking'].notifications.user.username }}
+                password: {{ credentials['networking'].notifications.user.password }}
             path: /openstack
           {%- endif %}
           {%- if 'compute' in services %}
@@ -103,8 +103,8 @@ spec:
           nova_service_notifications:
             auth:
               nova:
-                username: nova
-                password: password
+                username: {{ credentials['compute'].notifications.user.username }}
+                password: {{ credentials['compute'].notifications.user.password }}
             path: /openstack
           {%- endif %}
           {%- if 'load-balancer' in services %}
@@ -117,8 +117,8 @@ spec:
           octavia_service_notifications:
             auth:
               octavia:
-                username: octavia
-                password: password
+                username: {{ credentials['load-balancer'].notifications.user.username }}
+                password: {{ credentials['load-balancer'].notifications.user.password }}
             path: /openstack
           {%- endif %}
           {%- if 'dns' in services %}
@@ -131,8 +131,8 @@ spec:
           designate_service_notifications:
             auth:
               designate:
-                username: designate
-                password: password
+                username: {{ credentials['dns'].notifications.user.username }}
+                password: {{ credentials['dns'].notifications.user.password }}
             path: /openstack
           {%- endif %}
           {%- if 'key-manager' in services %}
@@ -145,8 +145,8 @@ spec:
           barbican_service_notifications:
             auth:
               barbican:
-                username: barbican
-                password: password
+                username: {{ credentials['key-manager'].notifications.user.username }}
+                password: {{ credentials['key-manager'].notifications.user.password }}
             path: /openstack
           {%- endif %}
         aux_conf:

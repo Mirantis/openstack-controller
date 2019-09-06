@@ -1,3 +1,4 @@
+{%- set service = 'cinder' %}
 {%- set messaging = spec.get('features', {}).get('messaging', {}) %}
 {%- set stacklight_enabled = spec.get('features', {}).get('stacklight', {}).get('enabled', False) %}
 {%- set notification_topics = ['notifications'] %}
@@ -138,24 +139,7 @@ spec:
         oslo_messaging:
           <<: *cinder_endpoints_oslo_messaging
 {%- endif %}
-        oslo_messaging_notifications:
-          auth:
-            cinder:
-              password: password
-              username: cinder
-          host_fqdn_override: {}
-          hosts:
-            default: rabbitmq
-          path: /openstack
-          port:
-            amqp:
-              default: 5672
-            http:
-              default: 15672
-          scheme: rabbit
-          statefulset:
-            name: openstack-rabbitmq-rabbitmq
-            replicas: 1
+{% include 'base/_notifications.yaml' %}
 {%- if spec.get('features', {}).get('ssl', {}).get('public_endpoints', {}).get('enabled', True) %}
         volume:
           host_fqdn_override:

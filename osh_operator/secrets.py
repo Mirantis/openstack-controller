@@ -21,6 +21,7 @@ class OSSytemCreds:
 class OpenStackCredentials:
     database: Dict[str, OSSytemCreds]
     messaging: Dict[str, OSSytemCreds]
+    notifications: Dict[str, OSSytemCreds]
 
 
 def handle_rgw_secret(body, meta, status, logger, diff, **kwargs):
@@ -65,7 +66,10 @@ def get_os_service_secret(
     secret = kube.find(pykube.Secret, name, namespace)
     data = secret.obj["data"]
 
-    os_creds = OpenStackCredentials(database={}, messaging={})
+    os_creds = OpenStackCredentials(
+        database={}, messaging={}, notifications={}
+    )
+
     for kind, creds in data.items():
         decoded = json.loads(base64.b64decode(creds))
         cr = getattr(os_creds, kind)

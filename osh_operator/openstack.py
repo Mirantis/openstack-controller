@@ -26,10 +26,12 @@ def get_or_create_os_credentials(service, namespace):
     try:
         os_creds = secrets.get_os_service_secret(secret_name, namespace)
     except pykube.exceptions.ObjectDoesNotExist:
-        os_creds = secrets.OpenStackCredentials(database={}, messaging={})
+        os_creds = secrets.OpenStackCredentials(
+            database={}, messaging={}, notifications={}
+        )
         srv = OS_SERVICES_MAP.get(service)
         if srv:
-            for service_type in ["database", "messaging"]:
+            for service_type in ["database", "messaging", "notifications"]:
                 getattr(os_creds, service_type)[
                     "user"
                 ] = _generate_credentials(srv)
