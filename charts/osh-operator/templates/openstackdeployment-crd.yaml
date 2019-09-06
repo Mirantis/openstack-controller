@@ -148,7 +148,7 @@ spec:
                       - dashboard
                       - image
                       - ingress
-                      - mariadb
+                      - database
                       - memcached
                       - networking
                       - orchestration

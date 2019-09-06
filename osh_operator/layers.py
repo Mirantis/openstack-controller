@@ -46,7 +46,7 @@ CHART_GROUP_MAPPING = {
     ],
     "infra": [
         "rabbitmq",
-        "mariadb",
+        "database",
         "memcached",
         "openvswitch",
         "libvirt",
