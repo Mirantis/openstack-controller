@@ -78,7 +78,7 @@ common:
             octavia_api: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/octavia:master-bionic-20190913180013
             octavia_db_sync: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/octavia:master-bionic-20190913180013
             octavia_health_manager: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/octavia:master-bionic-20190913180013
-            octavia_hm_port: docker-prod-local.docker.mirantis.net/mcp/octavia-hm:nightly
+            octavia_hm_port: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/octavia:master-bionic-20190913180013
             octavia_housekeeping: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/octavia:master-bionic-20190913180013
             openvswitch_db_server: docker-prod-local.docker.mirantis.net/mcp/openvswitch:2.11-bionic-1561381942782
             openvswitch_vswitchd: docker-prod-local.docker.mirantis.net/mcp/openvswitch:2.11-bionic-1561381942782
