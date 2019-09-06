@@ -22,7 +22,7 @@ spec:
      - memcached
      - networking
      - orchestration
-     - rabbitmq
+     - messaging
      - load-balancer
      - dns
     ssl:

@@ -45,7 +45,7 @@ CHART_GROUP_MAPPING = {
         "designate",
     ],
     "infra": [
-        "rabbitmq",
+        "messaging",
         "database",
         "memcached",
         "openvswitch",
