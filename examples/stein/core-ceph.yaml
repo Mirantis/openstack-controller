@@ -81,7 +81,6 @@ spec:
               images:
                 cirros:
                   container_format: bare
-                  id: 00000000-0000-0000-0000-000000000000
                   image_file: cirros-0.4.0-x86_64-disk.img
                   image_type: qcow2
                   min_disk: 1
@@ -92,7 +91,6 @@ spec:
                   source_url: https://artifactory.mcp.mirantis.net/artifactory/test-images/
                 fedora:
                   container_format: bare
-                  id: 00000000-0000-0000-0000-000000000001
                   image_file: Fedora-Cloud-Base-27-1.6.x86_64.qcow2
                   image_type: qcow2
                   min_disk: 1
@@ -110,13 +108,11 @@ spec:
                 options:
                   m1.extra_tiny_test:
                     disk: 5
-                    id: 00000000-0000-0000-0000-000000000000
                     name: m1.extra_tiny_test
                     ram: 256
                     vcpus: 1
                   m1.tiny_test:
                     disk: 5
-                    id: 00000000-0000-0000-0000-000000000001
                     name: m1.tiny_test
                     ram: 512
                     vcpus: 1
@@ -142,6 +138,14 @@ spec:
       tempest:
         values:
           conf:
+            convert_to_uuid:
+              network:
+                public_network_id: public
+              compute:
+                image_ref: Cirros-4.0
+                image_ref_alt: Cirros-4.0
+                flavor_ref:  m1.extra_tiny_test
+                flavor_ref_alt: m1.tiny_test
             blacklist:
               - (?:tempest.fake.test)
               - (?:heat_tempest_plugin\.)
@@ -151,11 +155,6 @@ spec:
             tempest:
               dashboard:
                 disable_ssl_certificate_validation: true
-              compute:
-                image_ref: 00000000-0000-0000-0000-000000000000
-                image_ref_alt: 00000000-0000-0000-0000-000000000000
-                flavor_ref: 00000000-0000-0000-0000-000000000000
-                flavor_ref_alt: 00000000-0000-0000-0000-000000000001
               validation:
                 image_ssh_password: gocubsgo
                 image_ssh_user: cirros
