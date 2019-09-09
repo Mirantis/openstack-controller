@@ -119,6 +119,18 @@ spec:
                 username: designate
                 password: password
             path: /openstack
+          barbican_service:
+            auth:
+              barbican:
+                username: barbican
+                password: password
+            path: /barbican
+          barbican_service_notifications:
+            auth:
+              barbican:
+                username: barbican
+                password: password
+            path: /openstack
         aux_conf:
           policies:
           - vhost: heat
@@ -133,7 +145,7 @@ spec:
             definition:
               expires: 3600000
             priority: 1
-  {%- for item in [ 'cinder', 'nova', 'glance', 'keystone', 'heat', 'neutron', 'octavia', 'openstack', 'designate'] %}
+  {%- for item in [ 'cinder', 'nova', 'glance', 'keystone', 'heat', 'neutron', 'octavia', 'openstack', 'designate', 'barbican'] %}
           - vhost: {{ item }}
             name: default-policy-{{ item }}
             pattern: '^(?!amq\.).*'

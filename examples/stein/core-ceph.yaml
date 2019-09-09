@@ -25,9 +25,15 @@ spec:
      - messaging
      - load-balancer
      - dns
+     - key-manager
     ssl:
       public_endpoints:
         enabled: True
+    barbican:
+      backend:
+        simple_crypto:
+          enabled: True
+          kek: 'YWJjZGVmZ2hpamtsbW5vcHFyc3R1dnd4eXoxMjM0NTY='
     keystone:
       users:
         admin:

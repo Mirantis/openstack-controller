@@ -73,6 +73,7 @@ CHART_GROUP_MAPPING = {
         "octavia",
         "ceph-rgw",
         "designate",
+        "barbican",
     ],
     "infra": [
         "messaging",

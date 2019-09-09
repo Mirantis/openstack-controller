@@ -6,6 +6,9 @@ common:
       values:
         images:
           tags:
+            scripted_test: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/heat:stein-bionic-20190901180016
+            barbican_db_sync: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/barbican:stein-bionic-20190906122255
+            barbican_api: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/barbican:stein-bionic-20190906122255
             bootstrap: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/heat:master-bionic-20190909180017
             cinder_api: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/cinder:master-bionic-20190909180017
             cinder_backup: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/cinder:master-bionic-20190909180017

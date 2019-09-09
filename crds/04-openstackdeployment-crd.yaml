@@ -134,6 +134,23 @@ spec:
                           description: >
                             API server private key
                           type: string
+                barbican:
+                  type: object
+                  properties:
+                    backend:
+                      type: object
+                      properties:
+                        simple_crypto:
+                          type: object
+                          properties:
+                            enabled:
+                              description: >
+                                Indicates if simple_crypto backend is enabled
+                              type: boolean
+                            kek:
+                              description: >
+                                A 32-byte value which is base64 encoded, needed for simple_crypto backend
+                              type: string
                 services:
                   type: array
                   description: List of enabled openstack and auxiliary services
@@ -155,6 +172,7 @@ spec:
                       - tempest
                       - load-balancer
                       - dns
+                      - key-manager
                 nova:
                   type: object
                   properties:

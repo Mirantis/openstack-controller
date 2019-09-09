@@ -253,7 +253,15 @@ openstack network create demoNetwork
 openstack subnet create demoSubnet --network demoNetwork --subnet-range 10.11.12.0/24
 openstack server create --image cirros-0.4.0-x86_64-disk --flavor m1.tiny --nic net-id=demoNetwork DemoVM
 ```
-
+## Barbican installation
+###Simple_crypto backend configuration
+```
+ barbican:
+   backend:
+     simple_crypto:
+       enabled: True
+       kek: 'YWJjZGVmZ2hpamtsbW5vcHFyc3R1dnd4eXoxMjM0NTY='
+```
 ## Advanced Usage
 
 ### Connect to helm directly

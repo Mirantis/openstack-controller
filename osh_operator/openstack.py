@@ -12,6 +12,7 @@ OS_SERVICES_MAP = {
     "orchestration": "heat",
     "dashboard": "horizon",
     "load-balancer": "octavia",
+    "key-manager": "barbican",
 }
 
 
