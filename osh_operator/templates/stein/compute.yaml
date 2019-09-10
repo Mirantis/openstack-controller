@@ -102,6 +102,10 @@ spec:
   - name: openstack-nova
     chart: {{spec.common.openstack.repo}}/nova
     values:
+      pod:
+        replicas:
+          osapi: 3
+          placement: 3
       dependencies:
         static:
           db_init:
