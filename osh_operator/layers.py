@@ -76,8 +76,8 @@ CHART_GROUP_MAPPING = {
         "barbican",
     ],
     "infra": [
-        "messaging",
-        "database",
+        "rabbitmq",
+        "mariadb",
         "memcached",
         "openvswitch",
         "libvirt",
