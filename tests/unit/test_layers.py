@@ -6,6 +6,7 @@ import pytest
 import yaml
 
 from osh_operator import layers
+from osh_operator import openstack
 
 
 @pytest.fixture
@@ -186,16 +187,18 @@ def test_merge_all_prioritize_group_releases_over_chart_releases(
     }
 
 
-def test_render_all(openstackdeployment):
+@mock.patch.object(openstack, "get_or_create_os_credentials")
+def test_render_all(mock_creds, openstackdeployment):
     openstackdeployment_old = copy.deepcopy(openstackdeployment)
     compute_helmbundle = layers.render_all(
         "compute",
         openstackdeployment,
         openstackdeployment["metadata"],
         openstackdeployment["spec"],
-        mock.Mock(),
         logging,
     )
+
+    mock_creds.assert_called_once_with("compute", "openstack")
     # check no modification in-place for openstackdeployment
     assert openstackdeployment_old == openstackdeployment
     assert compute_helmbundle["metadata"]["name"] == "openstack-compute"

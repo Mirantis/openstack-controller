@@ -1,3 +1,4 @@
+from collections import defaultdict
 import logging
 
 import deepmerge
@@ -160,10 +161,56 @@ def merge_all_layers(service, body, meta, spec, logger, **template_args):
     return service_helmbundle
 
 
-def render_all(service, body, meta, spec, credentials, logger):
+def _default_args(service, body, meta, spec, logger):
+    template_args = {}
+    namespace = meta["namespace"]
+    credentials = openstack.get_or_create_os_credentials(service, namespace)
+    template_args["credentials"] = credentials
+    return template_args
+
+
+def _tempest_args(service, body, meta, spec, logger):
+    template_args = {}
+    helmbundles_body = {}
+    # TODO: add wait for generated credential here
+    for s in set(spec["features"]["services"]) - set(["tempest"]):
+        service_creds = openstack.get_or_create_os_credentials(
+            s, meta["namespace"]
+        )
+        helmbundles_body[s] = merge_all_layers(
+            s, body, meta, spec, logger, credentials=service_creds
+        )
+    template_args["helmbundles_body"] = helmbundles_body
+
+    return template_args
+
+
+def _rabbitmq_args(service, body, meta, spec, logger):
+    credentials = {}
+    services = set(spec["features"]["services"]) - set(["tempest"])
+    for s in services:
+        if s not in openstack.OS_SERVICES_MAP:
+            continue
+        ns = meta["namespace"]
+        # TODO: 'use get or wait' approach for generated credential here
+        credentials[s] = openstack.get_or_create_os_credentials(s, ns)
+
+    return {"services": services, "credentials": credentials}
+
+
+def _get_template_args(service, body, meta, spec, logger) -> dict:
+    arg_factory = defaultdict(lambda: _default_args)
+    arg_factory["tempest"] = _tempest_args
+    arg_factory["messaging"] = _rabbitmq_args
+
+    return arg_factory[service](service, body, meta, spec, logger)
+
+
+def render_all(service, body, meta, spec, logger):
+    # logger.debug(f"found templates {ENV.list_templates()}")
     os_release = spec["openstack_version"]
     profile = spec["profile"]
-    logger.debug(f"Using profile {os_release}/{profile}")
+    logger.debug(f"Using profile {profile}")
 
     try:
         base = yaml.safe_load(
@@ -172,18 +219,8 @@ def render_all(service, body, meta, spec, credentials, logger):
         # Merge operator defaults with user context.
         spec = merger.merge(base, spec)
 
-        template_args = {}
-        if service == "tempest":
-            helmbundles_body = {}
-            for s in set(spec["features"]["services"]) - {"tempest"}:
-                service_creds = openstack.get_or_create_os_credentials(
-                    s, meta["namespace"]
-                )
-                helmbundles_body[s] = merge_all_layers(
-                    s, body, meta, spec, logger, credentials=service_creds
-                )
-            template_args["helmbundles_body"] = helmbundles_body
-        template_args["credentials"] = credentials
+        template_args = _get_template_args(service, body, meta, spec, logger)
+
         return merge_all_layers(
             service, body, meta, spec, logger, **template_args
         )

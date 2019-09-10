@@ -12,7 +12,6 @@ from mcp_k8s_lib import ceph_api
 
 from . import kube
 from . import layers
-from . import openstack
 
 
 # TODO(pas-ha) enable debug logging
@@ -23,8 +22,7 @@ async def delete_service(service, *, body, meta, spec, logger, **kwargs):
     namespace = meta["namespace"]
 
     # TODO(e0ne): remove credentials of the deleted services
-    credentials = openstack.get_or_create_os_credentials(service, namespace)
-    data = layers.render_all(service, body, meta, spec, credentials, logger)
+    data = layers.render_all(service, body, meta, spec, logger)
     kopf.adopt(data, body)
 
     # delete the object, already non-existing are auto-handled
@@ -123,9 +121,8 @@ async def apply_service(service, *, body, meta, spec, logger, event, **kwargs):
     logger.info(f"Applying config for {service}")
 
     namespace = meta["namespace"]
-    credentials = openstack.get_or_create_os_credentials(service, namespace)
 
-    data = layers.render_all(service, body, meta, spec, credentials, logger)
+    data = layers.render_all(service, body, meta, spec, logger)
 
     # NOTE(pas-ha) this sets the parent refs in child to point to our resource
     # so that cascading delete is handled by K8s itself

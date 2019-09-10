@@ -23,11 +23,12 @@ spec:
         enabled: false
       conf:
         users:
+          {%- if 'identity' in services %}
           keystone_service:
             auth:
               keystone_username:
-                username: keystone
-                password: password
+                username: {{ credentials['identity'].messaging.user.username }}
+                password: {{ credentials['identity'].messaging.user.password }}
             path: /keystone
           keystone_service_notifications:
             auth:
@@ -35,11 +36,13 @@ spec:
                 username: keystone
                 password: password
             path: /openstack
+          {%- endif %}
+          {%- if 'image' in services %}
           glance_service:
             auth:
               glance_username:
-                username: glance
-                password: password
+                username: {{ credentials['image'].messaging.user.username }}
+                password: {{ credentials['image'].messaging.user.password }}
             path: /glance
           glance_service_notifications:
             auth:
@@ -47,11 +50,13 @@ spec:
                 username: glance
                 password: password
             path: /openstack
+          {%- endif %}
+          {%- if 'block-storage' in services %}
           cinder_service:
             auth:
               cinder:
-                username: cinder
-                password: password
+                username: {{ credentials['block-storage'].messaging.user.username }}
+                password: {{ credentials['block-storage'].messaging.user.password }}
             path: /cinder
           cinder_service_notifications:
             auth:
@@ -59,11 +64,13 @@ spec:
                 username: cinder
                 password: password
             path: /openstack
+          {%- endif %}
+          {%- if 'orchestration' in services %}
           heat_service:
             auth:
               heat:
-                username: heat
-                password: password
+                username: {{ credentials['orchestration'].messaging.user.username }}
+                password: {{ credentials['orchestration'].messaging.user.password }}
             path: /heat
           heat_service_notifications:
             auth:
@@ -71,11 +78,13 @@ spec:
                 username: heat
                 password: password
             path: /openstack
+          {%- endif %}
+          {%- if 'networking' in services %}
           neutron_service:
             auth:
               neutron:
-                username: neutron
-                password: password
+                username: {{ credentials['networking'].messaging.user.username }}
+                password: {{ credentials['networking'].messaging.user.password }}
             path: /neutron
           neutron_service_notifications:
             auth:
@@ -83,11 +92,13 @@ spec:
                 username: neutron
                 password: password
             path: /openstack
+          {%- endif %}
+          {%- if 'compute' in services %}
           nova_service:
             auth:
               nova:
-                username: nova
-                password: password
+                username: {{ credentials['compute'].messaging.user.username }}
+                password: {{ credentials['compute'].messaging.user.password }}
             path: /nova
           nova_service_notifications:
             auth:
@@ -95,11 +106,13 @@ spec:
                 username: nova
                 password: password
             path: /openstack
+          {%- endif %}
+          {%- if 'load-balancer' in services %}
           octavia_service:
             auth:
               octavia:
-                username: octavia
-                password: password
+                username: {{ credentials['load-balancer'].messaging.user.username }}
+                password: {{ credentials['load-balancer'].messaging.user.password }}
             path: /octavia
           octavia_service_notifications:
             auth:
@@ -107,11 +120,13 @@ spec:
                 username: octavia
                 password: password
             path: /openstack
+          {%- endif %}
+          {%- if 'dns' in services %}
           designate_service:
             auth:
               designate:
-                username: designate
-                password: password
+                username: {{ credentials['dns'].messaging.user.username }}
+                password: {{ credentials['dns'].messaging.user.password }}
             path: /designate
           designate_service_notifications:
             auth:
@@ -119,11 +134,13 @@ spec:
                 username: designate
                 password: password
             path: /openstack
+          {%- endif %}
+          {%- if 'key-manager' in services %}
           barbican_service:
             auth:
               barbican:
-                username: barbican
-                password: password
+                username: {{ credentials['key-manager'].messaging.user.username }}
+                password: {{ credentials['key-manager'].messaging.user.password }}
             path: /barbican
           barbican_service_notifications:
             auth:
@@ -131,6 +148,7 @@ spec:
                 username: barbican
                 password: password
             path: /openstack
+          {%- endif %}
         aux_conf:
           policies:
           - vhost: heat
