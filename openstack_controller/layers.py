@@ -27,7 +27,7 @@ class TypeConflictFail(
     def strategy_fail(config, path, base, nxt):
         raise deepmerge.exception.InvalidMerge(
             f"Trying to merge different types of objects, {type(base)} and "
-            f"{type(nxt)}"
+            f"{type(nxt)} at path {':'.join(path)}"
         )
 
 
@@ -184,4 +184,7 @@ def merge_spec(spec, logger):
         # Merge operator defaults with user context.
         return merger.merge(base, spec)
     except Exception as e:
-        raise kopf.HandlerFatalError(str(e))
+        raise kopf.HandlerFatalError(
+            f"Error while merging OpenStackDeployment spec into profile "
+            f"'{profile}' of size '{size}': {e}"
+        )

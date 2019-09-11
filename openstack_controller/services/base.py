@@ -455,8 +455,10 @@ class Service(RuntimeIdentifierMixin):
         except kopf.HandlerRetryError:
             raise
         except Exception as e:
-            LOG.exception("Can not render template.")
-            raise kopf.HandlerFatalError(str(e))
+            raise kopf.HandlerFatalError(
+                f"Error while rendering HelmBundle for {self.service} "
+                f"service: {e}"
+            )
         data.update(self.resource_def)
         # NOTE(pas-ha) this sets the parent refs in child
         # to point to our resource so that cascading delete

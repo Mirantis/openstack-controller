@@ -1,5 +1,7 @@
 from dataclasses import asdict
 
+import kopf
+
 from openstack_controller import layers
 from openstack_controller import openstack
 from openstack_controller import secrets
@@ -395,14 +397,20 @@ class Tempest(Service):
             template_args = Service.registry[s](
                 self.osdpl.obj, self.logger
             ).template_args(spec)
-            helmbundles_body[s] = layers.merge_all_layers(
-                s,
-                self.osdpl.obj,
-                self.osdpl.metadata,
-                spec,
-                self.logger,
-                **template_args,
-            )
+            try:
+                helmbundles_body[s] = layers.merge_all_layers(
+                    s,
+                    self.osdpl.obj,
+                    self.osdpl.metadata,
+                    spec,
+                    self.logger,
+                    **template_args,
+                )
+            except Exception as e:
+                raise kopf.HandlerFatalError(
+                    f"Error while rendering HelmBundle for {self.service} "
+                    f"service: {e}"
+                )
         return {
             "helmbundles_body": helmbundles_body,
             "admin_creds": admin_creds,

@@ -2,6 +2,7 @@ import copy
 import logging
 from unittest import mock
 
+import deepmerge.exception
 import pytest
 
 from openstack_controller import layers
@@ -191,3 +192,21 @@ def test_merge_all_prioritize_group_releases_over_chart_releases(
         "test2": 3,
         "test3": 4,
     }
+
+
+@mock.patch.object(layers, "render_service_template")
+def test_merge_all_type_conflict(rst, openstackdeployment, compute_helmbundle):
+    openstackdeployment["spec"]["services"]["compute"]["nova"]["values"][
+        "conf"
+    ] = {"ceph": {"enabled": None}}
+    rst.return_value = compute_helmbundle
+    with pytest.raises(
+        deepmerge.exception.InvalidMerge, match="conf:ceph:enabled"
+    ):
+        layers.merge_all_layers(
+            "compute",
+            openstackdeployment,
+            openstackdeployment["metadata"],
+            openstackdeployment["spec"],
+            logging,
+        )
