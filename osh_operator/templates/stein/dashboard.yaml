@@ -5,6 +5,9 @@
 {%- if 'load-balancer' in spec.features.services %}
   {%- do horizon_extra_panels.append('octavia_dashboard') %}
 {%- endif %}
+{%- if 'dns' in spec.features.services %}
+  {%- do horizon_extra_panels.append('designatedashboard') %}
+{%- endif %}
 
 apiVersion: lcm.mirantis.com/v1alpha1
 kind: HelmBundle
