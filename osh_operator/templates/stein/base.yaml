@@ -92,8 +92,8 @@ common:
             mariadb_scripted_test: docker-prod-local.docker.mirantis.net/mcp/mariadb:10.2.23-bionic-1557188198369
             rabbit_init: docker.io/rabbitmq:3.7-management
             powerdns: docker-prod-local.docker.mirantis.net/mcp/powerdns:4.1-alpine-1566452831101
-            prometheus_rabbitmq_exporter: docker.io/kbudde/rabbitmq-exporter:v0.21.0
-            prometheus_rabbitmq_exporter_helm_tests: docker.io/openstackhelm/heat:ocata-ubuntu_xenial
+            prometheus_rabbitmq_exporter: docker-prod-local.docker.mirantis.net/stacklight/rabbitmq-exporter:v0.29.0
+            prometheus_rabbitmq_exporter_helm_tests: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/heat:stein-bionic-20190910180012
             rabbitmq_init: docker.io/openstackhelm/heat:ocata-ubuntu_xenial
             rabbitmq: docker.io/rabbitmq:3.7.13
             rabbitmq_scripted_test: docker.io/rabbitmq:3.7.13-management
