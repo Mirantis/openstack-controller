@@ -93,6 +93,7 @@ services:
             scheduler: 3
             novncproxy: 3
             placement: 4
+            compute_ironic: 3
           lifecycle:
             upgrades:
               daemonsets:
@@ -363,6 +364,13 @@ services:
             apache2:
               processes: 3
               threads: 10
+  baremetal:
+    ironic:
+      values:
+        pod:
+          replicas:
+            api: 5
+            conductor: 5
 timeouts:
   applicaion_readiness:
     nova:

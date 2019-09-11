@@ -9,6 +9,7 @@
 {%- set service_plugins = ['<None>'] if tungstenfabric_enabled else ['router', 'metering', 'qos'] %}
 {%- do notification_topics.append('stacklight_notifications') if stacklight_enabled %}
 {%- set floating_network = spec.features.neutron.get('floating_network', {}) %}
+{%- set baremetal_enabled = 'baremetal' in services %}
 
 spec:
   releases:
@@ -261,6 +262,9 @@ spec:
             public: https
       manifests:
         job_rabbit_init: false
+      {%- if baremetal_enabled %}
+        deployment_ironic_agent: true
+      {%- endif %}
         secret_ca_bundle: true
       {%- if tungstenfabric_enabled %}
         daemonset_dhcp_agent: false
@@ -276,6 +280,12 @@ spec:
       {%- if spec.get('features', {}).get('neutron', {}).get('tunnel_interface') %}
         interface:
           tunnel: {{ spec.features.neutron.tunnel_interface }}
+      {%- endif %}
+      {%- if baremetal_enabled %}
+        backend:
+        - openvswitch
+        - baremetal
+        - genericswitch
       {%- endif %}
       {%- if floating_network.get('enabled', False) %}
       bootstrap:
@@ -387,6 +397,16 @@ spec:
               {%- if 'dns' in spec.features.services %}
                 - dns_domain_ports
               {%- endif %}
+              tenant_network_types: {{ spec.features.neutron.get('tenant_network_types', 'vxlan') }}
+          {%- if baremetal_enabled %}
+            {%- for gs_dev in spec.features.neutron.get('baremetal', {}).get('ngs', {}).get('devices', []) %}
+            genericswitch:{{ gs_dev.name }}:
+              device_type: {{ gs_dev.device_type }}
+              ip: {{ gs_dev.ip }}
+              username: {{ gs_dev.username }}
+              {% if gs_dev.password is defined %}password: {{ gs_dev.password }}{% endif %}
+            {%- endfor %}
+          {%- endif %}
           openvswitch_agent:
             agent:
               # NOTE(vsaienko): change default 4789 port to do not conflict with docker swarm

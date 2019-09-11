@@ -47,6 +47,9 @@ spec:
           OIDCSSLValidateServer: false
     neutron:
       backend: ml2
+      tenant_network_types:
+      - vlan
+      - vxlan
       external_networks:
       - bridge: br-ex
         interface: veth-phy

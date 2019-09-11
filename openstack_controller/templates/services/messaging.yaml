@@ -168,6 +168,21 @@ spec:
                 password: {{ spec.features.stacklight.user.password }}
             path: /openstack
           {%- endif %}
+          {%- if 'baremetal' in services %}
+          {%- do enabled_vhosts.append('ironic') %}
+          ironic_service:
+            auth:
+              ironic:
+                username: {{ credentials['baremetal'].messaging.user.username }}
+                password: {{ credentials['baremetal'].messaging.user.password }}
+            path: /ironic
+          ironic_service_notifications:
+            auth:
+              ironic:
+                username: {{ credentials['baremetal'].notifications.user.username }}
+                password: {{ credentials['baremetal'].notifications.user.password }}
+            path: /openstack
+          {%- endif %}
         aux_conf:
           policies:
   {%- if 'orchestration' in services %}

@@ -216,6 +216,7 @@ spec:
                       - placement
                       - coordination
                       - dashboard-selenium
+                      - baremetal
                 nova:
                   type: object
                   required:
@@ -306,6 +307,15 @@ spec:
                       enum:
                         - ml2
                         - tungstenfabric
+                    tenant_network_types:
+                      type: array
+                      description: Ordered list of network_types to allocate as tenant networks
+                      items:
+                        type: string
+                        enum:
+                          - flat
+                          - vlan
+                          - vxlan
                     external_networks:
                       type: array
                       items:
@@ -385,6 +395,113 @@ spec:
                             name:
                               type: string
                               description: "The name of public router"
+                    baremetal:
+                      type: object
+                      properties:
+                        ngs:
+                          type: object
+                          properties:
+                            devices:
+                              type: array
+                              items:
+                                type: object
+                                required:
+                                  - name
+                                  - device_type
+                                  - ip
+                                  - username
+                                properties:
+                                  name:
+                                    type: string
+                                    description: Switch name
+                                  device_type:
+                                    type: string
+                                    description: Netmiko device type
+                                  ngs_mac_address:
+                                    type: string
+                                    description: Switch mac address
+                                  ip:
+                                    type: string
+                                    description: IP address of switch
+                                  port:
+                                    type: integer
+                                    description: SSH port
+                                  username:
+                                    type: string
+                                    description: Credential username
+                                  password:
+                                    type: string
+                                    description: Credential password
+                                  key_file:
+                                    type: string
+                                    description: SSH key file
+                                  secret:
+                                    type: string
+                                    description: Enable secret
+                                  ngs_port_default_vlan:
+                                    type: integer
+                                    description: Port default vlan
+                ironic:
+                  type: object
+                  required:
+                    - provisioning_interface
+                    - baremetal_network_name
+                    - networks
+                  properties:
+                    provisioning_interface:
+                      type: string
+                      description: name of physical interface to bind PXE services
+                    baremetal_network_name:
+                      type: string
+                      description: name of baremetal provisioning/cleaning network
+                    networks:
+                      type: object
+                      properties:
+                        baremetal:
+                          type: object
+                        properties:
+                          name:
+                            type: string
+                            description: name of baremetal network
+                          physnet:
+                            type: string
+                            description: name of physical network to associate
+                          network_type:
+                            type: string
+                            enum:
+                              - flat
+                              - vlan
+                            description: type of provisioning/cleaning baremetal network
+                          segmentation_id:
+                            type: integer
+                            description: the vlan number of cleaning network in case of VLAN segmentation is used
+                          mtu:
+                            type: integer
+                            description: the MTU for cleaning network
+                          subnets:
+                            type: object
+                            required:
+                              - baremetal_subnet
+                            properties:
+                              baremetal_subnet:
+                                type: object
+                                required:
+                                  - range
+                                  - pool_start
+                                  - pool_end
+                                  - gateway
+                                range:
+                                  type: string
+                                  description: the cidr of baremetal network
+                                pool_start:
+                                  type: string
+                                  description: the start range of allocation pool for baremetal network
+                                pool_end:
+                                  type: string
+                                  description: the end range of allocation pool for baremetal network
+                                gateway:
+                                  type: string
+                                  description: the gateway for baremetal network
                 octavia:
                   type: object
                   properties:

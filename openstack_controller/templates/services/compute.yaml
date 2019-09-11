@@ -7,6 +7,7 @@
 {%- set notification_topics = ['notifications'] %}
 {%- do notification_topics.append('stacklight_notifications') if stacklight_enabled %}
 {%- set neutron_backend = spec.features.neutron.get('backend', 'ml2') %}
+{%- set baremetal_enabled = 'baremetal' in spec.features.services %}
 
 spec:
   releases:
@@ -238,6 +239,9 @@ spec:
         service_placement: false
 {%- endif %}
         secret_ca_bundle: true
+      {%- if baremetal_enabled %}
+        statefulset_compute_ironic: true
+      {%- endif %}
       endpoints:
         cluster_domain_suffix: {{ spec.internal_domain_name }}
 {% include 'base/_admin_identity.yaml' %}
@@ -414,6 +418,18 @@ spec:
 {%- endfor %}
           oslo_messaging_notifications:
             topics: {{ notification_topics|join(',') }}
+      {%- if baremetal_enabled %}
+        nova_ironic:
+          DEFAULT:
+            compute_driver: ironic.IronicDriver
+            reserved_host_memory_mb: 0
+            reserved_host_cpu: 0
+            reserved_host_disk_mb: 0
+          filter_scheduler:
+            track_instance_changes: false
+          scheduler:
+            discover_hosts_in_cells_interval: 120
+      {%- endif %}
         logging:
           logger_nova:
             level: {{ spec.get('features', {}).get('logging', {}).get('nova', {}).get('level', 'INFO') }}

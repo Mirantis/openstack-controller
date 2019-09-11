@@ -8,6 +8,7 @@ CHART_GROUP_MAPPING = {
         "glance",
         "heat",
         "horizon",
+        "ironic",
         "keystone",
         "neutron",
         "nova",
@@ -42,6 +43,7 @@ OS_SERVICES_MAP = {
     "load-balancer": "octavia",
     "key-manager": "barbican",
     "placement": "placement",
+    "baremetal": "ironic",
 }
 
 OPENSTACK_SERVICES_UPGRADE_ORDER = [

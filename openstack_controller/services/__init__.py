@@ -367,6 +367,29 @@ class Horizon(OpenStackService):
         return {"horizon": {"job_db_init", "job_db_sync", "job_db_drop"}}
 
 
+class Ironic(OpenStackService):
+    service = "baremetal"
+    openstack_chart = "ironic"
+    _child_objects = {
+        "ironic": {
+            "Job": {
+                "ironic-manage-networks": {
+                    "images": ["ironic_manage_networks"],
+                    "manifest": "job_manage_networks",
+                }
+            }
+        },
+        "rabbitmq": {
+            "Job": {
+                "openstack-ironic-rabbitmq-cluster-wait": {
+                    "images": ["rabbitmq_scripted_test"],
+                    "manifest": "job_cluster_wait",
+                }
+            }
+        },
+    }
+
+
 class Keystone(OpenStackService):
     service = "identity"
     openstack_chart = "keystone"
