@@ -168,7 +168,7 @@ spec:
                       - networking
                       - orchestration
                       - object-storage
-                      - rabbitmq
+                      - messaging
                       - tempest
                       - load-balancer
                       - dns
