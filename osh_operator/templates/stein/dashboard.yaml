@@ -84,7 +84,4 @@ spec:
 {%- endif %}
 {%- if ssl_public_endpoints_enabled %}
               secure_proxy_ssl_header: true
-              ssl_features:
-                openstack_ssl_cacert:
-                  enabled: True
 {%- endif %}
