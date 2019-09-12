@@ -97,7 +97,7 @@ spec:
               name: keycloak
             identity_provider:
               remote_ids:
-                - "{{ keystone_keycloak.get('oidc', {}).get('OIDCProviderMetadataURL', keystone_keycloak.url + "/auth/realms/iam")}}
+                - "{{ keystone_keycloak.get('oidc', {}).get('OIDCProviderMetadataURL', keystone_keycloak.url + "/auth/realms/iam")}}"
               id: keycloak
               domain_id: keycloak
             mapping:
@@ -123,16 +123,16 @@ spec:
                 idp_id: "keycloak"
                 mapping_id: "keycloak_mapping"
 {%- endif %}
-        keystone:
-          oslo_messaging_notifications:
-            topics: {{ notification_topics|join(',') }}
         logging:
           logger_keystone:
             level: {{ spec.get('features', {}).get('logging', {}).get('keystone', {}).get('level', 'INFO') }}
+        keystone:
+          oslo_messaging_notifications:
+            topics: {{ notification_topics|join(',') }}
 {%- if keystone_keycloak.get('enabled', False) %}
           federation:
             # TODO: move this logic to keystone helm chart
-            trusted_dashboard: "http://horizon.openstack.svc.{{ spec.domain_name }}/auth/websso/"
+            trusted_dashboard: "https://horizon.openstack.svc.{{ spec.domain_name }}/auth/websso/"
           mapped:
             remote_id_attribute: HTTP_OIDC_ISS
         wsgi_keystone: |
