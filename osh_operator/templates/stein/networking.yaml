@@ -236,11 +236,15 @@ spec:
 # TODO: make other networks types configurable
 {%- set networks = {'flat': [], 'vlan': []} %}
 {%- set bridge_mappings = [] %}
+{%- set physnet_vlan_mappings = [] %}
 {%- set physnet_mtus = [] %}
 {%- for network in spec.features.neutron.external_networks %}
     {%- for network_type in network.network_types %}
         {%- do networks[network_type].append(network.physnet) %}
     {%- endfor %}
+    {%- if network.get('vlan_ranges') %}
+        {%- do physnet_vlan_mappings.append(network.physnet + ':' + network.vlan_ranges) %}
+    {%- endif %}
     {%- do bridge_mappings.append(network.physnet + ':' + network.bridge) %}
     {%- if network.get('mtu') %}
         {%- do physnet_mtus.append(network.physnet + ':' + network.mtu|string) %}
@@ -248,6 +252,10 @@ spec:
 {%- endfor %}
         plugins:
           ml2_conf:
+            {%- if physnet_vlan_mappings %}
+            ml2_type_vlan:
+              network_vlan_ranges: {{ ','.join(physnet_vlan_mappings) }}
+            {%- endif %}
             ml2_type_flat:
               flat_networks: {{ ','.join(networks.flat) }}
               {%- if physnet_mtus %}
