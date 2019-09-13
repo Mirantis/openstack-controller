@@ -1,4 +1,3 @@
-from collections import defaultdict
 import logging
 
 import deepmerge
@@ -9,7 +8,6 @@ import kopf
 import yaml
 
 from osh_operator.filters.tempest import generate_tempest_config
-from . import openstack
 
 LOG = logging.getLogger(__name__)
 
@@ -117,7 +115,7 @@ def render_service_template(
 
 
 def merge_all_layers(service, body, meta, spec, logger, **template_args):
-    """Merge releases and values from OpenstackDeployment crd into service HelmBundle"""
+    """Merge releases and values from osdpl crd into service HelmBundle"""
 
     service_helmbundle = render_service_template(
         service, body, meta, spec, logger, **template_args
@@ -161,76 +159,8 @@ def merge_all_layers(service, body, meta, spec, logger, **template_args):
     return service_helmbundle
 
 
-def _default_args(service, body, meta, spec, logger):
-    template_args = {}
-    namespace = meta["namespace"]
-    credentials = openstack.get_or_create_os_credentials(service, namespace)
-    admin_creds = openstack.get_admin_credentials(meta["namespace"])
-    template_args["credentials"] = credentials
-    template_args["admin_creds"] = admin_creds
-    return template_args
-
-
-def _tempest_args(service, body, meta, spec, logger):
-    template_args = {}
-    helmbundles_body = {}
-    # TODO: add wait for generated credential here
-    admin_creds = openstack.get_admin_credentials(meta["namespace"])
-    for s in set(spec["features"]["services"]) - set(["tempest"]):
-        service_creds = openstack.get_or_create_os_credentials(
-            s, meta["namespace"]
-        )
-        helmbundles_body[s] = merge_all_layers(
-            s,
-            body,
-            meta,
-            spec,
-            logger,
-            credentials=service_creds,
-            admin_creds=admin_creds,
-        )
-
-    template_args["admin_creds"] = admin_creds
-    template_args["helmbundles_body"] = helmbundles_body
-
-    return template_args
-
-
-def _rabbitmq_args(service, body, meta, spec, logger):
-    credentials = {}
-    admin_creds = openstack.get_admin_credentials(meta["namespace"])
-    services = set(spec["features"]["services"]) - set(["tempest"])
-    for s in services:
-        if s not in openstack.OS_SERVICES_MAP:
-            continue
-        ns = meta["namespace"]
-        # TODO: 'use get or wait' approach for generated credential here
-        credentials[s] = openstack.get_or_create_os_credentials(s, ns)
-
-    return {
-        "services": services,
-        "credentials": credentials,
-        "admin_creds": admin_creds,
-    }
-
-
-def _mariadb_args(service, body, meta, spec, logger):
-    admin_creds = openstack.get_admin_credentials(meta["namespace"])
-
-    return {"admin_creds": admin_creds}
-
-
-def _get_template_args(service, body, meta, spec, logger) -> dict:
-    arg_factory = defaultdict(lambda: _default_args)
-    arg_factory["tempest"] = _tempest_args
-    arg_factory["messaging"] = _rabbitmq_args
-    arg_factory["database"] = _mariadb_args
-
-    return arg_factory[service](service, body, meta, spec, logger)
-
-
-def render_all(service, body, meta, spec, logger):
-    # logger.debug(f"found templates {ENV.list_templates()}")
+def merge_spec(spec, logger):
+    """Merge user-defined OsDpl spec with base for profile and OS version"""
     os_release = spec["openstack_version"]
     profile = spec["profile"]
     logger.debug(f"Using profile {profile}")
@@ -240,12 +170,6 @@ def render_all(service, body, meta, spec, logger):
             ENV.get_template(f"{os_release}/{profile}.yaml").render()
         )
         # Merge operator defaults with user context.
-        spec = merger.merge(base, spec)
-
-        template_args = _get_template_args(service, body, meta, spec, logger)
-
-        return merge_all_layers(
-            service, body, meta, spec, logger, **template_args
-        )
+        return merger.merge(base, spec)
     except Exception as e:
         raise kopf.HandlerFatalError(str(e))

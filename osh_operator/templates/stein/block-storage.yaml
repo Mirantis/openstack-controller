@@ -8,10 +8,6 @@ apiVersion: lcm.mirantis.com/v1alpha1
 kind: HelmBundle
 metadata:
   name: openstack-block-storage
-{%- if spec.get('features', {}).get('cinder', {}).get('backup', {}).get('backend') == 'ceph' %}
-  annotations:
-    lcm.mirantis.com/ceph_required: 'True'
-{%- endif %}
 spec:
   releases:
 {%- if messaging.get('dedicated_rabbitmq', {}).get('enabled', True) %}

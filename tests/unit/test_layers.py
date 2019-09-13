@@ -3,20 +3,8 @@ import logging
 from unittest import mock
 
 import pytest
-import yaml
 
 from osh_operator import layers
-from osh_operator import openstack
-
-
-@pytest.fixture
-def openstackdeployment():
-    yield yaml.safe_load(open("tests/fixtures/openstackdeployment.yaml"))
-
-
-@pytest.fixture
-def compute_helmbundle():
-    yield yaml.safe_load(open("tests/fixtures/compute_helmbundle.yaml"))
 
 
 def test_no_changes_for_empty_services():
@@ -115,7 +103,8 @@ def test_merge_all_prioritize_service_values_over_common_group_values(
 
     openstackdeployment["spec"]["common"]["charts"]["repositories"] = []
     openstackdeployment["spec"]["common"]["charts"]["releases"]["values"] = {}
-    # this overrides are for nova only as rabbitmq and libvirt are not in openstack group
+    # this overrides are for nova only
+    # as rabbitmq and libvirt are not in openstack group
     openstackdeployment["spec"]["common"]["openstack"]["values"] = {
         "test1": 1,
         "test2": 2,
@@ -157,7 +146,8 @@ def test_merge_all_prioritize_group_releases_over_chart_releases(
     openstackdeployment["spec"]["common"]["charts"]["repositories"] = []
     openstackdeployment["spec"]["common"]["charts"]["releases"]["values"] = {}
     openstackdeployment["spec"]["services"]["compute"] = {}
-    # helmbundle values will be overriden by common.chart.releases for all charts
+    # helmbundle values will be overriden by common.chart.releases
+    # for all charts
     openstackdeployment["spec"]["common"]["charts"]["releases"]["values"] = {
         "test1": 1,
         "test2": 2,
@@ -186,24 +176,3 @@ def test_merge_all_prioritize_group_releases_over_chart_releases(
         "test2": 3,
         "test3": 4,
     }
-
-
-@mock.patch.object(openstack, "get_or_create_os_credentials")
-def test_render_all(mock_creds, openstackdeployment):
-    openstackdeployment_old = copy.deepcopy(openstackdeployment)
-    compute_helmbundle = layers.render_all(
-        "compute",
-        openstackdeployment,
-        openstackdeployment["metadata"],
-        openstackdeployment["spec"],
-        logging,
-    )
-
-    mock_creds.assert_called_once_with("compute", "openstack")
-    # check no modification in-place for openstackdeployment
-    assert openstackdeployment_old == openstackdeployment
-    assert compute_helmbundle["metadata"]["name"] == "openstack-compute"
-    # check helmbundle has data from base.yaml
-    assert compute_helmbundle["spec"]["releases"][0]["values"]["images"][
-        "tags"
-    ]

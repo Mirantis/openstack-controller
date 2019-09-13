@@ -36,6 +36,13 @@ def resource(data):
     )
 
 
+def dummy(klass, name, namespace=None):
+    meta = {"name": name}
+    if namespace:
+        meta["namespace"] = namespace
+    return klass(api, {"metadata": meta})
+
+
 def find(klass, name, namespace=None):
     return klass.objects(api).filter(namespace=namespace).get(name=name)
 
