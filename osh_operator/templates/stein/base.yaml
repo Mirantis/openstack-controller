@@ -6,7 +6,7 @@ common:
       values:
         images:
           tags:
-            scripted_test: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/heat:stein-bionic-20190901180016
+            scripted_test: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/heat:stein-bionic-20190910180012
             barbican_db_sync: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/barbican:stein-bionic-20190910180012
             barbican_api: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/barbican:stein-bionic-20190910180012
             bootstrap: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/heat:stein-bionic-20190910180012
@@ -102,9 +102,9 @@ common:
             glance_metadefs_load: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/glance:stein-bionic-20190910180012
     repositories:
     - name: osh
-      url: https://harbor.mcp.mirantis.net/chartrepo/mcp-openstack-helm-20190910114617
+      url: https://harbor.mcp.mirantis.net/chartrepo/mcp-openstack-helm-20190912112428
     - name: osh-infra
-      url: https://harbor.mcp.mirantis.net/chartrepo/mcp-openstack-helm-infra-20190909091236
+      url: https://harbor.mcp.mirantis.net/chartrepo/mcp-openstack-helm-infra-20190912072805
   openstack:
     repo: osh
     values:
