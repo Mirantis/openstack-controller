@@ -142,6 +142,24 @@ spec:
     tempest:
       tempest:
         values:
+          bootstrap:
+            enabled: true
+            script: |
+              openstack network show heat-net || openstack network create heat-net
+              openstack subnet show heat-subnet || openstack subnet create heat-subnet \
+                --dhcp --subnet-range 10.20.30.0/24 \
+                --allocation-pool start=10.20.30.10,end=10.20.30.254 \
+                --gateway 10.20.30.1 \
+                --network heat-net
+              openstack router show heat-router || openstack router create heat-router
+              openstack router add subnet heat-router heat-subnet
+              openstack router set --external-gateway public heat-router
+          dependencies:
+            static:
+              run_tests:
+                jobs:
+                - tempest-ks-user
+                - tempest-bootstrap
           conf:
             convert_to_uuid:
               network:
@@ -172,6 +190,8 @@ spec:
               #TODO: Will be automated soon in filters.
               volume:
                 storage_protocol: ceph
+          manifests:
+            job_bootstrap: true
     load-balancer:
       octavia:
         values:
