@@ -19,16 +19,7 @@ spec:
         storage_class: rook-ceph-block
       endpoints:
         cluster_domain_suffix: {{ spec.domain_name }}
-        identity:
-          auth:
-            admin:
-              region_name: {{ spec.features.keystone.users.admin.get('region_name', 'RegionOne') }}
-              username: {{ spec.features.keystone.users.admin.username }}
-              password: {{ spec.features.keystone.users.admin.password }}
-              project_name: {{ spec.features.keystone.users.admin.get('project_name', 'admin') }}
-              user_domain_name: {{ spec.features.keystone.users.admin.get('user_domain_name', 'default') }}
-              project_domain_name: {{ spec.features.keystone.users.admin.get('project_domain_name', 'default') }}
-              default_domain_id: {{ spec.features.keystone.users.admin.get('default_domain_id', 'default') }}
+{% include 'base/_admin_identity.yaml' %}
 {%- if spec.get('features', {}).get('ssl', {}).get('public_endpoints', {}).get('enabled', True) %}
         dashboard:
           host_fqdn_override:

@@ -177,27 +177,32 @@ spec:
                       - key-manager
                 keystone:
                   type: object
-                  required:
-                    - users
                   properties:
                     users:
                       type: object
-                      required:
-                        - admin
                       properties:
                         admin:
                           type: object
-                          required:
-                          - username
-                          - password
                           properties:
-                            username:
+                            region_name:
                               description: >
-                                Username for admin of Openstack deployment
+                                OpenStack region name
                               type: string
-                            password:
+                            project_name:
                               description: >
-                                Password for admin of Openstack deployment
+                                Project name for admin of OpenStack deployment
+                              type: string
+                            user_domain_name:
+                              description: >
+                                Domain name for admin of OpenStack deployment
+                              type: string
+                            project_domain_name:
+                              description: >
+                                Project domain name for admin of OpenStack deployment
+                              type: string
+                            default_domain_id:
+                              description: >
+                                Domain ID for admin of OpenStack deployment
                               type: string
                     keycloak:
                       type: object

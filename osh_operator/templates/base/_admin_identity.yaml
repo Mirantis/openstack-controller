@@ -1,0 +1,10 @@
+        identity:
+          auth:
+            admin:
+              region_name: {{ spec.features.keystone.get('users', {}).get('admin', {}).get('region_name', 'RegionOne') }}
+              username: {{ admin_creds.identity.username }}
+              password: {{ admin_creds.identity.password }}
+              project_name: {{ spec.features.keystone.get('users', {}).get('admin', {}).get('project_name', 'admin') }}
+              user_domain_name: {{ spec.features.keystone.get('users', {}).get('admin', {}).get('user_domain_name', 'default') }}
+              project_domain_name: {{ spec.features.keystone.get('users', {}).get('admin', {}).get('project_domain_name', 'default') }}
+              default_domain_id: {{ spec.features.keystone.get('users', {}).get('admin', {}).get('default_domain_id', 'default') }}

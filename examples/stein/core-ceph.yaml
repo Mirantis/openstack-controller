@@ -41,10 +41,6 @@ spec:
           # https://github.com/zmartzone/mod_auth_openidc/issues/329 is not
           # fixed and CA is custom.
           OIDCSSLValidateServer: false
-      users:
-        admin:
-          username: admin
-          password: workshop
     glance:
       backend: ceph
     cinder:

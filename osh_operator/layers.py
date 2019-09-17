@@ -190,6 +190,7 @@ def _tempest_args(service, body, meta, spec, logger):
             admin_creds=admin_creds,
         )
 
+    template_args["admin_creds"] = admin_creds
     template_args["helmbundles_body"] = helmbundles_body
 
     return template_args

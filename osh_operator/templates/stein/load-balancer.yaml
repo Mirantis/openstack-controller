@@ -126,16 +126,7 @@ spec:
           public: c3NoLXJzYSBBQUFBQjNOemFDMXljMkVBQUFBREFRQUJBQUFCQVFDMk9jOE1teEJPZ2NHMmlvaWpYbVoxSmlsK0x6UG9NVXlMd1p1alFvSTNmYzVTZm00NXkxdDIyTlI5NjZHOGpxbkhWSUtlL0phTFQwVzN4NWJDcjRyQXNJWXB0VEV1K29xVzI0bnNyY3Npc1plUzM2YXBrM2c3MWNwNVVwOWtmNlpCYVNURkZhQmZhdnhFbzFYY2FSMDIxM3ZoV09FLzVIcGRJb2xEVm54dnQ0Y3pYUy9vaU5OaitNOXpPTXI1N0lKNFNQaXB0S2RYeDRxV291R0dxNjVKQkdaUTdZTkZLTXRWMmwxL1lFSGo4RjFZV3dOZzZaZnVadnlTa1N2MjlENXpVa294Y1BBUHA2SFBKVHlRVDdXUldibk01NFRMZ2QxZ2d5bTlSODNqMC9WcWRGWFloSkRWa1Q2dmJZZ0F3cVhTMTZTc1lmUjcvVTAvVU1YbXNnMHo=
       endpoints:
         cluster_domain_suffix: {{ spec.domain_name }}
-        identity:
-          auth:
-            admin:
-              region_name: {{ spec.features.keystone.users.admin.get('region_name', 'RegionOne') }}
-              username: {{ spec.features.keystone.users.admin.username }}
-              password: {{ spec.features.keystone.users.admin.password }}
-              project_name: {{ spec.features.keystone.users.admin.get('project_name', 'admin') }}
-              user_domain_name: {{ spec.features.keystone.users.admin.get('user_domain_name', 'default') }}
-              project_domain_name: {{ spec.features.keystone.users.admin.get('project_domain_name', 'default') }}
-              default_domain_id: {{ spec.features.keystone.users.admin.get('default_domain_id', 'default') }}
+{% include 'base/_admin_identity.yaml' %}
         oslo_db:
           auth:
             admin:
