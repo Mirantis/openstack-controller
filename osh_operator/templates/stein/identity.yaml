@@ -251,6 +251,9 @@ spec:
 {%- endif %}
         oslo_db:
           auth:
+            admin:
+              username: {{ admin_creds.database.username }}
+              password: {{ admin_creds.database.password }}
             keystone:
               username: {{ credentials.database.user.username }}
               password: {{ credentials.database.user.password }}

@@ -41,3 +41,35 @@ def get_or_create_os_credentials(service, namespace):
 
         secrets.save_os_service_secret(secret_name, namespace, os_creds)
     return os_creds
+
+
+def create_admin_credentials(namespace):
+    secret_name = "openstack-admin-users"
+
+    db = secrets.OSSytemCreds(
+        username="root", password=secrets.generate_password()
+    )
+    messaging = secrets.OSSytemCreds(
+        username="rabbitmq", password=secrets.generate_password()
+    )
+    identity = secrets.OSSytemCreds(
+        username="admin", password=secrets.generate_password()
+    )
+
+    admin_creds = secrets.OpenStackAdminCredentials(
+        database=db, messaging=messaging, identity=identity
+    )
+
+    secrets.save_os_admin_secret(secret_name, namespace, admin_creds)
+
+
+def get_admin_credentials(namespace):
+    secret_name = "openstack-admin-users"
+    return secrets.get_os_admin_secret(secret_name, namespace)
+
+
+def get_or_create_admin_credentials(namespace):
+    try:
+        return get_admin_credentials(namespace)
+    except pykube.exceptions.ObjectDoesNotExist:
+        return create_admin_credentials(namespace)

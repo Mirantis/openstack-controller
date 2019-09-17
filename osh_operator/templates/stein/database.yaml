@@ -18,6 +18,18 @@ spec:
         job_cluster_wait: true
       endpoints:
         cluster_domain_suffix: {{ spec.domain_name }}
+        oslo_db:
+          namespace: null
+          auth:
+            admin:
+              username: {{ admin_creds.database.username }}
+              password: {{ admin_creds.database.password }}
+            sst:
+              username: sst
+              password: password
+            exporter:
+              username: exporter
+              password: password
       pod:
         replicas:
           server: 3

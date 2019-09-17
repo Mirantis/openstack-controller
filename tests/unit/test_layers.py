@@ -71,6 +71,7 @@ def test_render_template(openstackdeployment):
         openstackdeployment["spec"],
         logging,
         credentials=mock.Mock(),
+        admin_creds=mock.Mock(),
     )
     assert data["metadata"]["name"] == "openstack-compute"
 

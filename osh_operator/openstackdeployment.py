@@ -38,7 +38,7 @@ async def delete_service(service, *, body, meta, spec, logger, **kwargs):
     )
 
 
-def wait_for_rook_secret(namespace, name):
+def wait_for_secret(namespace, name):
     kube.wait_for_resource(pykube.Secret, name, namespace)
 
 
@@ -153,7 +153,7 @@ async def apply_service(service, *, body, meta, spec, logger, event, **kwargs):
                 }
             }
             osdpl.patch({"status": status_patch})
-            wait_for_rook_secret(
+            wait_for_secret(
                 ceph_api.SHARED_SECRET_NAMESPACE, "rook-ceph-admin-keyring"
             )
             oscp = get_rook_ceph_data()

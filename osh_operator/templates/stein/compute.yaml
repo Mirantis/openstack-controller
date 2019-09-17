@@ -132,16 +132,25 @@ spec:
               default_domain_id: {{ spec.features.keystone.users.admin.get('default_domain_id', 'default') }}
         oslo_db:
           auth:
+            admin:
+              username: {{ admin_creds.database.username }}
+              password: {{ admin_creds.database.password }}
             nova:
               username: {{ credentials.database.user.username }}
               password: {{ credentials.database.user.password }}
         oslo_db_api:
           auth:
+            admin:
+              username: {{ admin_creds.database.username }}
+              password: {{ admin_creds.database.password }}
             nova:
               username: {{ credentials.database.user.username }}
               password: {{ credentials.database.user.password }}
         oslo_db_cell0:
           auth:
+            admin:
+              username: {{ admin_creds.database.username }}
+              password: {{ admin_creds.database.password }}
             nova:
               username: {{ credentials.database.user.username }}
               password: {{ credentials.database.user.password }}

@@ -118,6 +118,9 @@ spec:
               default_domain_id: {{ spec.features.keystone.users.admin.get('default_domain_id', 'default') }}
         oslo_db:
           auth:
+            admin:
+              username: {{ admin_creds.database.username }}
+              password: {{ admin_creds.database.password }}
             barbican:
               username: {{ credentials.database.user.username }}
               password: {{ credentials.database.user.password }}

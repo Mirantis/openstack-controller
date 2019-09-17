@@ -165,7 +165,9 @@ def _default_args(service, body, meta, spec, logger):
     template_args = {}
     namespace = meta["namespace"]
     credentials = openstack.get_or_create_os_credentials(service, namespace)
+    admin_creds = openstack.get_or_create_admin_credentials(meta["namespace"])
     template_args["credentials"] = credentials
+    template_args["admin_creds"] = admin_creds
     return template_args
 
 
@@ -173,13 +175,21 @@ def _tempest_args(service, body, meta, spec, logger):
     template_args = {}
     helmbundles_body = {}
     # TODO: add wait for generated credential here
+    admin_creds = openstack.get_or_create_admin_credentials(meta["namespace"])
     for s in set(spec["features"]["services"]) - set(["tempest"]):
         service_creds = openstack.get_or_create_os_credentials(
             s, meta["namespace"]
         )
         helmbundles_body[s] = merge_all_layers(
-            s, body, meta, spec, logger, credentials=service_creds
+            s,
+            body,
+            meta,
+            spec,
+            logger,
+            credentials=service_creds,
+            admin_creds=admin_creds,
         )
+
     template_args["helmbundles_body"] = helmbundles_body
 
     return template_args
@@ -198,10 +208,17 @@ def _rabbitmq_args(service, body, meta, spec, logger):
     return {"services": services, "credentials": credentials}
 
 
+def _mariadb_args(service, body, meta, spec, logger):
+    admin_creds = openstack.get_or_create_admin_credentials(meta["namespace"])
+
+    return {"admin_creds": admin_creds}
+
+
 def _get_template_args(service, body, meta, spec, logger) -> dict:
     arg_factory = defaultdict(lambda: _default_args)
     arg_factory["tempest"] = _tempest_args
     arg_factory["messaging"] = _rabbitmq_args
+    arg_factory["database"] = _mariadb_args
 
     return arg_factory[service](service, body, meta, spec, logger)
 

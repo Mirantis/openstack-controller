@@ -24,6 +24,13 @@ class OpenStackCredentials:
     notifications: Dict[str, OSSytemCreds]
 
 
+@dataclass
+class OpenStackAdminCredentials:
+    database: Optional[OSSytemCreds]
+    messaging: Optional[OSSytemCreds]
+    identity: Optional[OSSytemCreds]
+
+
 def handle_rgw_secret(body, meta, status, logger, diff, **kwargs):
     data = body["data"]
     keys = [
@@ -81,8 +88,43 @@ def get_os_service_secret(
     return os_creds
 
 
+def get_os_admin_secret(
+    name: str, namespace: str
+) -> OpenStackAdminCredentials:
+    # pykube.exceptions.ObjectDoesNotExist will be handled on the layer above
+    secret = kube.find(pykube.Secret, name, namespace)
+    data = secret.obj["data"]
+
+    os_creds = OpenStackAdminCredentials(
+        database=None, messaging=None, identity=None
+    )
+
+    for kind, creds in data.items():
+        decoded = json.loads(base64.b64decode(creds))
+        setattr(
+            os_creds,
+            kind,
+            OSSytemCreds(
+                username=decoded["username"], password=decoded["password"]
+            ),
+        )
+
+    return os_creds
+
+
 def save_os_service_secret(
     name: str, namespace: str, params: OpenStackCredentials
+):
+    data = asdict(params)
+
+    for key in data.keys():
+        data[key] = base64.b64encode(json.dumps(data[key]).encode()).decode()
+
+    kube.save_secret_data(namespace, name, data)
+
+
+def save_os_admin_secret(
+    name: str, namespace: str, params: OpenStackAdminCredentials
 ):
     data = asdict(params)
 
