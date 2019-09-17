@@ -12,6 +12,7 @@ from mcp_k8s_lib import ceph_api
 
 from . import kube
 from . import layers
+from . import openstack
 
 
 # TODO(pas-ha) enable debug logging
@@ -36,10 +37,6 @@ async def delete_service(service, *, body, meta, spec, logger, **kwargs):
     kopf.info(
         body, reason="Delete", message=f"deleted {obj.kind} for {service}"
     )
-
-
-def wait_for_secret(namespace, name):
-    kube.wait_for_resource(pykube.Secret, name, namespace)
 
 
 def get_rook_ceph_data(namespace=ceph_api.SHARED_SECRET_NAMESPACE):
@@ -153,7 +150,7 @@ async def apply_service(service, *, body, meta, spec, logger, event, **kwargs):
                 }
             }
             osdpl.patch({"status": status_patch})
-            wait_for_secret(
+            kube.wait_for_secret(
                 ceph_api.SHARED_SECRET_NAMESPACE, "rook-ceph-admin-keyring"
             )
             oscp = get_rook_ceph_data()
@@ -193,6 +190,11 @@ async def apply_service(service, *, body, meta, spec, logger, event, **kwargs):
 
 @kopf.on.create(*kube.OpenStackDeployment.kopf_on_args)
 async def create(body, meta, spec, logger, **kwargs):
+    # TODO(e0ne): change create_admin_credentials once kube.save_secret_data
+    # won't update secrets
+    openstack.get_or_create_admin_credentials(meta["namespace"])
+    kube.wait_for_secret(meta["namespace"], openstack.ADMIN_SECRET_NAME)
+
     create, delete = layers.services(spec, logger, **kwargs)
     service_fns = {
         s: functools.partial(apply_service, service=s) for s in create
@@ -206,6 +208,11 @@ async def create(body, meta, spec, logger, **kwargs):
 
 @kopf.on.update(*kube.OpenStackDeployment.kopf_on_args)
 async def update(body, meta, spec, logger, **kwargs):
+    # TODO(e0ne): change create_admin_credentials once kube.save_secret_data
+    # won't update secrets
+    openstack.get_or_create_admin_credentials(meta["namespace"])
+    kube.wait_for_secret(meta["namespace"], openstack.ADMIN_SECRET_NAME)
+
     update, delete = layers.services(spec, logger, **kwargs)
     if delete:
         logger.info(f"deleting children {' '.join(delete)}")

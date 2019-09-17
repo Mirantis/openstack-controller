@@ -31,6 +31,9 @@ spec:
         cluster_domain_suffix: {{ spec.domain_name }}
         oslo_messaging: &neutron_endpoints_oslo_messaging
           auth:
+            admin:
+              username: {{ admin_creds.messaging.username }}
+              password: {{ admin_creds.messaging.password }}
             neutron:
               username: {{ credentials.messaging.user.username }}
               password: {{ credentials.messaging.user.password }}

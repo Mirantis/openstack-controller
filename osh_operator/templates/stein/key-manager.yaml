@@ -30,6 +30,9 @@ spec:
         cluster_domain_suffix: {{ spec.domain_name }}
         oslo_messaging: &barbican_endpoints_oslo_messaging
           auth:
+            admin:
+              username: {{ admin_creds.messaging.username }}
+              password: {{ admin_creds.messaging.password }}
             barbican:
               username: {{ credentials.messaging.user.username }}
               password: {{ credentials.messaging.user.password }}

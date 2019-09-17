@@ -185,6 +185,10 @@ spec:
       endpoints:
         cluster_domain_suffix: {{ spec.domain_name }}
         oslo_messaging:
+          auth:
+            user:
+              username: {{ admin_creds.messaging.username }}
+              password: {{ admin_creds.messaging.password }}
           statefulset:
             replicas: 1
             name: openstack-rabbitmq-rabbitmq

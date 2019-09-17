@@ -32,6 +32,9 @@ spec:
         cluster_domain_suffix: {{ spec.domain_name }}
         oslo_messaging: &keystone_endpoints_oslo_messaging
           auth:
+            admin:
+              username: {{ admin_creds.messaging.username }}
+              password: {{ admin_creds.messaging.password }}
             keystone:
               username: {{ credentials.messaging.user.username }}
               password: {{ credentials.messaging.user.password }}

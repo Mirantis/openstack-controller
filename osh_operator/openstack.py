@@ -15,6 +15,8 @@ OS_SERVICES_MAP = {
     "key-manager": "barbican",
 }
 
+ADMIN_SECRET_NAME = "openstack-admin-users"
+
 
 def _generate_credentials(username: str) -> secrets.OSSytemCreds:
     password = secrets.generate_password()
@@ -44,8 +46,6 @@ def get_or_create_os_credentials(service, namespace):
 
 
 def create_admin_credentials(namespace):
-    secret_name = "openstack-admin-users"
-
     db = secrets.OSSytemCreds(
         username="root", password=secrets.generate_password()
     )
@@ -60,12 +60,11 @@ def create_admin_credentials(namespace):
         database=db, messaging=messaging, identity=identity
     )
 
-    secrets.save_os_admin_secret(secret_name, namespace, admin_creds)
+    secrets.save_os_admin_secret(ADMIN_SECRET_NAME, namespace, admin_creds)
 
 
 def get_admin_credentials(namespace):
-    secret_name = "openstack-admin-users"
-    return secrets.get_os_admin_secret(secret_name, namespace)
+    return secrets.get_os_admin_secret(ADMIN_SECRET_NAME, namespace)
 
 
 def get_or_create_admin_credentials(namespace):

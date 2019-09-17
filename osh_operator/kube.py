@@ -54,6 +54,10 @@ def wait_for_resource(klass, name, namespace=None, delay=60):
         )
 
 
+def wait_for_secret(namespace, name):
+    wait_for_resource(pykube.Secret, name, namespace)
+
+
 def save_secret_data(namespace: str, name: str, data: Dict[str, str]):
     secret = {"metadata": {"name": name, "namespace": namespace}, "data": data}
     try:

@@ -165,7 +165,7 @@ def _default_args(service, body, meta, spec, logger):
     template_args = {}
     namespace = meta["namespace"]
     credentials = openstack.get_or_create_os_credentials(service, namespace)
-    admin_creds = openstack.get_or_create_admin_credentials(meta["namespace"])
+    admin_creds = openstack.get_admin_credentials(meta["namespace"])
     template_args["credentials"] = credentials
     template_args["admin_creds"] = admin_creds
     return template_args
@@ -175,7 +175,7 @@ def _tempest_args(service, body, meta, spec, logger):
     template_args = {}
     helmbundles_body = {}
     # TODO: add wait for generated credential here
-    admin_creds = openstack.get_or_create_admin_credentials(meta["namespace"])
+    admin_creds = openstack.get_admin_credentials(meta["namespace"])
     for s in set(spec["features"]["services"]) - set(["tempest"]):
         service_creds = openstack.get_or_create_os_credentials(
             s, meta["namespace"]
@@ -197,6 +197,7 @@ def _tempest_args(service, body, meta, spec, logger):
 
 def _rabbitmq_args(service, body, meta, spec, logger):
     credentials = {}
+    admin_creds = openstack.get_admin_credentials(meta["namespace"])
     services = set(spec["features"]["services"]) - set(["tempest"])
     for s in services:
         if s not in openstack.OS_SERVICES_MAP:
@@ -205,11 +206,15 @@ def _rabbitmq_args(service, body, meta, spec, logger):
         # TODO: 'use get or wait' approach for generated credential here
         credentials[s] = openstack.get_or_create_os_credentials(s, ns)
 
-    return {"services": services, "credentials": credentials}
+    return {
+        "services": services,
+        "credentials": credentials,
+        "admin_creds": admin_creds,
+    }
 
 
 def _mariadb_args(service, body, meta, spec, logger):
-    admin_creds = openstack.get_or_create_admin_credentials(meta["namespace"])
+    admin_creds = openstack.get_admin_credentials(meta["namespace"])
 
     return {"admin_creds": admin_creds}
 
