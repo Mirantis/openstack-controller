@@ -54,6 +54,11 @@ class HeatPlugin(base_section.BaseSection):
         "vm_to_heat_api_insecure",
     ]
 
+    def _get_keystone_credential(self, cred_name):
+        return self.get_values_item(
+            "keystone", f"endpoints.identity.auth.admin.{cred_name}"
+        )
+
     @property
     def admin_password(self):
         pass
@@ -64,15 +69,21 @@ class HeatPlugin(base_section.BaseSection):
 
     @property
     def admin_username(self):
-        pass
+        return self._get_keystone_credential("username")
 
     @property
     def auth_url(self):
-        pass
+        host = self.get_values_item(
+            "keystone", "endpoints.identity.hosts.public.host", "keystone"
+        )
+        scheme = self.get_values_item(
+            "keystone", "endpoints.identity.scheme.public", "http"
+        )
+        return f"{scheme}://{host}"
 
     @property
     def auth_version(self):
-        pass
+        return DEFAULT_HEAT_PLUGIN_PARAMETERS["auth_version"]
 
     @property
     def boot_config_env(self):
@@ -104,7 +115,10 @@ class HeatPlugin(base_section.BaseSection):
 
     @property
     def disable_ssl_certificate_validation(self):
-        pass
+        ca_file_exists = self.get_values_item("heat", "conf.heat.ssl.ca_file")
+        if ca_file_exists:
+            return False
+        return True
 
     @property
     def fixed_network_name(self):
@@ -140,11 +154,17 @@ class HeatPlugin(base_section.BaseSection):
 
     @property
     def minimal_image_ref(self):
-        pass
+        images = self.get_values_item("glance", "bootstrap.structured.images")
+        if images:
+            return list(images.values())[0]["name"]
 
     @property
     def minimal_instance_type(self):
-        pass
+        flavors = self.get_values_item(
+            "nova", "bootstrap.structured.flavors.options"
+        )
+        if flavors:
+            return list(flavors.values())[0]["name"]
 
     @property
     def network_for_ssh(self):
@@ -152,11 +172,11 @@ class HeatPlugin(base_section.BaseSection):
 
     @property
     def password(self):
-        pass
+        return self._get_keystone_credential("password")
 
     @property
     def project_domain_id(self):
-        pass
+        return self._get_keystone_credential("project_domain_name")
 
     @property
     def project_domain_name(self):
@@ -164,11 +184,11 @@ class HeatPlugin(base_section.BaseSection):
 
     @property
     def project_name(self):
-        pass
+        return self._get_keystone_credential("project_name")
 
     @property
     def region(self):
-        pass
+        return self._get_keystone_credential("region_name")
 
     @property
     def sighup_config_edit_retries(self):
@@ -212,7 +232,7 @@ class HeatPlugin(base_section.BaseSection):
 
     @property
     def user_domain_id(self):
-        pass
+        return self._get_keystone_credential("user_domain_name")
 
     @property
     def user_domain_name(self):
@@ -220,7 +240,7 @@ class HeatPlugin(base_section.BaseSection):
 
     @property
     def username(self):
-        pass
+        return self._get_keystone_credential("username")
 
     @property
     def volume_size(self):

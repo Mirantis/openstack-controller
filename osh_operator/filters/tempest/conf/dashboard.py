@@ -20,4 +20,11 @@ class Dashboard(base_section.BaseSection):
 
     @property
     def disable_ssl_certificate_validation(self):
-        pass
+        ssl_cacert_enabled = self.get_values_item(
+            "horizon",
+            "conf.horizon.local_settings.config.ssl_features.openstack_ssl_cacert.enabled",
+            False,
+        )
+        if not ssl_cacert_enabled:
+            return True
+        return False
