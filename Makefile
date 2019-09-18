@@ -21,6 +21,15 @@ CHARTS := $(filter-out $(EXCLUDES), $(wildcard ./charts/*/))
 
 .PHONY: $(EXCLUDES) $(CHARTS)
 
+ARGS =
+
+ifdef VERSION
+ARGS += --version $(VERSION)
+endif
+
+ifdef PACKAGE_DIR
+ARGS += --destination $(PACKAGE_DIR)
+endif
 
 all: $(CHARTS)
 
@@ -38,7 +47,7 @@ lint-%: init-%
 	if [ -d $* ]; then helm lint $*; fi
 
 build-%: lint-%
-	if [ -d $* ]; then helm package $*; fi
+	if [ -d $* ]; then helm package $* $(ARGS); fi
 
 clean:
 	@echo "Clean all build artifacts"
