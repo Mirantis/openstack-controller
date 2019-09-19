@@ -102,7 +102,7 @@ common:
             glance_metadefs_load: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/glance:stein-bionic-20190917082540
     repositories:
     - name: osh
-      url: https://harbor.mcp.mirantis.net/chartrepo/mcp-openstack-helm-20190916125348
+      url: https://harbor.mcp.mirantis.net/chartrepo/mcp-openstack-helm-20190918125149
     - name: osh-infra
       url: https://harbor.mcp.mirantis.net/chartrepo/mcp-openstack-helm-infra-20190916092754
   openstack:
