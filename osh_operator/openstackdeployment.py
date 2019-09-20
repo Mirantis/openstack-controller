@@ -8,24 +8,9 @@ from . import services
 # TODO(pas-ha) enable debug logging
 
 
-@kopf.on.create(*kube.OpenStackDeployment.kopf_on_args)
-async def create(body, meta, spec, logger, **kwargs):
-    # TODO(e0ne): change create_admin_credentials once kube.save_secret_data
-    # won't update secrets
-    openstack.get_or_create_admin_credentials(meta["namespace"])
-    kube.wait_for_secret(meta["namespace"], openstack.ADMIN_SECRET_NAME)
-
-    create, delete = layers.services(spec, logger, **kwargs)
-    service_fns = {s: services.registry[s](body, logger).apply for s in create}
-    if service_fns:
-        await kopf.execute(fns=service_fns)
-        return {"message": "created"}
-    else:
-        return {"message": "skipped"}
-
-
-@kopf.on.update(*kube.OpenStackDeployment.kopf_on_args)
-async def update(body, meta, spec, logger, **kwargs):
+async def process_osdpl_event(body, meta, spec, logger, **kwargs):
+    event = kwargs["cause"].event
+    logger.info(f"Got osdpl event {event}")
     # TODO(e0ne): change create_admin_credentials once kube.save_secret_data
     # won't update secrets
     openstack.get_or_create_admin_credentials(meta["namespace"])
@@ -43,9 +28,24 @@ async def update(body, meta, spec, logger, **kwargs):
     )
     if service_fns:
         await kopf.execute(fns=service_fns)
-        return {"message": "updated"}
+        return {"message": "created" if event == "create" else "updated"}
     else:
         return {"message": "skipped"}
+
+
+@kopf.on.create(*kube.OpenStackDeployment.kopf_on_args)
+async def create(body, meta, spec, logger, **kwargs):
+    return await process_osdpl_event(body, meta, spec, logger, **kwargs)
+
+
+@kopf.on.update(*kube.OpenStackDeployment.kopf_on_args)
+async def update(body, meta, spec, logger, **kwargs):
+    return await process_osdpl_event(body, meta, spec, logger, **kwargs)
+
+
+@kopf.on.resume(*kube.OpenStackDeployment.kopf_on_args)
+async def resume(body, meta, spec, logger, **kwargs):
+    return await process_osdpl_event(body, meta, spec, logger, **kwargs)
 
 
 @kopf.on.delete(*kube.OpenStackDeployment.kopf_on_args)
