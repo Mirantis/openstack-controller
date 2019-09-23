@@ -1,4 +1,4 @@
-{%- set service = 'ocatavia' %}
+{%- set service = 'octavia' %}
 {%- set messaging = spec.get('features', {}).get('messaging', {}) %}
 {%- set stacklight_enabled = spec.get('features', {}).get('stacklight', {}).get('enabled', False) %}
 {%- set notification_topics = ['notifications'] %}
