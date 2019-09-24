@@ -25,11 +25,11 @@ spec:
               username: {{ admin_creds.database.username }}
               password: {{ admin_creds.database.password }}
             sst:
-              username: sst
-              password: password
+              username: {{ galera_creds.sst.username }}
+              password: {{ galera_creds.sst.password }}
             exporter:
-              username: exporter
-              password: password
+              username: {{ galera_creds.exporter.username }}
+              password: {{ galera_creds.exporter.password }}
       pod:
         replicas:
           server: 3

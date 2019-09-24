@@ -14,7 +14,10 @@ class MariaDB(Service):
 
     def template_args(self, spec):
         admin_creds = openstack.get_admin_credentials(self.namespace)
-        return {"admin_creds": admin_creds}
+        galera_creds = openstack.get_or_create_galera_credentials(
+            self.namespace
+        )
+        return {"admin_creds": admin_creds, "galera_creds": galera_creds}
 
 
 class Memcached(Service):

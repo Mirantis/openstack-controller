@@ -25,6 +25,12 @@ class OpenStackCredentials:
 
 
 @dataclass
+class GaleraCredentials:
+    sst: OSSytemCreds
+    exporter: OSSytemCreds
+
+
+@dataclass
 class OpenStackAdminCredentials:
     database: Optional[OSSytemCreds]
     messaging: Optional[OSSytemCreds]
@@ -64,6 +70,31 @@ async def handle_secrets_update(body, meta, status, logger, diff, **kwargs):
     # opentack-helm doesn't support password update by design we will need
     # to get back here when it is solved.
     pass
+
+
+def get_galera_secret(name: str, namespace: str) -> GaleraCredentials:
+    secret = kube.find(pykube.Secret, name, namespace)
+    data = secret.obj["data"]
+    for kind, creds in data.items():
+        data[kind] = json.loads(base64.b64decode(creds))
+    return GaleraCredentials(
+        sst=OSSytemCreds(
+            username=data["sst"]["username"], password=data["sst"]["password"]
+        ),
+        exporter=OSSytemCreds(
+            username=data["exporter"]["username"],
+            password=data["exporter"]["password"],
+        ),
+    )
+
+
+def save_galera_secret(name: str, namespace: str, params: GaleraCredentials):
+    data = asdict(params)
+
+    for key in data.keys():
+        data[key] = base64.b64encode(json.dumps(data[key]).encode()).decode()
+
+    kube.save_secret_data(namespace, name, data)
 
 
 def get_os_service_secret(

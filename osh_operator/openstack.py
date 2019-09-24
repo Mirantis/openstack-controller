@@ -18,11 +18,27 @@ OS_SERVICES_MAP = {
 }
 
 ADMIN_SECRET_NAME = "openstack-admin-users"
+GALERA_SECRET_NAME = "generated-galera-passwords"
 
 
 def _generate_credentials(username: str) -> secrets.OSSytemCreds:
     password = secrets.generate_password()
     return secrets.OSSytemCreds(username=username, password=password)
+
+
+def get_or_create_galera_credentials(
+    namespace: str
+) -> secrets.GaleraCredentials:
+    try:
+        galera_creds = secrets.get_galera_secret(GALERA_SECRET_NAME, namespace)
+    except pykube.exceptions.ObjectDoesNotExist:
+        galera_creds = secrets.GaleraCredentials(
+            sst=_generate_credentials("sst"),
+            exporter=_generate_credentials("exporter"),
+        )
+        secrets.save_galera_secret(GALERA_SECRET_NAME, namespace, galera_creds)
+
+    return galera_creds
 
 
 def get_or_create_os_credentials(
