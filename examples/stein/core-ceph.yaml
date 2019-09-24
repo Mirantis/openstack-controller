@@ -151,7 +151,6 @@ spec:
             blacklist:
               - (?:tempest\.fake\.test)
               - (?:heat_tempest_plugin\.)
-              - (?:octavia_tempest_plugin\.)
               - (?:designate_tempest_plugin\.)
             script: |
               tempest run --config-file /etc/tempest/tempest.conf -w 4 --smoke --blacklist-file  /etc/tempest/test-blacklist

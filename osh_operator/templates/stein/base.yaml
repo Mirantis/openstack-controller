@@ -78,18 +78,18 @@ common:
             octavia_api: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/octavia:stein-bionic-20190923180012
             octavia_db_sync: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/octavia:stein-bionic-20190923180012
             octavia_health_manager: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/octavia:stein-bionic-20190923180012
-            octavia_hm_port: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/octavia:stein-bionic-20190917082540
+            octavia_hm_port: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/octavia:stein-bionic-20190923180012
             octavia_housekeeping: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/octavia:stein-bionic-20190923180012
             openvswitch_db_server: docker-prod-local.docker.mirantis.net/mcp/openvswitch:2.11-bionic-1561381942782
             openvswitch_vswitchd: docker-prod-local.docker.mirantis.net/mcp/openvswitch:2.11-bionic-1561381942782
             create_resources: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/heat:stein-bionic-20190923180012
             octavia_worker: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/octavia:stein-bionic-20190923180012
-            mariadb: docker-prod-local.docker.mirantis.net/mirantis/general/mariadb:10.2.23-bionic-20190923031714
-            prometheus_create_mysql_user: docker-prod-local.docker.mirantis.net/mirantis/general/mariadb:10.2.23-bionic-20190923031714
+            mariadb: docker-prod-local.docker.mirantis.net/mirantis/general/mariadb:10.2.23-bionic-20190924031713
+            prometheus_create_mysql_user: docker-prod-local.docker.mirantis.net/mirantis/general/mariadb:10.2.23-bionic-20190924031713
             prometheus_mysql_exporter: docker-prod-local.docker.mirantis.net/stacklight/mysqld-exporter:v0.11.0
             prometheus_mysql_exporter_helm_tests: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/heat:stein-bionic-20190923180012
-            mariadb_backup: docker-prod-local.docker.mirantis.net/mirantis/general/mariadb:10.2.23-bionic-20190923031714
-            mariadb_scripted_test: docker-prod-local.docker.mirantis.net/mirantis/general/mariadb:10.2.23-bionic-20190923031714
+            mariadb_backup: docker-prod-local.docker.mirantis.net/mirantis/general/mariadb:10.2.23-bionic-20190924031713
+            mariadb_scripted_test: docker-prod-local.docker.mirantis.net/mirantis/general/mariadb:10.2.23-bionic-20190924031713
             rabbit_init: docker.io/rabbitmq:3.7-management
             powerdns: docker-prod-local.docker.mirantis.net/mcp/powerdns:4.1-alpine-1566452831101
             prometheus_rabbitmq_exporter: docker-prod-local.docker.mirantis.net/stacklight/rabbitmq-exporter:v0.29.0
