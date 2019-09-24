@@ -57,6 +57,16 @@ class Cinder(Service):
 
 class Designate(Service):
     service = "dns"
+    backend_service = "powerdns"
+
+    def template_args(self, spec):
+        t_args = super().template_args(spec)
+        credentials = openstack.get_or_create_os_credentials(
+            self.backend_service, self.namespace
+        )
+        t_args[self.backend_service] = credentials
+
+        return t_args
 
 
 class Glance(Service):
@@ -101,17 +111,16 @@ class Tempest(Service):
         admin_creds = openstack.get_admin_credentials(self.namespace)
         helmbundles_body = {}
         for s in set(spec["features"]["services"]) - {"tempest"}:
-            service_creds = openstack.get_or_create_os_credentials(
-                s, self.namespace
-            )
+            template_args = Service.registry[s](
+                self.osdpl.obj, self.logger
+            ).template_args(spec)
             helmbundles_body[s] = layers.merge_all_layers(
                 s,
                 self.osdpl.obj,
                 self.osdpl.metadata,
                 spec,
                 self.logger,
-                credentials=service_creds,
-                admin_creds=admin_creds,
+                **template_args,
             )
         return {
             "helmbundles_body": helmbundles_body,

@@ -196,3 +196,6 @@ spec:
             admin:
               username: {{ admin_creds.database.username }}
               password: {{ admin_creds.database.password }}
+            powerdns:
+              username: {{ powerdns.database.user.username }}
+              password: {{ powerdns.database.user.password }}

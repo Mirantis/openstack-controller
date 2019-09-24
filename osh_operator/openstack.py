@@ -1,3 +1,5 @@
+from typing import Optional
+
 import pykube
 
 from . import secrets
@@ -23,7 +25,9 @@ def _generate_credentials(username: str) -> secrets.OSSytemCreds:
     return secrets.OSSytemCreds(username=username, password=password)
 
 
-def get_or_create_os_credentials(service, namespace):
+def get_or_create_os_credentials(
+    service: str, namespace: str
+) -> Optional[secrets.OpenStackCredentials]:
     secret_name = f"generated-{service}-passwords"
     try:
         os_creds = secrets.get_os_service_secret(secret_name, namespace)
@@ -37,6 +41,8 @@ def get_or_create_os_credentials(service, namespace):
                 getattr(os_creds, service_type)[
                     "user"
                 ] = _generate_credentials(srv)
+        elif service == "powerdns":
+            os_creds.database["user"] = _generate_credentials(service)
         else:
             # TODO(e0ne): add logging here
             return
@@ -45,7 +51,7 @@ def get_or_create_os_credentials(service, namespace):
     return os_creds
 
 
-def create_admin_credentials(namespace):
+def create_admin_credentials(namespace: str):
     db = secrets.OSSytemCreds(
         username="root", password=secrets.generate_password()
     )
@@ -63,7 +69,7 @@ def create_admin_credentials(namespace):
     secrets.save_os_admin_secret(ADMIN_SECRET_NAME, namespace, admin_creds)
 
 
-def get_admin_credentials(namespace):
+def get_admin_credentials(namespace: str) -> secrets.OpenStackAdminCredentials:
     return secrets.get_os_admin_secret(ADMIN_SECRET_NAME, namespace)
 
 
