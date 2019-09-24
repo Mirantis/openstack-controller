@@ -88,8 +88,21 @@ spec:
       storage: ceph
       ceph_client:
         configmap: rook-ceph-config
-        user_secret_name: rook-ceph-admin-keyring
+        user_secret_name: {{ ceph.cinder.secrets }}
       conf:
+        backends:
+{%- set backends=[] %}
+{%- for backend, backend_config in ceph.cinder.pools.items() %}
+  {%- if backend_config.role == 'volumes' %}
+    {%- do backends.append(backend) %}
+  {%- endif %}
+          {{ backend }}:
+            volume_driver: cinder.volume.drivers.rbd.RBDDriver
+            volume_backend_name: {{ backend }}
+            rbd_pool: {{ backend_config.name }}
+            rbd_user: {{ ceph.cinder.username }}
+            rbd_ceph_conf: "/etc/ceph/ceph.conf"
+{%- endfor %}
         ceph:
           pools:
             backup:
@@ -101,18 +114,32 @@ spec:
               crush_rule: replicated_ruleset
               chunk_size: 8
         cinder:
-{%- if spec.get('features', {}).get('cinder', {}).get('backup', {}).get('backend') == 'ceph' %}
           DEFAULT:
+{%- if spec.get('features', {}).get('cinder', {}).get('backup', {}).get('backend') == 'ceph' %}
             backup_driver: cinder.backup.drivers.ceph.CephBackupDriver
+{%- for backend, backend_config in ceph.cinder.pools.items() %}
+  {%- if backend_config.role == 'backup' %}
+            backup_ceph_user: {{ ceph.cinder.username }}
+            backup_ceph_pool: {{ backend_config.name }}
+  {%- endif %}
+{%- endfor %}
 {%- endif %}
+            enabled_backends: {{ backends|join(',') }}
+            default_volume_type: {{ backends[0] }}
           oslo_messaging_notifications:
             topics: {{ notification_topics|join(',') }}
         logging:
           logger_cinder:
             level: {{ spec.get('features', {}).get('logging', {}).get('cinder', {}).get('level', 'INFO') }}
+      secrets:
+        rbd:
+          volume: {{ ceph.cinder.secrets }}
+          backup: {{ ceph.cinder.secrets }}
       manifests:
         network_policy: false
         job_rabbit_init: false
+        job_storage_init: false
+        job_backup_storage_init: false
 {%- if spec.get('features', {}).get('ssl', {}).get('public_endpoints', {}).get('enabled', True) %}
         secret_ca_bundle: true
 {%- endif %}

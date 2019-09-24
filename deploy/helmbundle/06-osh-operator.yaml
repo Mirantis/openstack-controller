@@ -13,6 +13,8 @@ spec:
     version: 0.1.0-mcp-245
     namespace: osh-system
     values:
+      kopf:
+        enabled: false
       image:
         repository: docker-prod-local.docker.mirantis.net/mcp/osh-operator
         tag: nightly

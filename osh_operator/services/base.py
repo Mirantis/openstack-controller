@@ -1,6 +1,4 @@
 import base64
-from ipaddress import IPv4Address
-import re
 
 import kopf
 from mcp_k8s_lib import ceph_api
@@ -9,6 +7,7 @@ import pykube
 from osh_operator import layers
 from osh_operator import kube
 from osh_operator import openstack
+from osh_operator import secrets
 
 
 class Service:
@@ -99,12 +98,12 @@ class Service:
             kube.dummy(
                 pykube.Secret,
                 ceph_api.CEPH_OPENSTACK_TARGET_SECRET,
-                self.osdpl.namespace,
+                self.namespace,
             ).exists()
             and kube.dummy(
                 pykube.ConfigMap,
                 ceph_api.CEPH_OPENSTACK_TARGET_CONFIGMAP,
-                self.osdpl.namespace,
+                self.namespace,
             ).exists()
         ):
             self.create_ceph_secrets()
@@ -124,10 +123,13 @@ class Service:
             }
         )
         kube.wait_for_secret(
-            ceph_api.SHARED_SECRET_NAMESPACE, "rook-ceph-admin-keyring"
+            ceph_api.SHARED_SECRET_NAMESPACE, ceph_api.OPENSTACK_KEYS_SECRET
         )
-        oscp = self.get_rook_ceph_data()
-        self.save_ceph_secret(oscp)
+        oscp = ceph_api.get_os_ceph_params(secrets.get_secret_data)
+        # TODO(vsaienko): the subset of secrets might be changed after
+        # deployment. For example additional service is deployed,
+        # we need to handle this.
+        self.save_ceph_secrets(oscp)
         self.save_ceph_configmap(oscp)
         self.set_parent_status(
             {
@@ -139,45 +141,20 @@ class Service:
         )
         self.logger.info("Ceph resources were created successfully.")
 
-    def get_rook_ceph_data(self, namespace=ceph_api.SHARED_SECRET_NAMESPACE):
-        # TODO: switch to kaas ceph operator data
-        secret = kube.find(pykube.Secret, "rook-ceph-admin-keyring", namespace)
-        keyring = base64.b64decode(secret.obj["data"]["keyring"]).decode()
-        m = re.search("key = ((\S)+)", keyring)
-        key = m.group(1)
-        endpoints_obj = kube.find(
-            pykube.ConfigMap, "rook-ceph-mon-endpoints", namespace
-        ).obj
-        endp_mapping = endpoints_obj["data"]["data"]
-        endpoints = [x.split("=")[1] for x in endp_mapping.split(",")]
-        mon_endpoints = []
-        rgw_params = ceph_api.RGWParams(internal_url="", external_url="")
-        for endpoint in endpoints:
-            address = endpoint.split(":")[0]
-            port = endpoint.split(":")[1]
-            mon_endpoints.append((IPv4Address(address), port))
-        oscp = ceph_api.OSCephParams(
-            admin_key=key,
-            mon_endpoints=mon_endpoints,
-            services=[],
-            rgw=rgw_params,
-        )
-        return oscp
-
-    def save_ceph_secret(self, params: ceph_api.OSCephParams):
-        key_data = f"[{params.admin_user}]\n        key = {params.admin_key}\n"
-        secret = {
-            "metadata": {
-                "name": ceph_api.CEPH_OPENSTACK_TARGET_SECRET,
-                "namespace": self.osdpl.namespace,
-            },
-            "data": {"key": base64.b64encode(key_data.encode()).decode()},
-        }
-        try:
-            pykube.Secret(kube.api, secret).create()
-        except Exception:
-            # TODO check for resource exists exception.
-            pass
+    def save_ceph_secrets(self, params: ceph_api.OSCephParams):
+        for service in params.services:
+            name = ceph_api.get_os_user_keyring_name(service.user)
+            secret = {
+                "metadata": {"name": name, "namespace": self.namespace},
+                "data": {
+                    "key": base64.b64encode(service.key.encode()).decode()
+                },
+            }
+            try:
+                pykube.Secret(kube.api, secret).create()
+            except Exception:
+                # TODO check for resource exists exception.
+                pass
 
     def save_ceph_configmap(self, params: ceph_api.OSCephParams):
         mon_host = ",".join(
@@ -187,7 +164,7 @@ class Service:
         configmap = {
             "metadata": {
                 "name": ceph_api.CEPH_OPENSTACK_TARGET_CONFIGMAP,
-                "namespace": self.osdpl.namespace,
+                "namespace": self.namespace,
             },
             "data": {"ceph.conf": ceph_conf},
         }
@@ -197,12 +174,49 @@ class Service:
             # TODO check for resource exists exception.
             pass
 
+    @staticmethod
+    def get_ceph_role_pools(oscp: ceph_api.OSServiceCreds):
+        ret = {}
+        service_user = oscp.user.name
+        for pool in oscp.pools:
+            if pool.role.name in ceph_api.CEPH_POOL_ROLE_SERVICES_MAP.get(
+                service_user
+            ):
+                ret.update(
+                    {pool.name: {"name": pool.name, "role": pool.role.name}}
+                )
+
+        return ret
+
+    def ceph_config(self):
+        ceph_config = {}
+        oscp = ceph_api.get_os_ceph_params(secrets.get_secret_data)
+        for oscp_service in oscp.services:
+            srv_username = openstack.OS_SERVICES_MAP.get(self.service)
+            if oscp_service.user.name == srv_username:
+                ceph_config[srv_username] = {
+                    "username": srv_username,
+                    "keyring": oscp_service.key,
+                    "secrets": ceph_api.get_os_user_keyring_name(
+                        oscp_service.user
+                    ),
+                    "pools": self.get_ceph_role_pools(oscp_service),
+                }
+        return {"ceph": ceph_config}
+
     def template_args(self, spec):
         credentials = openstack.get_or_create_os_credentials(
             self.service, self.namespace
         )
         admin_creds = openstack.get_admin_credentials(self.namespace)
-        return {"credentials": credentials, "admin_creds": admin_creds}
+        template_args = {
+            "credentials": credentials,
+            "admin_creds": admin_creds,
+        }
+        if self.ceph_required:
+            template_args.update(self.ceph_config())
+
+        return template_args
 
     def render(self):
         spec = layers.merge_spec(self.osdpl.obj["spec"], self.logger)

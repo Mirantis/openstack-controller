@@ -15,7 +15,7 @@ spec:
         replicas:
           server: 1
       pvc:
-        storage_class: rook-ceph-block
+        storage_class: mirablock-k8s-block-hdd
       endpoints:
         cluster_domain_suffix: {{ spec.domain_name }}
 {% include 'base/_admin_identity.yaml' %}

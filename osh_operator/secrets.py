@@ -73,8 +73,7 @@ async def handle_secrets_update(body, meta, status, logger, diff, **kwargs):
 
 
 def get_galera_secret(name: str, namespace: str) -> GaleraCredentials:
-    secret = kube.find(pykube.Secret, name, namespace)
-    data = secret.obj["data"]
+    data = get_secret_data(namespace, name)
     for kind, creds in data.items():
         data[kind] = json.loads(base64.b64decode(creds))
     return GaleraCredentials(
@@ -97,12 +96,16 @@ def save_galera_secret(name: str, namespace: str, params: GaleraCredentials):
     kube.save_secret_data(namespace, name, data)
 
 
+def get_secret_data(namespace: str, name: str):
+    secret = kube.find(pykube.Secret, name, namespace)
+    return secret.obj["data"]
+
+
 def get_os_service_secret(
     name: str, namespace: str
 ) -> Optional[OpenStackCredentials]:
     # pykube.exceptions.ObjectDoesNotExist will be handled on the layer above
-    secret = kube.find(pykube.Secret, name, namespace)
-    data = secret.obj["data"]
+    data = get_secret_data(namespace, name)
 
     os_creds = OpenStackCredentials(
         database={}, messaging={}, notifications={}
@@ -204,8 +207,8 @@ def generate_name(prefix="", length=16):
 
 def get_or_create_keycloak_salt(namespace: str, name: str) -> str:
     try:
-        secret = kube.find(pykube.Secret, name, namespace)
-        return base64.b64decode(secret.obj["data"]["name"])
+        data = get_secret_data(namespace, name)
+        return base64.b64decode(data["name"])
     except pykube.exceptions.ObjectDoesNotExist:
         salt = generate_password()
         data = {name: base64.b64encode(json.dumps(salt).encode()).decode()}

@@ -60,6 +60,14 @@ def test_render_template(openstackdeployment):
         logging,
         credentials=mock.Mock(),
         admin_creds=mock.Mock(),
+        ceph={
+            "nova": {
+                "pools": {},
+                "username": "nova",
+                "keyring": "nova",
+                "secrets": "nova",
+            }
+        },
     )
     assert len(data) == 1 and "spec" in data
 

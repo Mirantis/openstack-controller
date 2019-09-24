@@ -84,12 +84,15 @@ spec:
 {%- if (spec.get('features', {}).get('nova', {}).get('images', {}).get('backend') == 'ceph') or (spec.get('features', {}).get('cinder', {}).get('volume', {}).get('backend') == 'ceph') %}
       ceph_client:
         configmap: rook-ceph-config
-        user_secret_name: rook-ceph-admin-keyring
+        user_secret_name: {{ ceph.nova.secrets }}
 {%- endif %}
       conf:
         ceph:
 {%- if (spec.get('features', {}).get('nova', {}).get('images', {}).get('backend') == 'ceph') or (spec.get('features', {}).get('cinder', {}).get('volume', {}).get('backend') == 'ceph') %}
           enabled: true
+          cinder:
+            user: {{ ceph.nova.username }}
+            keyring: {{ ceph.nova.keyring }}
 {%- else %}
           enabled: false
 {%- endif %}
@@ -244,15 +247,18 @@ spec:
             default: http
             public: https
 {%- endif %}
-{%- if spec.get('features', {}).get('nova', {}).get('images', {}).get('backend') == 'ceph' %}
+{%- if spec.get('features', {}).get('nova', {}).get('images', {}).get('backend') == 'ceph' or (spec.get('features', {}).get('cinder', {}).get('volume', {}).get('backend') == 'ceph') %}
       ceph_client:
         configmap: rook-ceph-config
-        user_secret_name: rook-ceph-admin-keyring
+        user_secret_name: {{ ceph.nova.secrets }}
 {%- endif %}
       conf:
         ceph:
 {%- if spec.get('features', {}).get('nova', {}).get('images', {}).get('backend') == 'ceph' %}
           enabled: true
+          cinder:
+            user: {{ ceph.nova.username }}
+            keyring: {{ ceph.nova.keyring }}
 {%- elif spec.get('features', {}).get('nova', {}).get('images', {}).get('backend') == 'local' %}
           enabled: false
 {%- endif %}
@@ -261,6 +267,10 @@ spec:
             cpu_mode: custom
             cpu_model: kvm64
             virt_type: kvm
+            rbd_user: {{ ceph.nova.username }}
+{%- for pools, pools_config in ceph.nova.pools.items() %}
+            images_rbd_pool: {{ pools_config.name }}
+{%- endfor %}
           oslo_messaging_notifications:
             topics: {{ notification_topics|join(',') }}
         logging:

@@ -92,7 +92,9 @@ spec:
             enable_v1_api: True
             enable_v2_registry: True
           glance_store:
-            rbd_store_crush_rule: replicated_ruleset
+{%- for pools, pools_config in ceph.glance.pools.items() %}
+            rbd_store_pool: {{ pools_config.name }}
+{%- endfor %}
           oslo_messaging_notifications:
             topics: {{ notification_topics|join(',') }}
         logging:
@@ -103,10 +105,13 @@ spec:
         size: 2Gi
       ceph_client:
         configmap: rook-ceph-config
-        user_secret_name: rook-ceph-admin-keyring
+        user_secret_name: {{ ceph.glance.secrets }}
+      secrets:
+        rbd: {{ ceph.glance.secrets }}
       manifests:
         network_policy: false
         job_rabbit_init: false
+        job_storage_init: false
 {%- if spec.get('features', {}).get('ssl', {}).get('public_endpoints', {}).get('enabled', True) %}
         secret_ca_bundle: true
 {%- endif %}
