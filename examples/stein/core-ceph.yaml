@@ -149,9 +149,10 @@ spec:
                 flavor_ref:  m1.extra_tiny_test
                 flavor_ref_alt: m1.tiny_test
             blacklist:
-              - (?:tempest.fake.test)
+              - (?:tempest\.fake\.test)
               - (?:heat_tempest_plugin\.)
-              #- (?:tempest\.api\.compute\.servers\.test_server_actions\.ServerActionsTestJSON)
+              - (?:octavia_tempest_plugin\.)
+              - (?:designate_tempest_plugin\.)
             script: |
               tempest run --config-file /etc/tempest/tempest.conf -w 4 --smoke --blacklist-file  /etc/tempest/test-blacklist
             tempest:
