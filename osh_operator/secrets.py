@@ -10,6 +10,8 @@ import pykube
 from . import kube
 from mcp_k8s_lib import ceph_api
 
+RGW_KEYSTONE_SECRET = "ceph-keystone-user"
+
 
 @dataclass
 class OSSytemCreds:
@@ -58,18 +60,24 @@ def handle_rgw_secret(body, meta, status, logger, diff, **kwargs):
 
 
 @kopf.on.create("", "v1", "secrets")
-async def handle_secrets_create(body, meta, status, logger, diff, **kwargs):
+async def handle_secrets_create(
+    body,
+    meta,
+    name,
+    status,
+    logger,
+    diff,
+    labels={"application": "ceph", "component": "rgw"},
+    **kwargs,
+):
     # TODO: unhardcode secret name
-    logger.info(f"Handling secret create {meta['name']}")
-    if meta["name"] == "ceph-keystone-user":
+    logger.debug(f"Handling secret create {name}")
+    if name == RGW_KEYSTONE_SECRET:
         handle_rgw_secret(body, meta, status, logger, diff, **kwargs)
 
 
-@kopf.on.update("", "v1", "secrets")
-async def handle_secrets_update(body, meta, status, logger, diff, **kwargs):
-    # opentack-helm doesn't support password update by design we will need
-    # to get back here when it is solved.
-    pass
+# TODO(pas-ha) opentack-helm doesn't support password update by design,
+# we will need to get back here when it is solved.
 
 
 def get_galera_secret(name: str, namespace: str) -> GaleraCredentials:

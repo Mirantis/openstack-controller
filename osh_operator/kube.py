@@ -73,7 +73,8 @@ def save_secret_data(namespace: str, name: str, data: Dict[str, str]):
         find(pykube.Secret, name, namespace)
     except pykube.exceptions.ObjectDoesNotExist:
         pykube.Secret(api, secret).create()
-    pykube.Secret(api, secret).update()
+    else:
+        pykube.Secret(api, secret).update()
 
 
 find_osdpl = functools.partial(find, OpenStackDeployment)
