@@ -218,8 +218,13 @@ spec:
         neutron:
           DEFAULT:
             api_workers: 4
+            # Combined DVR + L3 HA is not recommended until load tested (had issues in the past)
+            {%- if spec.get('features', {}).get('neutron', {}).get('dvr', {}).get('enabled', False) %}
             l3_ha: False
-            max_l3_agents_per_router: 1
+            {%- else %}
+            l3_ha: True
+            {%- endif %}
+            max_l3_agents_per_router: 3
             l3_ha_network_type: vxlan
             dhcp_agents_per_network: 1
             {%- if 'dns' in spec.features.services %}
