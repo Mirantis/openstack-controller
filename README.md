@@ -184,11 +184,11 @@ spec:
       public_endpoints:
         enabled: true
         ca_cert: |
-          CA certificate content
+          CA certificate content (ca.pem)
         api_cert: |
-          server certificate content
-        api_key:
-          server private key
+          server certificate content (server.pem)
+        api_key: |
+          server private key (server-key.pem)
 ```
 
 `kubectl apply -f examples/stein/core-ceph.yaml`
