@@ -1,3 +1,6 @@
+#apiVersion: lcm.mirantis.com/v1alpha1
+#kind: HelmBundle
+
 spec:
   releases:
   - name: ingress-openstack

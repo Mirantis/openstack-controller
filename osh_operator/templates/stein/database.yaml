@@ -1,3 +1,6 @@
+#apiVersion: lcm.mirantis.com/v1alpha1
+#kind: HelmBundle
+
 {%- set stacklight_enabled = spec.get('features', {}).get('stacklight', {}).get('enabled', False) %}
 
 spec:

@@ -1,3 +1,6 @@
+#apiVersion: lcm.mirantis.com/v1alpha1
+#kind: HelmBundle
+
 {%- set keystone_keycloak_enabled = spec.get('features', {}).get('keystone', {}).get('keycloak', {}).get('enabled', False) %}
 {%- set ssl_public_endpoints_enabled = spec.get('features', {}).get('ssl', {}).get('public_endpoints', {}).get('enabled', True) %}
 #The list of extra panels in Horizon helm-chart is overwritten in case 'extra_panels' is defined in osh-operator.
