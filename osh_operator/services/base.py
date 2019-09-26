@@ -1,6 +1,8 @@
+import asyncio
 import base64
 import os, socket
 
+from dacite import from_dict
 import kopf
 from mcp_k8s_lib import ceph_api
 import pykube
@@ -40,6 +42,52 @@ class RuntimeIdentifierMixin:
         return self.runtime_identifier != self.latest_runtime_identifier
 
 
+class GenericChildObject:
+    def __init__(self, service, chart):
+        self.chart = chart
+        self.service = service
+        self.namespace = service.namespace
+
+    def _get_job_object(self, suffix, manifest, images):
+        child_obj = kube.dummy(
+            kube.Job, f"{self.chart}-{suffix}", self.namespace
+        )
+        helmbundle_ext = kube.HelmBundleExt(self.chart, manifest, images)
+        child_obj.helmbundle_ext = helmbundle_ext
+        child_obj.service = self.service
+
+        return child_obj
+
+    def job_db_init(self):
+        return self._get_job_object("db-init", "job_db_init", ["db_init"])
+
+    def job_db_sync(self):
+        return self._get_job_object(
+            "db-sync", "job_db_sync", [f"{self.chart}_db_sync"]
+        )
+
+    def job_db_drop(self):
+        return self._get_job_object("db-drop", "job_db_drop", ["db_drop"])
+
+    def job_ks_endpoints(self):
+        return self._get_job_object(
+            "ks-endpoints", "job_ks_endpoints", ["ks_endpoints"]
+        )
+
+    def job_ks_service(self):
+        return self._get_job_object(
+            "ks-service", "job_ks_service", ["ks_service"]
+        )
+
+    def job_ks_user(self):
+        return self._get_job_object("ks-user", "job_ks_user", ["ks_user"])
+
+    def job_bootstrap(self):
+        return self._get_job_object(
+            "bootstrap", "job_bootstrap", ["bootstrap"]
+        )
+
+
 class Service(RuntimeIdentifierMixin):
 
     ceph_required = False
@@ -47,6 +95,20 @@ class Service(RuntimeIdentifierMixin):
     version = "lcm.mirantis.com/v1alpha1"
     kind = "HelmBundle"
     registry = {}
+    _child_objects = {
+        #       '<chart>': {
+        #           '<Kind>': {
+        #               '<kubernetes resource name>': {
+        #                   'images': ['List of images'],
+        #                   'manifest': '<manifest flag>'
+        #               }
+        #           }
+        #       }
+    }
+
+    @property
+    def _child_generic_objects(self):
+        return {}
 
     def __init_subclass__(cls, *args, **kwargs):
         super().__init_subclass__(*args, **kwargs)
@@ -67,8 +129,94 @@ class Service(RuntimeIdentifierMixin):
         }
         return res
 
+    def _get_generic_child_objects(self):
+        res = []
+        for chart, items in self._child_generic_objects.items():
+            for item in items:
+                res.append(
+                    GenericChildObject(self, chart).__getattribute__(item)()
+                )
+        return res
+
+    @property
+    def child_objects(self):
+        res = []
+
+        for chart_name, charts in self._child_objects.items():
+            child = {}
+            m_ext = {}
+            for kind, kinds in charts.items():
+                child["kind"] = kind
+                for kind_name, meta in kinds.items():
+                    m_ext = meta
+                    m_ext["chart"] = chart_name
+                    m_ext_obj = from_dict(kube.HelmBundleExt, m_ext)
+
+                    child_obj = kube.dummy(
+                        kube.__getattribute__(kind), kind_name, self.namespace
+                    )
+                    child_obj.helmbundle_ext = m_ext_obj
+                    child_obj.service = self
+                    res.append(child_obj)
+        return res + self._get_generic_child_objects()
+
+    def set_release_values(self, values):
+        data = self.resource_def
+        kopf.adopt(data, self.osdpl.obj)
+        obj = kube.resource(data)
+        obj.reload()
+        data = obj.obj
+
+        for release in data["spec"]["releases"]:
+            layers.merger.merge(release["values"], values)
+        obj.update()
+        self.logger.info(f"Update {self.service} with {values}")
+
+    def get_child_object(self, kind, name):
+        return [
+            child
+            for child in self.child_objects
+            if child.kind == kind and child.name == name
+        ][0]
+
     def update_status(self, patch):
         self.osdpl.patch({"status": patch})
+
+    async def cleanup_immutable_resources(self):
+        old_data = self.resource_def
+        kopf.adopt(old_data, self.osdpl.obj)
+        old_obj = kube.resource(old_data)
+        old_obj.reload()
+
+        new_data = self.render()
+        kopf.adopt(new_data, self.osdpl.obj)
+        new_obj = kube.resource(new_data)
+
+        to_cleanup = []
+
+        def _is_image_changed(image, chart):
+            for old_release in old_obj.obj["spec"]["releases"]:
+                for new_release in new_obj.obj["spec"]["releases"]:
+                    if old_release["chart"].endswith(f"/{chart}") and (
+                        old_release["values"]["images"]["tags"][image]
+                        != new_release["values"]["images"]["tags"][image]
+                    ):
+                        return True
+
+        for resource in self.child_objects:
+            if resource.immutable:
+                for image in resource.helmbundle_ext.images:
+                    if _is_image_changed(image, resource.helmbundle_ext.chart):
+                        to_cleanup.append(resource)
+                        # Break on first image match.
+                        break
+
+        self.logger.info(f"Removing the following jobs: {to_cleanup}")
+        tasks = set()
+        for child_object in to_cleanup:
+            tasks.add(child_object.purge())
+
+        await asyncio.gather(*tasks)
 
     async def delete(self, *, body, meta, spec, logger, **kwargs):
         self.logger.info(f"Deleting config for {self.service}")
@@ -97,6 +245,8 @@ class Service(RuntimeIdentifierMixin):
         obj = kube.resource(data)
         # apply state of the object
         if obj.exists():
+            # Drop immutable resources (jobs) before changing theirs values.
+            await self.cleanup_immutable_resources()
             # TODO(pas-ha) delete jobs if image was changed
             obj.reload()
             obj.set_obj(data)
@@ -249,8 +399,10 @@ class Service(RuntimeIdentifierMixin):
 
         return template_args
 
-    def render(self):
+    def render(self, openstack_version=""):
         spec = layers.merge_spec(self.osdpl.obj["spec"], self.logger)
+        if openstack_version:
+            spec["openstack_version"] = openstack_version
         try:
             template_args = self.template_args(spec)
             data = layers.merge_all_layers(
@@ -269,3 +421,27 @@ class Service(RuntimeIdentifierMixin):
         data.update(self.resource_def)
         kopf.adopt(data, self.osdpl.obj)
         return data
+
+    def get_image(self, name, chart, openstack_version=None):
+        data = self.render(openstack_version)
+        for release in data["spec"]["releases"]:
+            if release["chart"].endswith(f"/{chart}"):
+                return release["values"]["images"]["tags"][name]
+
+
+class OpenStackService(Service):
+    openstack_chart = None
+
+    @property
+    def _child_generic_objects(self):
+        return {
+            f"{self.openstack_chart}": {
+                "job_db_init",
+                "job_db_sync",
+                "job_db_drop",
+                "job_ks_endpoints",
+                "job_ks_service",
+                "job_ks_user",
+                "job_bootstrap",
+            }
+        }
