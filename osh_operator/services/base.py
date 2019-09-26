@@ -15,6 +15,8 @@ class Service:
 
     ceph_required = False
     service = None
+    version = "lcm.mirantis.com/v1alpha1"
+    kind = "HelmBundle"
     registry = {}
 
     def __init_subclass__(cls, *args, **kwargs):
@@ -26,15 +28,25 @@ class Service:
         self.namespace = self.osdpl.namespace
         self.logger = logger
 
+    @property
+    def resource_def(self):
+        """Minimal representation of the resource"""
+        res = {
+            "apiVersion": self.version,
+            "kind": self.kind,
+            "metadata": {"name": f"openstack-{self.service}"},
+        }
+        return res
+
     def set_parent_status(self, patch):
         self.osdpl.patch({"status": patch})
 
     async def delete(self, *, body, meta, spec, logger, **kwargs):
         self.logger.info(f"Deleting config for {self.service}")
         # TODO(e0ne): remove credentials of the deleted services
-        data = self.render()
+        obj = kube.resource(self.resource_def)
+        kopf.adopt(obj, self.osdpl.obj)
         # delete the object, already non-existing are auto-handled
-        obj = kube.resource(data)
         obj.delete(propagation_policy="Foreground")
         self.logger.info(f"{obj.kind} {obj.namespace}/{obj.name} deleted")
         # remove child reference from status
@@ -208,5 +220,6 @@ class Service:
         # NOTE(pas-ha) this sets the parent refs in child
         # to point to our resource so that cascading delete
         # is handled by K8s itself
+        data.update(self.resource_def)
         kopf.adopt(data, self.osdpl.obj)
         return data

@@ -1,7 +1,3 @@
-apiVersion: lcm.mirantis.com/v1alpha1
-kind: HelmBundle
-metadata:
-  name: openstack-object-storage
 spec:
   releases:
   - name: openstack-ceph-rgw

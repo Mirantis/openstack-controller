@@ -1,8 +1,5 @@
 {%- set stacklight_enabled = spec.get('features', {}).get('stacklight', {}).get('enabled', False) %}
-apiVersion: lcm.mirantis.com/v1alpha1
-kind: HelmBundle
-metadata:
-  name: openstack-messaging
+
 spec:
   releases:
   - name: openstack-rabbitmq

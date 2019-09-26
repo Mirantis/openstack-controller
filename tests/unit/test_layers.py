@@ -61,7 +61,7 @@ def test_render_template(openstackdeployment):
         credentials=mock.Mock(),
         admin_creds=mock.Mock(),
     )
-    assert data["metadata"]["name"] == "openstack-compute"
+    assert len(data) == 1 and "spec" in data
 
 
 @mock.patch.object(layers, "render_service_template")

@@ -1,7 +1,3 @@
-apiVersion: lcm.mirantis.com/v1alpha1
-kind: HelmBundle
-metadata:
-  name: openstack-tempest
 spec:
   releases:
   - name: openstack-tempest

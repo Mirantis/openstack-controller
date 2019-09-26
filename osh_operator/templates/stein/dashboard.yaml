@@ -9,10 +9,6 @@
   {%- do horizon_extra_panels.append('designatedashboard') %}
 {%- endif %}
 
-apiVersion: lcm.mirantis.com/v1alpha1
-kind: HelmBundle
-metadata:
-  name: openstack-dashboard
 spec:
   releases:
   - name: openstack-horizon

@@ -4,10 +4,6 @@
 {%- set notification_topics = ['notifications'] %}
 {%- do notification_topics.append('stacklight_notifications') if stacklight_enabled %}
 
-apiVersion: lcm.mirantis.com/v1alpha1
-kind: HelmBundle
-metadata:
-  name: openstack-loadbalancer
 spec:
   releases:
 {%- if messaging.get('dedicated_rabbitmq', {}).get('enabled', True) %}
