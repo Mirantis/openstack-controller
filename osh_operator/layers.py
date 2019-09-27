@@ -73,6 +73,7 @@ CHART_GROUP_MAPPING = {
         "ceph-rgw",
         "designate",
         "barbican",
+        "tempest",
     ],
     "infra": [
         "rabbitmq",
