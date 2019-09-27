@@ -177,3 +177,14 @@ def generate_password(length=32):
     chars = "aAbBcCdDeEfFgGhHiIjJkKlLmMnNpPqQrRsStTuUvVwWxXyYzZ1234567890"
 
     return "".join(chars[c % len(chars)] for c in urandom(length))
+
+
+def get_or_create_keycloak_salt(namespace: str, name: str) -> str:
+    try:
+        secret = kube.find(pykube.Secret, name, namespace)
+        return base64.b64decode(secret.obj["data"]["name"])
+    except pykube.exceptions.ObjectDoesNotExist:
+        salt = generate_password()
+        data = {name: base64.b64encode(json.dumps(salt).encode()).decode()}
+        kube.save_secret_data(namespace, name, data)
+        return data[name]

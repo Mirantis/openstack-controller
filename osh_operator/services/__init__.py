@@ -1,5 +1,6 @@
 from osh_operator import layers
 from osh_operator import openstack
+from osh_operator import secrets
 from .base import Service
 
 # INFRA SERVICES
@@ -87,6 +88,26 @@ class Horizon(Service):
 
 class Keystone(Service):
     service = "identity"
+    keycloak_secret = "oidc-crypto-passphrase"
+
+    def template_args(self, spec):
+        t_args = super().template_args(spec)
+        keycloak_enabled = (
+            spec.get("features", {})
+            .get("keystone", {})
+            .get("keycloak", {})
+            .get("enabled", False)
+        )
+
+        if not keycloak_enabled:
+            return t_args
+
+        keycloak_salt = secrets.get_or_create_keycloak_salt(
+            self.namespace, self.keycloak_secret
+        )
+        t_args[self.keycloak_secret] = keycloak_salt
+
+        return t_args
 
 
 class Neutron(Service):
