@@ -7,7 +7,7 @@ metadata:
   annotations: {}
 spec:
   openstack_version: stein
-  profile: base
+  profile: compute
   domain_name: kaas-kubernetes-3af5ae538cf411e9a6c7fa163e5a4837
   # features that would enable coordinated changes to values of several charts
   features:

@@ -55,7 +55,7 @@ spec:
               description: profile to use
               type: string
               enum:
-                - base
+                - compute
             domain_name:
               type: string
             common:

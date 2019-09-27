@@ -1,8 +1,6 @@
 common:
   charts:
     releases:
-      version: 0.1.0
-      namespace: openstack
       values:
         images:
           tags:
@@ -105,30 +103,3 @@ common:
             ingress: docker-prod-local.docker.mirantis.net/mcp/nginx-ingress-controller:0.9.0-20190916150122
             error_pages: docker-prod-local.docker.mirantis.net/mcp/defaultbackend:1.0-20190916150122
             prometheus_memcached_exporter: docker-prod-local.docker.mirantis.net/stacklight/memcached-exporter:v0.5.0
-    repositories:
-    - name: osh
-      url: https://harbor.mcp.mirantis.net/chartrepo/mcp-openstack-helm-20190927201054
-    - name: osh-infra
-      url: https://harbor.mcp.mirantis.net/chartrepo/mcp-openstack-helm-infra-20190927170458
-  openstack:
-    repo: osh
-    values:
-      pod:
-        replicas:
-          api: 3
-    releases:
-      version: 0.1.0-mcp-3080
-  infra:
-    repo: osh-infra
-    releases:
-      version: 0.1.0-mcp-1930
-features:
-  messaging:
-    dedicated_rabbitmq:
-      enabled: true
-  database:
-    local_volumes:
-      enabled: true
-  ssl:
-    public_endpoints:
-      enabled: false

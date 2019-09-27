@@ -57,7 +57,7 @@ spec:
               description: profile to deploy
               type: string
               enum:
-                - base
+                - compute
             domain_name:
               type: string
             common:

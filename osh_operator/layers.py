@@ -168,9 +168,12 @@ def merge_spec(spec, logger):
     logger.debug(f"Using profile {profile}")
 
     try:
-        base = yaml.safe_load(
-            ENV.get_template(f"{os_release}/{profile}.yaml").render()
+        base = yaml.safe_load(ENV.get_template(f"{profile}.yaml").render())
+        artifacts = yaml.safe_load(
+            ENV.get_template(f"{os_release}/artifacts.yaml").render()
         )
+        # Merge operator defaults with user context.
+        merger.merge(base, artifacts)
         # Merge operator defaults with user context.
         return merger.merge(base, spec)
     except Exception as e:
