@@ -20,7 +20,7 @@ spec:
   {%- endif %}
       pod:
         replicas:
-          server: 1
+          server: 3
       manifests:
         network_policy: false
         job_users_create: true
@@ -203,6 +203,7 @@ spec:
             paste.app_factory: neutron.pecan_wsgi.app:versions_factory
         neutron:
           DEFAULT:
+            api_workers: 4
             l3_ha: False
             max_l3_agents_per_router: 1
             l3_ha_network_type: vxlan
