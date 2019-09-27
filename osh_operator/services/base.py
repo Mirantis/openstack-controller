@@ -44,8 +44,9 @@ class Service:
     async def delete(self, *, body, meta, spec, logger, **kwargs):
         self.logger.info(f"Deleting config for {self.service}")
         # TODO(e0ne): remove credentials of the deleted services
-        obj = kube.resource(self.resource_def)
-        kopf.adopt(obj, self.osdpl.obj)
+        data = self.resource_def
+        kopf.adopt(data, self.osdpl.obj)
+        obj = kube.resource(data)
         # delete the object, already non-existing are auto-handled
         obj.delete(propagation_policy="Foreground")
         self.logger.info(f"{obj.kind} {obj.namespace}/{obj.name} deleted")
