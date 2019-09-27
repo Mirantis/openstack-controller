@@ -82,6 +82,7 @@ CHART_GROUP_MAPPING = {
         "openvswitch",
         "libvirt",
         "powerdns",
+        "ingress",
     ],
 }
 
