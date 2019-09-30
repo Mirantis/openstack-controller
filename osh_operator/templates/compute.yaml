@@ -5,7 +5,7 @@ common:
       namespace: openstack
     repositories:
     - name: osh
-      url: https://harbor.mcp.mirantis.net/chartrepo/mcp-openstack-helm-20190927201054
+      url: https://harbor.mcp.mirantis.net/chartrepo/mcp-openstack-helm-20190930102643
     - name: osh-infra
       url: https://harbor.mcp.mirantis.net/chartrepo/mcp-openstack-helm-infra-20190927170458
   openstack:
@@ -15,7 +15,7 @@ common:
         replicas:
           api: 3
     releases:
-      version: 0.1.0-mcp-3080
+      version: 0.1.0-mcp-3083
   infra:
     repo: osh-infra
     releases:
