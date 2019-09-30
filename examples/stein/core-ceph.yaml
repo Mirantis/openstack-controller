@@ -169,6 +169,9 @@ spec:
               #TODO: Will be automated soon in filters.
               compute_feature_enabled:
                 attach_encrypted_volume: false
+              #TODO: Will be automated soon in filters.
+              volume:
+                storage_protocol: ceph
     load-balancer:
       octavia:
         values:
