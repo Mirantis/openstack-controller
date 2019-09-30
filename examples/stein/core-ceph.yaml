@@ -166,6 +166,9 @@ spec:
               network:
                 shared_physical_network: false
                 floating_network_name: public
+              #TODO: Will be automated soon in filters.
+              compute_feature_enabled:
+                attach_encrypted_volume: false
     load-balancer:
       octavia:
         values:
