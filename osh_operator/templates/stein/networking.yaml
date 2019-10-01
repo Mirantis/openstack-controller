@@ -20,7 +20,7 @@ spec:
   {%- endif %}
       pod:
         replicas:
-          server: 3
+          server: 1
       manifests:
         network_policy: false
         job_users_create: true
@@ -81,6 +81,9 @@ spec:
   - name: openstack-neutron
     chart: {{spec.common.openstack.repo}}/neutron
     values:
+      pod:
+        replicas:
+          server: 3
       {%- if spec.get('features', {}).get('neutron', {}).get('dvr', {}).get('enabled', False) %}
       labels:
         agent:
