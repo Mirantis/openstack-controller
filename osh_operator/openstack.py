@@ -21,8 +21,11 @@ ADMIN_SECRET_NAME = "openstack-admin-users"
 GALERA_SECRET_NAME = "generated-galera-passwords"
 
 
-def _generate_credentials(username: str) -> secrets.OSSytemCreds:
-    password = secrets.generate_password()
+def _generate_credentials(
+    prefix: str, username_length: int = 16, password_length: int = 32
+) -> secrets.OSSytemCreds:
+    password = secrets.generate_password(length=password_length)
+    username = secrets.generate_name(prefix=prefix, length=username_length)
     return secrets.OSSytemCreds(username=username, password=password)
 
 
@@ -33,8 +36,8 @@ def get_or_create_galera_credentials(
         galera_creds = secrets.get_galera_secret(GALERA_SECRET_NAME, namespace)
     except pykube.exceptions.ObjectDoesNotExist:
         galera_creds = secrets.GaleraCredentials(
-            sst=_generate_credentials("sst"),
-            exporter=_generate_credentials("exporter"),
+            sst=_generate_credentials("sst", 3),
+            exporter=_generate_credentials("exporter", 8),
         )
         secrets.save_galera_secret(GALERA_SECRET_NAME, namespace, galera_creds)
 
@@ -56,9 +59,9 @@ def get_or_create_os_credentials(
             for service_type in ["database", "messaging", "notifications"]:
                 getattr(os_creds, service_type)[
                     "user"
-                ] = _generate_credentials(srv)
+                ] = _generate_credentials(srv, 16)
         elif service == "powerdns":
-            os_creds.database["user"] = _generate_credentials(service)
+            os_creds.database["user"] = _generate_credentials(service, 16)
         else:
             # TODO(e0ne): add logging here
             return

@@ -179,6 +179,29 @@ def generate_password(length=32):
     return "".join(chars[c % len(chars)] for c in urandom(length))
 
 
+def generate_name(prefix="", length=16):
+    """
+    Generate name of defined length
+
+    Example:
+
+        Template
+        -------
+        {{ generate_name('nova') }}
+
+        Output
+        ------
+        novaS4LRMYrkh7Nl
+    """
+    res = [prefix]
+    res.append(
+        generate_password(
+            len(prefix) if length >= len(prefix) else len(prefix) - length
+        )
+    )
+    return "".join(res)
+
+
 def get_or_create_keycloak_salt(namespace: str, name: str) -> str:
     try:
         secret = kube.find(pykube.Secret, name, namespace)
