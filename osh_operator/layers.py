@@ -169,11 +169,15 @@ def merge_spec(spec, logger):
 
     try:
         base = yaml.safe_load(ENV.get_template(f"{profile}.yaml").render())
-        artifacts = yaml.safe_load(
-            ENV.get_template(f"{os_release}/artifacts.yaml").render()
-        )
-        # Merge operator defaults with user context.
-        merger.merge(base, artifacts)
+        for artifact_path in [
+            "artifacts.yaml",
+            f"{os_release}/artifacts.yaml",
+        ]:
+            artifacts = yaml.safe_load(
+                ENV.get_template(artifact_path).render()
+            )
+            merger.merge(base, artifacts)
+
         # Merge operator defaults with user context.
         return merger.merge(base, spec)
     except Exception as e:

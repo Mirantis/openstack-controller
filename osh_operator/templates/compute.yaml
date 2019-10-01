@@ -1,25 +1,14 @@
 common:
   charts:
     releases:
-      version: 0.1.0
       namespace: openstack
-    repositories:
-    - name: osh
-      url: https://harbor.mcp.mirantis.net/chartrepo/mcp-openstack-helm-20190930102643
-    - name: osh-infra
-      url: https://harbor.mcp.mirantis.net/chartrepo/mcp-openstack-helm-infra-20190927170458
   openstack:
-    repo: osh
     values:
       pod:
+        # TODO(vsaienko): move resource count to dedicated `size` layer
         replicas:
           api: 3
-    releases:
-      version: 0.1.0-mcp-3083
-  infra:
-    repo: osh-infra
-    releases:
-      version: 0.1.0-mcp-1930
+          server: 3
 features:
   messaging:
     dedicated_rabbitmq:

@@ -81,9 +81,6 @@ spec:
   - name: openstack-neutron
     chart: {{spec.common.openstack.repo}}/neutron
     values:
-      pod:
-        replicas:
-          server: 3
       {%- if spec.get('features', {}).get('neutron', {}).get('dvr', {}).get('enabled', False) %}
       labels:
         agent:
