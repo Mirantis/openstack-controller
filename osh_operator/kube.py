@@ -1,11 +1,13 @@
 import functools
-import logging
 
 import kopf
 import pykube
 from typing import Dict
 
-log = logging.getLogger(__name__)
+from mcp_k8s_lib import utils
+
+
+LOG = utils.get_logger(__name__)
 
 
 def login():
@@ -16,7 +18,7 @@ def login():
         # not running in cluster => load local ~/.kube/config for testing
         config = pykube.KubeConfig.from_file()
     client = pykube.HTTPClient(config)
-    log.info(f"Created k8s api client from context {config.current_context}")
+    LOG.info(f"Created k8s api client from context {config.current_context}")
     return client
 
 

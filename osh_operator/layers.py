@@ -1,5 +1,3 @@
-import logging
-
 import deepmerge
 import deepmerge.exception
 import deepmerge.strategy.type_conflict
@@ -7,9 +5,11 @@ import jinja2
 import kopf
 import yaml
 
+from mcp_k8s_lib import utils
 from osh_operator.filters.tempest import generate_tempest_config
 
-LOG = logging.getLogger(__name__)
+LOG = utils.get_logger(__name__)
+
 
 ENV = jinja2.Environment(
     loader=jinja2.PackageLoader(__name__.split(".")[0]),
