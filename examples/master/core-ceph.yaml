@@ -68,6 +68,9 @@ spec:
         backend: local
     stacklight:
       enabled: true
+      user:
+        username: stacklight
+        password: stacklight
   # enabled services and their specific configuration
   services:
     identity:

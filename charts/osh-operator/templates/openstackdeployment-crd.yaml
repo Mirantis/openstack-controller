@@ -272,11 +272,28 @@ spec:
                             nullable: true
                 stacklight:
                   type: object
+                  required:
+                    - enabled
+                    - user
                   properties:
                     enabled:
                       description: >
                         enable StackLight operations support system
                       type: boolean
+                    user:
+                      type: object
+                      required:
+                        - username
+                        - password
+                      properties:
+                        username:
+                          type: string
+                          description: >
+                            Rabbitmq username to access notifications.
+                        password:
+                          type: string
+                          description: >
+                            Rabbitmq password to access notifications.
                 logging:
                   type: object
                   properties:

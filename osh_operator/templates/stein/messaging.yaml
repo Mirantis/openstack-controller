@@ -149,6 +149,14 @@ spec:
                 password: {{ credentials['key-manager'].notifications.user.password }}
             path: /openstack
           {%- endif %}
+          {%- if stacklight_enabled %}
+          stacklight_service_notifications:
+            auth:
+              stacklight:
+                username: {{ spec.features.stacklight.user.username }}
+                password: {{ spec.features.stacklight.user.password }}
+            path: /openstack
+          {%- endif %}
         aux_conf:
           policies:
           - vhost: heat
