@@ -83,6 +83,8 @@ spec:
               - openstack-mariadb-cluster-wait
       conf:
         designate:
+          service:api:
+            enabled_extensions_admin: quotas
           oslo_messaging_notifications:
             topics: {{ notification_topics|join(',') }}
         logging:
