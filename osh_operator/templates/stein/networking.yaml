@@ -81,6 +81,20 @@ spec:
   - name: openstack-neutron
     chart: {{spec.common.openstack.repo}}/neutron
     values:
+      pod:
+        probes:
+          dhcp_agent:
+            dhcp_agent:
+              readiness:
+                enabled: false
+          l3_agent:
+            l3_agent:
+              readiness:
+                enabled: false
+          ovs_agent:
+            ovs_agent:
+              readiness:
+                enabled: false
       {%- if spec.get('features', {}).get('neutron', {}).get('dvr', {}).get('enabled', False) %}
       labels:
         agent:
