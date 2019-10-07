@@ -127,17 +127,17 @@ spec:
           bootstrap:
             enabled: true
             script: |
-              openstack network create \
+              openstack network show public || openstack network create \
                 --provider-network-type flat \
                 --provider-physical-network external \
                 --external \
                 public
-              openstack subnet create public-subnet \
+              openstack subnet show public-subnet || openstack subnet create public-subnet \
                 --no-dhcp --subnet-range 10.11.12.0/24 \
                 --allocation-pool start=10.11.12.100,end=10.11.12.200 \
                 --gateway 10.11.12.10 \
                 --network public
-              openstack router create r1
+              openstack router show r1 || openstack router create r1
               openstack router set --external-gateway public r1
     tempest:
       tempest:
