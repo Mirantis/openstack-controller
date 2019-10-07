@@ -154,6 +154,8 @@ spec:
               openstack router show heat-router || openstack router create heat-router
               openstack router add subnet heat-router heat-subnet
               openstack router set --external-gateway public heat-router
+              openstack role create --or-show "key-manager:service-admin"
+              openstack role create --or-show creator
           dependencies:
             static:
               run_tests:
@@ -176,6 +178,8 @@ spec:
             script: |
               tempest run --config-file /etc/tempest/tempest.conf -w 4 --smoke --blacklist-file  /etc/tempest/test-blacklist
             tempest:
+              auth:
+                tempest_roles: creator
               dashboard:
                 disable_ssl_certificate_validation: true
               validation:
