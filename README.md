@@ -23,33 +23,19 @@ Apply all the required labels to all the nodes except of master k8s node
 
 ## Usage
 
-### Create shared namespace with ceph secrets
-
-`kubectl create ns openstack-ceph-shared`
-
 ### Deploy osh-operator (crds, operator, helmbundlecontroller)
 
 `kubectl apply -f crds/`
 
-Deploy Ceph (Optional)
+In case to deploy with Ceph (Optional)
 
-Deploy Rook
+Deploy ceph-kaas-controller to deploy Ceph related CRDs
 
-`kubectl apply -f https://raw.githubusercontent.com/jumpojoy/os-k8s/master/crds/helmbundle/ceph/rook.yaml`
+`kubectl apply -f https://gerrit.mcp.mirantis.com/gitweb?p=mcp/mcp-pipelines.git;a=blob_plain;f=tools/ceph/ceph-controller.yaml;hb=refs/heads/master`
 
 Deploy ceph cluster
 
-`kubectl apply -f https://raw.githubusercontent.com/jumpojoy/os-k8s/master/crds/ceph/cluster.yaml`
-
-Create Ceph storageclass
-
-`kubectl apply -f https://raw.githubusercontent.com/jumpojoy/os-k8s/master/crds/ceph/storageclass.yaml`
-
-Share metadata with openstack
-
-`kubectl -n rook-ceph get secret rook-ceph-admin-keyring -o yaml  --export | kubectl apply -n openstack-ceph-shared -f-`
-`kubectl -n rook-ceph get configmaps rook-ceph-mon-endpoints -o yaml --export | kubectl apply -n openstack-ceph-shared -f-`
-
+`kubectl apply -f https://gerrit.mcp.mirantis.com/gitweb?p=mcp/mcp-pipelines.git;a=blob_plain;f=tools/ceph/ceph_local_folder_openstack.yaml;hb=refs/heads/master`
 
 In case local volumes are used for Mariadb and/or Rabbitmq configure local volumes provisioner as follows.
 Setup mount points for local volumes provisioner (1 mount point - 1 volume) (Workaround for https://mirantis.jira.com/browse/PROD-31627)
