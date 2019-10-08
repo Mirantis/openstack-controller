@@ -180,17 +180,6 @@ spec:
             tempest:
               auth:
                 tempest_roles: creator
-              #TODO (PRODX-289): Will be automated soon in filters.
-              dns_feature_enabled:
-                api_v2_quotas: True
-                api_v2: True
-                api_v1: False
-                bug_1573141_fixed: True
-                api_admin: True
-                notification_nova_fixed: True
-                api_v2_quotas_verify_project: false
-                notification_neutron_floatingip: True
-                api_v2_root_recordsets: True
               dashboard:
                 disable_ssl_certificate_validation: true
               validation:

@@ -2,6 +2,14 @@ from osh_operator.filters.tempest import base_section
 
 
 DNS_FEATURES_RELEASE_MAPPING = {
+    "stein": {
+        "api_admin": True,
+        "api_v1": False,
+        "api_v2": True,
+        "bug_1573141_fixed": True,
+        "api_v2_quotas": True,
+        "api_v2_root_recordsets": True,
+    },
     "queens": {
         "api_v1": False,
         "api_v2": True,
@@ -58,11 +66,15 @@ class DnsFeatureEnabled(base_section.BaseSection):
 
     @property
     def api_admin(self):
-        pass
+        return DNS_FEATURES_RELEASE_MAPPING[self.spec["openstack_version"]][
+            "api_admin"
+        ]
 
     @property
     def api_v1(self):
-        pass
+        return DNS_FEATURES_RELEASE_MAPPING[self.spec["openstack_version"]][
+            "api_v1"
+        ]
 
     @property
     def api_v1_servers(self):
@@ -70,23 +82,31 @@ class DnsFeatureEnabled(base_section.BaseSection):
 
     @property
     def api_v2(self):
-        pass
+        return DNS_FEATURES_RELEASE_MAPPING[self.spec["openstack_version"]][
+            "api_v2"
+        ]
 
     @property
     def api_v2_quotas(self):
-        pass
+        return DNS_FEATURES_RELEASE_MAPPING[self.spec["openstack_version"]][
+            "api_v2_quotas"
+        ]
 
     @property
     def api_v2_root_recordsets(self):
-        pass
+        return DNS_FEATURES_RELEASE_MAPPING[self.spec["openstack_version"]][
+            "api_v2_root_recordsets"
+        ]
 
     @property
     def bug_1573141_fixed(self):
-        pass
+        return DNS_FEATURES_RELEASE_MAPPING[self.spec["openstack_version"]][
+            "bug_1573141_fixed"
+        ]
 
     @property
     def api_v2_quotas_verify_project(self):
-        pass
+        return False
 
     @property
     def notification_nova_fixed(self):
