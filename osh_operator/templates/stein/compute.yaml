@@ -76,9 +76,6 @@ spec:
   - name: openstack-libvirt
     chart: {{spec.common.infra.repo}}/libvirt
     values:
-      images:
-        tags:
-          libvirt: docker-prod-virtual.docker.mirantis.net/mcp/libvirt:4.0.0-bionic-1554881274591
       manifests:
         network_policy: false
 {%- if (spec.get('features', {}).get('nova', {}).get('images', {}).get('backend') == 'ceph') or (spec.get('features', {}).get('cinder', {}).get('volume', {}).get('backend') == 'ceph') %}

@@ -73,6 +73,7 @@ common:
             nova_placement: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/nova:stein-bionic-20191006180016
             nova_scheduler: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/nova:stein-bionic-20191006180016
             nova_service_cleaner: docker-prod-local.docker.mirantis.net/mcp/ceph-config-helper:nightly
+            libvirt: docker-prod-virtual.docker.mirantis.net/mcp/libvirt:4.0.0-bionic-1554881274591
             octavia_api: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/octavia:stein-bionic-20191006180016
             octavia_db_sync: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/octavia:stein-bionic-20191006180016
             octavia_health_manager: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/octavia:stein-bionic-20191006180016
