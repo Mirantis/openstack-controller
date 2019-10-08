@@ -80,97 +80,24 @@ spec:
             keystone:
               DEFAULT:
                mykey: myvalue
-    image:
-      glance:
-        values:
-          bootstrap:
-            enabled: true
-            ks_user: admin
-            structured:
-              images:
-                cirros:
-                  container_format: bare
-                  id: 00000000-0000-0000-0000-000000000000
-                  image_file: cirros-0.4.0-x86_64-disk.img
-                  image_type: qcow2
-                  min_disk: 1
-                  name: Cirros-4.0
-                  private: false
-                  properties:
-                    os_distro: cirros
-                  source_url: https://artifactory.mcp.mirantis.net/artifactory/test-images/
-                fedora:
-                  container_format: bare
-                  id: 00000000-0000-0000-0000-000000000001
-                  image_file: Fedora-Cloud-Base-27-1.6.x86_64.qcow2
-                  image_type: qcow2
-                  min_disk: 1
-                  name: Fedora-27-1.6
-                  private: false
-                  properties:
-                    os_distro: fedora
-                  source_url: https://artifactory.mcp.mirantis.net/artifactory/test-images/
-    compute:
-      nova:
-        values:
-          bootstrap:
-            structured:
-              flavors:
-                options:
-                  m1.extra_tiny_test:
-                    disk: 5
-                    id: 00000000-0000-0000-0000-000000000000
-                    name: m1.extra_tiny_test
-                    ram: 256
-                    vcpus: 1
-                  m1.tiny_test:
-                    disk: 5
-                    id: 00000000-0000-0000-0000-000000000001
-                    name: m1.tiny_test
-                    ram: 512
-                    vcpus: 1
     networking:
       neutron:
         values:
           bootstrap:
             enabled: true
             script: |
-              openstack network create \
+              openstack network show public || openstack network create \
                 --provider-network-type flat \
                 --provider-physical-network external \
                 --external \
                 public
-              openstack subnet create public-subnet \
+              openstack subnet show public-subnet || openstack subnet create public-subnet \
                 --no-dhcp --subnet-range 10.11.12.0/24 \
                 --allocation-pool start=10.11.12.100,end=10.11.12.200 \
                 --gateway 10.11.12.10 \
                 --network public
-              openstack router create r1
+              openstack router show r1 || openstack router create r1
               openstack router set --external-gateway public r1
-    tempest:
-      tempest:
-        values:
-          conf:
-            blacklist:
-              - (?:tempest.fake.test)
-              - (?:heat_tempest_plugin\.)
-              #- (?:tempest\.api\.compute\.servers\.test_server_actions\.ServerActionsTestJSON)
-            script: |
-              tempest run --config-file /etc/tempest/tempest.conf -w 4 --smoke --blacklist-file  /etc/tempest/test-blacklist
-            tempest:
-              dashboard:
-                disable_ssl_certificate_validation: true
-              compute:
-                image_ref: 00000000-0000-0000-0000-000000000000
-                image_ref_alt: 00000000-0000-0000-0000-000000000000
-                flavor_ref: 00000000-0000-0000-0000-000000000000
-                flavor_ref_alt: 00000000-0000-0000-0000-000000000001
-              validation:
-                image_ssh_password: gocubsgo
-                image_ssh_user: cirros
-              network:
-                shared_physical_network: false
-                floating_network_name: public
     load-balancer:
       octavia:
         values:
