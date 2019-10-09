@@ -112,3 +112,4 @@ common:
             ironic_conductor: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/ironic:stein-bionic-20191008180016
             ironic_pxe: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/ironic:stein-bionic-20191008180016
             ironic_pxe_init: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/ironic:stein-bionic-20191008180016
+            powerdns_db_sync: docker-prod-local.docker.mirantis.net/mcp/powerdns:4.1-alpine-1566452831101
