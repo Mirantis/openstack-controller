@@ -43,12 +43,20 @@ class ComputeFeatureEnabled(base_section.BaseSection):
 
     @property
     def attach_encrypted_volume(self):
-        pass
+        if (
+            self.get_values_item("cinder", "conf.cinder.keymgr.api_class")
+            == "cinder.keymgr.barbican.BarbicanKeyManager"
+            and self.get_values_item("nova", "conf.nova.keymgr.api_class")
+            == "nova.keymgr.barbican.BarbicanKeyManager"
+        ):
+            return True
+        else:
+            return False
 
     @property
     def barbican_integration_enabled(self):
-        return self.get_config_item(
-            "nova", "nova.glance.verify_glance_signatures", False
+        return self.get_values_item(
+            "nova", "conf.nova.glance.verify_glance_signatures", False
         )
 
     @property

@@ -42,7 +42,11 @@ class Auth(base_section.BaseSection):
 
     @property
     def tempest_roles(self):
-        pass
+        roles = []
+        if self.is_service_enabled("barbican"):
+            roles.append("creator")
+        if roles:
+            return ", ".join(roles)
 
     @property
     def test_accounts_file(self):
