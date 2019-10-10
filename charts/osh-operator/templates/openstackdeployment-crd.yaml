@@ -273,7 +273,6 @@ spec:
                 stacklight:
                   type: object
                   required:
-                    - enabled
                     - user
                   properties:
                     enabled:
@@ -283,7 +282,6 @@ spec:
                     user:
                       type: object
                       required:
-                        - username
                         - password
                       properties:
                         username:

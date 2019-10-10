@@ -10,6 +10,15 @@ common:
           api: 3
           server: 3
 features:
+  glance:
+    backend: ceph
+  cinder:
+    volume:
+      backend: ceph
+    backup:
+      backend: ceph
+  neutron:
+    backend: ovs
   messaging:
     dedicated_rabbitmq:
       enabled: true
@@ -18,7 +27,11 @@ features:
       enabled: true
   ssl:
     public_endpoints:
-      enabled: false
+      enabled: true
+  stacklight:
+    enabled: true
+    user:
+      password: stacklight
 services:
   image:
     glance:

@@ -1,0 +1,89 @@
+apiVersion: lcm.mirantis.com/v1alpha1
+kind: OpenStackDeployment
+metadata:
+  name: osh-dev
+  namespace: openstack
+  labels: {}
+  annotations: {}
+spec:
+  openstack_version: queens
+  profile: compute
+  domain_name: kaas-kubernetes-3af5ae538cf411e9a6c7fa163e5a4837
+  # features that would enable coordinated changes to values of several charts
+  features:
+    services:
+     - block-storage
+     - compute
+     - identity
+     - dashboard
+     - image
+     - ingress
+     - database
+     - memcached
+     - networking
+     - orchestration
+     - messaging
+     - load-balancer
+     - dns
+     - key-manager
+    barbican:
+      backend:
+        simple_crypto:
+          enabled: True
+          kek: 'YWJjZGVmZ2hpamtsbW5vcHFyc3R1dnd4eXoxMjM0NTY='
+    keystone:
+      keycloak:
+        oidc:
+          # SSL validation have to be disabled until upstream bug
+          # https://github.com/zmartzone/mod_auth_openidc/issues/329 is not
+          # fixed and CA is custom.
+          OIDCSSLValidateServer: false
+    neutron:
+      external_networks:
+        - physnet: external
+          interface: veth-phy
+          bridge: br-ex
+          network_types:
+           - flat
+          vlan_ranges: null
+          mtu: null
+
+    nova:
+      images:
+        backend: local
+    stacklight:
+      user:
+        password: stacklight
+  # enabled services and their specific configuration
+  services:
+    identity:
+      keystone:
+        values:
+          conf:
+            keystone:
+              DEFAULT:
+               mykey: myvalue
+    networking:
+      neutron:
+        values:
+          bootstrap:
+            enabled: true
+            script: |
+              openstack network show public || openstack network create \
+                --provider-network-type flat \
+                --provider-physical-network external \
+                --external \
+                public
+              openstack subnet show public-subnet || openstack subnet create public-subnet \
+                --no-dhcp --subnet-range 10.11.12.0/24 \
+                --allocation-pool start=10.11.12.100,end=10.11.12.200 \
+                --gateway 10.11.12.10 \
+                --network public
+              openstack router show r1 || openstack router create r1
+              openstack router set --external-gateway public r1
+    load-balancer:
+      octavia:
+        values:
+          octavia:
+            settings:
+              amphora_image_url: "http://images.mcp.mirantis.net/octavia/amphora-x64-haproxy-queens-testing.qcow2"
