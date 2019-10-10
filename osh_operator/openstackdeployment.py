@@ -19,7 +19,16 @@ async def process_osdpl_event(body, meta, spec, logger, **kwargs):
     update, delete = layers.services(spec, logger, **kwargs)
     if delete:
         logger.info(f"deleting children {' '.join(delete)}")
-    service_fns = {s: services.registry[s](body, logger).apply for s in update}
+    service_fns = {}
+    for service in update:
+        service_instance = services.registry[service](body, logger)
+        if event == "resume":
+            if not service_instance.is_identifier_changed:
+                logger.info(
+                    f"Got fake resume event for osdpl {meta['name']}, service: {service}"
+                )
+                continue
+        service_fns[service] = service_instance.apply
     service_fns.update(
         {
             f"{s}_delete": services.registry[s](body, logger).delete

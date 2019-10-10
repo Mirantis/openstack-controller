@@ -1,4 +1,5 @@
 import base64
+import os, socket
 
 import kopf
 from mcp_k8s_lib import ceph_api
@@ -10,7 +11,36 @@ from osh_operator import openstack
 from osh_operator import secrets
 
 
-class Service:
+class RuntimeIdentifierMixin:
+    @property
+    def runtime_identifier(self):
+        pgrp = os.getpgrp()
+        hostname = socket.gethostname()
+        return f"{hostname}_{pgrp}"
+
+    @property
+    def latest_runtime_identifier(self):
+        return (
+            self.osdpl.obj.get("status", {})
+            .get("runtime_identitfier", {})
+            .get(self.service)
+        )
+
+    def set_runtime_identifier(self):
+        self.logger.info(
+            f"Setting runtime identifier to osdpl service {self.service}."
+        )
+        patch = {
+            "runtime_identitfier": {self.service: self.runtime_identifier}
+        }
+        self.update_status(patch)
+
+    @property
+    def is_identifier_changed(self):
+        return self.runtime_identifier != self.latest_runtime_identifier
+
+
+class Service(RuntimeIdentifierMixin):
 
     ceph_required = False
     service = None
@@ -37,7 +67,7 @@ class Service:
         }
         return res
 
-    def set_parent_status(self, patch):
+    def update_status(self, patch):
         self.osdpl.patch({"status": patch})
 
     async def delete(self, *, body, meta, spec, logger, **kwargs):
@@ -50,7 +80,7 @@ class Service:
         obj.delete(propagation_policy="Foreground")
         self.logger.info(f"{obj.kind} {obj.namespace}/{obj.name} deleted")
         # remove child reference from status
-        self.set_parent_status({"children": {obj.name: None}})
+        self.update_status({"children": {obj.name: None}})
         kopf.info(
             body,
             reason="Delete",
@@ -58,6 +88,7 @@ class Service:
         )
 
     async def apply(self, event, **kwargs):
+        self.set_runtime_identifier()
         if self.ceph_required:
             self.ensure_ceph_secrets()
         self.logger.info(f"Applying config for {self.service}")
@@ -79,7 +110,7 @@ class Service:
             "children", {}
         ):
             status_patch = {"children": {obj.name: "Unknown"}}
-            self.set_parent_status(status_patch)
+            self.update_status(status_patch)
         kopf.info(
             self.osdpl.obj,
             reason=event.capitalize(),
@@ -114,7 +145,7 @@ class Service:
         self.logger.info("Waiting for ceph resources.")
         # FIXME(pas-ha) race? we can re-write result of parallel thread..
         # but who cares TBH
-        self.set_parent_status(
+        self.update_status(
             {
                 "ceph": {
                     "secret": ceph_api.CephStatus.waiting,
@@ -131,7 +162,7 @@ class Service:
         # we need to handle this.
         self.save_ceph_secrets(oscp)
         self.save_ceph_configmap(oscp)
-        self.set_parent_status(
+        self.update_status(
             {
                 "ceph": {
                     "secret": ceph_api.CephStatus.created,
