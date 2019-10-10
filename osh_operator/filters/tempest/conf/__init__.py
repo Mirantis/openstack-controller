@@ -9,6 +9,7 @@ from osh_operator.filters.tempest.conf import debug
 from osh_operator.filters.tempest.conf import default
 from osh_operator.filters.tempest.conf import dns
 from osh_operator.filters.tempest.conf import dns_feature_enabled
+from osh_operator.filters.tempest.conf import ephemeral_storage_encryption
 from osh_operator.filters.tempest.conf import heat_plugin
 from osh_operator.filters.tempest.conf import identity
 from osh_operator.filters.tempest.conf import identity_feature_enabled
@@ -42,6 +43,7 @@ SECTIONS = [
     default.Default,
     dns.Dns,
     dns_feature_enabled.DnsFeatureEnabled,
+    ephemeral_storage_encryption.EphemeralStorageEncryption,
     heat_plugin.HeatPlugin,
     identity.Identity,
     identity_feature_enabled.IdentityFeatureEnabled,
