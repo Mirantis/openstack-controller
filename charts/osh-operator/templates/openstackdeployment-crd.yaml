@@ -51,6 +51,7 @@ spec:
               description: version of OpenStack to deploy
               type: string
               enum:
+                - queens # not supported, only for migration
                 - stein
                 - master
             profile:
