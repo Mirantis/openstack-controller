@@ -50,6 +50,7 @@ spec:
               type: string
               enum:
                 - queens # not supported, only for migration
+                - rocky # not supported, only for migration
                 - stein
                 - master
             profile:
