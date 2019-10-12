@@ -6,11 +6,11 @@ metadata:
 spec:
   repositories:
   - name: osh-operator
-    url: https://harbor.mcp.mirantis.net/chartrepo/master-osh-operator-20191010191919
+    url: https://harbor.mcp.mirantis.net/chartrepo/master-osh-operator-20191011214008
   releases:
   - name: openstack-osh-operator
     chart: osh-operator/osh-operator
-    version: 0.1.0-mcp-287
+    version: 0.1.0-mcp-291
     namespace: osh-system
     values:
       kopf:
