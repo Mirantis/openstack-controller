@@ -16,5 +16,5 @@ spec:
       kopf:
         enabled: false
       image:
-        repository: docker-prod-local.docker.mirantis.net/mcp/osh-operator
+        repository: docker-dev-kaas-local.docker.mirantis.net/mcp/osh-operator
         tag: nightly
