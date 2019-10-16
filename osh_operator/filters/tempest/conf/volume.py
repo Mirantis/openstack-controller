@@ -67,7 +67,11 @@ class Volume(base_section.BaseSection):
 
     @property
     def storage_protocol(self):
-        pass
+        backend = self.get_values_item("cinder", "storage")
+
+        # TODO: Add more backends here
+        protocol_map = {"ceph": "ceph"}
+        return protocol_map.get(backend)
 
     @property
     def vendor_name(self):

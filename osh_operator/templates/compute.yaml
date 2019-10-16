@@ -124,9 +124,6 @@ services:
               shared_physical_network: false
               floating_network_name: public
             #TODO: Will be automated soon in filters.
-            volume:
-              storage_protocol: ceph
-            #TODO: Will be automated soon in filters.
             network-feature-enabled:
               api_extensions:
                 - default-subnetpools
