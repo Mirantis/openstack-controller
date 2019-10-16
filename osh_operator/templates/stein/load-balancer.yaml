@@ -107,6 +107,8 @@ spec:
         octavia:
           certificates:
             endpoint_type: internalURL
+          haproxy_amphora:
+            connection_max_retries: 500
           glance:
             endpoint_type: internalURL
           neutron:
