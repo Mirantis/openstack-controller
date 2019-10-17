@@ -64,17 +64,18 @@ class DnsFeatureEnabled(base_section.BaseSection):
         "notification_neutron_floatingip",
     ]
 
+    def _get_dns_release_feature(self, feature):
+        return DNS_FEATURES_RELEASE_MAPPING.get(
+            self.spec["openstack_version"], {}
+        ).get(feature)
+
     @property
     def api_admin(self):
-        return DNS_FEATURES_RELEASE_MAPPING[self.spec["openstack_version"]][
-            "api_admin"
-        ]
+        return self._get_dns_release_feature("api_admin")
 
     @property
     def api_v1(self):
-        return DNS_FEATURES_RELEASE_MAPPING[self.spec["openstack_version"]][
-            "api_v1"
-        ]
+        return self._get_dns_release_feature("api_v1")
 
     @property
     def api_v1_servers(self):
@@ -82,27 +83,19 @@ class DnsFeatureEnabled(base_section.BaseSection):
 
     @property
     def api_v2(self):
-        return DNS_FEATURES_RELEASE_MAPPING[self.spec["openstack_version"]][
-            "api_v2"
-        ]
+        return self._get_dns_release_feature("api_v2")
 
     @property
     def api_v2_quotas(self):
-        return DNS_FEATURES_RELEASE_MAPPING[self.spec["openstack_version"]][
-            "api_v2_quotas"
-        ]
+        return self._get_dns_release_feature("api_v2_quotas")
 
     @property
     def api_v2_root_recordsets(self):
-        return DNS_FEATURES_RELEASE_MAPPING[self.spec["openstack_version"]][
-            "api_v2_root_recordsets"
-        ]
+        return self._get_dns_release_feature("api_v2_root_recordsets")
 
     @property
     def bug_1573141_fixed(self):
-        return DNS_FEATURES_RELEASE_MAPPING[self.spec["openstack_version"]][
-            "bug_1573141_fixed"
-        ]
+        return self._get_dns_release_feature("bug_1573141_fixed")
 
     @property
     def api_v2_quotas_verify_project(self):
