@@ -4,13 +4,13 @@ common:
       version: 0.1.0
     repositories:
     - name: osh
-      url: https://harbor.mcp.mirantis.net/chartrepo/mcp-openstack-helm-20191008123317
+      url: https://artifactory.mcp.mirantis.net/binary-dev-kaas-local/openstack/mcp-openstack-helm
     - name: osh-infra
-      url: https://harbor.mcp.mirantis.net/chartrepo/mcp-openstack-helm-infra-20191009172943
+      url: https://artifactory.mcp.mirantis.net/binary-dev-kaas-local/openstack/mcp-openstack-helm-infra
   openstack:
     repo: osh
     releases:
-      version: 0.1.0-mcp-3117
+      version: 0.1.0-mcp-3118
   infra:
     repo: osh-infra
     releases:
