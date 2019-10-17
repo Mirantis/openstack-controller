@@ -226,7 +226,7 @@ spec:
             {%- endif %}
             max_l3_agents_per_router: 3
             l3_ha_network_type: vxlan
-            dhcp_agents_per_network: 1
+            dhcp_agents_per_network: 2
             {%- if 'dns' in spec.features.services %}
             external_dns_driver: designate
             {%- endif %}
