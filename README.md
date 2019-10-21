@@ -25,7 +25,7 @@ Apply all the required labels to all the nodes except of master k8s node
 
 ### Deploy osh-operator (crds, operator, helmbundlecontroller)
 
-`kubectl apply -f crds/`
+`kubectl apply -f deploy/helmbundle/`
 
 In case to deploy with Ceph (Optional)
 
@@ -47,7 +47,7 @@ nodeVolumesCount=1
 volDirPrefix='vol'
 sshUser='ubuntu'
 for node in $(sudo kubectl --kubeconfig=/root/.kube/config get nodes -o NAME -l openstack-control-plane=enabled); do
-  ip=$(sudo kubectl --kubeconfig=/root/.kube/config describe ${node} | grep InternalIP | cut -d' ' -f5;)
+  ip=$(sudo kubectl --kubeconfig=/root/.kube/config describe ${node} | grep InternalIP | cut -d' ' -f5);
   for i in $(seq 1 $nodeVolumesCount); do
     volDir="${volDirPrefix}-${i}"
     ssh -o "StrictHostKeyChecking=no" ${sshUser}@${ip} "sudo mkdir -p /mnt/local-provisioner/${volDir} && sudo mkdir -p /mnt/${volDir}"
@@ -67,7 +67,7 @@ kubectl apply -f mcp-pipelines/tools/openstack-local-volume-provisoner.yaml
 
 Update DNS to match currently configured by kaas
 
-`sed -i "s/kaas-kubernetes-3af5ae538cf411e9a6c7fa163e5a4837/$(kubectl get configmap -n kube-system coredns -o jsonpath='{.data.Corefile}' |grep -oh kaas-kubernetes-[[:alnum:]]*)/g" examples/stein/core-ceph.yaml`
+`sed -i "s/kaas-kubernetes-3af5ae538cf411e9a6c7fa163e5a4837/$(kubectl get configmap -n kube-system coredns -o jsonpath='{.data.Corefile}' |grep -oh kaas-kubernetes-[[:alnum:]]*)/g" examples/stein/core-ceph-local-non-dvr.yaml`
 
 #### In case SSL on public endpoints is enabled before applying context need to generate certificates and set them in context yaml.
 ```
