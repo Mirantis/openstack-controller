@@ -120,12 +120,16 @@ class Service(RuntimeIdentifierMixin):
         self.logger = logger
 
     @property
+    def resource_name(self):
+        return f"openstack-{self.service}"
+
+    @property
     def resource_def(self):
         """Minimal representation of the resource"""
         res = {
             "apiVersion": self.version,
             "kind": self.kind,
-            "metadata": {"name": f"openstack-{self.service}"},
+            "metadata": {"name": self.resource_name},
         }
         return res
 
@@ -247,6 +251,12 @@ class Service(RuntimeIdentifierMixin):
 
     async def apply(self, event, **kwargs):
         self.set_runtime_identifier()
+        # ensure child ref exists in the status
+        if self.resource_name not in self.osdpl.obj.get("status", {}).get(
+            "children", {}
+        ):
+            status_patch = {"children": {self.resource_name: "Unknown"}}
+            self.update_status(status_patch)
         if self.ceph_required:
             self.ensure_ceph_secrets()
         self.logger.info(f"Applying config for {self.service}")
@@ -265,12 +275,6 @@ class Service(RuntimeIdentifierMixin):
         else:
             obj.create()
             self.logger.debug(f"{obj.kind} child is created: %s", obj.obj)
-        # ensure child ref exists in the status
-        if obj.name not in self.osdpl.obj.get("status", {}).get(
-            "children", {}
-        ):
-            status_patch = {"children": {obj.name: "Unknown"}}
-            self.update_status(status_patch)
         kopf.info(
             self.osdpl.obj,
             reason=event.capitalize(),
@@ -425,10 +429,10 @@ class Service(RuntimeIdentifierMixin):
             )
         except Exception as e:
             raise kopf.HandlerFatalError(str(e))
+        data.update(self.resource_def)
         # NOTE(pas-ha) this sets the parent refs in child
         # to point to our resource so that cascading delete
         # is handled by K8s itself
-        data.update(self.resource_def)
         kopf.adopt(data, self.osdpl.obj)
         return data
 
