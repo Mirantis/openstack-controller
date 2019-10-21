@@ -8,6 +8,21 @@ spec:
   - name: openstack-mariadb
     chart: {{spec.common.infra.repo}}/mariadb
     values:
+      images:
+        tags:
+{%- for image in [
+    "ingress",
+    "prometheus_create_mysql_user",
+    "image_repo_sync",
+    "error_pages",
+    "mariadb_backup",
+    "prometheus_mysql_exporter",
+    "prometheus_mysql_exporter_helm_tests",
+    "dep_check",
+    "mariadb",
+    "mariadb_scripted_test",] %}
+          {{ image }}: {{ images[image] }}
+{%- endfor %}
 {%- if stacklight_enabled %}
       monitoring:
         prometheus:

@@ -6,6 +6,19 @@ spec:
   - name: openstack-ceph-rgw
     chart: {{spec.common.infra.repo}}/ceph-rgw
     values:
+      images:
+        tags:
+{%- for image in [
+    "ks_service",
+    "image_repo_sync",
+    "rgw_s3_admin",
+    "ceph_config_helper",
+    "ks_endpoints",
+    "dep_check",
+    "ceph_rgw",
+    "ks_user",] %}
+          {{ image }}: {{ images[image] }}
+{%- endfor %}
       conf:
         rgw_ks:
           enabled: true

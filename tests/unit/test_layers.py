@@ -60,6 +60,7 @@ def test_render_template(openstackdeployment):
         logging,
         credentials=mock.Mock(),
         admin_creds=mock.Mock(),
+        images=mock.Mock(),
         ceph={
             "nova": {
                 "pools": {},

@@ -9,12 +9,14 @@ from osh_operator import layers
 def main(args):
     n = len(args)
     os_version = "stein"
-    openstackdeployment_file = "examples/{os_version}/core-ceph.yaml"
+    openstackdeployment_file = (
+        f"examples/{os_version}/core-ceph-local-non-dvr.yaml"
+    )
     openstackdeployment = yaml.safe_load(open(openstackdeployment_file))
     profile = openstackdeployment["spec"]["profile"]
     base = yaml.safe_load(layers.ENV.get_template(f"{profile}.yaml").render())
     artifacts = yaml.safe_load(
-        layers.ENV.get_template(f"{os_version}/artifacts.yaml").render()
+        layers.ENV.get_template("artifacts.yaml").render()
     )
     openstackdeployment["spec"] = layers.merger.merge(
         base, openstackdeployment["spec"]

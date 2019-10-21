@@ -13,6 +13,7 @@ spec:
   - name: openstack-glance-rabbitmq
     chart: {{spec.common.infra.repo}}/rabbitmq
     values:
+{% include 'base/_rabbitmq_images.yaml' %}
   {%- if stacklight_enabled %}
       monitoring:
         prometheus:
@@ -76,6 +77,26 @@ spec:
   - name: openstack-glance
     chart: {{spec.common.openstack.repo}}/glance
     values:
+      images:
+        tags:
+{%- for image in [
+    "ks_service",
+    "db_drop",
+    "image_repo_sync",
+    "bootstrap",
+    "glance_db_sync",
+    "glance_storage_init",
+    "ks_endpoints",
+    "rabbit_init",
+    "glance_api",
+    "db_init",
+    "dep_check",
+    "test",
+    "glance_registry",
+    "glance_metadefs_load",
+    "ks_user",] %}
+          {{ image }}: {{ images[image] }}
+{%- endfor %}
       dependencies:
         static:
           db_init:

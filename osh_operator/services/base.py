@@ -196,12 +196,22 @@ class Service(RuntimeIdentifierMixin):
 
         def _is_image_changed(image, chart):
             for old_release in old_obj.obj["spec"]["releases"]:
-                for new_release in new_obj.obj["spec"]["releases"]:
-                    if old_release["chart"].endswith(f"/{chart}") and (
-                        old_release["values"]["images"]["tags"][image]
-                        != new_release["values"]["images"]["tags"][image]
-                    ):
-                        return True
+                if old_release["chart"].endswith(f"/{chart}"):
+                    for new_release in new_obj.obj["spec"]["releases"]:
+                        if new_release["chart"].endswith(f"/{chart}"):
+                            old_image = old_release["values"]["images"][
+                                "tags"
+                            ].get(image)
+                            new_image = new_release["values"]["images"][
+                                "tags"
+                            ][image]
+                            # When image name is changed it will not present in helmbundle object
+                            # on deployed environmet. At the same time in current version of code
+                            # we will use new name of image.
+                            if old_image is None:
+                                return True
+                            if old_image != new_image:
+                                return True
 
         for resource in self.child_objects:
             if resource.immutable:

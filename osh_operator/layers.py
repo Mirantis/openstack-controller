@@ -118,9 +118,13 @@ def render_service_template(
 
 def merge_all_layers(service, body, meta, spec, logger, **template_args):
     """Merge releases and values from osdpl crd into service HelmBundle"""
+    os_release = spec["openstack_version"]
+    images = yaml.safe_load(
+        ENV.get_template(f"{os_release}/artifacts.yaml").render()
+    )
 
     service_helmbundle = render_service_template(
-        service, body, meta, spec, logger, **template_args
+        service, body, meta, spec, logger, images=images, **template_args
     )
 
     # FIXME(pas-ha) either move to dict merging stage before,
@@ -163,20 +167,13 @@ def merge_all_layers(service, body, meta, spec, logger, **template_args):
 
 def merge_spec(spec, logger):
     """Merge user-defined OsDpl spec with base for profile and OS version"""
-    os_release = spec["openstack_version"]
     profile = spec["profile"]
     logger.debug(f"Using profile {profile}")
 
     try:
         base = yaml.safe_load(ENV.get_template(f"{profile}.yaml").render())
-        for artifact_path in [
-            "artifacts.yaml",
-            f"{os_release}/artifacts.yaml",
-        ]:
-            artifacts = yaml.safe_load(
-                ENV.get_template(artifact_path).render()
-            )
-            merger.merge(base, artifacts)
+        artifacts = yaml.safe_load(ENV.get_template("artifacts.yaml").render())
+        merger.merge(base, artifacts)
 
         # Merge operator defaults with user context.
         return merger.merge(base, spec)

@@ -13,6 +13,7 @@ spec:
   - name: openstack-neutron-rabbitmq
     chart: {{spec.common.infra.repo}}/rabbitmq
     values:
+{% include 'base/_rabbitmq_images.yaml' %}
   {%- if stacklight_enabled %}
       monitoring:
         prometheus:
@@ -76,11 +77,48 @@ spec:
   - name: openstack-openvswitch
     chart: {{spec.common.infra.repo}}/openvswitch
     values:
+      images:
+        tags:
+{%- for image in [
+    "openvswitch_db_server",
+    "openvswitch_vswitchd",
+    "dep_check",
+    "image_repo_sync",] %}
+          {{ image }}: {{ images[image] }}
+{%- endfor %}
       endpoints:
         cluster_domain_suffix: {{ spec.domain_name }}
   - name: openstack-neutron
     chart: {{spec.common.openstack.repo}}/neutron
     values:
+      images:
+        tags:
+{%- for image in [
+    "neutron_metadata",
+    "db_drop",
+    "image_repo_sync",
+    "neutron_l2gw",
+    "neutron_bagpipe_bgp",
+    "neutron_openvswitch_agent",
+    "neutron_db_sync",
+    "db_init",
+    "neutron_dhcp",
+    "dep_check",
+    "ks_user",
+    "ks_service",
+    "neutron_linuxbridge_agent",
+    "ks_endpoints",
+    "neutron_l3",
+    "neutron_sriov_agent_init",
+    "bootstrap",
+    "neutron_ironic_agent",
+    "neutron_sriov_agent",
+    "rabbit_init",
+    "neutron_server",
+    "purge_test",
+    "test",] %}
+          {{ image }}: {{ images[image] }}
+{%- endfor %}
       pod:
         probes:
           dhcp_agent:

@@ -6,6 +6,15 @@ spec:
   - name: openstack-tempest
     chart: {{spec.common.openstack.repo}}/tempest
     values:
+      images:
+        tags:
+{%- for image in [
+    "tempest_run_tests",
+    "ks_user",
+    "dep_check",
+    "image_repo_sync",] %}
+          {{ image }}: {{ images[image] }}
+{%- endfor %}
       manifests:
         network_policy: false
 {%- if spec.get('features', {}).get('ssl', {}).get('public_endpoints', {}).get('enabled', True) %}

@@ -13,6 +13,7 @@ spec:
   - name: openstack-octavia-rabbitmq
     chart: {{spec.common.infra.repo}}/rabbitmq
     values:
+{% include 'base/_rabbitmq_images.yaml' %}
   {%- if stacklight_enabled %}
       monitoring:
         prometheus:
@@ -76,6 +77,29 @@ spec:
   - name: openstack-octavia
     chart: {{spec.common.openstack.get('repo', spec.common.charts.repo)}}/octavia
     values:
+      images:
+        tags:
+{%- for image in [
+    "openvswitch_vswitchd",
+    "octavia_worker",
+    "db_drop",
+    "image_repo_sync",
+    "ks_endpoints",
+    "test",
+    "db_init",
+    "dep_check",
+    "octavia_api",
+    "ks_user",
+    "ks_service",
+    "octavia_db_sync",
+    "octavia_health_manager_init",
+    "bootstrap",
+    "rabbit_init",
+    "octavia_health_manager",
+    "octavia_housekeeping",
+    "create_resources",] %}
+          {{ image }}: {{ images[image] }}
+{%- endfor %}
       dependencies:
         static:
           db_init:

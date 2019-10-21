@@ -13,6 +13,7 @@ spec:
   - name: openstack-nova-rabbitmq
     chart: {{spec.common.infra.repo}}/rabbitmq
     values:
+{% include 'base/_rabbitmq_images.yaml' %}
   {%- if stacklight_enabled %}
       monitoring:
         prometheus:
@@ -76,6 +77,13 @@ spec:
   - name: openstack-libvirt
     chart: {{spec.common.infra.repo}}/libvirt
     values:
+      images:
+        tags:
+{%- for image in ["image_repo_sync",
+                 "libvirt",
+                 "dep_check",] %}
+          {{ image }}: {{ images[image] }}
+{%- endfor %}
       manifests:
         network_policy: false
 {%- if (spec.get('features', {}).get('nova', {}).get('images', {}).get('backend') == 'ceph') or (spec.get('features', {}).get('cinder', {}).get('volume', {}).get('backend') == 'ceph') %}
@@ -101,6 +109,37 @@ spec:
   - name: openstack-nova
     chart: {{spec.common.openstack.repo}}/nova
     values:
+      images:
+        tags:
+{%- for image in [
+    "nova_cell_setup_init",
+    "nova_placement",
+    "nova_compute_ironic",
+    "nova_db_sync",
+    "db_drop",
+    "bootstrap",
+    "image_repo_sync",
+    "nova_compute_ssh",
+    "ks_endpoints",
+    "nova_api",
+    "db_init",
+    "nova_conductor",
+    "dep_check",
+    "nova_compute",
+    "nova_novncproxy",
+    "ks_user",
+    "ks_service",
+    "nova_spiceproxy",
+    "nova_scheduler",
+    "nova_novncproxy_assets",
+    "nova_spiceproxy_assets",
+    "rabbit_init",
+    "nova_cell_setup",
+    "nova_consoleauth",
+    "test",
+    "nova_service_cleaner",] %}
+          {{ image }}: {{ images[image] }}
+{%- endfor %}
       pod:
         replicas:
           osapi: 3

@@ -46,7 +46,7 @@ class RabbitMQ(Service):
         "rabbitmq": {
             "Job": {
                 "openstack-rabbitmq-cluster-wait": {
-                    "images": ["scripted_test"],
+                    "images": ["rabbitmq_scripted_test"],
                     "manifest": "job_cluster_wait",
                 }
             }
@@ -82,7 +82,7 @@ class Barbican(OpenStackService):
         "rabbitmq": {
             "Job": {
                 "openstack-barbican-rabbitmq-cluster-wait": {
-                    "images": ["scripted_test"],
+                    "images": ["rabbitmq_scripted_test"],
                     "manifest": "job_cluster_wait",
                 }
             }
@@ -114,7 +114,7 @@ class Cinder(OpenStackService):
         "rabbitmq": {
             "Job": {
                 "openstack-cinder-rabbitmq-cluster-wait": {
-                    "images": ["scripted_test"],
+                    "images": ["rabbitmq_scripted_test"],
                     "manifest": "job_cluster_wait",
                 }
             }
@@ -130,7 +130,7 @@ class Designate(OpenStackService):
         "rabbitmq": {
             "Job": {
                 "openstack-designate-rabbitmq-cluster-wait": {
-                    "images": ["scripted_test"],
+                    "images": ["rabbitmq_scripted_test"],
                     "manifest": "job_cluster_wait",
                 }
             }
@@ -167,7 +167,7 @@ class Glance(OpenStackService):
         "rabbitmq": {
             "Job": {
                 "openstack-glance-rabbitmq-cluster-wait": {
-                    "images": ["scripted_test"],
+                    "images": ["rabbitmq_scripted_test"],
                     "manifest": "job_cluster_wait",
                 }
             }
@@ -195,7 +195,7 @@ class Heat(OpenStackService):
         "rabbitmq": {
             "Job": {
                 "openstack-heat-rabbitmq-cluster-wait": {
-                    "images": ["scripted_test"],
+                    "images": ["rabbitmq_scripted_test"],
                     "manifest": "job_cluster_wait",
                 }
             }
@@ -254,7 +254,7 @@ class Keystone(OpenStackService):
         "rabbitmq": {
             "Job": {
                 "openstack-keystone-rabbitmq-cluster-wait": {
-                    "images": ["scripted_test"],
+                    "images": ["rabbitmq_scripted_test"],
                     "manifest": "job_cluster_wait",
                 }
             }
@@ -288,7 +288,7 @@ class Neutron(OpenStackService):
         "rabbitmq": {
             "Job": {
                 "openstack-neutron-rabbitmq-cluster-wait": {
-                    "images": ["scripted_test"],
+                    "images": ["rabbitmq_scripted_test"],
                     "manifest": "job_cluster_wait",
                 }
             }
@@ -324,7 +324,7 @@ class Nova(OpenStackService):
         "rabbitmq": {
             "Job": {
                 "openstack-nova-rabbitmq-cluster-wait": {
-                    "images": ["scripted_test"],
+                    "images": ["rabbitmq_scripted_test"],
                     "manifest": "job_cluster_wait",
                 }
             }
@@ -347,7 +347,7 @@ class Octavia(OpenStackService):
         "rabbitmq": {
             "Job": {
                 "openstack-octavia-rabbitmq-cluster-wait": {
-                    "images": ["scripted_test"],
+                    "images": ["rabbitmq_scripted_test"],
                     "manifest": "job_cluster_wait",
                 }
             }

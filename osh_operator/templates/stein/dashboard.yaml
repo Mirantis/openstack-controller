@@ -17,6 +17,18 @@ spec:
   - name: openstack-horizon
     chart: {{spec.common.openstack.repo}}/horizon
     values:
+      images:
+        tags:
+{%- for image in [
+    "horizon_db_sync",
+    "db_init",
+    "db_drop",
+    "horizon",
+    "image_repo_sync",
+    "test",
+    "dep_check",] %}
+          {{ image }}: {{ images[image] }}
+{%- endfor %}
       dependencies:
         static:
           db_init:

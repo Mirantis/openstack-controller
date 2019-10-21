@@ -13,6 +13,7 @@ spec:
   - name: openstack-heat-rabbitmq
     chart: {{spec.common.infra.repo}}/rabbitmq
     values:
+{% include 'base/_rabbitmq_images.yaml' %}
   {%- if stacklight_enabled %}
       monitoring:
         prometheus:
@@ -88,6 +89,28 @@ spec:
   - name: openstack-heat
     chart: {{spec.common.openstack.repo}}/heat
     values:
+      images:
+        tags:
+{%- for image in [
+    "db_drop",
+    "image_repo_sync",
+    "heat_engine",
+    "heat_api",
+    "ks_endpoints",
+    "db_init",
+    "dep_check",
+    "heat_engine_cleaner",
+    "ks_service",
+    "heat_purge_deleted",
+    "heat_db_sync",
+    "bootstrap",
+    "rabbit_init",
+    "heat_cfn",
+    "heat_cloudwatch",
+    "test",
+    "ks_user",] %}
+          {{ image }}: {{ images[image] }}
+{%- endfor %}
       dependencies:
         static:
           db_init:

@@ -8,6 +8,15 @@ spec:
   - name: openstack-memcached
     chart: {{spec.common.infra.repo}}/memcached
     values:
+      images:
+        tags:
+{%- for image in [
+    "dep_check",
+    "memcached",
+    "prometheus_memcached_exporter",
+    "image_repo_sync",] %}
+          {{ image }}: {{ images[image] }}
+{%- endfor %}
   {%- if stacklight_enabled %}
       monitoring:
         prometheus:

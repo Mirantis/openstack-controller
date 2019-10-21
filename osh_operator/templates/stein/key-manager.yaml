@@ -12,6 +12,7 @@ spec:
   - name: openstack-barbican-rabbitmq
     chart: {{spec.common.infra.repo}}/rabbitmq
     values:
+{% include 'base/_rabbitmq_images.yaml' %}
   {%- if stacklight_enabled %}
       monitoring:
         prometheus:
@@ -75,6 +76,23 @@ spec:
   - name: openstack-barbican
     chart: {{spec.common.openstack.repo}}/barbican
     values:
+      images:
+        tags:
+{%- for image in [
+    "ks_service",
+    "bootstrap",
+    "db_drop",
+    "barbican_db_sync",
+    "image_repo_sync",
+    "ks_endpoints",
+    "rabbit_init",
+    "db_init",
+    "dep_check",
+    "ks_user",
+    "scripted_test",
+    "barbican_api",] %}
+          {{ image }}: {{ images[image] }}
+{%- endfor %}
       dependencies:
         static:
           db_init:

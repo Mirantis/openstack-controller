@@ -6,6 +6,19 @@ spec:
   - name: ingress-openstack
     chart: {{spec.common.infra.repo}}/ingress
     values:
+      images:
+        tags:
+{%- for image in [
+    "ingress",
+    "ingress_routed_vip",
+    "error_pages",
+    "image_repo_sync",
+    "keepalived",
+    "ingress_module_init",
+    "entrypoint",
+    "dep_check",] %}
+          {{ image }}: {{ images[image] }}
+{%- endfor %}
       manifests:
         network_policy: false
       endpoints:
