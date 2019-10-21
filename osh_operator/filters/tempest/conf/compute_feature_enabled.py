@@ -81,7 +81,8 @@ class ComputeFeatureEnabled(base_section.BaseSection):
 
     @property
     def console_output(self):
-        pass
+        if self.is_service_enabled("ironic"):
+            return False
 
     @property
     def disk_config(self):
