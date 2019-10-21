@@ -4,112 +4,112 @@ common:
       values:
         images:
           tags:
-            scripted_test: docker-dev-kaas-local.docker.mirantis.net/openstack/heat:stein-bionic-20191018123503
-            barbican_db_sync: docker-dev-kaas-local.docker.mirantis.net/openstack/barbican:stein-bionic-20191018123503
-            barbican_api: docker-dev-kaas-local.docker.mirantis.net/openstack/barbican:stein-bionic-20191018123503
-            bootstrap: docker-dev-kaas-local.docker.mirantis.net/openstack/heat:stein-bionic-20191018123503
-            cinder_api: docker-dev-kaas-local.docker.mirantis.net/openstack/cinder:stein-bionic-20191018123503
-            cinder_backup: docker-dev-kaas-local.docker.mirantis.net/openstack/cinder:stein-bionic-20191018123503
+            scripted_test: docker-dev-kaas-local.docker.mirantis.net/openstack/heat:stein-bionic-20191020180016
+            barbican_db_sync: docker-dev-kaas-local.docker.mirantis.net/openstack/barbican:stein-bionic-20191020180016
+            barbican_api: docker-dev-kaas-local.docker.mirantis.net/openstack/barbican:stein-bionic-20191020180016
+            bootstrap: docker-dev-kaas-local.docker.mirantis.net/openstack/heat:stein-bionic-20191020180016
+            cinder_api: docker-dev-kaas-local.docker.mirantis.net/openstack/cinder:stein-bionic-20191020180016
+            cinder_backup: docker-dev-kaas-local.docker.mirantis.net/openstack/cinder:stein-bionic-20191020180016
             cinder_backup_storage_init: docker-prod-local.docker.mirantis.net/mcp/ceph-config-helper:nightly
-            cinder_db_sync: docker-dev-kaas-local.docker.mirantis.net/openstack/cinder:stein-bionic-20191018123503
-            cinder_scheduler: docker-dev-kaas-local.docker.mirantis.net/openstack/cinder:stein-bionic-20191018123503
+            cinder_db_sync: docker-dev-kaas-local.docker.mirantis.net/openstack/cinder:stein-bionic-20191020180016
+            cinder_scheduler: docker-dev-kaas-local.docker.mirantis.net/openstack/cinder:stein-bionic-20191020180016
             cinder_storage_init: docker-prod-local.docker.mirantis.net/mcp/ceph-config-helper:nightly
-            cinder_volume: docker-dev-kaas-local.docker.mirantis.net/openstack/cinder:stein-bionic-20191018123503
-            cinder_volume_usage_audit: docker-dev-kaas-local.docker.mirantis.net/openstack/cinder:stein-bionic-20191018123503
-            db_drop: docker-dev-kaas-local.docker.mirantis.net/openstack/heat:stein-bionic-20191018123503
-            db_init: docker-dev-kaas-local.docker.mirantis.net/openstack/heat:stein-bionic-20191018123503
+            cinder_volume: docker-dev-kaas-local.docker.mirantis.net/openstack/cinder:stein-bionic-20191020180016
+            cinder_volume_usage_audit: docker-dev-kaas-local.docker.mirantis.net/openstack/cinder:stein-bionic-20191020180016
+            db_drop: docker-dev-kaas-local.docker.mirantis.net/openstack/heat:stein-bionic-20191020180016
+            db_init: docker-dev-kaas-local.docker.mirantis.net/openstack/heat:stein-bionic-20191020180016
             dep_check: docker-prod-local.docker.mirantis.net/mcp/kubernetes-entrypoint:v0.3.1-20190916150122
-            designate_api: docker-dev-kaas-local.docker.mirantis.net/openstack/designate:stein-bionic-20191018123503
-            designate_central: docker-dev-kaas-local.docker.mirantis.net/openstack/designate:stein-bionic-20191018123503
-            designate_db_sync: docker-dev-kaas-local.docker.mirantis.net/openstack/designate:stein-bionic-20191018123503
-            designate_mdns: docker-dev-kaas-local.docker.mirantis.net/openstack/designate:stein-bionic-20191018123503
-            designate_producer: docker-dev-kaas-local.docker.mirantis.net/openstack/designate:stein-bionic-20191018123503
-            designate_sink: docker-dev-kaas-local.docker.mirantis.net/openstack/designate:stein-bionic-20191018123503
-            designate_worker: docker-dev-kaas-local.docker.mirantis.net/openstack/designate:stein-bionic-20191018123503
-            glance_api: docker-dev-kaas-local.docker.mirantis.net/openstack/glance:stein-bionic-20191018123503
-            glance_db_sync: docker-dev-kaas-local.docker.mirantis.net/openstack/glance:stein-bionic-20191018123503
-            glance_registry: docker-dev-kaas-local.docker.mirantis.net/openstack/glance:stein-bionic-20191018123503
+            designate_api: docker-dev-kaas-local.docker.mirantis.net/openstack/designate:stein-bionic-20191020180016
+            designate_central: docker-dev-kaas-local.docker.mirantis.net/openstack/designate:stein-bionic-20191020180016
+            designate_db_sync: docker-dev-kaas-local.docker.mirantis.net/openstack/designate:stein-bionic-20191020180016
+            designate_mdns: docker-dev-kaas-local.docker.mirantis.net/openstack/designate:stein-bionic-20191020180016
+            designate_producer: docker-dev-kaas-local.docker.mirantis.net/openstack/designate:stein-bionic-20191020180016
+            designate_sink: docker-dev-kaas-local.docker.mirantis.net/openstack/designate:stein-bionic-20191020180016
+            designate_worker: docker-dev-kaas-local.docker.mirantis.net/openstack/designate:stein-bionic-20191020180016
+            glance_api: docker-dev-kaas-local.docker.mirantis.net/openstack/glance:stein-bionic-20191020180016
+            glance_db_sync: docker-dev-kaas-local.docker.mirantis.net/openstack/glance:stein-bionic-20191020180016
+            glance_registry: docker-dev-kaas-local.docker.mirantis.net/openstack/glance:stein-bionic-20191020180016
             glance_storage_init: docker-prod-local.docker.mirantis.net/mcp/ceph-config-helper:nightly
-            heat_api: docker-dev-kaas-local.docker.mirantis.net/openstack/heat:stein-bionic-20191018123503
-            heat_cfn: docker-dev-kaas-local.docker.mirantis.net/openstack/heat:stein-bionic-20191018123503
-            heat_cloudwatch: docker-dev-kaas-local.docker.mirantis.net/openstack/heat:stein-bionic-20191018123503
-            heat_db_sync: docker-dev-kaas-local.docker.mirantis.net/openstack/heat:stein-bionic-20191018123503
-            heat_engine: docker-dev-kaas-local.docker.mirantis.net/openstack/heat:stein-bionic-20191018123503
-            heat_engine_cleaner: docker-dev-kaas-local.docker.mirantis.net/openstack/heat:stein-bionic-20191018123503
-            heat_purge_deleted: docker-dev-kaas-local.docker.mirantis.net/openstack/heat:stein-bionic-20191018123503
-            horizon: docker-dev-kaas-local.docker.mirantis.net/openstack/horizon:stein-bionic-20191018123503
-            horizon_db_sync: docker-dev-kaas-local.docker.mirantis.net/openstack/horizon:stein-bionic-20191018123503
+            heat_api: docker-dev-kaas-local.docker.mirantis.net/openstack/heat:stein-bionic-20191020180016
+            heat_cfn: docker-dev-kaas-local.docker.mirantis.net/openstack/heat:stein-bionic-20191020180016
+            heat_cloudwatch: docker-dev-kaas-local.docker.mirantis.net/openstack/heat:stein-bionic-20191020180016
+            heat_db_sync: docker-dev-kaas-local.docker.mirantis.net/openstack/heat:stein-bionic-20191020180016
+            heat_engine: docker-dev-kaas-local.docker.mirantis.net/openstack/heat:stein-bionic-20191020180016
+            heat_engine_cleaner: docker-dev-kaas-local.docker.mirantis.net/openstack/heat:stein-bionic-20191020180016
+            heat_purge_deleted: docker-dev-kaas-local.docker.mirantis.net/openstack/heat:stein-bionic-20191020180016
+            horizon: docker-dev-kaas-local.docker.mirantis.net/openstack/horizon:stein-bionic-20191020180016
+            horizon_db_sync: docker-dev-kaas-local.docker.mirantis.net/openstack/horizon:stein-bionic-20191020180016
             image_repo_sync: docker-prod-local.docker.mirantis.net/mcp/docker:17.07.0-20190916150122
-            keystone_api: docker-dev-kaas-local.docker.mirantis.net/openstack/keystone:stein-bionic-20191018123503
-            keystone_credential_cleanup: docker-dev-kaas-local.docker.mirantis.net/openstack/heat:stein-bionic-20191018123503
-            keystone_credential_rotate: docker-dev-kaas-local.docker.mirantis.net/openstack/keystone:stein-bionic-20191018123503
-            keystone_credential_setup: docker-dev-kaas-local.docker.mirantis.net/openstack/keystone:stein-bionic-20191018123503
-            keystone_db_sync: docker-dev-kaas-local.docker.mirantis.net/openstack/keystone:stein-bionic-20191018123503
-            keystone_domain_manage: docker-dev-kaas-local.docker.mirantis.net/openstack/keystone:stein-bionic-20191018123503
-            keystone_fernet_rotate: docker-dev-kaas-local.docker.mirantis.net/openstack/keystone:stein-bionic-20191018123503
-            keystone_fernet_setup: docker-dev-kaas-local.docker.mirantis.net/openstack/keystone:stein-bionic-20191018123503
-            ks_endpoints: docker-dev-kaas-local.docker.mirantis.net/openstack/heat:stein-bionic-20191018123503
-            ks_service: docker-dev-kaas-local.docker.mirantis.net/openstack/heat:stein-bionic-20191018123503
-            ks_user: docker-dev-kaas-local.docker.mirantis.net/openstack/heat:stein-bionic-20191018123503
-            keystone_federations_create: docker-dev-kaas-local.docker.mirantis.net/openstack/heat:stein-bionic-20191018123503
-            neutron_db_sync: docker-dev-kaas-local.docker.mirantis.net/openstack/neutron:stein-bionic-20191018123503
-            neutron_dhcp: docker-dev-kaas-local.docker.mirantis.net/openstack/neutron:stein-bionic-20191018123503
-            neutron_l3: docker-dev-kaas-local.docker.mirantis.net/openstack/neutron:stein-bionic-20191018123503
-            neutron_linuxbridge_agent: docker-dev-kaas-local.docker.mirantis.net/openstack/neutron:stein-bionic-20191018123503
-            neutron_metadata: docker-dev-kaas-local.docker.mirantis.net/openstack/neutron:stein-bionic-20191018123503
-            neutron_openvswitch_agent: docker-dev-kaas-local.docker.mirantis.net/openstack/neutron:stein-bionic-20191018123503
-            neutron_server: docker-dev-kaas-local.docker.mirantis.net/openstack/neutron:stein-bionic-20191018123503
-            nova_api: docker-dev-kaas-local.docker.mirantis.net/openstack/nova:stein-bionic-20191018123503
-            nova_cell_setup: docker-dev-kaas-local.docker.mirantis.net/openstack/nova:stein-bionic-20191018123503
-            nova_cell_setup_init: docker-dev-kaas-local.docker.mirantis.net/openstack/heat:stein-bionic-20191018123503
-            nova_compute: docker-dev-kaas-local.docker.mirantis.net/openstack/nova:stein-bionic-20191018123503
-            nova_compute_ironic: docker-dev-kaas-local.docker.mirantis.net/openstack/nova:stein-bionic-20191018123503
-            nova_compute_ssh: docker-dev-kaas-local.docker.mirantis.net/openstack/nova:stein-bionic-20191018123503
-            nova_conductor: docker-dev-kaas-local.docker.mirantis.net/openstack/nova:stein-bionic-20191018123503
-            nova_consoleauth: docker-dev-kaas-local.docker.mirantis.net/openstack/nova:stein-bionic-20191018123503
-            nova_db_sync: docker-dev-kaas-local.docker.mirantis.net/openstack/nova:stein-bionic-20191018123503
-            nova_novncproxy: docker-dev-kaas-local.docker.mirantis.net/openstack/nova:stein-bionic-20191018123503
-            nova_novncproxy_assets: docker-dev-kaas-local.docker.mirantis.net/openstack/nova:stein-bionic-20191018123503
-            nova_placement: docker-dev-kaas-local.docker.mirantis.net/openstack/nova:stein-bionic-20191018123503
-            nova_scheduler: docker-dev-kaas-local.docker.mirantis.net/openstack/nova:stein-bionic-20191018123503
+            keystone_api: docker-dev-kaas-local.docker.mirantis.net/openstack/keystone:stein-bionic-20191020180016
+            keystone_credential_cleanup: docker-dev-kaas-local.docker.mirantis.net/openstack/heat:stein-bionic-20191020180016
+            keystone_credential_rotate: docker-dev-kaas-local.docker.mirantis.net/openstack/keystone:stein-bionic-20191020180016
+            keystone_credential_setup: docker-dev-kaas-local.docker.mirantis.net/openstack/keystone:stein-bionic-20191020180016
+            keystone_db_sync: docker-dev-kaas-local.docker.mirantis.net/openstack/keystone:stein-bionic-20191020180016
+            keystone_domain_manage: docker-dev-kaas-local.docker.mirantis.net/openstack/keystone:stein-bionic-20191020180016
+            keystone_fernet_rotate: docker-dev-kaas-local.docker.mirantis.net/openstack/keystone:stein-bionic-20191020180016
+            keystone_fernet_setup: docker-dev-kaas-local.docker.mirantis.net/openstack/keystone:stein-bionic-20191020180016
+            ks_endpoints: docker-dev-kaas-local.docker.mirantis.net/openstack/heat:stein-bionic-20191020180016
+            ks_service: docker-dev-kaas-local.docker.mirantis.net/openstack/heat:stein-bionic-20191020180016
+            ks_user: docker-dev-kaas-local.docker.mirantis.net/openstack/heat:stein-bionic-20191020180016
+            keystone_federations_create: docker-dev-kaas-local.docker.mirantis.net/openstack/heat:stein-bionic-20191020180016
+            neutron_db_sync: docker-dev-kaas-local.docker.mirantis.net/openstack/neutron:stein-bionic-20191020180016
+            neutron_dhcp: docker-dev-kaas-local.docker.mirantis.net/openstack/neutron:stein-bionic-20191020180016
+            neutron_l3: docker-dev-kaas-local.docker.mirantis.net/openstack/neutron:stein-bionic-20191020180016
+            neutron_linuxbridge_agent: docker-dev-kaas-local.docker.mirantis.net/openstack/neutron:stein-bionic-20191020180016
+            neutron_metadata: docker-dev-kaas-local.docker.mirantis.net/openstack/neutron:stein-bionic-20191020180016
+            neutron_openvswitch_agent: docker-dev-kaas-local.docker.mirantis.net/openstack/neutron:stein-bionic-20191020180016
+            neutron_server: docker-dev-kaas-local.docker.mirantis.net/openstack/neutron:stein-bionic-20191020180016
+            nova_api: docker-dev-kaas-local.docker.mirantis.net/openstack/nova:stein-bionic-20191020180016
+            nova_cell_setup: docker-dev-kaas-local.docker.mirantis.net/openstack/nova:stein-bionic-20191020180016
+            nova_cell_setup_init: docker-dev-kaas-local.docker.mirantis.net/openstack/heat:stein-bionic-20191020180016
+            nova_compute: docker-dev-kaas-local.docker.mirantis.net/openstack/nova:stein-bionic-20191020180016
+            nova_compute_ironic: docker-dev-kaas-local.docker.mirantis.net/openstack/nova:stein-bionic-20191020180016
+            nova_compute_ssh: docker-dev-kaas-local.docker.mirantis.net/openstack/nova:stein-bionic-20191020180016
+            nova_conductor: docker-dev-kaas-local.docker.mirantis.net/openstack/nova:stein-bionic-20191020180016
+            nova_consoleauth: docker-dev-kaas-local.docker.mirantis.net/openstack/nova:stein-bionic-20191020180016
+            nova_db_sync: docker-dev-kaas-local.docker.mirantis.net/openstack/nova:stein-bionic-20191020180016
+            nova_novncproxy: docker-dev-kaas-local.docker.mirantis.net/openstack/nova:stein-bionic-20191020180016
+            nova_novncproxy_assets: docker-dev-kaas-local.docker.mirantis.net/openstack/nova:stein-bionic-20191020180016
+            nova_placement: docker-dev-kaas-local.docker.mirantis.net/openstack/nova:stein-bionic-20191020180016
+            nova_scheduler: docker-dev-kaas-local.docker.mirantis.net/openstack/nova:stein-bionic-20191020180016
             nova_service_cleaner: docker-prod-local.docker.mirantis.net/mcp/ceph-config-helper:nightly
             libvirt: docker-prod-virtual.docker.mirantis.net/mcp/libvirt:4.0.0-bionic-1554881274591
-            octavia_api: docker-dev-kaas-local.docker.mirantis.net/openstack/octavia:stein-bionic-20191018123503
-            octavia_db_sync: docker-dev-kaas-local.docker.mirantis.net/openstack/octavia:stein-bionic-20191018123503
-            octavia_health_manager: docker-dev-kaas-local.docker.mirantis.net/openstack/octavia:stein-bionic-20191018123503
-            octavia_hm_port: docker-dev-kaas-local.docker.mirantis.net/openstack/octavia:stein-bionic-20191018123503
-            octavia_housekeeping: docker-dev-kaas-local.docker.mirantis.net/openstack/octavia:stein-bionic-20191018123503
-            openvswitch_db_server: docker-prod-local.docker.mirantis.net/mirantis/general/openvswitch:2.11-bionic-20191016024510
-            openvswitch_vswitchd: docker-prod-local.docker.mirantis.net/mirantis/general/openvswitch:2.11-bionic-20191016024510
-            create_resources: docker-dev-kaas-local.docker.mirantis.net/openstack/heat:stein-bionic-20191018123503
-            octavia_worker: docker-dev-kaas-local.docker.mirantis.net/openstack/octavia:stein-bionic-20191018123503
-            mariadb: docker-prod-local.docker.mirantis.net/mirantis/general/mariadb:10.2.23-bionic-20191016024511
-            prometheus_create_mysql_user: docker-prod-local.docker.mirantis.net/mirantis/general/mariadb:10.2.23-bionic-20191016024511
+            octavia_api: docker-dev-kaas-local.docker.mirantis.net/openstack/octavia:stein-bionic-20191020180016
+            octavia_db_sync: docker-dev-kaas-local.docker.mirantis.net/openstack/octavia:stein-bionic-20191020180016
+            octavia_health_manager: docker-dev-kaas-local.docker.mirantis.net/openstack/octavia:stein-bionic-20191020180016
+            octavia_hm_port: docker-dev-kaas-local.docker.mirantis.net/openstack/octavia:stein-bionic-20191020180016
+            octavia_housekeeping: docker-dev-kaas-local.docker.mirantis.net/openstack/octavia:stein-bionic-20191020180016
+            openvswitch_db_server: docker-prod-local.docker.mirantis.net/mirantis/general/openvswitch:2.11-bionic-20191019024511
+            openvswitch_vswitchd: docker-prod-local.docker.mirantis.net/mirantis/general/openvswitch:2.11-bionic-20191019024511
+            create_resources: docker-dev-kaas-local.docker.mirantis.net/openstack/heat:stein-bionic-20191020180016
+            octavia_worker: docker-dev-kaas-local.docker.mirantis.net/openstack/octavia:stein-bionic-20191020180016
+            mariadb: docker-prod-local.docker.mirantis.net/mirantis/general/mariadb:10.2.23-bionic-20191019024511
+            prometheus_create_mysql_user: docker-prod-local.docker.mirantis.net/mirantis/general/mariadb:10.2.23-bionic-20191019024511
             prometheus_mysql_exporter: docker-kaas-local.docker.mirantis.net/stacklight/mysqld-exporter:v0.11.0
-            prometheus_mysql_exporter_helm_tests: docker-dev-kaas-local.docker.mirantis.net/openstack/heat:stein-bionic-20191018123503
-            mariadb_backup: docker-prod-local.docker.mirantis.net/mirantis/general/mariadb:10.2.23-bionic-20191016024511
-            mariadb_scripted_test: docker-prod-local.docker.mirantis.net/mirantis/general/mariadb:10.2.23-bionic-20191016024511
-            rabbit_init: docker-prod-local.docker.mirantis.net/mcp/rabbitmq-management:3.7.15-bionic-1560516651125
+            prometheus_mysql_exporter_helm_tests: docker-dev-kaas-local.docker.mirantis.net/openstack/heat:stein-bionic-20191020180016
+            mariadb_backup: docker-prod-local.docker.mirantis.net/mirantis/general/mariadb:10.2.23-bionic-20191019024511
+            mariadb_scripted_test: docker-prod-local.docker.mirantis.net/mirantis/general/mariadb:10.2.23-bionic-20191019024511
+            rabbit_init: docker-prod-local.docker.mirantis.net/mirantis/general/rabbitmq-management:3.7.15-bionic-20191019031710
             powerdns: docker-prod-local.docker.mirantis.net/mcp/powerdns:4.1-alpine-1566452831101
             prometheus_rabbitmq_exporter: docker-kaas-local.docker.mirantis.net/stacklight/rabbitmq-exporter:v0.29.0
-            prometheus_rabbitmq_exporter_helm_tests: docker-dev-kaas-local.docker.mirantis.net/openstack/heat:stein-bionic-20191018123503
-            rabbitmq_init: docker-dev-kaas-local.docker.mirantis.net/openstack/heat:stein-bionic-20191018123503
-            rabbitmq: docker-prod-local.docker.mirantis.net/mcp/rabbitmq:3.7.15-bionic-1560515813082
-            rabbitmq_scripted_test: docker-prod-local.docker.mirantis.net/mcp/rabbitmq-management:3.7.15-bionic-1560516651125
-            tempest_run_tests: docker-dev-kaas-local.docker.mirantis.net/openstack/tempest:stein-bionic-20191018123503
-            tempest-uuids-init: docker-dev-kaas-local.docker.mirantis.net/openstack/heat:stein-bionic-20191018123503
-            glance_metadefs_load: docker-dev-kaas-local.docker.mirantis.net/openstack/glance:stein-bionic-20191018123503
+            prometheus_rabbitmq_exporter_helm_tests: docker-dev-kaas-local.docker.mirantis.net/openstack/heat:stein-bionic-20191020180016
+            rabbitmq_init: docker-dev-kaas-local.docker.mirantis.net/openstack/heat:stein-bionic-20191020180016
+            rabbitmq: docker-prod-local.docker.mirantis.net/mirantis/general/rabbitmq:3.7.15-bionic-20191019024511
+            rabbitmq_scripted_test: docker-prod-local.docker.mirantis.net/mirantis/general/rabbitmq-management:3.7.15-bionic-20191019031710
+            tempest_run_tests: docker-dev-kaas-local.docker.mirantis.net/openstack/tempest:stein-bionic-20191020180016
+            tempest-uuids-init: docker-dev-kaas-local.docker.mirantis.net/openstack/heat:stein-bionic-20191020180016
+            glance_metadefs_load: docker-dev-kaas-local.docker.mirantis.net/openstack/glance:stein-bionic-20191020180016
             memcached: docker-prod-local.docker.mirantis.net/mcp/memcached:1.5.12-debian-1558605861247
             db_sync: docker-prod-local.docker.mirantis.net/mcp/powerdns:4.1-alpine-1566452831101
             ingress: docker-prod-local.docker.mirantis.net/mcp/nginx-ingress-controller:0.9.0-20190916150122
             error_pages: docker-prod-local.docker.mirantis.net/mcp/defaultbackend:1.0-20190916150122
             prometheus_memcached_exporter: docker-kaas-local.docker.mirantis.net/stacklight/memcached-exporter:v0.5.0
-            ironic_manage_cleaning_network: docker-dev-kaas-local.docker.mirantis.net/openstack/heat:stein-bionic-20191018123503
-            ironic_retrive_cleaning_network: docker-dev-kaas-local.docker.mirantis.net/openstack/heat:stein-bionic-20191018123503
-            ironic_retrive_swift_config: docker-dev-kaas-local.docker.mirantis.net/openstack/heat:stein-bionic-20191018123503
-            ironic_db_sync: docker-dev-kaas-local.docker.mirantis.net/openstack/ironic:stein-bionic-20191018123503
-            ironic_api: docker-dev-kaas-local.docker.mirantis.net/openstack/ironic:stein-bionic-20191018123503
-            ironic_conductor: docker-dev-kaas-local.docker.mirantis.net/openstack/ironic:stein-bionic-20191018123503
-            ironic_pxe: docker-dev-kaas-local.docker.mirantis.net/openstack/ironic:stein-bionic-20191018123503
-            ironic_pxe_init: docker-dev-kaas-local.docker.mirantis.net/openstack/ironic:stein-bionic-20191018123503
+            ironic_manage_cleaning_network: docker-dev-kaas-local.docker.mirantis.net/openstack/heat:stein-bionic-20191020180016
+            ironic_retrive_cleaning_network: docker-dev-kaas-local.docker.mirantis.net/openstack/heat:stein-bionic-20191020180016
+            ironic_retrive_swift_config: docker-dev-kaas-local.docker.mirantis.net/openstack/heat:stein-bionic-20191020180016
+            ironic_db_sync: docker-dev-kaas-local.docker.mirantis.net/openstack/ironic:stein-bionic-20191020180016
+            ironic_api: docker-dev-kaas-local.docker.mirantis.net/openstack/ironic:stein-bionic-20191020180016
+            ironic_conductor: docker-dev-kaas-local.docker.mirantis.net/openstack/ironic:stein-bionic-20191020180016
+            ironic_pxe: docker-dev-kaas-local.docker.mirantis.net/openstack/ironic:stein-bionic-20191020180016
+            ironic_pxe_init: docker-dev-kaas-local.docker.mirantis.net/openstack/ironic:stein-bionic-20191020180016
             powerdns_db_sync: docker-prod-local.docker.mirantis.net/mcp/powerdns:4.1-alpine-1566452831101
