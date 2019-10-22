@@ -31,7 +31,7 @@ features:
   stacklight:
     enabled: true
     user:
-      password: stacklight
+      username: stacklight
 services:
   image:
     glance:
