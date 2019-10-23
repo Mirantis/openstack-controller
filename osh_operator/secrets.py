@@ -24,6 +24,7 @@ class OpenStackCredentials:
     database: Dict[str, OSSytemCreds]
     messaging: Dict[str, OSSytemCreds]
     notifications: Dict[str, OSSytemCreds]
+    memcached: str
 
 
 @dataclass
@@ -116,13 +117,17 @@ def get_os_service_secret(
     data = get_secret_data(namespace, name)
 
     os_creds = OpenStackCredentials(
-        database={}, messaging={}, notifications={}
+        database={}, messaging={}, notifications={}, memcached=""
     )
 
     for kind, creds in data.items():
         decoded = json.loads(base64.b64decode(creds))
+        if kind == "memcached":
+            os_creds.memcached = decoded
+            continue
         cr = getattr(os_creds, kind)
         for account, c in decoded.items():
+
             cr[account] = OSSytemCreds(
                 username=c["username"], password=c["password"]
             )

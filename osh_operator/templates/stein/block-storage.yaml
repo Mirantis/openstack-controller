@@ -178,6 +178,9 @@ spec:
             cinder:
               username: {{ credentials.database.user.username }}
               password: {{ credentials.database.user.password }}
+        oslo_cache:
+          auth:
+            memcache_secret_key: {{ credentials.memcached }}
 {%- if messaging.get('dedicated_rabbitmq', {}).get('enabled', True) %}
         oslo_messaging:
           <<: *cinder_endpoints_oslo_messaging
