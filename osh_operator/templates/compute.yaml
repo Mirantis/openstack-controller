@@ -91,8 +91,9 @@ services:
               --gateway 10.20.30.1 \
               --network heat-net
             openstack router show heat-router || openstack router create heat-router
-            openstack router add subnet heat-router heat-subnet
-            openstack router set --external-gateway public heat-router
+            # TODO(mshalamov): Temporary solution will be add some checker PRODX-1142
+            openstack router add subnet heat-router heat-subnet || true
+            openstack router set --external-gateway public heat-router || true
             openstack role create --or-show "key-manager:service-admin"
             openstack role create --or-show creator
         dependencies:
