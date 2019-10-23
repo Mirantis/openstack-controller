@@ -2,6 +2,9 @@ from osh_operator.filters.tempest import base_section
 
 
 IRONIC_MICROVERSION_RELEASE_MAPPING = {
+    "train": {"min_microversion": "1.1", "max_microversion": "1.58"},
+    "stein": {"min_microversion": "1.1", "max_microversion": "1.56"},
+    "rocky": {"min_microversion": "1.1", "max_microversion": "1.46"},
     "queens": {"min_microversion": "1.1", "max_microversion": "1.38"},
     "pike": {"min_microversion": "1.1", "max_microversion": "1.34"},
     "ocata": {"min_microversion": "1.1", "max_microversion": "1.31"},
@@ -77,11 +80,29 @@ class Baremetal(base_section.BaseSection):
 
     @property
     def max_microversion(self):
-        pass
+        ironic_enabled = self.is_service_enabled("ironic")
+        version = self.spec["openstack_version"]
+        if (
+            ironic_enabled
+            and version
+            and version in IRONIC_MICROVERSION_RELEASE_MAPPING
+        ):
+            return IRONIC_MICROVERSION_RELEASE_MAPPING[version][
+                "max_microversion"
+            ]
 
     @property
     def min_microversion(self):
-        pass
+        ironic_enabled = self.is_service_enabled("ironic")
+        version = self.spec["openstack_version"]
+        if (
+            ironic_enabled
+            and version
+            and version in IRONIC_MICROVERSION_RELEASE_MAPPING
+        ):
+            return IRONIC_MICROVERSION_RELEASE_MAPPING[version][
+                "min_microversion"
+            ]
 
     @property
     def partition_image_ref(self):

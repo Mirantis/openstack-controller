@@ -2,6 +2,9 @@ from osh_operator.filters.tempest import base_section
 
 
 MICROVERSION_RELEASE_MAPPING = {
+    "train": {"min_microversion": "2.1", "max_microversion": "2.79"},
+    "stein": {"min_microversion": "2.1", "max_microversion": "2.72"},
+    "rocky": {"min_microversion": "2.1", "max_microversion": "2.65"},
     "queens": {"min_microversion": "2.1", "max_microversion": "2.60"},
     "pike": {"min_microversion": "2.1", "max_microversion": "2.53"},
     "ocata": {"min_microversion": "2.1", "max_microversion": "2.42"},
@@ -75,7 +78,14 @@ class Compute(base_section.BaseSection):
 
     @property
     def max_microversion(self):
-        pass
+        nova_enabled = self.is_service_enabled("nova")
+        version = self.spec["openstack_version"]
+        if (
+            nova_enabled
+            and version
+            and version in MICROVERSION_RELEASE_MAPPING
+        ):
+            return MICROVERSION_RELEASE_MAPPING[version]["max_microversion"]
 
     @property
     def min_compute_nodes(self):
@@ -83,7 +93,14 @@ class Compute(base_section.BaseSection):
 
     @property
     def min_microversion(self):
-        pass
+        nova_enabled = self.is_service_enabled("nova")
+        version = self.spec["openstack_version"]
+        if (
+            nova_enabled
+            and version
+            and version in MICROVERSION_RELEASE_MAPPING
+        ):
+            return MICROVERSION_RELEASE_MAPPING[version]["min_microversion"]
 
     @property
     def ready_wait(self):

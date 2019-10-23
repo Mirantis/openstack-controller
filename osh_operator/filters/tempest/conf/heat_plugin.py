@@ -208,7 +208,13 @@ class HeatPlugin(base_section.BaseSection):
 
     @property
     def skip_scenario_test_list(self):
-        pass
+        skip_list = []
+        aodh_enabled = self.is_service_enabled("aodh")
+
+        if not aodh_enabled:
+            skip_list.append("AodhAlarmTest")
+
+        return " ,".join(skip_list)
 
     @property
     def skip_scenario_tests(self):

@@ -45,4 +45,6 @@ class Image(base_section.BaseSection):
 
     @property
     def region(self):
-        pass
+        return self.get_values_item(
+            "keystone", "endpoints.identity.auth.admin.region"
+        )
