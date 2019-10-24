@@ -10,71 +10,6 @@
 
 spec:
   releases:
-{%- if messaging.get('dedicated_rabbitmq', {}).get('enabled', True) %}
-  - name: openstack-keystone-rabbitmq
-    chart: {{spec.common.infra.repo}}/rabbitmq
-    values:
-{% include 'base/_rabbitmq_images.yaml' %}
-  {%- if stacklight_enabled %}
-      monitoring:
-        prometheus:
-          enabled: true
-  {%- endif %}
-      pod:
-        replicas:
-          server: 1
-      manifests:
-        network_policy: false
-        job_users_create: true
-      volume:
-        enabled: false
-      endpoints:
-        cluster_domain_suffix: {{ spec.domain_name }}
-        oslo_messaging: &keystone_endpoints_oslo_messaging
-          auth:
-            admin:
-              username: {{ admin_creds.messaging.username }}
-              password: {{ admin_creds.messaging.password }}
-            keystone:
-              username: {{ credentials.messaging.user.username }}
-              password: {{ credentials.messaging.user.password }}
-          statefulset:
-            replicas: 1
-            name: openstack-keystone-rabbitmq-rabbitmq
-          hosts:
-            default: rabbitmq-keystone
-          path: /keystone
-        prometheus_rabbitmq_exporter:
-          hosts:
-            default: rabbitmq-exporter-keystone
-      conf:
-        users:
-          keystone:
-            auth:
-              service_user:
-                username: {{ credentials.messaging.user.username }}
-                password: {{ credentials.messaging.user.password }}
-            path: /keystone
-        aux_conf:
-          policies:
-          - vhost: keystone
-            name: default-policy
-            pattern: '^(?!amq\.).*'
-            definition:
-              message-ttl: 120000
-          - vhost: keystone
-            name: results_expire
-            pattern: '^results\.'
-            definition:
-              expires: 3600000
-            priority: 1
-          - vhost: keystone
-            name: tasks_expire
-            pattern: '^tasks\.'
-            definition:
-              expires: 3600000
-            priority: 1
-{%- endif %}
   - name: openstack-keystone
     chart: {{spec.common.openstack.repo}}/keystone
     values:
@@ -272,8 +207,4 @@ spec:
             keystone:
               username: {{ credentials.database.user.username }}
               password: {{ credentials.database.user.password }}
-{%- if messaging.get('dedicated_rabbitmq', {}).get('enabled', True) %}
-        oslo_messaging:
-          <<: *keystone_endpoints_oslo_messaging
-{%- endif %}
 {% include 'base/_notifications.yaml' %}
