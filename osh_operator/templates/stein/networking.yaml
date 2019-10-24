@@ -205,9 +205,6 @@ spec:
         oslo_messaging:
           <<: *neutron_endpoints_oslo_messaging
 {%- endif %}
-        oslo_cache:
-          auth:
-            memcache_secret_key: {{ credentials.memcached }}
 {% include 'base/_notifications.yaml' %}
 {%- if spec.get('features', {}).get('ssl', {}).get('public_endpoints', {}).get('enabled', True) %}
         network:
@@ -257,6 +254,9 @@ spec:
           app:neutronversions:
             paste.app_factory: neutron.pecan_wsgi.app:versions_factory
         neutron:
+          keystone_authtoken:
+            memcache_security_strategy: ENCRYPT
+            memcache_secret_key: {{ credentials.memcached }}
           DEFAULT:
             api_workers: 4
             # Combined DVR + L3 HA is not recommended until load tested (had issues in the past)

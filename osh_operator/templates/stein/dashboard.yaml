@@ -59,9 +59,6 @@ spec:
             horizon:
               username: {{ credentials.database.user.username }}
               password: {{ credentials.database.user.password }}
-        oslo_cache:
-          auth:
-            memcache_secret_key: {{ credentials.memcached }}
 {%- if ssl_public_endpoints_enabled %}
         dashboard:
           host_fqdn_override:

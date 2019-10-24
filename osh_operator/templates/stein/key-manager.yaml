@@ -100,6 +100,9 @@ spec:
               - openstack-mariadb-cluster-wait
       conf:
         barbican:
+          keystone_authtoken:
+            memcache_security_strategy: ENCRYPT
+            memcache_secret_key: {{ credentials.memcached }}
           oslo_messaging_notifications:
             topics: {{ notification_topics|join(',') }}
           DEFAULT:
@@ -146,9 +149,6 @@ spec:
         oslo_messaging:
           <<: *barbican_endpoints_oslo_messaging
 {%- endif %}
-        oslo_cache:
-          auth:
-            memcache_secret_key: {{ credentials.memcached }}
         oslo_messaging_notifications:
           auth:
             barbican:

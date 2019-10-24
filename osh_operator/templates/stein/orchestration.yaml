@@ -124,6 +124,9 @@ spec:
 {%- endif %}
       conf:
         heat:
+          keystone_authtoken:
+            memcache_security_strategy: ENCRYPT
+            memcache_secret_key: {{ credentials.memcached }}
           oslo_messaging_notifications:
             topics: {{ notification_topics|join(',') }}
         logging:
@@ -144,9 +147,6 @@ spec:
         oslo_messaging:
           <<: *heat_endpoints_oslo_messaging
 {%- endif %}
-        oslo_cache:
-          auth:
-            memcache_secret_key: {{ credentials.memcached }}
 {% include 'base/_notifications.yaml' %}
 {%- if spec.get('features', {}).get('ssl', {}).get('public_endpoints', {}).get('enabled', True) %}
         orchestration:

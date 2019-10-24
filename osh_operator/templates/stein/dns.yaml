@@ -104,6 +104,9 @@ spec:
               - openstack-mariadb-cluster-wait
       conf:
         designate:
+          keystone_authtoken:
+            memcache_security_strategy: ENCRYPT
+            memcache_secret_key: {{ credentials.memcached }}
           service:api:
             enabled_extensions_admin: quotas
           oslo_messaging_notifications:
@@ -132,9 +135,6 @@ spec:
         oslo_messaging:
           <<: *designate_endpoints_oslo_messaging
 {%- endif %}
-        oslo_cache:
-          auth:
-            memcache_secret_key: {{ credentials.memcached }}
 {% include 'base/_notifications.yaml' %}
 {%- if spec.get('features', {}).get('ssl', {}).get('public_endpoints', {}).get('enabled', True) %}
         dns:
