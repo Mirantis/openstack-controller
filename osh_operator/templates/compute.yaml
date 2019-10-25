@@ -96,12 +96,6 @@ services:
             openstack router set --external-gateway public heat-router || true
             openstack role create --or-show "key-manager:service-admin"
             openstack role create --or-show creator
-        dependencies:
-          static:
-            run_tests:
-              jobs:
-                - tempest-ks-user
-                - tempest-bootstrap
         conf:
           convert_to_uuid:
             network:
