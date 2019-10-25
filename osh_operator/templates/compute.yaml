@@ -98,9 +98,14 @@ services:
               --gateway 10.20.30.1 \
               --network heat-net
             openstack router show heat-router || openstack router create heat-router
-            # TODO(mshalamov): Temporary solution will be add some checker PRODX-1142
-            openstack router add subnet heat-router heat-subnet || true
-            openstack router set --external-gateway public heat-router || true
+            subnet_id=$(openstack subnet show heat-subnet -f value -c id)
+            subnet_ids=$(openstack router show heat-router -f json -c interfaces_info | jq -r '.[] | fromjson |.[] |.subnet_id')
+            if [[ $subnet_ids =~ (^|[[:space:]])$subnet_id($|[[:space:]]) ]]; then
+              echo "$subnet_id is in the list"
+            else
+              openstack router add subnet heat-router heat-subnet
+              openstack router set --external-gateway public heat-router
+            fi
             openstack role create --or-show "key-manager:service-admin"
             openstack role create --or-show creator
         conf:

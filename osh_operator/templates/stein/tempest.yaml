@@ -12,7 +12,9 @@ spec:
     "tempest_run_tests",
     "ks_user",
     "dep_check",
-    "image_repo_sync",] %}
+    "image_repo_sync",
+    "bootstrap",
+    "tempest-uuids-init",] %}
           {{ image }}: {{ images[image] }}
 {%- endfor %}
       manifests:
