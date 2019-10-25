@@ -119,6 +119,12 @@ services:
           script: |
             tempest run --config-file /etc/tempest/tempest.conf -w 4 --smoke --blacklist-file  /etc/tempest/test-blacklist
           tempest:
+            #TODO(mshalamov): Will be removed during process of completing PRODX-1192
+            compute:
+              min_compute_nodes: 3
+            #TODO(mshalamov): Will be removed during process of completing PRODX-1192
+            compute_feature_enabled:
+              cold_migration: true
             validation:
               image_ssh_password: gocubsgo
               image_ssh_user: cirros
