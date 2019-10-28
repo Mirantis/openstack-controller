@@ -15,6 +15,7 @@ from osh_operator.filters.tempest.conf import identity
 from osh_operator.filters.tempest.conf import identity_feature_enabled
 from osh_operator.filters.tempest.conf import image
 from osh_operator.filters.tempest.conf import image_feature_enabled
+from osh_operator.filters.tempest.conf import load_balancer
 from osh_operator.filters.tempest.conf import network
 from osh_operator.filters.tempest.conf import network_feature_enabled
 from osh_operator.filters.tempest.conf import object_storage
@@ -49,6 +50,7 @@ SECTIONS = [
     identity_feature_enabled.IdentityFeatureEnabled,
     image.Image,
     image_feature_enabled.ImageFeatureEnabled,
+    load_balancer.LoadBalancer,
     network.Network,
     network_feature_enabled.NetworkFeatureEnabled,
     object_storage.ObjectStorage,

@@ -35,4 +35,7 @@ class NetworkFeatureEnabled(base_section.BaseSection):
 
     @property
     def port_security(self):
-        pass
+        # TODO:(PRODX-1206)Need to generate 'api_extensions' in openstack-networking helmbundle.
+        # In this case we should check that 'port_security' locate in 'api_extensions'.
+        if self.is_service_enabled("neutron"):
+            return True
