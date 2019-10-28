@@ -95,6 +95,7 @@ spec:
             trusted_dashboard: "https://horizon.openstack.svc.{{ spec.domain_name }}/auth/websso/"
           mapped:
             remote_id_attribute: HTTP_OIDC_ISS
+{%- endif %}
         wsgi_keystone: |
           {%- raw %}
           {{- $portInt := tuple "identity" "internal" "api" $ | include "helm-toolkit.endpoints.endpoint_port_lookup" }}
@@ -108,7 +109,7 @@ spec:
           CustomLog /dev/stdout combined env=!forwarded
           CustomLog /dev/stdout proxy env=forwarded
           <VirtualHost *:{% raw %}{{ $portInt }}{% endraw %}>
-              WSGIDaemonProcess keystone-public processes=1 threads=1 user=keystone group=keystone display-name=%{GROUP}
+              WSGIDaemonProcess keystone-public processes=8 threads=1 user=keystone group=keystone display-name=%{GROUP}
               WSGIProcessGroup keystone-public
               WSGIScriptAlias / /var/www/cgi-bin/keystone/keystone-wsgi-public
               WSGIApplicationGroup %{GLOBAL}
@@ -118,6 +119,7 @@ spec:
               </IfVersion>
               ErrorLog /dev/stdout
               SetEnvIf X-Forwarded-For "^.*\..*\..*\..*" forwarded proxy env=forwarded
+{%- if keystone_keycloak.get('enabled', False) %}
               OIDCClaimPrefix "OIDC-"
               OIDCResponseType "id_token"
               OIDCScope "openid email profile"
@@ -151,8 +153,8 @@ spec:
                   Require valid-user
                   LogLevel debug
               </Location>
-              </VirtualHost>
 {%- endif %}
+              </VirtualHost>
       manifests:
         network_policy: false
 {%- if keystone_keycloak.get('enabled', False) %}
