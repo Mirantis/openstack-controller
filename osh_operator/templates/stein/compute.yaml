@@ -317,4 +317,4 @@ spec:
             level: {{ spec.get('features', {}).get('logging', {}).get('nova', {}).get('level', 'INFO') }}
         # TODO(vsaienko): unhardcode this interface
         libvirt:
-          live_migration_interface: ens3
+          live_migration_interface: {{ spec.features.nova.live_migration_interface }}

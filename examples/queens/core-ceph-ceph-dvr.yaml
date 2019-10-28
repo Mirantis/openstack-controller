@@ -39,6 +39,7 @@ spec:
           # fixed and CA is custom.
           OIDCSSLValidateServer: false
     neutron:
+      tunnel_interface: ens3
       dvr:
         enabled:  True
       external_networks:
@@ -51,6 +52,7 @@ spec:
           mtu: null
 
     nova:
+      live_migration_interface: ens3
       images:
         backend: ceph
     stacklight:

@@ -248,7 +248,7 @@ spec:
 {%- endif %}
       network:
         interface:
-          tunnel: ens3
+          tunnel: {{ spec.features.neutron.tunnel_interface }}
       conf:
         paste:
           app:neutronversions:

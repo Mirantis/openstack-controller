@@ -101,6 +101,8 @@ spec:
               required:
                 - services
                 - keystone
+                - neutron
+                - nova
               properties:
                 messaging:
                   type: object
@@ -177,7 +179,12 @@ spec:
                       - key-manager
                 nova:
                   type: object
+                  required:
+                    - live_migration_interface
                   properties:
+                    live_migration_interface:
+                      type: string
+                      description: "Physical interface used for live migration."
                     images:
                       type: object
                       properties:
@@ -244,7 +251,12 @@ spec:
                                 description: Require a valid SSL server certificate when communicating with the OP
                 neutron:
                   type: object
+                  required:
+                    - tunnel_interface
                   properties:
+                    tunnel_interface:
+                      type: string
+                      description: "Physical interface used for tunnel traffic"
                     backend:
                       type: string
                       description: Neutron backend
