@@ -19,6 +19,11 @@ from openstack_controller import version
 
 LOG = logging.getLogger(__name__)
 
+from mcp_k8s_lib import utils
+
+
+LOG = utils.get_logger(__name__)
+
 
 class RuntimeIdentifierMixin:
     @property
@@ -36,7 +41,7 @@ class RuntimeIdentifierMixin:
         )
 
     def set_runtime_identifier(self):
-        self.logger.info(
+        LOG.info(
             f"Setting runtime identifier to osdpl service {self.service}."
         )
         patch = {
@@ -205,7 +210,7 @@ class Service(RuntimeIdentifierMixin):
         for release in data["spec"]["releases"]:
             layers.merger.merge(release["values"], values)
         obj.update()
-        self.logger.info(f"Update {self.service} with {values}")
+        LOG.info(f"Update {self.service} with {values}")
 
     def get_child_object(self, kind, name):
         return [
@@ -256,7 +261,7 @@ class Service(RuntimeIdentifierMixin):
                         # Break on first image match.
                         break
 
-        self.logger.info(f"Removing the following jobs: {to_cleanup}")
+        LOG.info(f"Removing the following jobs: {to_cleanup}")
         tasks = set()
         for child_object in to_cleanup:
             tasks.add(child_object.purge())
@@ -264,14 +269,14 @@ class Service(RuntimeIdentifierMixin):
         await asyncio.gather(*tasks)
 
     async def delete(self, *, body, meta, spec, logger, **kwargs):
-        self.logger.info(f"Deleting config for {self.service}")
+        LOG.info(f"Deleting config for {self.service}")
         # TODO(e0ne): remove credentials of the deleted services
         data = self.resource_def
         kopf.adopt(data, self.osdpl.obj)
         obj = kube.resource(data)
         # delete the object, already non-existing are auto-handled
         obj.delete(propagation_policy="Foreground")
-        self.logger.info(f"{obj.kind} {obj.namespace}/{obj.name} deleted")
+        LOG.info(f"{obj.kind} {obj.namespace}/{obj.name} deleted")
         # remove child reference from status
         self.update_status({"children": {obj.name: None}})
         kopf.info(
@@ -290,7 +295,7 @@ class Service(RuntimeIdentifierMixin):
             self.update_status(status_patch)
         if self.ceph_required:
             self.ensure_ceph_secrets()
-        self.logger.info(f"Applying config for {self.service}")
+        LOG.info(f"Applying config for {self.service}")
         data = self.render()
         kopf.adopt(data, self.osdpl.obj)
         obj = kube.resource(data)
@@ -302,10 +307,10 @@ class Service(RuntimeIdentifierMixin):
             obj.reload()
             obj.set_obj(data)
             obj.update()
-            self.logger.debug(f"{obj.kind} child is updated: %s", obj.obj)
+            LOG.debug(f"{obj.kind} child is updated: %s", obj.obj)
         else:
             obj.create()
-            self.logger.debug(f"{obj.kind} child is created: %s", obj.obj)
+            LOG.debug(f"{obj.kind} child is created: %s", obj.obj)
         kopf.info(
             self.osdpl.obj,
             reason=event.capitalize(),
@@ -334,10 +339,10 @@ class Service(RuntimeIdentifierMixin):
         ):
             self.create_ceph_secrets()
         else:
-            self.logger.info("Secret and Configmap are present.")
+            LOG.info("Secret and Configmap are present.")
 
     def create_ceph_secrets(self):
-        self.logger.info("Waiting for ceph resources.")
+        LOG.info("Waiting for ceph resources.")
         # FIXME(pas-ha) race? we can re-write result of parallel thread..
         # but who cares TBH
         self.update_status(
@@ -365,7 +370,7 @@ class Service(RuntimeIdentifierMixin):
                 }
             }
         )
-        self.logger.info("Ceph resources were created successfully.")
+        LOG.info("Ceph resources were created successfully.")
 
     def save_ceph_secrets(self, params: ceph_api.OSCephParams):
         for service in params.services:

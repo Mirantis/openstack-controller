@@ -80,10 +80,10 @@ class HelmBundleMixin:
                         applied_images.append(image)
                 if len(applied_images) > 0 and self.ready:
                     return
-                self.service.logger.info(
+                LOG.info(
                     f"The images are not updated yet for {self.kind} {self.name}."
                 )
-            self.service.logger.info(
+            LOG.info(
                 f"The {self.kind} {self.name} is not ready. Waiting, attempt: {i}"
             )
             i += 1
@@ -109,7 +109,7 @@ class HelmBundleMixin:
                 return
             if not self.exists():
                 return
-            self.service.logger.info(
+            LOG.info(
                 f"The object {self.kind} {self.name} still exists, retrying {i}"
             )
             await asyncio.sleep(delay)
@@ -129,14 +129,10 @@ class HelmBundleMixin:
         i = 1
         while True:
             if not self.exists():
-                self.service.logger.info(
-                    f"Object {self.kind}: {self.name} is not present."
-                )
+                LOG.info(f"Object {self.kind}: {self.name} is not present.")
                 return
             self.delete(propagation_policy="Background")
-            self.service.logger.info(
-                f"Retrying {i} removing {self.kind}: {self.name}"
-            )
+            LOG.info(f"Retrying {i} removing {self.kind}: {self.name}")
             i += 1
             await asyncio.sleep(delay)
 
@@ -148,7 +144,7 @@ class HelmBundleMixin:
         self.reload()
         for container in self.obj["spec"]["template"]["spec"]["containers"]:
             if container["image"] == value:
-                self.service.logger.info(
+                LOG.info(
                     f"Found image in container {container['name']} for {self.kind}: {self.name}"
                 )
                 return True
@@ -170,11 +166,11 @@ class Job(pykube.Job, HelmBundleMixin):
             if c["type"] in ["Ready", "Complete"]
         ]
         if completed and all(completed):
-            self.service.logger.info(
+            LOG.info(
                 f"All conditions for the {self.kind} {self.name} completed."
             )
             return True
-        self.service.logger.info(
+        LOG.info(
             f"Some conditions {conditions} for the {self.kind} {self.name} not completed."
         )
         return False

@@ -6,7 +6,10 @@ from . import openstack
 from . import services
 from . import version
 
-# TODO(pas-ha) enable debug logging
+from mcp_k8s_lib import utils
+
+
+LOG = utils.get_logger(__name__)
 
 
 async def update_status(body, patch):
@@ -16,8 +19,8 @@ async def update_status(body, patch):
 
 async def process_osdpl_event(body, meta, spec, logger, **kwargs):
     event = kwargs["cause"].event
-    logger.info(f"Got osdpl event {event}")
     namespace = meta["namespace"]
+    LOG.info(f"Got osdpl event {event}")
     # TODO(e0ne): change create_admin_credentials once kube.save_secret_data
     # won't update secrets
     openstack.get_or_create_admin_credentials(namespace)
@@ -33,13 +36,13 @@ async def process_osdpl_event(body, meta, spec, logger, **kwargs):
     update, delete = layers.services(spec, logger, **kwargs)
 
     if delete:
-        logger.info(f"deleting children {' '.join(delete)}")
+        LOG.info(f"deleting children {' '.join(delete)}")
     service_fns = {}
     for service in update:
         service_instance = services.registry[service](body, logger)
         if event == "resume":
             if not service_instance.is_identifier_changed:
-                logger.info(
+                LOG.info(
                     f"Got fake resume event for osdpl {meta['name']}, service: {service}"
                 )
                 continue
@@ -75,4 +78,4 @@ async def resume(body, meta, spec, logger, **kwargs):
 @kopf.on.delete(*kube.OpenStackDeployment.kopf_on_args)
 async def delete(meta, logger, **kwargs):
     # TODO(pas-ha) wait for children to be deleted
-    logger.info(f"deleting {meta['name']}")
+    LOG.info(f"deleting {meta['name']}")

@@ -148,7 +148,7 @@ def services(spec, logger, **kwargs):
     # and metadata except labels and annotations
     # (kind and apiVersion and namespace are de-facto immutable)
     for op, path, old, new in kwargs.get("diff", []):
-        logger.debug(f"{op} {'.'.join(path)} from {old} to {new}")
+        LOG.debug(f"{op} {'.'.join(path)} from {old} to {new}")
         if path == ("spec", "features", "services"):
             # NOTE(pas-ha) something changed in services,
             # need to check if any were deleted
@@ -161,9 +161,8 @@ def render_service_template(
     service, body, meta, spec, logger, **template_args
 ):
     os_release = spec["openstack_version"]
-    # logger.debug(f"found templates {ENV.list_templates()}")
     tpl = ENV.get_template(f"{os_release}/{service}.yaml")
-    logger.debug(f"Using template {tpl.filename}")
+    LOG.debug(f"Using template {tpl.filename}")
 
     text = tpl.render(body=body, meta=meta, spec=spec, **template_args)
     data = yaml.safe_load(text)
@@ -229,8 +228,8 @@ def merge_spec(spec, logger):
     """Merge user-defined OsDpl spec with base for profile and OS version"""
     profile = spec["profile"]
     size = spec["size"]
-    logger.debug(f"Using profile {profile}")
-    logger.debug(f"Using size {size}")
+    LOG.debug(f"Using profile {profile}")
+    LOG.debug(f"Using size {size}")
 
     base = yaml.safe_load(ENV.get_template(f"profile/{profile}.yaml").render())
     profile_charts_base_url = base["artifacts"]["charts_base_url"]

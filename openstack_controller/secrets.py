@@ -8,9 +8,10 @@ import kopf
 import pykube
 
 from . import kube
-from mcp_k8s_lib import ceph_api
+from mcp_k8s_lib import ceph_api, utils
 
 RGW_KEYSTONE_SECRET = "ceph-keystone-user"
+LOG = utils.get_logger(__name__)
 
 
 @dataclass
@@ -65,7 +66,7 @@ async def handle_rgw_secret(
     body, meta, name, status, logger, diff, **kwargs,
 ):
     # TODO: unhardcode secret name
-    logger.debug(f"Handling secret create {name}")
+    LOG.debug(f"Handling secret create {name}")
     if name != RGW_KEYSTONE_SECRET:
         return
     data = body["data"]
