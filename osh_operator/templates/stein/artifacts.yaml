@@ -64,6 +64,9 @@ nova_consoleauth: docker-dev-kaas-local.docker.mirantis.net/openstack/nova:stein
 nova_db_sync: docker-dev-kaas-local.docker.mirantis.net/openstack/nova:stein-bionic-20191024180015
 nova_novncproxy: docker-dev-kaas-local.docker.mirantis.net/openstack/nova:stein-bionic-20191024180015
 nova_novncproxy_assets: docker-dev-kaas-local.docker.mirantis.net/openstack/nova:stein-bionic-20191024180015
+nova_spiceproxy: docker-dev-kaas-local.docker.mirantis.net/openstack/nova:stein-bionic-20191024180015
+nova_spiceproxy_assets: docker.io/kolla/ubuntu-source-nova-spicehtml5proxy:ocata
+test: docker.io/xrally/xrally-openstack:1.3.0
 nova_placement: docker-dev-kaas-local.docker.mirantis.net/openstack/nova:stein-bionic-20191024180015
 nova_scheduler: docker-dev-kaas-local.docker.mirantis.net/openstack/nova:stein-bionic-20191024180015
 nova_service_cleaner: docker-prod-local.docker.mirantis.net/mcp/ceph-config-helper:nightly
