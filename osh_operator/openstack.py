@@ -30,7 +30,7 @@ def _generate_credentials(
 
 
 def get_or_create_galera_credentials(
-    namespace: str
+    namespace: str,
 ) -> secrets.GaleraCredentials:
     try:
         galera_creds = secrets.get_galera_secret(GALERA_SECRET_NAME, namespace)
@@ -94,7 +94,7 @@ def get_admin_credentials(namespace: str) -> secrets.OpenStackAdminCredentials:
 
 
 def get_or_create_admin_credentials(
-    namespace
+    namespace,
 ) -> secrets.OpenStackAdminCredentials:
     try:
         return get_admin_credentials(namespace)
