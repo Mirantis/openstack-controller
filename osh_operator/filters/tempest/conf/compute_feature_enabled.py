@@ -65,7 +65,13 @@ class ComputeFeatureEnabled(base_section.BaseSection):
 
     @property
     def block_migration_for_live_migration(self):
-        pass
+        if (
+            self.get_values_item("nova", "conf.nova.libvirt.images_type")
+            == "qcow2"
+        ):
+            return True
+        else:
+            return False
 
     @property
     def change_password(self):

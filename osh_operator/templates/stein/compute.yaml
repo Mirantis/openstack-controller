@@ -307,6 +307,11 @@ spec:
             cpu_model: kvm64
             virt_type: kvm
             rbd_user: {{ ceph.nova.username }}
+{%- if spec.get('features', {}).get('nova', {}).get('images', {}).get('backend') == 'ceph' %}
+            images_type: rbd
+{%- elif spec.get('features', {}).get('nova', {}).get('images', {}).get('backend') == 'local' %}
+            images_type: qcow2
+{%- endif %}
 {%- for pools, pools_config in ceph.nova.pools.items() %}
             images_rbd_pool: {{ pools_config.name }}
 {%- endfor %}

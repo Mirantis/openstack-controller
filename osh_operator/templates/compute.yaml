@@ -128,7 +128,7 @@ services:
             compute:
               min_compute_nodes: 3
             #TODO(mshalamov): Will be removed during process of completing PRODX-1192
-            compute_feature_enabled:
+            compute-feature-enabled:
               cold_migration: true
             validation:
               image_ssh_password: gocubsgo
