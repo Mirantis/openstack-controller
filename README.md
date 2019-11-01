@@ -37,31 +37,6 @@ Deploy ceph cluster
 
 `kubectl apply -f https://gerrit.mcp.mirantis.com/gitweb?p=mcp/mcp-pipelines.git;a=blob_plain;f=tools/ceph/ceph_local_folder_openstack.yaml;hb=refs/heads/master`
 
-In case local volumes are used for Mariadb and/or Rabbitmq configure local volumes provisioner as follows.
-Setup mount points for local volumes provisioner (1 mount point - 1 volume) (Workaround for https://mirantis.jira.com/browse/PROD-31627)
-nodeVolumesCount - number of local volumes per openstack control plane node, choose it according to
-number of openstack control plane nodes in environment e.g. for mariadb (3 replicas) we need 3 local volumes.
-
-```
-nodeVolumesCount=1
-volDirPrefix='vol'
-sshUser='ubuntu'
-for node in $(sudo kubectl --kubeconfig=/root/.kube/config get nodes -o NAME -l openstack-control-plane=enabled); do
-  ip=$(sudo kubectl --kubeconfig=/root/.kube/config describe ${node} | grep InternalIP | cut -d' ' -f5);
-  for i in $(seq 1 $nodeVolumesCount); do
-    volDir="${volDirPrefix}-${i}"
-    ssh -o "StrictHostKeyChecking=no" ${sshUser}@${ip} "sudo mkdir -p /mnt/local-provisioner/${volDir} && sudo mkdir -p /mnt/${volDir}"
-    ssh -o "StrictHostKeyChecking=no" ${sshUser}@${ip} "sudo mount --bind /mnt/${volDir} /mnt/local-provisioner/${volDir}"
-    ssh -o "StrictHostKeyChecking=no" ${sshUser}@${ip} "echo '/mnt/${volDir} /mnt/local-provisioner/${volDir} none defaults,bind 0 0' | sudo tee -a /etc/fstab"
-  done;
-done;
-```
-
-Setup provisioner for local volumes and related storage class (workaround for https://mirantis.jira.com/browse/PROD-31681)
-
-`git clone https://<username>@gerrit.mcp.mirantis.com/a/mcp/mcp-pipelines.git`
-kubectl apply -f mcp-pipelines/tools/openstack-local-volume-provisoner.yaml
-
 
 ### Deploy OpenStack
 

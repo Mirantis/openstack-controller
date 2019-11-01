@@ -58,7 +58,7 @@ spec:
 {%- endif %}
       volume:
 {%- if spec.get('features', {}).get('database', {}).get('local_volumes', {}).get('enabled', False) %}
-        class_name: local-provisioner
+        class_name: lvp-fake-root
 {%- else %}
         class_name: rook-ceph-block
 {%- endif %}

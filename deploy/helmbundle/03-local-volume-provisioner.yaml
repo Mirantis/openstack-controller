@@ -1,0 +1,37 @@
+apiVersion: lcm.mirantis.com/v1alpha1
+kind: HelmBundle
+metadata:
+  name: local-volume-provisioner
+  namespace: osh-system
+spec:
+  repositories:
+  - name: lvp
+    url: https://artifactory.mcp.mirantis.net/binary-dev-kaas-local/openstack/mcp-sig-storage-local-static-provisioner
+  releases:
+  - name: local-volume-provisioner
+    chart: lvp/provisioner
+    version: 0.1.0-mcp-352
+    namespace: osh-system
+    values:
+      common:
+        namespace: osh-system
+      classes:
+      - name: lvp-fake-root # Defines name of storage class.
+        hostDir: /mnt/local-volume-provisioner
+        mountDir: /mnt/local-volume-provisioner
+        volumeMode: Filesystem
+        storageClass: true
+        fakeMounts:
+            mountPoints:
+              - srcRoot: /var/lib/local-volume-provisioner
+                mounts:
+                 - vol1
+                 - vol2
+                 - vol3
+      daemonset:
+        image: docker-dev-kaas-local.docker.mirantis.net/openstack/extra/local-volume-provisioner:v2.3.3
+        nodeSelector:
+          openstack-control-plane: enabled
+        initFakeMounts: true
+        init:
+          image: docker-dev-kaas-local.docker.mirantis.net/openstack/heat:stein-bionic-20191031180024
