@@ -21,7 +21,9 @@ spec:
     "dep_check",
     "mariadb",
     "mariadb_scripted_test",] %}
+        {%- if image in images %}
           {{ image }}: {{ images[image] }}
+        {%- endif %}
 {%- endfor %}
 {%- if stacklight_enabled %}
       monitoring:

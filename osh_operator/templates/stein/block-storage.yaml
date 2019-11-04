@@ -98,7 +98,9 @@ spec:
     "rabbit_init",
     "cinder_volume",
     "test",] %}
+        {%- if image in images %}
           {{ image }}: {{ images[image] }}
+        {%- endif %}
 {%- endfor %}
       dependencies:
         static:

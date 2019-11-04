@@ -32,7 +32,9 @@ spec:
     "keystone_db_sync",
     "rabbit_init",
     "test",] %}
+        {%- if image in images %}
           {{ image }}: {{ images[image] }}
+        {%- endif %}
 {%- endfor %}
       dependencies:
         static:

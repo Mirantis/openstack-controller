@@ -84,7 +84,9 @@ spec:
     "openvswitch_vswitchd",
     "dep_check",
     "image_repo_sync",] %}
+        {%- if image in images %}
           {{ image }}: {{ images[image] }}
+        {%- endif %}
 {%- endfor %}
       endpoints:
         cluster_domain_suffix: {{ spec.domain_name }}
@@ -117,7 +119,9 @@ spec:
     "neutron_server",
     "purge_test",
     "test",] %}
+        {%- if image in images %}
           {{ image }}: {{ images[image] }}
+        {%- endif %}
 {%- endfor %}
       pod:
         probes:

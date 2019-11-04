@@ -17,7 +17,9 @@ spec:
     "dep_check",
     "ceph_rgw",
     "ks_user",] %}
+        {%- if image in images %}
           {{ image }}: {{ images[image] }}
+        {%- endif %}
 {%- endfor %}
       conf:
         rgw_ks:

@@ -95,7 +95,9 @@ spec:
     "rabbit_init",
     "designate_worker",
     "designate_central",] %}
+        {%- if image in images %}
           {{ image }}: {{ images[image] }}
+        {%- endif %}
 {%- endfor %}
       dependencies:
         static:
@@ -214,7 +216,9 @@ spec:
     "db_init",
     "powerdns_db_sync",
     "image_repo_sync",] %}
+        {%- if image in images %}
           {{ image }}: {{ images[image] }}
+        {%- endif %}
 {%- endfor %}
       dependencies:
         static:

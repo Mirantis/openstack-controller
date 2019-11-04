@@ -52,6 +52,8 @@ def test_fail_render_template_with_incorrect_release(openstackdeployment):
 
 
 def test_render_template(openstackdeployment):
+    images_mock = mock.Mock()
+    images_mock = ["a", "b"]
     data = layers.render_service_template(
         "compute",
         openstackdeployment,
@@ -60,7 +62,7 @@ def test_render_template(openstackdeployment):
         logging,
         credentials=mock.Mock(),
         admin_creds=mock.Mock(),
-        images=mock.Mock(),
+        images=images_mock,
         ceph={
             "nova": {
                 "pools": {},

@@ -91,7 +91,9 @@ spec:
     "ks_user",
     "scripted_test",
     "barbican_api",] %}
+        {%- if image in images %}
           {{ image }}: {{ images[image] }}
+        {%- endif %}
 {%- endfor %}
       dependencies:
         static:

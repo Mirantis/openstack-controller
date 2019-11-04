@@ -109,7 +109,9 @@ spec:
     "heat_cloudwatch",
     "test",
     "ks_user",] %}
+        {%- if image in images %}
           {{ image }}: {{ images[image] }}
+        {%- endif %}
 {%- endfor %}
       dependencies:
         static:

@@ -95,7 +95,9 @@ spec:
     "glance_registry",
     "glance_metadefs_load",
     "ks_user",] %}
+        {%- if image in images %}
           {{ image }}: {{ images[image] }}
+        {%- endif %}
 {%- endfor %}
       dependencies:
         static:

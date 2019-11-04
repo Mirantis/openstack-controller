@@ -82,7 +82,9 @@ spec:
 {%- for image in ["image_repo_sync",
                  "libvirt",
                  "dep_check",] %}
+        {%- if image in images %}
           {{ image }}: {{ images[image] }}
+        {%- endif %}
 {%- endfor %}
       manifests:
         network_policy: false
@@ -138,7 +140,9 @@ spec:
     "nova_consoleauth",
     "test",
     "nova_service_cleaner",] %}
+        {%- if image in images %}
           {{ image }}: {{ images[image] }}
+        {%- endif %}
 {%- endfor %}
       pod:
         replicas:

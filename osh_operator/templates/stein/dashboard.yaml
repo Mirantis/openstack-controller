@@ -27,7 +27,9 @@ spec:
     "image_repo_sync",
     "test",
     "dep_check",] %}
+        {%- if image in images %}
           {{ image }}: {{ images[image] }}
+        {%- endif %}
 {%- endfor %}
       dependencies:
         static:
