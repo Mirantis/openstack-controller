@@ -10,7 +10,7 @@ spec:
   releases:
   - name: openstack-osh-operator
     chart: osh-operator/osh-operator
-    version: 0.1.0-mcp-347
+    version: 0.1.0-mcp-356
     namespace: osh-system
     values:
       kopf:
