@@ -2,6 +2,7 @@
 #kind: HelmBundle
 
 {%- set stacklight_enabled = spec.get('features', {}).get('stacklight', {}).get('enabled', False) %}
+{%- set enabled_vhosts = ['openstack'] %}
 
 spec:
   releases:
@@ -25,6 +26,7 @@ spec:
       conf:
         users:
           {%- if 'identity' in services %}
+          {%- do enabled_vhosts.append('keystone') %}
           keystone_service:
             auth:
               keystone_username:
@@ -39,6 +41,7 @@ spec:
             path: /openstack
           {%- endif %}
           {%- if 'image' in services %}
+          {%- do enabled_vhosts.append('glance') %}
           glance_service:
             auth:
               glance_username:
@@ -53,6 +56,7 @@ spec:
             path: /openstack
           {%- endif %}
           {%- if 'block-storage' in services %}
+          {%- do enabled_vhosts.append('cinder') %}
           cinder_service:
             auth:
               cinder:
@@ -67,6 +71,7 @@ spec:
             path: /openstack
           {%- endif %}
           {%- if 'orchestration' in services %}
+          {%- do enabled_vhosts.append('heat') %}
           heat_service:
             auth:
               heat:
@@ -81,6 +86,7 @@ spec:
             path: /openstack
           {%- endif %}
           {%- if 'networking' in services %}
+          {%- do enabled_vhosts.append('neutron') %}
           neutron_service:
             auth:
               neutron:
@@ -95,6 +101,7 @@ spec:
             path: /openstack
           {%- endif %}
           {%- if 'compute' in services %}
+          {%- do enabled_vhosts.append('nova') %}
           nova_service:
             auth:
               nova:
@@ -109,6 +116,7 @@ spec:
             path: /openstack
           {%- endif %}
           {%- if 'load-balancer' in services %}
+          {%- do enabled_vhosts.append('octavia') %}
           octavia_service:
             auth:
               octavia:
@@ -123,6 +131,7 @@ spec:
             path: /openstack
           {%- endif %}
           {%- if 'dns' in services %}
+          {%- do enabled_vhosts.append('designate') %}
           designate_service:
             auth:
               designate:
@@ -137,6 +146,7 @@ spec:
             path: /openstack
           {%- endif %}
           {%- if 'key-manager' in services %}
+          {%- do enabled_vhosts.append('barbican') %}
           barbican_service:
             auth:
               barbican:
@@ -172,7 +182,7 @@ spec:
             definition:
               expires: 3600000
             priority: 1
-  {%- for item in [ 'cinder', 'nova', 'glance', 'keystone', 'heat', 'neutron', 'octavia', 'openstack', 'designate', 'barbican'] %}
+  {%- for item in enabled_vhosts %}
           - vhost: {{ item }}
             name: default-policy-{{ item }}
             pattern: '^(?!amq\.).*'
