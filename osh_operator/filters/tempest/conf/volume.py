@@ -79,4 +79,21 @@ class Volume(base_section.BaseSection):
 
     @property
     def volume_size(self):
-        pass
+        # Some tests use volume_size to boot an instance and it should be an
+        # equal disk of used flavor described in flavor_ref. By default,
+        # this value will be equal to 1.
+        flavor_ref = self.get_values_item(
+            "tempest", "conf.convert_to_uuid.compute.flavor_ref"
+        )
+        flavor_disk = self.get_values_item(
+            "nova", f"bootstrap.structured.flavors.options.{flavor_ref}.disk"
+        )
+        default_flavors_disks = {
+            "m1.tiny": 1,
+            "m1.small": 20,
+            "m1.medium": 40,
+            "m1.large": 80,
+            "m1.xlarge": 160,
+        }
+        if flavor_disk:
+            return flavor_disk or default_flavors_disks.get(flavor_ref)
