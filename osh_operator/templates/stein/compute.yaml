@@ -307,6 +307,8 @@ spec:
           enabled: false
 {%- endif %}
         nova:
+          DEFAULT:
+            allow_resize_to_same_host: true
           keystone_authtoken:
             memcache_security_strategy: ENCRYPT
             memcache_secret_key: {{ credentials.memcached }}
@@ -335,3 +337,6 @@ spec:
           {{ ssh_credentials.private|indent(10)|trim }}
         ssh_public: |
           {{ ssh_credentials.public }}
+      network:
+        sshd:
+          enabled: true

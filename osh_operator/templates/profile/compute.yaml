@@ -123,6 +123,7 @@ services:
             #TODO(mshalamov): Will be removed during process of completing PRODX-1192
             compute-feature-enabled:
               cold_migration: true
+              resize: true
             validation:
               image_ssh_password: gocubsgo
               image_ssh_user: cirros
