@@ -58,6 +58,11 @@ spec:
               type: string
               enum:
                 - compute
+            size:
+              description: timeout and sizing parameters
+              type: string
+              enum:
+                - small
             domain_name:
               type: string
             common:
@@ -351,4 +356,5 @@ spec:
           required:
             - openstack_version
             - profile
+            - size
             - domain_name

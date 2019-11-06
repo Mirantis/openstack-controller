@@ -168,12 +168,18 @@ def merge_all_layers(service, body, meta, spec, logger, **template_args):
 def merge_spec(spec, logger):
     """Merge user-defined OsDpl spec with base for profile and OS version"""
     profile = spec["profile"]
+    size = spec["size"]
     logger.debug(f"Using profile {profile}")
+    logger.debug(f"Using size {size}")
 
     try:
-        base = yaml.safe_load(ENV.get_template(f"{profile}.yaml").render())
+        base = yaml.safe_load(
+            ENV.get_template(f"profile/{profile}.yaml").render()
+        )
         artifacts = yaml.safe_load(ENV.get_template("artifacts.yaml").render())
+        sizing = yaml.safe_load(ENV.get_template(f"size/{size}.yaml").render())
         merger.merge(base, artifacts)
+        merger.merge(base, sizing)
 
         # Merge operator defaults with user context.
         return merger.merge(base, spec)

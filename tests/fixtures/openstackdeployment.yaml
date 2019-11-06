@@ -84,6 +84,7 @@ spec:
       enabled: true
   openstack_version: stein
   profile: compute
+  size: small
   services:
     compute:
       nova:

@@ -1,0 +1,163 @@
+common:
+  openstack:
+    values:
+      pod:
+        replicas:
+          api: 3
+          server: 3
+          api_metadata: 3
+          osapi: 3
+          conductor: 3
+          consoleauth: 3
+          scheduler: 3
+          novncproxy: 3
+
+services:
+  identity:
+    keystone:
+      values:
+        conf:
+          keystone:
+            database:
+              max_pool_size: 10
+              max_retries: -1
+              max_overflow: 30
+            oslo_messaging_rabbit:
+              rabbit_qos_prefetch_count: 64
+  image:
+    glance:
+      values:
+        conf:
+          glance:
+            DEFAULT:
+              workers: 8
+            database:
+              max_pool_size: 10
+              max_retries: -1
+              max_overflow: 30
+            oslo_messaging_rabbit:
+              rabbit_qos_prefetch_count: 64
+  compute:
+    nova:
+      values:
+        conf:
+          nova:
+            DEFAULT:
+              cpu_allocation_ratio: 8.0
+              ram_allocation_ratio: 1.1
+              disk_allocation_ratio: 1.6
+              metadata_workers: 8
+              osapi_compute_workers: 8
+              block_device_allocate_retries: 600
+              block_device_allocate_retries_interval: 10
+              report_interval: 60
+              service_down_time: 180
+              rpc_response_timeout: 30
+            api_database:
+              max_pool_size: 10
+              max_retries: -1
+              max_overflow: 30
+            cell0_database:
+              max_pool_size: 10
+              max_retries: -1
+              max_overflow: 30
+            database:
+              max_pool_size: 10
+              max_retries: -1
+              max_overflow: 30
+            placement_database:
+              max_pool_size: 10
+              max_retries: -1
+              max_overflow: 30
+#TODO(ogrudev): increase amount of workers once PRODX-1368 is resolved
+#            conductor:
+#              workers: 8
+            neutron:
+              timeout: 300
+            filter_scheduler:
+              host_subset_size: 30
+            oslo_messaging_rabbit:
+              rabbit_qos_prefetch_count: 64
+  networking:
+    neutron:
+      values:
+        conf:
+          neutron:
+            DEFAULT:
+              dhcp_lease_duration: 600
+              rpc_workers: 16
+              rpc_state_report_workers: 4
+              agent_down_time: 30
+              max_l3_agents_per_router: 0
+              executor_thread_pool_size: 70
+            agent:
+              report_interval: 10
+            database:
+              max_pool_size: 10
+              max_retries: -1
+              max_overflow: 70
+            oslo_messaging_rabbit:
+              rabbit_qos_prefetch_count: 64
+  block-storage:
+    cinder:
+      values:
+        conf:
+          cinder:
+            DEFAULT:
+              rpc_response_timeout: 3600
+              osapi_volume_workers: 4
+            database:
+              max_pool_size: 10
+              max_retries: -1
+              max_overflow: 30
+            oslo_messaging_rabbit:
+              rabbit_qos_prefetch_count: 64
+  orchestration:
+    heat:
+      values:
+        conf:
+          heat:
+            DEFAULT:
+              rpc_response_timeout: 600
+              num_engine_workers: 4
+              max_resources_per_stack: '20000'
+              max_template_size: '5440000'
+              max_json_body_size: '10880000'
+            heat_api:
+              workers: 4
+            heat_api_cfn:
+              workers: 4
+            heat_api_cloudwatch:
+              workers: 4
+            database:
+              max_pool_size: 10
+              max_retries: -1
+              max_overflow: 30
+            oslo_messaging_rabbit:
+              rabbit_qos_prefetch_count: 64
+  load-balancer:
+    octavia:
+      values:
+        conf:
+          octavia:
+            database:
+              max_pool_size: 10
+              max_retries: -1
+              max_overflow: 30
+            controller_worker:
+              amp_active_retries: 100
+              amp_active_wait_sec: 2
+              workers: 8
+            haproxy_amphora:
+              connection_max_retries: 1500
+              connection_retry_interval: 1
+              rest_request_conn_timeout: 10
+              rest_request_read_timeout: 120
+            task_flow:
+              engine: parallel
+              max_workers: 64
+            house_keeping:
+              amphora_expiry_age: 3600
+              load_balancer_expiry_age: 3600
+            oslo_messaging_rabbit:
+              rabbit_qos_prefetch_count: 64

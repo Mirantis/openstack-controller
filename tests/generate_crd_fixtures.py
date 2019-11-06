@@ -14,14 +14,21 @@ def main(args):
     )
     openstackdeployment = yaml.safe_load(open(openstackdeployment_file))
     profile = openstackdeployment["spec"]["profile"]
-    base = yaml.safe_load(layers.ENV.get_template(f"{profile}.yaml").render())
+    size = openstackdeployment["spec"]["size"]
+    base = yaml.safe_load(
+        layers.ENV.get_template(f"profile/{profile}.yaml").render()
+    )
     artifacts = yaml.safe_load(
         layers.ENV.get_template("artifacts.yaml").render()
+    )
+    sizing = yaml.safe_load(
+        layers.ENV.get_template(f"size/{size}.yaml").render()
     )
     openstackdeployment["spec"] = layers.merger.merge(
         base, openstackdeployment["spec"]
     )
     openstackdeployment["spec"] = layers.merger.merge(base, artifacts)
+    openstackdeployment["spec"] = layers.merger.merge(base, sizing)
     openstackdeployment["spec"]["features"]["ssl"]["public_endpoints"][
         "enabled"
     ] = False
