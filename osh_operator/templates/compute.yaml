@@ -108,6 +108,12 @@ services:
             fi
             openstack role create --or-show "key-manager:service-admin"
             openstack role create --or-show creator
+            openstack subnet pool show default_pool || \
+              openstack subnet pool create --share --default \
+              --pool-prefix 10.20.40.0/24 --default-prefix-length 26 \
+              default_pool
+            openstack network auto allocated topology create --or-show
+            openstack subnet pool set default_pool --default
         conf:
           convert_to_uuid:
             network:

@@ -83,6 +83,7 @@ spec:
                 --network public
               openstack router show r1 || openstack router create r1
               openstack router set --external-gateway public r1
+              openstack network set public --default
     load-balancer:
       octavia:
         values:
