@@ -54,11 +54,6 @@ class HeatPlugin(base_section.BaseSection):
         "vm_to_heat_api_insecure",
     ]
 
-    def _get_keystone_credential(self, cred_name):
-        return self.get_values_item(
-            "keystone", f"endpoints.identity.auth.admin.{cred_name}"
-        )
-
     @property
     def admin_password(self):
         pass
@@ -69,7 +64,7 @@ class HeatPlugin(base_section.BaseSection):
 
     @property
     def admin_username(self):
-        return self._get_keystone_credential("username")
+        return self.get_keystone_credential("username")
 
     @property
     def auth_url(self):
@@ -172,11 +167,11 @@ class HeatPlugin(base_section.BaseSection):
 
     @property
     def password(self):
-        return self._get_keystone_credential("password")
+        return self.get_keystone_credential("password")
 
     @property
     def project_domain_id(self):
-        return self._get_keystone_credential("project_domain_name")
+        return self.get_keystone_credential("project_domain_name")
 
     @property
     def project_domain_name(self):
@@ -184,11 +179,11 @@ class HeatPlugin(base_section.BaseSection):
 
     @property
     def project_name(self):
-        return self._get_keystone_credential("project_name")
+        return self.get_keystone_credential("project_name")
 
     @property
     def region(self):
-        return self._get_keystone_credential("region_name")
+        return self.get_keystone_credential("region_name")
 
     @property
     def sighup_config_edit_retries(self):
@@ -238,7 +233,7 @@ class HeatPlugin(base_section.BaseSection):
 
     @property
     def user_domain_id(self):
-        return self._get_keystone_credential("user_domain_name")
+        return self.get_keystone_credential("user_domain_name")
 
     @property
     def user_domain_name(self):
@@ -246,7 +241,7 @@ class HeatPlugin(base_section.BaseSection):
 
     @property
     def username(self):
-        return self._get_keystone_credential("username")
+        return self.get_keystone_credential("username")
 
     @property
     def volume_size(self):

@@ -22,15 +22,15 @@ class Auth(base_section.BaseSection):
 
     @property
     def admin_password(self):
-        pass
+        return self.get_keystone_credential("password")
 
     @property
     def admin_project_name(self):
-        pass
+        return self.get_keystone_credential("project_name")
 
     @property
     def admin_username(self):
-        pass
+        return self.get_keystone_credential("username")
 
     @property
     def create_isolated_networks(self):
@@ -54,4 +54,11 @@ class Auth(base_section.BaseSection):
 
     @property
     def use_dynamic_credentials(self):
-        pass
+        # This option requires that OpenStack Identity API
+        # admin credentials are known.
+        admin_username = self.get_keystone_credential("username")
+        admin_password = self.get_keystone_credential("password")
+
+        if admin_username and admin_password:
+            return True
+        return False

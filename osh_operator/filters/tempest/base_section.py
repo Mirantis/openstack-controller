@@ -27,6 +27,19 @@ class BaseSection(object):
                     else:
                         return item_default
 
+    def get_spec_item(self, item_path, item_default=None):
+        res = jsonpath.parse(item_path).find(self.spec)
+        if res:
+            return res[0].value
+        else:
+            return item_default
+
+    def get_keystone_credential(self, cred_name):
+        if self.is_service_enabled("keystone"):
+            return self.get_values_item(
+                "keystone", f"endpoints.identity.auth.admin.{cred_name}"
+            )
+
     def is_service_enabled(self, service):
         """Check if service is enabled in specific environment.
 
