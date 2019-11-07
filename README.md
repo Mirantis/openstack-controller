@@ -170,35 +170,15 @@ clouds:
   openstack_helm:
     region_name: RegionOne
     identity_api_version: 3
+    verify: false
     auth:
       username: '$(kubectl -n openstack get secrets keystone-keystone-admin -o jsonpath='{.data.OS_USERNAME}' | base64 -d)'
       password: '$(kubectl -n openstack get secrets keystone-keystone-admin -o jsonpath='{.data.OS_PASSWORD}' | base64 -d)'
       project_name: 'admin'
       project_domain_name: 'default'
       user_domain_name: 'default'
-      auth_url: 'http://keystone.openstack.svc.$(kubectl get configmap -n kube-system coredns -o jsonpath='{.data.Corefile}' |grep -oh kaas-kubernetes-[[:alnum:]]*)/v3'
+      auth_url: '$(kubectl -n openstack get helmbundles openstack-identity -o jsonpath='{.spec.releases[0].values.endpoints.identity.scheme.public}')://keystone.openstack.svc.$(kubectl get configmap -n kube-system coredns -o jsonpath='{.data.Corefile}' |grep -oh kaas-kubernetes-[[:alnum:]]*)/'
 EOF
-```
-### In case ssl is enabled on public endpoints use another clouds.yml and put ca cert to the system:
-```
-tee /etc/openstack/clouds.yaml << EOF
-clouds:
-  openstack_helm:
-    region_name: RegionOne
-    identity_api_version: 3
-    auth:
-      username: '$(kubectl -n openstack get secrets keystone-keystone-admin -o jsonpath='{.data.OS_USERNAME}' | base64 -d)'
-      password: '$(kubectl -n openstack get secrets keystone-keystone-admin -o jsonpath='{.data.OS_PASSWORD}' | base64 -d)'
-      project_name: 'admin'
-      project_domain_name: 'default'
-      user_domain_name: 'default'
-      auth_url: 'https://keystone.openstack.svc.$(kubectl get configmap -n kube-system coredns -o jsonpath='{.data.Corefile}' |grep -oh kaas-kubernetes-[[:alnum:]]*):443/v3'
-EOF
-cd cert
-mkdir /usr/local/share/ca-certificates/openstack
-cp ca.pem /usr/local/share/ca-certificates/openstack
-update-ca-certificates
-export OS_CACERT=/etc/ssl/certs/
 ```
 ```
 export OS_CLOUD=openstack_helm
