@@ -170,6 +170,7 @@ spec:
           {%- endif %}
         aux_conf:
           policies:
+  {%- if 'orchestration' in services %}
           - vhost: heat
             name: heat_engine_rpc_expire
             pattern: '^heat-engine-listener\.'
@@ -182,6 +183,7 @@ spec:
             definition:
               expires: 3600000
             priority: 1
+  {%- endif %}
   {%- for item in enabled_vhosts %}
           - vhost: {{ item }}
             name: default-policy-{{ item }}
