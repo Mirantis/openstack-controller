@@ -327,3 +327,7 @@ spec:
         # TODO(vsaienko): unhardcode this interface
         libvirt:
           live_migration_interface: {{ spec.features.nova.live_migration_interface }}
+        ssh_private: |
+          {{ ssh_credentials.private|indent(10)|trim }}
+        ssh_public: |
+          {{ ssh_credentials.public }}

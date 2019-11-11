@@ -71,6 +71,10 @@ def test_render_template(openstackdeployment):
                 "secrets": "nova",
             }
         },
+        ssh_credentials={
+            "private": "nova_private_key",
+            "public": "nova_public_key",
+        },
     )
     assert len(data) == 1 and "spec" in data
 

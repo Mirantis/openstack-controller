@@ -1,5 +1,12 @@
 from typing import Optional
 
+from cryptography.hazmat.primitives import (
+    serialization as crypto_serialization,
+)
+from cryptography.hazmat.primitives.asymmetric import rsa
+from cryptography.hazmat.backends import (
+    default_backend as crypto_default_backend,
+)
 import pykube
 
 from . import secrets
@@ -27,6 +34,37 @@ def _generate_credentials(
     password = secrets.generate_password(length=password_length)
     username = secrets.generate_name(prefix=prefix, length=username_length)
     return secrets.OSSytemCreds(username=username, password=password)
+
+
+def _generate_ssh_key(bits=2048) -> secrets.SshKey:
+    key = rsa.generate_private_key(
+        backend=crypto_default_backend(), public_exponent=65537, key_size=2048
+    )
+    private_key = key.private_bytes(
+        crypto_serialization.Encoding.PEM,
+        crypto_serialization.PrivateFormat.PKCS8,
+        crypto_serialization.NoEncryption(),
+    )
+    public_key = key.public_key().public_bytes(
+        crypto_serialization.Encoding.OpenSSH,
+        crypto_serialization.PublicFormat.OpenSSH,
+    )
+    return secrets.SshKey(
+        public=public_key.decode(), private=private_key.decode()
+    )
+
+
+def get_or_create_ssh_credentials(
+    service: str, namespace: str,
+) -> secrets.SshKey:
+    secret_name = f"generated-{service}-ssh-creds"
+    try:
+        ssh_creds = secrets.get_ssh_secret(secret_name, namespace)
+    except pykube.exceptions.ObjectDoesNotExist:
+        ssh_creds = _generate_ssh_key()
+        secrets.save_ssh_secret(secret_name, namespace, ssh_creds)
+
+    return ssh_creds
 
 
 def get_or_create_galera_credentials(

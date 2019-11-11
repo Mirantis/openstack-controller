@@ -40,6 +40,12 @@ class OpenStackAdminCredentials:
     identity: Optional[OSSytemCreds]
 
 
+@dataclass
+class SshKey:
+    public: str
+    private: str
+
+
 def handle_rgw_secret(body, meta, status, logger, diff, **kwargs):
     data = body["data"]
     keys = [
@@ -102,6 +108,22 @@ def save_galera_secret(name: str, namespace: str, params: GaleraCredentials):
     for key in data.keys():
         data[key] = base64.b64encode(json.dumps(data[key]).encode()).decode()
 
+    kube.save_secret_data(namespace, name, data)
+
+
+def get_ssh_secret(name: str, namespace: str) -> SshKey:
+    data = get_secret_data(namespace, name)
+    obj = {}
+    for kind, key in data.items():
+        key_dec = base64.b64decode(key.encode()).decode()
+        obj[kind] = key_dec
+    return SshKey(**obj)
+
+
+def save_ssh_secret(name: str, namespace: str, params: SshKey):
+    data = asdict(params)
+    for kind, key in data.items():
+        data[kind] = base64.b64encode(key.encode()).decode()
     kube.save_secret_data(namespace, name, data)
 
 

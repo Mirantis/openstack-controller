@@ -1,3 +1,5 @@
+from dataclasses import asdict
+
 from osh_operator import layers
 from osh_operator import openstack
 from osh_operator import secrets
@@ -330,6 +332,13 @@ class Nova(OpenStackService):
             }
         },
     }
+
+    def template_args(self, spec):
+        t_args = super().template_args(spec)
+        t_args["ssh_credentials"] = asdict(
+            openstack.get_or_create_ssh_credentials("nova", self.namespace)
+        )
+        return t_args
 
 
 class Octavia(OpenStackService):
