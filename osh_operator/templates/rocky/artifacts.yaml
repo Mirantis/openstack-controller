@@ -77,12 +77,12 @@ openvswitch_db_server: docker-prod-local.docker.mirantis.net/mirantis/general/op
 openvswitch_vswitchd: docker-prod-local.docker.mirantis.net/mirantis/general/openvswitch:2.11-bionic-20191028111709
 create_resources: docker-dev-kaas-local.docker.mirantis.net/openstack/heat:rocky-bionic-20191105180034
 octavia_worker: docker-dev-kaas-local.docker.mirantis.net/openstack/octavia:rocky-bionic-20191105180034
-mariadb: docker-prod-local.docker.mirantis.net/mirantis/general/mariadb:10.2.26-bionic-20191028111709
-prometheus_create_mysql_user: docker-prod-local.docker.mirantis.net/mirantis/general/mariadb:10.2.26-bionic-20191028111709
+mariadb: docker-dev-kaas-local.docker.mirantis.net/general/mariadb:10.2.26-bionic-20191110024514
+prometheus_create_mysql_user: docker-dev-kaas-local.docker.mirantis.net/general/mariadb:10.2.26-bionic-20191110024514
 prometheus_mysql_exporter: docker-kaas-local.docker.mirantis.net/stacklight/mysqld-exporter:v0.11.0
 prometheus_mysql_exporter_helm_tests: docker-dev-kaas-local.docker.mirantis.net/openstack/heat:rocky-bionic-20191105180034
-mariadb_backup: docker-prod-local.docker.mirantis.net/mirantis/general/mariadb:10.2.26-bionic-20191028111709
-mariadb_scripted_test: docker-prod-local.docker.mirantis.net/mirantis/general/mariadb:10.2.26-bionic-20191028111709
+mariadb_backup: docker-dev-kaas-local.docker.mirantis.net/general/mariadb:10.2.26-bionic-20191110024514
+mariadb_scripted_test: docker-dev-kaas-local.docker.mirantis.net/general/mariadb:10.2.26-bionic-20191110024514
 rabbit_init: docker-prod-local.docker.mirantis.net/mirantis/general/rabbitmq-management:3.7.15-bionic-20191028114513
 powerdns: docker-prod-local.docker.mirantis.net/openstack/extra/powerdns:4.1-alpine-20191031084512
 prometheus_rabbitmq_exporter: docker-kaas-local.docker.mirantis.net/stacklight/rabbitmq-exporter:v0.29.0
