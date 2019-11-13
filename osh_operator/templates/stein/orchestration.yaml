@@ -85,6 +85,10 @@ spec:
             pattern: '^(?!amq\.).*'
             definition:
               message-ttl: 120000
+  {%- if stacklight_enabled %}
+        prometheus_exporter:
+          rabbit_exporters: "overview,exchange,node"
+  {%- endif %}
 {%- endif %}
   - name: openstack-heat
     chart: {{spec.common.openstack.repo}}/heat

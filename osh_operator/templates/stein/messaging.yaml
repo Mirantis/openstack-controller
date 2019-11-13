@@ -203,6 +203,10 @@ spec:
               expires: 3600000
             priority: 1
   {%- endfor %}
+  {%- if stacklight_enabled %}
+        prometheus_exporter:
+          rabbit_exporters: "overview,exchange,node"
+  {%- endif %}
       endpoints:
         cluster_domain_suffix: {{ spec.domain_name }}
         oslo_messaging:

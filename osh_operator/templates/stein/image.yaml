@@ -73,6 +73,10 @@ spec:
             definition:
               expires: 3600000
             priority: 1
+  {%- if stacklight_enabled %}
+        prometheus_exporter:
+          rabbit_exporters: "overview,exchange,node"
+  {%- endif %}
 {%- endif %}
   - name: openstack-glance
     chart: {{spec.common.openstack.repo}}/glance
