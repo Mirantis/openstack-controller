@@ -193,16 +193,8 @@ def render_service_template(
 @kopf_exception
 def merge_all_layers(service, body, meta, spec, logger, **template_args):
     """Merge releases and values from osdpl crd into service HelmBundle"""
-    os_release = spec["openstack_version"]
-    # values from profile were earlier merged to spec.
-    images_base_url = spec["artifacts"]["images_base_url"]
-    binary_base_url = spec["artifacts"]["binary_base_url"]
-    images = yaml.safe_load(
-        ENV.get_template(f"{os_release}/artifacts.yaml").render(
-            images_base_url=images_base_url, binary_base_url=binary_base_url
-        )
-    )
 
+    images = render_artifacts(body)
     service_helmbundle = render_service_template(
         service, body, meta, spec, logger, images=images, **template_args
     )
@@ -274,3 +266,29 @@ def merge_spec(spec, logger):
 
     # Merge operator defaults with user context.
     return merger.merge(base, spec)
+
+
+def render_cache_template(osdpl, name, images):
+    artifacts = render_artifacts(osdpl)
+    tpl = ENV.get_template("native/cache.yaml")
+    text = tpl.render(images=images, name=name, pause_image=artifacts["pause"])
+    return yaml.safe_load(text)
+
+
+def render_cache_images():
+    return yaml.safe_load(
+        ENV.get_template("native/cache_images.yaml").render()
+    )
+
+
+def render_artifacts(osdpl):
+    spec = osdpl["spec"]
+    os_release = spec["openstack_version"]
+    # values from profile were earlier merged to spec.
+    images_base_url = spec["artifacts"]["images_base_url"]
+    binary_base_url = spec["artifacts"]["binary_base_url"]
+    return yaml.safe_load(
+        ENV.get_template(f"{os_release}/artifacts.yaml").render(
+            images_base_url=images_base_url, binary_base_url=binary_base_url
+        )
+    )

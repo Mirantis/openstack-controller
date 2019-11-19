@@ -3,6 +3,7 @@ import asyncio
 import kopf
 
 from openstack_controller import exception
+from openstack_controller import cache
 from openstack_controller import kube
 from openstack_controller import layers
 from openstack_controller import openstack
@@ -104,6 +105,18 @@ async def run_task(task_def):
         raise unknown_exception
 
 
+def discover_images(osdpl):
+    cache_images = set(layers.render_cache_images() or [])
+    images = {}
+    for name, url in layers.render_artifacts(osdpl).items():
+        images.setdefault(url, []).append(name)
+    return {
+        names[0].replace("_", "-"): url
+        for url, names in images.items()
+        if set(names) & cache_images
+    }
+
+
 @kopf.on.resume(*kube.OpenStackDeployment.kopf_on_args)
 @kopf.on.update(*kube.OpenStackDeployment.kopf_on_args)
 @kopf.on.create(*kube.OpenStackDeployment.kopf_on_args)
@@ -127,6 +140,11 @@ async def apply(body, meta, spec, logger, event, **kwargs):
     }
 
     update_status(body, version_patch)
+
+    images = discover_images(body)
+    if images != await cache.images(meta["namespace"]):
+        await cache.restart(images, body)
+    await cache.wait_ready(meta["namespace"])
 
     update, delete = layers.services(spec, logger, **kwargs)
 

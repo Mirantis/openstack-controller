@@ -11,6 +11,7 @@ from typing import Dict
 from . import settings
 
 LOG = utils.get_logger(__name__)
+CACHE_NAME = "image-precaching"
 
 
 def login():
@@ -233,6 +234,10 @@ def find(klass, name, namespace=None):
     return klass.objects(api).filter(namespace=namespace).get(name=name)
 
 
+def resource_list(klass, selector, namespace=None):
+    return klass.objects(api).filter(namespace=namespace, selector=selector)
+
+
 def wait_for_resource(klass, name, namespace=None, delay=60):
     try:
         find(klass, name, namespace)
@@ -244,6 +249,27 @@ def wait_for_resource(klass, name, namespace=None, delay=60):
     except:
         raise kopf.TemporaryError(
             f"Unknown error occured while getting object: {klass.kind}.",
+            delay=delay,
+        )
+
+
+def wait_for_daemonset_ready(name, namespace=None, delay=60):
+    try:
+        ds = find(pykube.DaemonSet, name, namespace)
+        if not int(ds.obj["status"]["desiredNumberScheduled"]):
+            raise ValueError("Not scheduled yet")
+        if int(ds.obj["status"]["desiredNumberScheduled"]) != int(
+            ds.obj["status"]["numberReady"]
+        ):
+            raise ValueError("Not ready yet")
+
+    except pykube.exceptions.ObjectDoesNotExist:
+        raise kopf.TemporaryError(
+            f"The DaemonSet is not found yet.", delay=delay
+        )
+    except Exception as e:
+        raise kopf.TemporaryError(
+            f"An error occured while getting DaemonSet {name} ({e}).",
             delay=delay,
         )
 
