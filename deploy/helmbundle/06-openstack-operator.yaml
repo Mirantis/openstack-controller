@@ -1,0 +1,20 @@
+apiVersion: lcm.mirantis.com/v1alpha1
+kind: HelmBundle
+metadata:
+  name: openstack-operator
+  namespace: osh-system
+spec:
+  repositories:
+  - name: openstack-controller
+    url: https://artifactory.mcp.mirantis.net/binary-dev-kaas-local/openstack/master-openstack-controller
+  releases:
+  - name: openstack-operator
+    chart: openstack-controller/openstack-operator
+    version: 0.1.0-mcp-386
+    namespace: osh-system
+    values:
+      kopf:
+        enabled: false
+      image:
+        repository: docker-dev-kaas-local.docker.mirantis.net/mcp/openstack-controller
+        tag: nightly

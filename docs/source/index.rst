@@ -1,8 +1,8 @@
-======================================
-Welcome to osh-operator documentation!
-======================================
+==============================================
+Welcome to openstack-controller documentation!
+==============================================
 
-Welcome to osh-operator documentation!
+Welcome to openstack-controller documentation!
 
 Introduction
 ============

@@ -18,13 +18,15 @@ def compute_helmbundle():
 
 @pytest.fixture
 def kubeapi(mocker):
-    mock_api = mocker.patch("osh_operator.kube.api")
+    mock_api = mocker.patch("openstack_controller.kube.api")
     yield mock_api
     mocker.stopall()
 
 
 @pytest.fixture
 def credentials(mocker):
-    creds = mocker.patch("osh_operator.openstack.get_or_create_os_credentials")
+    creds = mocker.patch(
+        "openstack_controller.openstack.get_or_create_os_credentials"
+    )
     yield creds
     mocker.stopall()

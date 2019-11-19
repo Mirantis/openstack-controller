@@ -3,7 +3,7 @@ import sys
 
 import yaml
 
-from osh_operator import layers
+from openstack_controller import layers
 
 
 def main(args):

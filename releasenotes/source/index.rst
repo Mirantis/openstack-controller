@@ -1,6 +1,6 @@
-===========================
- OSH-operator Release Notes
-===========================
+==================================
+openstack-controller Release Notes
+==================================
 
 .. toctree::
    :maxdepth: 1

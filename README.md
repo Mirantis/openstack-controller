@@ -1,6 +1,6 @@
-# osh-operator
+# openstack-controller
 
-Operator to deploy **O**pen**S**tack-**H**elm charts onto KaaS
+Controller to deploy and manage OpenStack on Kubernetes
 
 ## Prerequisites
 
@@ -23,7 +23,7 @@ Apply all the required labels to all the nodes except of master k8s node
 
 ## Usage
 
-### Deploy osh-operator (crds, operator, helmbundlecontroller)
+### Deploy openstack-controller (crds, operator, helmbundlecontroller)
 
 `kubectl apply -f deploy/helmbundle/`
 

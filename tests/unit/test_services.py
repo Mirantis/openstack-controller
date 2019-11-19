@@ -1,7 +1,7 @@
 import copy
 import logging
 
-from osh_operator import services
+from openstack_controller import services
 
 
 def test_service_keystone_render(openstackdeployment, kubeapi, credentials):

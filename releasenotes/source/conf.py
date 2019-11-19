@@ -7,7 +7,7 @@ master_doc = 'index'
 source_suffix = '.rst'
 
 # General information about the project.
-project = u'OSH-operator Release Notes'
+project = u'openstack-controller Release Notes'
 copyright = u'2005-{} Mirantis, Inc.'.format(time.strftime("%Y"))
 
 latex_documents = [

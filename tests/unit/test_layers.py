@@ -4,7 +4,7 @@ from unittest import mock
 
 import pytest
 
-from osh_operator import layers
+from openstack_controller import layers
 
 
 def test_no_changes_for_empty_services():
