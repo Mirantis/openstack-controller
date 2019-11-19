@@ -40,7 +40,7 @@ spec:
 apiVersion: zalando.org/v1
 kind: ClusterKopfPeering
 metadata:
-  name: default
+  name: openstack-controller
 ...
 
 {{ end }}

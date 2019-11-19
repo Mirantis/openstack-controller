@@ -126,7 +126,7 @@ apiVersion: zalando.org/v1
 kind: KopfPeering
 metadata:
   namespace: openstack
-  name: default
+  name: openstack-controller
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -153,6 +153,8 @@ spec:
           - run
           - '-n'
           - openstack
+          - '-P'
+          - openstack-controller
           - '-m'
           - openstack_controller.openstackdeployment
           - '-m'

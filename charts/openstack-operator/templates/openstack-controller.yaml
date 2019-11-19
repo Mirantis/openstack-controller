@@ -126,7 +126,7 @@ apiVersion: zalando.org/v1
 kind: KopfPeering
 metadata:
   namespace: "{{ .Values.osdpl.namespace }}"
-  name: default
+  name: openstack-controller
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -160,6 +160,8 @@ spec:
             - run
             - '-n'
             - {{ .Values.osdpl.namespace }}
+            - '-P'
+            - openstack-controller
             - '-m'
             - openstack_controller.openstackdeployment
             - '-m'
