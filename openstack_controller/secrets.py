@@ -46,6 +46,13 @@ class SshKey:
     private: str
 
 
+@dataclass
+class SingedCertificate:
+    cert: str
+    key: str
+    cert_all: str
+
+
 def handle_rgw_secret(body, meta, status, logger, diff, **kwargs):
     data = body["data"]
     keys = [
@@ -124,6 +131,15 @@ def save_ssh_secret(name: str, namespace: str, params: SshKey):
     data = asdict(params)
     for kind, key in data.items():
         data[kind] = base64.b64encode(key.encode()).decode()
+    kube.save_secret_data(namespace, name, data)
+
+
+def save_cert_secret(name: str, namespace: str, params: SingedCertificate):
+    data = asdict(params)
+    for kind, key in data.items():
+        if not isinstance(key, bytes):
+            key = key.encode()
+        data[kind] = base64.b64encode(key).decode()
     kube.save_secret_data(namespace, name, data)
 
 

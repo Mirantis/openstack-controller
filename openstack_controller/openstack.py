@@ -1,12 +1,15 @@
 from typing import Optional
 
+from cryptography import x509
 from cryptography.hazmat.primitives import (
     serialization as crypto_serialization,
 )
+from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.backends import (
     default_backend as crypto_default_backend,
 )
+import datetime
 import pykube
 
 from . import secrets
@@ -138,3 +141,93 @@ def get_or_create_admin_credentials(
         return get_admin_credentials(namespace)
     except pykube.exceptions.ObjectDoesNotExist:
         return create_admin_credentials(namespace)
+
+
+def get_or_create_certs(name, namespace) -> secrets.SingedCertificate:
+    try:
+        return secrets.SingedCertificate(
+            **secrets.get_secret_data(namespace, name)
+        )
+    except pykube.exceptions.ObjectDoesNotExist:
+        return generate_ca_cert(name, namespace)
+
+
+def generate_ca_cert(name: str, namespace: str) -> secrets.SingedCertificate:
+    key = rsa.generate_private_key(
+        public_exponent=65537, key_size=2048, backend=crypto_default_backend()
+    )
+    builder = x509.CertificateBuilder()
+
+    issuer = x509.Name(
+        [
+            x509.NameAttribute(x509.oid.NameOID.COUNTRY_NAME, "US"),
+            x509.NameAttribute(x509.oid.NameOID.STATE_OR_PROVINCE_NAME, "CA"),
+            x509.NameAttribute(
+                x509.oid.NameOID.LOCALITY_NAME, "San Francisco"
+            ),
+            x509.NameAttribute(
+                x509.oid.NameOID.ORGANIZATION_NAME, "Mirantis Inc"
+            ),
+            x509.NameAttribute(
+                x509.oid.NameOID.COMMON_NAME, "octavia-amphora-ca"
+            ),
+        ]
+    )
+    builder = (
+        builder.issuer_name(issuer)
+        .subject_name(issuer)
+        .serial_number(x509.random_serial_number())
+        .not_valid_before(datetime.datetime.utcnow())
+        .not_valid_after(
+            datetime.datetime.utcnow() + datetime.timedelta(days=365)
+        )
+        .public_key(key.public_key())
+        .add_extension(
+            x509.BasicConstraints(ca=True, path_length=None), critical=True
+        )
+        .add_extension(
+            x509.KeyUsage(
+                digital_signature=True,
+                key_encipherment=True,
+                data_encipherment=True,
+                key_agreement=False,
+                content_commitment=False,
+                key_cert_sign=True,
+                crl_sign=False,
+                encipher_only=False,
+                decipher_only=False,
+            ),
+            critical=True,
+        )
+        .add_extension(
+            x509.ExtendedKeyUsage(
+                [
+                    x509.oid.ExtendedKeyUsageOID.SERVER_AUTH,
+                    x509.oid.ExtendedKeyUsageOID.CLIENT_AUTH,
+                ]
+            ),
+            critical=True,
+        )
+    )
+
+    certificate = builder.sign(
+        private_key=key,
+        algorithm=hashes.SHA256(),
+        backend=crypto_default_backend(),
+    )
+    client_cert = certificate.public_bytes(crypto_serialization.Encoding.PEM)
+    client_key = key.private_bytes(
+        encoding=crypto_serialization.Encoding.PEM,
+        format=crypto_serialization.PrivateFormat.TraditionalOpenSSL,
+        encryption_algorithm=crypto_serialization.NoEncryption(),
+    )
+
+    data = {
+        "cert": client_cert,
+        "key": client_key,
+        "cert_all": client_cert + client_key,
+    }
+    signed_cert = secrets.SingedCertificate(**data)
+    secrets.save_cert_secret(name, namespace, signed_cert)
+
+    return signed_cert

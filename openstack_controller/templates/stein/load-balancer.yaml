@@ -127,10 +127,80 @@ spec:
           worker: 3
           housekeeping: 3
           health_manager: 3
+        mounts:
+          octavia_api:
+            octavia_api:
+              volumeMounts:
+                - name: octavia-certs
+                  mountPath: /etc/octavia/certs/private/cakey.pem
+                  subPath: key
+                - name: octavia-certs
+                  mountPath: /etc/octavia/certs/ca_01.pem
+                  subPath: cert
+                - name: octavia-certs
+                  mountPath: /etc/octavia/certs/client.pem
+                  subPath: cert_all
+              volumes:
+                - name: octavia-certs
+                  secret:
+                    secretName: octavia-certs
+                    defaultMode: 0644
+          octavia_worker:
+            octavia_worker:
+              volumeMounts:
+                - name: octavia-certs
+                  mountPath: /etc/octavia/certs/private/cakey.pem
+                  subPath: key
+                - name: octavia-certs
+                  mountPath: /etc/octavia/certs/ca_01.pem
+                  subPath: cert
+                - name: octavia-certs
+                  mountPath: /etc/octavia/certs/client.pem
+                  subPath: cert_all
+              volumes:
+                - name: octavia-certs
+                  secret:
+                    secretName: octavia-certs
+                    defaultMode: 0644
+          octavia_housekeeping:
+            octavia_housekeeping:
+              volumeMounts:
+                - name: octavia-certs
+                  mountPath: /etc/octavia/certs/private/cakey.pem
+                  subPath: key
+                - name: octavia-certs
+                  mountPath: /etc/octavia/certs/ca_01.pem
+                  subPath: cert
+                - name: octavia-certs
+                  mountPath: /etc/octavia/certs/client.pem
+                  subPath: cert_all
+              volumes:
+                - name: octavia-certs
+                  secret:
+                    secretName: octavia-certs
+                    defaultMode: 0644
+          octavia_health_manager:
+            octavia_health_manager:
+              volumeMounts:
+                - name: octavia-certs
+                  mountPath: /etc/octavia/certs/private/cakey.pem
+                  subPath: key
+                - name: octavia-certs
+                  mountPath: /etc/octavia/certs/ca_01.pem
+                  subPath: cert
+                - name: octavia-certs
+                  mountPath: /etc/octavia/certs/client.pem
+                  subPath: cert_all
+              volumes:
+                - name: octavia-certs
+                  secret:
+                    secretName: octavia-certs
+                    defaultMode: 0644
       manifests:
         network_policy: false
         job_rabbit_init: false
         secret_amphora_ssh_key: true
+        secret_octavia_certs: false
 {%- if spec.get('features', {}).get('ssl', {}).get('public_endpoints', {}).get('enabled', True) %}
         secret_ca_bundle: true
 {%- endif %}
