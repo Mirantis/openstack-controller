@@ -180,5 +180,6 @@ services:
                 - project-id
                 - dvr
                 - filter-validation
+                - standard-attr-tag
         manifests:
           job_bootstrap: true

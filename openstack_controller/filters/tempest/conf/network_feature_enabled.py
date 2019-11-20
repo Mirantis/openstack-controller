@@ -23,11 +23,11 @@ class NetworkFeatureEnabled(base_section.BaseSection):
 
     @property
     def ipv6(self):
-        pass
+        return True
 
     @property
     def ipv6_subnet_attributes(self):
-        pass
+        return True
 
     @property
     def port_admin_state_change(self):
