@@ -42,7 +42,7 @@ spec:
         secret_ca_bundle: true
 {%- endif %}
       endpoints:
-        cluster_domain_suffix: {{ spec.domain_name }}
+        cluster_domain_suffix: {{ spec.internal_domain_name }}
 {%- if keystone_keycloak_enabled %}
         identity:
           hosts:
@@ -65,6 +65,7 @@ spec:
         dashboard:
           host_fqdn_override:
             public:
+              host: horizon.{{ spec.public_domain_name }}
               tls:
                 ca: |
 {{ spec.features.ssl.public_endpoints.ca_cert | indent( width=18, indentfirst=True) }}

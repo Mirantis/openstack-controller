@@ -28,7 +28,7 @@ spec:
       volume:
         enabled: false
       endpoints:
-        cluster_domain_suffix: {{ spec.domain_name }}
+        cluster_domain_suffix: {{ spec.internal_domain_name }}
         oslo_messaging: &nova_endpoints_oslo_messaging
           auth:
             admin:
@@ -165,7 +165,7 @@ spec:
         secret_ca_bundle: true
 {%- endif %}
       endpoints:
-        cluster_domain_suffix: {{ spec.domain_name }}
+        cluster_domain_suffix: {{ spec.internal_domain_name }}
 {% include 'base/_admin_identity.yaml' %}
         oslo_db:
           auth:
@@ -200,6 +200,7 @@ spec:
         compute:
           host_fqdn_override:
             public:
+              host: nova.{{ spec.public_domain_name }}
               tls:
                 ca: |
 {{ spec.features.ssl.public_endpoints.ca_cert | indent( width=18, indentfirst=True) }}
@@ -233,6 +234,7 @@ spec:
         placement:
           host_fqdn_override:
             public:
+              host: placement.{{ spec.public_domain_name }}
               tls:
                 ca: |
 {{ spec.features.ssl.public_endpoints.ca_cert | indent( width=18, indentfirst=True) }}
@@ -266,6 +268,7 @@ spec:
         compute_novnc_proxy:
           host_fqdn_override:
             public:
+              host: novncproxy.{{ spec.public_domain_name }}
               tls:
                 ca: |
 {{ spec.features.ssl.public_endpoints.ca_cert | indent(width=18, indentfirst=True) }}

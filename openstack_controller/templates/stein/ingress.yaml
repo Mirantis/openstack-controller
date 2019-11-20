@@ -24,4 +24,4 @@ spec:
       manifests:
         network_policy: false
       endpoints:
-        cluster_domain_suffix: {{ spec.domain_name }}
+        cluster_domain_suffix: {{ spec.internal_domain_name }}

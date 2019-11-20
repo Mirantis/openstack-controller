@@ -69,10 +69,10 @@ class HeatPlugin(base_section.BaseSection):
     @property
     def auth_url(self):
         host = self.get_values_item(
-            "keystone", "endpoints.identity.hosts.public.host", "keystone"
+            "keystone", "endpoints.identity.hosts.internal.host", "keystone"
         )
         scheme = self.get_values_item(
-            "keystone", "endpoints.identity.scheme.public", "http"
+            "keystone", "endpoints.identity.scheme.internal", "http"
         )
         return f"{scheme}://{host}"
 

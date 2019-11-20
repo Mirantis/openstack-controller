@@ -208,7 +208,7 @@ spec:
           rabbit_exporters: "overview,exchange,node"
   {%- endif %}
       endpoints:
-        cluster_domain_suffix: {{ spec.domain_name }}
+        cluster_domain_suffix: {{ spec.internal_domain_name }}
         oslo_messaging:
           auth:
             user:

@@ -95,33 +95,9 @@ EOF
 
 tee ./server-csr.json << EOF
 {
-    "CN": "*.openstack.svc.kaas-kubernetes-3af5ae538cf411e9a6c7fa163e5a4838",
+    "CN": "*.it.just.works",
     "hosts":     [
-        "keystone",
-        "keystone.openstack",
-        "glance",
-        "glance.openstack",
-        "cinder",
-        "cinder.openstack",
-        "cloudformation",
-        "cloudformation.openstack",
-        "glance-reg",
-        "glance-reg.openstack",
-        "heat",
-        "heat.openstack",
-        "horizon",
-        "horizon.openstack",
-        "metadata",
-        "metadata.openstack",
-        "neutron",
-        "neutron.openstack",
-        "nova",
-        "nova.openstack",
-        "novncproxy",
-        "novncproxy.openstack",
-        "placement",
-        "placement.openstack",
-        "*.openstack.svc.kaas-kubernetes-3af5ae538cf411e9a6c7fa163e5a4838"
+        "*.it.just.works"
     ],
     "key":     {
         "algo": "rsa",
@@ -134,7 +110,6 @@ tee ./server-csr.json << EOF
     }]
 }
 EOF
-sed -i "s/kaas-kubernetes-3af5ae538cf411e9a6c7fa163e5a4838/$(kubectl get configmap -n kube-system coredns -o jsonpath='{.data.Corefile}' |grep -oh kaas-kubernetes-[[:alnum:]]*)/g" ./*
 ./cfssl gencert -ca=ca.pem -ca-key=ca-key.pem --config=ca-config.json -profile=kubernetes server-csr.json | ./cfssljson -bare server
 ```
 Add certificates to context:

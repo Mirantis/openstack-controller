@@ -94,7 +94,7 @@ spec:
 {%- if keystone_keycloak.get('enabled', False) %}
           federation:
             # TODO: move this logic to keystone helm chart
-            trusted_dashboard: "https://horizon.openstack.svc.{{ spec.domain_name }}/auth/websso/"
+            trusted_dashboard: "https://horizon.{{ spec.public_domain_name }}/auth/websso/"
           mapped:
             remote_id_attribute: HTTP_OIDC_ISS
 {%- endif %}
@@ -167,11 +167,12 @@ spec:
         secret_ca_bundle: true
 {%- endif %}
       endpoints:
-        cluster_domain_suffix: {{ spec.domain_name }}
+        cluster_domain_suffix: {{ spec.internal_domain_name }}
 {% include 'base/_admin_identity.yaml' %}
 {%- if spec.get('features', {}).get('ssl', {}).get('public_endpoints', {}).get('enabled', True) %}
           host_fqdn_override:
             public:
+              host: keystone.{{ spec.public_domain_name }}
               tls:
                 ca: |
 {{ spec.features.ssl.public_endpoints.ca_cert | indent( width=18, indentfirst=True) }}

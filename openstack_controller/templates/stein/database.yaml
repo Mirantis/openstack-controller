@@ -34,7 +34,7 @@ spec:
         network_policy: false
         job_cluster_wait: true
       endpoints:
-        cluster_domain_suffix: {{ spec.domain_name }}
+        cluster_domain_suffix: {{ spec.internal_domain_name }}
         oslo_db:
           namespace: null
           auth:

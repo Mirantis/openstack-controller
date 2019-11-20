@@ -28,7 +28,7 @@ spec:
       volume:
         enabled: false
       endpoints:
-        cluster_domain_suffix: {{ spec.domain_name }}
+        cluster_domain_suffix: {{ spec.internal_domain_name }}
         oslo_messaging: &neutron_endpoints_oslo_messaging
           auth:
             admin:
@@ -93,8 +93,8 @@ spec:
         {%- endif %}
 {%- endfor %}
       endpoints:
-        cluster_domain_suffix: {{ spec.domain_name }}
-{%- if spec.get('migration', {}).get('neutron', {}).get('deploy_main_service', True) %}
+        cluster_domain_suffix: {{ spec.internal_domain_name }}
+{%- if spec.get('migration', {}).get('neutron', {}).get('deploy_main_service', true) %}
   - name: openstack-neutron
     chart: {{spec.common.openstack.repo}}/neutron
     values:
@@ -200,7 +200,7 @@ spec:
             jobs:
               - openstack-mariadb-cluster-wait
       endpoints:
-        cluster_domain_suffix: {{ spec.domain_name }}
+        cluster_domain_suffix: {{ spec.internal_domain_name }}
 {% include 'base/_admin_identity.yaml' %}
         oslo_db:
           auth:
@@ -219,6 +219,7 @@ spec:
         network:
           host_fqdn_override:
             public:
+              host: neutron.{{ spec.public_domain_name }}
               tls:
                 ca: |
 {{ spec.features.ssl.public_endpoints.ca_cert | indent( width=18, indentfirst=True) }}

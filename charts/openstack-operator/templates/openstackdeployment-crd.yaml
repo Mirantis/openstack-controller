@@ -67,8 +67,12 @@ spec:
                 - tiny
                 - small
                 - medium
-            domain_name:
+            public_domain_name:
               type: string
+              description: domain name used for public endpoints
+            internal_domain_name:
+              type: string
+              description: internal k8s domain name
             common:
               type: object
               properties:
@@ -361,4 +365,5 @@ spec:
             - openstack_version
             - profile
             - size
-            - domain_name
+            - public_domain_name
+            - internal_domain_name
