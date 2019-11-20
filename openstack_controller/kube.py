@@ -218,7 +218,8 @@ def wait_for_resource(klass, name, namespace=None, delay=60):
         find(klass, name, namespace)
     except pykube.exceptions.ObjectDoesNotExist:
         raise kopf.HandlerRetryError(
-            f"The object: {klass.kind} is not found yet.", delay=delay
+            f"The object: {klass.kind} with name '{name}' is not found yet.",
+            delay=delay,
         )
     except:
         raise kopf.HandlerRetryError(

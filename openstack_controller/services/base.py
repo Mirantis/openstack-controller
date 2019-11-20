@@ -1,6 +1,9 @@
 import asyncio
 import base64
-import os, socket
+import logging
+import os
+import socket
+from typing import List
 
 from dacite import from_dict
 import kopf
@@ -11,6 +14,9 @@ from openstack_controller import layers
 from openstack_controller import kube
 from openstack_controller import openstack
 from openstack_controller import secrets
+
+
+LOG = logging.getLogger(__name__)
 
 
 class RuntimeIdentifierMixin:
@@ -105,6 +111,16 @@ class Service(RuntimeIdentifierMixin):
         #           }
         #       }
     }
+
+    _service_accounts = []
+    _required_accounts = {}
+
+    @property
+    def service_accounts(self) -> List[str]:
+        service_name = openstack.OS_SERVICES_MAP.get(self.service)
+        if service_name:
+            return self._service_accounts + [service_name, "test"]
+        return self._service_accounts
 
     @property
     def _child_generic_objects(self):
@@ -403,10 +419,19 @@ class Service(RuntimeIdentifierMixin):
         credentials = openstack.get_or_create_os_credentials(
             self.service, self.namespace
         )
+
         admin_creds = openstack.get_admin_credentials(self.namespace)
+        service_creds = secrets.get_or_create_service_credentials(
+            self.namespace,
+            self.service,
+            self.service_accounts,
+            self._required_accounts,
+        )
+
         template_args = {
             "credentials": credentials,
             "admin_creds": admin_creds,
+            "service_creds": service_creds,
         }
         if self.ceph_required:
             template_args.update(self.ceph_config())
@@ -427,7 +452,10 @@ class Service(RuntimeIdentifierMixin):
                 self.logger,
                 **template_args,
             )
+        except kopf.HandlerRetryError:
+            raise
         except Exception as e:
+            LOG.exception("Can not render template.")
             raise kopf.HandlerFatalError(str(e))
         data.update(self.resource_def)
         # NOTE(pas-ha) this sets the parent refs in child

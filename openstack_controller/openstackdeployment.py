@@ -11,12 +11,14 @@ from . import services
 async def process_osdpl_event(body, meta, spec, logger, **kwargs):
     event = kwargs["cause"].event
     logger.info(f"Got osdpl event {event}")
+    namespace = meta["namespace"]
     # TODO(e0ne): change create_admin_credentials once kube.save_secret_data
     # won't update secrets
-    openstack.get_or_create_admin_credentials(meta["namespace"])
-    kube.wait_for_secret(meta["namespace"], openstack.ADMIN_SECRET_NAME)
+    openstack.get_or_create_admin_credentials(namespace)
+    kube.wait_for_secret(namespace, openstack.ADMIN_SECRET_NAME)
 
     update, delete = layers.services(spec, logger, **kwargs)
+
     if delete:
         logger.info(f"deleting children {' '.join(delete)}")
     service_fns = {}

@@ -4,7 +4,9 @@ import logging
 from openstack_controller import services
 
 
-def test_service_keystone_render(openstackdeployment, kubeapi, credentials):
+def test_service_keystone_render(
+    openstackdeployment, kubeapi, credentials, service_credentials
+):
     openstackdeployment_old = copy.deepcopy(openstackdeployment)
     service = services.Keystone(openstackdeployment, logging)
     compute_helmbundle = service.render()

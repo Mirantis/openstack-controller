@@ -96,6 +96,7 @@ class Cinder(OpenStackService):
     ceph_required = True
     service = "block-storage"
     openstack_chart = "cinder"
+
     _child_objects = {
         "cinder": {
             "Job": {
@@ -153,6 +154,7 @@ class Glance(OpenStackService):
     ceph_required = True
     service = "image"
     openstack_chart = "glance"
+
     _child_objects = {
         "glance": {
             "Job": {
@@ -180,6 +182,7 @@ class Glance(OpenStackService):
 class Heat(OpenStackService):
     service = "orchestration"
     openstack_chart = "heat"
+    _service_accounts = ["heat_trustee", "heat_stack_user"]
     _child_objects = {
         "heat": {
             "Job": {
@@ -286,6 +289,8 @@ class Keystone(OpenStackService):
 class Neutron(OpenStackService):
     service = "networking"
     openstack_chart = "neutron"
+    _required_accounts = {"compute": ["nova"], "dns": ["designate"]}
+
     _child_objects = {
         "rabbitmq": {
             "Job": {
@@ -302,6 +307,9 @@ class Nova(OpenStackService):
     service = "compute"
     ceph_required = True
     openstack_chart = "nova"
+    _service_accounts = ["placement"]
+    _required_accounts = {"networking": ["neutron"]}  # ironic
+
     _child_objects = {
         "nova": {
             "Job": {
@@ -379,6 +387,9 @@ class Tempest(Service):
     def template_args(self, spec):
         # TODO: add wait for generated credential here
         admin_creds = openstack.get_admin_credentials(self.namespace)
+        credentials = openstack.get_or_create_os_credentials(
+            self.service, self.namespace
+        )
         helmbundles_body = {}
         for s in set(spec["features"]["services"]) - {"tempest"}:
             template_args = Service.registry[s](
@@ -395,6 +406,7 @@ class Tempest(Service):
         return {
             "helmbundles_body": helmbundles_body,
             "admin_creds": admin_creds,
+            "credentials": credentials,
         }
 
 

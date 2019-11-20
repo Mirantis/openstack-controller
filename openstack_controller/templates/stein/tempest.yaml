@@ -1,6 +1,8 @@
 #apiVersion: lcm.mirantis.com/v1alpha1
 #kind: HelmBundle
 
+{%- set service = 'tempest' %}
+
 spec:
   releases:
   - name: openstack-tempest

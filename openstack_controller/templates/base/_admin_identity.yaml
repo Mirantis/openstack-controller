@@ -8,3 +8,8 @@
               user_domain_name: {{ spec.features.keystone.get('users', {}).get('admin', {}).get('user_domain_name', 'default') }}
               project_domain_name: {{ spec.features.keystone.get('users', {}).get('admin', {}).get('project_domain_name', 'default') }}
               default_domain_id: {{ spec.features.keystone.get('users', {}).get('admin', {}).get('default_domain_id', 'default') }}
+{%- for account in  service_creds %}
+            {{ account.account }}:
+              username: {{ account.username }}
+              password: {{ account.password }}
+{%- endfor %}

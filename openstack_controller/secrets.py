@@ -2,7 +2,7 @@ import base64
 from dataclasses import asdict, dataclass
 import json
 from os import urandom
-from typing import Dict, Optional
+from typing import Dict, List, Optional
 
 import kopf
 import pykube
@@ -17,6 +17,11 @@ RGW_KEYSTONE_SECRET = "ceph-keystone-user"
 class OSSytemCreds:
     username: str
     password: str
+
+
+@dataclass
+class OSServiceCreds(OSSytemCreds):
+    account: str
 
 
 @dataclass
@@ -265,3 +270,58 @@ def get_or_create_keycloak_salt(namespace: str, name: str) -> str:
         data = {name: base64.b64encode(json.dumps(salt).encode()).decode()}
         kube.save_secret_data(namespace, name, data)
         return data[name]
+
+
+def get_or_create_service_credentials(
+    namespace: str,
+    service: str,
+    service_accounts: List[str],
+    required_accounts: Dict[str, List[str]],
+) -> List[OSServiceCreds]:
+    try:
+        service_creds = get_service_secrets(namespace, service)
+    except pykube.exceptions.ObjectDoesNotExist:
+        service_creds = []
+        for account in service_accounts:
+            service_creds.append(
+                OSServiceCreds(
+                    account=account,
+                    username=generate_name(account),
+                    password=generate_password(),
+                )
+            )
+        save_service_secrets(namespace, service, service_creds)
+
+    for service_dep, accounts in required_accounts.items():
+        secret_name = f"{service_dep}-service-accounts"
+        kube.wait_for_secret(namespace, secret_name)
+        ra_creds = get_service_secrets(namespace, service_dep)
+
+        for creds in ra_creds:
+            if creds.account in accounts:
+                service_creds.append(creds)
+    return service_creds
+
+
+def get_service_secrets(namespace: str, service: str) -> List[OSServiceCreds]:
+    service_creds = []
+    data = get_secret_data(namespace, f"{service}-service-accounts")
+    dict_list = json.loads(base64.b64decode(data[service]))
+
+    for creds in dict_list:
+        service_creds.append(OSServiceCreds(**creds))
+
+    return service_creds
+
+
+def save_service_secrets(
+    namespace: str, service: str, credentials: List[OSServiceCreds]
+) -> None:
+    data = []
+    for creds in credentials:
+        data.append(asdict(creds))
+    kube.save_secret_data(
+        namespace,
+        f"{service}-service-accounts",
+        {service: base64.b64encode(json.dumps(data).encode()).decode()},
+    )

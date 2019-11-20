@@ -93,17 +93,17 @@ def get_or_create_os_credentials(
         os_creds = secrets.get_os_service_secret(secret_name, namespace)
     except pykube.exceptions.ObjectDoesNotExist:
         os_creds = secrets.OpenStackCredentials(
-            database={}, messaging={}, notifications={}, memcached={}
+            database={}, messaging={}, notifications={}, memcached=""
         )
         srv = OS_SERVICES_MAP.get(service)
         if srv:
             for service_type in ["database", "messaging", "notifications"]:
                 getattr(os_creds, service_type)[
                     "user"
-                ] = _generate_credentials(srv, 16)
+                ] = _generate_credentials(srv)
             os_creds.memcached = secrets.generate_password(length=16)
         elif service == "powerdns":
-            os_creds.database["user"] = _generate_credentials(service, 16)
+            os_creds.database["user"] = _generate_credentials(service)
         else:
             # TODO(e0ne): add logging here
             return
@@ -128,6 +128,7 @@ def create_admin_credentials(namespace: str):
     )
 
     secrets.save_os_admin_secret(ADMIN_SECRET_NAME, namespace, admin_creds)
+    return admin_creds
 
 
 def get_admin_credentials(namespace: str) -> secrets.OpenStackAdminCredentials:

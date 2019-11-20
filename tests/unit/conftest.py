@@ -30,3 +30,12 @@ def credentials(mocker):
     )
     yield creds
     mocker.stopall()
+
+
+@pytest.fixture
+def service_credentials(mocker):
+    creds = mocker.patch(
+        "openstack_controller.secrets.get_or_create_service_credentials"
+    )
+    yield creds
+    mocker.stopall()
