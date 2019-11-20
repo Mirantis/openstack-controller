@@ -46,72 +46,10 @@ Update DNS to match currently configured by kaas
 `sed -i "s/kaas-kubernetes-3af5ae538cf411e9a6c7fa163e5a4837/$(kubectl get configmap -n kube-system coredns -o jsonpath='{.data.Corefile}' |grep -oh kaas-kubernetes-[[:alnum:]]*)/g" examples/stein/core-ceph-local-non-dvr.yaml`
 
 #### In case SSL on public endpoints is enabled before applying context need to generate certificates and set them in context yaml.
+Generate certs with correct domain
 ```
-mkdir cert
-cd cert
-curl -L https://pkg.cfssl.org/R1.2/cfssl_linux-amd64 -o cfssl
-chmod +x cfssl
-curl -L https://pkg.cfssl.org/R1.2/cfssljson_linux-amd64 -o cfssljson
-chmod +x cfssljson
-
-tee ./ca-config.json << EOF
-{
-  "signing": {
-    "default": {
-      "expiry": "8760h"
-    },
-    "profiles": {
-      "kubernetes": {
-        "usages": [
-          "signing",
-          "key encipherment",
-          "server auth",
-          "client auth"
-        ],
-        "expiry": "8760h"
-      }
-    }
-  }
-}
-EOF
-
-tee ./ca-csr.json << EOF
-{
-  "CN": "kubernetes",
-  "key": {
-    "algo": "rsa",
-    "size": 2048
-  },
-  "names":[{
-    "C": "<country>",
-    "ST": "<state>",
-    "L": "<city>",
-    "O": "<organization>",
-    "OU": "<organization unit>"
-  }]
-}
-EOF
-
-./cfssl gencert -initca ca-csr.json | ./cfssljson -bare ca
-
-tee ./server-csr.json << EOF
-{
-    "CN": "*.it.just.works",
-    "hosts":     [
-        "*.it.just.works"
-    ],
-    "key":     {
-        "algo": "rsa",
-        "size": 2048
-    },
-    "names": [    {
-        "C": "US",
-        "L": "CA",
-        "ST": "San Francisco"
-    }]
-}
-EOF
-./cfssl gencert -ca=ca.pem -ca-key=ca-key.pem --config=ca-config.json -profile=kubernetes server-csr.json | ./cfssljson -bare server
+cd tools/ssl
+./makecerts.sh
 ```
 Add certificates to context:
 ```
@@ -120,12 +58,12 @@ spec:
     ssl:
       public_endpoints:
         enabled: true
-        ca_cert: |
-          CA certificate content (ca.pem)
         api_cert: |
-          server certificate content (server.pem)
+          server certificate content (from tools/ssl/certs/server.pem)
         api_key: |
-          server private key (server-key.pem)
+          server private key content (from tools/ssl/certs/server-key.pem)
+        ca_cert: |
+          CA certificate content (from tools/ssl/certs/ca.pem)
 ```
 
 `kubectl apply -f examples/stein/core-ceph.yaml`
