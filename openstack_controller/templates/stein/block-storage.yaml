@@ -78,6 +78,7 @@ spec:
           rabbit_exporters: "overview,exchange,node"
   {%- endif %}
 {%- endif %}
+{%- if spec.get('migration', {}).get('cinder', {}).get('deploy_main_service', True) %}
   - name: openstack-cinder
     chart: {{spec.common.openstack.repo}}/cinder
     values:
@@ -292,4 +293,5 @@ spec:
           scheme:
             default: http
             public: https
+{%- endif %}
 {%- endif %}

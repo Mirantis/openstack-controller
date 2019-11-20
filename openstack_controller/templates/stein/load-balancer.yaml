@@ -78,6 +78,7 @@ spec:
           rabbit_exporters: "overview,exchange,node"
   {%- endif %}
 {%- endif %}
+{%- if spec.get('migration', {}).get('octavia', {}).get('deploy_main_service', True) %}
   - name: openstack-octavia
     chart: {{spec.common.openstack.get('repo', spec.common.charts.repo)}}/octavia
     values:
@@ -208,4 +209,5 @@ spec:
           scheme:
             default: http
             public: https
+{%- endif %}
 {%- endif %}

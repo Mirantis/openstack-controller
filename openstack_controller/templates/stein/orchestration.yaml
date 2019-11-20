@@ -90,6 +90,7 @@ spec:
           rabbit_exporters: "overview,exchange,node"
   {%- endif %}
 {%- endif %}
+{%- if spec.get('migration', {}).get('heat', {}).get('deploy_main_service', True) %}
   - name: openstack-heat
     chart: {{spec.common.openstack.repo}}/heat
     values:
@@ -221,4 +222,5 @@ spec:
           scheme:
             default: http
             public: https
+{%- endif %}
 {%- endif %}

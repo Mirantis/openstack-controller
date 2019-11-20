@@ -78,6 +78,7 @@ spec:
           rabbit_exporters: "overview,exchange,node"
   {%- endif %}
 {%- endif %}
+{%- if spec.get('migration', {}).get('designate', {}).get('deploy_main_service', True) %}
   - name: openstack-designate
     chart: {{spec.common.openstack.repo}}/designate
     values:
@@ -208,6 +209,7 @@ spec:
           scheme:
             default: http
             public: https
+{%- endif %}
 {%- endif %}
   - name: openstack-powerdns
     chart: {{spec.common.infra.repo}}/powerdns

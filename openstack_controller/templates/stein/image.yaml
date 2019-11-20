@@ -78,6 +78,7 @@ spec:
           rabbit_exporters: "overview,exchange,node"
   {%- endif %}
 {%- endif %}
+{%- if spec.get('migration', {}).get('glance', {}).get('deploy_main_service', True) %}
   - name: openstack-glance
     chart: {{spec.common.openstack.repo}}/glance
     values:
@@ -195,4 +196,5 @@ spec:
           scheme:
             default: http
             public: https
+{%- endif %}
 {%- endif %}

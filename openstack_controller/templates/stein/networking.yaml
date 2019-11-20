@@ -94,6 +94,7 @@ spec:
 {%- endfor %}
       endpoints:
         cluster_domain_suffix: {{ spec.domain_name }}
+{%- if spec.get('migration', {}).get('neutron', {}).get('deploy_main_service', True) %}
   - name: openstack-neutron
     chart: {{spec.common.openstack.repo}}/neutron
     values:
@@ -360,3 +361,4 @@ spec:
                   DEFAULT:
                     agent_mode: dvr_snat
         {%- endif %}
+{%- endif %}

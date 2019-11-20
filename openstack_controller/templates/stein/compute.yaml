@@ -112,6 +112,7 @@ spec:
             catalog_info: volumev3::internalURL
         libvirt:
           listen_addr: 0.0.0.0
+{%- if spec.get('migration', {}).get('nova', {}).get('deploy_main_service', True) %}
   - name: openstack-nova
     chart: {{spec.common.openstack.repo}}/nova
     values:
@@ -340,3 +341,4 @@ spec:
       network:
         sshd:
           enabled: true
+{%- endif %}
