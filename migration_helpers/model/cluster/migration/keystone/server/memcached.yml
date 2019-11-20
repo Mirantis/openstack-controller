@@ -1,0 +1,7 @@
+parameters:
+  keystone:
+    server:
+      cache:
+        ~members:
+        - host: ${_param:mcp2_memcached_keystone_address}
+          port: 11211

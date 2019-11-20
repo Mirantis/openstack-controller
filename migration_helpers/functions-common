@@ -1,0 +1,177 @@
+function info {
+    local msg="[INFO]: $1"
+    echo "$msg"
+}
+
+# Control Functions
+# =================
+
+# Prints backtrace info
+# filename:lineno:function
+# backtrace level
+function backtrace {
+    local level=$1
+    local deep
+    deep=$((${#BASH_SOURCE[@]} - 1))
+    echo "[Call Trace]"
+    while [ $level -le $deep ]; do
+        echo "${BASH_SOURCE[$deep]}:${BASH_LINENO[$deep-1]}:${FUNCNAME[$deep-1]}"
+        deep=$((deep - 1))
+    done
+}
+
+# Prints line number and "message" then exits
+# die $LINENO "message"
+function die {
+    local exitcode=$?
+    set +o xtrace
+    local line=$1; shift
+    if [ $exitcode == 0 ]; then
+        exitcode=1
+    fi
+    backtrace 2
+    err $line "$*"
+    # Give buffers a second to flush
+    sleep 1
+    exit $exitcode
+}
+
+# Checks an environment variable is not set or has length 0 OR if the
+# exit code is non-zero and prints "message" and exits
+# NOTE: env-var is the variable name without a '$'
+# die_if_not_set $LINENO env-var "message"
+function die_if_not_set {
+    local exitcode=$?
+    local xtrace
+    xtrace=$(set +o | grep xtrace)
+    set +o xtrace
+    local line=$1; shift
+    local evar=$1; shift
+    if ! is_set $evar || [ $exitcode != 0 ]; then
+        die $line "$*"
+    fi
+    $xtrace
+}
+
+function deprecated {
+    local text=$1
+    DEPRECATED_TEXT+="\n$text"
+    echo "WARNING: $text" >&2
+}
+
+# Prints line number and "message" in error format
+# err $LINENO "message"
+function err {
+    local exitcode=$?
+    local xtrace
+    xtrace=$(set +o | grep xtrace)
+    set +o xtrace
+    local msg="[ERROR] ${BASH_SOURCE[2]}:$1 $2"
+    echo "$msg" 1>&2;
+    if [[ -n ${LOGDIR} ]]; then
+        echo "$msg" >> "${LOGDIR}/error.log"
+    fi
+    $xtrace
+    return $exitcode
+}
+
+# Checks an environment variable is not set or has length 0 OR if the
+# exit code is non-zero and prints "message"
+# NOTE: env-var is the variable name without a '$'
+# err_if_not_set $LINENO env-var "message"
+function err_if_not_set {
+    local exitcode=$?
+    local xtrace
+    xtrace=$(set +o | grep xtrace)
+    set +o xtrace
+    local line=$1; shift
+    local evar=$1; shift
+    if ! is_set $evar || [ $exitcode != 0 ]; then
+        err $line "$*"
+    fi
+    $xtrace
+    return $exitcode
+}
+
+# Exit after outputting a message about the distribution not being supported.
+# exit_distro_not_supported [optional-string-telling-what-is-missing]
+function exit_distro_not_supported {
+    if [[ -z "$DISTRO" ]]; then
+        GetDistro
+    fi
+
+    if [ $# -gt 0 ]; then
+        die $LINENO "Support for $DISTRO is incomplete: no support for $@"
+    else
+        die $LINENO "Support for $DISTRO is incomplete."
+    fi
+}
+
+# Test if the named environment variable is set and not zero length
+# is_set env-var
+function is_set {
+    local var=\$"$1"
+    eval "[ -n \"$var\" ]" # For ex.: sh -c "[ -n \"$var\" ]" would be better, but several exercises depends on this
+}
+
+function service_name_to_type {
+    local service_name=$1
+    case "$service_name" in
+        "keystone" )
+            echo "identity";;
+        "heat" )
+            echo "orchestration" ;;
+        "glance" )
+            echo "image" ;;
+        "horizon" )
+            echo "dashboard" ;;
+        "nova" )
+            echo "compute" ;;
+        "octavia" )
+            echo "load-balancer" ;;
+        "cinder" )
+            echo "block-storage" ;;
+        "designate" )
+            echo "dns" ;;
+        "barbican" )
+            echo "key-manager" ;;
+        "neutron" )
+            echo "networking" ;;
+        *)
+            exit 1 ;;
+    esac
+}
+
+function get_service_subservices_internal_endpoints {
+local service_name=$1
+    case "$service_name" in
+        "heat" )
+            echo "heat-api heat-cfn" ;;
+        "nova" )
+            echo "nova-api placement-api" ;;
+        "neutron" )
+            echo "neutron-server" ;;
+        *)
+            echo "${service_name}-api" ;;
+    esac
+}
+
+function get_mcp2_external_ip {
+  local service="$1"
+  echo "$(kubectl -n openstack get services $service -o jsonpath='{.status.loadBalancer.ingress[0].ip}')"
+}
+
+function get_mcp2_internal_domain_name {
+  echo $(kubectl -n openstack get ingress keystone -o yaml |grep '\- keystone.openstack.svc' | awk '{print $2}' | awk -F '.' '{print $4}')
+}
+
+function get_mcp2_public_domain_name {
+  # TODO: get this info from osdpl
+  echo "it.just.works.local"
+}
+
+function refresh_pillars {
+  info "Refreshing pillars"
+  timeout 600 salt '*' saltutil.refresh_pillar --timeout=600 > /dev/null || die $LINENO "Failed to refresh pillars"
+  info "Pillars are refreshed"
+}

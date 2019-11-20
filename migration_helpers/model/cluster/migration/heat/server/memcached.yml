@@ -1,0 +1,7 @@
+parameters:
+  heat:
+    server:
+      cache:
+        ~members:
+        - host: ${_param:mcp2_memcached_heat_address}
+          port: 11211

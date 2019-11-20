@@ -1,0 +1,7 @@
+parameters:
+  cinder:
+    volume:
+      cache:
+        ~members:
+        - host: ${_param:mcp2_memcached_cinder_address}
+          port: 11211

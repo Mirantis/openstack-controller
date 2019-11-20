@@ -1,0 +1,7 @@
+parameters:
+  neutron:
+    compute:
+      cache:
+        ~members:
+        - host: ${_param:mcp2_memcached_neutron_address}
+          port: 11211

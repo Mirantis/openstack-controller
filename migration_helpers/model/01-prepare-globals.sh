@@ -1,0 +1,128 @@
+#!/bin/bash
+
+set -e #x
+RUN_DIR=$(cd $(dirname "$0") && pwd)
+TOP_DIR=$( cd $(dirname $RUN_DIR/../../) && pwd)
+
+. $TOP_DIR/globals
+. $TOP_DIR/functions-common
+
+function generate_globals {
+  local mcp2_db_address=$(get_mcp2_external_ip mariadb)
+  local mcp2_rabbitmq_notifications_address=$(get_mcp2_external_ip rabbitmq-external)
+
+cat <<EOF > $RUN_DIR/cluster/migration/init.yml
+parameters:
+  _param:
+    mcp2_rabbitmq_notifications_address: ${mcp2_rabbitmq_notifications_address}
+EOF
+
+  for component in $COMPONENTS_TO_MIGRATE; do
+    local service_type=$(service_name_to_type $component)
+    local mcp2_db_user=$(kubectl -n openstack get secrets generated-${service_type}-passwords -o jsonpath="{.data.database}" | base64 -d | jq ".user.username" | tr -d '"')
+    local mcp2_db_password=$(kubectl -n openstack get secrets generated-${service_type}-passwords -o jsonpath="{.data.database}" | base64 -d | jq ".user.password" | tr -d '"')
+    local mcp2_rabbitmq_notifications_component_username=$(kubectl -n openstack get secrets generated-${service_type}-passwords -o jsonpath="{.data.notifications}" | base64 -d | jq ".user.username" | tr -d '"')
+    local mcp2_rabbitmq_notifications_component_password=$(kubectl -n openstack get secrets generated-${service_type}-passwords -o jsonpath="{.data.notifications}" | base64 -d | jq ".user.password" | tr -d '"')
+
+    local mcp2_rabbitmq_component_username=$(kubectl -n openstack get secrets generated-${service_type}-passwords -o jsonpath="{.data.messaging}" | base64 -d | jq ".user.username" | tr -d '"')
+    local mcp2_rabbitmq_component_password=$(kubectl -n openstack get secrets generated-${service_type}-passwords -o jsonpath="{.data.messaging}" | base64 -d | jq ".user.password" | tr -d '"')
+
+cat <<EOF >> $RUN_DIR/cluster/migration/init.yml
+    mcp2_database_${component}_address: $mcp2_db_address
+    mcp2_database_${component}_username: $mcp2_db_user
+    mcp2_database_${component}_password: $mcp2_db_password
+    mcp2_rabbitmq_notifications_${component}_username: $mcp2_rabbitmq_notifications_component_username
+    mcp2_rabbitmq_notifications_${component}_password: $mcp2_rabbitmq_notifications_component_password
+    mcp2_rabbitmq_${component}_username: $mcp2_rabbitmq_component_username
+    mcp2_rabbitmq_${component}_password: $mcp2_rabbitmq_component_password
+EOF
+
+  done
+
+  for component in $COMPONENTS_TO_MIGRATE; do
+    # Skip keystone as it doesn't use messaging for inter service communications.
+    if [[ "$component" == "keystone" ]]; then
+      continue
+    fi
+    local mcp2_rabbitmq_component_address=$(get_mcp2_external_ip rabbitmq-$component-external)
+
+cat <<EOF >> $RUN_DIR/cluster/migration/init.yml
+    mcp2_rabbitmq_${component}_address: $mcp2_rabbitmq_component_address
+EOF
+
+  done
+
+  # Set mcp1 database parameters
+  local mcp1_database_address=$(salt 'dbs01*' pillar.items _param:openstack_database_address --out json | jq '.[]|.[]' | tr -d '"')
+cat <<EOF >> $RUN_DIR/cluster/migration/init.yml
+    mcp1_database_address: $mcp1_database_address
+    mcp2_database_address: $mcp2_db_address
+EOF
+
+  for component in $COMPONENTS_TO_MIGRATE; do
+    local mcp1_db_user=$(salt 'dbs01*' pillar.items _param:mysql_${component}_username --out json | jq '.[]|.[]' | tr -d '"')
+    if ! is_set mcp1_db_user; then
+      info "Username for $component is not set in _param:mysql_${component}_username, falling back to default user name."
+      mcp1_db_user=$component
+    fi
+
+    local mcp1_db_password=$(salt 'dbs01*' pillar.items _param:mysql_${component}_password --out json | jq '.[]|.[]' | tr -d '"')
+    die_if_not_set $LINENO mcp1_db_user "Cant get mcp1_db_password for $component"
+
+cat <<EOF >> $RUN_DIR/cluster/migration/init.yml
+    mcp1_database_${component}_username: $mcp1_db_user
+    mcp1_database_${component}_password: $mcp1_db_password
+EOF
+  done
+
+  local mcp2_internal_domain_name=$(get_mcp2_internal_domain_name)
+
+  local mcp2_memcached_address=$(get_mcp2_external_ip memcached-external)
+  # memcached
+  # Use dns to make sure URL in mcp1 and mcp2 are the same
+  local mcp2_memcached_fqdn=memcached.openstack.svc.${mcp2_internal_domain_name}
+  for component in $COMPONENTS_TO_MIGRATE; do
+    local mcp2_memcached_component_secret_key=$(kubectl -n openstack get secrets generated-${service_type}-passwords -o jsonpath="{.data.memcached}" | base64 -d | tr -d '"')
+cat <<EOF >> $RUN_DIR/cluster/migration/init.yml
+    mcp2_memcached_${component}_address: $mcp2_memcached_fqdn
+    mcp2_memcached_${component}_secret_key: $mcp2_memcached_component_secret_key
+EOF
+  done
+
+  # generate hosts part
+  local mcp2_ingress_address=$(get_mcp2_external_ip ingress)
+  local mcp2_public_domain_name=$(get_mcp2_public_domain_name)
+
+cat <<EOF >> $RUN_DIR/cluster/migration/init.yml
+  linux:
+    network:
+      host:
+        mcp2_memcached_public_api_host:
+          address: $mcp2_memcached_address
+          names:
+          - $mcp2_memcached_fqdn
+        mcp2_openstack_public_api_host:
+          address: $mcp2_ingress_address
+          names:
+EOF
+  for component in $COMPONENTS_TO_MIGRATE; do
+cat <<EOF >> $RUN_DIR/cluster/migration/init.yml
+          - ${component}.${mcp2_public_domain_name}
+EOF
+  done
+
+  for component in $COMPONENTS_TO_MIGRATE; do
+    for internal_service in $(get_service_subservices_internal_endpoints $component); do
+      local internal_service_ip=$(get_mcp2_external_ip ${internal_service})
+cat <<EOF >> $RUN_DIR/cluster/migration/init.yml
+        mcp2_${component}_${internal_service}_internal:
+          address: $internal_service_ip
+          names:
+           - ${internal_service}.openstack.svc.${mcp2_internal_domain_name}
+EOF
+    done
+  done
+
+}
+
+generate_globals
