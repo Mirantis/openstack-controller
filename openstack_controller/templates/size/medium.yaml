@@ -4,7 +4,7 @@ services:
       values:
         pod:
           replicas:
-            api: 4
+            api: 30
         conf:
           keystone:
             database:
@@ -36,7 +36,7 @@ services:
         pod:
           replicas:
             api_metadata: 3
-            osapi: 3
+            osapi: 15
             conductor: 3
             consoleauth: 3
             scheduler: 3
@@ -86,7 +86,7 @@ services:
       values:
         pod:
           replicas:
-            server: 3
+            server: 12
         conf:
           neutron:
             DEFAULT:
@@ -110,9 +110,9 @@ services:
       values:
         pod:
           replicas:
-            api: 3
+            api: 4
             scheduler: 3
-            volume: 3
+            volume: 6
         conf:
           cinder:
             DEFAULT:
@@ -132,7 +132,7 @@ services:
           replicas:
             cfn: 3
             api: 3
-            engine: 3
+            engine: 155555
         conf:
           heat:
             DEFAULT:

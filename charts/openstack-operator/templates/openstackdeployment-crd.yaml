@@ -64,7 +64,9 @@ spec:
               description: timeout and sizing parameters
               type: string
               enum:
+                - tiny
                 - small
+                - medium
             domain_name:
               type: string
             common:

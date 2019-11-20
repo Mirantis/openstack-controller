@@ -20,11 +20,6 @@ spec:
       repo: osh-infra
     openstack:
       repo: osh
-      values:
-        pod:
-          replicas:
-            api: 3
-            server: 3
   domain_name: kaas-kubernetes-3af5ae538cf411e9a6c7fa163e5a4837
   features:
     barbican:
