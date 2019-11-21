@@ -52,7 +52,7 @@ spec:
         mtu: null
         network_types:
         - flat
-        physnet: external
+        physnet: physnet1
         vlan_ranges: null
     nova:
       images:

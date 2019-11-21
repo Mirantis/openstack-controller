@@ -42,7 +42,7 @@ spec:
     neutron:
       tunnel_interface: ens3
       external_networks:
-        - physnet: external
+        - physnet: physnet1
           interface: veth-phy
           bridge: br-ex
           network_types:
@@ -74,7 +74,7 @@ spec:
             script: |
               openstack network show public || openstack network create \
                 --provider-network-type flat \
-                --provider-physical-network external \
+                --provider-physical-network physnet1 \
                 --external \
                 public
               openstack subnet show public-subnet || openstack subnet create public-subnet \
