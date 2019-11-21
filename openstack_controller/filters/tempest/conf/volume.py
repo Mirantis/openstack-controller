@@ -35,7 +35,7 @@ class Volume(base_section.BaseSection):
 
     @property
     def catalog_type(self):
-        return "volumev2"
+        return "volumev3"
 
     @property
     def disk_format(self):
