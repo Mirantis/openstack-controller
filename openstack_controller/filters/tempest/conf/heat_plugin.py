@@ -249,4 +249,4 @@ class HeatPlugin(base_section.BaseSection):
 
     @property
     def vm_to_heat_api_insecure(self):
-        pass
+        return self.get_spec_item("ssl.public_endpoints.enabled", True)

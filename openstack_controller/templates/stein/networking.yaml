@@ -286,6 +286,7 @@ spec:
             {%- if spec.get('features', {}).get('neutron', {}).get('dvr', {}).get('enabled', False) %}
             router_distributed: True
             {%- endif %}
+            dnsmasq_local_resolv: true
           oslo_messaging_notifications:
             topics: {{ notification_topics|join(',') }}
         logging:

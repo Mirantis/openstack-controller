@@ -99,3 +99,10 @@ spec:
           octavia:
             settings:
               amphora_image_url: "http://images.mcp.mirantis.net/octavia/amphora-x64-haproxy-rocky-testing.qcow2"
+    orchestration:
+      heat:
+        values:
+          conf:
+            heat:
+              clients_heat:
+                insecure: true
