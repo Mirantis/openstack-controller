@@ -17,7 +17,10 @@ async def update_status(body, patch):
     osdpl.patch({"status": patch})
 
 
-async def process_osdpl_event(body, meta, spec, logger, **kwargs):
+@kopf.on.resume(*kube.OpenStackDeployment.kopf_on_args)
+@kopf.on.update(*kube.OpenStackDeployment.kopf_on_args)
+@kopf.on.create(*kube.OpenStackDeployment.kopf_on_args)
+async def apply(body, meta, spec, logger, event, **kwargs):
     event = kwargs["cause"].event
     namespace = meta["namespace"]
     LOG.info(f"Got osdpl event {event}")
@@ -40,12 +43,6 @@ async def process_osdpl_event(body, meta, spec, logger, **kwargs):
     service_fns = {}
     for service in update:
         service_instance = services.registry[service](body, logger)
-        if event == "resume":
-            if not service_instance.is_identifier_changed:
-                LOG.info(
-                    f"Got fake resume event for osdpl {meta['name']}, service: {service}"
-                )
-                continue
         service_fns[service] = service_instance.apply
     service_fns.update(
         {
@@ -55,27 +52,13 @@ async def process_osdpl_event(body, meta, spec, logger, **kwargs):
     )
     if service_fns:
         await kopf.execute(fns=service_fns)
-        return {"message": "created" if event == "create" else "updated"}
+        return {"lastStatus": f"{event}d"}
     else:
-        return {"message": "skipped"}
-
-
-@kopf.on.create(*kube.OpenStackDeployment.kopf_on_args)
-async def create(body, meta, spec, logger, **kwargs):
-    return await process_osdpl_event(body, meta, spec, logger, **kwargs)
-
-
-@kopf.on.update(*kube.OpenStackDeployment.kopf_on_args)
-async def update(body, meta, spec, logger, **kwargs):
-    return await process_osdpl_event(body, meta, spec, logger, **kwargs)
-
-
-@kopf.on.resume(*kube.OpenStackDeployment.kopf_on_args)
-async def resume(body, meta, spec, logger, **kwargs):
-    return await process_osdpl_event(body, meta, spec, logger, **kwargs)
+        return {"lastStatus": "{event} skipped"}
 
 
 @kopf.on.delete(*kube.OpenStackDeployment.kopf_on_args)
-async def delete(meta, logger, **kwargs):
+async def delete(name, logger, **kwargs):
     # TODO(pas-ha) wait for children to be deleted
-    LOG.info(f"deleting {meta['name']}")
+    # TODO(pas-ha) remove secrets and so on?
+    LOG.info(f"deleting {name}")

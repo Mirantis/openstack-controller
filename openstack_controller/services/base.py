@@ -2,8 +2,6 @@ import asyncio
 import base64
 import json
 import logging
-import os
-import socket
 from typing import List
 
 import kopf
@@ -23,35 +21,6 @@ from mcp_k8s_lib import utils
 
 
 LOG = utils.get_logger(__name__)
-
-
-class RuntimeIdentifierMixin:
-    @property
-    def runtime_identifier(self):
-        pgrp = os.getpgrp()
-        hostname = socket.gethostname()
-        return f"{hostname}_{pgrp}"
-
-    @property
-    def latest_runtime_identifier(self):
-        return (
-            self.osdpl.obj.get("status", {})
-            .get("runtime_identitfier", {})
-            .get(self.service)
-        )
-
-    def set_runtime_identifier(self):
-        LOG.info(
-            f"Setting runtime identifier to osdpl service {self.service}."
-        )
-        patch = {
-            "runtime_identitfier": {self.service: self.runtime_identifier}
-        }
-        self.update_status(patch)
-
-    @property
-    def is_identifier_changed(self):
-        return self.runtime_identifier != self.latest_runtime_identifier
 
 
 class GenericChildObject:
@@ -100,7 +69,7 @@ class GenericChildObject:
         )
 
 
-class Service(RuntimeIdentifierMixin):
+class Service:
 
     ceph_required = False
     service = None
@@ -286,7 +255,6 @@ class Service(RuntimeIdentifierMixin):
         )
 
     async def apply(self, event, **kwargs):
-        self.set_runtime_identifier()
         # ensure child ref exists in the status
         if self.resource_name not in self.osdpl.obj.get("status", {}).get(
             "children", {}
