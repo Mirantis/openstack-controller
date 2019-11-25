@@ -27,6 +27,14 @@ features:
     user:
       username: stacklight
 services:
+  database:
+    mariadb:
+      values:
+        conf:
+          database_conf:
+            mysqld:
+              wsrep_provider_options:
+                gcache.size: 1024M
   image:
     glance:
       values:
