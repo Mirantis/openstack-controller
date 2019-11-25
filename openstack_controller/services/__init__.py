@@ -376,6 +376,11 @@ class Octavia(OpenStackService):
     def template_args(self, spec):
         t_args = super().template_args(spec)
         openstack.get_or_create_certs("octavia-certs", self.namespace)
+        t_args["ssh_credentials"] = asdict(
+            openstack.get_or_create_ssh_credentials(
+                self.service, self.namespace
+            )
+        )
         return t_args
 
 

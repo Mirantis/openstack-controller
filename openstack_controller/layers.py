@@ -1,3 +1,4 @@
+import base64
 import json
 import hashlib
 
@@ -21,6 +22,9 @@ ENV = jinja2.Environment(
 LOG.info(f"found templates {ENV.list_templates()}")
 
 ENV.filters["generate_tempest_config"] = generate_tempest_config
+ENV.filters["b64encode"] = base64.b64encode
+ENV.filters["decode"] = lambda x: x.decode()
+ENV.filters["encode"] = lambda x: x.encode()
 
 
 class TypeConflictFail(
