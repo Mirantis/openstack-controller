@@ -6,11 +6,11 @@ metadata:
 spec:
   repositories:
   - name: lvp
-    url: https://artifactory.mcp.mirantis.net/binary-dev-kaas-local/openstack/mcp-sig-storage-local-static-provisioner
+    url: https://artifactory.mcp.mirantis.net/binary-dev-kaas-local/bm/helm
   releases:
   - name: local-volume-provisioner
-    chart: lvp/provisioner
-    version: 0.1.0-mcp-352
+    chart: lvp/local-volume-provisioner
+    version: 0.1.0-mcp-353
     namespace: osh-system
     values:
       common:
@@ -29,9 +29,8 @@ spec:
                  - vol2
                  - vol3
       daemonset:
-        image: docker-dev-kaas-local.docker.mirantis.net/openstack/extra/local-volume-provisioner:v2.3.3
         nodeSelector:
           openstack-control-plane: enabled
         initFakeMounts: true
         init:
-          image: docker-dev-kaas-local.docker.mirantis.net/openstack/heat:stein-bionic-20191031180024
+          image: docker-dev-kaas-local.docker.mirantis.net/openstack/heat:stein-bionic-20191124180014
