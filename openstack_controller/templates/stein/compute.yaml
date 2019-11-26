@@ -313,6 +313,8 @@ spec:
         nova:
           DEFAULT:
             allow_resize_to_same_host: true
+          cache:
+            backend: oslo_cache.memcache_pool
           keystone_authtoken:
             memcache_security_strategy: ENCRYPT
             memcache_secret_key: {{ credentials.memcached }}

@@ -264,6 +264,8 @@ spec:
           app:neutronversions:
             paste.app_factory: neutron.pecan_wsgi.app:versions_factory
         neutron:
+          cache:
+            backend: oslo_cache.memcache_pool
           keystone_authtoken:
             memcache_security_strategy: ENCRYPT
             memcache_secret_key: {{ credentials.memcached }}
