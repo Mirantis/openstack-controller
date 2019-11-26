@@ -82,6 +82,11 @@ spec:
   - name: openstack-octavia
     chart: {{spec.common.openstack.get('repo', spec.common.charts.repo)}}/octavia
     values:
+      octavia:
+        settings:
+          lbmgmt_cidr: "192.168.0.0/19"
+          lbmgmt_subnet_start: "192.168.0.100"
+          lbmgmt_subnet_end: "192.168.31.254"
       images:
         tags:
 {%- for image in [
