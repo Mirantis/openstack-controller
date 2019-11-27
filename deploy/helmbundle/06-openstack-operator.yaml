@@ -10,7 +10,7 @@ spec:
   releases:
   - name: openstack-operator
     chart: openstack-controller/openstack-operator
-    version: 0.1.0-mcp-398
+    version: 0.1.0-mcp-406
     namespace: osh-system
     values:
       kopf:
