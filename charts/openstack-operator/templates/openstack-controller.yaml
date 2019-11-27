@@ -64,10 +64,10 @@ rules:
     resources: [helmbundles]
     verbs: [list, get, watch, create, update, patch, delete]
 
-  # Manage child reousrces only list and delete grants
+  # Manage child resources
   - apiGroups: [extensions, apps, batch]
-    resources: [deployments, jobs]
-    verbs: [list, get, delete]
+    resources: [deployments, statefulsets, daemonsets, jobs]
+    verbs: [list, get, watch, patch]
 ---
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: Role
@@ -158,14 +158,16 @@ spec:
           command:
             - kopf
             - run
+            - '-n'
+            - {{ .Values.osdpl.namespace }}
             - '-m'
             - openstack_controller.openstackdeployment
             - '-m'
             - openstack_controller.helmbundle
             - '-m'
             - openstack_controller.secrets
-            - '-n'
-            - openstack
+            - '-m'
+            - openstack_controller.health
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       {{- with .Values.nodeSelector }}
