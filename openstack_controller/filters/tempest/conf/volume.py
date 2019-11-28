@@ -1,5 +1,12 @@
 from openstack_controller.filters.tempest import base_section
 
+MICROVERSION_RELEASE_MAPPING = {
+    "train": {"min_microversion": "3.0", "max_microversion": "3.59"},
+    "stein": {"min_microversion": "3.0", "max_microversion": "3.59"},
+    "rocky": {"min_microversion": "3.0", "max_microversion": "3.55"},
+    "queens": {"min_microversion": "3.0", "max_microversion": "3.50"},
+}
+
 
 class Volume(base_section.BaseSection):
 
@@ -55,11 +62,17 @@ class Volume(base_section.BaseSection):
 
     @property
     def max_microversion(self):
-        pass
+        version = self.spec["openstack_version"]
+        return MICROVERSION_RELEASE_MAPPING.get(version, {}).get(
+            "max_microversion"
+        )
 
     @property
     def min_microversion(self):
-        pass
+        version = self.spec["openstack_version"]
+        return MICROVERSION_RELEASE_MAPPING.get(version, {}).get(
+            "min_microversion"
+        )
 
     @property
     def region(self):
