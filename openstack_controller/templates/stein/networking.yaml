@@ -256,9 +256,11 @@ spec:
 {%- if spec.get('features', {}).get('ssl', {}).get('public_endpoints', {}).get('enabled', True) %}
         secret_ca_bundle: true
 {%- endif %}
+      {%- if spec.get('features', {}).get('neutron', {}).get('tunnel_interface') %}
       network:
         interface:
           tunnel: {{ spec.features.neutron.tunnel_interface }}
+      {%- endif %}
       conf:
         paste:
           app:neutronversions:
