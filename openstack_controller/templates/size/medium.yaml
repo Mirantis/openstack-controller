@@ -132,7 +132,7 @@ services:
           replicas:
             cfn: 3
             api: 3
-            engine: 155555
+            engine: 15
         conf:
           heat:
             DEFAULT:
