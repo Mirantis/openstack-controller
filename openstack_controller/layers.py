@@ -119,8 +119,12 @@ def render_service_template(
 def merge_all_layers(service, body, meta, spec, logger, **template_args):
     """Merge releases and values from osdpl crd into service HelmBundle"""
     os_release = spec["openstack_version"]
+    # values from profile were earlier merged to spec.
+    images_base_url = spec["artifacts"]["images_base_url"]
     images = yaml.safe_load(
-        ENV.get_template(f"{os_release}/artifacts.yaml").render()
+        ENV.get_template(f"{os_release}/artifacts.yaml").render(
+            images_base_url=images_base_url
+        )
     )
 
     service_helmbundle = render_service_template(
@@ -176,7 +180,15 @@ def merge_spec(spec, logger):
         base = yaml.safe_load(
             ENV.get_template(f"profile/{profile}.yaml").render()
         )
-        artifacts = yaml.safe_load(ENV.get_template("artifacts.yaml").render())
+        profile_charts_base_url = base["artifacts"]["charts_base_url"]
+        charts_base_url = spec.get("artifacts", {}).get(
+            "charts_base_url", profile_charts_base_url
+        )
+        artifacts = yaml.safe_load(
+            ENV.get_template("artifacts.yaml").render(
+                charts_base_url=charts_base_url
+            )
+        )
         sizing = yaml.safe_load(ENV.get_template(f"size/{size}.yaml").render())
         merger.merge(base, artifacts)
         merger.merge(base, sizing)

@@ -47,6 +47,15 @@ spec:
           type: object
         spec:
           properties:
+            artifacts:
+              type: object
+              properties:
+                images_base_url:
+                  type: string
+                  description: "base URL for docker images"
+                charts_base_url:
+                  type: string
+                  description: "base URL for repo with helm charts."
             openstack_version:
               description: version of OpenStack to deploy
               type: string

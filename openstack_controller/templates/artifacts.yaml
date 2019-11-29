@@ -4,9 +4,9 @@ common:
       version: 0.1.0
     repositories:
     - name: osh
-      url: https://artifactory.mcp.mirantis.net/binary-dev-kaas-local/openstack/mcp-openstack-helm
+      url: {{ charts_base_url }}/openstack/mcp-openstack-helm
     - name: osh-infra
-      url: https://artifactory.mcp.mirantis.net/binary-dev-kaas-local/openstack/mcp-openstack-helm-infra
+      url: {{ charts_base_url }}/openstack/mcp-openstack-helm-infra
   openstack:
     repo: osh
     releases:
