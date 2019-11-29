@@ -14,4 +14,4 @@ common:
   infra:
     repo: osh-infra
     releases:
-      version: 0.1.0-mcp-2019
+      version: 0.1.0-mcp-2087
