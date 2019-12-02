@@ -112,10 +112,10 @@ nova_spiceproxy: {{ images_base_url }}/openstack/nova:queens-bionic-201911281800
 nova_spiceproxy_assets: {{ images_base_url }}/openstack/nova:queens-bionic-20191128180015
 octavia_health_manager_init: {{ images_base_url }}/openstack/octavia:queens-bionic-20191128180015
 entrypoint: {{ images_base_url }}/openstack/extra/kubernetes-entrypoint:v0.3.1
+prometheus_mysql_exporter: {{ images_base_url }}/stacklight/mysqld-exporter:v0.11.0
+prometheus_rabbitmq_exporter: {{ images_base_url }}/stacklight/rabbitmq-exporter:v0.29.0
+prometheus_memcached_exporter: {{ images_base_url }}/stacklight/memcached-exporter:v0.5.0
 cinder_backup_storage_init: docker-prod-local.docker.mirantis.net/mcp/ceph-config-helper:nightly
 cinder_storage_init: docker-prod-local.docker.mirantis.net/mcp/ceph-config-helper:nightly
 glance_storage_init: docker-prod-local.docker.mirantis.net/mcp/ceph-config-helper:nightly
-prometheus_mysql_exporter: docker-kaas-local.docker.mirantis.net/stacklight/mysqld-exporter:v0.11.0
-prometheus_rabbitmq_exporter: docker-kaas-local.docker.mirantis.net/stacklight/rabbitmq-exporter:v0.29.0
 db_sync: docker-prod-local.docker.mirantis.net/mcp/powerdns:4.1-alpine-1566452831101
-prometheus_memcached_exporter: docker-kaas-local.docker.mirantis.net/stacklight/memcached-exporter:v0.5.0
