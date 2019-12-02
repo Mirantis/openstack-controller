@@ -213,6 +213,25 @@ def test_merge_all_type_conflict(rst, openstackdeployment, compute_helmbundle):
         )
 
 
+@mock.patch.object(layers, "LOG")
+@mock.patch.object(layers, "render_service_template")
+def test_merge_all_float_int(
+    rst, mock_log, openstackdeployment, compute_helmbundle
+):
+    openstackdeployment["spec"]["services"]["compute"]["nova"]["values"][
+        "conf"
+    ] = {"nova": {"scheduler": {"ram_weight_multiplier": 2}}}
+    rst.return_value = compute_helmbundle
+    layers.merge_all_layers(
+        "compute",
+        openstackdeployment,
+        openstackdeployment["metadata"],
+        openstackdeployment["spec"],
+        logging,
+    )
+    mock_log.assert_not_called()
+
+
 def test_spec_hash():
     obj1 = """{
 "spec": {

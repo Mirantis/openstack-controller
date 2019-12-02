@@ -64,6 +64,8 @@ spec:
             cpu_mode: custom
             cpu_model: kvm64
             virt_type: kvm
+          scheduler:
+            ram_weight_multiplier: 1.0
       dependencies:
         static:
           db_init:
