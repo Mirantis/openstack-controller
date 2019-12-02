@@ -89,6 +89,14 @@ cat <<EOF >> $RUN_DIR/cluster/migration/init.yml
 EOF
   done
 
+  # get public cert from MCP2
+  local mcp2_public_ca=$(kubectl get osdpl osh-dev -n openstack -o jsonpath='{.spec.features.ssl.public_endpoints.ca_cert}')
+
+cat <<EOF >> $RUN_DIR/cluster/migration/init.yml
+    mcp2_public_ca: |
+$(echo "$mcp2_public_ca" | sed 's/^/      /g')
+EOF
+
   # generate hosts part
   local mcp2_ingress_address=$(get_mcp2_external_ip ingress)
   local mcp2_public_domain_name=$(get_mcp2_public_domain_name)
@@ -122,6 +130,16 @@ cat <<EOF >> $RUN_DIR/cluster/migration/init.yml
 EOF
     done
   done
+
+  # get public cert from MCP2
+  local mcp2_public_ca=$(kubectl get osdpl osh-dev -n openstack -o jsonpath='{.spec.features.ssl.public_endpoints.ca_cert}')
+
+cat <<EOF >> $RUN_DIR/cluster/migration/init.yml
+    system:
+      ca_certificates:
+        mcp2_public_ca: \${_param:mcp2_public_ca}
+EOF
+
 
 }
 

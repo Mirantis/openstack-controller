@@ -16,4 +16,4 @@ if [[ ! -d $SAL_CLUSTER_ROOT/migration ]]; then
   ln -s $TOP_DIR/model/cluster/migration/ $SAL_CLUSTER_ROOT/
 fi
 
-info "Globals are located in $SAL_CLUSTER_ROOT/migration/init.yml please include them to $SAL_CLUSTER_ROOT/infra/init.yml"
+info "Globals are located in $TOP_DIR/model/cluster/migration/init.yml please include them to $SAL_CLUSTER_ROOT/infra/init.yml"
