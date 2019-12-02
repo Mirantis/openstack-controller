@@ -65,6 +65,15 @@ spec:
         password: stacklight
   # enabled services and their specific configuration
   services:
+    # NOTE(vsaienko): run on all nodes to have access to public API from routers/VMs
+    # For more details please see https://mirantis.jira.com/browse/PRODX-1321
+    ingress:
+      ingress:
+        values:
+          labels:
+            server:
+              node_selector_key: kubernetes.io/os
+              value: linux
     identity:
       keystone:
         values:
@@ -83,10 +92,11 @@ spec:
                 --provider-physical-network physnet1 \
                 --external \
                 public
+              # set default gateway via any non-master/worker node to get into ingress controller
               openstack subnet show public-subnet || openstack subnet create public-subnet \
                 --no-dhcp --subnet-range 10.11.12.0/24 \
                 --allocation-pool start=10.11.12.100,end=10.11.12.200 \
-                --gateway 10.11.12.10 \
+                --gateway 10.11.12.11 \
                 --network public
               openstack router show r1 || openstack router create r1
               openstack router set --external-gateway public r1
