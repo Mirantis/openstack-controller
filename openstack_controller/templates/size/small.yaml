@@ -1,3 +1,4 @@
+#connection_recycle_time is set to 300sec in order not to hit into conntrack timeouts (PRODX-1179, PRODX-1170)
 services:
   identity:
     keystone:
@@ -11,6 +12,7 @@ services:
               max_pool_size: 10
               max_retries: -1
               max_overflow: 30
+              connection_recycle_time: 300
             oslo_messaging_rabbit:
               rabbit_qos_prefetch_count: 64
   image:
@@ -28,6 +30,7 @@ services:
               max_pool_size: 10
               max_retries: -1
               max_overflow: 30
+              connection_recycle_time: 300
             oslo_messaging_rabbit:
               rabbit_qos_prefetch_count: 64
   compute:
@@ -59,18 +62,22 @@ services:
               max_pool_size: 10
               max_retries: -1
               max_overflow: 30
+              connection_recycle_time: 300
             cell0_database:
               max_pool_size: 10
               max_retries: -1
               max_overflow: 30
+              connection_recycle_time: 300
             database:
               max_pool_size: 10
               max_retries: -1
               max_overflow: 30
+              connection_recycle_time: 300
             placement_database:
               max_pool_size: 10
               max_retries: -1
               max_overflow: 30
+              connection_recycle_time: 300
             conductor:
               workers: 8
             scheduler:
@@ -103,6 +110,7 @@ services:
               max_pool_size: 10
               max_retries: -1
               max_overflow: 70
+              connection_recycle_time: 300
             oslo_messaging_rabbit:
               rabbit_qos_prefetch_count: 64
   block-storage:
@@ -123,6 +131,7 @@ services:
               max_pool_size: 10
               max_retries: -1
               max_overflow: 30
+              connection_recycle_time: 300
             oslo_messaging_rabbit:
               rabbit_qos_prefetch_count: 64
   orchestration:
@@ -151,6 +160,7 @@ services:
               max_pool_size: 10
               max_retries: -1
               max_overflow: 30
+              connection_recycle_time: 300
             oslo_messaging_rabbit:
               rabbit_qos_prefetch_count: 64
   load-balancer:
@@ -165,6 +175,7 @@ services:
               max_pool_size: 10
               max_retries: -1
               max_overflow: 30
+              connection_recycle_time: 300
             controller_worker:
               amp_active_retries: 100
               amp_active_wait_sec: 2
