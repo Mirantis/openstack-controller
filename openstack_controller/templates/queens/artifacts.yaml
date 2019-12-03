@@ -118,5 +118,4 @@ prometheus_memcached_exporter: '{{ images_base_url }}/stacklight/memcached-expor
 cinder_backup_storage_init: '{{ images_base_url }}/openstack/extra/ceph-config-helper:nautilus-bionic-20191203060056'
 cinder_storage_init: '{{ images_base_url }}/openstack/extra/ceph-config-helper:nautilus-bionic-20191203060056'
 glance_storage_init: '{{ images_base_url }}/openstack/extra/ceph-config-helper:nautilus-bionic-20191203060056'
-db_sync: docker-prod-local.docker.mirantis.net/mcp/powerdns:4.1-alpine-1566452831101
 test: '{{ images_base_url }}/openstack/extra/xrally-openstack:1.5.0'
