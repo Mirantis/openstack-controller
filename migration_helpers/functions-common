@@ -175,3 +175,10 @@ function refresh_pillars {
   timeout 600 salt '*' saltutil.refresh_pillar --timeout=600 > /dev/null || die $LINENO "Failed to refresh pillars"
   info "Pillars are refreshed"
 }
+
+function get_first_active_minion {
+  local minion_id
+
+  minion_id=$(salt $@ test.ping --out json | jq 'keys[0]' | head -1 | tr -d '"')
+  echo $minion_id
+}
