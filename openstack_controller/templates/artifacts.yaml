@@ -4,13 +4,13 @@ common:
       version: 0.1.0
     repositories:
     - name: osh
-      url: "{{ charts_base_url }}/openstack/mcp-openstack-helm"
+      url: '{{ charts_base_url }}/openstack/mcp-openstack-helm'
     - name: osh-infra
-      url: "{{ charts_base_url }}/openstack/mcp-openstack-helm-infra"
+      url: '{{ charts_base_url }}/openstack/mcp-openstack-helm-infra'
   openstack:
     repo: osh
     releases:
-      version: 0.1.0-mcp-3181
+      version: 0.1.0-mcp-3182
   infra:
     repo: osh-infra
     releases:
