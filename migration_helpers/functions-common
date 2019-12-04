@@ -178,8 +178,7 @@ function get_mcp2_internal_domain_name {
 }
 
 function get_mcp2_public_domain_name {
-  # TODO: get this info from osdpl
-  echo "it.just.works"
+  echo $(kubectl get osdpl "${OPENSTACK_DEPLOYMENT_OBJECT_NAME}" -n openstack -o jsonpath='{.spec.public_domain_name}')
 }
 
 function refresh_pillars {

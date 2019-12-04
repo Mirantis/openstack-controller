@@ -4,6 +4,7 @@ export DATABASE_DIR=${DATABASE_DIR:-/var/lib/mysql_dump/}
 export COMPONENTS_TO_MIGRATE=${COMPONENTS_TO_MIGRATE:-keystone glance cinder heat neutron nova}
 export COMPONENTS_TO_MIGRATE_DB=${COMPONENTS_TO_MIGRATE_DB:-${COMPONENTS_TO_MIGRATE}}
 export KEY_REPOSITORY="/var/lib/keystone/credential-keys /var/lib/keystone/fernet-keys"
+export OPENSTACK_DEPLOYMENT_OBJECT_NAME=${OPENSTACK_DEPLOYMENT_OBJECT_NAME:-osh-dev}
 if [[ -z $CLUSTER_NAME ]]; then
   echo "[INFO]: Getting cluster name"
   export CLUSTER_NAME=$(salt-call pillar.items _param:cluster_name --out json | jq '.local|.[]' | tr -d '"')
