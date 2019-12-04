@@ -1,5 +1,12 @@
 #connection_recycle_time is set to 300sec in order not to hit into conntrack timeouts (PRODX-1179, PRODX-1170)
 services:
+  database:
+    mariadb:
+      values:
+        conf:
+          ingress_conf:
+            proxy-buffer-size: "20m"
+            proxy-connect-timeout: "600"
   identity:
     keystone:
       values:
