@@ -129,39 +129,12 @@ spec:
 
 `kubectl apply -f examples/stein/core-ceph.yaml`
 
-### Post deployment hacks
-
-Update host OS dns to point to kubernetes coredns
-
-`sed -i "s/#DNS=/DNS=$(kubectl get svc coredns -n kube-system -ojsonpath='{.spec.clusterIP}')/g" /etc/systemd/resolved.conf`
-`systemctl restart systemd-resolved`
 
 ## Validate OpenStack
 
 ```
-mkdir /etc/openstack
-tee /etc/openstack/clouds.yaml << EOF
-clouds:
-  openstack_helm:
-    region_name: RegionOne
-    identity_api_version: 3
-    verify: false
-    auth:
-      username: '$(kubectl -n openstack get secrets keystone-keystone-admin -o jsonpath='{.data.OS_USERNAME}' | base64 -d)'
-      password: '$(kubectl -n openstack get secrets keystone-keystone-admin -o jsonpath='{.data.OS_PASSWORD}' | base64 -d)'
-      project_name: 'admin'
-      project_domain_name: 'default'
-      user_domain_name: 'default'
-      auth_url: '$(kubectl -n openstack get helmbundles openstack-identity -o jsonpath='{.spec.releases[0].values.endpoints.identity.scheme.public}')://keystone.openstack.svc.$(kubectl get configmap -n kube-system coredns -o jsonpath='{.data.Corefile}' |grep -oh kaas-kubernetes-[[:alnum:]]*)/'
-EOF
-```
-```
-export OS_CLOUD=openstack_helm
+kubect -n openstack exec -it keystone-client-8987f9985-h7c2l -- bash
 
-apt-get install virtualenv build-essential python-dev -y
-virtualenv osclient
-source osclient/bin/activate
-pip install python-openstackclient
 
 wget https://artifactory.mcp.mirantis.net/artifactory/test-images/cirros-0.4.0-x86_64-disk.img
 openstack image create cirros-0.4.0-x86_64-disk --file cirros-0.4.0-x86_64-disk.img --disk-format qcow2 --container-format bare --public
