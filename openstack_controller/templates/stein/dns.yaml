@@ -235,6 +235,11 @@ spec:
       manifests:
         network_policy: false
         service_api: true
+        service_external: true
+      network:
+        external:
+          service:
+            externalTrafficPolicy: Local
       endpoints:
         cluster_domain_suffix: {{ spec.internal_domain_name }}
         oslo_db:
