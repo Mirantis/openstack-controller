@@ -6,9 +6,11 @@ from . import kube
 
 LOG = logging.getLogger(__name__)
 
+UNKNOWN, OK, PROGRESS, BAD = "Unknown", "Ready", "Progressing", "Unhealthy"
+
 
 @dataclass(frozen=True)
-class DeplCondition:
+class DeploymentStatusCondition:
     status: str
     type: str
     reason: str
@@ -18,7 +20,7 @@ class DeplCondition:
 
 
 @dataclass(frozen=True)
-class StsStatus:
+class StatefulSetStatus:
     observedGeneration: int
     replicas: int
     readyReplicas: int
@@ -30,7 +32,7 @@ class StsStatus:
 
 
 @dataclass(frozen=True)
-class DsStatus:
+class DaemonSetStatus:
     currentNumberScheduled: int
     numberMisscheduled: int
     desiredNumberScheduled: int
@@ -74,7 +76,7 @@ def ident(meta):
 
 
 def report_to_osdpl(namespace, status_health_patch):
-    # NOTE(pas-ha): this depends on fact that there"s *only one* OsDpl object
+    # NOTE(pas-ha): this depends on fact that there's *only one* OsDpl object
     # in the namespace, which is fine unitl we use openstack-helm
     # since it has hardcoded names for all the top-level resources it creates.
     # TODO(pas-ha) fix this whenever that assumption turns false
@@ -90,6 +92,21 @@ def report_to_osdpl(namespace, status_health_patch):
         )
 
 
+# NOTE(pas-ha) it turns out Deployment is sensitive to annotation changes as
+# it bumps metadata.generation and status.observedGeneration on any
+# change to annotations
+# However, kopf stores its last handled state in the annotations
+# of the resources the handler watches.
+# Thus if we subscribe to whole 'status' field, we end up with infinite loop:
+# kopf sees status change -> kopf handler handles this change ->
+# kopf patches annotation -> status.observedGeneration bumped ->
+# kopf sees status change ...
+# This is why we subscribe to status.conditions only and use some
+# heuristics to understand the reason of those changes.
+# The drawback is that on any change to Deployment (even internal one like
+# crashed pod being recreated) its revision and observedGeneration
+# will be bumped as many times as there were changes in status.conditions
+# until a stable state was reached.
 @kopf.on.field("apps", "v1", "deployments", field="status.conditions")
 async def deployments(name, namespace, meta, status, new, **kwargs):
     LOG.debug(f"Deployment {name} status.conditions is {status}")
@@ -97,22 +114,22 @@ async def deployments(name, namespace, meta, status, new, **kwargs):
     # just for aggroing, but derive health from other status fields
     # which are available.
     application, component = ident(meta)
-    conds = [DeplCondition(**c) for c in new]
+    conds = [DeploymentStatusCondition(**c) for c in new]
     for c in conds:
         if c.type == "Available":
             avail_cond = c
         elif c.type == "Progressing":
             progr_cond = c
-    health = "Unknown"
+    health = UNKNOWN
     if avail_cond.status == "True" and (
         progr_cond.status == "True"
         and progr_cond.reason == "NewReplicaSetAvailable"
     ):
-        health = "Ready"
+        health = OK
     elif avail_cond.status == "False":
-        health = "Unhealthy"
+        health = BAD
     elif progr_cond.reason == "ReplicaSetUpdated":
-        health = "Progressing"
+        health = PROGRESS
     patch = {
         application: {
             component: {
@@ -128,22 +145,22 @@ async def deployments(name, namespace, meta, status, new, **kwargs):
 async def statefulsets(name, namespace, meta, status, **kwargs):
     LOG.debug(f"StatefulSet {name} status is {status}")
     application, component = ident(meta)
-    st = StsStatus(**status)
-    health = "Unknown"
+    st = StatefulSetStatus(**status)
+    health = UNKNOWN
     if st.updateRevision:
         # updating, created new ReplicaSet
         if st.currentRevision == st.updateRevision:
             if st.replicas == st.readyReplicas == st.currentReplicas:
-                health = "Ready"
+                health = OK
             else:
-                health = "Unhealthy"
+                health = BAD
         else:
-            health = "Progressing"
+            health = PROGRESS
     else:
         if st.replicas == st.readyReplicas == st.currentReplicas:
-            health = "Ready"
+            health = OK
         else:
-            health = "Unhealthy"
+            health = BAD
     patch = {
         application: {
             component: {
@@ -159,8 +176,8 @@ async def statefulsets(name, namespace, meta, status, **kwargs):
 async def daemonsets(name, namespace, meta, status, **kwargs):
     LOG.debug(f"DaemonSet {name} status is {status}")
     application, component = ident(meta)
-    st = DsStatus(**status)
-    health = "Unknown"
+    st = DaemonSetStatus(**status)
+    health = UNKNOWN
     if (
         st.currentNumberScheduled
         == st.desiredNumberScheduled
@@ -169,13 +186,13 @@ async def daemonsets(name, namespace, meta, status, **kwargs):
         == st.numberAvailable
     ):
         if not st.numberMisscheduled:
-            health = "Ready"
+            health = OK
         else:
-            health = "Progressing"
+            health = PROGRESS
     elif st.updatedNumberScheduled < st.desiredNumberScheduled:
-        health = "Progressing"
+        health = PROGRESS
     elif st.numberReady < st.desiredNumberScheduled:
-        health = "Unhealthy"
+        health = BAD
     patch = {
         application: {
             component: {
