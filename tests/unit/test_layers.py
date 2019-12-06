@@ -1,4 +1,5 @@
 import copy
+import json
 import logging
 from unittest import mock
 
@@ -210,3 +211,42 @@ def test_merge_all_type_conflict(rst, openstackdeployment, compute_helmbundle):
             openstackdeployment["spec"],
             logging,
         )
+
+
+def test_spec_hash():
+    obj1 = """{
+"spec": {
+  "foo": {
+    "bar": "baz",
+    "eggs": {
+        "parrots": "vikings",
+        "ham": "spam"
+        }
+    },
+  "fools": [1,2]
+ },
+"status": {"ham": "spam"},
+"metadata": {"eggs": "parrors"}
+}
+ """
+    # change order of keys in spec, change order of keys overall,
+    # change values in keys other that spec
+    # spec_hash should be the same
+    obj2 = """{
+"status": {"ham": "parrors"},
+"metadata": {"eggs": "spam"},
+"spec": {
+  "fools": [1,2],
+  "foo": {
+    "eggs": {
+        "ham": "spam",
+        "parrots": "vikings"
+        },
+    "bar": "baz"
+    }
+ }
+ }
+"""
+    assert layers.spec_hash(json.loads(obj1)) == layers.spec_hash(
+        json.loads(obj2)
+    )

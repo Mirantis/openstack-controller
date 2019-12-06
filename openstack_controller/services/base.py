@@ -1,5 +1,6 @@
 import asyncio
 import base64
+import json
 import logging
 import os
 import socket
@@ -14,6 +15,7 @@ from openstack_controller import layers
 from openstack_controller import kube
 from openstack_controller import openstack
 from openstack_controller import secrets
+from openstack_controller import version
 
 
 LOG = logging.getLogger(__name__)
@@ -98,7 +100,8 @@ class Service(RuntimeIdentifierMixin):
 
     ceph_required = False
     service = None
-    version = "lcm.mirantis.com/v1alpha1"
+    group = "lcm.mirantis.com"
+    version = "v1alpha1"
     kind = "HelmBundle"
     registry = {}
     _child_objects = {
@@ -142,10 +145,23 @@ class Service(RuntimeIdentifierMixin):
     @property
     def resource_def(self):
         """Minimal representation of the resource"""
+        fingerprint = layers.spec_hash(self.osdpl.obj)
+        annotations = {
+            f"{self.group}/openstack-controller-fingerprint": json.dumps(
+                {
+                    "osdpl_generation": self.osdpl.metadata["generation"],
+                    "version": version.release_string,
+                    "fingerprint": fingerprint,
+                }
+            )
+        }
         res = {
-            "apiVersion": self.version,
+            "apiVersion": f"{self.group}/{self.version}",
             "kind": self.kind,
-            "metadata": {"name": self.resource_name},
+            "metadata": {
+                "name": self.resource_name,
+                "annotations": annotations,
+            },
         }
         return res
 

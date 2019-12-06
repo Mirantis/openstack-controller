@@ -1,3 +1,6 @@
+import json
+import hashlib
+
 import deepmerge
 import deepmerge.exception
 import deepmerge.strategy.type_conflict
@@ -85,6 +88,18 @@ CHART_GROUP_MAPPING = {
         "ingress",
     ],
 }
+
+
+def spec_hash(body):
+    """Generate stable hash of body.spec structure
+
+    as these are objects received from k8s API it is presumed
+    that this object is already JSON-serializable w/o any need
+    for additional conversions
+    """
+    hasher = hashlib.sha256()
+    hasher.update(json.dumps(body["spec"], sort_keys=True).encode())
+    return hasher.hexdigest()
 
 
 def services(spec, logger, **kwargs):

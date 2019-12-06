@@ -5,6 +5,7 @@ metadata:
   labels: {}
   name: osh-dev
   namespace: openstack
+  generation: 123
 spec:
   common:
     charts:

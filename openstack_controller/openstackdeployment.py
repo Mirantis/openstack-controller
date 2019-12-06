@@ -4,8 +4,14 @@ from . import kube
 from . import layers
 from . import openstack
 from . import services
+from . import version
 
 # TODO(pas-ha) enable debug logging
+
+
+async def update_status(body, patch):
+    osdpl = kube.OpenStackDeployment(kube.api, body)
+    osdpl.patch({"status": patch})
 
 
 async def process_osdpl_event(body, meta, spec, logger, **kwargs):
@@ -16,6 +22,13 @@ async def process_osdpl_event(body, meta, spec, logger, **kwargs):
     # won't update secrets
     openstack.get_or_create_admin_credentials(namespace)
     kube.wait_for_secret(namespace, openstack.ADMIN_SECRET_NAME)
+
+    fingerprint = layers.spec_hash(body)
+    version_patch = {
+        "version": version.release_string,
+        "fingerprint": fingerprint,
+    }
+    await update_status(body, version_patch)
 
     update, delete = layers.services(spec, logger, **kwargs)
 
