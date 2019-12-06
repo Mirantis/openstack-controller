@@ -194,3 +194,62 @@ function get_first_active_minion {
   minion_id=$(salt $@ test.ping --out json | jq 'keys[0]' | head -1 | tr -d '"')
   echo $minion_id
 }
+
+function get_token_project {
+  local token_project=$(salt -C 'I@keystone:server:role:primary' cmd.run '. /root/keystonercv3; openstack token issue -f value -c id -c project_id' --out json | jq '.[]' | tr -d '"')
+  echo $token_project
+}
+
+function get_mcp1_public_endpoint {
+  # TODO: unhardcode
+  echo "https://10.13.0.80"
+}
+
+function get_mcp2_public_endpoint {
+ local service_name=$1
+ echo "https://${service_name}.$(get_mcp2_public_domain_name)"
+}
+
+function get_service_port {
+  local service_name="$1"
+  case "$service_name" in
+      "keystone" )
+          echo "5000";;
+      "heat" )
+          echo "8004" ;;
+      "glance" )
+          echo "9292" ;;
+      "nova" )
+          echo "8774" ;;
+      "cinder" )
+          echo "8776" ;;
+      "neutron" )
+          echo "9696" ;;
+      *)
+          exit 1 ;;
+  esac
+}
+
+function get_check_endpoint {
+  local service_name="$1"
+  local project="$2"
+  case "$service_name" in
+      "keystone" )
+          endpoint="v3/users";;
+      "heat" )
+          endpoint="v1/${project}/stacks" ;;
+      "glance" )
+          endpoint="v2/images" ;;
+      "nova" )
+          endpoint="v2.1/servers" ;;
+      "cinder" )
+          endpoint="v3/${project}/volumes/detail" ;;
+      "neutron" )
+          endpoint="v2.0/agents" ;;
+      *)
+          exit 1 ;;
+  esac
+
+  echo $endpoint
+}
+
