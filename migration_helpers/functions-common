@@ -156,6 +156,18 @@ local service_name=$1
     esac
 }
 
+function get_service_subservices_public_endpoints {
+local service_name=$1
+    case "$service_name" in
+        "heat" )
+            echo "cloudformation heat" ;;
+        "nova" )
+            echo "novncproxy nova placement" ;;
+        *)
+            echo "${service_name}" ;;
+    esac
+}
+
 function get_mcp2_external_ip {
   local service="$1"
   echo "$(kubectl -n openstack get services $service -o jsonpath='{.status.loadBalancer.ingress[0].ip}')"
@@ -167,7 +179,7 @@ function get_mcp2_internal_domain_name {
 
 function get_mcp2_public_domain_name {
   # TODO: get this info from osdpl
-  echo "it.just.works.local"
+  echo "it.just.works"
 }
 
 function refresh_pillars {

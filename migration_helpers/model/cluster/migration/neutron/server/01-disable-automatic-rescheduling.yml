@@ -6,3 +6,4 @@ parameters:
         neutron_server:
           DEFAULT:
             allow_automatic_l3agent_failover: False
+            enable_new_agents: False

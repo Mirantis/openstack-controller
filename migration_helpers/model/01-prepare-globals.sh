@@ -97,6 +97,13 @@ cat <<EOF >> $RUN_DIR/cluster/migration/init.yml
 $(echo "$mcp2_public_ca" | sed 's/^/      /g')
 EOF
 
+  # Get nova parameters
+  local mcp1_nova_ceph_libvirt_secret_uuid=$(salt $(get_first_active_minion -C "I@nova:compute") pillar.items nova:compute:ceph:secret_uuid --out json | jq '.[]|.[]' | tr -d '"')
+
+cat <<EOF >> $RUN_DIR/cluster/migration/init.yml
+    mcp1_nova_ceph_libvirt_secret_uuid: ${mcp1_nova_ceph_libvirt_secret_uuid}
+EOF
+
   # generate hosts part
   local mcp2_ingress_address=$(get_mcp2_external_ip ingress)
   local mcp2_public_domain_name=$(get_mcp2_public_domain_name)

@@ -40,6 +40,6 @@ function force_remove_cron_for_keystone {
 
 
 #refresh_pillars
-#force_remove_cron_for_keystone
+force_remove_cron_for_keystone
 check_fernets_are_disabled_mcp1
 check_fernets_are_disabled_mcp2

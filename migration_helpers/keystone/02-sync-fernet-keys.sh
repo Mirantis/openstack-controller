@@ -10,9 +10,7 @@ TOP_DIR=$(cd $(dirname $RUN_DIR/../../) && pwd)
 
 function get_key_archive_path {
   local key_dir=$1
-  local key_directory=$(basename ${key_dir})
-  local repository_path=$(dirname ${key_dir})
-  echo "${key_directory}.tar.gz"
+  echo "${key_dir}.tar.gz"
 }
 
 function pack_keystone_keys {
