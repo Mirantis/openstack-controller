@@ -119,3 +119,4 @@ cinder_backup_storage_init: '{{ images_base_url }}/openstack/extra/ceph-config-h
 cinder_storage_init: '{{ images_base_url }}/openstack/extra/ceph-config-helper:nautilus-bionic-20191203060056'
 glance_storage_init: '{{ images_base_url }}/openstack/extra/ceph-config-helper:nautilus-bionic-20191203060056'
 test: '{{ images_base_url }}/openstack/extra/xrally-openstack:1.5.0'
+pause: '{{ images_base_url }}/general/external/pause:3.1'
