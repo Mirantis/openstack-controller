@@ -14,12 +14,7 @@ LOG = utils.get_logger(__name__)
 
 
 def login():
-    try:
-        # running in cluster
-        config = pykube.KubeConfig.from_service_account()
-    except FileNotFoundError:
-        # not running in cluster => load local ~/.kube/config for testing
-        config = pykube.KubeConfig.from_file()
+    config = pykube.KubeConfig.from_env()
     client = pykube.HTTPClient(config)
     LOG.info(f"Created k8s api client from context {config.current_context}")
     return client
