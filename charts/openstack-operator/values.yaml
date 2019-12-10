@@ -6,7 +6,7 @@ replicaCount: 1
 
 image:
   repository: docker-dev-kaas-local.docker.mirantis.net/mcp/openstack-controller
-  tag: nightly
+  tag: 0.1.0-bionic-20191209190341
   pullPolicy: IfNotPresent
 
 nameOverride: ""
