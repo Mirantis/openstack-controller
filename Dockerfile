@@ -4,3 +4,4 @@ RUN apk update && apk add --no-cache --virtual build_deps git build-base libffi-
 ADD . /opt/operator
 RUN /opt/operator/install.sh --no-cache-dir /opt/operator
 RUN apk del build_deps
+RUN echo -e "LABELS:\n  IMAGE_TAG: $(pip freeze | awk -F '==' '/^openstack-controller=/ {print $2}')" > /dockerimage_metadata
