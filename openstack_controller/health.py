@@ -23,10 +23,10 @@ class DeploymentStatusCondition:
 class StatefulSetStatus:
     observedGeneration: int
     replicas: int
-    readyReplicas: int
     currentRevision: str
     updateRevision: str  # optional?
     collisionCount: int
+    readyReplicas: int = 0
     updatedReplicas: int = 0
     currentReplicas: int = 0
 
@@ -38,7 +38,7 @@ class DaemonSetStatus:
     desiredNumberScheduled: int
     numberReady: int
     observedGeneration: int
-    numberAvailable: int
+    numberAvailable: int = 0
     numberUnavailable: int = 0
     updatedNumberScheduled: int = 0
 
