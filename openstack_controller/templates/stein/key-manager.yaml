@@ -9,7 +9,6 @@
 
 spec:
   releases:
-{%- if messaging.get('dedicated_rabbitmq', {}).get('enabled', True) %}
   - name: openstack-barbican-rabbitmq
     chart: {{spec.common.infra.repo}}/rabbitmq
     values:
@@ -77,7 +76,6 @@ spec:
         prometheus_exporter:
           rabbit_exporters: "overview,exchange,node"
   {%- endif %}
-{%- endif %}
 {%- if spec.get('migration', {}).get('barbican', {}).get('deploy_main_service', True) %}
   - name: openstack-barbican
     chart: {{spec.common.openstack.repo}}/barbican
@@ -153,10 +151,8 @@ spec:
             barbican:
               username: {{ credentials.database.user.username }}
               password: {{ credentials.database.user.password }}
-{%- if messaging.get('dedicated_rabbitmq', {}).get('enabled', True) %}
         oslo_messaging:
           <<: *barbican_endpoints_oslo_messaging
-{%- endif %}
         oslo_messaging_notifications:
           auth:
             barbican:

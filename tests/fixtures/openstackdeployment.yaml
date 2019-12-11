@@ -46,9 +46,6 @@ spec:
       keycloak:
         oidc:
           OIDCSSLValidateServer: false
-    messaging:
-      dedicated_rabbitmq:
-        enabled: true
     neutron:
       backend: ovs
       external_networks:

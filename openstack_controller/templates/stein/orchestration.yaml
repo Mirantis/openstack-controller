@@ -9,7 +9,6 @@
 
 spec:
   releases:
-{%- if messaging.get('dedicated_rabbitmq', {}).get('enabled', True) %}
   - name: openstack-heat-rabbitmq
     chart: {{spec.common.infra.repo}}/rabbitmq
     values:
@@ -89,7 +88,6 @@ spec:
         prometheus_exporter:
           rabbit_exporters: "overview,exchange,node"
   {%- endif %}
-{%- endif %}
 {%- if spec.get('migration', {}).get('heat', {}).get('deploy_main_service', True) %}
   - name: openstack-heat
     chart: {{spec.common.openstack.repo}}/heat
@@ -150,10 +148,8 @@ spec:
             heat:
               username: {{ credentials.database.user.username }}
               password: {{ credentials.database.user.password }}
-{%- if messaging.get('dedicated_rabbitmq', {}).get('enabled', True) %}
         oslo_messaging:
           <<: *heat_endpoints_oslo_messaging
-{%- endif %}
 {% include 'base/_notifications.yaml' %}
 {%- if spec.get('features', {}).get('ssl', {}).get('public_endpoints', {}).get('enabled', True) %}
         orchestration:

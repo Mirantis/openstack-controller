@@ -9,7 +9,6 @@
 
 spec:
   releases:
-{%- if messaging.get('dedicated_rabbitmq', {}).get('enabled', True) %}
   - name: openstack-cinder-rabbitmq
     chart: {{spec.common.infra.repo}}/rabbitmq
     values:
@@ -77,7 +76,6 @@ spec:
         prometheus_exporter:
           rabbit_exporters: "overview,exchange,node"
   {%- endif %}
-{%- endif %}
 {%- if spec.get('migration', {}).get('cinder', {}).get('deploy_main_service', True) %}
   - name: openstack-cinder
     chart: {{spec.common.openstack.repo}}/cinder
@@ -188,10 +186,8 @@ spec:
             cinder:
               username: {{ credentials.database.user.username }}
               password: {{ credentials.database.user.password }}
-{%- if messaging.get('dedicated_rabbitmq', {}).get('enabled', True) %}
         oslo_messaging:
           <<: *cinder_endpoints_oslo_messaging
-{%- endif %}
 {% include 'base/_notifications.yaml' %}
 {%- if spec.get('features', {}).get('ssl', {}).get('public_endpoints', {}).get('enabled', True) %}
         volume:

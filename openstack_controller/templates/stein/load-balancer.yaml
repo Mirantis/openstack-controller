@@ -9,7 +9,6 @@
 
 spec:
   releases:
-{%- if messaging.get('dedicated_rabbitmq', {}).get('enabled', True) %}
   - name: openstack-octavia-rabbitmq
     chart: {{spec.common.infra.repo}}/rabbitmq
     values:
@@ -77,7 +76,6 @@ spec:
         prometheus_exporter:
           rabbit_exporters: "overview,exchange,node"
   {%- endif %}
-{%- endif %}
 {%- if spec.get('migration', {}).get('octavia', {}).get('deploy_main_service', True) %}
   - name: openstack-octavia
     chart: {{spec.common.openstack.get('repo', spec.common.charts.repo)}}/octavia
@@ -245,10 +243,8 @@ spec:
             octavia:
               username: {{ credentials.database.user.username }}
               password: {{ credentials.database.user.password }}
-{%- if messaging.get('dedicated_rabbitmq', {}).get('enabled', True) %}
         oslo_messaging:
           <<: *octavia_endpoints_oslo_messaging
-{%- endif %}
 {% include 'base/_notifications.yaml' %}
 {%- if spec.get('features', {}).get('ssl', {}).get('public_endpoints', {}).get('enabled', True) %}
         load_balancer:

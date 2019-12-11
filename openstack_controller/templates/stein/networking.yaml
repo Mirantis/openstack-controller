@@ -9,7 +9,6 @@
 
 spec:
   releases:
-{%- if messaging.get('dedicated_rabbitmq', {}).get('enabled', True) %}
   - name: openstack-neutron-rabbitmq
     chart: {{spec.common.infra.repo}}/rabbitmq
     values:
@@ -77,7 +76,6 @@ spec:
         prometheus_exporter:
           rabbit_exporters: "overview,exchange,node"
   {%- endif %}
-{%- endif %}
   - name: openstack-openvswitch
     chart: {{spec.common.infra.repo}}/openvswitch
     values:
@@ -210,10 +208,8 @@ spec:
             neutron:
               username: {{ credentials.database.user.username }}
               password: {{ credentials.database.user.password }}
-{%- if messaging.get('dedicated_rabbitmq', {}).get('enabled', True) %}
         oslo_messaging:
           <<: *neutron_endpoints_oslo_messaging
-{%- endif %}
 {% include 'base/_notifications.yaml' %}
 {%- if spec.get('features', {}).get('ssl', {}).get('public_endpoints', {}).get('enabled', True) %}
         network:

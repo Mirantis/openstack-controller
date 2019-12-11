@@ -122,22 +122,10 @@ spec:
               type: object
               required:
                 - services
-                - keystone
+                - ssl
                 - neutron
                 - nova
               properties:
-                messaging:
-                  type: object
-                  properties:
-                    dedicated_rabbitmq:
-                      type: object
-                      properties:
-                        enabled:
-                          description: >
-                            enable deployment of each openstack service
-                            with dedicated instance of rabbitmq
-                            for intra-service communications
-                          type: boolean
                 ssl:
                   type: object
                   properties:

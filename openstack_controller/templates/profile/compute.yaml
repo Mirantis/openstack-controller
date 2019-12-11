@@ -18,9 +18,6 @@ features:
       backend: ceph
   neutron:
     backend: ovs
-  messaging:
-    dedicated_rabbitmq:
-      enabled: true
   database:
     local_volumes:
       enabled: true
