@@ -1,12 +1,23 @@
 import copy
 
 import kopf
+from mcp_k8s_lib import utils
+import pykube
 
 from . import kube
 
+LOG = utils.get_logger(__name__)
+
 
 async def update_status(owner, meta, status):
-    osdpl = kube.find_osdpl(owner, namespace=meta["namespace"])
+    try:
+        osdpl = kube.find_osdpl(owner, namespace=meta["namespace"])
+    except pykube.ObjectDoesNotExist:
+        LOG.warning(
+            f"Failed to find OpenStackDeployment {owner} "
+            f"in namespace {meta['namespace']}, skipping status update."
+        )
+        return
     child_status = {
         meta["name"]: all(
             s["success"] is True for n, s in status["releaseStatuses"].items()
@@ -21,6 +32,7 @@ async def update_status(owner, meta, status):
         s is True for c, s in new_children_status.items()
     )
     osdpl.patch({"status": status_patch})
+    LOG.info(f"Updated {meta['name']} status in {owner}")
 
 
 @kopf.on.field("lcm.mirantis.com", "v1alpha1", "helmbundles", field="status")
@@ -33,13 +45,12 @@ async def status(body, meta, status, logger, diff, **kwargs):
         and o["apiVersion"] == kube.OpenStackDeployment.version
     ]
     if not owners:
-        logger.info("not managed by openstack-controller, ignoring")
+        LOG.info("Not managed by openstack-controller, ignoring")
         return
     elif len(owners) > 1:
-        logger.error(
-            f"several owners of kind OpenStackDeployment "
-            f"for {body['kind']} {namespace}/{meta['name']}!"
+        LOG.error(
+            f"Several owners of kind OpenStackDeployment "
+            f"for {body['kind']} {namespace}/{meta['name']}! Ignoring."
         )
-        raise NotImplementedError
+        return
     await update_status(owners[0], meta, status)
-    logger.info(f"Updated {meta['name']} status in {owners[0]}")
