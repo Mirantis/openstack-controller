@@ -6,11 +6,11 @@ metadata:
 spec:
   repositories:
   - name: openstack-controller
-    url: https://artifactory.mcp.mirantis.net/binary-dev-kaas-local/openstack/master-openstack-controller
+    url: https://artifactory.mcp.mirantis.net/binary-dev-kaas-local/openstack/helm/openstack-controller
   releases:
   - name: openstack-operator
     chart: openstack-controller/openstack-operator
-    version: 0.1.0-mcp-452
+    version: 0.1.0-mcp-462
     namespace: osh-system
     values:
       kopf:

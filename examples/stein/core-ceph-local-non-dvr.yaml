@@ -13,7 +13,7 @@ spec:
   public_domain_name: it.just.works
   artifacts:
     images_base_url: docker-dev-kaas-local.docker.mirantis.net
-    charts_base_url: https://artifactory.mcp.mirantis.net/binary-dev-kaas-local
+    charts_base_url: https://artifactory.mcp.mirantis.net/binary-dev-kaas-local/openstack/helm
   # features that would enable coordinated changes to values of several charts
   features:
     services:

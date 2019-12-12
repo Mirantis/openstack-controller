@@ -1,7 +1,6 @@
 artifacts:
-  # TODO: switch to public links
-  images_base_url: docker-dev-kaas-local.docker.mirantis.net
-  charts_base_url: https://artifactory.mcp.mirantis.net
+  images_base_url: docker-kaas-local.artifactory.mirantis.com
+  charts_base_url: https://binary.mirantis.com/openstack/helm
 
 common:
   charts:
