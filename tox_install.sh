@@ -9,4 +9,13 @@ DATA_DIR=${WORKDIR}/data
 if [[ ! -d ${DATA_DIR} ]]; then
     ${WORKDIR}/pre-build.sh
 fi
-${WORKDIR}/install.sh $@
+# install pre-cloned dependencies that are not available in PyPI
+install_cmd="pip install"
+install_args=""
+for d in `ls $DATA_DIR`; do
+    install_args="$install_args $DATA_DIR/$d"
+done
+
+$install_cmd $install_args $@
+
+exit $?

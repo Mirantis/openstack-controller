@@ -1,7 +1,11 @@
-FROM python:3.7-alpine
+FROM python:3.7-alpine as builder
 # need Git for pbr to install from source checkout w/o sdist tarball
 RUN apk update && apk add --no-cache --virtual build_deps git build-base libffi-dev openssl-dev
 ADD . /opt/operator
-RUN /opt/operator/install.sh --no-cache-dir /opt/operator
-RUN apk del build_deps
-RUN echo -e "LABELS:\n  IMAGE_TAG: $(pip freeze | awk -F '==' '/^openstack-controller=/ {print $2}')" > /dockerimage_metadata
+RUN /opt/operator/build.sh --wheel-dir=/opt/wheels /opt/operator
+
+from python:3.7-alpine
+COPY --from=builder /opt/wheels /opt/wheels
+# ADD tools /opt
+RUN pip install --no-index --no-cache --find-links /opt/wheels openstack-controller && \
+    echo -e "LABELS:\n  IMAGE_TAG: $(pip freeze | awk -F '==' '/^openstack-controller=/ {print $2}')" > /dockerimage_metadata
