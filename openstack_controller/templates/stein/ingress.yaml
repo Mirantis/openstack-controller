@@ -14,7 +14,7 @@ spec:
       labels:
         server:
           node_selector_key: openstack-control-plane
-          node_selector_value: linux
+          node_selector_value: enabled
       network:
         service:
           type: LoadBalancer

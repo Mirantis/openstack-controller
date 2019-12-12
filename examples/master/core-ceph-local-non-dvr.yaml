@@ -78,7 +78,7 @@ spec:
           labels:
             server:
               node_selector_key: kubernetes.io/os
-              value: linux
+              node_selector_value: linux
     identity:
       keystone:
         values:
