@@ -6,15 +6,15 @@ metadata:
 spec:
   repositories:
   - name: openstack-controller
-    url: https://artifactory.mcp.mirantis.net/binary-dev-kaas-local/openstack/helm/openstack-controller
+    url: https://binary.mirantis.com/openstack/openstack/helm/openstack-controller
   releases:
   - name: openstack-operator
     chart: openstack-controller/openstack-operator
-    version: 0.1.0-mcp-462
+    version: 0.1.0
     namespace: osh-system
     values:
       kopf:
         enabled: false
       image:
-        repository: docker-dev-kaas-local.docker.mirantis.net/mcp/openstack-controller
-        tag: nightly
+        repository: docker-kaas-local.artifactory.mirantis.com/mcp/openstack-controller
+        tag: 0.1.0
