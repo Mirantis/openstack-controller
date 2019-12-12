@@ -5,8 +5,8 @@
 replicaCount: 1
 
 image:
-  repository: docker-dev-kaas-local.docker.mirantis.net/mcp/openstack-controller
-  tag: 0.1.0-bionic-20191209190341
+  repository: docker-kaas-local.artifactory.mirantis.com/mcp/openstack-controller
+  tag: 0.1.0
   pullPolicy: IfNotPresent
 
 nameOverride: ""
