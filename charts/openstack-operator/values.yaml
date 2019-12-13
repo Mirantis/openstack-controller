@@ -5,8 +5,8 @@
 replicaCount: 1
 
 image:
-  repository: docker-kaas-local.artifactory.mirantis.com/mcp/openstack-controller
-  tag: 0.1.0
+  repository: docker-kaas-local.artifactory.mirantis.com/openstack/openstack-controller
+  tag: 0.1.1
   pullPolicy: IfNotPresent
 
 nameOverride: ""
