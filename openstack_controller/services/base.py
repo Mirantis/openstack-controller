@@ -6,7 +6,6 @@ import os
 import socket
 from typing import List
 
-from dacite import from_dict
 import kopf
 from mcp_k8s_lib import ceph_api
 import pykube
@@ -186,7 +185,7 @@ class Service(RuntimeIdentifierMixin):
                 for kind_name, meta in kinds.items():
                     m_ext = meta
                     m_ext["chart"] = chart_name
-                    m_ext_obj = from_dict(kube.HelmBundleExt, m_ext)
+                    m_ext_obj = kube.HelmBundleExt(**m_ext)
 
                     child_obj = kube.dummy(
                         kube.__getattribute__(kind), kind_name, self.namespace
