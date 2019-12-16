@@ -3,7 +3,7 @@ import json
 import logging
 from unittest import mock
 
-import deepmerge.exception
+import kopf
 import pytest
 
 from openstack_controller import layers
@@ -201,9 +201,7 @@ def test_merge_all_type_conflict(rst, openstackdeployment, compute_helmbundle):
         "conf"
     ] = {"ceph": {"enabled": None}}
     rst.return_value = compute_helmbundle
-    with pytest.raises(
-        deepmerge.exception.InvalidMerge, match="conf:ceph:enabled"
-    ):
+    with pytest.raises(kopf.PermanentError, match="conf:ceph:enabled"):
         layers.merge_all_layers(
             "compute",
             openstackdeployment,

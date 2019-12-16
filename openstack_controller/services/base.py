@@ -453,27 +453,20 @@ class Service(RuntimeIdentifierMixin):
 
         return template_args
 
+    @layers.kopf_exception
     def render(self, openstack_version=""):
         spec = layers.merge_spec(self.osdpl.obj["spec"], self.logger)
         if openstack_version:
             spec["openstack_version"] = openstack_version
-        try:
-            template_args = self.template_args(spec)
-            data = layers.merge_all_layers(
-                self.service,
-                self.osdpl.obj,
-                self.osdpl.metadata,
-                spec,
-                self.logger,
-                **template_args,
-            )
-        except kopf.HandlerRetryError:
-            raise
-        except Exception as e:
-            raise kopf.HandlerFatalError(
-                f"Error while rendering HelmBundle for {self.service} "
-                f"service: {e}"
-            )
+        template_args = self.template_args(spec)
+        data = layers.merge_all_layers(
+            self.service,
+            self.osdpl.obj,
+            self.osdpl.metadata,
+            spec,
+            self.logger,
+            **template_args,
+        )
         data.update(self.resource_def)
         # NOTE(pas-ha) this sets the parent refs in child
         # to point to our resource so that cascading delete

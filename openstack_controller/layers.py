@@ -1,5 +1,6 @@
 import base64
 import json
+import functools
 import hashlib
 
 import deepmerge
@@ -96,6 +97,37 @@ CHART_GROUP_MAPPING = {
 }
 
 
+def kopf_exception(f):
+    @functools.wraps(f)
+    def wrapper(*args, **kwargs):
+        try:
+            return f(*args, **kwargs)
+        except (kopf.TemporaryError, kopf.PermanentError):
+            raise
+        except deepmerge.exception.InvalidMerge as e:
+            raise kopf.PermanentError(f"DeepMerge Error: {e}") from e
+        except yaml.YAMLError as e:
+            raise kopf.PermanentError(f"YAML error: {e}") from e
+        except jinja2.TemplateNotFound as e:
+            raise kopf.PermanentError(
+                f"Template {e.name} (loaded from file {e.filename}) "
+                f"was not found: {e}"
+            ) from e
+        except jinja2.TemplateSyntaxError as e:
+            raise kopf.PermanentError(
+                f"Template {e.name} (loaded from {e.filename}) "
+                f"has syntax error at lineno {e.lineno}: {e.message}"
+            ) from e
+        except jinja2.UndefinedError as e:
+            raise kopf.TemporaryError(
+                f"Template for tried to operate on undefined: " f"{e.message}"
+            ) from e
+        except Exception as e:
+            raise kopf.TemporaryError(f"{e}") from e
+
+    return wrapper
+
+
 def spec_hash(body):
     """Generate stable hash of body.spec structure
 
@@ -124,6 +156,7 @@ def services(spec, logger, **kwargs):
     return to_apply, to_delete
 
 
+@kopf_exception
 def render_service_template(
     service, body, meta, spec, logger, **template_args
 ):
@@ -137,6 +170,7 @@ def render_service_template(
     return data
 
 
+@kopf_exception
 def merge_all_layers(service, body, meta, spec, logger, **template_args):
     """Merge releases and values from osdpl crd into service HelmBundle"""
     os_release = spec["openstack_version"]
@@ -190,6 +224,7 @@ def merge_all_layers(service, body, meta, spec, logger, **template_args):
     return service_helmbundle
 
 
+@kopf_exception
 def merge_spec(spec, logger):
     """Merge user-defined OsDpl spec with base for profile and OS version"""
     profile = spec["profile"]
@@ -197,27 +232,19 @@ def merge_spec(spec, logger):
     logger.debug(f"Using profile {profile}")
     logger.debug(f"Using size {size}")
 
-    try:
-        base = yaml.safe_load(
-            ENV.get_template(f"profile/{profile}.yaml").render()
+    base = yaml.safe_load(ENV.get_template(f"profile/{profile}.yaml").render())
+    profile_charts_base_url = base["artifacts"]["charts_base_url"]
+    charts_base_url = spec.get("artifacts", {}).get(
+        "charts_base_url", profile_charts_base_url
+    )
+    artifacts = yaml.safe_load(
+        ENV.get_template("artifacts.yaml").render(
+            charts_base_url=charts_base_url
         )
-        profile_charts_base_url = base["artifacts"]["charts_base_url"]
-        charts_base_url = spec.get("artifacts", {}).get(
-            "charts_base_url", profile_charts_base_url
-        )
-        artifacts = yaml.safe_load(
-            ENV.get_template("artifacts.yaml").render(
-                charts_base_url=charts_base_url
-            )
-        )
-        sizing = yaml.safe_load(ENV.get_template(f"size/{size}.yaml").render())
-        merger.merge(base, artifacts)
-        merger.merge(base, sizing)
+    )
+    sizing = yaml.safe_load(ENV.get_template(f"size/{size}.yaml").render())
+    merger.merge(base, artifacts)
+    merger.merge(base, sizing)
 
-        # Merge operator defaults with user context.
-        return merger.merge(base, spec)
-    except Exception as e:
-        raise kopf.HandlerFatalError(
-            f"Error while merging OpenStackDeployment spec into profile "
-            f"'{profile}' of size '{size}': {e}"
-        )
+    # Merge operator defaults with user context.
+    return merger.merge(base, spec)
