@@ -6,15 +6,13 @@ metadata:
 spec:
   repositories:
   - name: openstack-controller
-    url: https://binary.mirantis.com/openstack/openstack/helm/openstack-controller
+    url: https://artifactory.mirantis.com/binary-kaas-local/openstack/helm/openstack-controller
   releases:
   - name: openstack-operator
     chart: openstack-controller/openstack-operator
-    version: 0.1.1
+    version: 0.1.2
     namespace: osh-system
     values:
+      # The kopf peering object will be created by ceph controller.
       kopf:
         enabled: false
-      image:
-        repository: docker-kaas-local.artifactory.mirantis.com/openstack/openstack-controller
-        tag: 0.1.1

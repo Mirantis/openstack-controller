@@ -1,12 +1,16 @@
 # Default values for openstack-controller.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
+global:
+  dockerBaseUrl: docker-kaas-local.artifactory.mirantis.com
+  helmBaseUrl: https://artifactory.mirantis.com/binary-kaas-local
 
 replicaCount: 1
 
 image:
-  repository: docker-kaas-local.artifactory.mirantis.com/openstack/openstack-controller
-  tag: 0.1.1
+  repository: openstack
+  name: openstack-controller
+  tag: 0.1.2
   pullPolicy: IfNotPresent
 
 nameOverride: ""
@@ -23,13 +27,15 @@ helmbundle:
   # unless we deploy it via kaas management cluster
   enabled: false
   image:
-    repository: docker-prod-local.artifactory.mirantis.com/mirantis/kubernetes/lcm/lcm-controller
-    tag: latest
+    repository: lcm
+    name: lcm-controller
+    tag: v0.2.0-43
     pullPolicy: IfNotPresent
   tiller:
     image:
-      repository: gcr.io/kubernetes-helm/tiller
-      tag: v2.13.1
+      repository: lcm/helm
+      name: tiller
+      tag: v2.15.2-1
       pullPolicy: IfNotPresent
 
 resources: {}

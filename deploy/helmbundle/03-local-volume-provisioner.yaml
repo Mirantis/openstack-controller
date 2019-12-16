@@ -6,7 +6,7 @@ metadata:
 spec:
   repositories:
   - name: lvp
-    url: https://artifactory.mcp.mirantis.net/binary-dev-kaas-local/bm/helm
+    url: https://artifactory.mirantis.com/binary-kaas-local/bm/helm
   releases:
   - name: local-volume-provisioner
     chart: lvp/local-volume-provisioner
@@ -33,4 +33,4 @@ spec:
           openstack-control-plane: enabled
         initFakeMounts: true
         init:
-          image: docker-dev-kaas-local.docker.mirantis.net/openstack/heat:stein-bionic-20191124180014
+          image: docker-kaas-local.artifactory.mirantis.com/openstack/openstack-controller:0.1.1

@@ -146,7 +146,7 @@ spec:
       serviceAccountName: openstack-controller-account
       containers:
       - name: osh-controller
-        image: docker-prod-local.docker.mirantis.net/mcp/openstack-controller:nightly
+        image: docker-kaas-local.artifactory.mirantis.com/openstack/openstack-controller:0.1.2
         imagePullPolicy: Always
         command:
           - kopf

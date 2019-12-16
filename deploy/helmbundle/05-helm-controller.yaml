@@ -67,7 +67,7 @@ spec:
           value: osh-system
         - name: TILLER_HISTORY_MAX
           value: "0"
-        image: docker-prod-local.artifactory.mirantis.com/mirantis/helm/tiller:v2.14.3-14
+        image: docker-kaas-local.artifactory.mirantis.com/lcm/helm/tiller:v2.15.2-1
         imagePullPolicy: IfNotPresent
         livenessProbe:
           httpGet:
@@ -88,7 +88,7 @@ spec:
         env:
         - name: TMPDIR
           value: /helm
-        image: docker-prod-local.artifactory.mirantis.com/mirantis/kubernetes/lcm/lcm-controller:latest
+        image:  docker-kaas-local.artifactory.mirantis.com/lcm/lcm-controller:v0.2.0-43
         securityContext:
           readOnlyRootFilesystem: true
         volumeMounts:

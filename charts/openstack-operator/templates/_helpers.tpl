@@ -30,3 +30,16 @@ Create chart name and version as used by the chart label.
 {{- define "openstack-controller.chart" -}}
 {{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
+
+{{/*
+Generate full image paths for KaaS CDN
+*/}}
+{{- define "getImageUrl" -}}
+{{- $context := index . 0 -}}
+{{- $imageContext := index . 1 -}}
+{{- if ($imageContext.fullName) -}}
+{{- $imageContext.fullName -}}
+{{- else -}}
+{{- printf "%s/%s/%s:%s" $context.Values.global.dockerBaseUrl $imageContext.repository $imageContext.name $imageContext.tag -}}
+{{- end -}}
+{{- end -}}

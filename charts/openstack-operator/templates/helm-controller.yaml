@@ -68,7 +68,7 @@ spec:
           value: osh-system
         - name: TILLER_HISTORY_MAX
           value: "0"
-        image: "{{ .Values.helmbundle.tiller.image.repository }}:{{ .Values.helmbundle.tiller.image.tag }}"
+        image: {{ tuple . .Values.helmbundle.tiller.image | include "getImageUrl" }}
         imagePullPolicy: "{{ .Values.helmbundle.tiller.image.pullPolicy }}"
         livenessProbe:
           httpGet:
@@ -89,7 +89,7 @@ spec:
         env:
         - name: TMPDIR
           value: /helm
-        image: "{{ .Values.helmbundle.image.repository }}:{{ .Values.helmbundle.image.tag }}"
+        image: {{ tuple . .Values.helmbundle.image | include "getImageUrl" }}
         imagePullPolicy: "{{ .Values.helmbundle.image.pullPolicy }}"
         securityContext:
           readOnlyRootFilesystem: true
