@@ -16,6 +16,7 @@ for d in `ls $DATA_DIR`; do
     install_args="$install_args $DATA_DIR/$d"
 done
 
-$install_cmd $install_args $@
+$install_cmd $install_args
+$install_cmd $@
 
 exit $?
