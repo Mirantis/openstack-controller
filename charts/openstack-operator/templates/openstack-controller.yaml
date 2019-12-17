@@ -72,8 +72,8 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: Role
 metadata:
-  namespace: "openstack-ceph-shared"
-  name: "openstack-controller-role-openstack-ceph-shared"
+  namespace: {{ .Values.osdpl.cephSharedNamespace }}
+  name: "openstack-controller-role-{{ .Values.osdpl.cephSharedNamespace }}"
 rules:
 
   # Application: read ceph access data from shared namespace.
@@ -111,12 +111,12 @@ subjects:
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: RoleBinding
 metadata:
-  namespace: "openstack-ceph-shared"
-  name: "openstack-controller-rolebinding-openstack-ceph-shared"
+  namespace: {{ .Values.osdpl.cephSharedNamespace }}
+  name: "openstack-controller-rolebinding-{{ .Values.osdpl.cephSharedNamespace }}"
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
-  name: "openstack-controller-role-openstack-ceph-shared"
+  name: "openstack-controller-role-{{ .Values.osdpl.cephSharedNamespace }}"
 subjects:
   - kind: ServiceAccount
     name: openstack-controller-account

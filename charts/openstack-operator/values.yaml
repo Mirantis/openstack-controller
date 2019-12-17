@@ -21,7 +21,7 @@ kopf:
 
 osdpl:
   namespace: openstack
-
+  cephSharedNamespace: openstack-ceph-shared
 
 helmbundle:
   # unless we deploy it via kaas management cluster

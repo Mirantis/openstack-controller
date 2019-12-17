@@ -9,4 +9,14 @@ metadata:
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: openstack
+  name: {{ .Values.osdpl.namespace }}
+{{ if .Values.kopf.enabled }}
+# NOTE(vsaienko): create shared namespace to make sure roles and
+# rolebindings can be created succesfully. The kopfpeerings and
+# shared namespace will be created by ceph operator by default.
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: {{ .Values.osdpl.cephSharedNamespace }}
+{{ end }}
