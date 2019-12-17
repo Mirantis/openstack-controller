@@ -58,7 +58,16 @@ class SingedCertificate:
     cert_all: str
 
 
-def handle_rgw_secret(body, meta, status, logger, diff, **kwargs):
+@kopf.on.create(
+    "", "v1", "secrets", labels={"application": "ceph", "component": "rgw"}
+)
+async def handle_rgw_secret(
+    body, meta, name, status, logger, diff, **kwargs,
+):
+    # TODO: unhardcode secret name
+    logger.debug(f"Handling secret create {name}")
+    if name != RGW_KEYSTONE_SECRET:
+        return
     data = body["data"]
     keys = [
         "OS_AUTH_URL",
@@ -76,23 +85,6 @@ def handle_rgw_secret(body, meta, status, logger, diff, **kwargs):
         args[key[3:].lower()] = data[key]
     os_rgw_creds = ceph_api.OSRGWCreds(**args)
     ceph_api.set_os_rgw_creds(os_rgw_creds, kube.save_secret_data)
-
-
-@kopf.on.create("", "v1", "secrets")
-async def handle_secrets_create(
-    body,
-    meta,
-    name,
-    status,
-    logger,
-    diff,
-    labels={"application": "ceph", "component": "rgw"},
-    **kwargs,
-):
-    # TODO: unhardcode secret name
-    logger.debug(f"Handling secret create {name}")
-    if name == RGW_KEYSTONE_SECRET:
-        handle_rgw_secret(body, meta, status, logger, diff, **kwargs)
 
 
 # TODO(pas-ha) opentack-helm doesn't support password update by design,
