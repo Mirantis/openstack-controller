@@ -6,9 +6,13 @@ master_doc = 'index'
 # The suffix of source filenames.
 source_suffix = '.rst'
 
+extensions = [
+  'reno.sphinxext',
+]
+
 # General information about the project.
-project = u'openstack-controller Release Notes'
-copyright = u'2005-{} Mirantis, Inc.'.format(time.strftime("%Y"))
+project = u'OpenStack Controller Release Notes'
+copyright = u'2019-{} Mirantis, Inc.'.format(time.strftime("%Y"))
 
 latex_documents = [
     (

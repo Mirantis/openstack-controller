@@ -1,9 +1,8 @@
 ==================================
-openstack-controller Release Notes
+OpenStack Controller Release Notes
 ==================================
 
 .. toctree::
    :maxdepth: 1
 
-   unreleased
-   master
+   alpha
