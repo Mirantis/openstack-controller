@@ -1,0 +1,64 @@
+---
+prelude: |
+    OpenStack controller implements **Kubernetes Operator** model
+    by providing Custom Resource Definiton for
+    ``openstackdeployments.lcm.mirantis.com`` and code that handles
+    objects defined by this custom resource definition.
+
+    It is written in Python language and is based on
+    `Kopf <https://kopf.readthedocs.io/>`_ framework.
+    Under the hood it transforms the spec of the custom resource
+    to multiple other custom resources (``HelmBundles``),
+    which in turn are handled by Mirantis-written helmbundle controller
+    and result in OpenStack and its auxiliary services deployed via
+    openstack-helm and openstack-helm-infra Helm charts.
+
+features:
+  - |
+    Initial support for ``Stein`` OpenStack release for the following components:
+
+    * Identity (Keystone)
+    * Compute (Nova)
+    * Image (Glance)
+    * Volume (Cinder)
+    * Orchestration (Heat)
+    * Network (Neutron)
+    * Load Balancer (Octavia)
+    * DNS (Designate)
+    * Dashboard (Horizon)
+    * Key Manager (Barbican)
+    * Tempest
+
+  - |
+    Deploy MariaDB with WSREP/Galera cluster on local storage for database
+
+  - |
+    Deploy separate non-clusterized instance of RabbitMQ server for each
+    OpenStack service
+
+  - |
+    Deploy shared instance of non-clusterized RabbitMQ server to use for
+    OpenStack notifications
+
+  - |
+    Uses Ubuntu 18.04 (Bionic) as a base image for containers
+
+  - |
+    Initial support for integration with Mirantis Kaas IAM
+
+  - |
+    Initial support for integration with Mirantis StackLight
+
+  - |
+    Integration with Ceph:
+
+    - as a backend for Glance (required)
+    - as a backend for Cinder volumes and backups (required)
+    - as an ephemeral storage for Nova (optional)
+    - expose Ceph's Rados Gateway as the OpenStack Object Storage service
+
+  - |
+    Support for configuring HTTPS on public endpoints of OpenStack services
+
+  - |
+    Auto-generation of internal service and admin credentials
