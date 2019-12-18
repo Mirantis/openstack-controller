@@ -174,7 +174,7 @@ function get_mcp2_external_ip {
 }
 
 function get_mcp2_internal_domain_name {
-  echo $(kubectl -n openstack get ingress keystone -o yaml |grep '\- keystone.openstack.svc' | awk '{print $2}' | awk -F '.' '{print $4}')
+  echo $(kubectl get osdpl osh-dev -n openstack -o jsonpath='{.spec.internal_domain_name}')
 }
 
 function get_mcp2_public_domain_name {

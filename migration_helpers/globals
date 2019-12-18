@@ -7,7 +7,7 @@ export KEY_REPOSITORY="/var/lib/keystone/credential-keys /var/lib/keystone/ferne
 export OPENSTACK_DEPLOYMENT_OBJECT_NAME=${OPENSTACK_DEPLOYMENT_OBJECT_NAME:-osh-dev}
 if [[ -z $CLUSTER_NAME ]]; then
   echo "[INFO]: Getting cluster name"
-  export CLUSTER_NAME=$(salt-call pillar.items _param:cluster_name --out json | jq '.local|.[]' | tr -d '"')
+  export CLUSTER_NAME=$(salt-call pillar.items _param:cluster_name --out json | jq -r '.local|.[]')
 fi
 
 export SAL_CLUSTER_ROOT=${SAL_CLUSTER_ROOT:-/srv/salt/reclass/classes/cluster/$CLUSTER_NAME}

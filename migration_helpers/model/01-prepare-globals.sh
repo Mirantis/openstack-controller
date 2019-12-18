@@ -10,11 +10,17 @@ TOP_DIR=$( cd $(dirname $RUN_DIR/../../) && pwd)
 function generate_globals {
   local mcp2_db_address=$(get_mcp2_external_ip mariadb)
   local mcp2_rabbitmq_notifications_address=$(get_mcp2_external_ip rabbitmq-external)
+  local mcp1_heat_domain_name=$(salt $(get_first_active_minion -C "I@heat:server") pillar.get heat:server:stack_domain_admin --out json | jq -r '.[].stack_user_domain_name')
+  local mcp1_heat_username=$(salt $(get_first_active_minion -C "I@heat:server") pillar.get heat:server:stack_domain_admin --out json | jq -r '.[].name')
+  local mcp1_heat_username_password=$(salt $(get_first_active_minion -C "I@heat:server") pillar.get heat:server:stack_domain_admin --out json | jq -r '.[].password')
 
 cat <<EOF > $RUN_DIR/cluster/migration/init.yml
 parameters:
   _param:
     mcp2_rabbitmq_notifications_address: ${mcp2_rabbitmq_notifications_address}
+    mcp1_heat_domain_name: ${mcp1_heat_domain_name}
+    mcp1_heat_username: ${mcp1_heat_username}
+    mcp1_heat_username_password: ${mcp1_heat_username_password}
 EOF
 
   for component in $COMPONENTS_TO_MIGRATE; do
@@ -107,11 +113,16 @@ EOF
   # generate hosts part
   local mcp2_ingress_address=$(get_mcp2_external_ip ingress)
   local mcp2_public_domain_name=$(get_mcp2_public_domain_name)
+  local mcp2_mariadb_address=$(get_mcp2_external_ip mariadb)
 
 cat <<EOF >> $RUN_DIR/cluster/migration/init.yml
   linux:
     network:
       host:
+        mcp2_mariadb_public_host:
+          address: $mcp2_mariadb_address
+          names:
+          - mariadb.openstack.svc.${mcp2_internal_domain_name}
         mcp2_memcached_public_api_host:
           address: $mcp2_memcached_address
           names:
@@ -125,7 +136,6 @@ cat <<EOF >> $RUN_DIR/cluster/migration/init.yml
           - ${component}.${mcp2_public_domain_name}
 EOF
   done
-
   for component in $COMPONENTS_TO_MIGRATE; do
     for internal_service in $(get_service_subservices_internal_endpoints $component); do
       local internal_service_ip=$(get_mcp2_external_ip ${internal_service})
@@ -137,6 +147,15 @@ cat <<EOF >> $RUN_DIR/cluster/migration/init.yml
 EOF
     done
   done
+if [[ "$component" == "nova" ]]; then
+
+cat <<EOF >> $RUN_DIR/cluster/migration/init.yml
+        mcp2_nova_dedicated_rabbit:
+          address: $mcp2_rabbitmq_component_address
+          names:
+           - $(salt $(get_first_active_minion -C "I@nova:compute") cmd.run "nova-manage cell_v2 list_cells | grep cell1 | awk -F\"|\" '{print \$4}' | sed  \"s/.*@\(.*\):.*/\1/\"" --out json | jq '.[]' | tr -d '"')
+EOF
+fi
 
   # get public cert from MCP2
   local mcp2_public_ca=$(kubectl get osdpl osh-dev -n openstack -o jsonpath='{.spec.features.ssl.public_endpoints.ca_cert}')
