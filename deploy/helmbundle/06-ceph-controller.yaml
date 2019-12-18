@@ -1,0 +1,21 @@
+apiVersion: lcm.mirantis.com/v1alpha1
+kind: HelmBundle
+metadata:
+  name: ceph-kaas-controller
+  namespace: osh-system
+spec:
+  repositories:
+  - name: mirantis-ceph-controller
+    url:  'https://artifactory.mirantis.com/helm-prod-virtual'
+  releases:
+  - name: ceph-kaas-controller
+    chart: mirantis-ceph-controller/ceph-controller
+    version: 0.2.25
+    namespace: osh-system
+    values:
+      global:
+        dockerBaseHostname: docker-prod-local.docker.mirantis.net
+      images:
+        cephController:
+          repository: mcp/ceph-operator
+          tag: nightly
