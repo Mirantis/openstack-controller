@@ -30,6 +30,7 @@ spec:
     "bootstrap",
     "keystone_credential_setup",
     "keystone_db_sync",
+    "keystone_client",
     "rabbit_init",
     "test",] %}
         {%- if image in images %}
