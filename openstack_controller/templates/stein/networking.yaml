@@ -120,6 +120,7 @@ spec:
     "neutron_sriov_agent",
     "rabbit_init",
     "neutron_server",
+    "neutron_rpc_server",
     "purge_test",
     "test",] %}
         {%- if image in images %}
