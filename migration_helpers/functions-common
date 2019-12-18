@@ -188,10 +188,13 @@ function refresh_pillars {
   info "Pillars are refreshed"
 }
 
+# examples of args:
+# -C I@ceph:common
+# -C '"I@ceph:common and I@ceph:mon"'
 function get_first_active_minion {
   local minion_id
-
-  minion_id=$(salt $@ test.ping --out json | jq 'keys[0]' | head -1 | tr -d '"')
+  local cmd="salt $@ test.ping --out json"
+  minion_id=$(eval "$cmd" | jq 'keys[0]' | head -1 | tr -d '"')
   echo $minion_id
 }
 
