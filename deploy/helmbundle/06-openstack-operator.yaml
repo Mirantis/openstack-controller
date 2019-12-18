@@ -13,6 +13,9 @@ spec:
     version: 0.1.2
     namespace: osh-system
     values:
+      global:
+        dockerBaseUrl: docker-kaas-local.artifactory.mirantis.com
+        helmBaseUrl: https://artifactory.mirantis.com/binary-kaas-local
       # The kopf peering object will be created by ceph controller.
       kopf:
         enabled: false

@@ -13,6 +13,9 @@ spec:
     version: 0.1.0-mcp-353
     namespace: osh-system
     values:
+      global:
+        dockerBaseUrl: docker-kaas-local.artifactory.mirantis.com
+        helmBaseUrl: https://artifactory.mirantis.com/binary-kaas-local
       common:
         namespace: osh-system
       classes:
