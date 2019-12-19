@@ -25,17 +25,18 @@ Apply all the required labels to all the nodes except of master k8s node
 
 ### Deploy openstack-controller (crds, operator, helmbundlecontroller)
 
-`kubectl apply -f deploy/helmbundle/`
+Create resources one by one with small delay to ensure kopfpeering is created by ceph.
+`pushd deploy/helmbundle; for i in $(ls -1 ./*); do kubectl apply -f $i; sleep 10 done; popd`
 
 In case to deploy with Ceph (Optional)
 
 Deploy ceph-kaas-controller to deploy Ceph related CRDs
 
-`kubectl apply -f https://gerrit.mcp.mirantis.com/gitweb?p=mcp/mcp-pipelines.git;a=blob_plain;f=tools/ceph/ceph-controller.yaml;hb=refs/heads/master`
+Update node names in examples/ceph/ceph_local_folder_openstack.yaml
 
 Deploy ceph cluster
 
-`kubectl apply -f https://gerrit.mcp.mirantis.com/gitweb?p=mcp/mcp-pipelines.git;a=blob_plain;f=tools/ceph/ceph_local_folder_openstack.yaml;hb=refs/heads/master`
+`kubectl apply -f examples/ceph/ceph_local_folder_openstack.yaml`
 
 
 ### Deploy OpenStack
