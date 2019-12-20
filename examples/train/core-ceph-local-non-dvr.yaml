@@ -1,0 +1,126 @@
+apiVersion: lcm.mirantis.com/v1alpha1
+kind: OpenStackDeployment
+metadata:
+  name: osh-dev
+  namespace: openstack
+  labels: {}
+  annotations: {}
+spec:
+  openstack_version: train
+  profile: compute
+  size: tiny
+  internal_domain_name: kaas-kubernetes-3af5ae538cf411e9a6c7fa163e5a4837
+  public_domain_name: it.just.works
+  artifacts:
+    images_base_url: docker-dev-kaas-local.docker.mirantis.net
+    charts_base_url: https://artifactory.mcp.mirantis.net/binary-dev-kaas-local/openstack/helm
+  # features that would enable coordinated changes to values of several charts
+  features:
+    services:
+     - block-storage
+     - compute
+     - identity
+     - dashboard
+     - image
+     - ingress
+     - database
+     - memcached
+     - networking
+     - orchestration
+     - messaging
+     - load-balancer
+     - dns
+     - key-manager
+    barbican:
+      backend:
+        simple_crypto:
+          enabled: True
+          kek: 'YWJjZGVmZ2hpamtsbW5vcHFyc3R1dnd4eXoxMjM0NTY='
+    keystone:
+      keycloak:
+        oidc:
+          # SSL validation have to be disabled until upstream bug
+          # https://github.com/zmartzone/mod_auth_openidc/issues/329 is not
+          # fixed and CA is custom.
+          OIDCSSLValidateServer: false
+    neutron:
+      tunnel_interface: ens3
+      external_networks:
+        - physnet: physnet1
+          interface: veth-phy
+          bridge: br-ex
+          network_types:
+           - flat
+          vlan_ranges: null
+          mtu: null
+
+    nova:
+      live_migration_interface: ens3
+      images:
+        backend: local
+    stacklight:
+      user:
+        password: stacklight
+  # enabled services and their specific configuration
+  services:
+  # disable powerdns external service, because openstack CPI
+  # doesn't support UDP load balancers
+    dns:
+      powerdns:
+        values:
+          manifests:
+            service_external: false
+    # NOTE(vsaienko): run on all nodes to have access to public API from routers/VMs
+    # For more details please see https://mirantis.jira.com/browse/PRODX-1321
+    ingress:
+      ingress:
+        values:
+          labels:
+            server:
+              node_selector_key: kubernetes.io/os
+              node_selector_value: linux
+    identity:
+      keystone:
+        values:
+          conf:
+            keystone:
+              DEFAULT:
+               mykey: myvalue
+    networking:
+      neutron:
+        values:
+          bootstrap:
+            enabled: true
+            script: |
+              openstack network show public || openstack network create \
+                --provider-network-type flat \
+                --provider-physical-network physnet1 \
+                --external \
+                public
+              # set default gateway via any non-master/worker node to get into ingress controller
+              openstack subnet show public-subnet || openstack subnet create public-subnet \
+                --no-dhcp --subnet-range 10.11.12.0/24 \
+                --allocation-pool start=10.11.12.100,end=10.11.12.200 \
+                --gateway 10.11.12.11 \
+                --network public
+              openstack router show r1 || openstack router create r1
+              openstack router set --external-gateway public r1
+              openstack network set public --default
+          conf:
+            neutron:
+              DEFAULT:
+                # to match Calico tunnel value within container operations
+                global_physnet_mtu: 1480
+    load-balancer:
+      octavia:
+        values:
+          octavia:
+            settings:
+              amphora_image_url: "http://images.mcp.mirantis.net/octavia/amphora-x64-haproxy-stein-testing.qcow2"
+    orchestration:
+      heat:
+        values:
+          conf:
+            heat:
+              clients_heat:
+                insecure: true
