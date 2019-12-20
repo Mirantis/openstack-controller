@@ -1,1 +1,68 @@
-../stein/tempest.yaml
+#apiVersion: lcm.mirantis.com/v1alpha1
+#kind: HelmBundle
+
+{%- set service = 'tempest' %}
+
+spec:
+  releases:
+  - name: openstack-tempest
+    chart: {{spec.common.openstack.repo}}/tempest
+    values:
+      images:
+        tags:
+{%- for image in [
+    "tempest_run_tests",
+    "ks_user",
+    "dep_check",
+    "image_repo_sync",
+    "bootstrap",
+    "tempest-uuids-init",] %}
+        {%- if image in images %}
+          {{ image }}: {{ images[image] }}
+        {%- endif %}
+{%- endfor %}
+      manifests:
+        network_policy: false
+{%- if spec.get('features', {}).get('ssl', {}).get('public_endpoints', {}).get('enabled', True) %}
+        secret_ca_bundle: true
+{%- endif %}
+      pod:
+        replicas:
+          server: 1
+      pvc:
+        storage_class: mirablock-k8s-block-hdd
+      endpoints:
+        cluster_domain_suffix: {{ spec.internal_domain_name }}
+{% include 'base/_admin_identity.yaml' %}
+{%- if spec.get('features', {}).get('ssl', {}).get('public_endpoints', {}).get('enabled', True) %}
+        dashboard:
+          host_fqdn_override:
+            public:
+              tls:
+                ca: |
+{{ spec.features.ssl.public_endpoints.ca_cert | indent( width=18, indentfirst=True) }}
+                crt: |
+{{ spec.features.ssl.public_endpoints.api_cert | indent( width=18, indentfirst=True) }}
+                key: |
+{{ spec.features.ssl.public_endpoints.api_key | indent( width=18, indentfirst=True) }}
+          hosts:
+            default: horizon-int
+            public:
+              host: horizon
+              tls:
+                ca: |
+{{ spec.features.ssl.public_endpoints.ca_cert | indent( width=18, indentfirst=True) }}
+                crt: |
+{{ spec.features.ssl.public_endpoints.api_cert | indent( width=18, indentfirst=True) }}
+                key: |
+{{ spec.features.ssl.public_endpoints.api_key | indent( width=18, indentfirst=True) }}
+          port:
+            web:
+              default: 80
+              public: 443
+          scheme:
+            default: http
+            public: https
+{%- endif %}
+      conf:
+        tempest: {{ spec | generate_tempest_config(helmbundles_body) }}

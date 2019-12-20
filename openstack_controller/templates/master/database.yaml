@@ -1,1 +1,66 @@
-../stein/database.yaml
+#apiVersion: lcm.mirantis.com/v1alpha1
+#kind: HelmBundle
+
+{%- set stacklight_enabled = spec.get('features', {}).get('stacklight', {}).get('enabled', False) %}
+
+spec:
+  releases:
+  - name: openstack-mariadb
+    chart: {{spec.common.infra.repo}}/mariadb
+    values:
+      images:
+        tags:
+{%- for image in [
+    "ingress",
+    "prometheus_create_mysql_user",
+    "image_repo_sync",
+    "error_pages",
+    "mariadb_backup",
+    "prometheus_mysql_exporter",
+    "prometheus_mysql_exporter_helm_tests",
+    "dep_check",
+    "mariadb",
+    "mariadb_scripted_test",] %}
+        {%- if image in images %}
+          {{ image }}: {{ images[image] }}
+        {%- endif %}
+{%- endfor %}
+{%- if stacklight_enabled %}
+      monitoring:
+        prometheus:
+          enabled: true
+{%- endif %}
+      manifests:
+        network_policy: false
+        job_cluster_wait: true
+      endpoints:
+        cluster_domain_suffix: {{ spec.internal_domain_name }}
+        oslo_db:
+          namespace: null
+          auth:
+            admin:
+              username: {{ admin_creds.database.username }}
+              password: {{ admin_creds.database.password }}
+            sst:
+              username: {{ galera_creds.sst.username }}
+              password: {{ galera_creds.sst.password }}
+            exporter:
+              username: {{ galera_creds.exporter.username }}
+              password: {{ galera_creds.exporter.password }}
+      pod:
+        replicas:
+          server: 3
+{%- if spec.get('features', {}).get('database', {}).get('local_volumes', {}).get('enabled', False) %}
+        # To have higher level of data redundency in case of local volumes - ensure pods are spread
+        # across volumes placed on different nodes
+        affinity:
+          anti:
+            type:
+              default: requiredDuringSchedulingIgnoredDuringExecution
+{%- endif %}
+      volume:
+{%- if spec.get('features', {}).get('database', {}).get('local_volumes', {}).get('enabled', False) %}
+        class_name: lvp-fake-root
+{%- else %}
+        class_name: rook-ceph-block
+{%- endif %}

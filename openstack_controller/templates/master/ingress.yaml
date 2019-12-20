@@ -1,1 +1,40 @@
-../stein/ingress.yaml
+#apiVersion: lcm.mirantis.com/v1alpha1
+#kind: HelmBundle
+
+spec:
+  releases:
+  - name: ingress-openstack
+    chart: {{spec.common.infra.repo}}/ingress
+    values:
+      # NOTE(vsaienko): run ingress as daemonset on control plane nodes with externalTrafficPolicy: Local
+      # For virtualized environment with Octavia need to run on all nodes
+      # For more details please see https://mirantis.jira.com/browse/PRODX-1321
+      deployment:
+        type: DaemonSet
+      labels:
+        server:
+          node_selector_key: openstack-control-plane
+          node_selector_value: enabled
+      network:
+        service:
+          type: LoadBalancer
+          externalTrafficPolicy: Local
+      images:
+        tags:
+{%- for image in [
+    "ingress",
+    "ingress_routed_vip",
+    "error_pages",
+    "image_repo_sync",
+    "keepalived",
+    "ingress_module_init",
+    "entrypoint",
+    "dep_check",] %}
+        {%- if image in images %}
+          {{ image }}: {{ images[image] }}
+        {%- endif %}
+{%- endfor %}
+      manifests:
+        network_policy: false
+      endpoints:
+        cluster_domain_suffix: {{ spec.internal_domain_name }}

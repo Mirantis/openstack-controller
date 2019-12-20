@@ -1,7 +1,7 @@
 #apiVersion: lcm.mirantis.com/v1alpha1
 #kind: HelmBundle
 
-{%- set service = 'designate' %}
+{%- set service = 'barbican' %}
 {%- set messaging = spec.get('features', {}).get('messaging', {}) %}
 {%- set stacklight_enabled = spec.get('features', {}).get('stacklight', {}).get('enabled', False) %}
 {%- set notification_topics = ['notifications'] %}
@@ -9,7 +9,7 @@
 
 spec:
   releases:
-  - name: openstack-designate-rabbitmq
+  - name: openstack-barbican-rabbitmq
     chart: {{spec.common.infra.repo}}/rabbitmq
     values:
 {% include 'base/_rabbitmq_images.yaml' %}
@@ -28,45 +28,45 @@ spec:
         enabled: false
       endpoints:
         cluster_domain_suffix: {{ spec.internal_domain_name }}
-        oslo_messaging: &designate_endpoints_oslo_messaging
+        oslo_messaging: &barbican_endpoints_oslo_messaging
           auth:
             admin:
               username: {{ admin_creds.messaging.username }}
               password: {{ admin_creds.messaging.password }}
-            designate:
+            barbican:
               username: {{ credentials.messaging.user.username }}
               password: {{ credentials.messaging.user.password }}
           statefulset:
             replicas: 1
-            name: openstack-designate-rabbitmq-rabbitmq
+            name: openstack-barbican-rabbitmq-rabbitmq
           hosts:
-            default: rabbitmq-designate
-            path: /designate
+            default: rabbitmq-barbican
+            path: /barbican
         prometheus_rabbitmq_exporter:
           hosts:
-            default: rabbitmq-exporter-designate
+            default: rabbitmq-exporter-barbican
       conf:
         users:
-          designate:
+          barbican:
             auth:
               service_user:
                 username: {{ credentials.messaging.user.username }}
                 password: {{ credentials.messaging.user.password }}
-            path: /designate
+            path: /barbican
         aux_conf:
           policies:
-          - vhost: designate
+          - vhost: barbican
             name: default-policy
             pattern: '^(?!amq\.).*'
             definition:
               message-ttl: 120000
-          - vhost: designate
+          - vhost: barbican
             name: results_expire
             pattern: '^results\.'
             definition:
               expires: 3600000
             priority: 1
-          - vhost: designate
+          - vhost: barbican
             name: tasks_expire
             pattern: '^tasks\.'
             definition:
@@ -76,28 +76,25 @@ spec:
         prometheus_exporter:
           rabbit_exporters: "overview,exchange,node"
   {%- endif %}
-{%- if spec.get('migration', {}).get('designate', {}).get('deploy_main_service', True) %}
-  - name: openstack-designate
-    chart: {{spec.common.openstack.repo}}/designate
+{%- if spec.get('migration', {}).get('barbican', {}).get('deploy_main_service', True) %}
+  - name: openstack-barbican
+    chart: {{spec.common.openstack.repo}}/barbican
     values:
       images:
         tags:
 {%- for image in [
     "ks_service",
-    "db_drop",
-    "designate_sink",
-    "designate_producer",
     "bootstrap",
-    "designate_mdns",
+    "db_drop",
+    "barbican_db_sync",
+    "image_repo_sync",
     "ks_endpoints",
-    "designate_api",
+    "rabbit_init",
     "db_init",
     "dep_check",
-    "designate_db_sync",
     "ks_user",
-    "rabbit_init",
-    "designate_worker",
-    "designate_central",] %}
+    "scripted_test",
+    "barbican_api",] %}
         {%- if image in images %}
           {{ image }}: {{ images[image] }}
         {%- endif %}
@@ -108,17 +105,35 @@ spec:
             jobs:
               - openstack-mariadb-cluster-wait
       conf:
-        designate:
+        barbican:
           keystone_authtoken:
             memcache_security_strategy: ENCRYPT
             memcache_secret_key: {{ credentials.memcached }}
-          service:api:
-            enabled_extensions_admin: quotas
           oslo_messaging_notifications:
             topics: {{ notification_topics|join(',') }}
+          DEFAULT:
+            sql_idle_timeout: 3600
+            sql_max_retries: -1
+            sql_retry_interval: 1
+{%- if spec.get('features', {}).get('barbican', {}).get('backend', {}).get('simple_crypto', {}).get('enabled', False) %}
+          secretstore:
+            namespace: barbican.secretstore.plugin
+            enabled_secretstore_plugins: store_crypto
+          crypto:
+            enabled_crypto_plugins: simple_crypto
+          simple_crypto_plugin:
+            kek: {{ spec.features.barbican.backend.simple_crypto.kek }}
+{%- endif %}
         logging:
-          logger_designate:
-            level: {{ spec.get('features', {}).get('logging', {}).get('designate', {}).get('level', 'INFO') }}
+          logger_barbican:
+            level: {{ spec.get('features', {}).get('logging', {}).get('barbican', {}).get('level', 'INFO') }}
+        # TODO(vsaienko): drop policy settings in upstream values.yaml to ensure in-code policy
+        # defaults are used.
+        policy:
+          secret_project_match: project_id:%(target.secret.project_id)s
+          secret_creator_user: user_id:%(target.secret.creator_id)s
+          container_project_match: project_id:%(target.container.project_id)s
+          container_creator_user: user_id:%(target.container.creator_id)s
       manifests:
         network_policy: false
         job_rabbit_init: false
@@ -133,17 +148,34 @@ spec:
             admin:
               username: {{ admin_creds.database.username }}
               password: {{ admin_creds.database.password }}
-            designate:
+            barbican:
               username: {{ credentials.database.user.username }}
               password: {{ credentials.database.user.password }}
         oslo_messaging:
-          <<: *designate_endpoints_oslo_messaging
-{% include 'base/_notifications.yaml' %}
+          <<: *barbican_endpoints_oslo_messaging
+        oslo_messaging_notifications:
+          auth:
+            barbican:
+              username: barbican
+              password: password
+          host_fqdn_override: {}
+          hosts:
+            default: rabbitmq
+          path: /openstack
+          port:
+            amqp:
+              default: 5672
+            http:
+              default: 15672
+          scheme: rabbit
+          statefulset:
+            name: openstack-rabbitmq-rabbitmq
+            replicas: 1
 {%- if spec.get('features', {}).get('ssl', {}).get('public_endpoints', {}).get('enabled', True) %}
-        dns:
+        key_manager:
           host_fqdn_override:
             public:
-              host: designate.{{ spec.public_domain_name }}
+              host: barbican.{{ spec.public_domain_name }}
               tls:
                 ca: |
 {{ spec.features.ssl.public_endpoints.ca_cert | indent( width=18, indentfirst=True) }}
@@ -153,11 +185,11 @@ spec:
 {{ spec.features.ssl.public_endpoints.api_key | indent( width=18, indentfirst=True) }}
           hosts:
             admin:
-              host: designate-api
-            default: designate
-            internal: designate-api
+              host: barbican-api
+            default: barbican
+            internal: barbican-api
             public:
-              host: designate
+              host: barbican
               tls:
                 ca: |
 {{ spec.features.ssl.public_endpoints.ca_cert | indent( width=18, indentfirst=True) }}
@@ -167,82 +199,12 @@ spec:
 {{ spec.features.ssl.public_endpoints.api_key | indent( width=18, indentfirst=True) }}
           port:
             api:
-              admin: 9001
+              admin: 9311
               default: 80
-              internal: 9001
-              public: 443
-          scheme:
-            default: http
-            public: https
-        mdns:
-          host_fqdn_override:
-            public:
-              tls:
-                ca: |
-{{ spec.features.ssl.public_endpoints.ca_cert | indent( width=18, indentfirst=True) }}
-                crt: |
-{{ spec.features.ssl.public_endpoints.api_cert | indent( width=18, indentfirst=True) }}
-                key: |
-{{ spec.features.ssl.public_endpoints.api_key | indent( width=18, indentfirst=True) }}
-          hosts:
-            admin:
-              host: designate-mdns
-            default: minidns
-            public:
-              host: minidns
-              tls:
-                ca: |
-{{ spec.features.ssl.public_endpoints.ca_cert | indent( width=18, indentfirst=True) }}
-                crt: |
-{{ spec.features.ssl.public_endpoints.api_cert | indent( width=18, indentfirst=True) }}
-                key: |
-{{ spec.features.ssl.public_endpoints.api_key | indent( width=18, indentfirst=True) }}
-          port:
-            ipc:
-              admin: 5354
-              default: 80
-              internal: 5354
+              internal: 9311
               public: 443
           scheme:
             default: http
             public: https
 {%- endif %}
 {%- endif %}
-  - name: openstack-powerdns
-    chart: {{spec.common.infra.repo}}/powerdns
-    values:
-      images:
-        tags:
-{%- for image in [
-    "powerdns",
-    "dep_check",
-    "db_init",
-    "powerdns_db_sync",
-    "image_repo_sync",] %}
-        {%- if image in images %}
-          {{ image }}: {{ images[image] }}
-        {%- endif %}
-{%- endfor %}
-      dependencies:
-        static:
-          db_init:
-            jobs:
-              - openstack-mariadb-cluster-wait
-      manifests:
-        network_policy: false
-        service_api: true
-        service_external: true
-      network:
-        external:
-          service:
-            externalTrafficPolicy: Local
-      endpoints:
-        cluster_domain_suffix: {{ spec.internal_domain_name }}
-        oslo_db:
-          auth:
-            admin:
-              username: {{ admin_creds.database.username }}
-              password: {{ admin_creds.database.password }}
-            powerdns:
-              username: {{ powerdns.database.user.username }}
-              password: {{ powerdns.database.user.password }}

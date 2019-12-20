@@ -1,1 +1,197 @@
-../stein/image.yaml
+#apiVersion: lcm.mirantis.com/v1alpha1
+#kind: HelmBundle
+
+{%- set service = 'glance' %}
+{%- set messaging = spec.get('features', {}).get('messaging', {}) %}
+{%- set stacklight_enabled = spec.get('features', {}).get('stacklight', {}).get('enabled', False) %}
+{%- set notification_topics = ['notifications'] %}
+{%- do notification_topics.append('stacklight_notifications') if stacklight_enabled %}
+
+spec:
+  releases:
+  - name: openstack-glance-rabbitmq
+    chart: {{spec.common.infra.repo}}/rabbitmq
+    values:
+{% include 'base/_rabbitmq_images.yaml' %}
+  {%- if stacklight_enabled %}
+      monitoring:
+        prometheus:
+          enabled: true
+  {%- endif %}
+      pod:
+        replicas:
+          server: 1
+      manifests:
+        network_policy: false
+        job_users_create: true
+      volume:
+        enabled: false
+      endpoints:
+        cluster_domain_suffix: {{ spec.internal_domain_name }}
+        oslo_messaging: &glance_endpoints_oslo_messaging
+          auth:
+            admin:
+              username: {{ admin_creds.messaging.username }}
+              password: {{ admin_creds.messaging.password }}
+            glance:
+              username: {{ credentials.messaging.user.username }}
+              password: {{ credentials.messaging.user.password }}
+          statefulset:
+            replicas: 1
+            name: openstack-glance-rabbitmq-rabbitmq
+          hosts:
+            default: rabbitmq-glance
+          path: /glance
+        prometheus_rabbitmq_exporter:
+          hosts:
+            default: rabbitmq-exporter-glance
+      conf:
+        users:
+          glance:
+            auth:
+              service_user:
+                username: {{ credentials.messaging.user.username }}
+                password: {{ credentials.messaging.user.password }}
+            path: /glance
+        aux_conf:
+          policies:
+          - vhost: glance
+            name: default-policy
+            pattern: '^(?!amq\.).*'
+            definition:
+              message-ttl: 120000
+          - vhost: glance
+            name: results_expire
+            pattern: '^results\.'
+            definition:
+              expires: 3600000
+            priority: 1
+          - vhost: glance
+            name: tasks_expire
+            pattern: '^tasks\.'
+            definition:
+              expires: 3600000
+            priority: 1
+  {%- if stacklight_enabled %}
+        prometheus_exporter:
+          rabbit_exporters: "overview,exchange,node"
+  {%- endif %}
+{%- if spec.get('migration', {}).get('glance', {}).get('deploy_main_service', True) %}
+  - name: openstack-glance
+    chart: {{spec.common.openstack.repo}}/glance
+    values:
+      images:
+        tags:
+{%- for image in [
+    "ks_service",
+    "db_drop",
+    "image_repo_sync",
+    "bootstrap",
+    "glance_db_sync",
+    "glance_storage_init",
+    "ks_endpoints",
+    "rabbit_init",
+    "glance_api",
+    "db_init",
+    "dep_check",
+    "test",
+    "glance_registry",
+    "glance_metadefs_load",
+    "ks_user",] %}
+        {%- if image in images %}
+          {{ image }}: {{ images[image] }}
+        {%- endif %}
+{%- endfor %}
+      dependencies:
+        static:
+          db_init:
+            jobs:
+              - openstack-mariadb-cluster-wait
+      pod:
+        replicas:
+          api: 1
+          registry: 1
+      storage: rbd
+      conf:
+        glance:
+          keystone_authtoken:
+            memcache_security_strategy: ENCRYPT
+            memcache_secret_key: {{ credentials.memcached }}
+          DEFAULT:
+            enable_v1_api: True
+            enable_v2_registry: True
+          glance_store:
+{%- for pools, pools_config in ceph.glance.pools.items() %}
+            rbd_store_pool: {{ pools_config.name }}
+{%- endfor %}
+          oslo_messaging_notifications:
+            topics: {{ notification_topics|join(',') }}
+        logging:
+          logger_glance:
+            level: {{ spec.get('features', {}).get('logging', {}).get('glance', {}).get('level', 'INFO') }}
+      volume:
+        class_name: rook-ceph-block
+        size: 2Gi
+      ceph_client:
+        configmap: rook-ceph-config
+        user_secret_name: {{ ceph.glance.secrets }}
+      secrets:
+        rbd: {{ ceph.glance.secrets }}
+      manifests:
+        network_policy: false
+        job_rabbit_init: false
+        job_storage_init: false
+{%- if spec.get('features', {}).get('ssl', {}).get('public_endpoints', {}).get('enabled', True) %}
+        secret_ca_bundle: true
+{%- endif %}
+      endpoints:
+        cluster_domain_suffix: {{ spec.internal_domain_name }}
+{% include 'base/_admin_identity.yaml' %}
+        oslo_db:
+          auth:
+            admin:
+              username: {{ admin_creds.database.username }}
+              password: {{ admin_creds.database.password }}
+            glance:
+              username: {{ credentials.database.user.username }}
+              password: {{ credentials.database.user.password }}
+        oslo_messaging:
+          <<: *glance_endpoints_oslo_messaging
+{% include 'base/_notifications.yaml' %}
+{%- if spec.get('features', {}).get('ssl', {}).get('public_endpoints', {}).get('enabled', True) %}
+        image:
+          host_fqdn_override:
+            public:
+              host: glance.{{ spec.public_domain_name }}
+              tls:
+                ca: |
+{{ spec.features.ssl.public_endpoints.ca_cert | indent( width=18, indentfirst=True) }}
+                crt: |
+{{ spec.features.ssl.public_endpoints.api_cert | indent( width=18, indentfirst=True) }}
+                key: |
+{{ spec.features.ssl.public_endpoints.api_key | indent( width=18, indentfirst=True) }}
+          hosts:
+            admin:
+              host: glance-api
+            default: glance
+            internal: glance-api
+            public:
+              host: glance
+              tls:
+                ca: |
+{{ spec.features.ssl.public_endpoints.ca_cert | indent( width=18, indentfirst=True) }}
+                crt: |
+{{ spec.features.ssl.public_endpoints.api_cert | indent( width=18, indentfirst=True) }}
+                key: |
+{{ spec.features.ssl.public_endpoints.api_key | indent( width=18, indentfirst=True) }}
+          port:
+            api:
+              admin: 9292
+              default: 80
+              internal: 9292
+              public: 443
+          scheme:
+            default: http
+            public: https
+{%- endif %}
+{%- endif %}

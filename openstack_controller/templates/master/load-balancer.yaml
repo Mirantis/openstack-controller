@@ -1,1 +1,284 @@
-../stein/load-balancer.yaml
+#apiVersion: lcm.mirantis.com/v1alpha1
+#kind: HelmBundle
+
+{%- set service = 'octavia' %}
+{%- set messaging = spec.get('features', {}).get('messaging', {}) %}
+{%- set stacklight_enabled = spec.get('features', {}).get('stacklight', {}).get('enabled', False) %}
+{%- set notification_topics = ['notifications'] %}
+{%- do notification_topics.append('stacklight_notifications') if stacklight_enabled %}
+
+spec:
+  releases:
+  - name: openstack-octavia-rabbitmq
+    chart: {{spec.common.infra.repo}}/rabbitmq
+    values:
+{% include 'base/_rabbitmq_images.yaml' %}
+  {%- if stacklight_enabled %}
+      monitoring:
+        prometheus:
+          enabled: true
+  {%- endif %}
+      pod:
+        replicas:
+          server: 1
+      manifests:
+        network_policy: false
+        job_users_create: true
+      volume:
+        enabled: false
+      endpoints:
+        cluster_domain_suffix: {{ spec.internal_domain_name }}
+        oslo_messaging: &octavia_endpoints_oslo_messaging
+          auth:
+            admin:
+              username: {{ admin_creds.messaging.username }}
+              password: {{ admin_creds.messaging.password }}
+            octavia:
+              username: {{ credentials.messaging.user.username }}
+              password: {{ credentials.messaging.user.password }}
+          statefulset:
+            replicas: 1
+            name: openstack-octavia-rabbitmq-rabbitmq
+          hosts:
+            default: rabbitmq-octavia
+          path: /octavia
+        prometheus_rabbitmq_exporter:
+          hosts:
+            default: rabbitmq-exporter-octavia
+      conf:
+        users:
+          octavia:
+            auth:
+              service_user:
+                username: {{ credentials.messaging.user.username }}
+                password: {{ credentials.messaging.user.password }}
+            path: /octavia
+        aux_conf:
+          policies:
+          - vhost: octavia
+            name: default-policy
+            pattern: '^(?!amq\.).*'
+            definition:
+              message-ttl: 120000
+          - vhost: octavia
+            name: results_expire
+            pattern: '^results\.'
+            definition:
+              expires: 3600000
+            priority: 1
+          - vhost: octavia
+            name: tasks_expire
+            pattern: '^tasks\.'
+            definition:
+              expires: 3600000
+            priority: 1
+  {%- if stacklight_enabled %}
+        prometheus_exporter:
+          rabbit_exporters: "overview,exchange,node"
+  {%- endif %}
+{%- if spec.get('migration', {}).get('octavia', {}).get('deploy_main_service', True) %}
+  - name: openstack-octavia
+    chart: {{spec.common.openstack.get('repo', spec.common.charts.repo)}}/octavia
+    values:
+      octavia:
+        settings:
+          lbmgmt_cidr: "192.168.0.0/19"
+          lbmgmt_subnet_start: "192.168.0.100"
+          lbmgmt_subnet_end: "192.168.31.254"
+      images:
+        tags:
+{%- for image in [
+    "openvswitch_vswitchd",
+    "octavia_worker",
+    "db_drop",
+    "image_repo_sync",
+    "ks_endpoints",
+    "test",
+    "db_init",
+    "dep_check",
+    "octavia_api",
+    "ks_user",
+    "ks_service",
+    "octavia_db_sync",
+    "octavia_health_manager_init",
+    "bootstrap",
+    "rabbit_init",
+    "octavia_health_manager",
+    "octavia_housekeeping",
+    "create_resources",] %}
+        {%- if image in images %}
+          {{ image }}: {{ images[image] }}
+        {%- endif %}
+{%- endfor %}
+      dependencies:
+        static:
+          db_init:
+            jobs:
+              - openstack-mariadb-cluster-wait
+      labels:
+        worker:
+          node_selector_key: openvswitch
+          node_selector_value: enabled
+        housekeeping:
+          node_selector_key: openvswitch
+          node_selector_value: enabled
+        health_manager:
+          node_selector_key: openvswitch
+          node_selector_value: enabled
+      pod:
+        replicas:
+          worker: 3
+          housekeeping: 3
+          health_manager: 3
+        mounts:
+          octavia_api:
+            octavia_api:
+              volumeMounts:
+                - name: octavia-certs
+                  mountPath: /etc/octavia/certs/private/cakey.pem
+                  subPath: key
+                - name: octavia-certs
+                  mountPath: /etc/octavia/certs/ca_01.pem
+                  subPath: cert
+                - name: octavia-certs
+                  mountPath: /etc/octavia/certs/client.pem
+                  subPath: cert_all
+              volumes:
+                - name: octavia-certs
+                  secret:
+                    secretName: octavia-certs
+                    defaultMode: 0644
+          octavia_worker:
+            octavia_worker:
+              volumeMounts:
+                - name: octavia-certs
+                  mountPath: /etc/octavia/certs/private/cakey.pem
+                  subPath: key
+                - name: octavia-certs
+                  mountPath: /etc/octavia/certs/ca_01.pem
+                  subPath: cert
+                - name: octavia-certs
+                  mountPath: /etc/octavia/certs/client.pem
+                  subPath: cert_all
+              volumes:
+                - name: octavia-certs
+                  secret:
+                    secretName: octavia-certs
+                    defaultMode: 0644
+          octavia_housekeeping:
+            octavia_housekeeping:
+              volumeMounts:
+                - name: octavia-certs
+                  mountPath: /etc/octavia/certs/private/cakey.pem
+                  subPath: key
+                - name: octavia-certs
+                  mountPath: /etc/octavia/certs/ca_01.pem
+                  subPath: cert
+                - name: octavia-certs
+                  mountPath: /etc/octavia/certs/client.pem
+                  subPath: cert_all
+              volumes:
+                - name: octavia-certs
+                  secret:
+                    secretName: octavia-certs
+                    defaultMode: 0644
+          octavia_health_manager:
+            octavia_health_manager:
+              volumeMounts:
+                - name: octavia-certs
+                  mountPath: /etc/octavia/certs/private/cakey.pem
+                  subPath: key
+                - name: octavia-certs
+                  mountPath: /etc/octavia/certs/ca_01.pem
+                  subPath: cert
+                - name: octavia-certs
+                  mountPath: /etc/octavia/certs/client.pem
+                  subPath: cert_all
+              volumes:
+                - name: octavia-certs
+                  secret:
+                    secretName: octavia-certs
+                    defaultMode: 0644
+      manifests:
+        network_policy: false
+        job_rabbit_init: false
+        secret_amphora_ssh_key: true
+        secret_octavia_certs: false
+{%- if spec.get('features', {}).get('ssl', {}).get('public_endpoints', {}).get('enabled', True) %}
+        secret_ca_bundle: true
+{%- endif %}
+      conf:
+        octavia:
+          keystone_authtoken:
+            memcache_security_strategy: ENCRYPT
+            memcache_secret_key: {{ credentials.memcached }}
+          certificates:
+            endpoint_type: internalURL
+          haproxy_amphora:
+            connection_max_retries: 500
+          glance:
+            endpoint_type: internalURL
+          neutron:
+            endpoint_type: internalURL
+          nova:
+            endpoint_type: internalURL
+          oslo_messaging_notifications:
+            topics: {{ notification_topics|join(',') }}
+        logging:
+          logger_octavia:
+            level: {{ spec.get('features', {}).get('logging', {}).get('octavia', {}).get('level', 'INFO') }}
+      secrets:
+        amphora_ssh_key:
+          private: {{ ssh_credentials.private| encode | b64encode | decode }}
+          public: {{ ssh_credentials.public | encode | b64encode | decode }}
+      endpoints:
+        cluster_domain_suffix: {{ spec.internal_domain_name }}
+{% include 'base/_admin_identity.yaml' %}
+        oslo_db:
+          auth:
+            admin:
+              username: {{ admin_creds.database.username }}
+              password: {{ admin_creds.database.password }}
+            octavia:
+              username: {{ credentials.database.user.username }}
+              password: {{ credentials.database.user.password }}
+        oslo_messaging:
+          <<: *octavia_endpoints_oslo_messaging
+{% include 'base/_notifications.yaml' %}
+{%- if spec.get('features', {}).get('ssl', {}).get('public_endpoints', {}).get('enabled', True) %}
+        load_balancer:
+          host_fqdn_override:
+            public:
+              host: octavia.{{ spec.public_domain_name }}
+              tls:
+                ca: |
+{{ spec.features.ssl.public_endpoints.ca_cert | indent( width=18, indentfirst=True) }}
+                crt: |
+{{ spec.features.ssl.public_endpoints.api_cert | indent( width=18, indentfirst=True) }}
+                key: |
+{{ spec.features.ssl.public_endpoints.api_key | indent( width=18, indentfirst=True) }}
+          hosts:
+            admin:
+              host: octavia-api
+            default: octavia
+            internal: octavia-api
+            public:
+              host: octavia
+              tls:
+                ca: |
+{{ spec.features.ssl.public_endpoints.ca_cert | indent( width=18, indentfirst=True) }}
+                crt: |
+{{ spec.features.ssl.public_endpoints.api_cert | indent( width=18, indentfirst=True) }}
+                key: |
+{{ spec.features.ssl.public_endpoints.api_key | indent( width=18, indentfirst=True) }}
+          port:
+            api:
+              admin: 9876
+              default: 80
+              internal: 9876
+              public: 443
+          scheme:
+            default: http
+            public: https
+{%- endif %}
+{%- endif %}

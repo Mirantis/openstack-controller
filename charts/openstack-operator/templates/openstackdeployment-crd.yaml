@@ -63,6 +63,7 @@ spec:
                 - queens # not supported, only for migration
                 - rocky # not supported, only for migration
                 - stein
+                - train
                 - master
             profile:
               description: profile to deploy
