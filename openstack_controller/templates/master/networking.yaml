@@ -5,6 +5,7 @@
 {%- set messaging = spec.get('features', {}).get('messaging', {}) %}
 {%- set stacklight_enabled = spec.get('features', {}).get('stacklight', {}).get('enabled', False) %}
 {%- set notification_topics = ['notifications'] %}
+{%- set service_plugins = ['router', 'metering'] %}
 {%- do notification_topics.append('stacklight_notifications') if stacklight_enabled %}
 
 spec:
@@ -286,6 +287,7 @@ spec:
             router_distributed: True
             {%- endif %}
             dnsmasq_local_resolv: true
+            service_plugins: {{ service_plugins|join(',') }}
           oslo_messaging_notifications:
             topics: {{ notification_topics|join(',') }}
         logging:
