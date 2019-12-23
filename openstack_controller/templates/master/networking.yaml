@@ -147,49 +147,29 @@ spec:
         agent:
           l3:
             node_affinity:
-              preferredDuringSchedulingIgnoredDuringExecution:
-              - weight: 2
-                preference:
-                  matchExpressions:
-                  - key: openstack-gateway
+              requiredDuringSchedulingIgnoredDuringExecution:
+                nodeSelectorTerms:
+                - matchExpressions:
+                  - key: openvswitch
                     operator: In
                     values:
                     - enabled
-              - weight: 2
-                preference:
-                  matchExpressions:
-                  - key: openstack-compute-node
-                    operator: In
-                    values:
-                    - enabled
-              - weight: 1
-                preference:
-                  matchExpressions:
-                  - key: openstack-control-plane
+                - matchExpressions:
+                  - key: linuxbridge
                     operator: In
                     values:
                     - enabled
           metadata:
             node_affinity:
-              preferredDuringSchedulingIgnoredDuringExecution:
-              - weight: 2
-                preference:
-                  matchExpressions:
-                  - key: openstack-gateway
+              requiredDuringSchedulingIgnoredDuringExecution:
+                nodeSelectorTerms:
+                - matchExpressions:
+                  - key: openvswitch
                     operator: In
                     values:
                     - enabled
-              - weight: 2
-                preference:
-                  matchExpressions:
-                  - key: openstack-compute-node
-                    operator: In
-                    values:
-                    - enabled
-              - weight: 1
-                preference:
-                  matchExpressions:
-                  - key: openstack-control-plane
+                - matchExpressions:
+                  - key: linuxbridge
                     operator: In
                     values:
                     - enabled
