@@ -1,7 +1,7 @@
 # GLOBAL_VARS
 export KUBECONFIG=${KUBECONFIG:-/root/kubernetes-admin.conf}
 export DATABASE_DIR=${DATABASE_DIR:-/var/lib/mysql_dump/}
-export COMPONENTS_TO_MIGRATE=${COMPONENTS_TO_MIGRATE:-keystone glance cinder heat neutron nova}
+export COMPONENTS_TO_MIGRATE=${COMPONENTS_TO_MIGRATE:-keystone glance cinder heat neutron nova octavia}
 export COMPONENTS_TO_MIGRATE_DB=${COMPONENTS_TO_MIGRATE_DB:-${COMPONENTS_TO_MIGRATE}}
 export KEY_REPOSITORY="/var/lib/keystone/credential-keys /var/lib/keystone/fernet-keys"
 export OPENSTACK_DEPLOYMENT_OBJECT_NAME=${OPENSTACK_DEPLOYMENT_OBJECT_NAME:-osh-dev}
