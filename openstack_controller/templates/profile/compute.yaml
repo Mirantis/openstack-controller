@@ -95,8 +95,7 @@ services:
               --network heat-net
             openstack router show heat-router || openstack router create heat-router
             subnet_id=$(openstack subnet show heat-subnet -f value -c id)
-            subnet_ids=$(openstack router show heat-router -f json -c interfaces_info | jq -r '.[] | fromjson |.[] |.subnet_id')
-            if [[ $subnet_ids =~ (^|[[:space:]])$subnet_id($|[[:space:]]) ]]; then
+            if openstack router show heat-router -f json -c interfaces_info |grep -qw ${subnet_id}; then
               echo "$subnet_id is in the list"
             else
               openstack router add subnet heat-router heat-subnet
