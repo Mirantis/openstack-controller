@@ -310,6 +310,11 @@ spec:
               {%- endif %}
             ovs:
               bridge_mappings: {{ ','.join(bridge_mappings) }}
+            securitygroup:
+              # iptables security groups may lead to conflicts with k8s iptables rules on host
+              # so use openvswitch securuty groups by default
+              # (https://mirantis.jira.com/browse/PRODX-2048)
+              firewall_driver: openvswitch
           linuxbridge_agent:
             linux_bridge:
               bridge_mappings: {{ ','.join(bridge_mappings) }}
