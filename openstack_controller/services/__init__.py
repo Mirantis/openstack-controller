@@ -309,16 +309,44 @@ class Nova(OpenStackService):
     service = "compute"
     ceph_required = True
     openstack_chart = "nova"
-    _service_accounts = ["placement"]
-    _required_accounts = {"networking": ["neutron"]}  # ironic
 
-    _child_objects = {
-        "nova": {
-            "Job": {
-                "nova-cell-setup": {
-                    "images": ["nova_cell_setup", "nova_cell_setup_init"],
-                    "manifest": "job_cell_setup",
-                },
+    @property
+    def _service_accounts(self):
+        s_accounts = []
+        if self.osdpl.obj["spec"]["openstack_version"] in [
+            "queens",
+            "rocky",
+            "stein",
+        ]:
+            s_accounts.append("placement")
+        return s_accounts
+
+    @property
+    def _required_accounts(self):
+        r_accounts = {"networking": ["neutron"]}  # ironic
+        if self.osdpl.obj["spec"]["openstack_version"] not in [
+            "queens",
+            "rocky",
+            "stein",
+        ]:
+            r_accounts["placement"] = ["placement"]
+        return r_accounts
+
+    @property
+    def _child_objects(self):
+        nova_jobs = {
+            "nova-cell-setup": {
+                "images": ["nova_cell_setup", "nova_cell_setup_init"],
+                "manifest": "job_cell_setup",
+            },
+        }
+        if self.osdpl.obj["spec"]["openstack_version"] in [
+            "queens",
+            "rocky",
+            "stein",
+        ]:
+            nova_jobs = {
+                **nova_jobs,
                 "placement-ks-user": {
                     "images": ["ks_user"],
                     "manifest": "job_ks_placement_user",
@@ -332,16 +360,17 @@ class Nova(OpenStackService):
                     "manifest": "job_ks_placement_endpoints",
                 },
             }
-        },
-        "rabbitmq": {
-            "Job": {
-                "openstack-nova-rabbitmq-cluster-wait": {
-                    "images": ["rabbitmq_scripted_test"],
-                    "manifest": "job_cluster_wait",
+        return {
+            "nova": {"Job": nova_jobs,},
+            "rabbitmq": {
+                "Job": {
+                    "openstack-nova-rabbitmq-cluster-wait": {
+                        "images": ["rabbitmq_scripted_test"],
+                        "manifest": "job_cluster_wait",
+                    }
                 }
-            }
-        },
-    }
+            },
+        }
 
     def template_args(self, spec):
         t_args = super().template_args(spec)
@@ -349,6 +378,24 @@ class Nova(OpenStackService):
             openstack.get_or_create_ssh_credentials("nova", self.namespace)
         )
         return t_args
+
+
+class Placement(OpenStackService):
+    service = "placement"
+    openstack_chart = "placement"
+
+    @property
+    def _child_generic_objects(self):
+        return {
+            "placement": {
+                "job_db_init",
+                "job_db_sync",
+                "job_db_drop",
+                "job_ks_endpoints",
+                "job_ks_service",
+                "job_ks_user",
+            }
+        }
 
 
 class Octavia(OpenStackService):

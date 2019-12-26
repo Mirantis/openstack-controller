@@ -84,6 +84,7 @@ CHART_GROUP_MAPPING = {
         "ceph-rgw",
         "designate",
         "barbican",
+        "placement",
         "tempest",
     ],
     "infra": [

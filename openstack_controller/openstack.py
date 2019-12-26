@@ -25,6 +25,7 @@ OS_SERVICES_MAP = {
     "dashboard": "horizon",
     "load-balancer": "octavia",
     "key-manager": "barbican",
+    "placement": "placement",
 }
 
 ADMIN_SECRET_NAME = "openstack-admin-users"

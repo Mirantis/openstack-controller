@@ -21,6 +21,9 @@ features:
     - orchestration
     - messaging
     - load-balancer
+{%- if openstack_version not in ['queens', 'rocky', 'stein'] %}
+    - placement
+{%- endif %}
   glance:
     backend: ceph
   cinder:

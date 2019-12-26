@@ -158,6 +158,17 @@ spec:
         job_rabbit_init: false
 {%- if spec.openstack_version not in ['queens', 'rocky', 'stein'] %}
         deployment_consoleauth: false
+# Since train placemnt is deployed as separate service
+        deployment_placement: false
+        ingress_placement: false
+        job_db_init_placement: false
+        job_ks_placement_endpoints: false
+        job_ks_placement_service: false
+        job_ks_placement_user: false
+        pdb_placement: false
+        secret_keystone_placement: false
+        service_ingress_placement: false
+        service_placement: false
 {%- endif %}
 {%- if spec.get('features', {}).get('ssl', {}).get('public_endpoints', {}).get('enabled', True) %}
         secret_ca_bundle: true

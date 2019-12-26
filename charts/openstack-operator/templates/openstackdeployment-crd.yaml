@@ -193,6 +193,7 @@ spec:
                       - load-balancer
                       - dns
                       - key-manager
+                      - placement
                 nova:
                   type: object
                   required:

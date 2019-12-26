@@ -1,0 +1,95 @@
+#apiVersion: lcm.mirantis.com/v1alpha1
+#kind: HelmBundle
+
+{%- set service = 'placement' %}
+spec:
+  releases:
+{%- if spec.get('migration', {}).get('placement', {}).get('deploy_main_service', True) %}
+  - name: openstack-placement
+    chart: {{spec.common.openstack.repo}}/placement
+    values:
+      images:
+        tags:
+{%- for image in [
+    "placement",
+    "ks_user",
+    "ks_service",
+    "ks_endpoints",
+    "db_init",
+    "db_drop",
+    "placement_db_sync",
+    "dep_check",
+    "image_repo_sync", ] %}
+        {%- if image in images %}
+          {{ image }}: {{ images[image] }}
+        {%- endif %}
+{%- endfor %}
+      dependencies:
+        static:
+          db_init:
+            jobs:
+              - openstack-mariadb-cluster-wait
+      pod:
+        replicas:
+          api: 1
+      conf:
+        placement:
+          keystone_authtoken:
+            memcache_security_strategy: ENCRYPT
+            memcache_secret_key: {{ credentials.memcached }}
+        logging:
+          logger_placement:
+            level: {{ spec.get('features', {}).get('logging', {}).get('placement', {}).get('level', 'INFO') }}
+      manifests:
+        network_policy: false
+{%- if spec.get('features', {}).get('ssl', {}).get('public_endpoints', {}).get('enabled', True) %}
+        secret_ca_bundle: true
+{%- endif %}
+      endpoints:
+        cluster_domain_suffix: {{ spec.internal_domain_name }}
+{% include 'base/_admin_identity.yaml' %}
+        oslo_db:
+          auth:
+            admin:
+              username: {{ admin_creds.database.username }}
+              password: {{ admin_creds.database.password }}
+            placement:
+              username: {{ credentials.database.user.username }}
+              password: {{ credentials.database.user.password }}
+{%- if spec.get('features', {}).get('ssl', {}).get('public_endpoints', {}).get('enabled', True) %}
+        placement:
+          host_fqdn_override:
+            public:
+              host: placement.{{ spec.public_domain_name }}
+              tls:
+                ca: |
+{{ spec.features.ssl.public_endpoints.ca_cert | indent( width=18, indentfirst=True) }}
+                crt: |
+{{ spec.features.ssl.public_endpoints.api_cert | indent( width=18, indentfirst=True) }}
+                key: |
+{{ spec.features.ssl.public_endpoints.api_key | indent( width=18, indentfirst=True) }}
+          hosts:
+            admin:
+              host: placement-api
+            default: placement
+            internal: placement-api
+            public:
+              host: placement
+              tls:
+                ca: |
+{{ spec.features.ssl.public_endpoints.ca_cert | indent( width=18, indentfirst=True) }}
+                crt: |
+{{ spec.features.ssl.public_endpoints.api_cert | indent( width=18, indentfirst=True) }}
+                key: |
+{{ spec.features.ssl.public_endpoints.api_key | indent( width=18, indentfirst=True) }}
+          port:
+            api:
+              admin: 8778
+              default: 80
+              internal: 8778
+              public: 443
+          scheme:
+            default: http
+            public: https
+{%- endif %}
+{%- endif %}
