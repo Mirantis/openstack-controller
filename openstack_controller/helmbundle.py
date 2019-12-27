@@ -9,7 +9,7 @@ from . import kube
 LOG = utils.get_logger(__name__)
 
 
-async def update_status(owner, name, namespace, status):
+def update_status(owner, name, namespace, status):
     try:
         osdpl = kube.find_osdpl(owner, namespace=namespace)
     except pykube.ObjectDoesNotExist:
@@ -59,4 +59,4 @@ async def helmbundle_status(body, meta, name, namespace, status, **kwargs):
             f"for {body['kind']} {namespace}/{name}! Ignoring."
         )
         return
-    await update_status(owners[0], name, namespace, status)
+    update_status(owners[0], name, namespace, status)

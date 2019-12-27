@@ -107,9 +107,18 @@ class Service:
         cls.registry[cls.service] = cls
 
     def __init__(self, body, logger):
+        # TODO(e0ne): we need to omit this object usage in the future to
+        # not face side-effects with mutable PyKube OSDPL object.
+        # We have to use self._get_osdpl() method instead of it.
         self.osdpl = kube.OpenStackDeployment(kube.api, body)
-        self.namespace = self.osdpl.namespace
+        self.body = body
+        self.namespace = body["metadata"]["namespace"]
         self.logger = logger
+
+    def _get_osdpl(self):
+        osdpl = kube.OpenStackDeployment(kube.api, self.body)
+        osdpl.reload()
+        return osdpl
 
     @property
     def resource_name(self):
@@ -118,11 +127,13 @@ class Service:
     @property
     def resource_def(self):
         """Minimal representation of the resource"""
-        fingerprint = layers.spec_hash(self.osdpl.obj)
+        fingerprint = layers.spec_hash(self.body["spec"])
         annotations = {
             f"{self.group}/openstack-controller-fingerprint": json.dumps(
                 {
-                    "osdpl_generation": self.osdpl.metadata["generation"],
+                    "osdpl_generation": self._get_osdpl().metadata[
+                        "generation"
+                    ],
                     "version": version.release_string,
                     "fingerprint": fingerprint,
                 }
@@ -191,15 +202,9 @@ class Service:
     def update_status(self, patch):
         self.osdpl.patch({"status": patch})
 
-    async def cleanup_immutable_resources(self):
-        old_data = self.resource_def
-        kopf.adopt(old_data, self.osdpl.obj)
-        old_obj = kube.resource(old_data)
-        old_obj.reload()
-
-        new_data = self.render()
-        kopf.adopt(new_data, self.osdpl.obj)
-        new_obj = kube.resource(new_data)
+    async def cleanup_immutable_resources(self, old_obj, rendered_spec):
+        new_obj = kube.resource(rendered_spec)
+        new_obj.reload()
 
         to_cleanup = []
 
@@ -256,7 +261,7 @@ class Service:
 
     async def apply(self, event, **kwargs):
         # ensure child ref exists in the status
-        if self.resource_name not in self.osdpl.obj.get("status", {}).get(
+        if self.resource_name not in self.body.get("status", {}).get(
             "children", {}
         ):
             status_patch = {"children": {self.resource_name: "Unknown"}}
@@ -265,24 +270,35 @@ class Service:
             self.ensure_ceph_secrets()
         LOG.info(f"Applying config for {self.service}")
         data = self.render()
+
+        # NOTE(pas-ha) this sets the parent refs in child
+        # to point to our resource so that cascading delete
+        # is handled by K8s itself
         kopf.adopt(data, self.osdpl.obj)
-        obj = kube.resource(data)
+        helmbundle_obj = kube.resource(data)
+
         # apply state of the object
-        if obj.exists():
+        if helmbundle_obj.exists():
             # Drop immutable resources (jobs) before changing theirs values.
-            await self.cleanup_immutable_resources()
+            await self.cleanup_immutable_resources(helmbundle_obj, data)
             # TODO(pas-ha) delete jobs if image was changed
-            obj.reload()
-            obj.set_obj(data)
-            obj.update()
-            LOG.debug(f"{obj.kind} child is updated: %s", obj.obj)
+            helmbundle_obj.reload()
+            helmbundle_obj.set_obj(data)
+            helmbundle_obj.update()
+            LOG.debug(
+                f"{helmbundle_obj.kind} child is updated: %s",
+                helmbundle_obj.obj,
+            )
         else:
-            obj.create()
-            LOG.debug(f"{obj.kind} child is created: %s", obj.obj)
+            helmbundle_obj.create()
+            LOG.debug(
+                f"{helmbundle_obj.kind} child is created: %s",
+                helmbundle_obj.obj,
+            )
         kopf.info(
             self.osdpl.obj,
             reason=event.capitalize(),
-            message=f"{event}d {obj.kind} for {self.service}",
+            message=f"{event}d {helmbundle_obj.kind} for {self.service}",
         )
 
     def ensure_ceph_secrets(self):
@@ -428,23 +444,20 @@ class Service:
 
     @layers.kopf_exception
     def render(self, openstack_version=""):
-        spec = layers.merge_spec(self.osdpl.obj["spec"], self.logger)
+        spec = layers.merge_spec(self.body["spec"], self.logger)
         if openstack_version:
             spec["openstack_version"] = openstack_version
         template_args = self.template_args(spec)
         data = layers.merge_all_layers(
             self.service,
-            self.osdpl.obj,
-            self.osdpl.metadata,
+            self.body,
+            self.body["metadata"],
             spec,
             self.logger,
             **template_args,
         )
         data.update(self.resource_def)
-        # NOTE(pas-ha) this sets the parent refs in child
-        # to point to our resource so that cascading delete
-        # is handled by K8s itself
-        kopf.adopt(data, self.osdpl.obj)
+
         return data
 
     def get_image(self, name, chart, openstack_version=None):

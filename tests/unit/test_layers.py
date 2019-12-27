@@ -241,17 +241,13 @@ def test_spec_hash():
         }
     },
   "fools": [1,2]
- },
-"status": {"ham": "spam"},
-"metadata": {"eggs": "parrors"}
+ }
 }
  """
     # change order of keys in spec, change order of keys overall,
     # change values in keys other that spec
     # spec_hash should be the same
     obj2 = """{
-"status": {"ham": "parrors"},
-"metadata": {"eggs": "spam"},
 "spec": {
   "fools": [1,2],
   "foo": {

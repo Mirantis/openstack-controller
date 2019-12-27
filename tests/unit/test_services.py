@@ -1,12 +1,18 @@
 import copy
 import logging
+from unittest import mock
 
 from openstack_controller import services
 
 
+@mock.patch.object(services.base.Service, "_get_osdpl")
 def test_service_keystone_render(
-    openstackdeployment, kubeapi, credentials, service_credentials
+    mock_osdpl, openstackdeployment, kubeapi, credentials, service_credentials
 ):
+    class MockOsdpl:
+        metadata = {"generation": 123}
+
+    mock_osdpl.return_value = MockOsdpl()
     openstackdeployment_old = copy.deepcopy(openstackdeployment)
     service = services.Keystone(openstackdeployment, logging)
     compute_helmbundle = service.render()

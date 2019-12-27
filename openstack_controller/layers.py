@@ -128,7 +128,7 @@ def kopf_exception(f):
     return wrapper
 
 
-def spec_hash(body):
+def spec_hash(spec):
     """Generate stable hash of body.spec structure
 
     as these are objects received from k8s API it is presumed
@@ -136,7 +136,7 @@ def spec_hash(body):
     for additional conversions
     """
     hasher = hashlib.sha256()
-    hasher.update(json.dumps(body["spec"], sort_keys=True).encode())
+    hasher.update(json.dumps(spec, sort_keys=True).encode())
     return hasher.hexdigest()
 
 

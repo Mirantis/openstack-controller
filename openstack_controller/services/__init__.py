@@ -400,13 +400,13 @@ class Tempest(Service):
         helmbundles_body = {}
         for s in set(spec["features"]["services"]) - {"tempest"}:
             template_args = Service.registry[s](
-                self.osdpl.obj, self.logger
+                self.body, self.logger
             ).template_args(spec)
             try:
                 helmbundles_body[s] = layers.merge_all_layers(
                     s,
-                    self.osdpl.obj,
-                    self.osdpl.metadata,
+                    self.body,
+                    self.body["metadata"],
                     spec,
                     self.logger,
                     **template_args,
