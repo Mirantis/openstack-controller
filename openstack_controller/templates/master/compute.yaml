@@ -156,6 +156,9 @@ spec:
       manifests:
         network_policy: false
         job_rabbit_init: false
+{%- if spec.openstack_version not in ['queens', 'rocky', 'stein'] %}
+        deployment_consoleauth: false
+{%- endif %}
 {%- if spec.get('features', {}).get('ssl', {}).get('public_endpoints', {}).get('enabled', True) %}
         secret_ca_bundle: true
 {%- endif %}
