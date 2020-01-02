@@ -304,6 +304,9 @@ spec:
               {%- endif %}
           openvswitch_agent:
             agent:
+              # NOTE(vsaienko): change default 4789 port to do not conflict with docker swarm
+              # overlay networks.
+              vxlan_udp_port: 4790
               tunnel_types: vxlan
               {%- if spec.get('features', {}).get('neutron', {}).get('dvr', {}).get('enabled', False) %}
               enable_distributed_routing: True
