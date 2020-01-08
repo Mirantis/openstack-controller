@@ -9,9 +9,23 @@ import pytest
 from openstack_controller import layers
 
 
-def test_no_changes_for_empty_services():
-    ta, td = layers.services({}, mock.Mock())
-    assert not ta
+def test_apply_list_empty_stein(osdpl_min_stein):
+    compute_services = {
+        "block-storage",
+        "compute",
+        "identity",
+        "dashboard",
+        "image",
+        "ingress",
+        "database",
+        "memcached",
+        "networking",
+        "orchestration",
+        "messaging",
+        "load-balancer",
+    }
+    ta, td = layers.services(osdpl_min_stein["spec"], mock.Mock())
+    assert ta == compute_services
     assert not td
 
 
@@ -19,26 +33,6 @@ def test_apply_list_not_empty(openstackdeployment):
     ta, td = layers.services(openstackdeployment["spec"], mock.Mock())
     assert "compute" in ta
     assert not td
-
-
-def test_delete_list_not_empty():
-    diff = [
-        ("add", ("metadata", "labels", "label1"), None, "new-value"),
-        ("change", ("metadata", "labels", "label2"), "old-value", "new-value"),
-        ("remove", ("metadata", "labels", "label3"), "old-value", None),
-        ("change", ("spec", "size"), "10G", "100G"),
-        (
-            "change",
-            ("spec", "features", "services"),
-            ("compute", "image"),
-            ("compute",),
-        ),
-    ]
-    # TODO(avolkov): check "remove" op has the same semantic
-    # regarding old/new values
-    ta, td = layers.services({}, logging, diff=diff)
-    assert not ta
-    assert "image" in td
 
 
 def test_fail_render_template_with_incorrect_release(openstackdeployment):

@@ -17,18 +17,6 @@ spec:
   # features that would enable coordinated changes to values of several charts
   features:
     services:
-     - block-storage
-     - compute
-     - identity
-     - dashboard
-     - image
-     - ingress
-     - database
-     - memcached
-     - networking
-     - orchestration
-     - messaging
-     - load-balancer
      - dns
      - key-manager
     barbican:

@@ -11,6 +11,21 @@ def openstackdeployment():
     yield yaml.safe_load(open("tests/fixtures/openstackdeployment.yaml"))
 
 
+def _osdpl_minimal(os_release):
+    return {
+        "spec": {
+            "openstack_version": os_release,
+            "size": "tiny",
+            "profile": "compute",
+        }
+    }
+
+
+@pytest.fixture
+def osdpl_min_stein():
+    return _osdpl_minimal("stein")
+
+
 @pytest.fixture
 def compute_helmbundle():
     yield yaml.safe_load(open("tests/fixtures/compute_helmbundle.yaml"))

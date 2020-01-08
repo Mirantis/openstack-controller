@@ -122,7 +122,6 @@ spec:
             features:
               type: object
               required:
-                - services
                 - ssl
                 - neutron
                 - nova

@@ -1,4 +1,5 @@
 import base64
+import copy
 import json
 import functools
 import hashlib
@@ -141,7 +142,12 @@ def spec_hash(spec):
 
 
 def services(spec, logger, **kwargs):
-    to_apply = set(spec.get("features", {}).get("services", []))
+    spec_cp = dict(copy.deepcopy(spec))
+    base = merge_spec(spec_cp, logger)
+
+    to_apply = set(base["features"]["services"])
+    LOG.debug(f"Working with openstack services: {to_apply}")
+
     to_delete = {}
     # NOTE(pas-ha) each diff is (op, (path, parts, ...), old, new)
     # kopf ignores changes to status except its own internal fields
@@ -228,10 +234,15 @@ def merge_spec(spec, logger):
     """Merge user-defined OsDpl spec with base for profile and OS version"""
     profile = spec["profile"]
     size = spec["size"]
+    os_release = spec["openstack_version"]
     LOG.debug(f"Using profile {profile}")
     LOG.debug(f"Using size {size}")
 
-    base = yaml.safe_load(ENV.get_template(f"profile/{profile}.yaml").render())
+    base = yaml.safe_load(
+        ENV.get_template(f"profile/{profile}.yaml").render(
+            openstack_version=os_release
+        )
+    )
     profile_charts_base_url = base["artifacts"]["charts_base_url"]
     charts_base_url = spec.get("artifacts", {}).get(
         "charts_base_url", profile_charts_base_url

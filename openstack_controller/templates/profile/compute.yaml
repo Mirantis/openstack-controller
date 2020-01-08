@@ -8,6 +8,19 @@ common:
       namespace: openstack
 
 features:
+  services:
+    - block-storage
+    - compute
+    - identity
+    - dashboard
+    - image
+    - ingress
+    - database
+    - memcached
+    - networking
+    - orchestration
+    - messaging
+    - load-balancer
   glance:
     backend: ceph
   cinder:
