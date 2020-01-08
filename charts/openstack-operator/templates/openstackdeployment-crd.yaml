@@ -36,6 +36,9 @@ spec:
     - name: Deployed
       type: boolean
       JSONPath: .status.deployed
+    - name: Draft
+      type: boolean
+      JSONPath: .spec.draft
   validation:
     openAPIV3Schema:
       properties:
@@ -47,6 +50,9 @@ spec:
           type: object
         spec:
           properties:
+            draft:
+              type: boolean
+              description: trigger to process osdpl resource
             artifacts:
               type: object
               properties:
@@ -359,6 +365,7 @@ spec:
             services:
               type: object
           required:
+            - draft
             - openstack_version
             - profile
             - size

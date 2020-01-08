@@ -6,6 +6,7 @@ metadata:
   labels: {}
   annotations: {}
 spec:
+  draft: false
   openstack_version: master
   profile: compute
   size: tiny

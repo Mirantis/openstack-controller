@@ -26,6 +26,10 @@ async def apply(body, meta, spec, logger, event, **kwargs):
     event = kwargs["cause"].event
     namespace = meta["namespace"]
     LOG.info(f"Got osdpl event {event}")
+    if spec["draft"]:
+        LOG.info("OpenStack deployment is in draft mode, skipping handling...")
+        return
+
     # TODO(e0ne): change create_admin_credentials once kube.save_secret_data
     # won't update secrets
     openstack.get_or_create_admin_credentials(namespace)
