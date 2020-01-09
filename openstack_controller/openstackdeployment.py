@@ -28,7 +28,7 @@ async def apply(body, meta, spec, logger, event, **kwargs):
     LOG.info(f"Got osdpl event {event}")
     if spec["draft"]:
         LOG.info("OpenStack deployment is in draft mode, skipping handling...")
-        return
+        return {"lastStatus": f"{event} drafted"}
 
     # TODO(e0ne): change create_admin_credentials once kube.save_secret_data
     # won't update secrets
