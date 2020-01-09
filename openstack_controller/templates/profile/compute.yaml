@@ -141,6 +141,8 @@ services:
           script: |
             tempest run --config-file /etc/tempest/tempest.conf -w 4 --smoke --blacklist-file  /etc/tempest/test-blacklist
           tempest:
+            identity:
+              ca_certificates_file: /certs/ca-bundle.pem
             #TODO(mshalamov): Will be removed during process of completing PRODX-1192
             compute:
               min_compute_nodes: 3
