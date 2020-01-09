@@ -1,0 +1,4 @@
+---
+features:
+  - |
+    Added Openstack Placement as separate service deployed by separate chart.
