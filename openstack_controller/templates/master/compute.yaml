@@ -325,6 +325,9 @@ spec:
           keystone_authtoken:
             memcache_security_strategy: ENCRYPT
             memcache_secret_key: {{ credentials.memcached }}
+          ironic:
+            memcache_security_strategy: ENCRYPT
+            memcache_secret_key: {{ credentials.memcached }}
           cinder:
             catalog_info: volumev3::internalURL
           libvirt:
