@@ -22,8 +22,18 @@ def _osdpl_minimal(os_release):
 
 
 @pytest.fixture
+def osdpl_min_train():
+    return _osdpl_minimal("train")
+
+
+@pytest.fixture
 def osdpl_min_stein():
     return _osdpl_minimal("stein")
+
+
+@pytest.fixture
+def osdpl_min_rocky():
+    return _osdpl_minimal("rocky")
 
 
 @pytest.fixture

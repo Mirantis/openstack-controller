@@ -66,6 +66,8 @@ nova_spiceproxy_assets: '{{ images_base_url }}/openstack/nova:stein-bionic-20200
 nova_placement: '{{ images_base_url }}/openstack/nova:stein-bionic-20200111180020'
 nova_scheduler: '{{ images_base_url }}/openstack/nova:stein-bionic-20200111180020'
 nova_service_cleaner: '{{ images_base_url }}/openstack/extra/ceph-config-helper:nautilus-bionic-20191203060056'
+placement: '{{ images_base_url }}/openstack/placement:stein-bionic-20200114060118'
+placement_db_sync: '{{ images_base_url }}/openstack/placement:stein-bionic-20200114060118'
 libvirt: '{{ images_base_url }}/general/libvirt:4.0.0-bionic-20200110114813'
 octavia_api: '{{ images_base_url }}/openstack/octavia:stein-bionic-20200111180020'
 octavia_db_sync: '{{ images_base_url }}/openstack/octavia:stein-bionic-20200111180020'

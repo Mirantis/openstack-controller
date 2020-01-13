@@ -13,6 +13,7 @@ def test_apply_list_empty_stein(osdpl_min_stein):
     compute_services = {
         "block-storage",
         "compute",
+        "placement",
         "identity",
         "dashboard",
         "image",
@@ -25,6 +26,47 @@ def test_apply_list_empty_stein(osdpl_min_stein):
         "load-balancer",
     }
     ta, td = layers.services(osdpl_min_stein["spec"], mock.Mock())
+    assert ta == compute_services
+    assert not td
+
+
+def test_apply_list_empty_train(osdpl_min_train):
+    compute_services = {
+        "block-storage",
+        "compute",
+        "placement",
+        "identity",
+        "dashboard",
+        "image",
+        "ingress",
+        "database",
+        "memcached",
+        "networking",
+        "orchestration",
+        "messaging",
+        "load-balancer",
+    }
+    ta, td = layers.services(osdpl_min_train["spec"], mock.Mock())
+    assert ta == compute_services
+    assert not td
+
+
+def test_apply_list_empty_rocky(osdpl_min_rocky):
+    compute_services = {
+        "block-storage",
+        "compute",
+        "identity",
+        "dashboard",
+        "image",
+        "ingress",
+        "database",
+        "memcached",
+        "networking",
+        "orchestration",
+        "messaging",
+        "load-balancer",
+    }
+    ta, td = layers.services(osdpl_min_rocky["spec"], mock.Mock())
     assert ta == compute_services
     assert not td
 

@@ -156,9 +156,9 @@ spec:
       manifests:
         network_policy: false
         job_rabbit_init: false
-{%- if spec.openstack_version not in ['queens', 'rocky', 'stein'] %}
+{%- if spec.openstack_version not in ['queens', 'rocky'] %}
         deployment_consoleauth: false
-# Since train placemnt is deployed as separate service
+# Since Rocky placemnt is deployed as separate service
         deployment_placement: false
         ingress_placement: false
         job_db_init_placement: false

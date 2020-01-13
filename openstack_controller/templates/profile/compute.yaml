@@ -21,7 +21,7 @@ features:
     - orchestration
     - messaging
     - load-balancer
-{%- if openstack_version not in ['queens', 'rocky', 'stein'] %}
+{%- if openstack_version not in ['queens', 'rocky'] %}
     - placement
 {%- endif %}
   glance:

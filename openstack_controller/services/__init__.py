@@ -316,7 +316,6 @@ class Nova(OpenStackService):
         if self.osdpl.obj["spec"]["openstack_version"] in [
             "queens",
             "rocky",
-            "stein",
         ]:
             s_accounts.append("placement")
         return s_accounts
@@ -327,7 +326,6 @@ class Nova(OpenStackService):
         if self.osdpl.obj["spec"]["openstack_version"] not in [
             "queens",
             "rocky",
-            "stein",
         ]:
             r_accounts["placement"] = ["placement"]
         return r_accounts
@@ -343,7 +341,6 @@ class Nova(OpenStackService):
         if self.osdpl.obj["spec"]["openstack_version"] in [
             "queens",
             "rocky",
-            "stein",
         ]:
             nova_jobs = {
                 **nova_jobs,
