@@ -132,6 +132,18 @@ class Designate(OpenStackService):
     backend_service = "powerdns"
     openstack_chart = "designate"
     _child_objects = {
+        "designate": {
+            "Job": {
+                "designate-powerdns-db-init": {
+                    "images": ["db_init"],
+                    "manifest": "job_powerdns_db_init",
+                },
+                "designate-powerdns-db-sync": {
+                    "images": ["powerdns_db_sync"],
+                    "manifest": "job_powerdns_db_sync",
+                },
+            },
+        },
         "rabbitmq": {
             "Job": {
                 "openstack-designate-rabbitmq-cluster-wait": {
@@ -139,7 +151,7 @@ class Designate(OpenStackService):
                     "manifest": "job_cluster_wait",
                 }
             }
-        }
+        },
     }
 
     def template_args(self, spec):

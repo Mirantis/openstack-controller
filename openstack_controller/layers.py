@@ -93,7 +93,6 @@ CHART_GROUP_MAPPING = {
         "memcached",
         "openvswitch",
         "libvirt",
-        "powerdns",
         "ingress",
     ],
 }
