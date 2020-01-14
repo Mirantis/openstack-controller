@@ -1,11 +1,15 @@
 from dataclasses import asdict
 
 import kopf
+from mcp_k8s_lib import utils
 
 from openstack_controller import layers
 from openstack_controller import openstack
 from openstack_controller import secrets
 from .base import Service, OpenStackService
+
+
+LOG = utils.get_logger(__name__)
 
 # INFRA SERVICES
 
@@ -13,9 +17,18 @@ from .base import Service, OpenStackService
 class Ingress(Service):
     service = "ingress"
 
+    @property
+    def health_groups(self):
+        return ["ingress"]
+
 
 class MariaDB(Service):
     service = "database"
+
+    @property
+    def health_groups(self):
+        return ["mysql"]
+
     _child_objects = {
         "mariadb": {
             "Job": {
@@ -43,9 +56,18 @@ class MariaDB(Service):
 class Memcached(Service):
     service = "memcached"
 
+    @property
+    def health_groups(self):
+        return ["memcached"]
+
 
 class RabbitMQ(Service):
     service = "messaging"
+
+    @property
+    def health_groups(self):
+        return ["rabbitmq"]
+
     _child_objects = {
         "rabbitmq": {
             "Job": {
@@ -98,7 +120,6 @@ class Cinder(OpenStackService):
     ceph_required = True
     service = "block-storage"
     openstack_chart = "cinder"
-
     _child_objects = {
         "cinder": {
             "Job": {
@@ -262,6 +283,18 @@ class Keystone(OpenStackService):
                     "images": ["keystone_credential_setup"],
                     "manifest": "job_credential_cleanup",
                 },
+                "keystone-db-sync-expand": {
+                    "images": ["keystone_db_sync_expand"],
+                    "manifest": "job_db_sync_expand",
+                },
+                "keystone-db-sync-migrate": {
+                    "images": ["keystone_db_sync_migrate"],
+                    "manifest": "job_db_sync_migrate",
+                },
+                "keystone-db-sync-contract": {
+                    "images": ["keystone_db_sync_contract"],
+                    "manifest": "job_db_sync_contract",
+                },
             },
             "Deployment": {
                 "keystone-api": {
@@ -299,11 +332,30 @@ class Keystone(OpenStackService):
 
         return t_args
 
+    @layers.kopf_exception
+    async def _upgrade(self, event, **kwargs):
+        await self.wait_service_healthy()
+
+        LOG.info(f"Upgrading {self.service} started")
+        upgrade_map = [
+            ("Job", "keystone-db-sync-expand"),
+            ("Job", "keystone-db-sync-migrate"),
+            ("Deployment", "keystone-api"),
+            ("Job", "keystone-db-sync-contract"),
+        ]
+        for kind, obj_name in upgrade_map:
+            child_obj = self.get_child_object(kind, obj_name)
+            await child_obj.enable(self.openstack_version, True)
+
 
 class Neutron(OpenStackService):
     service = "networking"
     openstack_chart = "neutron"
     _required_accounts = {"compute": ["nova"], "dns": ["designate"]}
+
+    @property
+    def health_groups(self):
+        return [self.openstack_chart, "openvswitch"]
 
     _child_objects = {
         "rabbitmq": {
@@ -325,7 +377,7 @@ class Nova(OpenStackService):
     @property
     def _service_accounts(self):
         s_accounts = []
-        if self.osdpl.obj["spec"]["openstack_version"] in [
+        if self.openstack_version in [
             "queens",
             "rocky",
         ]:
@@ -335,7 +387,7 @@ class Nova(OpenStackService):
     @property
     def _required_accounts(self):
         r_accounts = {"networking": ["neutron"]}  # ironic
-        if self.osdpl.obj["spec"]["openstack_version"] not in [
+        if self.openstack_version not in [
             "queens",
             "rocky",
         ]:
@@ -350,7 +402,7 @@ class Nova(OpenStackService):
                 "manifest": "job_cell_setup",
             },
         }
-        if self.osdpl.obj["spec"]["openstack_version"] in [
+        if self.openstack_version in [
             "queens",
             "rocky",
         ]:

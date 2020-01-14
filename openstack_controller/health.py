@@ -1,3 +1,4 @@
+import asyncio
 from dataclasses import dataclass
 import logging
 
@@ -90,6 +91,46 @@ def report_to_osdpl(namespace, status_health_patch):
             f"Could not find unique OpenStackDeployment resource "
             f"in namespace {namespace}, skipping health report."
         )
+
+
+def is_application_ready(application, osdpl):
+    osdpl = kube.OpenStackDeployment(kube.api, osdpl.obj)
+
+    app_status = osdpl.obj.get("status", {}).get("health", {}).get(application)
+    if not app_status:
+        LOG.info(
+            f"Application: {application} is not present in .status.health."
+        )
+        return False
+    elif all([x["status"] == "Ready" for x in app_status.values()]):
+        LOG.info(f"All components for application: {application} are healty.")
+        return True
+
+    not_ready = [
+        component
+        for component, health in app_status.items()
+        if health["status"] != "Ready"
+    ]
+    LOG.info(
+        f"Some components for application: {application} not ready: {not_ready}"
+    )
+    return False
+
+
+async def _wait_application_ready(application, osdpl, delay=10):
+    i = 1
+    while not is_application_ready(application, osdpl):
+        LOG.info(f"Checking application {application} health, attempt: {i}")
+        i += 1
+        await asyncio.sleep(delay)
+
+
+async def wait_application_ready(application, osdpl, timeout=300, delay=10):
+    LOG.info(f"Waiting for application becomes ready for {timeout}s")
+    await asyncio.wait_for(
+        _wait_application_ready(application, osdpl, delay=delay),
+        timeout=timeout,
+    )
 
 
 # NOTE(pas-ha) it turns out Deployment is sensitive to annotation changes as

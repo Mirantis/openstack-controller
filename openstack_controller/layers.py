@@ -71,6 +71,21 @@ merger = CustomMerger(
 )
 
 
+OPENSTACK_SERVICES_UPGRADE_ORDER = [
+    "identity",
+    "placement",
+    "image",
+    "networking",
+    "compute",
+    "volume",
+    "load-balancer",
+    "dns",
+    "key-manager",
+    "orchestration",
+    "dashboard",
+]
+
+
 CHART_GROUP_MAPPING = {
     "openstack": [
         "cinder",

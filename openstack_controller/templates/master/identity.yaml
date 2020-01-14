@@ -30,6 +30,9 @@ spec:
     "bootstrap",
     "keystone_credential_setup",
     "keystone_db_sync",
+    "keystone_db_sync_expand",
+    "keystone_db_sync_migrate",
+    "keystone_db_sync_contract",
     "keystone_client",
     "rabbit_init",
     "test",] %}

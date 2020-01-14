@@ -20,6 +20,20 @@ def update_status(body, patch):
     osdpl.patch({"status": patch})
 
 
+def is_openstack_version_changed(diff):
+    for diff_item in diff:
+        if diff_item.field == ("spec", "openstack_version"):
+            return True
+
+
+def get_os_services_for_upgrade(enabled_services):
+    return [
+        service
+        for service in layers.OPENSTACK_SERVICES_UPGRADE_ORDER
+        if service in enabled_services
+    ]
+
+
 async def run_task(task_def):
     """ Run OpenStack controller tasks
 
@@ -116,6 +130,38 @@ async def apply(body, meta, spec, logger, event, **kwargs):
 
     update, delete = layers.services(spec, logger, **kwargs)
 
+    if is_openstack_version_changed(kwargs["diff"]):
+        services_to_upgrade = get_os_services_for_upgrade(update)
+        LOG.info(
+            f"Starting upgrade for the following services: {services_to_upgrade}"
+        )
+        for service in services_to_upgrade:
+            task_def = {}
+            service_instance = services.registry[service](body, logger)
+            task_def[
+                asyncio.create_task(
+                    service_instance.upgrade(
+                        event=event,
+                        body=body,
+                        meta=meta,
+                        spec=spec,
+                        logger=logger,
+                        **kwargs,
+                    )
+                )
+            ] = (
+                service_instance.upgrade,
+                event,
+                body,
+                meta,
+                spec,
+                logger,
+                kwargs,
+            )
+            await run_task(task_def)
+
+    # NOTE(vsaienko): explicitly call apply() here to make sure that newly deployed environment
+    # and environment after upgrade/update are identical.
     task_def = {}
     for service in update:
         service_instance = services.registry[service](body, logger)

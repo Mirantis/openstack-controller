@@ -62,7 +62,7 @@ class HelmBundleMixin:
         diff = {"images": {"tags": {}}, "manifests": {}}
         for image in self.helmbundle_ext.images:
             diff["images"]["tags"][image] = self.service.get_image(
-                image, self.chart, version
+                image, self.helmbundle_ext.chart, version
             )
         diff["manifests"][self.helmbundle_ext.manifest] = True
         i = 1
@@ -75,7 +75,9 @@ class HelmBundleMixin:
                 applied_images = []
                 for image in self.helmbundle_ext.images:
                     if self.image_applied(
-                        self.service.get_image(image, self.chart, version)
+                        self.service.get_image(
+                            image, self.helmbundle_ext.chart, version
+                        )
                     ):
                         applied_images.append(image)
                 if len(applied_images) > 0 and self.ready:
@@ -182,8 +184,8 @@ class Deployment(pykube.Deployment, HelmBundleMixin):
         return (
             self.obj["status"]["observedGeneration"]
             >= self.obj["metadata"]["generation"]
-            and self.obj["status"]["updatedReplicas"] == self.replicas
-            and self.obj["status"]["readyReplicas"] == self.replicas
+            and self.obj["status"].get("updatedReplicas") == self.replicas
+            and self.obj["status"].get("readyReplicas") == self.replicas
         )
 
 

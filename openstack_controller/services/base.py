@@ -1,23 +1,19 @@
 import asyncio
 import base64
 import json
-import logging
 from typing import List
 
 import kopf
 from mcp_k8s_lib import ceph_api
+from mcp_k8s_lib import utils
 import pykube
 
+from openstack_controller import health
 from openstack_controller import layers
 from openstack_controller import kube
 from openstack_controller import openstack
 from openstack_controller import secrets
 from openstack_controller import version
-
-
-LOG = logging.getLogger(__name__)
-
-from mcp_k8s_lib import utils
 
 
 LOG = utils.get_logger(__name__)
@@ -114,6 +110,7 @@ class Service:
         self.body = body
         self.namespace = body["metadata"]["namespace"]
         self.logger = logger
+        self.openstack_version = self.body["spec"]["openstack_version"]
 
     def _get_osdpl(self):
         osdpl = kube.OpenStackDeployment(kube.api, self.body)
@@ -301,6 +298,28 @@ class Service:
             message=f"{event}d {helmbundle_obj.kind} for {self.service}",
         )
 
+    async def wait_service_healthy(self):
+        for healt_group in self.health_groups:
+            LOG.info(f"Checking {healt_group} health.")
+            await health.wait_application_ready(healt_group, self.osdpl)
+
+    async def _upgrade(self, event, **kwargs):
+        pass
+
+    async def upgrade(self, event, **kwargs):
+        await self.wait_service_healthy()
+        LOG.info(f"Upgrading {self.service} started.")
+        await self._upgrade(event, **kwargs)
+
+        await self.apply(event, **kwargs)
+        # TODO(vsaienko): implement logic that will check that changes made in helmbundle
+        # object were handled by tiller/helmcontroller
+        # can be done only once https://mirantis.jira.com/browse/PRODX-2283 is implemented.
+        await asyncio.sleep(10)
+
+        await self.wait_service_healthy()
+        LOG.info(f"Upgrading {self.service} done")
+
     def ensure_ceph_secrets(self):
         self.osdpl.reload()
         if all(
@@ -460,15 +479,35 @@ class Service:
 
         return data
 
-    def get_image(self, name, chart, openstack_version=None):
+    def get_chart_value_or_none(
+        self, chart, path, openstack_version=None, default=None
+    ):
         data = self.render(openstack_version)
+        value = None
         for release in data["spec"]["releases"]:
             if release["chart"].endswith(f"/{chart}"):
-                return release["values"]["images"]["tags"][name]
+                value = release["values"]
+                try:
+                    for path_link in path:
+                        value = value[path_link]
+                except KeyError:
+                    return default
+        return value
+
+    def get_image(self, name, chart, openstack_version=None):
+        return self.get_chart_value_or_none(
+            chart,
+            ["images", "tags", name],
+            openstack_version=openstack_version,
+        )
 
 
 class OpenStackService(Service):
     openstack_chart = None
+
+    @property
+    def health_groups(self):
+        return [self.openstack_chart]
 
     @property
     def _child_generic_objects(self):
