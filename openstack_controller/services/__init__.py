@@ -456,7 +456,7 @@ class Tempest(Service):
                     **template_args,
                 )
             except Exception as e:
-                raise kopf.HandlerFatalError(
+                raise kopf.PermanentError(
                     f"Error while rendering HelmBundle for {self.service} "
                     f"service: {e}"
                 )

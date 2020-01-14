@@ -2,6 +2,7 @@ import asyncio
 
 import kopf
 
+from . import exception
 from . import kube
 from . import layers
 from . import openstack
@@ -17,6 +18,76 @@ LOG = utils.get_logger(__name__)
 def update_status(body, patch):
     osdpl = kube.OpenStackDeployment(kube.api, body)
     osdpl.patch({"status": patch})
+
+
+async def run_task(task_def):
+    """ Run OpenStack controller tasks
+
+    Runs tasks passed as `task_def` with implementing the following logic:
+
+    * In case of permanent error retry all the tasks that finished with
+      TemporaryError and fail permanently.
+
+    * In case of unknown error retry all the tasks that finished with
+      TemporaryError and raise TaskException. In this case kpof will
+      retry whole handler by default.
+
+    :param task_def: Dictionary with the task definitision.
+    :raises: kopf.PermanentError when permanent error occured.
+    :raises: TaskException when unknown exception occured.
+    """
+
+    permanent_exception = None
+    unknown_exception = None
+
+    while task_def:
+        # NOTE(e0ne): we can switch to asyncio.as_completed to run tasks
+        # faster if needed.
+        done, _ = await asyncio.wait(task_def.keys())
+        for task in done:
+            coro, event, body, meta, spec, logger, kwargs = task_def.pop(task)
+            if task.exception():
+                if isinstance(task.exception(), kopf.TemporaryError):
+                    LOG.warning(
+                        f"Got retriable exception when applying {coro}, retrying..."
+                    )
+                    task_def[
+                        asyncio.create_task(
+                            coro(
+                                event=event,
+                                body=body,
+                                meta=meta,
+                                spec=spec,
+                                logger=logger,
+                                **kwargs,
+                            )
+                        )
+                    ] = (coro, event, body, meta, spec, logger, kwargs)
+                    LOG.debug(task.print_stack())
+                elif isinstance(task.exception(), kopf.PermanentError):
+                    LOG.error(f"Failed to apply {coro} permanently.")
+                    LOG.error(task.print_stack())
+                    permanent_exception = kopf.PermanentError(
+                        "Permanent error occured."
+                    )
+                else:
+                    LOG.warning(
+                        f"Got unknown exception while applying {coro}."
+                    )
+                    LOG.warning(task.print_stack())
+                    unknown_exception = exception.TaskException(
+                        "Unknown error occured."
+                    )
+        # Let's wait for 10 second before retry to not introduce a lot of
+        # task scheduling in case of some depended task is slow.
+        await asyncio.sleep(10)
+
+    if permanent_exception:
+        raise permanent_exception
+    if unknown_exception:
+        # NOTE(vsaienko): raise unknown for kopf to keep default exception retry behaviour
+        # https://github.com/zalando-incubator/kopf/blob/351bf5/docs/errors.rst#regular-errors
+        raise unknown_exception
 
 
 @kopf.on.resume(*kube.OpenStackDeployment.kopf_on_args)
@@ -72,28 +143,8 @@ async def apply(body, meta, spec, logger, event, **kwargs):
                 )
             )
         ] = (service_instance.delete, event, body, meta, spec, logger, kwargs)
-    while task_def:
-        # NOTE(e0ne): we can switch to asyncio.as_completed to run tasks
-        # faster if needed.
-        done, _ = await asyncio.wait(task_def.keys())
-        for task in done:
-            coro, event, body, meta, spec, logger, kwargs = task_def.pop(task)
-            if isinstance(task.exception(), kopf.HandlerRetryError):
-                task_def[
-                    asyncio.create_task(
-                        coro(
-                            event=event,
-                            body=body,
-                            meta=meta,
-                            spec=spec,
-                            logger=logger,
-                            **kwargs,
-                        )
-                    )
-                ] = (coro, event, body, meta, spec, logger, kwargs)
-        # Let's wait for 10 second before retry to not introduce a lot of
-        # task scheduling in case of some depended task is slow.
-        await asyncio.sleep(10)
+
+    await run_task(task_def)
 
     return {"lastStatus": f"{event}d"}
 
