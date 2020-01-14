@@ -25,7 +25,7 @@ spec:
   public_domain_name: it.just.works
   artifacts:
     images_base_url: docker-dev-kaas-local.docker.mirantis.net
-    charts_base_url: https://artifactory.mcp.mirantis.net/binary-dev-kaas-local
+    binary_base_url: https://artifactory.mcp.mirantis.net/binary-dev-kaas-local
   features:
     barbican:
       backend:

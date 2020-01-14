@@ -59,9 +59,9 @@ spec:
                 images_base_url:
                   type: string
                   description: "base URL for docker images"
-                charts_base_url:
+                binary_base_url:
                   type: string
-                  description: "base URL for repo with helm charts."
+                  description: "base URL for repo with helm charts & other binaries"
             openstack_version:
               description: version of OpenStack to deploy
               type: string

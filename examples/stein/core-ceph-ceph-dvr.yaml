@@ -14,7 +14,7 @@ spec:
   public_domain_name: it.just.works
   artifacts:
     images_base_url: docker-dev-kaas-local.docker.mirantis.net
-    charts_base_url: https://artifactory.mcp.mirantis.net/binary-dev-kaas-local/openstack/helm
+    binary_base_url: https://artifactory.mcp.mirantis.net/binary-dev-kaas-local
   # features that would enable coordinated changes to values of several charts
   features:
     services:
@@ -102,12 +102,6 @@ spec:
               DEFAULT:
                 # to match Calico tunnel value within container operations
                 global_physnet_mtu: 1480
-    load-balancer:
-      octavia:
-        values:
-          octavia:
-            settings:
-              amphora_image_url: "http://images.mcp.mirantis.net/octavia/amphora-x64-haproxy-stein-testing.qcow2"
     orchestration:
       heat:
         values:

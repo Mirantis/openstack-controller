@@ -85,6 +85,7 @@ spec:
           lbmgmt_cidr: "192.168.0.0/19"
           lbmgmt_subnet_start: "192.168.0.100"
           lbmgmt_subnet_end: "192.168.31.254"
+          amphora_image_url: {{ images["octavia_amphora"] }}
       images:
         tags:
 {%- for image in [

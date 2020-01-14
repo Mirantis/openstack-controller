@@ -258,13 +258,13 @@ def merge_spec(spec, logger):
             openstack_version=os_release
         )
     )
-    profile_charts_base_url = base["artifacts"]["charts_base_url"]
-    charts_base_url = spec.get("artifacts", {}).get(
-        "charts_base_url", profile_charts_base_url
+    profile_binary_base_url = base["artifacts"]["binary_base_url"]
+    binary_base_url = spec.get("artifacts", {}).get(
+        "binary_base_url", profile_binary_base_url
     )
     artifacts = yaml.safe_load(
         ENV.get_template("artifacts.yaml").render(
-            charts_base_url=charts_base_url
+            binary_base_url=binary_base_url
         )
     )
     sizing = yaml.safe_load(ENV.get_template(f"size/{size}.yaml").render())

@@ -1,6 +1,6 @@
 artifacts:
   images_base_url: docker-kaas-local.artifactory.mirantis.com
-  charts_base_url: https://binary.mirantis.com/openstack/helm
+  binary_base_url: https://binary.mirantis.com
 
 common:
   charts:
