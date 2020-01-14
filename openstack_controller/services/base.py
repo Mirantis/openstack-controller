@@ -202,9 +202,9 @@ class Service:
     def update_status(self, patch):
         self.osdpl.patch({"status": patch})
 
-    async def cleanup_immutable_resources(self, old_obj, rendered_spec):
-        new_obj = kube.resource(rendered_spec)
-        new_obj.reload()
+    async def cleanup_immutable_resources(self, new_obj, rendered_spec):
+        old_obj = kube.resource(rendered_spec)
+        old_obj.reload()
 
         to_cleanup = []
 

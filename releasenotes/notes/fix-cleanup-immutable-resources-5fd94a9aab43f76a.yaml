@@ -1,0 +1,5 @@
+---
+fixes:
+  - |
+    Fixes an issue with KeyError in ``cleanup_immutable_resources`` when
+    updating helm charts that adds new jobs into OpenStack deployment.
