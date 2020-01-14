@@ -1,0 +1,5 @@
+---
+upgrade:
+  - |
+    Deployment of placement services is done as standalone helm release since
+    Stein.
