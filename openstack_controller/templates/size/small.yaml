@@ -200,3 +200,18 @@ services:
               load_balancer_expiry_age: 3600
             oslo_messaging_rabbit:
               rabbit_qos_prefetch_count: 64
+  dns:
+    designate:
+      values:
+        pod:
+          replicas:
+            api: 3
+            central: 3
+            mdns: 3
+            producer: 3
+            sink: 3
+            worker: 3
+        conf:
+          designate:
+            service:api:
+              workers: 2
