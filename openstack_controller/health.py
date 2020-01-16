@@ -48,6 +48,7 @@ def ident(meta):
     name = meta["name"]
     application = meta.get("labels", {}).get("application", name)
     component = meta.get("labels", {}).get("component", name)
+
     # single out prometheus-exported Deployments
     if application.startswith("prometheus") and component == "exporter":
         application = "prometheus-exporter"
@@ -67,11 +68,13 @@ def ident(meta):
         if service != "rabbitmq":
             application = service
             component = "rabbitmq"
-    # single out openvswitch DaemonSets
-    elif application == "openvswitch":
-        # example:
-        # name=openvswitch-db component=openvswitch-vswitchd-db
-        component = "-".join(component.split("-")[1:])
+    else:
+        # For other cases pick component name from resource name to allow multiple
+        # resources per same component/application.
+        # Remove redundant {applicaion}- part
+        short_component_name = name.split(f"{application}-", maxsplit=1)[-1]
+        if short_component_name:
+            component = short_component_name
 
     return application, component
 
@@ -93,8 +96,20 @@ def report_to_osdpl(namespace, status_health_patch):
         )
 
 
+def set_application_health(
+    application, component, namespace, health, observed_generation
+):
+    patch = {
+        application: {
+            component: {"status": health, "generation": observed_generation,}
+        }
+    }
+    report_to_osdpl(namespace, patch)
+
+
 def is_application_ready(application, osdpl):
     osdpl = kube.OpenStackDeployment(kube.api, osdpl.obj)
+    osdpl.reload()
 
     app_status = osdpl.obj.get("status", {}).get("health", {}).get(application)
     if not app_status:
@@ -102,7 +117,12 @@ def is_application_ready(application, osdpl):
             f"Application: {application} is not present in .status.health."
         )
         return False
-    elif all([x["status"] == "Ready" for x in app_status.values()]):
+    elif all(
+        [
+            component_health["status"] == OK
+            for component_health in app_status.values()
+        ]
+    ):
         LOG.info(f"All components for application: {application} are healty.")
         return True
 
@@ -171,15 +191,9 @@ async def deployments(name, namespace, meta, status, new, **kwargs):
         health = BAD
     elif progr_cond.reason == "ReplicaSetUpdated":
         health = PROGRESS
-    patch = {
-        application: {
-            component: {
-                "status": health,
-                "generation": status["observedGeneration"],
-            }
-        }
-    }
-    report_to_osdpl(namespace, patch)
+    set_application_health(
+        application, component, namespace, health, status["observedGeneration"]
+    )
 
 
 @kopf.on.field("apps", "v1", "statefulsets", field="status")
@@ -202,21 +216,16 @@ async def statefulsets(name, namespace, meta, status, **kwargs):
             health = OK
         else:
             health = BAD
-    patch = {
-        application: {
-            component: {
-                "status": health,
-                "generation": status["observedGeneration"],
-            }
-        }
-    }
-    report_to_osdpl(namespace, patch)
+    set_application_health(
+        application, component, namespace, health, status["observedGeneration"]
+    )
 
 
 @kopf.on.field("apps", "v1", "daemonsets", field="status")
 async def daemonsets(name, namespace, meta, status, **kwargs):
     LOG.debug(f"DaemonSet {name} status is {status}")
     application, component = ident(meta)
+
     st = DaemonSetStatus(**status)
     health = UNKNOWN
     if (
@@ -234,12 +243,35 @@ async def daemonsets(name, namespace, meta, status, **kwargs):
         health = PROGRESS
     elif st.numberReady < st.desiredNumberScheduled:
         health = BAD
-    patch = {
-        application: {
-            component: {
-                "status": health,
-                "generation": status["observedGeneration"],
-            }
-        }
-    }
+    set_application_health(
+        application, component, namespace, health, status["observedGeneration"]
+    )
+
+
+async def _delete(kind, meta):
+    LOG.info(f"Handling delete event for {kind}")
+    name = meta["name"]
+    namespace = meta["namespace"]
+    application, component = ident(meta)
+    patch = {application: {component: None}}
+    LOG.debug(f"Cleaning health for {kind} {name}")
     report_to_osdpl(namespace, patch)
+
+
+# NOTE(vsaienko): for unknown reason when using optional=True, which have to
+# prevent kopf from adding finalizer to the object, prevent kopf from handling
+# delete event. Add finalizers here should be ok as we do not expect deployment
+# changes on helmbundle level directly.
+@kopf.on.delete("apps", "v1", "daemonsets")
+async def delete_daemonset(name, meta, **kwargs):
+    await _delete("DaemonSet", meta)
+
+
+@kopf.on.delete("apps", "v1", "deployments")
+async def delete_deployment(name, meta, **kwargs):
+    await _delete("Deployment", meta)
+
+
+@kopf.on.delete("apps", "v1", "statefulsets")
+async def delete_statefulset(name, meta, **kwargs):
+    await _delete("StatefulSet", meta)
