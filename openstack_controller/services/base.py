@@ -13,6 +13,7 @@ from openstack_controller import layers
 from openstack_controller import kube
 from openstack_controller import openstack
 from openstack_controller import secrets
+from openstack_controller import settings
 from openstack_controller import version
 
 
@@ -315,7 +316,7 @@ class Service:
         # TODO(vsaienko): implement logic that will check that changes made in helmbundle
         # object were handled by tiller/helmcontroller
         # can be done only once https://mirantis.jira.com/browse/PRODX-2283 is implemented.
-        await asyncio.sleep(10)
+        await asyncio.sleep(settings.OSCTL_HELMBUNDLE_APPLY_DELAY)
 
         await self.wait_service_healthy()
         LOG.info(f"Upgrading {self.service} done")

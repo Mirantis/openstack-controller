@@ -4,6 +4,7 @@ import logging
 
 import kopf
 from . import kube
+from . import settings
 
 LOG = logging.getLogger(__name__)
 
@@ -137,7 +138,9 @@ def is_application_ready(application, osdpl):
     return False
 
 
-async def _wait_application_ready(application, osdpl, delay=10):
+async def _wait_application_ready(
+    application, osdpl, delay=settings.OSCTL_WAIT_APPLICATION_READY_DELAY
+):
     i = 1
     while not is_application_ready(application, osdpl):
         LOG.info(f"Checking application {application} health, attempt: {i}")
@@ -145,7 +148,12 @@ async def _wait_application_ready(application, osdpl, delay=10):
         await asyncio.sleep(delay)
 
 
-async def wait_application_ready(application, osdpl, timeout=300, delay=10):
+async def wait_application_ready(
+    application,
+    osdpl,
+    timeout=settings.OSCTL_WAIT_APPLICATION_READY_TIMEOUT,
+    delay=settings.OSCTL_WAIT_APPLICATION_READY_DELAY,
+):
     LOG.info(f"Waiting for application becomes ready for {timeout}s")
     await asyncio.wait_for(
         _wait_application_ready(application, osdpl, delay=delay),

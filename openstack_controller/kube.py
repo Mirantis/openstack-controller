@@ -4,11 +4,11 @@ from typing import List
 import functools
 
 import kopf
+from mcp_k8s_lib import utils
 import pykube
 from typing import Dict
 
-from mcp_k8s_lib import utils
-
+from . import settings
 
 LOG = utils.get_logger(__name__)
 
@@ -58,7 +58,12 @@ class HelmBundleMixin:
     def helmbundle_ext(self, helmbundle_ext: HelmBundleExt):
         self.__helmbundle_ext = helmbundle_ext
 
-    async def _enable(self, version, wait_completion=False, delay=10):
+    async def _enable(
+        self,
+        version,
+        wait_completion=False,
+        delay=settings.OSCTL_HELMBUNLE_MANIFEST_ENABLE_DELAY,
+    ):
         diff = {"images": {"tags": {}}, "manifests": {}}
         for image in self.helmbundle_ext.images:
             diff["images"]["tags"][image] = self.service.get_image(
@@ -92,7 +97,11 @@ class HelmBundleMixin:
             await asyncio.sleep(delay)
 
     async def enable(
-        self, version, wait_completion=False, timeout=300, delay=10
+        self,
+        version,
+        wait_completion=False,
+        timeout=settings.OSCTL_HELMBUNLE_MANIFEST_ENABLE_TIMEOUT,
+        delay=settings.OSCTL_HELMBUNLE_MANIFEST_ENABLE_DELAY,
     ):
         await asyncio.wait_for(
             self._enable(
@@ -101,7 +110,11 @@ class HelmBundleMixin:
             timeout=timeout,
         )
 
-    async def _disable(self, wait_completion=False, delay=10):
+    async def _disable(
+        self,
+        wait_completion=False,
+        delay=settings.OSCTL_HELMBUNLE_MANIFEST_DISABLE_DELAY,
+    ):
         diff = {"images": {"tags": {}}, "manifests": {}}
         diff["manifests"][self.helmbundle_ext.manifest] = False
         i = 1
@@ -118,7 +131,11 @@ class HelmBundleMixin:
             i += 1
 
     async def disable(
-        self, version, wait_completion=False, timeout=300, delay=10
+        self,
+        version,
+        wait_completion=False,
+        timeout=settings.OSCTL_HELMBUNLE_MANIFEST_DISABLE_TIMEOUT,
+        delay=settings.OSCTL_HELMBUNLE_MANIFEST_DISABLE_DELAY,
     ):
         await asyncio.wait_for(
             self._disable(
@@ -127,7 +144,11 @@ class HelmBundleMixin:
             timeout=timeout,
         )
 
-    async def _purge(self, timeout=300, delay=10):
+    async def _purge(
+        self,
+        timeout=settings.OSCTL_HELMBUNLE_MANIFEST_PURGE_TIMEOUT,
+        delay=settings.OSCTL_HELMBUNLE_MANIFEST_PURGE_DELAY,
+    ):
         i = 1
         while True:
             if not self.exists():
@@ -138,7 +159,11 @@ class HelmBundleMixin:
             i += 1
             await asyncio.sleep(delay)
 
-    async def purge(self, timeout=300, delay=10):
+    async def purge(
+        self,
+        timeout=settings.OSCTL_HELMBUNLE_MANIFEST_PURGE_TIMEOUT,
+        delay=settings.OSCTL_HELMBUNLE_MANIFEST_PURGE_DELAY,
+    ):
         await asyncio.wait_for(self._purge(delay=delay), timeout=timeout)
 
     def image_applied(self, value):
