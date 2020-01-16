@@ -126,7 +126,25 @@ apiVersion: zalando.org/v1
 kind: KopfPeering
 metadata:
   namespace: openstack
-  name: openstack-controller
+  name: openstack-controller.osdpl
+---
+apiVersion: zalando.org/v1
+kind: KopfPeering
+metadata:
+  namespace: openstack
+  name: openstack-controller.helmbundle
+---
+apiVersion: zalando.org/v1
+kind: KopfPeering
+metadata:
+  namespace: openstack
+  name: openstack-controller.secrets
+---
+apiVersion: zalando.org/v1
+kind: KopfPeering
+metadata:
+  namespace: openstack
+  name: openstack-controller.health
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -145,7 +163,7 @@ spec:
     spec:
       serviceAccountName: openstack-controller-account
       containers:
-      - name: osh-controller
+      - name: osdpl
         image: docker-kaas-local.artifactory.mirantis.com/openstack/openstack-controller:0.1.2
         imagePullPolicy: Always
         command:
@@ -154,13 +172,43 @@ spec:
           - '-n'
           - openstack
           - '-P'
-          - openstack-controller
+          - openstack-controller.osdpl
           - '-m'
           - openstack_controller.openstackdeployment
+      - name: helmbundle
+        image: docker-kaas-local.artifactory.mirantis.com/openstack/openstack-controller:0.1.2
+        imagePullPolicy: Always
+        command:
+          - kopf
+          - run
+          - '-n'
+          - openstack
+          - '-P'
+          - openstack-controller.helmbundle
           - '-m'
           - openstack_controller.helmbundle
+      - name: secrets
+        image: docker-kaas-local.artifactory.mirantis.com/openstack/openstack-controller:0.1.2
+        imagePullPolicy: Always
+        command:
+          - kopf
+          - run
+          - '-n'
+          - openstack
+          - '-P'
+          - openstack-controller.secrets
           - '-m'
           - openstack_controller.secrets
+      - name: health
+        image: docker-kaas-local.artifactory.mirantis.com/openstack/openstack-controller:0.1.2
+        imagePullPolicy: Always
+        command:
+          - kopf
+          - run
+          - '-n'
+          - openstack
+          - '-P'
+          - openstack-controller.health
           - '-m'
           - openstack_controller.health
 ...

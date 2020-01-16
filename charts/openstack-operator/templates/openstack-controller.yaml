@@ -126,7 +126,25 @@ apiVersion: zalando.org/v1
 kind: KopfPeering
 metadata:
   namespace: "{{ .Values.osdpl.namespace }}"
-  name: openstack-controller
+  name: openstack-controller.osdpl
+---
+apiVersion: zalando.org/v1
+kind: KopfPeering
+metadata:
+  namespace: "{{ .Values.osdpl.namespace }}"
+  name: openstack-controller.helmbundle
+---
+apiVersion: zalando.org/v1
+kind: KopfPeering
+metadata:
+  namespace: "{{ .Values.osdpl.namespace }}"
+  name: openstack-controller.secrets
+---
+apiVersion: zalando.org/v1
+kind: KopfPeering
+metadata:
+  namespace: "{{ .Values.osdpl.namespace }}"
+  name: openstack-controller.health
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -152,7 +170,7 @@ spec:
     spec:
       serviceAccountName: openstack-controller-account
       containers:
-        - name: {{ .Chart.Name }}
+        - name: osdpl
           image: {{ tuple . .Values.image | include "getImageUrl" }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           command:
@@ -161,13 +179,49 @@ spec:
             - '-n'
             - {{ .Values.osdpl.namespace }}
             - '-P'
-            - openstack-controller
+            - openstack-controller.osdpl
             - '-m'
             - openstack_controller.openstackdeployment
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+        - name: helmbundle
+          image: {{ tuple . .Values.image | include "getImageUrl" }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command:
+            - kopf
+            - run
+            - '-n'
+            - {{ .Values.osdpl.namespace }}
+            - '-P'
+            - openstack-controller.helmbundle
             - '-m'
             - openstack_controller.helmbundle
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+        - name: secrets
+          image: {{ tuple . .Values.image | include "getImageUrl" }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command:
+            - kopf
+            - run
+            - '-n'
+            - {{ .Values.osdpl.namespace }}
+            - '-P'
+            - openstack-controller.secrets
             - '-m'
             - openstack_controller.secrets
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+        - name: health
+          image: {{ tuple . .Values.image | include "getImageUrl" }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command:
+            - kopf
+            - run
+            - '-n'
+            - {{ .Values.osdpl.namespace }}
+            - '-P'
+            - openstack-controller.health
             - '-m'
             - openstack_controller.health
           resources:
