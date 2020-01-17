@@ -136,8 +136,6 @@ services:
               flavor_ref_alt: m1.tiny_test
           blacklist:
             - (?:tempest\.fake\.test)
-            # TODO(imenkov): Will be removed during process of completing PRODX-976
-            - (?:designate_tempest_plugin.tests.scenario.v2.test_recordsets.RecordsetsTest\.)
           script: |
             tempest run --config-file /etc/tempest/tempest.conf -w 4 --smoke --blacklist-file  /etc/tempest/test-blacklist
           tempest:
