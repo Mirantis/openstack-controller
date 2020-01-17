@@ -124,7 +124,7 @@ spec:
                   private: false
                   properties:
                     os_distro: cirros
-                  source_url: https://artifactory.mcp.mirantis.net/artifactory/test-images/
+                  source_url: https://binary.mirantis.com/openstack/bin/cirros/0.4.0/
                 fedora:
                   container_format: bare
                   image_file: Fedora-Cloud-Base-27-1.6.x86_64.qcow2
@@ -134,7 +134,7 @@ spec:
                   private: false
                   properties:
                     os_distro: fedora
-                  source_url: https://artifactory.mcp.mirantis.net/artifactory/test-images/
+                  source_url: https://binary.mirantis.com/openstack/bin/Fedora/27/
     load-balancer:
       octavia:
         values:

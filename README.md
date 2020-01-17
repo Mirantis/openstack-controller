@@ -75,7 +75,7 @@ spec:
 kubect -n openstack exec -it keystone-client-8987f9985-h7c2l -- bash
 
 
-wget https://artifactory.mcp.mirantis.net/artifactory/test-images/cirros-0.4.0-x86_64-disk.img
+wget https://binary.mirantis.com/openstack/bin/cirros/0.4.0/cirros-0.4.0-x86_64-disk.img
 openstack image create cirros-0.4.0-x86_64-disk --file cirros-0.4.0-x86_64-disk.img --disk-format qcow2 --container-format bare --public
 openstack network create demoNetwork
 openstack subnet create demoSubnet --network demoNetwork --subnet-range 10.11.12.0/24

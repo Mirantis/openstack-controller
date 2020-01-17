@@ -7,7 +7,7 @@ export STACK_TEST_NAME=${STACK_TEST_NAME:-cirros-stack-migration}
 export IMAGE_NAME=${IMAGE_NAME:-TestCirros-0.4.0}
 export FLAVOR_NAME=${FLAVOR_NAME:-m1.tiny_test}
 
-#wget https://artifactory.mcp.mirantis.net/artifactory/test-images/cirros-0.4.0-x86_64-disk.img
+#wget https://binary.mirantis.com/openstack/bin/cirros/0.4.0/cirros-0.4.0-x86_64-disk.img
 #openstack image create cirros-0.4.0-x86_64-disk --file cirros-0.4.0-x86_64-disk.img --disk-format qcow2 --container-format bare --public
 
 openstack network create ${STACK_TEST_NETWORK_NAME}
