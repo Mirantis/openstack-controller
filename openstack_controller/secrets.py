@@ -39,6 +39,12 @@ class GaleraCredentials:
 
 
 @dataclass
+class PowerDnsCredentials:
+    api_key: str
+    database: OSSytemCreds
+
+
+@dataclass
 class OpenStackAdminCredentials:
     database: Optional[OSSytemCreds]
     messaging: Optional[OSSytemCreds]
@@ -60,6 +66,30 @@ class SingedCertificate:
 
 # TODO(pas-ha) opentack-helm doesn't support password update by design,
 # we will need to get back here when it is solved.
+
+
+def get_powerdns_secret(name: str, namespace: str) -> PowerDnsCredentials:
+    data = get_secret_data(namespace, name)
+    for kind, creds in data.items():
+        data[kind] = json.loads(base64.b64decode(creds))
+    return PowerDnsCredentials(
+        api_key=data["api_key"],
+        database=OSSytemCreds(
+            username=data["database"]["username"],
+            password=data["database"]["password"],
+        ),
+    )
+
+
+def save_powerdns_secret(
+    name: str, namespace: str, params: PowerDnsCredentials
+):
+    data = asdict(params)
+
+    for key in data.keys():
+        data[key] = base64.b64encode(json.dumps(data[key]).encode()).decode()
+
+    kube.save_secret_data(namespace, name, data)
 
 
 def get_galera_secret(name: str, namespace: str) -> GaleraCredentials:

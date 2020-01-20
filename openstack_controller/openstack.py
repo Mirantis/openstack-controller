@@ -30,6 +30,7 @@ OS_SERVICES_MAP = {
 
 ADMIN_SECRET_NAME = "openstack-admin-users"
 GALERA_SECRET_NAME = "generated-galera-passwords"
+POWERDNS_SECRET_NAME = "generated-powerdns-passwords"
 
 
 def _generate_credentials(
@@ -86,6 +87,25 @@ def get_or_create_galera_credentials(
     return galera_creds
 
 
+def get_or_create_powerdns_credentials(
+    namespace: str,
+) -> secrets.PowerDnsCredentials:
+    try:
+        powerdns_creds = secrets.get_powerdns_secret(
+            POWERDNS_SECRET_NAME, namespace
+        )
+    except pykube.exceptions.ObjectDoesNotExist:
+        powerdns_creds = secrets.PowerDnsCredentials(
+            database=_generate_credentials("powerdns"),
+            api_key=secrets.generate_password(length=16),
+        )
+        secrets.save_powerdns_secret(
+            POWERDNS_SECRET_NAME, namespace, powerdns_creds
+        )
+
+    return powerdns_creds
+
+
 def get_or_create_os_credentials(
     service: str, namespace: str
 ) -> Optional[secrets.OpenStackCredentials]:
@@ -103,8 +123,6 @@ def get_or_create_os_credentials(
                     "user"
                 ] = _generate_credentials(srv)
             os_creds.memcached = secrets.generate_password(length=16)
-        elif service == "powerdns":
-            os_creds.database["user"] = _generate_credentials(service)
         else:
             # TODO(e0ne): add logging here
             return

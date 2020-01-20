@@ -156,11 +156,15 @@ spec:
               username: {{ admin_creds.database.username }}
               password: {{ admin_creds.database.password }}
             powerdns:
-              username: {{ powerdns.database.user.username }}
-              password: {{ powerdns.database.user.password }}
+              username: {{ powerdns.database.username }}
+              password: {{ powerdns.database.password }}
         oslo_messaging:
           <<: *designate_endpoints_oslo_messaging
 {% include 'base/_notifications.yaml' %}
+        powerdns:
+          auth:
+            service:
+              token: {{ powerdns.api_key }}
 {%- if spec.get('features', {}).get('ssl', {}).get('public_endpoints', {}).get('enabled', True) %}
         dns:
           host_fqdn_override:

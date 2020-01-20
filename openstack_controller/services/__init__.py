@@ -177,8 +177,8 @@ class Designate(OpenStackService):
 
     def template_args(self, spec):
         t_args = super().template_args(spec)
-        credentials = openstack.get_or_create_os_credentials(
-            self.backend_service, self.namespace
+        credentials = openstack.get_or_create_powerdns_credentials(
+            self.namespace
         )
         t_args[self.backend_service] = credentials
 
