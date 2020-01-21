@@ -155,7 +155,9 @@ class HelmBundleMixin:
                 LOG.info(f"Object {self.kind}: {self.name} is not present.")
                 return
             self.delete(propagation_policy="Background")
-            LOG.info(f"Retrying {i} removing {self.kind}: {self.name}")
+            LOG.info(
+                f"Retrying {i} removing {self.kind}: {self.name} in {delay}s"
+            )
             i += 1
             await asyncio.sleep(delay)
 

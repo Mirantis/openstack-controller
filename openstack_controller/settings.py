@@ -50,7 +50,7 @@ OSCTL_HELMBUNLE_MANIFEST_PURGE_TIMEOUT = os.environ.get(
 
 # The number of seconds between attempts to check that kubernetes object is removed
 OSCTL_HELMBUNLE_MANIFEST_PURGE_DELAY = os.environ.get(
-    "OSCTL_HELMBUNLE_MANIFEST_PURGE_DELAY", 300
+    "OSCTL_HELMBUNLE_MANIFEST_PURGE_DELAY", 10
 )
 
 # The number of seconds to pause for helmbundle changes
