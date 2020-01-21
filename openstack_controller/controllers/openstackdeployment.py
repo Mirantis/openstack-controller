@@ -2,12 +2,12 @@ import asyncio
 
 import kopf
 
-from . import exception
-from . import kube
-from . import layers
-from . import openstack
-from . import services
-from . import version
+from openstack_controller import exception
+from openstack_controller import kube
+from openstack_controller import layers
+from openstack_controller import openstack
+from openstack_controller import services
+from openstack_controller import version
 
 from mcp_k8s_lib import utils
 

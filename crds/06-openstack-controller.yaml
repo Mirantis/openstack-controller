@@ -174,7 +174,7 @@ spec:
           - '-P'
           - openstack-controller.osdpl
           - '-m'
-          - openstack_controller.openstackdeployment
+          - openstack_controller.controllers.openstackdeployment
       - name: helmbundle
         image: docker-kaas-local.artifactory.mirantis.com/openstack/openstack-controller:0.1.2
         imagePullPolicy: Always
@@ -186,7 +186,7 @@ spec:
           - '-P'
           - openstack-controller.helmbundle
           - '-m'
-          - openstack_controller.helmbundle
+          - openstack_controller.controllers.helmbundle
       - name: secrets
         image: docker-kaas-local.artifactory.mirantis.com/openstack/openstack-controller:0.1.2
         imagePullPolicy: Always
@@ -198,7 +198,7 @@ spec:
           - '-P'
           - openstack-controller.secrets
           - '-m'
-          - openstack_controller.secrets
+          - openstack_controller.controllers.secrets
       - name: health
         image: docker-kaas-local.artifactory.mirantis.com/openstack/openstack-controller:0.1.2
         imagePullPolicy: Always
@@ -210,5 +210,5 @@ spec:
           - '-P'
           - openstack-controller.health
           - '-m'
-          - openstack_controller.health
+          - openstack_controller.controllers.health
 ...

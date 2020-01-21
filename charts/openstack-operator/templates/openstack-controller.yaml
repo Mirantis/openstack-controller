@@ -181,7 +181,7 @@ spec:
             - '-P'
             - openstack-controller.osdpl
             - '-m'
-            - openstack_controller.openstackdeployment
+            - openstack_controller.controllers.openstackdeployment
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
         - name: helmbundle
@@ -195,7 +195,7 @@ spec:
             - '-P'
             - openstack-controller.helmbundle
             - '-m'
-            - openstack_controller.helmbundle
+            - openstack_controller.controllers.helmbundle
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
         - name: secrets
@@ -209,7 +209,7 @@ spec:
             - '-P'
             - openstack-controller.secrets
             - '-m'
-            - openstack_controller.secrets
+            - openstack_controller.controllers.secrets
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
         - name: health
@@ -223,7 +223,7 @@ spec:
             - '-P'
             - openstack-controller.health
             - '-m'
-            - openstack_controller.health
+            - openstack_controller.controllers.health
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       {{- with .Values.nodeSelector }}
