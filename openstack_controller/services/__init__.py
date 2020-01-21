@@ -499,6 +499,29 @@ class RadosGateWay(Service):
 class Tempest(Service):
     service = "tempest"
 
+    _child_objects = {
+        "tempest": {
+            "Job": {
+                "openstack-tempest-run-tests": {
+                    "images": ["tempest_run_tests", "tempest-uuids-init"],
+                    "manifest": "job_run_tests",
+                },
+                "tempest-bootstrap": {
+                    "images": ["bootstrap"],
+                    "manifest": "job_bootstrap",
+                },
+                "tempest-image-repo-sync": {
+                    "images": ["image_repo_sync"],
+                    "manifest": "job_image_repo_sync",
+                },
+                "tempest-ks-user": {
+                    "images": ["ks_user"],
+                    "manifest": "job_ks_user",
+                },
+            }
+        },
+    }
+
     def template_args(self, spec):
         # TODO: add wait for generated credential here
         admin_creds = openstack.get_admin_credentials(self.namespace)
