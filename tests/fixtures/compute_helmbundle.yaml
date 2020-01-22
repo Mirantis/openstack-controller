@@ -45,7 +45,7 @@ spec:
           listen_addr: 0.0.0.0
         nova:
           cinder:
-            catalog_info: volumev3::internalURL
+            catalog_info: volumev3:cinderv3:internalURL
       images:
         tags:
           libvirt: docker-prod-virtual.docker.mirantis.net/mcp/libvirt:4.0.0-bionic-1554881274591

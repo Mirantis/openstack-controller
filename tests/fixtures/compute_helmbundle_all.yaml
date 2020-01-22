@@ -136,7 +136,7 @@ spec:
           listen_addr: 0.0.0.0
         nova:
           cinder:
-            catalog_info: volumev3::internalURL
+            catalog_info: volumev3:cinderv3:internalURL
       images:
         tags:
           bootstrap: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/heat:stein-bionic-20190827193015
