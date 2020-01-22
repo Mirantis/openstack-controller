@@ -21,12 +21,13 @@ COPY --from=builder /opt/wheels /opt/wheels
 COPY --from=builder /opt/operator/uwsgi.ini /opt/operator/uwsgi.ini
 # NOTE(pas-ha) apt-get download + dpkg-deb -x is a dirty hack
 # to fetch distutils w/o pulling in most of python3.6
-# FIXME(pas-ha) strace/gdb is installed only temporary for now for debugging 
+# FIXME(pas-ha) strace/gdb is installed only temporary for now for debugging
 RUN set -ex; \
     apt-get -q update; \
     apt-get install -q -y --no-install-recommends --no-upgrade \
         python3.7 \
         python3.7-dbg \
+        libpython3.7 \
         gdb \
         strace \
         ca-certificates; \
