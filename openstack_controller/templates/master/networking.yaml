@@ -7,6 +7,7 @@
 {%- set notification_topics = ['notifications'] %}
 {%- set service_plugins = ['router', 'metering'] %}
 {%- do notification_topics.append('stacklight_notifications') if stacklight_enabled %}
+{%- set floating_network = spec.features.neutron.get('floating_network', {}) %}
 
 spec:
   releases:
@@ -238,6 +239,25 @@ spec:
       network:
         interface:
           tunnel: {{ spec.features.neutron.tunnel_interface }}
+      {%- endif %}
+      {%- if floating_network.get('enabled', False) %}
+      bootstrap:
+        enabled: true
+        script: |
+          openstack network show {{ floating_network.get('name', 'public') }} || openstack network create \
+            --provider-network-type flat \
+            --provider-physical-network {{ floating_network.get('physnet', 'physnet1') }} \
+            --external \
+            {{ floating_network.get('name', 'public') }}
+          # set default gateway via any non-master/worker node to get into ingress controller
+          openstack subnet show {{ floating_network.subnet.get('name', 'public-subnet') }} || openstack subnet create  {{ floating_network.subnet.get('name', 'public-subnet') }} \
+            --no-dhcp --subnet-range  {{ floating_network.subnet.range }} \
+            --allocation-pool start={{ floating_network.subnet.pool_start }},end={{ floating_network.subnet.pool_end }} \
+            --gateway {{ floating_network.subnet.gateway }} \
+            --network {{ floating_network.get('name', 'public') }}
+          openstack router show {{ floating_network.get('router', {}).get('name', 'r1') }} || openstack router create {{ floating_network.get('router', {}).get('name', 'r1') }}
+          openstack router set --external-gateway {{ floating_network.get('name', 'public') }} {{ floating_network.get('router', {}).get('name', 'r1') }}
+          openstack network set {{ floating_network.get('name', 'public') }} --default
       {%- endif %}
       conf:
         paste:

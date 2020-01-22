@@ -44,7 +44,14 @@ spec:
            - flat
           vlan_ranges: null
           mtu: null
-
+      floating_network:
+        enabled: True
+        physnet: physnet1
+        subnet:
+          range: 10.11.12.0/24
+          pool_start: 10.11.12.100
+          pool_end: 10.11.12.200
+          gateway: 10.11.12.11
     nova:
       live_migration_interface: ens3
       images:
@@ -80,23 +87,6 @@ spec:
     networking:
       neutron:
         values:
-          bootstrap:
-            enabled: true
-            script: |
-              openstack network show public || openstack network create \
-                --provider-network-type flat \
-                --provider-physical-network physnet1 \
-                --external \
-                public
-              # set default gateway via any non-master/worker node to get into ingress controller
-              openstack subnet show public-subnet || openstack subnet create public-subnet \
-                --no-dhcp --subnet-range 10.11.12.0/24 \
-                --allocation-pool start=10.11.12.100,end=10.11.12.200 \
-                --gateway 10.11.12.11 \
-                --network public
-              openstack router show r1 || openstack router create r1
-              openstack router set --external-gateway public r1
-              openstack network set public --default
           conf:
             neutron:
               DEFAULT:

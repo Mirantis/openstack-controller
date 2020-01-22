@@ -312,6 +312,49 @@ spec:
                           mtu:
                             type: integer
                             nullable: true
+                    floating_network:
+                      type: object
+                      properties:
+                        enabled:
+                          type: boolean
+                          description: >
+                            enable floating network creation
+                        name:
+                          type: string
+                          description: The name of floating network
+                        physnet:
+                          type: string
+                          description: >
+                            name of physical network to associate
+                        subnet:
+                          type: object
+                          required:
+                            - range
+                            - pool_start
+                            - pool_end
+                            - gateway
+                          properties:
+                            name:
+                              type: string
+                              description: "The name of floating subnet"
+                            range:
+                              type: string
+                              description: "IP address range ie: 1.2.3.0/24"
+                            pool_start:
+                              type: string
+                              description: "start IP address ie: 1.2.3.100"
+                            pool_end:
+                              type: string
+                              description: "end IP address ie: 1.2.3.200"
+                            gateway:
+                              type: string
+                              description: "IP address of subnet gateway"
+                        router:
+                          type: object
+                          properties:
+                            name:
+                              type: string
+                              description: "The name of public router"
                 stacklight:
                   type: object
                   required:
