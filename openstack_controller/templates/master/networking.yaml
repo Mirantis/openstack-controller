@@ -282,6 +282,9 @@ spec:
             dhcp_agents_per_network: 2
             {%- if 'dns' in spec.features.services %}
             external_dns_driver: designate
+            # NOTE: dns_domain can be safely hardcoded because it is just prerequisite option
+            # for enabling dns integration
+            dns_domain: openstack.internal.
             {%- endif %}
             {%- if spec.get('features', {}).get('neutron', {}).get('dvr', {}).get('enabled', False) %}
             router_distributed: True
@@ -318,9 +321,14 @@ spec:
             {%- endif %}
             ml2_type_flat:
               flat_networks: {{ ','.join(networks.flat) }}
-              {%- if physnet_mtus %}
             ml2:
+            {%- if physnet_mtus %}
               physical_network_mtus: {{ physnet_mtus }}
+            {%- endif %}
+              extension_drivers:
+                - port_security
+              {%- if 'dns' in spec.features.services %}
+                - dns_domain_ports
               {%- endif %}
           openvswitch_agent:
             agent:

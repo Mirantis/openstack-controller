@@ -13,6 +13,7 @@ def test_apply_list_empty_stein(osdpl_min_stein):
     compute_services = {
         "block-storage",
         "compute",
+        "dns",
         "placement",
         "identity",
         "dashboard",
@@ -34,6 +35,7 @@ def test_apply_list_empty_train(osdpl_min_train):
     compute_services = {
         "block-storage",
         "compute",
+        "dns",
         "placement",
         "identity",
         "dashboard",
@@ -55,6 +57,7 @@ def test_apply_list_empty_rocky(osdpl_min_rocky):
     compute_services = {
         "block-storage",
         "compute",
+        "dns",
         "identity",
         "dashboard",
         "image",

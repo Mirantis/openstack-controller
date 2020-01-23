@@ -11,6 +11,7 @@ features:
   services:
     - block-storage
     - compute
+    - dns
     - identity
     - dashboard
     - image
@@ -172,5 +173,7 @@ services:
                 - dvr
                 - filter-validation
                 - standard-attr-tag
+                - dns-domain-ports
+                - dns-integration
         manifests:
           job_bootstrap: true
