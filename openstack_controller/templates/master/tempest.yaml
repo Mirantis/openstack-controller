@@ -64,5 +64,30 @@ spec:
             default: http
             public: https
 {%- endif %}
+      bootstrap:
+        enabled: true
+        script: |
+          openstack network show heat-net || openstack network create heat-net
+          openstack subnet show heat-subnet || openstack subnet create heat-subnet \
+            --dhcp --subnet-range 10.20.30.0/24 \
+            --allocation-pool start=10.20.30.10,end=10.20.30.254 \
+            --gateway 10.20.30.1 \
+            --network heat-net
+          openstack router show heat-router || openstack router create heat-router
+          subnet_id=$(openstack subnet show heat-subnet -f value -c id)
+          if openstack router show heat-router -f json -c interfaces_info |grep -qw ${subnet_id}; then
+            echo "$subnet_id is in the list"
+          else
+            openstack router add subnet heat-router heat-subnet
+            openstack router set --external-gateway {{ spec.features.neutron.get('floating_network', {}).get('name', 'public') }} heat-router
+          fi
+          openstack role create --or-show "key-manager:service-admin"
+          openstack role create --or-show creator
+          openstack subnet pool show default_pool || \
+            openstack subnet pool create --share --default \
+            --pool-prefix 10.20.40.0/24 --default-prefix-length 26 \
+            default_pool
+          openstack network auto allocated topology create --or-show
+          openstack subnet pool set default_pool --default
       conf:
         tempest: {{ spec | generate_tempest_config(helmbundles_body) }}
