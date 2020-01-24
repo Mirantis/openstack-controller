@@ -118,7 +118,7 @@ services:
               ca_certificates_file: /certs/ca-bundle.pem
             #TODO(mshalamov): Will be removed during process of completing PRODX-1192
             compute:
-              min_compute_nodes: 3
+              min_compute_nodes: 2
             #TODO(mshalamov): Will be removed during process of completing PRODX-1192
             compute-feature-enabled:
               cold_migration: true
