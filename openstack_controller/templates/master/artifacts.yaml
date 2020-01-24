@@ -89,6 +89,7 @@ tempest-uuids-init: '{{ images_base_url }}/openstack/heat:master-bionic-20200117
 glance_metadefs_load: '{{ images_base_url }}/openstack/glance:master-bionic-20200117180018'
 memcached: '{{ images_base_url }}/general/memcached:1.5.20-alpine'
 ingress: '{{ images_base_url }}/openstack/extra/nginx-ingress-controller:0.9.0'
+mariadb_ingress: '{{ images_base_url }}/openstack/extra/nginx-ingress-controller:0.9.0'
 error_pages: '{{ images_base_url }}/openstack/extra/defaultbackend:1.0'
 ironic_manage_cleaning_network: '{{ images_base_url }}/openstack/heat:master-bionic-20200117180018'
 ironic_retrive_cleaning_network: '{{ images_base_url }}/openstack/heat:master-bionic-20200117180018'

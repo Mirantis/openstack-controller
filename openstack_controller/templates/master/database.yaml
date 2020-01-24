@@ -12,6 +12,7 @@ spec:
         tags:
 {%- for image in [
     "ingress",
+    "mariadb_ingress",
     "prometheus_create_mysql_user",
     "image_repo_sync",
     "error_pages",
