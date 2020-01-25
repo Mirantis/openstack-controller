@@ -127,6 +127,7 @@ spec:
         logging:
           logger_barbican:
             level: {{ spec.get('features', {}).get('logging', {}).get('barbican', {}).get('level', 'INFO') }}
+        {%- if spec.openstack_version not in ['queens', 'rocky'] %}
         # TODO(vsaienko): drop policy settings in upstream values.yaml to ensure in-code policy
         # defaults are used.
         policy:
@@ -134,6 +135,7 @@ spec:
           secret_creator_user: user_id:%(target.secret.creator_id)s
           container_project_match: project_id:%(target.container.project_id)s
           container_creator_user: user_id:%(target.container.creator_id)s
+        {%- endif %}
       manifests:
         network_policy: false
         job_rabbit_init: false
