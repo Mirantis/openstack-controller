@@ -196,9 +196,10 @@ def merge_all_layers(service, body, meta, spec, logger, **template_args):
     os_release = spec["openstack_version"]
     # values from profile were earlier merged to spec.
     images_base_url = spec["artifacts"]["images_base_url"]
+    binary_base_url = spec["artifacts"]["binary_base_url"]
     images = yaml.safe_load(
         ENV.get_template(f"{os_release}/artifacts.yaml").render(
-            images_base_url=images_base_url
+            images_base_url=images_base_url, binary_base_url=binary_base_url
         )
     )
 
