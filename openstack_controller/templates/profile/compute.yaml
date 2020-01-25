@@ -175,5 +175,10 @@ services:
                 - standard-attr-tag
                 - dns-domain-ports
                 - dns-integration
+            volume-feature-enabled:
+              api_v1: false
+              api_v2: false
+              api_v3: true
+
         manifests:
           job_bootstrap: true
