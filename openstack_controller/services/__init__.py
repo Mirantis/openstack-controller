@@ -1,11 +1,9 @@
-from dataclasses import asdict
-
 import kopf
 from mcp_k8s_lib import utils
 
+from openstack_controller import constants
 from openstack_controller import layers
 from openstack_controller import kube
-from openstack_controller import openstack
 from openstack_controller import secrets
 from .base import Service, OpenStackService
 
@@ -47,10 +45,9 @@ class MariaDB(Service):
     }
 
     def template_args(self, spec):
-        admin_creds = openstack.get_admin_credentials(self.namespace)
-        galera_creds = openstack.get_or_create_galera_credentials(
-            self.namespace
-        )
+        admin_creds = self._get_admin_creds()
+        galera_secret = secrets.GaleraSecret(self.namespace)
+        galera_creds = galera_secret.ensure()
         return {"admin_creds": admin_creds, "galera_creds": galera_creds}
 
 
@@ -82,15 +79,14 @@ class RabbitMQ(Service):
 
     def template_args(self, spec):
         credentials = {}
-        admin_creds = openstack.get_admin_credentials(self.namespace)
+        admin_creds = self._get_admin_creds()
         services = set(spec["features"]["services"]) - set(["tempest"])
         for s in services:
-            if s not in openstack.OS_SERVICES_MAP:
+            if s not in constants.OS_SERVICES_MAP:
                 continue
             # TODO: 'use get or wait' approach for generated credential here
-            credentials[s] = openstack.get_or_create_os_credentials(
-                s, self.namespace
-            )
+            secret = secrets.OpenStackServiceSecret(self.namespace, s)
+            credentials[s] = secret.ensure()
 
         return {
             "services": services,
@@ -178,9 +174,8 @@ class Designate(OpenStackService):
 
     def template_args(self, spec):
         t_args = super().template_args(spec)
-        credentials = openstack.get_or_create_powerdns_credentials(
-            self.namespace
-        )
+        power_dns_secret = secrets.PowerDNSSecret(self.namespace)
+        credentials = power_dns_secret.ensure()
         t_args[self.backend_service] = credentials
 
         return t_args
@@ -255,7 +250,6 @@ class Horizon(OpenStackService):
 
 class Keystone(OpenStackService):
     service = "identity"
-    keycloak_secret = "oidc-crypto-passphrase"
     openstack_chart = "keystone"
 
     @property
@@ -326,10 +320,8 @@ class Keystone(OpenStackService):
         if not keycloak_enabled:
             return t_args
 
-        keycloak_salt = secrets.get_or_create_keycloak_salt(
-            self.namespace, self.keycloak_secret
-        )
-        t_args[self.keycloak_secret] = keycloak_salt
+        keycloak_salt = secrets.KeycloakSecret(self.namespace)
+        t_args["oidc_crypto_passphrase"] = keycloak_salt.ensure().passphrase
 
         return t_args
 
@@ -436,9 +428,8 @@ class Nova(OpenStackService):
 
     def template_args(self, spec):
         t_args = super().template_args(spec)
-        t_args["ssh_credentials"] = asdict(
-            openstack.get_or_create_ssh_credentials("nova", self.namespace)
-        )
+        ssh_secret = secrets.SSHSecret(self.namespace, "nova")
+        t_args["ssh_credentials"] = ssh_secret.ensure()
         return t_args
 
 
@@ -484,12 +475,12 @@ class Octavia(OpenStackService):
 
     def template_args(self, spec):
         t_args = super().template_args(spec)
-        openstack.get_or_create_certs("octavia-certs", self.namespace)
-        t_args["ssh_credentials"] = asdict(
-            openstack.get_or_create_ssh_credentials(
-                self.service, self.namespace
-            )
+        cert_secret = secrets.SignedCertificateSecret(
+            self.namespace, "octavia"
         )
+        cert_secret.ensure()
+        ssh_secret = secrets.SSHSecret(self.namespace, self.service)
+        t_args["ssh_credentials"] = ssh_secret.ensure()
         return t_args
 
     async def cleanup_immutable_resources(self, new_obj, rendered_spec):
@@ -552,10 +543,9 @@ class Tempest(Service):
 
     def template_args(self, spec):
         # TODO: add wait for generated credential here
-        admin_creds = openstack.get_admin_credentials(self.namespace)
-        credentials = openstack.get_or_create_os_credentials(
-            self.service, self.namespace
-        )
+        admin_creds = self._get_admin_creds()
+        secret = secrets.OpenStackServiceSecret(self.namespace, self.service)
+        credentials = secret.ensure()
         helmbundles_body = {}
         for s in set(spec["features"]["services"]) - {"tempest"}:
             template_args = Service.registry[s](

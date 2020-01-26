@@ -2,12 +2,11 @@ import asyncio
 from dataclasses import dataclass
 import logging
 
+from openstack_controller import constants
 from openstack_controller import kube
 from openstack_controller import settings
 
 LOG = logging.getLogger(__name__)
-
-UNKNOWN, OK, PROGRESS, BAD = "Unknown", "Ready", "Progressing", "Unhealthy"
 
 
 @dataclass(frozen=True)
@@ -119,7 +118,7 @@ def is_application_ready(application, osdpl):
         return False
     elif all(
         [
-            component_health["status"] == OK
+            component_health["status"] == constants.OK
             for component_health in app_status.values()
         ]
     ):

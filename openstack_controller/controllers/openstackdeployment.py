@@ -5,9 +5,10 @@ import kopf
 
 from openstack_controller import exception
 from openstack_controller import cache
+from openstack_controller import constants
 from openstack_controller import kube
 from openstack_controller import layers
-from openstack_controller import openstack
+from openstack_controller import secrets
 from openstack_controller import services
 from openstack_controller import version
 
@@ -31,7 +32,7 @@ def is_openstack_version_changed(diff):
 def get_os_services_for_upgrade(enabled_services):
     return [
         service
-        for service in layers.OPENSTACK_SERVICES_UPGRADE_ORDER
+        for service in constants.OPENSTACK_SERVICES_UPGRADE_ORDER
         if service in enabled_services
     ]
 
@@ -131,10 +132,10 @@ async def apply(body, meta, spec, logger, event, **kwargs):
         LOG.info("OpenStack deployment is in draft mode, skipping handling...")
         return {"lastStatus": f"{event} drafted"}
 
-    # TODO(e0ne): change create_admin_credentials once kube.save_secret_data
+    # TODO(e0ne): change to use 'create' method once kube.save_secret_data
     # won't update secrets
-    openstack.get_or_create_admin_credentials(namespace)
-    kube.wait_for_secret(namespace, openstack.ADMIN_SECRET_NAME)
+    secrets.OpenStackAdminSecret(namespace).ensure()
+    kube.wait_for_secret(namespace, constants.ADMIN_SECRET_NAME)
 
     fingerprint = layers.spec_hash(body["spec"])
     version_patch = {

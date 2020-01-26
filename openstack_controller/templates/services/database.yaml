@@ -48,6 +48,9 @@ spec:
             exporter:
               username: {{ galera_creds.exporter.username }}
               password: {{ galera_creds.exporter.password }}
+            audit:
+              username: {{ galera_creds.audit.username }}
+              password: {{ galera_creds.audit.password }}
       pod:
         replicas:
           server: 3

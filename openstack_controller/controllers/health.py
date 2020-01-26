@@ -1,6 +1,7 @@
 import kopf
 from mcp_k8s_lib import utils
 
+from openstack_controller import constants
 from openstack_controller import health
 
 LOG = utils.get_logger(__name__)
@@ -34,16 +35,16 @@ async def deployments(name, namespace, meta, status, new, **kwargs):
             avail_cond = c
         elif c.type == "Progressing":
             progr_cond = c
-    res_health = health.UNKNOWN
+    res_health = constants.UNKNOWN
     if avail_cond.status == "True" and (
         progr_cond.status == "True"
         and progr_cond.reason == "NewReplicaSetAvailable"
     ):
-        res_health = health.OK
+        res_health = constants.OK
     elif avail_cond.status == "False":
-        res_health = health.BAD
+        res_health = constants.BAD
     elif progr_cond.reason == "ReplicaSetUpdated":
-        res_health = health.PROGRESS
+        res_health = constants.PROGRESS
     health.set_application_health(
         application,
         component,
@@ -58,21 +59,21 @@ async def statefulsets(name, namespace, meta, status, **kwargs):
     LOG.debug(f"StatefulSet {name} status is {status}")
     application, component = health.ident(meta)
     st = health.StatefulSetStatus(**status)
-    res_health = health.UNKNOWN
+    res_health = constants.UNKNOWN
     if st.updateRevision:
         # updating, created new ReplicaSet
         if st.currentRevision == st.updateRevision:
             if st.replicas == st.readyReplicas == st.currentReplicas:
-                res_health = health.OK
+                res_health = constants.OK
             else:
-                res_health = health.BAD
+                res_health = constants.BAD
         else:
-            res_health = health.PROGRESS
+            res_health = constants.PROGRESS
     else:
         if st.replicas == st.readyReplicas == st.currentReplicas:
-            res_health = health.OK
+            res_health = constants.OK
         else:
-            res_health = health.BAD
+            res_health = constants.BAD
     health.set_application_health(
         application,
         component,
@@ -88,7 +89,7 @@ async def daemonsets(name, namespace, meta, status, **kwargs):
     application, component = health.ident(meta)
 
     st = health.DaemonSetStatus(**status)
-    res_health = health.UNKNOWN
+    res_health = constants.UNKNOWN
     if (
         st.currentNumberScheduled
         == st.desiredNumberScheduled
@@ -97,13 +98,13 @@ async def daemonsets(name, namespace, meta, status, **kwargs):
         == st.numberAvailable
     ):
         if not st.numberMisscheduled:
-            res_health = health.OK
+            res_health = constants.OK
         else:
-            res_health = health.PROGRESS
+            res_health = constants.PROGRESS
     elif st.updatedNumberScheduled < st.desiredNumberScheduled:
-        res_health = health.PROGRESS
+        res_health = constants.PROGRESS
     elif st.numberReady < st.desiredNumberScheduled:
-        res_health = health.BAD
+        res_health = constants.BAD
     health.set_application_health(
         application,
         component,

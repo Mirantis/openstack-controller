@@ -12,6 +12,7 @@ import kopf
 import yaml
 
 from mcp_k8s_lib import utils
+from openstack_controller import constants
 from openstack_controller.filters.tempest import generate_tempest_config
 
 LOG = utils.get_logger(__name__)
@@ -69,48 +70,6 @@ merger = CustomMerger(
     # finally, choose the strategies in the case where the types conflict:
     ["fail"],
 )
-
-
-OPENSTACK_SERVICES_UPGRADE_ORDER = [
-    "identity",
-    "placement",
-    "image",
-    "networking",
-    "compute",
-    "volume",
-    "load-balancer",
-    "dns",
-    "key-manager",
-    "orchestration",
-    "dashboard",
-]
-
-
-CHART_GROUP_MAPPING = {
-    "openstack": [
-        "cinder",
-        "glance",
-        "heat",
-        "horizon",
-        "keystone",
-        "neutron",
-        "nova",
-        "octavia",
-        "ceph-rgw",
-        "designate",
-        "barbican",
-        "placement",
-        "tempest",
-    ],
-    "infra": [
-        "rabbitmq",
-        "mariadb",
-        "memcached",
-        "openvswitch",
-        "libvirt",
-        "ingress",
-    ],
-}
 
 
 def kopf_exception(f):
@@ -216,7 +175,7 @@ def merge_all_layers(service, body, meta, spec, logger, **template_args):
         merger.merge(
             release, spec["common"].get("charts", {}).get("releases", {})
         )
-        for group, charts in CHART_GROUP_MAPPING.items():
+        for group, charts in constants.CHART_GROUP_MAPPING.items():
             if chart_name in charts:
                 merger.merge(
                     release, spec["common"].get(group, {}).get("releases", {})

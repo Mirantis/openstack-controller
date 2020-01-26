@@ -8,10 +8,10 @@ from mcp_k8s_lib import ceph_api
 from mcp_k8s_lib import utils
 import pykube
 
+from openstack_controller import constants
 from openstack_controller import health
 from openstack_controller import layers
 from openstack_controller import kube
-from openstack_controller import openstack
 from openstack_controller import secrets
 from openstack_controller import settings
 from openstack_controller import version
@@ -90,7 +90,7 @@ class Service:
 
     @property
     def service_accounts(self) -> List[str]:
-        service_name = openstack.OS_SERVICES_MAP.get(self.service)
+        service_name = constants.OS_SERVICES_MAP.get(self.service)
         if service_name:
             return self._service_accounts + [service_name, "test"]
         return self._service_accounts
@@ -117,6 +117,10 @@ class Service:
         osdpl = kube.OpenStackDeployment(kube.api, self.body)
         osdpl.reload()
         return osdpl
+
+    def _get_admin_creds(self) -> secrets.OpenStackAdminCredentials:
+        admin_secret = secrets.OpenStackAdminSecret(self.namespace)
+        return admin_secret.ensure()
 
     @property
     def resource_name(self):
@@ -427,7 +431,7 @@ class Service:
         ceph_config = {}
         oscp = ceph_api.get_os_ceph_params(secrets.get_secret_data)
         for oscp_service in oscp.services:
-            srv_username = openstack.OS_SERVICES_MAP.get(self.service)
+            srv_username = constants.OS_SERVICES_MAP.get(self.service)
             if oscp_service.user.name == srv_username:
                 ceph_config[srv_username] = {
                     "username": srv_username,
@@ -440,17 +444,17 @@ class Service:
         return {"ceph": ceph_config}
 
     def template_args(self, spec):
-        credentials = openstack.get_or_create_os_credentials(
-            self.service, self.namespace
-        )
+        secret = secrets.OpenStackServiceSecret(self.namespace, self.service)
+        credentials = secret.ensure()
 
-        admin_creds = openstack.get_admin_credentials(self.namespace)
-        service_creds = secrets.get_or_create_service_credentials(
+        admin_creds = self._get_admin_creds()
+        service_secrets = secrets.ServiceAccountsSecrets(
             self.namespace,
             self.service,
             self.service_accounts,
             self._required_accounts,
         )
+        service_creds = service_secrets.ensure()
 
         template_args = {
             "credentials": credentials,

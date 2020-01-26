@@ -11,7 +11,6 @@ from typing import Dict
 from . import settings
 
 LOG = utils.get_logger(__name__)
-CACHE_NAME = "image-precaching"
 
 
 def login():

@@ -1,8 +1,8 @@
 import kopf
 from mcp_k8s_lib import ceph_api, utils
 
+from openstack_controller import constants
 from openstack_controller import kube
-from openstack_controller import secrets
 
 LOG = utils.get_logger(__name__)
 
@@ -15,7 +15,7 @@ async def handle_rgw_secret(
 ):
     # TODO: unhardcode secret name
     LOG.debug(f"Handling secret create {name}")
-    if name != secrets.RGW_KEYSTONE_SECRET:
+    if name != constants.RGW_KEYSTONE_SECRET:
         return
     data = body["data"]
     keys = [

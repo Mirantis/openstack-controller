@@ -1,6 +1,7 @@
 import kopf
 import pykube
 
+from . import constants
 from . import kube
 from . import layers
 
@@ -12,7 +13,9 @@ LOG = utils.get_logger(__name__)
 
 async def _get(namespace, i):
     try:
-        return kube.find(pykube.DaemonSet, f"{kube.CACHE_NAME}-{i}", namespace)
+        return kube.find(
+            pykube.DaemonSet, f"{constants.CACHE_NAME}-{i}", namespace
+        )
     except pykube.exceptions.PyKubeError:
         return None
 
@@ -66,7 +69,7 @@ async def restart(images, osdpl):
         )
         for i in range(len(image_groups)):
             cache = layers.render_cache_template(
-                osdpl, f"{kube.CACHE_NAME}-{i}", image_groups[i]
+                osdpl, f"{constants.CACHE_NAME}-{i}", image_groups[i]
             )
             kopf.adopt(cache, osdpl)
             kube.resource(cache).create()

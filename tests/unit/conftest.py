@@ -46,21 +46,3 @@ def kubeapi(mocker):
     mock_api = mocker.patch("openstack_controller.kube.api")
     yield mock_api
     mocker.stopall()
-
-
-@pytest.fixture
-def credentials(mocker):
-    creds = mocker.patch(
-        "openstack_controller.openstack.get_or_create_os_credentials"
-    )
-    yield creds
-    mocker.stopall()
-
-
-@pytest.fixture
-def service_credentials(mocker):
-    creds = mocker.patch(
-        "openstack_controller.secrets.get_or_create_service_credentials"
-    )
-    yield creds
-    mocker.stopall()
