@@ -120,6 +120,10 @@ spec:
           DEFAULT:
             enable_v1_api: True
             enable_v2_registry: True
+            # show_multiple_locations is set True because of the fact that glance uses always
+            # Ceph as backend. The parameter exposes additional information about the images
+            # but this information doesn't exist any sensitive data there are UUIDs and pool name.
+            show_multiple_locations: True
           glance_store:
 {%- for pools, pools_config in ceph.glance.pools.items() %}
             rbd_store_pool: {{ pools_config.name }}
