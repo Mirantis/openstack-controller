@@ -178,7 +178,7 @@ spec:
       serviceAccountName: openstack-controller-account
       containers:
       - name: osdpl
-        image: docker-kaas-local.artifactory.mirantis.com/openstack/openstack-controller:0.1.2
+        image: docker-kaas-local.artifactory.mirantis.com/openstack/openstack-controller:0.1.3
         imagePullPolicy: Always
         command:
           - kopf
@@ -199,7 +199,7 @@ spec:
             port: 44090
           periodSeconds: 120
       - name: helmbundle
-        image: docker-kaas-local.artifactory.mirantis.com/openstack/openstack-controller:0.1.2
+        image: docker-kaas-local.artifactory.mirantis.com/openstack/openstack-controller:0.1.3
         imagePullPolicy: Always
         command:
           - kopf
@@ -220,7 +220,7 @@ spec:
             port: 44091
           periodSeconds: 120
       - name: secrets
-        image: docker-kaas-local.artifactory.mirantis.com/openstack/openstack-controller:0.1.2
+        image: docker-kaas-local.artifactory.mirantis.com/openstack/openstack-controller:0.1.3
         imagePullPolicy: Always
         command:
           - kopf
@@ -241,7 +241,7 @@ spec:
             port: 44092
           periodSeconds: 120
       - name: health
-        image: docker-kaas-local.artifactory.mirantis.com/openstack/openstack-controller:0.1.2
+        image: docker-kaas-local.artifactory.mirantis.com/openstack/openstack-controller:0.1.3
         imagePullPolicy: Always
         command:
           - kopf
