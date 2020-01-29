@@ -181,8 +181,7 @@ def services(spec, logger, **kwargs):
 def render_service_template(
     service, body, meta, spec, logger, **template_args
 ):
-    os_release = spec["openstack_version"]
-    tpl = ENV.get_template(f"{os_release}/{service}.yaml")
+    tpl = ENV.get_template(f"services/{service}.yaml")
     LOG.debug(f"Using template {tpl.filename}")
 
     text = tpl.render(body=body, meta=meta, spec=spec, **template_args)
@@ -207,7 +206,7 @@ def merge_all_layers(service, body, meta, spec, logger, **template_args):
 
     # We have 4 level of hierarchy, in increasing priority order:
     # 1. helm values.yaml - which is default
-    # 2. openstack_controller/templates/<openstack_version>/<helmbundle>.yaml
+    # 2. openstack_controller/templates/services/<helmbundle>.yaml
     # 3. OpenstackDeployment or profile charts section
     # 4. OpenstackDeployment or profile common/group section
 
