@@ -134,14 +134,16 @@ spec:
               properties:
                 ssl:
                   type: object
+                  required:
+                   - public_endpoints
                   properties:
                     public_endpoints:
                       type: object
+                      required:
+                        - ca_cert
+                        - api_cert
+                        - api_key
                       properties:
-                        enabled:
-                          description: >
-                            enable ssl on public endpoints
-                          type: boolean
                         ca_cert:
                           description: >
                             CA certificate

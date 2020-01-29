@@ -139,9 +139,7 @@ spec:
       manifests:
         network_policy: false
         job_rabbit_init: false
-{%- if spec.get('features', {}).get('ssl', {}).get('public_endpoints', {}).get('enabled', True) %}
         secret_ca_bundle: true
-{%- endif %}
       endpoints:
         cluster_domain_suffix: {{ spec.internal_domain_name }}
 {% include 'base/_admin_identity.yaml' %}
@@ -173,7 +171,6 @@ spec:
           statefulset:
             name: openstack-rabbitmq-rabbitmq
             replicas: 1
-{%- if spec.get('features', {}).get('ssl', {}).get('public_endpoints', {}).get('enabled', True) %}
         key_manager:
           host_fqdn_override:
             public:
@@ -208,5 +205,4 @@ spec:
           scheme:
             default: http
             public: https
-{%- endif %}
 {%- endif %}

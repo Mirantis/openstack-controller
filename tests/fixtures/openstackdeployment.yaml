@@ -76,7 +76,12 @@ spec:
     - key-manager
     ssl:
       public_endpoints:
-        enabled: false
+        api_cert: |-
+          # Update server certificate content
+        api_key: |-
+          # Update server private key content
+        ca_cert: |-
+          # Update CA certificate content
     stacklight:
       enabled: true
   openstack_version: stein

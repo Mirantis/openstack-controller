@@ -170,9 +170,7 @@ spec:
         service_ingress_placement: false
         service_placement: false
 {%- endif %}
-{%- if spec.get('features', {}).get('ssl', {}).get('public_endpoints', {}).get('enabled', True) %}
         secret_ca_bundle: true
-{%- endif %}
       endpoints:
         cluster_domain_suffix: {{ spec.internal_domain_name }}
 {% include 'base/_admin_identity.yaml' %}
@@ -203,7 +201,6 @@ spec:
         oslo_messaging:
           <<: *nova_endpoints_oslo_messaging
 {% include 'base/_notifications.yaml' %}
-{%- if spec.get('features', {}).get('ssl', {}).get('public_endpoints', {}).get('enabled', True) %}
         compute:
           host_fqdn_override:
             public:
@@ -301,7 +298,6 @@ spec:
           scheme:
             default: http
             public: https
-{%- endif %}
 {%- if spec.get('features', {}).get('nova', {}).get('images', {}).get('backend') == 'ceph' or (spec.get('features', {}).get('cinder', {}).get('volume', {}).get('backend') == 'ceph') %}
       ceph_client:
         configmap: rook-ceph-config

@@ -170,9 +170,7 @@ spec:
         network_policy: false
         job_rabbit_init: false
         job_storage_init: false
-{%- if spec.get('features', {}).get('ssl', {}).get('public_endpoints', {}).get('enabled', True) %}
         secret_ca_bundle: true
-{%- endif %}
       endpoints:
         cluster_domain_suffix: {{ spec.internal_domain_name }}
 {% include 'base/_admin_identity.yaml' %}
@@ -187,7 +185,6 @@ spec:
         oslo_messaging:
           <<: *glance_endpoints_oslo_messaging
 {% include 'base/_notifications.yaml' %}
-{%- if spec.get('features', {}).get('ssl', {}).get('public_endpoints', {}).get('enabled', True) %}
         image:
           host_fqdn_override:
             public:
@@ -222,5 +219,4 @@ spec:
           scheme:
             default: http
             public: https
-{%- endif %}
 {%- endif %}

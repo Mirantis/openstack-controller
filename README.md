@@ -45,7 +45,7 @@ Update DNS to match currently configured by kaas
 
 `sed -i "s/kaas-kubernetes-3af5ae538cf411e9a6c7fa163e5a4837/$(kubectl get configmap -n kube-system coredns -o jsonpath='{.data.Corefile}' |grep -oh kaas-kubernetes-[[:alnum:]]*)/g" examples/stein/core-ceph-local-non-dvr.yaml`
 
-#### In case SSL on public endpoints is enabled before applying context need to generate certificates and set them in context yaml.
+#### Generate Certs for public endpoints
 Generate certs with correct domain
 ```
 cd tools/ssl
@@ -57,7 +57,6 @@ spec:
   features:
     ssl:
       public_endpoints:
-        enabled: true
         api_cert: |
           server certificate content (from tools/ssl/certs/server.pem)
         api_key: |

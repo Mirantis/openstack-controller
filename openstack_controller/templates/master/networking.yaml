@@ -194,7 +194,6 @@ spec:
         oslo_messaging:
           <<: *neutron_endpoints_oslo_messaging
 {% include 'base/_notifications.yaml' %}
-{%- if spec.get('features', {}).get('ssl', {}).get('public_endpoints', {}).get('enabled', True) %}
         network:
           host_fqdn_override:
             public:
@@ -229,12 +228,9 @@ spec:
           scheme:
             default: http
             public: https
-{%- endif %}
       manifests:
         job_rabbit_init: false
-{%- if spec.get('features', {}).get('ssl', {}).get('public_endpoints', {}).get('enabled', True) %}
         secret_ca_bundle: true
-{%- endif %}
       {%- if spec.get('features', {}).get('neutron', {}).get('tunnel_interface') %}
       network:
         interface:

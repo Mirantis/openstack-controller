@@ -124,9 +124,7 @@ spec:
       manifests:
         network_policy: false
         job_rabbit_init: false
-{%- if spec.get('features', {}).get('ssl', {}).get('public_endpoints', {}).get('enabled', True) %}
         secret_ca_bundle: true
-{%- endif %}
       conf:
         heat:
           keystone_authtoken:
@@ -151,7 +149,6 @@ spec:
         oslo_messaging:
           <<: *heat_endpoints_oslo_messaging
 {% include 'base/_notifications.yaml' %}
-{%- if spec.get('features', {}).get('ssl', {}).get('public_endpoints', {}).get('enabled', True) %}
         orchestration:
           host_fqdn_override:
             public:
@@ -220,5 +217,4 @@ spec:
           scheme:
             default: http
             public: https
-{%- endif %}
 {%- endif %}

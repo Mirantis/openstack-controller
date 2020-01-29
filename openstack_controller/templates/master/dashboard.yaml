@@ -2,7 +2,6 @@
 #kind: HelmBundle
 
 {%- set keystone_keycloak_enabled = spec.get('features', {}).get('keystone', {}).get('keycloak', {}).get('enabled', False) %}
-{%- set ssl_public_endpoints_enabled = spec.get('features', {}).get('ssl', {}).get('public_endpoints', {}).get('enabled', True) %}
 #The list of extra panels in Horizon helm-chart is overwritten in case 'extra_panels' is defined in openstack-controller.
 {%- set horizon_extra_panels = ['neutron_taas_dashboard', 'heat_dashboard'] %}
 {%- if 'load-balancer' in spec.features.services %}
@@ -38,9 +37,7 @@ spec:
               - openstack-mariadb-cluster-wait
       manifests:
         network_policy: false
-{%- if ssl_public_endpoints_enabled %}
         secret_ca_bundle: true
-{%- endif %}
       endpoints:
         cluster_domain_suffix: {{ spec.internal_domain_name }}
 {%- if keystone_keycloak_enabled %}
@@ -61,7 +58,6 @@ spec:
             horizon:
               username: {{ credentials.database.user.username }}
               password: {{ credentials.database.user.password }}
-{%- if ssl_public_endpoints_enabled %}
         dashboard:
           host_fqdn_override:
             public:
@@ -84,13 +80,13 @@ spec:
 {{ spec.features.ssl.public_endpoints.api_cert | indent( width=18, indentfirst=True) }}
                 key: |
 {{ spec.features.ssl.public_endpoints.api_key | indent( width=18, indentfirst=True) }}
-{%- endif %}
       conf:
         horizon:
           extra_panels: {{ horizon_extra_panels }}
           local_settings:
             config:
               horizon_images_upload_mode: 'direct'
+              secure_proxy_ssl_header: true
 {%- if keystone_keycloak_enabled %}
               auth:
                 idp_mapping:
@@ -101,7 +97,4 @@ spec:
                 sso:
                   enabled: true
                   initial_choice: mapped
-{%- endif %}
-{%- if ssl_public_endpoints_enabled %}
-              secure_proxy_ssl_header: true
 {%- endif %}

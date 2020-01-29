@@ -205,9 +205,7 @@ spec:
         job_rabbit_init: false
         secret_amphora_ssh_key: true
         secret_octavia_certs: false
-{%- if spec.get('features', {}).get('ssl', {}).get('public_endpoints', {}).get('enabled', True) %}
         secret_ca_bundle: true
-{%- endif %}
       conf:
         octavia:
           keystone_authtoken:
@@ -246,7 +244,6 @@ spec:
         oslo_messaging:
           <<: *octavia_endpoints_oslo_messaging
 {% include 'base/_notifications.yaml' %}
-{%- if spec.get('features', {}).get('ssl', {}).get('public_endpoints', {}).get('enabled', True) %}
         load_balancer:
           host_fqdn_override:
             public:
@@ -281,5 +278,4 @@ spec:
           scheme:
             default: http
             public: https
-{%- endif %}
 {%- endif %}

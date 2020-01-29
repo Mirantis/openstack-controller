@@ -132,9 +132,7 @@ spec:
         configmap_powerdns_etc: true
         job_powerdns_db_sync: true
         job_powerdns_db_init: true
-{%- if spec.get('features', {}).get('ssl', {}).get('public_endpoints', {}).get('enabled', True) %}
         secret_ca_bundle: true
-{%- endif %}
       network:
         mdns:
           node_port:
@@ -165,7 +163,6 @@ spec:
           auth:
             service:
               token: {{ powerdns.api_key }}
-{%- if spec.get('features', {}).get('ssl', {}).get('public_endpoints', {}).get('enabled', True) %}
         dns:
           host_fqdn_override:
             public:
@@ -232,5 +229,4 @@ spec:
           scheme:
             default: http
             public: https
-{%- endif %}
 {%- endif %}
