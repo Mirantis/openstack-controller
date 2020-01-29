@@ -194,7 +194,7 @@ def render_service_template(
 def merge_all_layers(service, body, meta, spec, logger, **template_args):
     """Merge releases and values from osdpl crd into service HelmBundle"""
 
-    images = render_artifacts(body)
+    images = render_artifacts(spec)
     service_helmbundle = render_service_template(
         service, body, meta, spec, logger, images=images, **template_args
     )
@@ -269,7 +269,7 @@ def merge_spec(spec, logger):
 
 
 def render_cache_template(osdpl, name, images):
-    artifacts = render_artifacts(osdpl)
+    artifacts = render_artifacts(osdpl["spec"])
     tpl = ENV.get_template("native/cache.yaml")
     text = tpl.render(images=images, name=name, pause_image=artifacts["pause"])
     return yaml.safe_load(text)
@@ -281,8 +281,7 @@ def render_cache_images():
     )
 
 
-def render_artifacts(osdpl):
-    spec = osdpl["spec"]
+def render_artifacts(spec):
     os_release = spec["openstack_version"]
     # values from profile were earlier merged to spec.
     images_base_url = spec["artifacts"]["images_base_url"]
