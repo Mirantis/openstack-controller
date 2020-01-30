@@ -4,6 +4,7 @@ import kopf
 from mcp_k8s_lib import utils
 
 from openstack_controller import layers
+from openstack_controller import kube
 from openstack_controller import openstack
 from openstack_controller import secrets
 from .base import Service, OpenStackService
@@ -490,6 +491,33 @@ class Octavia(OpenStackService):
             )
         )
         return t_args
+
+    async def cleanup_immutable_resources(self, new_obj, rendered_spec):
+        await super().cleanup_immutable_resources(new_obj, rendered_spec)
+
+        old_obj = kube.resource(rendered_spec)
+        old_obj.reload()
+
+        obj_name = "octavia-create-resources"
+        resource = self.get_child_object("Job", obj_name)
+
+        for old_release in old_obj.obj["spec"]["releases"]:
+            if old_release["chart"].endswith(f"/{self.openstack_chart}"):
+                for new_release in new_obj.obj["spec"]["releases"]:
+                    if new_release["chart"].endswith(
+                        f"/{self.openstack_chart}"
+                    ):
+                        old_image = old_release["values"]["octavia"][
+                            "settings"
+                        ].get("amphora_image_url")
+                        new_image = new_release["values"]["octavia"][
+                            "settings"
+                        ]["amphora_image_url"]
+                        if old_image is None or old_image != new_image:
+                            LOG.info(
+                                f"Removing the following jobs: [{obj_name}]"
+                            )
+                            await resource.purge()
 
 
 class RadosGateWay(Service):
