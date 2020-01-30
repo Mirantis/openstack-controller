@@ -58,13 +58,6 @@ spec:
         password: stacklight
   # enabled services and their specific configuration
   services:
-  # disable powerdns external service, because openstack CPI
-  # doesn't support UDP load balancers
-    dns:
-      designate:
-        values:
-          manifests:
-            service_powerdns_external: false
     # NOTE(vsaienko): run on all nodes to have access to public API from routers/VMs
     # For more details please see https://mirantis.jira.com/browse/PRODX-1321
     ingress:
