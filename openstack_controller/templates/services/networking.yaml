@@ -81,6 +81,40 @@ spec:
   - name: openstack-openvswitch
     chart: {{spec.common.infra.repo}}/openvswitch
     values:
+      pod:
+        probes:
+          ovs_db:
+            ovs_db:
+              liveness:
+                enabled: true
+                params:
+                  initialDelaySeconds: 0
+                  failureThreshold: 3
+                  periodSeconds: 30
+                  timeoutSeconds: 5
+              readiness:
+                enabled: true
+                params:
+                  initialDelaySeconds: 0
+                  failureThreshold: 3
+                  periodSeconds: 20
+                  timeoutSeconds: 5
+          ovs_vswitch:
+            ovs_vswitch:
+              liveness:
+                enabled: true
+                params:
+                  initialDelaySeconds: 0
+                  failureThreshold: 3
+                  periodSeconds: 30
+                  timeoutSeconds: 5
+              readiness:
+                enabled: true
+                params:
+                  initialDelaySeconds: 0
+                  failureThreshold: 3
+                  periodSeconds: 10
+                  timeoutSeconds: 5
       images:
         tags:
 {%- for image in [
