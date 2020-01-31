@@ -211,6 +211,9 @@ spec:
           keystone_authtoken:
             memcache_security_strategy: ENCRYPT
             memcache_secret_key: {{ credentials.memcached }}
+          service_auth:
+            memcache_security_strategy: ENCRYPT
+            memcache_secret_key: {{ credentials.memcached }}
           certificates:
             endpoint_type: internalURL
           haproxy_amphora:
