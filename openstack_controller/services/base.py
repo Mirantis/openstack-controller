@@ -291,6 +291,10 @@ class Service:
                 helmbundle_obj.obj,
             )
         else:
+            if kwargs.get("helmobj_overrides", {}):
+                self._helm_obj_override(
+                    helmbundle_obj, kwargs["helmobj_overrides"]
+                )
             helmbundle_obj.create()
             LOG.debug(
                 f"{helmbundle_obj.kind} child is created: %s",
@@ -301,6 +305,15 @@ class Service:
             reason=event.capitalize(),
             message=f"{event}d {helmbundle_obj.kind} for {self.service}",
         )
+
+    def _helm_obj_override(self, obj, overrides):
+        for release in obj.obj["spec"]["releases"]:
+            name = release["name"]
+            if name in overrides:
+                LOG.info(
+                    f"Setting values {overrides[name]} for release {name}"
+                )
+                layers.merger.merge(release["values"], overrides[name])
 
     async def wait_service_healthy(self):
         for health_group in self.health_groups:

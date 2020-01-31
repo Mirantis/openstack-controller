@@ -1,3 +1,4 @@
+import asyncio
 import kopf
 from mcp_k8s_lib import utils
 
@@ -5,6 +6,7 @@ from openstack_controller import constants
 from openstack_controller import layers
 from openstack_controller import kube
 from openstack_controller import secrets
+from openstack_controller import settings
 from .base import Service, OpenStackService, OpenStackServiceWithCeph
 
 
@@ -401,9 +403,20 @@ class Nova(OpenStackServiceWithCeph):
                 "manifest": "job_cell_setup",
             },
         }
+        nova_deployments = {}
+        nova_secrets = {}
+        nova_ingresses = {}
+        nova_services = {}
         if self.openstack_version in [
             "queens",
             "rocky",
+            # Consider placement resources as childs in stein too,
+            # needed for upgrade from rocky to stein. The effect is
+            # that when nova is upgraded from rocky to stein or
+            # from stein to train it will remove placement-ks-*
+            # jobs. But there is no negative effect on placement
+            # upgrade result.
+            "stein",
         ]:
             nova_jobs = {
                 **nova_jobs,
@@ -420,8 +433,43 @@ class Nova(OpenStackServiceWithCeph):
                     "manifest": "job_ks_placement_endpoints",
                 },
             }
+            nova_deployments = {
+                **nova_deployments,
+                "nova-placement-api": {
+                    "manifest": "deployment_placement",
+                    "images": [],
+                },
+            }
+            nova_secrets = {
+                **nova_secrets,
+                "placement-tls-public": {
+                    "manifest": "ingress_placement",
+                    "images": [],
+                },
+            }
+            nova_services = {
+                **nova_services,
+                "placement-api": {
+                    "manifest": "service_placement",
+                    "images": [],
+                },
+                "placement": {
+                    "manifest": "service_ingress_placement",
+                    "images": [],
+                },
+            }
+            nova_ingresses = {
+                **nova_ingresses,
+                "placement": {"manifest": "ingress_placement", "images": [],},
+            }
         return {
-            "nova": {"Job": nova_jobs,},
+            "nova": {
+                "Job": nova_jobs,
+                "Secret": nova_secrets,
+                "Deployment": nova_deployments,
+                "Service": nova_services,
+                "Ingress": nova_ingresses,
+            },
             "rabbitmq": {
                 "Job": {
                     "openstack-nova-rabbitmq-cluster-wait": {
@@ -455,6 +503,81 @@ class Placement(OpenStackService):
                 "job_ks_user",
             }
         }
+
+    @layers.kopf_exception
+    async def upgrade(self, event, **kwargs):
+        LOG.info(f"Upgrading {self.service} started.")
+        # NOTE(mkarpin): skip health check for stein release,
+        # as this is first release where placement is added
+        if self.body["spec"]["openstack_version"] == "stein":
+            self._child_objects = {
+                "placement": {
+                    "Job": {
+                        "placement-db-nova-migrate-placement": {
+                            "images": ["placement_db_nova_migrate_placement"],
+                            "manifest": "job_db_nova_migrate_placement",
+                        },
+                    },
+                },
+            }
+            upgrade_map = [
+                ("Deployment", "nova-placement-api"),
+                ("Job", "placement-ks-user"),
+                ("Job", "placement-ks-service"),
+                ("Job", "placement-ks-endpoints"),
+                ("Service", "placement"),
+                ("Service", "placement-api"),
+                ("Secret", "placement-tls-public"),
+                ("Ingress", "placement"),
+            ]
+            compute_service_instance = Service.registry["compute"](
+                self.body, self.logger
+            )
+            try:
+                LOG.info(
+                    f"Disabling Nova child objects related to {self.service}."
+                )
+                kwargs["helmobj_overrides"] = {
+                    "openstack-placement": {
+                        "manifests": {"job_db_nova_migrate_placement": True}
+                    }
+                }
+                for kind, obj_name in upgrade_map:
+                    child_obj = compute_service_instance.get_child_object(
+                        kind, obj_name
+                    )
+                    await child_obj.disable(wait_completion=True)
+                LOG.info(
+                    f"{self.service} database migration will be performed."
+                )
+                await self.apply(event, **kwargs)
+                # TODO(vsaienko): implement logic that will check that changes made in helmbundle
+                # object were handled by tiller/helmcontroller
+                # can be done only once https://mirantis.jira.com/browse/PRODX-2283 is implemented.
+                await asyncio.sleep(settings.OSCTL_HELMBUNDLE_APPLY_DELAY)
+                await self.wait_service_healthy()
+                # NOTE(mkarpin): db sync job should be cleaned up after upgrade and before apply
+                # because placement_db_nova_migrate_placement job is in dynamic dependencies
+                # for db sync job, during apply it will be removed
+                LOG.info(f"Cleaning up database migration jobs")
+                await self.get_child_object("Job", "placement-db-sync").purge()
+                await self.get_child_object(
+                    "Job", "placement-db-nova-migrate-placement"
+                ).disable(wait_completion=True)
+            except Exception as e:
+                # NOTE(mkarpin): in case something went wrong during placement migration
+                # we need to cleanup all child objects related to placement
+                # because disabling procedure  in next retry will never succeed, because
+                # nova release already have all objects disabled.
+                for kind, obj_name in upgrade_map:
+                    child_obj = compute_service_instance.get_child_object(
+                        kind, obj_name
+                    )
+                    await child_obj.purge()
+                raise kopf.TemporaryError(f"{e}") from e
+        else:
+            await super().upgrade(event, **kwargs)
+        LOG.info(f"Upgrading {self.service} done")
 
 
 class Octavia(OpenStackService):

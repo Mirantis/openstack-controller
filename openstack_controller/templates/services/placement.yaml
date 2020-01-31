@@ -18,6 +18,7 @@ spec:
     "db_init",
     "db_drop",
     "placement_db_sync",
+    "placement_db_nova_migrate_placement",
     "dep_check",
     "image_repo_sync", ] %}
         {%- if image in images %}

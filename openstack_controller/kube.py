@@ -176,6 +176,20 @@ class HelmBundleMixin:
                 return True
 
 
+class Secret(pykube.Secret, HelmBundleMixin):
+    pass
+
+
+class Service(pykube.Service, HelmBundleMixin):
+    pass
+
+
+class Ingress(pykube.objects.NamespacedAPIObject, HelmBundleMixin):
+    version = "extensions/v1beta1"
+    endpoint = "ingresses"
+    kind = "Ingress"
+
+
 class Job(pykube.Job, HelmBundleMixin):
 
     immutable = True
