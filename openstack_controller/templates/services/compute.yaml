@@ -145,6 +145,75 @@ spec:
         {%- endif %}
 {%- endfor %}
       pod:
+        probes:
+          rpc_timeout: 30
+          rpc_retries: 2
+          compute:
+            default:
+              liveness:
+                enabled: True
+                params:
+                  initialDelaySeconds: 0
+                  periodSeconds: 50
+                  timeoutSeconds: 40
+              readiness:
+                enabled: True
+                params:
+                  initialDelaySeconds: 0
+                  periodSeconds: 50
+                  timeoutSeconds: 40
+          conductor:
+            default:
+              liveness:
+                enabled: True
+                params:
+                  initialDelaySeconds: 0
+                  periodSeconds: 50
+                  timeoutSeconds: 40
+              readiness:
+                enabled: True
+                params:
+                  initialDelaySeconds: 0
+                  periodSeconds: 50
+                  timeoutSeconds: 40
+          consoleauth:
+            default:
+              liveness:
+                enabled: True
+                params:
+                  initialDelaySeconds: 0
+                  periodSeconds: 50
+                  timeoutSeconds: 40
+              readiness:
+                enabled: True
+                params:
+                  initialDelaySeconds: 0
+                  periodSeconds: 50
+                  timeoutSeconds: 40
+          novncproxy:
+            default:
+              liveness:
+                enabled: True
+                params:
+                  initialDelaySeconds: 0
+              readiness:
+                enabled: True
+                params:
+                  initialDelaySeconds: 0
+          scheduler:
+            default:
+              liveness:
+                enabled: True
+                params:
+                  initialDelaySeconds: 0
+                  periodSeconds: 50
+                  timeoutSeconds: 40
+              readiness:
+                enabled: True
+                params:
+                  initialDelaySeconds: 0
+                  periodSeconds: 50
+                  timeoutSeconds: 40
         replicas:
           osapi: 3
           placement: 3
