@@ -3,13 +3,7 @@
 set -e
 set -o pipefail
 
-which jg
-
-if [ $? -eq 1 ];
-then
-    echo "Please, install 'jq' before running this script"
-    exit 1
-fi
+command -v jq >/dev/null && echo "'jq' is installed. Configuring service token..." || { echo "Please, install 'jq' before running this script."; exit 1; }
 
 REPLICAS=`kubectl -n osh-system get deployment openstack-operator -o jsonpath='{.spec.replicas}' || echo 0`
 if [ $REPLICAS -gt 0 ];
