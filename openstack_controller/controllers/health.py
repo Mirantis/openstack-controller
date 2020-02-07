@@ -3,6 +3,7 @@ from mcp_k8s_lib import utils
 
 from openstack_controller import constants
 from openstack_controller import health
+from openstack_controller import kube
 from openstack_controller import settings
 
 LOG = utils.get_logger(__name__)
@@ -12,13 +13,27 @@ kopf.config.WatchersConfig.default_stream_timeout = (
 )
 
 
-def _delete(kind, meta, application, component):
+def get_osdpl(namespace):
+    osdpl = list(
+        kube.OpenStackDeployment.objects(kube.api).filter(namespace=namespace)
+    )
+    if len(osdpl) != 1:
+        LOG.warning(
+            f"Could not find unique OpenStackDeployment resource "
+            f"in namespace {namespace}, skipping health report processing."
+        )
+        return
+    return osdpl[0]
+
+
+def _delete(osdpl, kind, meta, application, component):
     LOG.info(f"Handling delete event for {kind}")
     name = meta["name"]
     namespace = meta["namespace"]
-    patch = {application: {component: None}}
     LOG.debug(f"Cleaning health for {kind} {name}")
-    health.report_to_osdpl(namespace, patch)
+    health.set_application_health(
+        osdpl, application, component, namespace, None, None
+    )
 
 
 # NOTE(vsaienko): for unknown reason when using optional=True, which have to
@@ -53,9 +68,12 @@ def _delete(kind, meta, application, component):
 @kopf.on.field("apps", "v1", "deployments", field="status.conditions")
 @kopf.on.delete("apps", "v1", "deployments")
 async def deployments(name, namespace, meta, status, new, event, **kwargs):
+    osdpl = get_osdpl(namespace)
+    if not osdpl:
+        return
     application, component = health.ident(meta)
     if event == "delete":
-        _delete("Deployment", meta, application, component)
+        _delete(osdpl, "Deployment", meta, application, component)
         return
     LOG.debug(f"Deployment {name} status.conditions is {status}")
     # TODO(pas-ha) investigate if we can use status.conditions
@@ -78,6 +96,7 @@ async def deployments(name, namespace, meta, status, new, event, **kwargs):
     elif progr_cond.reason == "ReplicaSetUpdated":
         res_health = constants.PROGRESS
     health.set_application_health(
+        osdpl,
         application,
         component,
         namespace,
@@ -89,9 +108,12 @@ async def deployments(name, namespace, meta, status, new, event, **kwargs):
 @kopf.on.field("apps", "v1", "statefulsets", field="status")
 @kopf.on.delete("apps", "v1", "statefulsets")
 async def statefulsets(name, namespace, meta, status, event, **kwargs):
+    osdpl = get_osdpl(namespace)
+    if not osdpl:
+        return
     application, component = health.ident(meta)
     if event == "delete":
-        _delete("StatefulSet", meta, application, component)
+        _delete(osdpl, "StatefulSet", meta, application, component)
         return
     LOG.debug(f"StatefulSet {name} status is {status}")
     st = health.StatefulSetStatus(**status)
@@ -111,6 +133,7 @@ async def statefulsets(name, namespace, meta, status, event, **kwargs):
         else:
             res_health = constants.BAD
     health.set_application_health(
+        osdpl,
         application,
         component,
         namespace,
@@ -122,9 +145,13 @@ async def statefulsets(name, namespace, meta, status, event, **kwargs):
 @kopf.on.field("apps", "v1", "daemonsets", field="status")
 @kopf.on.delete("apps", "v1", "daemonsets")
 async def daemonsets(name, namespace, meta, status, event, **kwargs):
+    LOG.debug(f"DaemonSet {name} status is {status}")
+    osdpl = get_osdpl(namespace)
+    if not osdpl:
+        return
     application, component = health.ident(meta)
     if event == "delete":
-        _delete("DaemonSet", meta, application, component)
+        _delete(osdpl, "DaemonSet", meta, application, component)
         return
     LOG.debug(f"DaemonSet {name} status is {status}")
     st = health.DaemonSetStatus(**status)
@@ -145,6 +172,7 @@ async def daemonsets(name, namespace, meta, status, event, **kwargs):
     elif st.numberReady < st.desiredNumberScheduled:
         res_health = constants.BAD
     health.set_application_health(
+        osdpl,
         application,
         component,
         namespace,

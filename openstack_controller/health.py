@@ -78,32 +78,17 @@ def ident(meta):
     return application, component
 
 
-def report_to_osdpl(namespace, status_health_patch):
-    # NOTE(pas-ha): this depends on fact that there's *only one* OsDpl object
-    # in the namespace, which is fine unitl we use openstack-helm
-    # since it has hardcoded names for all the top-level resources it creates.
-    # TODO(pas-ha) fix this whenever that assumption turns false
-    osdpl = list(
-        kube.OpenStackDeployment.objects(kube.api).filter(namespace=namespace)
-    )
-    if len(osdpl) == 1:
-        osdpl[0].patch({"status": {"health": status_health_patch}})
-    else:
-        LOG.warning(
-            f"Could not find unique OpenStackDeployment resource "
-            f"in namespace {namespace}, skipping health report."
-        )
-
-
 def set_application_health(
-    application, component, namespace, health, observed_generation
+    osdpl, application, component, namespace, health, observed_generation
 ):
     patch = {
         application: {
             component: {"status": health, "generation": observed_generation,}
+            if health is not None
+            else None
         }
     }
-    report_to_osdpl(namespace, patch)
+    osdpl.patch({"status": {"health": patch}})
 
 
 def is_application_ready(application, osdpl):
