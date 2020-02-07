@@ -1,12 +1,30 @@
 import kopf
-from mcp_k8s_lib import utils
+from mcp_k8s_lib import utils as mcp_utils
 
 from openstack_controller import constants
 from openstack_controller import health
+from openstack_controller import hooks
 from openstack_controller import kube
 from openstack_controller import settings
+from openstack_controller import utils
 
-LOG = utils.get_logger(__name__)
+
+LOG = mcp_utils.get_logger(__name__)
+
+# DAEMONSET_HOOKS format
+# {(transition state from, transition state to):
+#    {application-component: func to be called}}
+# node added in two transitions:
+# 1. from Ready to Unhealthy
+# 2. Unhealthy to Ready
+# node removed in two transitions:
+# 1. from Ready to Progressing
+# 2. from Progressing to Ready
+DAEMONSET_HOOKS = {
+    (constants.BAD, constants.OK): {
+        "nova-compute-default": hooks.nova_daemonset_created
+    },
+}
 
 kopf.config.WatchersConfig.default_stream_timeout = (
     settings.KOPF_WATCH_STREAM_TIMEOUT
@@ -171,6 +189,26 @@ async def daemonsets(name, namespace, meta, status, event, **kwargs):
         res_health = constants.PROGRESS
     elif st.numberReady < st.desiredNumberScheduled:
         res_health = constants.BAD
+    prev_res_health = utils.get_in(
+        osdpl.obj,
+        ["status", "health", application, component],
+        {"status": ""},
+    )
+    LOG.debug(
+        f"Daemonset {application}-{component} state transition from {prev_res_health['status']} to {res_health}"
+    )
+    hook = utils.get_in(
+        DAEMONSET_HOOKS,
+        [
+            (prev_res_health["status"], res_health),
+            f"{application}-{component}",
+        ],
+    )
+    kwargs["OK_desiredNumberScheduled"] = prev_res_health.get(
+        "OK_desiredNumberScheduled", 0
+    )
+    if hook:
+        await hook(osdpl, name, namespace, meta, **kwargs)
     health.set_application_health(
         osdpl,
         application,
@@ -178,4 +216,7 @@ async def daemonsets(name, namespace, meta, status, event, **kwargs):
         namespace,
         res_health,
         status["observedGeneration"],
+        {"OK_desiredNumberScheduled": st.desiredNumberScheduled}
+        if res_health == constants.OK
+        else {},
     )

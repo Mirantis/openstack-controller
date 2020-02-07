@@ -79,7 +79,13 @@ def ident(meta):
 
 
 def set_application_health(
-    osdpl, application, component, namespace, health, observed_generation
+    osdpl,
+    application,
+    component,
+    namespace,
+    health,
+    observed_generation,
+    custom_data={},
 ):
     patch = {
         application: {
@@ -88,6 +94,7 @@ def set_application_health(
             else None
         }
     }
+    patch[application][component].update(custom_data)
     osdpl.patch({"status": {"health": patch}})
 
 
