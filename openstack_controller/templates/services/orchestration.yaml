@@ -155,11 +155,11 @@ spec:
               host: heat.{{ spec.public_domain_name }}
               tls:
                 ca: |
-{{ spec.features.ssl.public_endpoints.ca_cert | indent( width=18, indentfirst=True) }}
+{{ spec.features.ssl.public_endpoints.ca_cert | indent( width=18, first=True) }}
                 crt: |
-{{ spec.features.ssl.public_endpoints.api_cert | indent( width=18, indentfirst=True) }}
+{{ spec.features.ssl.public_endpoints.api_cert | indent( width=18, first=True) }}
                 key: |
-{{ spec.features.ssl.public_endpoints.api_key | indent( width=18, indentfirst=True) }}
+{{ spec.features.ssl.public_endpoints.api_key | indent( width=18, first=True) }}
           hosts:
             admin:
               host: heat-api
@@ -169,11 +169,11 @@ spec:
               host: heat
               tls:
                 ca: |
-{{ spec.features.ssl.public_endpoints.ca_cert | indent( width=18, indentfirst=True) }}
+{{ spec.features.ssl.public_endpoints.ca_cert | indent( width=18, first=True) }}
                 crt: |
-{{ spec.features.ssl.public_endpoints.api_cert | indent( width=18, indentfirst=True) }}
+{{ spec.features.ssl.public_endpoints.api_cert | indent( width=18, first=True) }}
                 key: |
-{{ spec.features.ssl.public_endpoints.api_key | indent( width=18, indentfirst=True) }}
+{{ spec.features.ssl.public_endpoints.api_key | indent( width=18, first=True) }}
           port:
             api:
               admin: 8004
@@ -189,11 +189,11 @@ spec:
               host: cloudformation.{{ spec.public_domain_name }}
               tls:
                 ca: |
-{{ spec.features.ssl.public_endpoints.ca_cert | indent( width=18, indentfirst=True) }}
+{{ spec.features.ssl.public_endpoints.ca_cert | indent( width=18, first=True) }}
                 crt: |
-{{ spec.features.ssl.public_endpoints.api_cert | indent( width=18, indentfirst=True) }}
+{{ spec.features.ssl.public_endpoints.api_cert | indent( width=18, first=True) }}
                 key: |
-{{ spec.features.ssl.public_endpoints.api_key | indent( width=18, indentfirst=True) }}
+{{ spec.features.ssl.public_endpoints.api_key | indent( width=18, first=True) }}
           hosts:
             admin:
               host: heat-cfn
@@ -203,11 +203,11 @@ spec:
               host: cloudformation
               tls:
                 ca: |
-{{ spec.features.ssl.public_endpoints.ca_cert | indent( width=18, indentfirst=True) }}
+{{ spec.features.ssl.public_endpoints.ca_cert | indent( width=18, first=True) }}
                 crt: |
-{{ spec.features.ssl.public_endpoints.api_cert | indent( width=18, indentfirst=True) }}
+{{ spec.features.ssl.public_endpoints.api_cert | indent( width=18, first=True) }}
                 key: |
-{{ spec.features.ssl.public_endpoints.api_key | indent( width=18, indentfirst=True) }}
+{{ spec.features.ssl.public_endpoints.api_key | indent( width=18, first=True) }}
           port:
             api:
               admin: 8000

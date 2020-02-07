@@ -253,11 +253,11 @@ spec:
               host: octavia.{{ spec.public_domain_name }}
               tls:
                 ca: |
-{{ spec.features.ssl.public_endpoints.ca_cert | indent( width=18, indentfirst=True) }}
+{{ spec.features.ssl.public_endpoints.ca_cert | indent( width=18, first=True) }}
                 crt: |
-{{ spec.features.ssl.public_endpoints.api_cert | indent( width=18, indentfirst=True) }}
+{{ spec.features.ssl.public_endpoints.api_cert | indent( width=18, first=True) }}
                 key: |
-{{ spec.features.ssl.public_endpoints.api_key | indent( width=18, indentfirst=True) }}
+{{ spec.features.ssl.public_endpoints.api_key | indent( width=18, first=True) }}
           hosts:
             admin:
               host: octavia-api
@@ -267,11 +267,11 @@ spec:
               host: octavia
               tls:
                 ca: |
-{{ spec.features.ssl.public_endpoints.ca_cert | indent( width=18, indentfirst=True) }}
+{{ spec.features.ssl.public_endpoints.ca_cert | indent( width=18, first=True) }}
                 crt: |
-{{ spec.features.ssl.public_endpoints.api_cert | indent( width=18, indentfirst=True) }}
+{{ spec.features.ssl.public_endpoints.api_cert | indent( width=18, first=True) }}
                 key: |
-{{ spec.features.ssl.public_endpoints.api_key | indent( width=18, indentfirst=True) }}
+{{ spec.features.ssl.public_endpoints.api_key | indent( width=18, first=True) }}
           port:
             api:
               admin: 9876

@@ -169,11 +169,11 @@ spec:
               host: designate.{{ spec.public_domain_name }}
               tls:
                 ca: |
-{{ spec.features.ssl.public_endpoints.ca_cert | indent( width=18, indentfirst=True) }}
+{{ spec.features.ssl.public_endpoints.ca_cert | indent( width=18, first=True) }}
                 crt: |
-{{ spec.features.ssl.public_endpoints.api_cert | indent( width=18, indentfirst=True) }}
+{{ spec.features.ssl.public_endpoints.api_cert | indent( width=18, first=True) }}
                 key: |
-{{ spec.features.ssl.public_endpoints.api_key | indent( width=18, indentfirst=True) }}
+{{ spec.features.ssl.public_endpoints.api_key | indent( width=18, first=True) }}
           hosts:
             admin:
               host: designate-api
@@ -183,11 +183,11 @@ spec:
               host: designate
               tls:
                 ca: |
-{{ spec.features.ssl.public_endpoints.ca_cert | indent( width=18, indentfirst=True) }}
+{{ spec.features.ssl.public_endpoints.ca_cert | indent( width=18, first=True) }}
                 crt: |
-{{ spec.features.ssl.public_endpoints.api_cert | indent( width=18, indentfirst=True) }}
+{{ spec.features.ssl.public_endpoints.api_cert | indent( width=18, first=True) }}
                 key: |
-{{ spec.features.ssl.public_endpoints.api_key | indent( width=18, indentfirst=True) }}
+{{ spec.features.ssl.public_endpoints.api_key | indent( width=18, first=True) }}
           port:
             api:
               admin: 9001
@@ -202,11 +202,11 @@ spec:
             public:
               tls:
                 ca: |
-{{ spec.features.ssl.public_endpoints.ca_cert | indent( width=18, indentfirst=True) }}
+{{ spec.features.ssl.public_endpoints.ca_cert | indent( width=18, first=True) }}
                 crt: |
-{{ spec.features.ssl.public_endpoints.api_cert | indent( width=18, indentfirst=True) }}
+{{ spec.features.ssl.public_endpoints.api_cert | indent( width=18, first=True) }}
                 key: |
-{{ spec.features.ssl.public_endpoints.api_key | indent( width=18, indentfirst=True) }}
+{{ spec.features.ssl.public_endpoints.api_key | indent( width=18, first=True) }}
           hosts:
             admin:
               host: designate-mdns
@@ -215,11 +215,11 @@ spec:
               host: minidns
               tls:
                 ca: |
-{{ spec.features.ssl.public_endpoints.ca_cert | indent( width=18, indentfirst=True) }}
+{{ spec.features.ssl.public_endpoints.ca_cert | indent( width=18, first=True) }}
                 crt: |
-{{ spec.features.ssl.public_endpoints.api_cert | indent( width=18, indentfirst=True) }}
+{{ spec.features.ssl.public_endpoints.api_cert | indent( width=18, first=True) }}
                 key: |
-{{ spec.features.ssl.public_endpoints.api_key | indent( width=18, indentfirst=True) }}
+{{ spec.features.ssl.public_endpoints.api_key | indent( width=18, first=True) }}
           port:
             ipc:
               admin: 5354

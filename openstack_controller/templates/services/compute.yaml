@@ -276,11 +276,11 @@ spec:
               host: nova.{{ spec.public_domain_name }}
               tls:
                 ca: |
-{{ spec.features.ssl.public_endpoints.ca_cert | indent( width=18, indentfirst=True) }}
+{{ spec.features.ssl.public_endpoints.ca_cert | indent( width=18, first=True) }}
                 crt: |
-{{ spec.features.ssl.public_endpoints.api_cert | indent( width=18, indentfirst=True) }}
+{{ spec.features.ssl.public_endpoints.api_cert | indent( width=18, first=True) }}
                 key: |
-{{ spec.features.ssl.public_endpoints.api_key | indent( width=18, indentfirst=True) }}
+{{ spec.features.ssl.public_endpoints.api_key | indent( width=18, first=True) }}
           hosts:
             admin:
               host: nova-api
@@ -290,11 +290,11 @@ spec:
               host: nova
               tls:
                 ca: |
-{{ spec.features.ssl.public_endpoints.ca_cert | indent( width=18, indentfirst=True) }}
+{{ spec.features.ssl.public_endpoints.ca_cert | indent( width=18, first=True) }}
                 crt: |
-{{ spec.features.ssl.public_endpoints.api_cert | indent( width=18, indentfirst=True) }}
+{{ spec.features.ssl.public_endpoints.api_cert | indent( width=18, first=True) }}
                 key: |
-{{ spec.features.ssl.public_endpoints.api_key | indent( width=18, indentfirst=True) }}
+{{ spec.features.ssl.public_endpoints.api_key | indent( width=18, first=True) }}
           port:
             api:
               admin: 8774
@@ -310,11 +310,11 @@ spec:
               host: placement.{{ spec.public_domain_name }}
               tls:
                 ca: |
-{{ spec.features.ssl.public_endpoints.ca_cert | indent( width=18, indentfirst=True) }}
+{{ spec.features.ssl.public_endpoints.ca_cert | indent( width=18, first=True) }}
                 crt: |
-{{ spec.features.ssl.public_endpoints.api_cert | indent( width=18, indentfirst=True) }}
+{{ spec.features.ssl.public_endpoints.api_cert | indent( width=18, first=True) }}
                 key: |
-{{ spec.features.ssl.public_endpoints.api_key | indent( width=18, indentfirst=True) }}
+{{ spec.features.ssl.public_endpoints.api_key | indent( width=18, first=True) }}
           hosts:
             admin:
               host: placement-api
@@ -324,11 +324,11 @@ spec:
               host: placement
               tls:
                 ca: |
-{{ spec.features.ssl.public_endpoints.ca_cert | indent( width=18, indentfirst=True) }}
+{{ spec.features.ssl.public_endpoints.ca_cert | indent( width=18, first=True) }}
                 crt: |
-{{ spec.features.ssl.public_endpoints.api_cert | indent( width=18, indentfirst=True) }}
+{{ spec.features.ssl.public_endpoints.api_cert | indent( width=18, first=True) }}
                 key: |
-{{ spec.features.ssl.public_endpoints.api_key | indent( width=18, indentfirst=True) }}
+{{ spec.features.ssl.public_endpoints.api_key | indent( width=18, first=True) }}
           port:
             api:
               admin: 8778
@@ -344,22 +344,22 @@ spec:
               host: novncproxy.{{ spec.public_domain_name }}
               tls:
                 ca: |
-{{ spec.features.ssl.public_endpoints.ca_cert | indent(width=18, indentfirst=True) }}
+{{ spec.features.ssl.public_endpoints.ca_cert | indent(width=18, first=True) }}
                 crt: |
-{{ spec.features.ssl.public_endpoints.api_cert | indent(width=18, indentfirst=True) }}
+{{ spec.features.ssl.public_endpoints.api_cert | indent(width=18, first=True) }}
                 key: |
-{{ spec.features.ssl.public_endpoints.api_key | indent(width=18, indentfirst=True) }}
+{{ spec.features.ssl.public_endpoints.api_key | indent(width=18, first=True) }}
           hosts:
             default: nova-novncproxy
             public:
               host: novncproxy
               tls:
                 ca: |
-{{ spec.features.ssl.public_endpoints.ca_cert | indent(width=18, indentfirst=True) }}
+{{ spec.features.ssl.public_endpoints.ca_cert | indent(width=18, first=True) }}
                 crt: |
-{{ spec.features.ssl.public_endpoints.api_cert | indent(width=18, indentfirst=True) }}
+{{ spec.features.ssl.public_endpoints.api_cert | indent(width=18, first=True) }}
                 key: |
-{{ spec.features.ssl.public_endpoints.api_key | indent(width=18, indentfirst=True) }}
+{{ spec.features.ssl.public_endpoints.api_key | indent(width=18, first=True) }}
           port:
             novnc_proxy:
               default: 6080

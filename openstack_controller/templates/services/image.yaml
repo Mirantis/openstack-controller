@@ -191,11 +191,11 @@ spec:
               host: glance.{{ spec.public_domain_name }}
               tls:
                 ca: |
-{{ spec.features.ssl.public_endpoints.ca_cert | indent( width=18, indentfirst=True) }}
+{{ spec.features.ssl.public_endpoints.ca_cert | indent( width=18, first=True) }}
                 crt: |
-{{ spec.features.ssl.public_endpoints.api_cert | indent( width=18, indentfirst=True) }}
+{{ spec.features.ssl.public_endpoints.api_cert | indent( width=18, first=True) }}
                 key: |
-{{ spec.features.ssl.public_endpoints.api_key | indent( width=18, indentfirst=True) }}
+{{ spec.features.ssl.public_endpoints.api_key | indent( width=18, first=True) }}
           hosts:
             admin:
               host: glance-api
@@ -205,11 +205,11 @@ spec:
               host: glance
               tls:
                 ca: |
-{{ spec.features.ssl.public_endpoints.ca_cert | indent( width=18, indentfirst=True) }}
+{{ spec.features.ssl.public_endpoints.ca_cert | indent( width=18, first=True) }}
                 crt: |
-{{ spec.features.ssl.public_endpoints.api_cert | indent( width=18, indentfirst=True) }}
+{{ spec.features.ssl.public_endpoints.api_cert | indent( width=18, first=True) }}
                 key: |
-{{ spec.features.ssl.public_endpoints.api_key | indent( width=18, indentfirst=True) }}
+{{ spec.features.ssl.public_endpoints.api_key | indent( width=18, first=True) }}
           port:
             api:
               admin: 9292
