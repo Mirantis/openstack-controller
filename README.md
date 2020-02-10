@@ -87,7 +87,6 @@ openstack server create --image cirros-0.4.0-x86_64-disk --flavor m1.tiny --nic 
    backend:
      simple_crypto:
        enabled: True
-       kek: 'YWJjZGVmZ2hpamtsbW5vcHFyc3R1dnd4eXoxMjM0NTY='
 ```
 ## Advanced Usage
 

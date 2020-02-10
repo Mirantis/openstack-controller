@@ -87,6 +87,7 @@ class Service:
 
     _service_accounts = []
     _required_accounts = {}
+    _secret_class = secrets.OpenStackServiceSecret
 
     @property
     def service_accounts(self) -> List[str]:
@@ -444,7 +445,7 @@ class Service:
         return {"ceph": ceph_config}
 
     def template_args(self, spec):
-        secret = secrets.OpenStackServiceSecret(self.namespace, self.service)
+        secret = self._secret_class(self.namespace, self.service)
         credentials = secret.ensure()
 
         admin_creds = self._get_admin_creds()

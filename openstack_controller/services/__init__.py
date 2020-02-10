@@ -101,6 +101,7 @@ class RabbitMQ(Service):
 class Barbican(OpenStackService):
     service = "key-manager"
     openstack_chart = "barbican"
+    _secret_class = secrets.BarbicanSecret
     _child_objects = {
         "rabbitmq": {
             "Job": {

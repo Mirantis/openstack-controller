@@ -1,4 +1,3 @@
-import collections
 import copy
 import logging
 from unittest import mock
@@ -17,7 +16,7 @@ def test_service_keystone_render(
 
     creds = secrets.OSSytemCreds("test", "test")
     admin_creds = secrets.OpenStackAdminCredentials(creds, creds, creds)
-    creds_dict = collections.defaultdict(lambda: creds)
+    creds_dict = {"user": creds, "admin": creds}
     credentials = secrets.OpenStackCredentials(
         database=creds_dict,
         messaging=creds_dict,
@@ -34,11 +33,11 @@ def test_service_keystone_render(
     }
     openstackdeployment_old = copy.deepcopy(openstackdeployment)
     service = services.Keystone(openstackdeployment, logging)
-    compute_helmbundle = service.render()
+    identity_helmbundle = service.render()
     # check no modification in-place for openstackdeployment
     assert openstackdeployment_old == openstackdeployment
-    assert compute_helmbundle["metadata"]["name"] == "openstack-identity"
+    assert identity_helmbundle["metadata"]["name"] == "openstack-identity"
     # check helmbundle has data from base.yaml
-    assert compute_helmbundle["spec"]["releases"][0]["values"]["images"][
+    assert identity_helmbundle["spec"]["releases"][0]["values"]["images"][
         "tags"
     ]

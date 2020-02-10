@@ -44,6 +44,30 @@ class OpenStackCredentials:
     notifications: Dict[str, OSSytemCreds]
     memcached: str
 
+    def __init__(
+        self, database=None, messaging=None, notifications=None, memcached=""
+    ):
+        self.database = database or {}
+        self.messaging = messaging or {}
+        self.notifications = notifications or {}
+        self.memcached = memcached
+
+
+@dataclass
+class BarbicanCredentials(OpenStackCredentials):
+    kek: str
+
+    def __init__(
+        self,
+        database=None,
+        messaging=None,
+        notifications=None,
+        memcached="",
+        kek="",
+    ):
+        super().__init__(database, messaging, notifications, memcached)
+        self.kek = kek
+
 
 @dataclass
 class GaleraCredentials:
@@ -202,14 +226,12 @@ class OpenStackServiceSecret(Secret):
         self.service = service
 
     def decode(self, data):
-        os_creds = OpenStackCredentials(
-            database={}, messaging={}, notifications={}, memcached=""
-        )
+        os_creds = self.secret_class()
 
         for kind, creds in data.items():
             decoded = json.loads(base64.b64decode(creds))
-            if kind == "memcached":
-                os_creds.memcached = decoded
+            if kind not in ["database", "messaging", "identity"]:
+                setattr(os_creds, kind, decoded)
                 continue
             cr = getattr(os_creds, kind)
             for account, c in decoded.items():
@@ -220,9 +242,7 @@ class OpenStackServiceSecret(Secret):
         return os_creds
 
     def create(self) -> Optional[OpenStackCredentials]:
-        os_creds = OpenStackCredentials(
-            database={}, messaging={}, notifications={}, memcached=""
-        )
+        os_creds = self.secret_class()
         srv = constants.OS_SERVICES_MAP.get(self.service)
         if srv:
             for service_type in ["database", "messaging", "notifications"]:
@@ -232,6 +252,18 @@ class OpenStackServiceSecret(Secret):
             os_creds.memcached = generate_password(length=16)
             return os_creds
         return
+
+
+class BarbicanSecret(OpenStackServiceSecret):
+    secret_class = BarbicanCredentials
+
+    def create(self):
+        os_creds = super().create()
+        # the kek should be a 32-byte value which is base64 encoded
+        os_creds.kek = base64.b64encode(
+            generate_password(length=32).encode()
+        ).decode()
+        return os_creds
 
 
 class GaleraSecret(Secret):

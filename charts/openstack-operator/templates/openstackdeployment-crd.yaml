@@ -169,10 +169,6 @@ spec:
                               description: >
                                 Indicates if simple_crypto backend is enabled
                               type: boolean
-                            kek:
-                              description: >
-                                A 32-byte value which is base64 encoded, needed for simple_crypto backend
-                              type: string
                 services:
                   type: array
                   description: List of enabled openstack and auxiliary services

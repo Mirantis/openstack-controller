@@ -31,7 +31,6 @@ spec:
       backend:
         simple_crypto:
           enabled: true
-          kek: YWJjZGVmZ2hpamtsbW5vcHFyc3R1dnd4eXoxMjM0NTY=
     cinder:
       backup:
         backend: ceph
