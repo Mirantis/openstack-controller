@@ -165,18 +165,47 @@ spec:
 {%- endfor %}
       pod:
         probes:
+          rpc_timeout: 30
+          rpc_retries: 2
           dhcp_agent:
             dhcp_agent:
+              liveness:
+                enabled: true
+                initialDelaySeconds: 0
+                periodSeconds: 50
+                timeoutSeconds: 40
               readiness:
                 enabled: false
           l3_agent:
             l3_agent:
+              liveness:
+                enabled: true
+                initialDelaySeconds: 0
+                periodSeconds: 50
+                timeoutSeconds: 40
               readiness:
                 enabled: false
           ovs_agent:
             ovs_agent:
+              liveness:
+                enabled: true
+                initialDelaySeconds: 0
+                periodSeconds: 50
+                timeoutSeconds: 40
               readiness:
                 enabled: false
+          metadata_agent:
+            metadata_agent:
+              liveness:
+                enabled: true
+                initialDelaySeconds: 0
+                periodSeconds: 50
+                timeoutSeconds: 40
+              readiness:
+                enabled: true
+                initialDelaySeconds: 0
+                periodSeconds: 50
+                timeoutSeconds: 40
       {%- if spec.get('features', {}).get('neutron', {}).get('dvr', {}).get('enabled', False) %}
       labels:
         agent:
