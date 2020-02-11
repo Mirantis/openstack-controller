@@ -119,7 +119,7 @@ class HelmBundleMixin:
         diff["manifests"][self.helmbundle_ext.manifest] = False
         i = 1
         while True:
-            await self.service.set_release_values(diff)
+            self.service.set_release_values(diff)
             if not wait_completion:
                 return
             if not self.exists():
@@ -132,15 +132,12 @@ class HelmBundleMixin:
 
     async def disable(
         self,
-        version,
         wait_completion=False,
         timeout=settings.OSCTL_HELMBUNLE_MANIFEST_DISABLE_TIMEOUT,
         delay=settings.OSCTL_HELMBUNLE_MANIFEST_DISABLE_DELAY,
     ):
         await asyncio.wait_for(
-            self._disable(
-                version, wait_completion=wait_completion, delay=delay
-            ),
+            self._disable(wait_completion=wait_completion, delay=delay),
             timeout=timeout,
         )
 
