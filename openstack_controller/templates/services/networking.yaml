@@ -4,8 +4,9 @@
 {%- set service = 'neutron' %}
 {%- set messaging = spec.get('features', {}).get('messaging', {}) %}
 {%- set stacklight_enabled = spec.get('features', {}).get('stacklight', {}).get('enabled', False) %}
+{%- set tungstenfabric_enabled = spec.features.neutron.get('backend', 'ml2') == 'tungstenfabric' %}
 {%- set notification_topics = ['notifications'] %}
-{%- set service_plugins = ['router', 'metering'] %}
+{%- set service_plugins = ['<None>'] if tungstenfabric_enabled else ['router', 'metering'] %}
 {%- do notification_topics.append('stacklight_notifications') if stacklight_enabled %}
 {%- set floating_network = spec.features.neutron.get('floating_network', {}) %}
 
@@ -78,6 +79,7 @@ spec:
         prometheus_exporter:
           rabbit_exporters: "overview,exchange,node"
   {%- endif %}
+  {%- if not tungstenfabric_enabled %}
   - name: openstack-openvswitch
     chart: {{spec.common.infra.repo}}/openvswitch
     values:
@@ -128,6 +130,7 @@ spec:
 {%- endfor %}
       endpoints:
         cluster_domain_suffix: {{ spec.internal_domain_name }}
+  {%- endif %}
 {%- if spec.get('migration', {}).get('neutron', {}).get('deploy_main_service', true) %}
   - name: openstack-neutron
     chart: {{spec.common.openstack.repo}}/neutron
@@ -306,8 +309,18 @@ spec:
       manifests:
         job_rabbit_init: false
         secret_ca_bundle: true
-      {%- if spec.get('features', {}).get('neutron', {}).get('tunnel_interface') %}
+      {%- if tungstenfabric_enabled %}
+        daemonset_dhcp_agent: false
+        daemonset_l3_agent: false
+        daemonset_lb_agent: false
+        daemonset_metadata_agent: false
+        daemonset_ovs_agent: false
+        daemonset_sriov_agent: false
+        pod_rally_test: false
+      {%- endif %}
       network:
+        core_plugin: {{ spec.features.neutron.get('backend', 'ml2') }}
+      {%- if spec.get('features', {}).get('neutron', {}).get('tunnel_interface') %}
         interface:
           tunnel: {{ spec.features.neutron.tunnel_interface }}
       {%- endif %}
@@ -362,6 +375,12 @@ spec:
             {%- endif %}
             dnsmasq_local_resolv: true
             service_plugins: {{ service_plugins|join(',') }}
+          {%- if tungstenfabric_enabled %}
+            core_plugin: neutron_plugin_contrail.plugins.opencontrail.contrail_plugin.NeutronPluginContrailCoreV2
+            api_extensions_path: 'extensions:/var/lib/openstack/lib/python3.6/site-packages/neutron_plugin_contrail/extensions'
+          quotas:
+            quota_driver: neutron_plugin_contrail.plugins.opencontrail.quota.driver.QuotaDriver
+          {%- endif %}
           oslo_messaging_notifications:
             topics: {{ notification_topics|join(',') }}
         logging:

@@ -76,6 +76,7 @@ spec:
               type: string
               enum:
                 - compute
+                - compute-tf
             size:
               description: timeout and sizing parameters
               type: string
@@ -278,7 +279,8 @@ spec:
                       type: string
                       description: Neutron backend
                       enum:
-                        - ovs
+                        - ml2
+                        - tungstenfabric
                     external_networks:
                       type: array
                       items:

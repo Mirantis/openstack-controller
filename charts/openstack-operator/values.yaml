@@ -23,6 +23,10 @@ osdpl:
   namespace: openstack
   cephSharedNamespace: openstack-ceph-shared
 
+tf:
+  createSharedNamespace: true
+  sharedNamespace: openstack-tf-shared
+
 helmbundle:
   # unless we deploy it via kaas management cluster
   enabled: false

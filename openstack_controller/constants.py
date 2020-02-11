@@ -62,3 +62,7 @@ RGW_KEYSTONE_SECRET = "ceph-keystone-user"
 
 # Health
 UNKNOWN, OK, PROGRESS, BAD = "Unknown", "Ready", "Progressing", "Unhealthy"
+
+NEUTRON_KEYSTONE_SECRET = "neutron-keystone-admin"
+OPENSTACK_TF_SHARED_NAMESPACE = "openstack-tf-shared"
+OPENSTACK_TF_SECRET = "tf-data"

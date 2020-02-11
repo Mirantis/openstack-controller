@@ -1,4 +1,5 @@
 import asyncio
+import base64
 import kopf
 from mcp_k8s_lib import utils
 
@@ -395,6 +396,20 @@ class Neutron(OpenStackService):
             }
         }
     }
+
+    async def apply(self, event, **kwargs):
+        features = self.body["spec"]["features"].get("neutron", {})
+        if features.get("backend", "") == "tungstenfabric":
+            secret_data = {
+                "tunnel_interface": base64.b64encode(
+                    features.get("tunnel_interface", "").encode()
+                ).decode()
+            }
+
+            tfs = secrets.TungstenFabricSecret()
+            tfs.save(secret_data)
+
+        await super().apply(event, **kwargs)
 
 
 class Nova(OpenStackServiceWithCeph):

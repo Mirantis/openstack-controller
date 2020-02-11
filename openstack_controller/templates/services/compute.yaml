@@ -6,6 +6,7 @@
 {%- set stacklight_enabled = spec.get('features', {}).get('stacklight', {}).get('enabled', False) %}
 {%- set notification_topics = ['notifications'] %}
 {%- do notification_topics.append('stacklight_notifications') if stacklight_enabled %}
+{%- set neutron_backend = spec.features.neutron.get('backend', 'ml2') %}
 
 spec:
   releases:
@@ -107,6 +108,10 @@ spec:
 {%- endif %}
         libvirt:
           listen_addr: 0.0.0.0
+      {%- if neutron_backend == 'tungstenfabric' %}
+      network:
+        backend: []
+      {%- endif %}
 {%- if spec.get('migration', {}).get('nova', {}).get('deploy_main_service', True) %}
   - name: openstack-nova
     chart: {{spec.common.openstack.repo}}/nova
@@ -430,6 +435,10 @@ spec:
         ssh_public: |
           {{ ssh_credentials.public }}
       network:
+        core_plugin: {{ neutron_backend }}
+        {%- if neutron_backend == 'tungstenfabric' %}
+        backend: []
+        {%- endif %}
         sshd:
           enabled: true
 {%- endif %}

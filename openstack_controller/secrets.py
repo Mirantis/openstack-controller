@@ -447,6 +447,19 @@ class KeycloakSecret(Secret):
         return KeycloackCreds(passphrase=salt)
 
 
+class TungstenFabricSecret(Secret):
+    secret_name = constants.OPENSTACK_TF_SECRET
+
+    def __init__(self, namespace=constants.OPENSTACK_TF_SHARED_NAMESPACE):
+        super().__init__(namespace)
+
+    def save(self, secret) -> None:
+        kube.save_secret_data(self.namespace, self.secret_name, secret)
+
+    def create(self):
+        pass
+
+
 # NOTE(e0ne): Service accounts is a special case so we don't inherit it from
 # Secret class now.
 class ServiceAccountsSecrets:

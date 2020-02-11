@@ -46,7 +46,7 @@ spec:
         oidc:
           OIDCSSLValidateServer: false
     neutron:
-      backend: ovs
+      backend: ml2
       external_networks:
       - bridge: br-ex
         interface: veth-phy

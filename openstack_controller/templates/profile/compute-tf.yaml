@@ -21,7 +21,6 @@ features:
     - networking
     - orchestration
     - messaging
-    - load-balancer
 {%- if openstack_version not in ['queens', 'rocky'] %}
     - placement
 {%- endif %}
@@ -34,7 +33,7 @@ features:
     backup:
       backend: ceph
   neutron:
-    backend: ml2
+    backend: tungstenfabric
   database:
     local_volumes:
       enabled: true
@@ -42,7 +41,7 @@ features:
     public_endpoints:
       enabled: true
   stacklight:
-    enabled: true
+    enabled: false
     user:
       username: stacklight
 services:
@@ -110,10 +109,6 @@ services:
             - (?:neutron_tempest_plugin.api.test_allowed_address_pair.AllowedAddressPairTestJSON)
             - (?:neutron_tempest_plugin.api.test_extra_dhcp_options.ExtraDHCPOptionsIpV6TestJSON)
             - (?:neutron_tempest_plugin.api.test_extra_dhcp_options.ExtraDHCPOptionsTestJSON)
-            # test_ipv6_vip_mixed_ipv4_ipv6_members_traffic test is added to the list because the test requires IPv4 IPv6 dual stack mode in
-            # Kubernetes but the modes is supported from 1.16 version of Kubernetes. The test will be removed from the list once Kubernetes server
-            # will be at or later than version v1.16. The bug is described more comprehensively in PRODX-2330
-            - (?:octavia_tempest_plugin.tests.scenario.v2.test_ipv6_traffic_ops.IPv6TrafficOperationsScenarioTest.test_ipv6_vip_mixed_ipv4_ipv6_members_traffic)
           script: |
             tempest run --config-file /etc/tempest/tempest.conf -w 4 --smoke --blacklist-file  /etc/tempest/test-blacklist
           tempest:
