@@ -5,7 +5,7 @@ from openstack_controller import constants
 from openstack_controller import layers
 from openstack_controller import kube
 from openstack_controller import secrets
-from .base import Service, OpenStackService
+from .base import Service, OpenStackService, OpenStackServiceWithCeph
 
 
 LOG = utils.get_logger(__name__)
@@ -114,8 +114,7 @@ class Barbican(OpenStackService):
     }
 
 
-class Cinder(OpenStackService):
-    ceph_required = True
+class Cinder(OpenStackServiceWithCeph):
     service = "block-storage"
     openstack_chart = "cinder"
     _child_objects = {
@@ -182,8 +181,7 @@ class Designate(OpenStackService):
         return t_args
 
 
-class Glance(OpenStackService):
-    ceph_required = True
+class Glance(OpenStackServiceWithCeph):
     service = "image"
     openstack_chart = "glance"
 
@@ -363,9 +361,8 @@ class Neutron(OpenStackService):
     }
 
 
-class Nova(OpenStackService):
+class Nova(OpenStackServiceWithCeph):
     service = "compute"
-    ceph_required = True
     openstack_chart = "nova"
 
     @property

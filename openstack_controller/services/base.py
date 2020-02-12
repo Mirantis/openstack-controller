@@ -68,7 +68,6 @@ class GenericChildObject:
 
 class Service:
 
-    ceph_required = False
     service = None
     group = "lcm.mirantis.com"
     version = "v1alpha1"
@@ -269,8 +268,6 @@ class Service:
         ):
             status_patch = {"children": {self.resource_name: "Unknown"}}
             self.update_status(status_patch)
-        if self.ceph_required:
-            self.ensure_ceph_secrets()
         LOG.info(f"Applying config for {self.service}")
         data = self.render()
 
@@ -326,6 +323,91 @@ class Service:
         await self.wait_service_healthy()
         LOG.info(f"Upgrading {self.service} done")
 
+    def template_args(self, spec):
+        secret = self._secret_class(self.namespace, self.service)
+        credentials = secret.ensure()
+
+        admin_creds = self._get_admin_creds()
+        service_secrets = secrets.ServiceAccountsSecrets(
+            self.namespace,
+            self.service,
+            self.service_accounts,
+            self._required_accounts,
+        )
+        service_creds = service_secrets.ensure()
+
+        template_args = {
+            "credentials": credentials,
+            "admin_creds": admin_creds,
+            "service_creds": service_creds,
+        }
+
+        return template_args
+
+    @layers.kopf_exception
+    def render(self, openstack_version=""):
+        spec = layers.merge_spec(self.body["spec"], self.logger)
+        if openstack_version:
+            spec["openstack_version"] = openstack_version
+        template_args = self.template_args(spec)
+        data = layers.merge_all_layers(
+            self.service,
+            self.body,
+            self.body["metadata"],
+            spec,
+            self.logger,
+            **template_args,
+        )
+        data.update(self.resource_def)
+
+        return data
+
+    def get_chart_value_or_none(
+        self, chart, path, openstack_version=None, default=None
+    ):
+        data = self.render(openstack_version)
+        value = None
+        for release in data["spec"]["releases"]:
+            if release["chart"].endswith(f"/{chart}"):
+                value = release["values"]
+                try:
+                    for path_link in path:
+                        value = value[path_link]
+                except KeyError:
+                    return default
+        return value
+
+    def get_image(self, name, chart, openstack_version=None):
+        return self.get_chart_value_or_none(
+            chart,
+            ["images", "tags", name],
+            openstack_version=openstack_version,
+        )
+
+
+class OpenStackService(Service):
+    openstack_chart = None
+
+    @property
+    def health_groups(self):
+        return [self.openstack_chart]
+
+    @property
+    def _child_generic_objects(self):
+        return {
+            f"{self.openstack_chart}": {
+                "job_db_init",
+                "job_db_sync",
+                "job_db_drop",
+                "job_ks_endpoints",
+                "job_ks_service",
+                "job_ks_user",
+                "job_bootstrap",
+            }
+        }
+
+
+class OpenStackServiceWithCeph(OpenStackService):
     def ensure_ceph_secrets(self):
         self.osdpl.reload()
         if all(
@@ -444,87 +526,12 @@ class Service:
                 }
         return {"ceph": ceph_config}
 
+    async def apply(self, event, **kwargs):
+        # ensure child ref exists in the status
+        self.ensure_ceph_secrets()
+        await super().apply(event, **kwargs)
+
     def template_args(self, spec):
-        secret = self._secret_class(self.namespace, self.service)
-        credentials = secret.ensure()
-
-        admin_creds = self._get_admin_creds()
-        service_secrets = secrets.ServiceAccountsSecrets(
-            self.namespace,
-            self.service,
-            self.service_accounts,
-            self._required_accounts,
-        )
-        service_creds = service_secrets.ensure()
-
-        template_args = {
-            "credentials": credentials,
-            "admin_creds": admin_creds,
-            "service_creds": service_creds,
-        }
-        if self.ceph_required:
-            template_args.update(self.ceph_config())
-
+        template_args = super().template_args(spec)
+        template_args.update(self.ceph_config())
         return template_args
-
-    @layers.kopf_exception
-    def render(self, openstack_version=""):
-        spec = layers.merge_spec(self.body["spec"], self.logger)
-        if openstack_version:
-            spec["openstack_version"] = openstack_version
-        template_args = self.template_args(spec)
-        data = layers.merge_all_layers(
-            self.service,
-            self.body,
-            self.body["metadata"],
-            spec,
-            self.logger,
-            **template_args,
-        )
-        data.update(self.resource_def)
-
-        return data
-
-    def get_chart_value_or_none(
-        self, chart, path, openstack_version=None, default=None
-    ):
-        data = self.render(openstack_version)
-        value = None
-        for release in data["spec"]["releases"]:
-            if release["chart"].endswith(f"/{chart}"):
-                value = release["values"]
-                try:
-                    for path_link in path:
-                        value = value[path_link]
-                except KeyError:
-                    return default
-        return value
-
-    def get_image(self, name, chart, openstack_version=None):
-        return self.get_chart_value_or_none(
-            chart,
-            ["images", "tags", name],
-            openstack_version=openstack_version,
-        )
-
-
-class OpenStackService(Service):
-    openstack_chart = None
-
-    @property
-    def health_groups(self):
-        return [self.openstack_chart]
-
-    @property
-    def _child_generic_objects(self):
-        return {
-            f"{self.openstack_chart}": {
-                "job_db_init",
-                "job_db_sync",
-                "job_db_drop",
-                "job_ks_endpoints",
-                "job_ks_service",
-                "job_ks_user",
-                "job_bootstrap",
-            }
-        }
