@@ -192,6 +192,7 @@ spec:
                       - dns
                       - key-manager
                       - placement
+                      - coordination
                 nova:
                   type: object
                   required:

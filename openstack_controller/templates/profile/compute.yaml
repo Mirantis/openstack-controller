@@ -25,6 +25,7 @@ features:
 {%- if openstack_version not in ['queens', 'rocky'] %}
     - placement
 {%- endif %}
+    - coordination
   glance:
     backend: ceph
   cinder:

@@ -25,6 +25,7 @@ CHART_GROUP_MAPPING = {
         "openvswitch",
         "libvirt",
         "ingress",
+        "etcd",
     ],
 }
 

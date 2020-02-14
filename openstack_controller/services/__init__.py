@@ -21,6 +21,14 @@ class Ingress(Service):
         return ["ingress"]
 
 
+class Coordination(Service):
+    service = "coordination"
+
+    @property
+    def health_groups(self):
+        return ["etcd"]
+
+
 class MariaDB(Service):
     service = "database"
 

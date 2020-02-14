@@ -130,3 +130,4 @@ keystone_db_sync_expand: '{{ images_base_url }}/openstack/keystone:stein-bionic-
 keystone_db_sync_migrate: '{{ images_base_url }}/openstack/keystone:stein-bionic-20200128184224'
 keystone_db_sync_contract: '{{ images_base_url }}/openstack/keystone:stein-bionic-20200128184224'
 octavia_amphora: '{{ binary_base_url }}/openstack/bin/octavia/amphora-x64-haproxy-stein-20200125063158.qcow2'
+etcd: '{{ images_base_url }}/openstack/extra/etcd:3.2.24'

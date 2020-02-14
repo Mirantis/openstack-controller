@@ -1,0 +1,23 @@
+#apiVersion: lcm.mirantis.com/v1alpha1
+#kind: HelmBundle
+
+spec:
+  releases:
+  - name: openstack-etcd
+    chart: {{spec.common.infra.repo}}/etcd
+    values:
+      images:
+        tags:
+{%- for image in [
+    "etcd",
+    "dep_check",
+    "image_repo_sync",] %}
+        {%- if image in images %}
+          {{ image }}: {{ images[image] }}
+        {%- endif %}
+{%- endfor %}
+      endpoints:
+        cluster_domain_suffix: {{ spec.internal_domain_name }}
+      pod:
+        replicas:
+          etcd: 3

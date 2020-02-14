@@ -27,3 +27,4 @@
 - glance_api
 - nova_api
 - ironic_db_sync
+- etcd

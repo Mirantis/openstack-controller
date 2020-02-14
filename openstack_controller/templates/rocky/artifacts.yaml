@@ -128,3 +128,4 @@ keystone_db_sync_migrate: '{{ images_base_url }}/openstack/keystone:rocky-bionic
 keystone_db_sync_contract: '{{ images_base_url }}/openstack/keystone:rocky-bionic-20200128180019'
 nova_db_sync_online: '{{ images_base_url }}/openstack/nova:rocky-bionic-20200128180019'
 octavia_amphora: '{{ binary_base_url }}/openstack/bin/octavia/amphora-x64-haproxy-rocky-20200128172125.qcow2'
+etcd: '{{ images_base_url }}/openstack/extra/etcd:3.2.24'

@@ -130,3 +130,4 @@ keystone_db_sync_migrate: '{{ images_base_url }}/openstack/keystone:train-bionic
 keystone_db_sync_contract: '{{ images_base_url }}/openstack/keystone:train-bionic-20200206180015'
 nova_db_sync_online: '{{ images_base_url }}/openstack/nova:train-bionic-20200206180015'
 octavia_amphora: '{{ binary_base_url }}/openstack/bin/octavia/amphora-x64-haproxy-train-20200202063912.qcow2'
+etcd: '{{ images_base_url }}/openstack/extra/etcd:3.2.24'

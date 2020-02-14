@@ -130,3 +130,4 @@ keystone_db_sync_expand: '{{ images_base_url }}/openstack/keystone:master-bionic
 keystone_db_sync_migrate: '{{ images_base_url }}/openstack/keystone:master-bionic-20200207104704'
 keystone_db_sync_contract: '{{ images_base_url }}/openstack/keystone:master-bionic-20200207104704'
 octavia_amphora: http://images.mcp.mirantis.net/octavia/amphora-x64-haproxy-train-nightly.qcow2
+etcd: '{{ images_base_url }}/openstack/extra/etcd:3.2.24'
