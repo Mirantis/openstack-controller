@@ -221,3 +221,14 @@ services:
           designate:
             service:api:
               workers: 1
+  dashboard:
+    horizon:
+      values:
+        pod:
+          replicas:
+            server: 2
+        conf:
+          software:
+            apache2:
+              processes: 3
+              threads: 10
