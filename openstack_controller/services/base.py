@@ -302,9 +302,9 @@ class Service:
         )
 
     async def wait_service_healthy(self):
-        for healt_group in self.health_groups:
-            LOG.info(f"Checking {healt_group} health.")
-            await health.wait_application_ready(healt_group, self.osdpl)
+        for health_group in self.health_groups:
+            LOG.info(f"Checking {health_group} health.")
+            await health.wait_application_ready(health_group, self.osdpl)
 
     async def _upgrade(self, event, **kwargs):
         pass
