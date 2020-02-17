@@ -75,6 +75,10 @@ services:
     tempest:
       values:
         conf:
+          # NOTE(vsaienko): disable cleanup explicitly to avoid production data loss.
+          # DANGER: do not enable this on production environment.
+          cleanup:
+            enabled: False
           convert_to_uuid:
             network:
               public_network_id: public
