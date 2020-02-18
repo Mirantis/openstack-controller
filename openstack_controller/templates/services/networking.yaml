@@ -171,41 +171,53 @@ spec:
             dhcp_agent:
               liveness:
                 enabled: true
-                initialDelaySeconds: 0
-                periodSeconds: 50
-                timeoutSeconds: 40
+                params:
+                  initialDelaySeconds: 10
+                  periodSeconds: 50
+                  timeoutSeconds: 40
               readiness:
                 enabled: false
           l3_agent:
             l3_agent:
               liveness:
                 enabled: true
-                initialDelaySeconds: 0
-                periodSeconds: 50
-                timeoutSeconds: 40
+                params:
+                  initialDelaySeconds: 10
+                  periodSeconds: 50
+                  timeoutSeconds: 40
               readiness:
-                enabled: false
+                # The probe is used to detect inital sync state
+                # it takes near 10-15 minutes to synchronize state for 100 routers
+                # wait for 15x240=3600 unless marking pod as not ready.
+                enabled: true
+                params:
+                  failureThreshold: 240
+                  initialDelaySeconds: 60
+                  periodSeconds: 15
           ovs_agent:
             ovs_agent:
               liveness:
                 enabled: true
-                initialDelaySeconds: 0
-                periodSeconds: 50
-                timeoutSeconds: 40
+                params:
+                  initialDelaySeconds: 10
+                  periodSeconds: 50
+                  timeoutSeconds: 40
               readiness:
                 enabled: false
           metadata_agent:
             metadata_agent:
               liveness:
                 enabled: true
-                initialDelaySeconds: 0
-                periodSeconds: 50
-                timeoutSeconds: 40
+                params:
+                  initialDelaySeconds: 10
+                  periodSeconds: 50
+                  timeoutSeconds: 40
               readiness:
                 enabled: true
-                initialDelaySeconds: 0
-                periodSeconds: 50
-                timeoutSeconds: 40
+                params:
+                  initialDelaySeconds: 10
+                  periodSeconds: 50
+                  timeoutSeconds: 40
       {%- if spec.get('features', {}).get('neutron', {}).get('dvr', {}).get('enabled', False) %}
       labels:
         agent:
