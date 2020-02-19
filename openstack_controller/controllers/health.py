@@ -12,6 +12,29 @@ kopf.config.WatchersConfig.default_stream_timeout = (
 )
 
 
+def _delete(kind, meta, application, component):
+    LOG.info(f"Handling delete event for {kind}")
+    name = meta["name"]
+    namespace = meta["namespace"]
+    patch = {application: {component: None}}
+    LOG.debug(f"Cleaning health for {kind} {name}")
+    health.report_to_osdpl(namespace, patch)
+
+
+# NOTE(vsaienko): for unknown reason when using optional=True, which have to
+# prevent kopf from adding finalizer to the object, prevent kopf from handling
+# delete event. Add finalizers here should be ok as we do not expect deployment
+# changes on helmbundle level directly.
+
+# NOTE(pas-ha) not using separate handler for delete
+# seems like similar troubles with status bumps on metadata changes
+# happen at least to StatefulSets as well (see below)
+# Adding deletion timestamp to StatefulSet bumps the observedGeneration
+# in the status, and thus the on.status handler reacts, not on.delete,
+# which does not remove the finalizer.
+# better let kopf's handler deduplicaiton handle it, and
+# manually discern what to do in a single handler.
+
 # NOTE(pas-ha) it turns out Deployment is sensitive to annotation changes as
 # it bumps metadata.generation and status.observedGeneration on any
 # change to annotations
@@ -28,12 +51,16 @@ kopf.config.WatchersConfig.default_stream_timeout = (
 # will be bumped as many times as there were changes in status.conditions
 # until a stable state was reached.
 @kopf.on.field("apps", "v1", "deployments", field="status.conditions")
-async def deployments(name, namespace, meta, status, new, **kwargs):
+@kopf.on.delete("apps", "v1", "deployments")
+async def deployments(name, namespace, meta, status, new, event, **kwargs):
+    application, component = health.ident(meta)
+    if event == "delete":
+        _delete("Deployment", meta, application, component)
+        return
     LOG.debug(f"Deployment {name} status.conditions is {status}")
     # TODO(pas-ha) investigate if we can use status.conditions
     # just for aggroing, but derive health from other status fields
     # which are available.
-    application, component = health.ident(meta)
     conds = [health.DeploymentStatusCondition(**c) for c in new]
     for c in conds:
         if c.type == "Available":
@@ -60,9 +87,13 @@ async def deployments(name, namespace, meta, status, new, **kwargs):
 
 
 @kopf.on.field("apps", "v1", "statefulsets", field="status")
-async def statefulsets(name, namespace, meta, status, **kwargs):
-    LOG.debug(f"StatefulSet {name} status is {status}")
+@kopf.on.delete("apps", "v1", "statefulsets")
+async def statefulsets(name, namespace, meta, status, event, **kwargs):
     application, component = health.ident(meta)
+    if event == "delete":
+        _delete("StatefulSet", meta, application, component)
+        return
+    LOG.debug(f"StatefulSet {name} status is {status}")
     st = health.StatefulSetStatus(**status)
     res_health = constants.UNKNOWN
     if st.updateRevision:
@@ -89,10 +120,13 @@ async def statefulsets(name, namespace, meta, status, **kwargs):
 
 
 @kopf.on.field("apps", "v1", "daemonsets", field="status")
-async def daemonsets(name, namespace, meta, status, **kwargs):
-    LOG.debug(f"DaemonSet {name} status is {status}")
+@kopf.on.delete("apps", "v1", "daemonsets")
+async def daemonsets(name, namespace, meta, status, event, **kwargs):
     application, component = health.ident(meta)
-
+    if event == "delete":
+        _delete("DaemonSet", meta, application, component)
+        return
+    LOG.debug(f"DaemonSet {name} status is {status}")
     st = health.DaemonSetStatus(**status)
     res_health = constants.UNKNOWN
     if (
@@ -117,32 +151,3 @@ async def daemonsets(name, namespace, meta, status, **kwargs):
         res_health,
         status["observedGeneration"],
     )
-
-
-async def _delete(kind, meta):
-    LOG.info(f"Handling delete event for {kind}")
-    name = meta["name"]
-    namespace = meta["namespace"]
-    application, component = health.ident(meta)
-    patch = {application: {component: None}}
-    LOG.debug(f"Cleaning health for {kind} {name}")
-    health.report_to_osdpl(namespace, patch)
-
-
-# NOTE(vsaienko): for unknown reason when using optional=True, which have to
-# prevent kopf from adding finalizer to the object, prevent kopf from handling
-# delete event. Add finalizers here should be ok as we do not expect deployment
-# changes on helmbundle level directly.
-@kopf.on.delete("apps", "v1", "daemonsets")
-async def delete_daemonset(name, meta, **kwargs):
-    await _delete("DaemonSet", meta)
-
-
-@kopf.on.delete("apps", "v1", "deployments")
-async def delete_deployment(name, meta, **kwargs):
-    await _delete("Deployment", meta)
-
-
-@kopf.on.delete("apps", "v1", "statefulsets")
-async def delete_statefulset(name, meta, **kwargs):
-    await _delete("StatefulSet", meta)
