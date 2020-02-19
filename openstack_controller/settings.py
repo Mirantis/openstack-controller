@@ -57,3 +57,6 @@ OSCTL_HELMBUNLE_MANIFEST_PURGE_DELAY = os.environ.get(
 OSCTL_HELMBUNDLE_APPLY_DELAY = os.environ.get(
     "OSCTL_HELMBUNDLE_APPLY_DELAY", 10
 )
+
+# override internal kopf watch stream timeout (default is None)
+KOPF_WATCH_STREAM_TIMEOUT = os.environ.get("KOPF_WATCH_STREAM_TIMEOUT", 600)

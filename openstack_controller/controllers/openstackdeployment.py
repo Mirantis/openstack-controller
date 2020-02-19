@@ -10,12 +10,17 @@ from openstack_controller import kube
 from openstack_controller import layers
 from openstack_controller import secrets
 from openstack_controller import services
+from openstack_controller import settings
 from openstack_controller import version
 
 from mcp_k8s_lib import utils
 
 
 LOG = utils.get_logger(__name__)
+
+kopf.config.WatchersConfig.default_stream_timeout = (
+    settings.KOPF_WATCH_STREAM_TIMEOUT
+)
 
 
 def update_status(body, patch):

@@ -3,8 +3,13 @@ from mcp_k8s_lib import utils
 
 from openstack_controller import constants
 from openstack_controller import health
+from openstack_controller import settings
 
 LOG = utils.get_logger(__name__)
+
+kopf.config.WatchersConfig.default_stream_timeout = (
+    settings.KOPF_WATCH_STREAM_TIMEOUT
+)
 
 
 # NOTE(pas-ha) it turns out Deployment is sensitive to annotation changes as
