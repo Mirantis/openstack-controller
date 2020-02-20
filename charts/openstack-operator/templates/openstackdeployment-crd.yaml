@@ -407,6 +407,23 @@ spec:
                       <<: *logging_level
             services:
               type: object
+            timeouts:
+              type: object
+              properties:
+                applicaion_readiness:
+                  type: object
+                  properties:
+                    nova: &application_readiness
+                      type: objecet
+                      properties:
+                        timeout:
+                          type: integer
+                          description: Number of seconds to wait for application becomes ready.
+                        delay:
+                          type: integer
+                          description: Number of seconds between readiness attempts.
+                    neutron:
+                      <<: *application_readiness
           required:
             - draft
             - openstack_version

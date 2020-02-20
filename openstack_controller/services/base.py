@@ -112,6 +112,7 @@ class Service:
         self.namespace = body["metadata"]["namespace"]
         self.logger = logger
         self.openstack_version = self.body["spec"]["openstack_version"]
+        self.mspec = layers.merge_spec(self.body["spec"], self.logger)
 
     def _get_osdpl(self):
         osdpl = kube.OpenStackDeployment(kube.api, self.body)
@@ -304,7 +305,20 @@ class Service:
     async def wait_service_healthy(self):
         for health_group in self.health_groups:
             LOG.info(f"Checking {health_group} health.")
-            await health.wait_application_ready(health_group, self.osdpl)
+            readiness_timeouts = (
+                self.mspec.get("timeouts", {})
+                .get("applicaion_readiness", {})
+                .get(health_group, {})
+            )
+            delay = readiness_timeouts.get(
+                "delay", settings.OSCTL_WAIT_APPLICATION_READY_DELAY
+            )
+            timeout = readiness_timeouts.get(
+                "timeout", settings.OSCTL_WAIT_APPLICATION_READY_TIMEOUT
+            )
+            await health.wait_application_ready(
+                health_group, self.osdpl, delay=delay, timeout=timeout
+            )
 
     async def _upgrade(self, event, **kwargs):
         pass
@@ -323,7 +337,7 @@ class Service:
         await self.wait_service_healthy()
         LOG.info(f"Upgrading {self.service} done")
 
-    def template_args(self, spec):
+    def template_args(self):
         secret = self._secret_class(self.namespace, self.service)
         credentials = secret.ensure()
 
@@ -346,15 +360,14 @@ class Service:
 
     @layers.kopf_exception
     def render(self, openstack_version=""):
-        spec = layers.merge_spec(self.body["spec"], self.logger)
         if openstack_version:
-            spec["openstack_version"] = openstack_version
-        template_args = self.template_args(spec)
+            self.mspec["openstack_version"] = openstack_version
+        template_args = self.template_args()
         data = layers.merge_all_layers(
             self.service,
             self.body,
             self.body["metadata"],
-            spec,
+            self.mspec,
             self.logger,
             **template_args,
         )
@@ -531,7 +544,7 @@ class OpenStackServiceWithCeph(OpenStackService):
         self.ensure_ceph_secrets()
         await super().apply(event, **kwargs)
 
-    def template_args(self, spec):
-        template_args = super().template_args(spec)
+    def template_args(self):
+        template_args = super().template_args()
         template_args.update(self.ceph_config())
         return template_args

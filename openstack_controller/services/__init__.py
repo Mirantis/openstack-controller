@@ -52,7 +52,7 @@ class MariaDB(Service):
         }
     }
 
-    def template_args(self, spec):
+    def template_args(self):
         admin_creds = self._get_admin_creds()
         galera_secret = secrets.GaleraSecret(self.namespace)
         galera_creds = galera_secret.ensure()
@@ -85,10 +85,10 @@ class RabbitMQ(Service):
         }
     }
 
-    def template_args(self, spec):
+    def template_args(self):
         credentials = {}
         admin_creds = self._get_admin_creds()
-        services = set(spec["features"]["services"]) - set(["tempest"])
+        services = set(self.mspec["features"]["services"]) - set(["tempest"])
         for s in services:
             if s not in constants.OS_SERVICES_MAP:
                 continue
@@ -180,8 +180,8 @@ class Designate(OpenStackService):
         },
     }
 
-    def template_args(self, spec):
-        t_args = super().template_args(spec)
+    def template_args(self):
+        t_args = super().template_args()
         power_dns_secret = secrets.PowerDNSSecret(self.namespace)
         credentials = power_dns_secret.ensure()
         t_args[self.backend_service] = credentials
@@ -315,10 +315,10 @@ class Keystone(OpenStackService):
         },
     }
 
-    def template_args(self, spec):
-        t_args = super().template_args(spec)
+    def template_args(self):
+        t_args = super().template_args()
         keycloak_enabled = (
-            spec.get("features", {})
+            self.mspec.get("features", {})
             .get("keystone", {})
             .get("keycloak", {})
             .get("enabled", False)
@@ -432,8 +432,8 @@ class Nova(OpenStackServiceWithCeph):
             },
         }
 
-    def template_args(self, spec):
-        t_args = super().template_args(spec)
+    def template_args(self):
+        t_args = super().template_args()
         ssh_secret = secrets.SSHSecret(self.namespace, "nova")
         t_args["ssh_credentials"] = ssh_secret.ensure()
         return t_args
@@ -479,8 +479,8 @@ class Octavia(OpenStackService):
         },
     }
 
-    def template_args(self, spec):
-        t_args = super().template_args(spec)
+    def template_args(self):
+        t_args = super().template_args()
         cert_secret = secrets.SignedCertificateSecret(
             self.namespace, "octavia"
         )
@@ -547,22 +547,22 @@ class Tempest(Service):
         },
     }
 
-    def template_args(self, spec):
+    def template_args(self):
         # TODO: add wait for generated credential here
         admin_creds = self._get_admin_creds()
         secret = secrets.OpenStackServiceSecret(self.namespace, self.service)
         credentials = secret.ensure()
         helmbundles_body = {}
-        for s in set(spec["features"]["services"]) - {"tempest"}:
+        for s in set(self.mspec["features"]["services"]) - {"tempest"}:
             template_args = Service.registry[s](
                 self.body, self.logger
-            ).template_args(spec)
+            ).template_args()
             try:
                 helmbundles_body[s] = layers.merge_all_layers(
                     s,
                     self.body,
                     self.body["metadata"],
-                    spec,
+                    self.mspec,
                     self.logger,
                     **template_args,
                 )

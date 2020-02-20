@@ -1,4 +1,7 @@
 #connection_recycle_time is set to 300sec in order not to hit into conntrack timeouts (PRODX-1179, PRODX-1170)
+# Optimized for the following cloud configuration
+# controllers: 3
+# computes: <10
 services:
   database:
     mariadb:
@@ -52,6 +55,12 @@ services:
             scheduler: 3
             novncproxy: 3
             placement: 3
+          lifecycle:
+            upgrades:
+              daemonsets:
+                compute:
+                  # upgrade computes in butches with 10% of hosts from maximum
+                  max_unavailable: 1
         conf:
           nova:
             DEFAULT:
@@ -232,3 +241,14 @@ services:
             apache2:
               processes: 3
               threads: 10
+timeouts:
+  applicaion_readiness:
+    nova:
+      timeout: 600
+      delay: 10
+    neutron:
+      timeout: 600
+      delay: 10
+    openvswitch:
+      timeout: 600
+      delay: 10
