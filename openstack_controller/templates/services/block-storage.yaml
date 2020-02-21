@@ -147,6 +147,8 @@ spec:
             memcache_security_strategy: ENCRYPT
             memcache_secret_key: {{ credentials.memcached }}
           DEFAULT:
+            cluster: "cinder-ceph-cluster"
+            host: "<None>"
 {%- if spec.get('features', {}).get('cinder', {}).get('backup', {}).get('backend') == 'ceph' %}
             backup_driver: cinder.backup.drivers.ceph.CephBackupDriver
 {%- for backend, backend_config in ceph.cinder.pools.items() %}
