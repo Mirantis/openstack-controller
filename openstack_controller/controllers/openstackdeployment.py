@@ -1,5 +1,4 @@
 import asyncio
-import copy
 
 import kopf
 
@@ -113,7 +112,7 @@ async def run_task(task_def):
 
 
 def discover_images(body, logger):
-    osdpl = layers.merge_spec(copy.deepcopy(body)["spec"], logger)
+    osdpl = layers.merge_spec(body["spec"], logger)
 
     cache_images = set(layers.render_cache_images() or [])
     images = {}

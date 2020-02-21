@@ -69,10 +69,19 @@ def test_service_keystone_render(
         "admin_creds": admin_creds,
         "service_creds": service_creds,
     }
+    openstackdeployment["spec"]["common"]["openstack"] = {
+        "values": {"pod": {"replicas": {"api": 333}}}
+    }
     openstackdeployment_old = copy.deepcopy(openstackdeployment)
     service = services.Keystone(openstackdeployment, logging)
     identity_helmbundle = service.render()
     # check no modification in-place for openstackdeployment
+    assert (
+        openstackdeployment["spec"]["common"]["openstack"]["values"]["pod"][
+            "replicas"
+        ]["api"]
+        == 333
+    )
     assert openstackdeployment_old == openstackdeployment
     assert identity_helmbundle["metadata"]["name"] == "openstack-identity"
     # check helmbundle has data from base.yaml

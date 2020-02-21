@@ -116,8 +116,7 @@ def spec_hash(spec):
 
 
 def services(spec, logger, **kwargs):
-    spec_cp = dict(copy.deepcopy(spec))
-    base = merge_spec(spec_cp, logger)
+    base = merge_spec(spec, logger)
 
     to_apply = set(base["features"].get("services", []))
     LOG.debug(f"Working with openstack services: {to_apply}")
@@ -152,6 +151,7 @@ def render_service_template(
 def merge_all_layers(service, body, meta, spec, logger, **template_args):
     """Merge releases and values from osdpl crd into service HelmBundle"""
 
+    spec = copy.deepcopy(dict(spec))
     images = render_artifacts(spec)
     service_helmbundle = render_service_template(
         service, body, meta, spec, logger, images=images, **template_args
@@ -198,6 +198,7 @@ def merge_all_layers(service, body, meta, spec, logger, **template_args):
 @kopf_exception
 def merge_spec(spec, logger):
     """Merge user-defined OsDpl spec with base for profile and OS version"""
+    spec = copy.deepcopy(dict(spec))
     profile = spec["profile"]
     size = spec["size"]
     os_release = spec["openstack_version"]
