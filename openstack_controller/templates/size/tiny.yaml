@@ -16,6 +16,13 @@ services:
         pod:
           replicas:
             api: 3
+          lifecycle:
+            upgrades:
+              deployments:
+                pod_replacement_strategy: RollingUpdate
+                rolling_update:
+                  max_unavailable: 10%
+                  max_surge: 10%
         conf:
           keystone:
             database:
@@ -25,6 +32,19 @@ services:
               connection_recycle_time: 300
             oslo_messaging_rabbit:
               rabbit_qos_prefetch_count: 64
+  key-manager:
+    barbican:
+      values:
+        pod:
+          replicas:
+            api: 3
+          lifecycle:
+            upgrades:
+              deployments:
+                pod_replacement_strategy: RollingUpdate
+                rolling_update:
+                  max_unavailable: 10%
+                  max_surge: 10%
   image:
     glance:
       values:
@@ -32,6 +52,13 @@ services:
           replicas:
             api: 3
             registry: 3
+          lifecycle:
+            upgrades:
+              deployments:
+                pod_replacement_strategy: RollingUpdate
+                rolling_update:
+                  max_unavailable: 10%
+                  max_surge: 10%
         conf:
           glance:
             DEFAULT:
@@ -58,9 +85,15 @@ services:
           lifecycle:
             upgrades:
               daemonsets:
+                pod_replacement_strategy: RollingUpdate
                 compute:
                   # upgrade computes in butches with 10% of hosts from maximum
-                  max_unavailable: 1
+                  max_unavailable: 10%
+              deployments:
+                pod_replacement_strategy: RollingUpdate
+                rolling_update:
+                  max_unavailable: 10%
+                  max_surge: 10%
         conf:
           nova:
             DEFAULT:
@@ -110,6 +143,27 @@ services:
         pod:
           replicas:
             server: 3
+          lifecycle:
+            upgrades:
+              deployments:
+                pod_replacement_strategy: RollingUpdate
+                rolling_update:
+                  max_unavailable: 10%
+                  max_surge: 10%
+              daemonsets:
+                pod_replacement_strategy: RollingUpdate
+                dhcp_agent:
+                  max_unavailable: 1
+                l3_agent:
+                  max_unavailable: 1
+                lb_agent:
+                  max_unavailable: 10%
+                metadata_agent:
+                  max_unavailable: 10%
+                ovs_agent:
+                  max_unavailable: 10%
+                sriov_agent:
+                  max_unavailable: 10%
         conf:
           neutron:
             DEFAULT:
@@ -129,6 +183,17 @@ services:
               connection_recycle_time: 300
             oslo_messaging_rabbit:
               rabbit_qos_prefetch_count: 64
+    openvswitch:
+      values:
+        pod:
+          lifecycle:
+            upgrades:
+              daemonsets:
+                pod_replacement_strategy: RollingUpdate
+                ovs_db:
+                  max_unavailable: 1
+                ovs_vswitchd:
+                  max_unavailable: 1
   block-storage:
     cinder:
       values:
@@ -137,6 +202,13 @@ services:
             api: 3
             scheduler: 3
             volume: 3
+          lifecycle:
+            upgrades:
+              deployments:
+                pod_replacement_strategy: RollingUpdate
+                rolling_update:
+                  max_unavailable: 10%
+                  max_surge: 10%
         conf:
           cinder:
             DEFAULT:
@@ -158,6 +230,13 @@ services:
             cfn: 3
             api: 3
             engine: 3
+          lifecycle:
+            upgrades:
+              deployments:
+                pod_replacement_strategy: RollingUpdate
+                rolling_update:
+                  max_unavailable: 10%
+                  max_surge: 10%
         conf:
           heat:
             DEFAULT:
@@ -185,12 +264,30 @@ services:
         pod:
           replicas:
             api: 3
+          lifecycle:
+            upgrades:
+              deployments:
+                pod_replacement_strategy: RollingUpdate
+                rolling_update:
+                  max_unavailable: 10%
+                  max_surge: 10%
   load-balancer:
     octavia:
       values:
         pod:
           replicas:
             api: 3
+          lifecycle:
+            upgrades:
+              deployments:
+                pod_replacement_strategy: RollingUpdate
+                rolling_update:
+                  max_unavailable: 10%
+                  max_surge: 10%
+              daemonsets:
+                pod_replacement_strategy: RollingUpdate
+                health_manager:
+                  max_unavailable: 10%
         conf:
           octavia:
             database:
@@ -226,6 +323,13 @@ services:
             producer: 3
             sink: 3
             worker: 3
+          lifecycle:
+            upgrades:
+              deployments:
+                pod_replacement_strategy: RollingUpdate
+                rolling_update:
+                  max_unavailable: 10%
+                  max_surge: 10%
         conf:
           designate:
             service:api:
@@ -236,6 +340,13 @@ services:
         pod:
           replicas:
             server: 2
+          lifecycle:
+            upgrades:
+              deployments:
+                pod_replacement_strategy: RollingUpdate
+                rolling_update:
+                  max_unavailable: 10%
+                  max_surge: 10%
         conf:
           software:
             apache2:
