@@ -119,7 +119,7 @@ def services(spec, logger, **kwargs):
     spec_cp = dict(copy.deepcopy(spec))
     base = merge_spec(spec_cp, logger)
 
-    to_apply = set(base["features"]["services"])
+    to_apply = set(base["features"].get("services", []))
     LOG.debug(f"Working with openstack services: {to_apply}")
 
     to_delete = {}
@@ -132,7 +132,7 @@ def services(spec, logger, **kwargs):
         if path == ("spec", "features", "services"):
             # NOTE(pas-ha) something changed in services,
             # need to check if any were deleted
-            to_delete = set(old) - set(new)
+            to_delete = set(old or []) - set(new or [])
     return to_apply, to_delete
 
 

@@ -90,7 +90,9 @@ class RabbitMQ(Service):
     def template_args(self):
         credentials = {}
         admin_creds = self._get_admin_creds()
-        services = set(self.mspec["features"]["services"]) - set(["tempest"])
+        services = set(self.mspec["features"].get("services", [])) - set(
+            ["tempest"]
+        )
         for s in services:
             if s not in constants.OS_SERVICES_MAP:
                 continue
