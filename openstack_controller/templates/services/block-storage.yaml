@@ -195,6 +195,9 @@ spec:
           <<: *cinder_endpoints_oslo_messaging
 {% include 'base/_notifications.yaml' %}
         volume:
+          # TODO(mkarpin): remove volume v1 endpoint configuration fully
+          # once cinder chart is switched to volumev3
+          enabled: false
           host_fqdn_override:
             public:
               host: cinder.{{ spec.public_domain_name }}
