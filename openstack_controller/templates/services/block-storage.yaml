@@ -147,8 +147,11 @@ spec:
             memcache_security_strategy: ENCRYPT
             memcache_secret_key: {{ credentials.memcached }}
           DEFAULT:
+# NOTE(vsaienko): active/active mode is supported by rbd starting from Rocky
+{%- if spec.openstack_version not in ['queens'] %}
             cluster: "cinder-ceph-cluster"
             host: "<None>"
+{%- endif %}
 {%- if spec.get('features', {}).get('cinder', {}).get('backup', {}).get('backend') == 'ceph' %}
             backup_driver: cinder.backup.drivers.ceph.CephBackupDriver
 {%- for backend, backend_config in ceph.cinder.pools.items() %}
