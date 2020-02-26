@@ -37,6 +37,7 @@ spec:
           cinder_volume: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/cinder:stein-bionic-20190827193015
           cinder_volume_usage_audit: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/cinder:stein-bionic-20190827193015
           create_resources: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/heat:stein-bionic-20190827193015
+          dashboardselenium_run_tests: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/dashboard-selenium:stein-bionic-20200220094817
           db_drop: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/heat:stein-bionic-20190827193015
           db_init: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/heat:stein-bionic-20190827193015
           dep_check: quay.io/stackanetes/kubernetes-entrypoint:v0.3.1
@@ -149,6 +150,7 @@ spec:
           cinder_volume: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/cinder:stein-bionic-20190827193015
           cinder_volume_usage_audit: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/cinder:stein-bionic-20190827193015
           create_resources: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/heat:stein-bionic-20190827193015
+          dashboardselenium_run_tests: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/dashboard-selenium:stein-bionic-20200220094817
           db_drop: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/heat:stein-bionic-20190827193015
           db_init: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/heat:stein-bionic-20190827193015
           dep_check: quay.io/stackanetes/kubernetes-entrypoint:v0.3.1

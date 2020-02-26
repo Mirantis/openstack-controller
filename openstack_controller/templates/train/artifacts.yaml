@@ -8,6 +8,7 @@ cinder_db_sync: '{{ images_base_url }}/openstack/cinder:train-bionic-20200224180
 cinder_scheduler: '{{ images_base_url }}/openstack/cinder:train-bionic-20200224180015'
 cinder_volume: '{{ images_base_url }}/openstack/cinder:train-bionic-20200224180015'
 cinder_volume_usage_audit: '{{ images_base_url }}/openstack/cinder:train-bionic-20200224180015'
+dashboardselenium_run_tests: '{{ images_base_url }}/openstack/dashboard-selenium:train-bionic-20200226153638'
 db_drop: '{{ images_base_url }}/openstack/heat:train-bionic-20200224180015'
 db_init: '{{ images_base_url }}/openstack/heat:train-bionic-20200224180015'
 dep_check: '{{ images_base_url }}/openstack/extra/kubernetes-entrypoint:v0.3.1'

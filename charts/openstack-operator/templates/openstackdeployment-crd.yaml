@@ -193,6 +193,7 @@ spec:
                       - key-manager
                       - placement
                       - coordination
+                      - dashboard-selenium
                 nova:
                   type: object
                   required:

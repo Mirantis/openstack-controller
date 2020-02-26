@@ -17,6 +17,7 @@ CHART_GROUP_MAPPING = {
         "barbican",
         "placement",
         "tempest",
+        "dashboard-selenium",
     ],
     "infra": [
         "rabbitmq",

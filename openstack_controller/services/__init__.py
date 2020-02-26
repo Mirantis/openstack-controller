@@ -157,6 +157,33 @@ class Cinder(OpenStackServiceWithCeph):
     }
 
 
+class DashboardSelenium(OpenStackService):
+    service = "dashboard-selenium"
+
+    _child_objects = {
+        "dashboard-selenium": {
+            "Job": {
+                "dashboardselenium-run-tests": {
+                    "images": ["dashboardselenium_run_tests"],
+                    "manifest": "job_run_tests",
+                },
+                "dashboardselenium-bootstrap": {
+                    "images": ["bootstrap"],
+                    "manifest": "job_bootstrap",
+                },
+                "dashboardselenium-image-repo-sync": {
+                    "images": ["image_repo_sync"],
+                    "manifest": "job_image_repo_sync",
+                },
+                "dashboardselenium-ks-user": {
+                    "images": ["ks_user"],
+                    "manifest": "job_ks_user",
+                },
+            }
+        },
+    }
+
+
 class Designate(OpenStackService):
     service = "dns"
     backend_service = "powerdns"

@@ -63,6 +63,7 @@ spec:
     - compute
     - identity
     - dashboard
+    - dashboard-selenium
     - image
     - ingress
     - database
@@ -173,9 +174,8 @@ spec:
               network:
                 public_network_id: public
             script: 'tempest run --config-file /etc/tempest/tempest.conf -w 4 --smoke
-              --blacklist-file  /etc/tempest/test-blacklist
+              --blacklist-file  /etc/tempest/test-blacklist'
 
-              '
             tempest:
               dashboard:
                 disable_ssl_certificate_validation: true
