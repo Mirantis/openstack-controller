@@ -338,9 +338,6 @@ class Keystone(OpenStackService):
 
     @layers.kopf_exception
     async def _upgrade(self, event, **kwargs):
-        await self.wait_service_healthy()
-
-        LOG.info(f"Upgrading {self.service} started")
         upgrade_map = [
             ("Job", "keystone-db-sync-expand"),
             ("Job", "keystone-db-sync-migrate"),
@@ -403,6 +400,18 @@ class Nova(OpenStackServiceWithCeph):
             "nova-cell-setup": {
                 "images": ["nova_cell_setup", "nova_cell_setup_init"],
                 "manifest": "job_cell_setup",
+            },
+            "nova-db-sync-api": {
+                "images": ["nova_db_sync_api"],
+                "manifest": "job_db_sync_api",
+            },
+            "nova-db-sync-db": {
+                "images": ["nova_db_sync_db"],
+                "manifest": "job_db_sync_db",
+            },
+            "nova-db-sync-online": {
+                "images": ["nova_db_sync_online"],
+                "manifest": "job_db_sync_online",
             },
         }
         nova_deployments = {}
@@ -487,6 +496,18 @@ class Nova(OpenStackServiceWithCeph):
         ssh_secret = secrets.SSHSecret(self.namespace, "nova")
         t_args["ssh_credentials"] = ssh_secret.ensure()
         return t_args
+
+    @layers.kopf_exception
+    async def _upgrade(self, event, **kwargs):
+        upgrade_map = [
+            ("Job", "nova-db-sync-api"),
+            ("Job", "nova-db-sync-db"),
+            ("Job", "nova-db-sync"),
+        ]
+        for kind, obj_name in upgrade_map:
+            child_obj = self.get_child_object(kind, obj_name)
+            await child_obj.purge()
+            await child_obj.enable(self.openstack_version, True)
 
 
 class Placement(OpenStackService):
