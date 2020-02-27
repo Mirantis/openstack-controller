@@ -148,6 +148,10 @@ spec:
         {%- endif %}
 {%- endfor %}
       pod:
+        # NOTE(vsaienko): don't use host networking to be able to
+        # update pods with surge (when node hostport is used)
+        useHostNetwork:
+          novncproxy: false
         probes:
           rpc_timeout: 30
           rpc_retries: 2
