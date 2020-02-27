@@ -147,21 +147,11 @@ def render_service_template(
     return data
 
 
-@kopf_exception
-def merge_all_layers(service, body, meta, spec, logger, **template_args):
-    """Merge releases and values from osdpl crd into service HelmBundle"""
-
-    spec = copy.deepcopy(dict(spec))
-    images = render_artifacts(spec)
-    service_helmbundle = render_service_template(
-        service, body, meta, spec, logger, images=images, **template_args
-    )
-
-    # FIXME(pas-ha) either move to dict merging stage before,
-    # or move to the templates themselves
-    service_helmbundle["spec"]["repositories"] = spec["common"]["charts"][
-        "repositories"
-    ]
+def merge_osdpl_into_helmbundle(service, spec, service_helmbundle):
+    # let's make sure no deeply located dict are linked during the merge
+    # we don't modify input params and return a completely new dict
+    spec = copy.deepcopy(spec)
+    service_helmbundle = copy.deepcopy(service_helmbundle)
 
     # We have 4 level of hierarchy, in increasing priority order:
     # 1. helm values.yaml - which is default
@@ -173,16 +163,18 @@ def merge_all_layers(service, body, meta, spec, logger, **template_args):
     for release in service_helmbundle["spec"]["releases"]:
         chart_name = release["chart"].split("/")[-1]
         merger.merge(
-            release, spec["common"].get("charts", {}).get("releases", {})
+            release,
+            spec.get("common", {}).get("charts", {}).get("releases", {}),
         )
         for group, charts in constants.CHART_GROUP_MAPPING.items():
             if chart_name in charts:
                 merger.merge(
-                    release, spec["common"].get(group, {}).get("releases", {})
+                    release,
+                    spec.get("common", {}).get(group, {}).get("releases", {}),
                 )
                 merger.merge(
                     release["values"],
-                    spec["common"].get(group, {}).get("values", {}),
+                    spec.get("common", {}).get(group, {}).get("values", {}),
                 )
 
         merger.merge(
@@ -192,6 +184,33 @@ def merge_all_layers(service, body, meta, spec, logger, **template_args):
             .get(chart_name, {})
             .get("values", {}),
         )
+    return service_helmbundle
+
+
+@kopf_exception
+def merge_all_layers(service, body, meta, spec, logger, **template_args):
+    """Merge releases and values from osdpl crd into service HelmBundle"""
+
+    orig_spec = copy.deepcopy(body["spec"])
+    spec = copy.deepcopy(dict(spec))
+    images = render_artifacts(spec)
+    service_helmbundle = render_service_template(
+        service, body, meta, spec, logger, images=images, **template_args
+    )
+
+    # FIXME(pas-ha) either move to dict merging stage before,
+    # or move to the templates themselves
+    service_helmbundle["spec"]["repositories"] = spec["common"]["charts"][
+        "repositories"
+    ]
+    # first merge osdpl with profile and sizes
+    service_helmbundle = merge_osdpl_into_helmbundle(
+        service, spec, service_helmbundle
+    )
+    # and than an "original" osdpl on top of that
+    service_helmbundle = merge_osdpl_into_helmbundle(
+        service, orig_spec, service_helmbundle
+    )
     return service_helmbundle
 
 

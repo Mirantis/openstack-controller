@@ -76,15 +76,15 @@ def test_service_keystone_render(
     service = services.Keystone(openstackdeployment, logging)
     identity_helmbundle = service.render()
     # check no modification in-place for openstackdeployment
+    assert openstackdeployment_old == openstackdeployment
+    assert identity_helmbundle["metadata"]["name"] == "openstack-identity"
+    # check helmbundle has data from base.yaml
     assert (
-        openstackdeployment["spec"]["common"]["openstack"]["values"]["pod"][
+        identity_helmbundle["spec"]["releases"][0]["values"]["pod"][
             "replicas"
         ]["api"]
         == 333
     )
-    assert openstackdeployment_old == openstackdeployment
-    assert identity_helmbundle["metadata"]["name"] == "openstack-identity"
-    # check helmbundle has data from base.yaml
     assert identity_helmbundle["spec"]["releases"][0]["values"]["images"][
         "tags"
     ]
