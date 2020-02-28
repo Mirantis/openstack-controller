@@ -9,6 +9,25 @@ import pytest
 from openstack_controller import layers
 
 
+CREDS_KWARGS = {
+    "ssh_credentials": {"private": "", "public": ""},
+    "credentials": {
+        "memcached": "",
+        "database": {"user": {"username": "", "password": ""}},
+        "messaging": {"user": {"username": "", "password": ""}},
+        "notifications": {"user": {"username": "", "password": ""}},
+    },
+    "admin_creds": {
+        "database": {"username": "", "password": ""},
+        "identity": {"password": "", "username": ""},
+        "messaging": {"password": "", "username": ""},
+    },
+    "ceph": {
+        "nova": {"username": "", "secrets": "", "keyring": "", "pools": {}}
+    },
+}
+
+
 def test_apply_list_empty_stein(osdpl_min_stein):
     compute_services = {
         "block-storage",
@@ -253,24 +272,30 @@ def test_merge_all_type_conflict(rst, openstackdeployment, compute_helmbundle):
         )
 
 
-@pytest.mark.skip(
-    reason="merging int and float currenly results in None, need to be fixed"
-)
 @mock.patch.object(layers, "LOG")
-@mock.patch.object(layers, "render_service_template")
 def test_merge_all_float_int(
-    rst, mock_log, openstackdeployment, compute_helmbundle
+    mock_log, openstackdeployment, compute_helmbundle
 ):
+    spec = copy.deepcopy(openstackdeployment["spec"])
+    openstackdeployment["spec"]["common"]["charts"]["releases"]["values"] = {
+        "conf": {"nova": {"scheduler": {"ram_weight_multiplier": 1.0}}}
+    }
     openstackdeployment["spec"]["services"]["compute"]["nova"]["values"][
         "conf"
     ] = {"nova": {"scheduler": {"ram_weight_multiplier": 2}}}
-    rst.return_value = compute_helmbundle
-    layers.merge_all_layers(
+    helmbundle = layers.merge_all_layers(
         "compute",
         openstackdeployment,
         openstackdeployment["metadata"],
-        openstackdeployment["spec"],
+        spec,
         logging,
+        **CREDS_KWARGS,
+    )
+    assert (
+        helmbundle["spec"]["releases"][2]["values"]["conf"]["nova"][
+            "scheduler"
+        ]["ram_weight_multiplier"]
+        == 2
     )
     mock_log.assert_not_called()
 
@@ -328,16 +353,6 @@ def test_merge_all_two_layers():
     }
 
     osdpl = {"spec": spec}
-    kwargs = {
-        "credentials": {
-            "memcached": "",
-            "database": {"user": {"username": "", "password": ""}},
-        },
-        "admin_creds": {
-            "database": {"username": "", "password": ""},
-            "identity": {"password": "", "username": ""},
-        },
-    }
     logger = mock.MagicMock()
     # test layer 1 service values are overriden by layer 2 common values
     l1 = copy.deepcopy(spec)
@@ -345,7 +360,7 @@ def test_merge_all_two_layers():
     l1["services"] = {"placement": {"placement": {"values": {"a": 1}}}}
     l2["spec"]["common"]["charts"]["releases"] = {"values": {"a": 2}}
     helmbundle = layers.merge_all_layers(
-        "placement", l2, meta, l1, logger, **kwargs
+        "placement", l2, meta, l1, logger, **CREDS_KWARGS
     )
     assert helmbundle["spec"]["releases"][0]["values"]["a"] == 2
     # test layer 1 service values are overriden by layer 2 service values
@@ -354,7 +369,7 @@ def test_merge_all_two_layers():
     l1["services"] = {"placement": {"placement": {"values": {"b": 1}}}}
     l2["spec"]["services"] = {"placement": {"placement": {"values": {"b": 2}}}}
     helmbundle = layers.merge_all_layers(
-        "placement", l2, meta, l1, logger, **kwargs
+        "placement", l2, meta, l1, logger, **CREDS_KWARGS
     )
     assert helmbundle["spec"]["releases"][0]["values"]["b"] == 2
     # test layer 1 service values are used
@@ -362,7 +377,7 @@ def test_merge_all_two_layers():
     l2 = copy.deepcopy(osdpl)
     l1["services"] = {"placement": {"placement": {"values": {"c": 1}}}}
     helmbundle = layers.merge_all_layers(
-        "placement", l2, meta, l1, logger, **kwargs
+        "placement", l2, meta, l1, logger, **CREDS_KWARGS
     )
     assert helmbundle["spec"]["releases"][0]["values"]["c"] == 1
     # test layer 2 service values are used
@@ -370,6 +385,6 @@ def test_merge_all_two_layers():
     l2 = copy.deepcopy(osdpl)
     l2["spec"]["services"] = {"placement": {"placement": {"values": {"d": 1}}}}
     helmbundle = layers.merge_all_layers(
-        "placement", l2, meta, l1, logger, **kwargs
+        "placement", l2, meta, l1, logger, **CREDS_KWARGS
     )
     assert helmbundle["spec"]["releases"][0]["values"]["d"] == 1

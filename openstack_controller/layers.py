@@ -36,7 +36,7 @@ class TypeConflictFail(
     @staticmethod
     def strategy_fail(config, path, base, nxt):
         if (type(base), type(nxt)) == (float, int):
-            return
+            return nxt
         raise deepmerge.exception.InvalidMerge(
             f"Trying to merge different types of objects, {type(base)} and "
             f"{type(nxt)} at path {':'.join(path)}"
