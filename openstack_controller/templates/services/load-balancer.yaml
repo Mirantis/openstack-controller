@@ -116,16 +116,6 @@ spec:
           db_init:
             jobs:
               - openstack-mariadb-cluster-wait
-      labels:
-        worker:
-          node_selector_key: openvswitch
-          node_selector_value: enabled
-        housekeeping:
-          node_selector_key: openvswitch
-          node_selector_value: enabled
-        health_manager:
-          node_selector_key: openvswitch
-          node_selector_value: enabled
       pod:
         replicas:
           worker: 3
