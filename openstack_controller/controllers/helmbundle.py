@@ -5,13 +5,9 @@ from mcp_k8s_lib import utils
 import pykube
 
 from openstack_controller import kube
-from openstack_controller import settings
+from openstack_controller import settings  # noqa
 
 LOG = utils.get_logger(__name__)
-
-kopf.config.WatchersConfig.default_stream_timeout = (
-    settings.KOPF_WATCH_STREAM_TIMEOUT
-)
 
 
 def update_status(owner, name, namespace, status):

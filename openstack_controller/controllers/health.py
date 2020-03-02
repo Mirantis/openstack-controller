@@ -5,7 +5,7 @@ from openstack_controller import constants
 from openstack_controller import health
 from openstack_controller import hooks
 from openstack_controller import kube
-from openstack_controller import settings
+from openstack_controller import settings  # noqa
 from openstack_controller import utils
 
 
@@ -25,10 +25,6 @@ DAEMONSET_HOOKS = {
         "nova-compute-default": hooks.nova_daemonset_created
     },
 }
-
-kopf.config.WatchersConfig.default_stream_timeout = (
-    settings.KOPF_WATCH_STREAM_TIMEOUT
-)
 
 
 def get_osdpl(namespace):

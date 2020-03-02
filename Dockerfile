@@ -35,16 +35,7 @@ RUN set -ex; \
     rm -vf python3-distutils*.deb; \
     python3.7 /tmp/get-pip.py; \
     pip install --no-index --no-cache --find-links /opt/wheels openstack-controller
-ADD kopf-session-timeout.path /tmp/kopf-session-timeout.path
-RUN set -ex; \
-    apt-get -q update; \
-    apt-get install -q -y --no-install-recommends --no-upgrade \
-        patch; \
-    cd /usr/local/lib/python3.7/dist-packages; \
-    patch -p1 < /tmp/kopf-session-timeout.path; \
-    cd -
 RUN rm -rvf /opt/wheels; \
     apt-get -q clean; \
     rm -rvf /var/lib/apt/lists/*; \
-    rm -rvf /tmp/kopf-session-timeout.path; \
     sh -c "echo \"LABELS:\n  IMAGE_TAG: $(pip freeze | awk -F '==' '/^openstack-controller=/ {print $2}')\" > /dockerimage_metadata"

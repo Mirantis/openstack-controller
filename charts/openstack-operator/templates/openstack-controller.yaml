@@ -20,6 +20,11 @@ rules:
     resources: [clusterkopfpeerings]
     verbs: [list, get, watch, patch]
 
+  # Watch creation and deletion of nodes with compute labels
+  - apiGroups: ['']
+    resources: [nodes]
+    verbs: [list, get, watch, patch]
+
   # Application: read-only access for watching cluster-wide.
   - apiGroups: [lcm.mirantis.com]
     resources: [openstackdeployments]
@@ -53,6 +58,14 @@ rules:
   - apiGroups: [""]
     resources: [secrets,configmaps]
     verbs: [list, get, create]
+
+  - apiGroups: ["batch"]
+    resources: [cronjobs]
+    verbs: [list, get, watch]
+
+  - apiGroups: [""]
+    resources: ["pods", "pods/exec"]
+    verbs: [list, get]
 
   # Application: watching & handling for the custom resource we declare.
   - apiGroups: [lcm.mirantis.com]
@@ -186,6 +199,12 @@ metadata:
   namespace: "{{ .Values.osdpl.namespace }}"
   name: openstack-controller.health
 ---
+apiVersion: zalando.org/v1
+kind: KopfPeering
+metadata:
+  namespace: "{{ .Values.osdpl.namespace }}"
+  name: openstack-controller.node
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -226,6 +245,11 @@ spec:
             - openstack_controller.controllers.probe
             - '-L'
             - 'http://0.0.0.0:44090/healthz'
+          env:
+            {{- range $optionName, $optionValue := .Values.osdpl.settings.raw }}
+            - name: {{ $optionName }}
+              value: "{{ $optionValue }}"
+            {{- end }}
           livenessProbe:
             httpGet:
               path: /healthz
@@ -249,6 +273,11 @@ spec:
             - openstack_controller.controllers.probe
             - '-L'
             - 'http://0.0.0.0:44091/healthz'
+          env:
+            {{- range $optionName, $optionValue := .Values.osdpl.settings.raw }}
+            - name: {{ $optionName }}
+              value: "{{ $optionValue }}"
+            {{- end }}
           livenessProbe:
             httpGet:
               path: /healthz
@@ -272,6 +301,11 @@ spec:
             - openstack_controller.controllers.probe
             - '-L'
             - 'http://0.0.0.0:44092/healthz'
+          env:
+            {{- range $optionName, $optionValue := .Values.osdpl.settings.raw }}
+            - name: {{ $optionName }}
+              value: "{{ $optionValue }}"
+            {{- end }}
           livenessProbe:
             httpGet:
               path: /healthz
@@ -295,10 +329,43 @@ spec:
             - openstack_controller.controllers.probe
             - '-L'
             - 'http://0.0.0.0:44093/healthz'
+          env:
+            {{- range $optionName, $optionValue := .Values.osdpl.settings.raw }}
+            - name: {{ $optionName }}
+              value: "{{ $optionValue }}"
+            {{- end }}
           livenessProbe:
             httpGet:
               path: /healthz
               port: 44093
+            periodSeconds: 120
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+        - name: node
+          image: {{ tuple . .Values.image | include "getImageUrl" }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command:
+            - kopf
+            - run
+            - '-n'
+            - {{ .Values.osdpl.namespace }}
+            - '-P'
+            - openstack-controller.node
+            - '-m'
+            - openstack_controller.controllers.node
+            - '-m'
+            - openstack_controller.controllers.probe
+            - '-L'
+            - 'http://0.0.0.0:44094/healthz'
+          env:
+            {{- range $optionName, $optionValue := .Values.osdpl.settings.raw }}
+            - name: {{ $optionName }}
+              value: "{{ $optionValue }}"
+            {{- end }}
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 44094
             periodSeconds: 120
           resources:
             {{- toYaml .Values.resources | nindent 12 }}

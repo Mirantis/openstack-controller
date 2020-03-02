@@ -22,6 +22,10 @@ kopf:
 osdpl:
   namespace: openstack
   cephSharedNamespace: openstack-ceph-shared
+  settings:
+    raw:
+      OSCTL_NODE_NOT_READY_FLAPPING_TIMEOUT: 120
+      OSCTL_HELMBUNDLE_APPLY_DELAY: 10
 
 tf:
   createSharedNamespace: true

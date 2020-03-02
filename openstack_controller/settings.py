@@ -13,50 +13,68 @@
 #    under the License.
 import os
 
+import kopf
+
 # The number of seconds to wait for all component from application becomes ready
-OSCTL_WAIT_APPLICATION_READY_TIMEOUT = os.environ.get(
-    "OSCTL_WAIT_APPLICATION_READY_TIMEOUT", 1200
+OSCTL_WAIT_APPLICATION_READY_TIMEOUT = int(
+    os.environ.get("OSCTL_WAIT_APPLICATION_READY_TIMEOUT", 1200)
 )
 
 # The number of seconds to sleep between checking application ready attempts
-OSCTL_WAIT_APPLICATION_READY_DELAY = os.environ.get(
-    "OSCTL_WAIT_APPLICATION_READY_DELAY", 10
+OSCTL_WAIT_APPLICATION_READY_DELAY = int(
+    os.environ.get("OSCTL_WAIT_APPLICATION_READY_DELAY", 10)
 )
 
 # The number of seconds to wait for values set in manifest are propagated to child objects.
-OSCTL_HELMBUNLE_MANIFEST_ENABLE_TIMEOUT = os.environ.get(
-    "OSCTL_HELMBUNLE_MANIFEST_ENABLE_TIMEOUT", 600
+OSCTL_HELMBUNLE_MANIFEST_ENABLE_TIMEOUT = int(
+    os.environ.get("OSCTL_HELMBUNLE_MANIFEST_ENABLE_TIMEOUT", 600)
 )
 
 # The number of seconds between attempts to check that values were applied.
-OSCTL_HELMBUNLE_MANIFEST_ENABLE_DELAY = os.environ.get(
-    "OSCTL_HELMBUNLE_MANIFEST_ENABLE_DELAY", 10
+OSCTL_HELMBUNLE_MANIFEST_ENABLE_DELAY = int(
+    os.environ.get("OSCTL_HELMBUNLE_MANIFEST_ENABLE_DELAY", 10)
 )
 
 # The number of seconds to wait for values are removed from manifest and propagated to child objects.
-OSCTL_HELMBUNLE_MANIFEST_DISABLE_TIMEOUT = os.environ.get(
-    "OSCTL_HELMBUNLE_MANIFEST_DISABLE_TIMEOUT", 600
+OSCTL_HELMBUNLE_MANIFEST_DISABLE_TIMEOUT = int(
+    os.environ.get("OSCTL_HELMBUNLE_MANIFEST_DISABLE_TIMEOUT", 600)
 )
 
 # The number of seconds between attempts to check that values were removed from release.
-OSCTL_HELMBUNLE_MANIFEST_DISABLE_DELAY = os.environ.get(
-    "OSCTL_HELMBUNLE_MANIFEST_DISABLE_DELAY", 10
+OSCTL_HELMBUNLE_MANIFEST_DISABLE_DELAY = int(
+    os.environ.get("OSCTL_HELMBUNLE_MANIFEST_DISABLE_DELAY", 10)
 )
 
 # The number of seconds to wait for kubernetes object removal
-OSCTL_HELMBUNLE_MANIFEST_PURGE_TIMEOUT = os.environ.get(
-    "OSCTL_HELMBUNLE_MANIFEST_PURGE_TIMEOUT", 600
+OSCTL_HELMBUNLE_MANIFEST_PURGE_TIMEOUT = int(
+    os.environ.get("OSCTL_HELMBUNLE_MANIFEST_PURGE_TIMEOUT", 600)
 )
 
 # The number of seconds between attempts to check that kubernetes object is removed
-OSCTL_HELMBUNLE_MANIFEST_PURGE_DELAY = os.environ.get(
-    "OSCTL_HELMBUNLE_MANIFEST_PURGE_DELAY", 10
+OSCTL_HELMBUNLE_MANIFEST_PURGE_DELAY = int(
+    os.environ.get("OSCTL_HELMBUNLE_MANIFEST_PURGE_DELAY", 10)
 )
 
 # The number of seconds to pause for helmbundle changes
-OSCTL_HELMBUNDLE_APPLY_DELAY = os.environ.get(
-    "OSCTL_HELMBUNDLE_APPLY_DELAY", 10
+OSCTL_HELMBUNDLE_APPLY_DELAY = int(
+    os.environ.get("OSCTL_HELMBUNDLE_APPLY_DELAY", 10)
 )
 
-# override internal kopf watch stream timeout (default is None)
-KOPF_WATCH_STREAM_TIMEOUT = os.environ.get("KOPF_WATCH_STREAM_TIMEOUT", 600)
+# The amount of time to wit for flapping node
+OSCTL_NODE_NOT_READY_FLAPPING_TIMEOUT = int(
+    os.environ.get("OSCTL_NODE_NOT_READY_FLAPPING_TIMEOUT", 120)
+)
+
+# The name of openstack deployment namespace
+OSCTL_OS_DEPLOYMENT_NAMESPACE = os.environ.get(
+    "OSCTL_OS_DEPLOYMENT_NAMESPACE", "openstack"
+)
+
+
+@kopf.on.startup()
+def configure(settings: kopf.OperatorSettings, **_):
+    settings.watching.connect_timeout = 1 * 60
+    settings.watching.server_timeout = os.environ.get(
+        "KOPF_WATCH_STREAM_TIMEOUT", 10 * 60
+    )
+    settings.watching.client_timeout = 10 * 60

@@ -16,8 +16,9 @@ fi
 
 SERVICE_ACCOUNT_NAME=openstack-controller-account
 NAMESPACE=osh-system
-KUBECFG_FILE_NAME="/tmp/kube/k8s-${SERVICE_ACCOUNT_NAME}-${NAMESPACE}-conf"
 TARGET_FOLDER="/tmp/kube"
+export KUBECFG_FILE_NAME="/tmp/kube/k8s-${SERVICE_ACCOUNT_NAME}-${NAMESPACE}-conf"
+export OS_DEPLOYMENT_NAMESPACE="openstack"
 
 create_target_folder() {
     echo -n "Creating target directory to hold files in ${TARGET_FOLDER}..."
@@ -97,5 +98,5 @@ get_user_token_from_secret
 set_kube_config_values
 
 
-KUBECONFIG=${KUBECFG_FILE_NAME} kopf run --dev -m openstack_controller.controllers.openstackdeployment -m openstack_controller.controllers.helmbundle -m openstack_controller.controllers.secrets -m openstack_controller.controllers.health -m openstack_controller.controllers.probe -n openstack -P openstack-controller.osdpl --liveness=http://:8090/healthz
+kopf run --dev -m openstack_controller.controllers.node -m openstack_controller.controllers.openstackdeployment -m openstack_controller.controllers.helmbundle -m openstack_controller.controllers.secrets -m openstack_controller.controllers.health -m openstack_controller.controllers.probe -n openstack -P openstack-controller.osdpl --liveness=http://:8090/healthz
 

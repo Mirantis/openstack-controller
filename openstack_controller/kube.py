@@ -1,5 +1,6 @@
 import asyncio
 from dataclasses import dataclass
+import json
 from typing import List
 import functools
 
@@ -225,6 +226,50 @@ class Deployment(pykube.Deployment, HelmBundleMixin):
             and self.obj["status"].get("updatedReplicas") == self.replicas
             and self.obj["status"].get("readyReplicas") == self.replicas
         )
+
+
+class Pod(pykube.Pod):
+
+    # NOTE(vsaienko): override delete method unless client accepts grace_period parameter
+    def delete(
+        self, propagation_policy: str = None, grace_period_seconds=None
+    ):
+        """
+        Delete the Kubernetes resource by calling the API.
+        The parameter propagation_policy defines whether to cascade the delete. It can be "Foreground", "Background" or "Orphan".
+        See https://kubernetes.io/docs/concepts/workloads/controllers/garbage-collection/#setting-the-cascading-deletion-policy
+        """
+        options = {}
+        if propagation_policy:
+            options["propagationPolicy"] = propagation_policy
+        if grace_period_seconds is not None:
+            options["gracePeriodSeconds"] = grace_period_seconds
+        r = self.api.delete(**self.api_kwargs(data=json.dumps(options)))
+        if r.status_code != 404:
+            self.api.raise_for_status(r)
+
+
+class Node(pykube.Node):
+    @property
+    def ready(self):
+        """
+        Return whether the given pykube Node has "Ready" status
+        """
+        self.reload()
+        for condition in self.obj.get("status", {}).get("conditions", []):
+            if condition["type"] == "Ready" and condition["status"] == "True":
+                return True
+        return False
+
+    def remove_pods(self, namespace=None):
+        pods = Pod.objects(api).filter(namespace=namespace)
+
+        for pod in pods:
+            if pod.obj["spec"].get("nodeName") == self.name:
+                LOG.debug(f"Removing pod: {pod.name} from node: {self.name}")
+                pod.delete(
+                    propagation_policy="Background", grace_period_seconds=0
+                )
 
 
 def resource(data):
