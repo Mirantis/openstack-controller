@@ -32,7 +32,7 @@ Apply all the required labels to all the nodes except of master k8s node
    git clone "https://gerrit.mcp.mirantis.com/mcp/release-openstack-k8s"
    cd release-openstack-k8s
    git tag -n
-   git checkout 0.1.5
+   git checkout 0.1.6
 
 ### Deploy openstack-controller (crds, operator, helmbundlecontroller)
 
