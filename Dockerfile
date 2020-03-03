@@ -1,4 +1,5 @@
-FROM docker-remote.docker.mirantis.net/ubuntu:bionic as builder
+ARG FROM=docker-remote.docker.mirantis.net/ubuntu:bionic
+FROM $FROM as builder
 # NOTE(pas-ha) need Git for pbr to install from source checkout w/o sdist
 ADD https://bootstrap.pypa.io/get-pip.py /tmp/get-pip.py
 RUN apt-get update; \
@@ -14,7 +15,7 @@ ADD . /opt/operator
 RUN pip wheel --wheel-dir /opt/wheels /opt/operator/data/*
 RUN pip wheel --wheel-dir /opt/wheels --find-links /opt/wheels /opt/operator
 
-FROM docker-remote.docker.mirantis.net/ubuntu:bionic
+FROM $FROM
 COPY --from=builder /tmp/get-pip.py /tmp/get-pip.py
 COPY --from=builder /opt/wheels /opt/wheels
 COPY --from=builder /opt/operator/uwsgi.ini /opt/operator/uwsgi.ini
