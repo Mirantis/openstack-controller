@@ -195,42 +195,7 @@ spec:
           <<: *cinder_endpoints_oslo_messaging
 {% include 'base/_notifications.yaml' %}
         volume:
-          # TODO(mkarpin): remove volume v1 endpoint configuration fully
-          # once cinder chart is switched to volumev3
           enabled: false
-          host_fqdn_override:
-            public:
-              host: cinder.{{ spec.public_domain_name }}
-              tls:
-                ca: |
-{{ spec.features.ssl.public_endpoints.ca_cert | indent( width=18, first=True) }}
-                crt: |
-{{ spec.features.ssl.public_endpoints.api_cert | indent( width=18, first=True) }}
-                key: |
-{{ spec.features.ssl.public_endpoints.api_key | indent( width=18, first=True) }}
-          hosts:
-            admin:
-              host: cinder-api
-            default: cinder
-            internal: cinder-api
-            public:
-              host: cinder
-              tls:
-                ca: |
-{{ spec.features.ssl.public_endpoints.ca_cert | indent( width=18, first=True) }}
-                crt: |
-{{ spec.features.ssl.public_endpoints.api_cert | indent( width=18, first=True) }}
-                key: |
-{{ spec.features.ssl.public_endpoints.api_key | indent( width=18, first=True) }}
-          port:
-            api:
-              admin: 8776
-              default: 80
-              internal: 8776
-              public: 443
-          scheme:
-            default: http
-            public: https
         volumev2:
           host_fqdn_override:
             public:
