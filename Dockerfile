@@ -38,4 +38,4 @@ RUN set -ex; \
     rm -rvf /opt/wheels; \
     apt-get -q clean; \
     rm -rvf /var/lib/apt/lists/*; \
-    echo "LABELS:\n  IMAGE_TAG: $(pip freeze | awk -F '==' '/^openstack-controller=/ {print $2}')" > /dockerimage_metadata
+    sh -c "echo \"LABELS:\n  IMAGE_TAG: $(pip freeze | awk -F '==' '/^openstack-controller=/ {print $2}')\" > /dockerimage_metadata"
