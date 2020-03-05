@@ -190,6 +190,13 @@ spec:
                   secret:
                     secretName: octavia-certs
                     defaultMode: 0644
+      # NOTE(vsaienko): openstack-gateway label is mandatory, target
+      # workers to openstack-gateway nodes to ensure create resources
+      # job picks correct nodes to create lb ports.
+      labels:
+        worker:
+          node_selector_key: openstack-gateway
+          node_selector_value: enabled
       manifests:
         network_policy: false
         job_rabbit_init: false
