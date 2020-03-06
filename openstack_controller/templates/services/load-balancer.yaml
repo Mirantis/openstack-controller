@@ -197,6 +197,12 @@ spec:
         worker:
           node_selector_key: openstack-gateway
           node_selector_value: enabled
+        health_manager:
+          node_selector_key: openstack-gateway
+          node_selector_value: enabled
+        housekeeping:
+          node_selector_key: openstack-gateway
+          node_selector_value: enabled
       manifests:
         network_policy: false
         job_rabbit_init: false
