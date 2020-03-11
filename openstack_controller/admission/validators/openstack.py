@@ -13,7 +13,6 @@
 
 import copy
 import enum
-import sys
 
 from openstack_controller.admission.validators import base
 from openstack_controller import exception
@@ -22,14 +21,11 @@ from openstack_controller import exception
 class OpenStackVersion(enum.IntEnum):
     """Ordered OpenStack version"""
 
-    master = sys.maxsize
     queens = 1
     rocky = 2
     stein = 3
     train = 4
     ussuri = 5
-    # TODO(pas-ha) update this when adding new supported OpenStack releases
-    latest = 5
 
 
 class OpenStackValidator(base.BaseValidator):
@@ -40,34 +36,34 @@ class OpenStackValidator(base.BaseValidator):
     def validate(self, review_request):
         old_obj = review_request.get("oldObject", {})
         new_obj = review_request.get("object", {})
+        self._deny_master(new_obj)
         if review_request["operation"] == "UPDATE":
             # on update we deffinitely have both old and new as not empty
             self._validate_openstack_upgrade(old_obj, new_obj)
 
+    def _deny_master(self, new_obj):
+        new_version = new_obj.get("spec", {}).get("openstack_version")
+        if new_version == "master":
+            raise exception.OsDplValidationFailed(
+                "Using master of OpenStack is not permitted. "
+                "You must disable the OpenStackDeployment admission "
+                "controller to deploy, use or upgrade to master."
+            )
+
     def _validate_openstack_upgrade(self, old_obj, new_obj):
+        # NOTE(pas-ha) this logic relies on 'master' already has been denied
         old_version = OpenStackVersion[old_obj["spec"]["openstack_version"]]
         new_version = OpenStackVersion[new_obj["spec"]["openstack_version"]]
         # not an upgrade
         if new_version == old_version:
             return
-        # deny downgrades
         if old_version > new_version:
             raise exception.OsDplValidationFailed(
-                "Downgrading OpenStack version is not permitted"
+                "OpenStack version downgrade is not permitted"
             )
-        # deny skip-level upgrades
-        # but allow upgrade from latest release to master
-        # (as by our Enum it would look like skip-level)
-        # TODO(pas-ha) might deny upgrades to master at all
-        if (
-            not (
-                old_version == OpenStackVersion.latest
-                and new_version == OpenStackVersion.master
-            )
-            and new_version.value - old_version.value != 1
-        ):
+        if new_version.value - old_version.value != 1:
             raise exception.OsDplValidationFailed(
-                "Skip-level OpenStack upgrade is not permitted"
+                "Skip-level OpenStack version upgrade is not permitted"
             )
         # validate that nothing else is changed together with
         # openstack_version
