@@ -19,6 +19,7 @@ from unittest import mock
 
 from openstack_controller.admission import controller
 from openstack_controller.admission.validators import base
+from openstack_controller.admission.validators import openstack as osv
 from openstack_controller import exception
 
 
@@ -54,7 +55,13 @@ class FailValidator(base.BaseValidator):
         raise exception.OsDplValidationFailed("VIKINGS!")
 
 
-FAKE_VALIDATORS = {"ok": OkValidator(), "fail": FailValidator()}
+FAKE_VALIDATORS = {
+    "openstack": OkValidator(),
+    "ok": OkValidator(),
+    "fail": FailValidator(),
+}
+
+FAKE_SERVICES = ({"ok", "fail"}, set())
 
 
 class TestRootController(unittest.TestCase):
@@ -90,7 +97,7 @@ class TestValidationController(unittest.TestCase):
         self.assertIn("'apiVersion' is a required property", self.resp.body)
 
     @mock.patch.object(
-        FAKE_VALIDATORS["ok"], "validate", wraps=FAKE_VALIDATORS["ok"].validate
+        FAKE_VALIDATORS["ok"], "validate",
     )
     @mock.patch.object(
         FAKE_VALIDATORS["fail"],
@@ -98,37 +105,77 @@ class TestValidationController(unittest.TestCase):
         wraps=FAKE_VALIDATORS["fail"].validate,
     )
     @mock.patch.object(controller, "_VALIDATORS", FAKE_VALIDATORS)
-    def test_validate_validators_order_both_called(self, fail_mock, ok_mock):
+    @mock.patch.object(
+        controller.layers, "services", return_value=FAKE_SERVICES
+    )
+    def test_validate_validators_stop_after_first_fail(
+        self, svc_mock, fail_mock, ok_mock
+    ):
+        ok_mock.side_effect = exception.OsDplValidationFailed("VIKINGS!")
+        # Since we use sets, we don't know the order in which validators
+        # will be applied.
+        # we've set both validators to fail, and we'll check that only one
+        # of them was called
         self.req_body_dict["request"]["object"]["spec"]["features"][
             "services"
         ] = ["ok", "fail"]
         req_body = json.dumps(self.req_body_dict)
         req = mock.MagicMock(stream=io.StringIO(req_body))
         self.controller.on_post(req, self.resp)
-        ok_mock.assert_called_once()
-        fail_mock.assert_called_once()
         self.assertIn("400", self.resp.body)
         self.assertIn("VIKINGS!", self.resp.body)
+        # check that only one validator was called
+        self.assertEqual(1, ok_mock.call_count + fail_mock.call_count)
 
-    @mock.patch.object(
-        FAKE_VALIDATORS["ok"], "validate", wraps=FAKE_VALIDATORS["ok"].validate
-    )
-    @mock.patch.object(
-        FAKE_VALIDATORS["fail"],
-        "validate",
-        wraps=FAKE_VALIDATORS["fail"].validate,
-    )
-    @mock.patch.object(controller, "_VALIDATORS", FAKE_VALIDATORS)
-    def test_validate_validators_stop_after_first_fail(
-        self, fail_mock, ok_mock
-    ):
-        self.req_body_dict["request"]["object"]["spec"]["features"][
-            "services"
-        ] = ["fail", "ok"]
-        req_body = json.dumps(self.req_body_dict)
-        req = mock.MagicMock(stream=io.StringIO(req_body))
-        self.controller.on_post(req, self.resp)
-        ok_mock.assert_not_called()
-        fail_mock.assert_called_once()
-        self.assertIn("400", self.resp.body)
-        self.assertIn("VIKINGS!", self.resp.body)
+
+class TestOpenStackValidator(unittest.TestCase):
+    def setUp(self):
+        super().setUp()
+        self.validate = osv.OpenStackValidator().validate
+        self.req = {"operation": "UPDATE", "object": {}, "oldObject": {}}
+
+    def test_upgrade(self):
+        self.req["object"] = {"spec": {"openstack_version": "train"}}
+        self.req["oldObject"] = {"spec": {"openstack_version": "stein"}}
+        self.assertIsNone(self.validate(self.req))
+
+    def test_downgrade(self):
+        self.req["object"] = {"spec": {"openstack_version": "stein"}}
+        self.req["oldObject"] = {"spec": {"openstack_version": "train"}}
+        with self.assertRaises(exception.OsDplValidationFailed):
+            self.validate(self.req)
+
+    def test_skiplevel_upgrade(self):
+        self.req["object"] = {"spec": {"openstack_version": "train"}}
+        self.req["oldObject"] = {"spec": {"openstack_version": "rocky"}}
+        with self.assertRaises(exception.OsDplValidationFailed):
+            self.validate(self.req)
+
+    def upgrade_to_master(self):
+        self.req["object"] = {"spec": {"openstack_version": "master"}}
+        self.req["oldObject"] = {"spec": {"openstack_version": "train"}}
+        self.assertIsNone(self.validate(self.req))
+
+    def upgrade_with_extra_changes(self):
+        self.req["object"] = {"spec": {"openstack_version": "train"}}
+        self.req["oldObject"] = {
+            "spec": {"openstack_version": "stein", "spam": "ham"}
+        }
+        with self.assertRaises(exception.OsDplValidationFailed):
+            self.validate(self.req)
+
+    def test_openstackversion_latest(self):
+        self.assertEqual(
+            osv.OpenStackVersion.latest,
+            osv.OpenStackVersion.train,
+            "Latest version is not Train",
+        )
+
+    def test_openstackversion_master(self):
+        for v in osv.OpenStackVersion:
+            if v != osv.OpenStackVersion.master:
+                self.assertLess(
+                    v,
+                    osv.OpenStackVersion.master,
+                    "openstack/master is not the largest possible version",
+                )
