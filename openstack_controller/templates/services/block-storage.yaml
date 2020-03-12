@@ -120,17 +120,17 @@ spec:
         user_secret_name: {{ ceph.cinder.secrets }}
       conf:
         backends:
-{%- set backends=[] %}
+{%- set enabled_backends=[] %}
 {%- for backend, backend_config in ceph.cinder.pools.items() %}
   {%- if backend_config.role == 'volumes' %}
-    {%- do backends.append(backend) %}
-  {%- endif %}
+    {%- do enabled_backends.append(backend) %}
           {{ backend }}:
             volume_driver: cinder.volume.drivers.rbd.RBDDriver
             volume_backend_name: {{ backend }}
             rbd_pool: {{ backend_config.name }}
             rbd_user: {{ ceph.cinder.username }}
             rbd_ceph_conf: "/etc/ceph/ceph.conf"
+  {%- endif %}
 {%- endfor %}
         ceph:
           pools:
@@ -161,8 +161,8 @@ spec:
   {%- endif %}
 {%- endfor %}
 {%- endif %}
-            enabled_backends: {{ backends|join(',') }}
-            default_volume_type: {{ backends[0] }}
+            enabled_backends: {{ enabled_backends|join(',') }}
+            default_volume_type: {{ enabled_backends[0] }}
           oslo_messaging_notifications:
             topics: {{ notification_topics|join(',') }}
           coordination:
@@ -170,6 +170,16 @@ spec:
         logging:
           logger_cinder:
             level: {{ spec.get('features', {}).get('logging', {}).get('cinder', {}).get('level', 'INFO') }}
+      # NOTE(vsaienko): do not create backends from .Values.conf.cinder.DEFAULT.backends
+      # as we have default backend in chart values rbd1 which is not used.
+      # Do not create volume type for backup, as user can't use this backend directly.
+      bootstrap:
+        bootstrap_conf_backends: false
+        volume_types:
+{%- for backend in enabled_backends %}
+          {{ backend }}:
+            volume_backend_name: {{ backend }}
+{%- endfor %}
       secrets:
         rbd:
           volume: {{ ceph.cinder.secrets }}
