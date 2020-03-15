@@ -221,38 +221,6 @@ spec:
                   initialDelaySeconds: 10
                   periodSeconds: 50
                   timeoutSeconds: 40
-      {%- if spec.get('features', {}).get('neutron', {}).get('dvr', {}).get('enabled', False) %}
-      labels:
-        agent:
-          l3:
-            node_affinity:
-              requiredDuringSchedulingIgnoredDuringExecution:
-                nodeSelectorTerms:
-                - matchExpressions:
-                  - key: openvswitch
-                    operator: In
-                    values:
-                    - enabled
-                - matchExpressions:
-                  - key: linuxbridge
-                    operator: In
-                    values:
-                    - enabled
-          metadata:
-            node_affinity:
-              requiredDuringSchedulingIgnoredDuringExecution:
-                nodeSelectorTerms:
-                - matchExpressions:
-                  - key: openvswitch
-                    operator: In
-                    values:
-                    - enabled
-                - matchExpressions:
-                  - key: linuxbridge
-                    operator: In
-                    values:
-                    - enabled
-      {%- endif %}
       dependencies:
         static:
           db_init:
@@ -446,6 +414,7 @@ spec:
         {%- if spec.get('features', {}).get('neutron', {}).get('dvr', {}).get('enabled', False) %}
         overrides:
           neutron_l3-agent:
+            overrides_default: false
             labels:
             - label:
                 key: openstack-compute-node
@@ -455,14 +424,6 @@ spec:
                 l3_agent:
                   DEFAULT:
                     agent_mode: dvr
-            - label:
-                key: openstack-control-plane
-                values:
-                - "enabled"
-              conf:
-                l3_agent:
-                  DEFAULT:
-                    agent_mode: dvr_snat
             - label:
                 key: openstack-gateway
                 values:
