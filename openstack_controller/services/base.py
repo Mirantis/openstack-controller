@@ -263,10 +263,10 @@ class Service:
         )
 
     async def apply(self, event, **kwargs):
-        # ensure child ref exists in the status
-        if self.resource_name not in self.body.get("status", {}).get(
-            "children", {}
-        ):
+        # ensure child ref exists in the current status of osdpl object
+        if self.resource_name not in self._get_osdpl().obj.get(
+            "status", {}
+        ).get("children", {}):
             status_patch = {"children": {self.resource_name: "Unknown"}}
             self.update_status(status_patch)
         LOG.info(f"Applying config for {self.service}")
