@@ -148,7 +148,6 @@ services:
                 - agent
                 - subnet_allocation
                 - l3_agent_scheduler
-                - tag
                 - external-net
                 - flavors
                 - net-mtu
