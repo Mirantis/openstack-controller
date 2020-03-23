@@ -40,8 +40,9 @@ spec:
         secret_ca_bundle: true
       endpoints:
         cluster_domain_suffix: {{ spec.internal_domain_name }}
+{% include 'base/_admin_identity.yaml' %}
+# Keycloak-related Identity service configuration
 {%- if keystone_keycloak_enabled %}
-        identity:
           hosts:
             internal: keystone
           path:

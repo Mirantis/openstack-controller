@@ -70,6 +70,22 @@ class BarbicanCredentials(OpenStackCredentials):
 
 
 @dataclass
+class NeutronCredentials(OpenStackCredentials):
+    metadata_secret: str
+
+    def __init__(
+        self,
+        database=None,
+        messaging=None,
+        notifications=None,
+        memcached="",
+        metadata_secret="",
+    ):
+        super().__init__(database, messaging, notifications, memcached)
+        self.metadata_secret = metadata_secret
+
+
+@dataclass
 class GaleraCredentials:
     sst: OSSytemCreds
     exporter: OSSytemCreds
@@ -263,6 +279,15 @@ class BarbicanSecret(OpenStackServiceSecret):
         os_creds.kek = base64.b64encode(
             generate_password(length=32).encode()
         ).decode()
+        return os_creds
+
+
+class NeutronSecret(OpenStackServiceSecret):
+    secret_class = NeutronCredentials
+
+    def create(self):
+        os_creds = super().create()
+        os_creds.metadata_secret = generate_password(length=32)
         return os_creds
 
 

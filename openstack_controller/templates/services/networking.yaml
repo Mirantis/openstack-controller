@@ -33,7 +33,7 @@ spec:
         cluster_domain_suffix: {{ spec.internal_domain_name }}
         oslo_messaging: &neutron_endpoints_oslo_messaging
           auth:
-            admin:
+            user:
               username: {{ admin_creds.messaging.username }}
               password: {{ admin_creds.messaging.password }}
             neutron:
@@ -351,6 +351,8 @@ spec:
           logger_neutron:
             level: {{ spec.get('features', {}).get('logging', {}).get('neutron', {}).get('level', 'INFO') }}
         metadata_agent:
+          DEFAULT:
+            metadata_proxy_shared_secret: {{ credentials.metadata_secret }}
           cache:
             # NOTE(vsaienko): decrease cache to allow reuse same IP for new instance.
             # TODO(vsaienko): Remove once cache is cleared on metadata side by port unbound event

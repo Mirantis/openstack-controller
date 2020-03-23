@@ -30,7 +30,7 @@ spec:
         cluster_domain_suffix: {{ spec.internal_domain_name }}
         oslo_messaging: &heat_endpoints_oslo_messaging
           auth:
-            admin:
+            user:
               username: {{ admin_creds.messaging.username }}
               password: {{ admin_creds.messaging.password }}
             heat:

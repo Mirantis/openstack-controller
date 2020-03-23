@@ -31,7 +31,7 @@ spec:
         cluster_domain_suffix: {{ spec.internal_domain_name }}
         oslo_messaging: &nova_endpoints_oslo_messaging
           auth:
-            admin:
+            user:
               username: {{ admin_creds.messaging.username }}
               password: {{ admin_creds.messaging.password }}
             nova:
@@ -408,6 +408,8 @@ spec:
           cinder:
             # TODO(vsaienko): remove service_name when queens support is dropped.
             catalog_info: volumev3:cinderv3:internalURL
+          neutron:
+            metadata_proxy_shared_secret: {{ metadata_secret }}
           libvirt:
             cpu_mode: custom
             cpu_model: kvm64

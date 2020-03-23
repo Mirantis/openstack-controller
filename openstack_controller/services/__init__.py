@@ -381,6 +381,7 @@ class Neutron(OpenStackService):
     service = "networking"
     openstack_chart = "neutron"
     _required_accounts = {"compute": ["nova"], "dns": ["designate"]}
+    _secret_class = secrets.NeutronSecret
 
     @property
     def health_groups(self):
@@ -535,8 +536,15 @@ class Nova(OpenStackServiceWithCeph):
 
     def template_args(self):
         t_args = super().template_args()
+
         ssh_secret = secrets.SSHSecret(self.namespace, "nova")
         t_args["ssh_credentials"] = ssh_secret.ensure()
+
+        neutron_secret = secrets.NeutronSecret(self.namespace, "networking")
+        kube.wait_for_secret(self.namespace, neutron_secret.secret_name)
+        neutron_creds = neutron_secret.ensure()
+        t_args["metadata_secret"] = neutron_creds.metadata_secret
+
         return t_args
 
     @layers.kopf_exception

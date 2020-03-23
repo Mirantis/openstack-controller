@@ -30,7 +30,7 @@ spec:
         cluster_domain_suffix: {{ spec.internal_domain_name }}
         oslo_messaging: &barbican_endpoints_oslo_messaging
           auth:
-            admin:
+            user:
               username: {{ admin_creds.messaging.username }}
               password: {{ admin_creds.messaging.password }}
             barbican:
@@ -153,24 +153,7 @@ spec:
               password: {{ credentials.database.user.password }}
         oslo_messaging:
           <<: *barbican_endpoints_oslo_messaging
-        oslo_messaging_notifications:
-          auth:
-            barbican:
-              username: barbican
-              password: password
-          host_fqdn_override: {}
-          hosts:
-            default: rabbitmq
-          path: /openstack
-          port:
-            amqp:
-              default: 5672
-            http:
-              default: 15672
-          scheme: rabbit
-          statefulset:
-            name: openstack-rabbitmq-rabbitmq
-            replicas: 1
+{% include 'base/_notifications.yaml' %}
         key_manager:
           host_fqdn_override:
             public:
