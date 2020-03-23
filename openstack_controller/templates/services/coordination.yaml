@@ -18,6 +18,7 @@ spec:
 {%- endfor %}
       endpoints:
         cluster_domain_suffix: {{ spec.internal_domain_name }}
+#The amount of replicas is set to "1" until PROD-35005 is fixed (https://mirantis.jira.com/browse/PROD-35005)
       pod:
         replicas:
-          etcd: 3
+          etcd: 1
