@@ -398,7 +398,7 @@ class Neutron(OpenStackService):
     }
 
     async def apply(self, event, **kwargs):
-        features = self.body["spec"]["features"].get("neutron", {})
+        features = self.mspec["features"].get("neutron", {})
         if features.get("backend", "") == "tungstenfabric":
             secret_data = {
                 "tunnel_interface": base64.b64encode(
