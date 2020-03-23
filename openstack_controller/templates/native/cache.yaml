@@ -13,24 +13,25 @@ spec:
       labels:
         app.kubernetes.io/name: cache
     spec:
-      nodeAffinity:
-        requiredDuringSchedulingIgnoredDuringExecution:
-          nodeSelectorTerms:
-          - matchExpressions:
-            - key: openstack-control-plane
-              operator: In
-              values:
-              - enabled
-          - matchExpressions:
-            - key: openstack-compute-node
-              operator: In
-              values:
-              - enabled
-          - matchExpressions:
-            - key: openvswitch
-              operator: In
-              values:
-              - enabled
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: openstack-control-plane
+                operator: In
+                values:
+                - enabled
+            - matchExpressions:
+              - key: openstack-compute-node
+                operator: In
+                values:
+                - enabled
+            - matchExpressions:
+              - key: openvswitch
+                operator: In
+                values:
+                - enabled
       containers:
 {%- for name, url in images.items() %}
       - name: image-precaching-{{ name | replace("_", "-") }}
