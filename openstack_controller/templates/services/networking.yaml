@@ -178,8 +178,6 @@ spec:
                   initialDelaySeconds: 10
                   periodSeconds: 50
                   timeoutSeconds: 40
-              readiness:
-                enabled: false
           l3_agent:
             l3_agent:
               liveness:
@@ -205,8 +203,6 @@ spec:
                   initialDelaySeconds: 10
                   periodSeconds: 50
                   timeoutSeconds: 40
-              readiness:
-                enabled: false
           metadata_agent:
             metadata_agent:
               liveness:
