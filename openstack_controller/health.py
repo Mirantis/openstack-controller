@@ -94,7 +94,8 @@ def set_application_health(
             else None
         }
     }
-    patch[application][component].update(custom_data)
+    if patch[application][component]:
+        patch[application][component].update(custom_data)
     osdpl.patch({"status": {"health": patch}})
 
 
