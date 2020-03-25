@@ -43,13 +43,15 @@ spec:
 {% include 'base/_admin_identity.yaml' %}
 # Keycloak-related Identity service configuration
 {%- if keystone_keycloak_enabled %}
-          hosts:
-            internal: keystone
+        identity:
+          host_fqdn_override:
+            default: keystone.{{ spec.public_domain_name }}
+          scheme: https
           path:
             default: /v3
           port:
             api:
-              internal: 80
+              internal: 443
 {%- endif %}
         oslo_db:
           auth:

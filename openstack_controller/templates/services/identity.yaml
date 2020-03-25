@@ -17,6 +17,7 @@ spec:
         tags:
 {%- for image in [
     "keystone_domain_manage",
+    "keystone_federations_create",
     "db_drop",
     "image_repo_sync",
     "db_init",
