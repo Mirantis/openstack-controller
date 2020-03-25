@@ -305,7 +305,7 @@ spec:
             --network {{ floating_network.get('name', 'public') }}
           openstack router show {{ floating_network.get('router', {}).get('name', 'r1') }} || openstack router create {{ floating_network.get('router', {}).get('name', 'r1') }}
           openstack router set --external-gateway {{ floating_network.get('name', 'public') }} {{ floating_network.get('router', {}).get('name', 'r1') }}
-          openstack network set {{ floating_network.get('name', 'public') }} --default
+          openstack network set {{ floating_network.get('name', 'public') }}{% if not tungstenfabric_enabled %} --default{% endif %}
       {%- endif %}
       conf:
         paste:
