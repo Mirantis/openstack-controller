@@ -180,6 +180,22 @@ services:
               api_v1: false
               api_v2: false
               api_v3: true
+          tempest_logging:
+            handler_file:
+              args: ('/var/lib/tempest/data/tempest.log',)
+              class: FileHandler
+              formatter: tests
+              level: DEBUG
+            handler_stdout:
+              level: WARN
+            handlers:
+              keys: file,stdout
+            logger_root:
+              handlers: stdout,file
+              level: DEBUG
+            logger_tempest:
+              handlers: stdout,file
+              level: DEBUG
 
         manifests:
           job_bootstrap: true
