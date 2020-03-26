@@ -10,6 +10,7 @@ class Network(base_section.BaseSection):
         "catalog_type",
         "default_network",
         "dns_servers",
+        "dns_domain",
         "endpoint_type",
         "floating_network_name",
         "port_vnic_type",
@@ -43,6 +44,12 @@ class Network(base_section.BaseSection):
     @property
     def dns_servers(self):
         pass
+
+    @property
+    def dns_domain(self):
+        return self.get_values_item(
+            "neutron", "conf.neutron.DEFAULT.dns_domain"
+        )
 
     @property
     def endpoint_type(self):
