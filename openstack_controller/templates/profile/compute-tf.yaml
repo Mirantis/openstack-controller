@@ -109,6 +109,12 @@ services:
             - (?:neutron_tempest_plugin.api.test_allowed_address_pair.AllowedAddressPairTestJSON)
             - (?:neutron_tempest_plugin.api.test_extra_dhcp_options.ExtraDHCPOptionsIpV6TestJSON)
             - (?:neutron_tempest_plugin.api.test_extra_dhcp_options.ExtraDHCPOptionsTestJSON)
+            # Skip unsupported Tungsenfabric tests
+            # TODO(vsaienko): remove when PRODX-3721 resolved.
+            - (?:tempest.api.network.test_subnetpools_extensions.SubnetPoolsTestJSON)
+            - (?:neutron_tempest_plugin.api.test_subnetpool_prefix_ops)
+            - (?:neutron_tempest_plugin.api.test_subnetpools)
+            - (?:neutron_tempest_plugin.api.test_subnetpools_negative)
           script: |
             tempest run --config-file /etc/tempest/tempest.conf -w 4 --smoke --blacklist-file  /etc/tempest/test-blacklist
           tempest:
@@ -134,7 +140,11 @@ services:
             #TODO: Will be automated soon in filters.
             network-feature-enabled:
               api_extensions:
-                - default-subnetpools
+                # not supported by TungstenFabric
+                # - address-scope
+                # - default-subnetpools
+                # - standard-attr-tag
+                # - rbac-policies
                 - network-ip-availability
                 - network_availability_zone
                 - auto-allocated-topology
@@ -152,7 +162,6 @@ services:
                 - l3-ha
                 - provider
                 - multi-provider
-                - address-scope
                 - extraroute
                 - subnet-service-types
                 - standard-attr-timestamp
@@ -166,14 +175,12 @@ services:
                 - security-group
                 - dhcp_agent_scheduler
                 - router_availability_zone
-                - rbac-policies
                 - standard-attr-description
                 - router
                 - allowed-address-pairs
                 - project-id
                 - dvr
                 - filter-validation
-                - standard-attr-tag
                 - dns-domain-ports
                 - dns-integration
             volume-feature-enabled:
