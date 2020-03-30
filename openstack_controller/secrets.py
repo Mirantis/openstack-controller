@@ -70,6 +70,22 @@ class BarbicanCredentials(OpenStackCredentials):
 
 
 @dataclass
+class HorizonCredentials(OpenStackCredentials):
+    secret_key: str
+
+    def __init__(
+        self,
+        database=None,
+        messaging=None,
+        notifications=None,
+        memcached="",
+        secret_key="",
+    ):
+        super().__init__(database, messaging, notifications, memcached)
+        self.secret_key = secret_key
+
+
+@dataclass
 class NeutronCredentials(OpenStackCredentials):
     metadata_secret: str
 
@@ -279,6 +295,15 @@ class BarbicanSecret(OpenStackServiceSecret):
         os_creds.kek = base64.b64encode(
             generate_password(length=32).encode()
         ).decode()
+        return os_creds
+
+
+class HorizonSecret(OpenStackServiceSecret):
+    secret_class = HorizonCredentials
+
+    def create(self):
+        os_creds = super().create()
+        os_creds.secret_key = generate_password(length=32)
         return os_creds
 
 

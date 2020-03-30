@@ -88,6 +88,8 @@ spec:
           extra_panels: {{ horizon_extra_panels }}
           local_settings:
             config:
+              horizon_secret_key: {{ credentials.secret_key }}
+
               horizon_images_upload_mode: 'direct'
               secure_proxy_ssl_header: true
 {%- if keystone_keycloak_enabled %}

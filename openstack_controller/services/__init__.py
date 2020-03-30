@@ -281,6 +281,7 @@ class Heat(OpenStackService):
 class Horizon(OpenStackService):
     service = "dashboard"
     openstack_chart = "horizon"
+    _secret_class = secrets.HorizonSecret
 
     @property
     def _child_generic_objects(self):
