@@ -40,7 +40,7 @@ def main():
     except pykube.exceptions.ObjectDoesNotExist:
         sys.exit(f"Job {args.namespace}/{args.name} was not found!")
     purge_job_meta(job)
-    job.delete(propagation_policy="Foreground")
+    job.delete(propagation_policy="Backgound")
     while job.exists():
         time.sleep(3)
     try:
