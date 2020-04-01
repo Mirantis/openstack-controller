@@ -15,7 +15,7 @@ import os
 
 # The number of seconds to wait for all component from application becomes ready
 OSCTL_WAIT_APPLICATION_READY_TIMEOUT = os.environ.get(
-    "OSCTL_WAIT_APPLICATION_READY_TIMEOUT", 600
+    "OSCTL_WAIT_APPLICATION_READY_TIMEOUT", 1200
 )
 
 # The number of seconds to sleep between checking application ready attempts
@@ -25,7 +25,7 @@ OSCTL_WAIT_APPLICATION_READY_DELAY = os.environ.get(
 
 # The number of seconds to wait for values set in manifest are propagated to child objects.
 OSCTL_HELMBUNLE_MANIFEST_ENABLE_TIMEOUT = os.environ.get(
-    "OSCTL_HELMBUNLE_MANIFEST_ENABLE_TIMEOUT", 300
+    "OSCTL_HELMBUNLE_MANIFEST_ENABLE_TIMEOUT", 600
 )
 
 # The number of seconds between attempts to check that values were applied.
@@ -35,7 +35,7 @@ OSCTL_HELMBUNLE_MANIFEST_ENABLE_DELAY = os.environ.get(
 
 # The number of seconds to wait for values are removed from manifest and propagated to child objects.
 OSCTL_HELMBUNLE_MANIFEST_DISABLE_TIMEOUT = os.environ.get(
-    "OSCTL_HELMBUNLE_MANIFEST_DISABLE_TIMEOUT", 300
+    "OSCTL_HELMBUNLE_MANIFEST_DISABLE_TIMEOUT", 600
 )
 
 # The number of seconds between attempts to check that values were removed from release.
@@ -45,7 +45,7 @@ OSCTL_HELMBUNLE_MANIFEST_DISABLE_DELAY = os.environ.get(
 
 # The number of seconds to wait for kubernetes object removal
 OSCTL_HELMBUNLE_MANIFEST_PURGE_TIMEOUT = os.environ.get(
-    "OSCTL_HELMBUNLE_MANIFEST_PURGE_TIMEOUT", 300
+    "OSCTL_HELMBUNLE_MANIFEST_PURGE_TIMEOUT", 600
 )
 
 # The number of seconds between attempts to check that kubernetes object is removed
