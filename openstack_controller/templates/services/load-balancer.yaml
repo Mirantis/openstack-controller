@@ -82,9 +82,9 @@ spec:
     values:
       octavia:
         settings:
-          lbmgmt_cidr: "192.168.0.0/19"
-          lbmgmt_subnet_start: "192.168.0.100"
-          lbmgmt_subnet_end: "192.168.31.254"
+          lbmgmt_cidr: {{ spec.features.octavia.lb_network.subnet.range }}
+          lbmgmt_subnet_start: {{ spec.features.octavia.lb_network.subnet.pool_start }}
+          lbmgmt_subnet_end: {{ spec.features.octavia.lb_network.subnet.pool_end }}
           amphora_image_url: {{ images["octavia_amphora"] }}
       images:
         tags:

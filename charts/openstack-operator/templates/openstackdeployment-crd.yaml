@@ -68,9 +68,9 @@ spec:
               enum:
                 - queens # not supported, only for migration
                 - rocky # not supported, only for migration
-                - stein
+                - stein # not supported, only for migration
                 - train
-                - master
+                - master # not supported, only for example
             profile:
               description: profile to deploy
               type: string
@@ -357,6 +357,30 @@ spec:
                             name:
                               type: string
                               description: "The name of public router"
+                octavia:
+                  type: object
+                  properties:
+                    lb_network:
+                      type: object
+                      required:
+                        - subnet
+                      properties:
+                        subnet:
+                          type: object
+                          required:
+                            - range
+                            - pool_start
+                            - pool_end
+                          properties:
+                            range:
+                              type: string
+                              description: "IP address range ie: 1.2.3.0/24"
+                            pool_start:
+                              type: string
+                              description: "start IP address ie: 1.2.3.100"
+                            pool_end:
+                              type: string
+                              description: "end IP address ie: 1.2.3.200"
                 stacklight:
                   type: object
                   required:
