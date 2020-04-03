@@ -190,6 +190,7 @@ services:
               api_v1: false
               api_v2: false
               api_v3: true
+              cluster_active_active: true
           tempest_logging:
               handler_file:
                 args: ('/var/lib/tempest/data/tempest.log',)
