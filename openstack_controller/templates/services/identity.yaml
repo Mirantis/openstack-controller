@@ -102,8 +102,11 @@ spec:
           federation:
             # TODO: move this logic to keystone helm chart
             trusted_dashboard: "https://horizon.{{ spec.public_domain_name }}/auth/websso/"
+            remote_id_attribute: HTTP_OIDC_ISS
           mapped:
             remote_id_attribute: HTTP_OIDC_ISS
+          auth:
+            methods: password,token,mapped
 {%- endif %}
         wsgi_keystone: |
           {%- raw %}
@@ -135,9 +138,11 @@ spec:
               OIDCResponseType "id_token"
               OIDCScope "openid email profile"
               OIDCProviderMetadataURL {{ keystone_keycloak.get('oidc', {}).get('OIDCProviderMetadataURL', keystone_keycloak.url + "/auth/realms/iam/.well-known/openid-configuration")}}
-              OIDCClientID "os"
+              OIDCOAuthVerifyJwksUri {{ keystone_keycloak.get('oidc', {}).get('OIDCProviderMetadataURL', keystone_keycloak.url + "/auth/realms/iam/protocol/openid-connect/certs")}}
+              OIDCClientID {{ keystone_keycloak.get('oidc', {}).get('OIDCClientID', "os") }}
               OIDCCryptoPassphrase {{ oidc_crypto_passphrase }}
               OIDCSSLValidateServer {% if keystone_keycloak.get('oidc',{}).get('OIDCSSLValidateServer', true) %}On{%- else %}Off{%- endif %}
+              OIDCOAuthSSLValidateServer {% if keystone_keycloak.get('oidc',{}).get('OIDCOAuthSSLValidateServer', true) %}On{%- else %}Off{%- endif %}
               {%- if keystone_keycloak.get('oidc', {}).get('OIDCRedirectURI', []) %}
               {%- for uri in keystone_keycloak.oidc.OIDCRedirectURI %}
               OIDCRedirectURI {{ uri }}
