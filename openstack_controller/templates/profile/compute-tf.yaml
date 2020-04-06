@@ -122,6 +122,7 @@ services:
               ca_certificates_file: /certs/ca-bundle.pem
             #TODO(mshalamov): Will be removed during process of completing PRODX-1192
             compute:
+              fixed_network_name: tempest-fixed-net
               min_compute_nodes: 2
             #TODO(mshalamov): Will be removed during process of completing PRODX-1192
             compute-feature-enabled:

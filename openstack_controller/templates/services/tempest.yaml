@@ -86,6 +86,13 @@ spec:
             default_pool
           openstack network auto allocated topology create --or-show
           openstack subnet pool set default_pool --default
+{%- else %}
+          openstack network show tempest-fixed-net || openstack network create tempest-fixed-net --share
+          openstack subnet show tempest-subnet || openstack subnet create tempest-subnet \
+            --dhcp --subnet-range 10.20.40.0/24 \
+            --allocation-pool start=10.20.40.10,end=10.20.40.254 \
+            --gateway 10.20.40.1 \
+            --network tempest-fixed-net
 {%- endif %}
       conf:
         tempest: {{ spec | generate_tempest_config(helmbundles_body) }}
