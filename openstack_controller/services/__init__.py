@@ -179,6 +179,89 @@ class RabbitMQ(Service):
         }
 
 
+class Alarming(OpenStackService):
+    service = "alarming"
+
+    @property
+    def health_groups(self):
+        return ["aodh"]
+
+    @property
+    def _child_generic_objects(self):
+        return {
+            "aodh": {
+                "job_db_init",
+                "job_db_sync",
+                "job_db_drop",
+                "job_ks_endpoints",
+            }
+        }
+
+
+class Panko(OpenStackService):
+    service = "event"
+
+    @property
+    def health_groups(self):
+        return ["panko"]
+
+    @property
+    def _child_generic_objects(self):
+        return {
+            "panko": {
+                "job_db_init",
+                "job_db_sync",
+                "job_db_drop",
+                "job_ks_endpoints",
+            }
+        }
+
+
+class Metering(OpenStackService):
+    service = "metering"
+
+    @property
+    def health_groups(self):
+        return ["ceilometer"]
+
+    @property
+    def _child_generic_objects(self):
+        return {"ceilometer": {"job_db_init", "job_db_sync", "job_db_drop",}}
+
+
+class Metric(OpenStackService):
+    service = "metric"
+
+    @property
+    def health_groups(self):
+        return ["gnocchi"]
+
+    @property
+    def _child_generic_objects(self):
+        return {
+            "gnocchi": {
+                "job_db_init",
+                "job_db_sync",
+                "job_db_drop",
+                "job_ks_endpoints",
+            }
+        }
+
+    def template_args(self):
+        t_args = super().template_args()
+
+        t_args["redis_namespace"] = settings.OSCTL_REDIS_NAMESPACE
+
+        redis_secret = secrets.RedisSecret(settings.OSCTL_REDIS_NAMESPACE)
+        kube.wait_for_secret(
+            settings.OSCTL_REDIS_NAMESPACE, redis_secret.secret_name
+        )
+        redis_creds = redis_secret.get()
+        t_args["redis_secret"] = redis_creds.password.decode()
+
+        return t_args
+
+
 # OPENSTACK SERVICES
 
 

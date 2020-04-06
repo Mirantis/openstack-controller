@@ -29,3 +29,7 @@
 - ironic_db_sync
 - etcd
 - redis-failover
+- aodh
+- panko
+- ceilometer
+- gnocchi

@@ -19,6 +19,9 @@ CHART_GROUP_MAPPING = {
         "placement",
         "tempest",
         "dashboard-selenium",
+        "aodh",
+        "panko",
+        "ceilometer",
     ],
     "infra": [
         "rabbitmq",
@@ -28,6 +31,7 @@ CHART_GROUP_MAPPING = {
         "libvirt",
         "ingress",
         "etcd",
+        "gnocchi",
     ],
 }
 
@@ -44,6 +48,10 @@ OS_SERVICES_MAP = {
     "key-manager": "barbican",
     "placement": "placement",
     "baremetal": "ironic",
+    "alarming": "aodh",
+    "event": "panko",
+    "metering": "ceilometer",
+    "metric": "gnocchi",
 }
 
 OPENSTACK_SERVICES_UPGRADE_ORDER = [

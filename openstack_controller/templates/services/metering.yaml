@@ -1,0 +1,138 @@
+#apiVersion: lcm.mirantis.com/v1alpha1
+#kind: HelmBundle
+
+{%- set service = 'ceilometer' %}
+{%- set components_with_dedicated_messaging = spec.get('features', {}).get('messaging', {}).get('components_with_dedicated_messaging', []) %}
+{%- set stacklight_enabled = spec.get('features', {}).get('stacklight', {}).get('enabled', False) %}
+{%- set notification_topics = ['notifications'] %}
+{%- set telemetry_mode = spec.get('features', {}).get('telemetry', {}).get('mode') %}
+
+spec:
+  releases:
+{%- if spec.get('migration', {}).get('telemetry', {}).get('deploy_main_service', True) %}
+  - name: openstack-ceilometer
+    chart: {{spec.common.openstack.repo}}/ceilometer
+    values:
+      images:
+        tags:
+{%- for image in [
+    "test",
+    "db_init",
+    "db_drop",
+    "ceilometer_db_sync",
+    "rabbit_init",
+    "ks_user",
+    "ks_service",
+    "ks_endpoints",
+    "ceilometer_api",
+    "ceilometer_central",
+    "ceilometer_collector",
+    "ceilometer_compute",
+    "ceilometer_ipmi",
+    "ceilometer_notification",
+    "dep_check",
+    "image_repo_sync",] %}
+        {%- if image in images %}
+          {{ image }}: {{ images[image] }}
+        {%- endif %}
+{%- endfor %}
+      conf:
+{% include "base/telemetry/" + telemetry_mode + "/_event_pipeline.yaml" %}
+{% include "base/telemetry/" + telemetry_mode + "/_gnocchi_resources.yaml" %}
+{% include "base/telemetry/" + telemetry_mode + "/_meters.yaml" %}
+{% include "base/telemetry/" + telemetry_mode + "/_pipeline.yaml" %}
+{% include "base/telemetry/" + telemetry_mode + "/_polling.yaml" %}
+        ceilometer:
+          DEFAULT:
+            debug: false
+            event_dispatchers:
+              type: multistring
+              values:
+                - gnocchi
+            meter_dispatchers:
+              type: multistring
+              values:
+                - gnocchi
+          coordination:
+            backend_url: etcd3://etcd:2379
+          api:
+            aodh_is_enabled: "True"
+          compute:
+            instance_discovery_method: libvirt_metadata
+          hardware:
+            readonly_user_name: "public"
+            meter_definitions_file: "snmp.yaml"
+          keystone_authtoken:
+            memcache_security_strategy: ENCRYPT
+            memcache_secret_key: {{ credentials.memcached }}
+          oslo_messaging_notifications:
+            topics: {{ notification_topics|join(',') }}
+          cache:
+            backend: oslo_cache.memcache_pool
+        logging:
+          logger_ceilometer:
+            level: {{ spec.get('features', {}).get('logging', {}).get('ceilometer', {}).get('level', 'INFO') }}
+      manifests:
+        network_policy: false
+        secret_ca_bundle: true
+        ingress_api: false
+        service_ingress_api: false
+        secret_mongodb: false
+        deployment_api: false
+        deployment_collector: false
+        job_rabbit_init: false
+        job_db_init_mongodb: false
+        job_ks_endpoints: false
+        job_ks_service: false
+      endpoints:
+        cluster_domain_suffix: {{ spec.internal_domain_name }}
+{% include 'base/_admin_identity.yaml' %}
+        oslo_db:
+          auth:
+            admin:
+              username: {{ admin_creds.database.username }}
+              password: {{ admin_creds.database.password }}
+            ceilometer:
+              username: {{ credentials.database.user.username }}
+              password: {{ credentials.database.user.password }}
+{%- if 'metering' in components_with_dedicated_messaging %}
+{% include 'base/_messaging_dedicated.yaml' %}
+{%- else %}
+{% include 'base/_messaging_shared.yaml' %}
+{%- endif %}
+{% include 'base/_notifications.yaml' %}
+        metering:
+          host_fqdn_override:
+            public:
+              host: ceilometer.{{ spec.public_domain_name }}
+              tls:
+                ca: |
+{{ spec.features.ssl.public_endpoints.ca_cert | indent( width=18, first=True) }}
+                crt: |
+{{ spec.features.ssl.public_endpoints.api_cert | indent( width=18, first=True) }}
+                key: |
+{{ spec.features.ssl.public_endpoints.api_key | indent( width=18, first=True) }}
+          hosts:
+            admin:
+              host: ceilometer-api
+            default: ceilometer
+            internal: ceilometer-api
+            public:
+              host: ceilometer
+              tls:
+                ca: |
+{{ spec.features.ssl.public_endpoints.ca_cert | indent( width=18, first=True) }}
+                crt: |
+{{ spec.features.ssl.public_endpoints.api_cert | indent( width=18, first=True) }}
+                key: |
+{{ spec.features.ssl.public_endpoints.api_key | indent( width=18, first=True) }}
+          port:
+            api:
+              admin: 8042
+              default: 80
+              internal: 8042
+              public: 443
+          scheme:
+            default: http
+            public: https
+{%- endif %}

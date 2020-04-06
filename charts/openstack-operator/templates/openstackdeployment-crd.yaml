@@ -134,6 +134,17 @@ spec:
                 - neutron
                 - nova
               properties:
+                telemetry:
+                  type: object
+                  required:
+                   - mode
+                  properties:
+                    mode:
+                      type: string
+                      enum:
+                        - autoscaling
+                      description: >
+                        Which telemetry mode is going to be used for telemetry.
                 ssl:
                   type: object
                   required:
@@ -218,6 +229,10 @@ spec:
                       - dashboard-selenium
                       - baremetal
                       - redis-telemetry
+                      - alarming
+                      - event
+                      - metering
+                      - metric
                 nova:
                   type: object
                   required:
@@ -577,6 +592,14 @@ spec:
                     nova:
                       <<: *logging_level
                     octavia:
+                      <<: *logging_level
+                    aodh:
+                      <<: *logging_level
+                    panko:
+                      <<: *logging_level
+                    gnocchi:
+                      <<: *logging_level
+                    ceilometer:
                       <<: *logging_level
             services:
               type: object
