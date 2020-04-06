@@ -42,7 +42,7 @@ async def images(namespace):
     return images
 
 
-async def restart(images, osdpl):
+async def restart(images, osdpl, mspec):
     namespace = osdpl["metadata"]["namespace"]
     log_showed = False
     for ds in await _list(namespace):
@@ -69,7 +69,7 @@ async def restart(images, osdpl):
         )
         for i in range(len(image_groups)):
             cache = layers.render_cache_template(
-                osdpl, f"{constants.CACHE_NAME}-{i}", image_groups[i]
+                mspec, f"{constants.CACHE_NAME}-{i}", image_groups[i]
             )
             kopf.adopt(cache, osdpl)
             kube.resource(cache).create()

@@ -246,8 +246,8 @@ def merge_spec(spec, logger):
     return merger.merge(base, spec)
 
 
-def render_cache_template(osdpl, name, images):
-    artifacts = render_artifacts(osdpl["spec"])
+def render_cache_template(mspec, name, images):
+    artifacts = render_artifacts(mspec)
     tpl = ENV.get_template("native/cache.yaml")
     text = tpl.render(images=images, name=name, pause_image=artifacts["pause"])
     return yaml.safe_load(text)

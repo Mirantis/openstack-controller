@@ -111,12 +111,10 @@ async def run_task(task_def):
         raise unknown_exception
 
 
-def discover_images(body, logger):
-    osdpl = layers.merge_spec(body["spec"], logger)
-
+def discover_images(mspec, logger):
     cache_images = set(layers.render_cache_images() or [])
     images = {}
-    for name, url in layers.render_artifacts(osdpl).items():
+    for name, url in layers.render_artifacts(mspec).items():
         images.setdefault(url, []).append(name)
     return {
         names[0].replace("_", "-"): url
@@ -148,10 +146,10 @@ async def apply(body, meta, spec, logger, event, **kwargs):
     }
 
     update_status(body, version_patch)
-
-    images = discover_images(body, logger)
+    mspec = layers.merge_spec(body["spec"], logger)
+    images = discover_images(mspec, logger)
     if images != await cache.images(meta["namespace"]):
-        await cache.restart(images, body)
+        await cache.restart(images, body, mspec)
     await cache.wait_ready(meta["namespace"])
 
     update, delete = layers.services(spec, logger, **kwargs)
