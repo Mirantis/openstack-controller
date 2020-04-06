@@ -452,7 +452,6 @@ spec:
                     neutron:
                       <<: *application_readiness
           required:
-            - draft
             - openstack_version
             - profile
             - size

@@ -132,7 +132,7 @@ async def apply(body, meta, spec, logger, event, **kwargs):
     event = kwargs["cause"].event
     namespace = meta["namespace"]
     LOG.info(f"Got osdpl event {event}")
-    if spec["draft"]:
+    if spec.get("draft"):
         LOG.info("OpenStack deployment is in draft mode, skipping handling...")
         return {"lastStatus": f"{event} drafted"}
 
