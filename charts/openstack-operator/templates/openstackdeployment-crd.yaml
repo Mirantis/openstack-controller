@@ -327,6 +327,9 @@ spec:
                               enum:
                                 - flat
                                 - vlan
+                                - vxlan
+                                - gre
+                                - local
                           vlan_ranges:
                             type: string
                             nullable: true
