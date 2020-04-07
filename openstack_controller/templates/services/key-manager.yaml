@@ -115,14 +115,17 @@ spec:
             sql_idle_timeout: 3600
             sql_max_retries: -1
             sql_retry_interval: 1
-{%- if spec.get('features', {}).get('barbican', {}).get('backend', {}).get('simple_crypto', {}).get('enabled', False) %}
+{%- if spec.get('features', {}).get('barbican', {}).get('backends', {}).get('vault', {}).get('enabled', False) %}
           secretstore:
-            namespace: barbican.secretstore.plugin
-            enabled_secretstore_plugins: store_crypto
-          crypto:
-            enabled_crypto_plugins: simple_crypto
-          simple_crypto_plugin:
-            kek: {{ credentials.kek }}
+            enabled_secretstore_plugins: vault_plugin
+          vault_plugin:
+            approle_role_id: {{ spec.features.barbican.backends.vault.approle_role_id }}
+            approle_secret_id: {{ spec.features.barbican.backends.vault.approle_secret_id }}
+            vault_url: {{ spec.features.barbican.backends.vault.vault_url }}
+            use_ssl: {{ spec.features.barbican.backends.vault.use_ssl }}
+    {%- if spec.features.barbican.backends.vault.ssl_ca_crt_file is defined %}
+            ssl_ca_crt_file: {{ spec.features.barbican.backends.vault.ssl_ca_crt_file }}
+    {%- endif %}
 {%- endif %}
         logging:
           logger_barbican:

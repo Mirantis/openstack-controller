@@ -160,16 +160,36 @@ spec:
                 barbican:
                   type: object
                   properties:
-                    backend:
+                    backends:
                       type: object
                       properties:
-                        simple_crypto:
+                        vault:
                           type: object
                           properties:
                             enabled:
                               description: >
                                 Indicates if simple_crypto backend is enabled
                               type: boolean
+                            approle_role_id:
+                              description: >
+                                Specifies the app role ID
+                              type: string
+                            approle_secret_id:
+                              description: >
+                                 Specifies the secret ID created for the app role
+                              type: string
+                            vault_url:
+                              description: >
+                                URL of the Vault server
+                              type: string
+                            use_ssl:
+                              description: >
+                                Specifies whether to use SSL
+                              type: boolean
+                            ssl_ca_crt_file:
+                              description: >
+                                The path to CA cert file
+                              type: string
                 services:
                   type: array
                   description: List of enabled openstack and auxiliary services
