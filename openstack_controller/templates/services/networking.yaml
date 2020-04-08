@@ -353,11 +353,6 @@ spec:
         metadata_agent:
           DEFAULT:
             metadata_proxy_shared_secret: {{ credentials.metadata_secret }}
-          cache:
-            # NOTE(vsaienko): decrease cache to allow reuse same IP for new instance.
-            # TODO(vsaienko): Remove once cache is cleared on metadata side by port unbound event
-            # for more info please see PRODX-2968
-            expiration_time: 20
 # TODO: make other networks types configurable
 {%- set networks = {'flat': [], 'vlan': []} %}
 {%- set bridge_mappings = [] %}
