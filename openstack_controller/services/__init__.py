@@ -236,6 +236,18 @@ class Glance(OpenStackServiceWithCeph):
                     "images": ["glance_storage_init"],
                     "manifest": "job_storage_init",
                 },
+                "glance-db-expand": {
+                    "images": ["glance_db_expand"],
+                    "manifest": "job_db_expand",
+                },
+                "glance-db-migrate": {
+                    "images": ["glance_db_migrate"],
+                    "manifest": "job_db_migrate",
+                },
+                "glance-db-contract": {
+                    "images": ["glance_db_contract"],
+                    "manifest": "job_db_contract",
+                },
             }
         },
         "rabbitmq": {
@@ -247,6 +259,18 @@ class Glance(OpenStackServiceWithCeph):
             }
         },
     }
+
+    @layers.kopf_exception
+    async def _upgrade(self, event, **kwargs):
+        upgrade_map = [
+            ("Job", "glance-db-expand"),
+            ("Job", "glance-db-migrate"),
+            ("Deployment", "glance-api"),
+            ("Job", "glance-db-contract"),
+        ]
+        for kind, obj_name in upgrade_map:
+            child_obj = self.get_child_object(kind, obj_name)
+            await child_obj.enable(self.openstack_version, True)
 
 
 class Heat(OpenStackService):
