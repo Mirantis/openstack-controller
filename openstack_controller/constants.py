@@ -26,8 +26,8 @@ CHART_GROUP_MAPPING = {
         "openvswitch",
         "libvirt",
         "ingress",
-        "etcd",
     ],
+    "incubator": ["etcd",],
 }
 
 OS_SERVICES_MAP = {

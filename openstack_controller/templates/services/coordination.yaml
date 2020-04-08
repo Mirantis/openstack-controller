@@ -3,22 +3,13 @@
 
 spec:
   releases:
-  - name: openstack-etcd
-    chart: {{spec.common.infra.repo}}/etcd
+  - name: etcd
+    chart: {{spec.common.incubator.repo}}/etcd
     values:
-      images:
-        tags:
-{%- for image in [
-    "etcd",
-    "dep_check",
-    "image_repo_sync",] %}
-        {%- if image in images %}
-          {{ image }}: {{ images[image] }}
-        {%- endif %}
-{%- endfor %}
-      endpoints:
-        cluster_domain_suffix: {{ spec.internal_domain_name }}
-#The amount of replicas is set to "1" until PROD-35005 is fixed (https://mirantis.jira.com/browse/PROD-35005)
-      pod:
-        replicas:
-          etcd: 1
+      replicas: 3
+{%- if "etcd" in images %}
+    {% set imageList = images['etcd'].split(':') %}
+      image:
+        repository: "{{ imageList[-2] }}"
+        tag: "{{ imageList[-1] }}"
+{%- endif %}
