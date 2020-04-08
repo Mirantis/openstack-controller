@@ -146,14 +146,17 @@ services:
                 # - default-subnetpools
                 # - standard-attr-tag
                 # - rbac-policies
+                # - l3_agent_scheduler
+                # - ext-gw-mode
+                # - agent
+                # - dhcp_agent_scheduler
+                # - extraroute
+                # - dvr
                 - network-ip-availability
                 - network_availability_zone
                 - auto-allocated-topology
-                - ext-gw-mode
                 - binding
-                - agent
                 - subnet_allocation
-                - l3_agent_scheduler
                 - tag
                 - external-net
                 - flavors
@@ -163,7 +166,6 @@ services:
                 - l3-ha
                 - provider
                 - multi-provider
-                - extraroute
                 - subnet-service-types
                 - standard-attr-timestamp
                 - service-type
@@ -174,13 +176,11 @@ services:
                 - pagination
                 - sorting
                 - security-group
-                - dhcp_agent_scheduler
                 - router_availability_zone
                 - standard-attr-description
                 - router
                 - allowed-address-pairs
                 - project-id
-                - dvr
                 - filter-validation
                 - dns-domain-ports
                 - dns-integration
