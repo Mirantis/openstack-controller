@@ -76,6 +76,8 @@ spec:
     "db_init",
     "dep_check",
     "cinder_db_sync",
+    "cinder_db_sync_online",
+    "cinder_db_purge",
     "cinder_backup",
     "ks_user",
     "ks_service",
