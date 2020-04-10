@@ -180,6 +180,20 @@ spec:
         secret_ca_bundle: true
       endpoints:
         cluster_domain_suffix: {{ spec.internal_domain_name }}
+        oslo_messaging:
+          auth:
+            user:
+              username: {{ admin_creds.messaging.username }}
+              password: {{ admin_creds.messaging.password }}
+            keystone:
+              username: {{ credentials.messaging.user.username }}
+              password: {{ credentials.messaging.user.password }}
+          statefulset:
+            replicas: 1
+            name: openstack-rabbitmq-rabbitmq
+          hosts:
+            default: rabbitmq
+          path: /keystone
 {% include 'base/_admin_identity.yaml' %}
           host_fqdn_override:
             public:
