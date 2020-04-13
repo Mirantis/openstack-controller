@@ -175,17 +175,17 @@ spec:
               liveness:
                 enabled: true
                 params:
-                  initialDelaySeconds: 10
-                  periodSeconds: 50
-                  timeoutSeconds: 40
+                  initialDelaySeconds: 180
+                  periodSeconds: 90
+                  timeoutSeconds: 65
           l3_agent:
             l3_agent:
               liveness:
                 enabled: true
                 params:
-                  initialDelaySeconds: 10
-                  periodSeconds: 50
-                  timeoutSeconds: 40
+                  initialDelaySeconds: 180
+                  periodSeconds: 90
+                  timeoutSeconds: 65
               readiness:
                 # The probe is used to detect inital sync state
                 # it takes near 10-15 minutes to synchronize state for 100 routers
@@ -200,17 +200,17 @@ spec:
               liveness:
                 enabled: true
                 params:
-                  initialDelaySeconds: 10
-                  periodSeconds: 50
-                  timeoutSeconds: 40
+                  initialDelaySeconds: 180
+                  periodSeconds: 90
+                  timeoutSeconds: 65
           metadata_agent:
             metadata_agent:
               liveness:
                 enabled: true
                 params:
-                  initialDelaySeconds: 10
-                  periodSeconds: 50
-                  timeoutSeconds: 40
+                  initialDelaySeconds: 180
+                  periodSeconds: 90
+                  timeoutSeconds: 65
               readiness:
                 enabled: true
                 params:
