@@ -19,6 +19,7 @@ from unittest import mock
 
 from openstack_controller.admission import controller
 from openstack_controller.admission.validators import base
+from openstack_controller import exception
 
 
 REQ_BODY_DICT = {
@@ -44,13 +45,13 @@ TEST_SCHEMA = {
 
 
 class OkValidator(base.BaseValidator):
-    def validate(self, review_request, response):
+    def validate(self, review_request):
         pass
 
 
 class FailValidator(base.BaseValidator):
-    def validate(self, review_request, response):
-        response.set_error(400, "Foo")
+    def validate(self, review_request):
+        raise exception.OsDplValidationFailed("VIKINGS!")
 
 
 FAKE_VALIDATORS = {"ok": OkValidator(), "fail": FailValidator()}
@@ -107,7 +108,7 @@ class TestValidationController(unittest.TestCase):
         ok_mock.assert_called_once()
         fail_mock.assert_called_once()
         self.assertIn("400", self.resp.body)
-        self.assertIn("Foo", self.resp.body)
+        self.assertIn("VIKINGS!", self.resp.body)
 
     @mock.patch.object(
         FAKE_VALIDATORS["ok"], "validate", wraps=FAKE_VALIDATORS["ok"].validate
@@ -130,4 +131,4 @@ class TestValidationController(unittest.TestCase):
         ok_mock.assert_not_called()
         fail_mock.assert_called_once()
         self.assertIn("400", self.resp.body)
-        self.assertIn("Foo", self.resp.body)
+        self.assertIn("VIKINGS!", self.resp.body)

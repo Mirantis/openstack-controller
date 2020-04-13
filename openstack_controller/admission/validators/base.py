@@ -15,5 +15,5 @@
 class BaseValidator(object):
     service = None
 
-    def validate(self, review_request, response):
+    def validate(self, review_request):
         raise NotImplementedError()

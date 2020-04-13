@@ -18,6 +18,7 @@ import falcon
 import jsonschema
 
 from openstack_controller.admission import validators
+from openstack_controller import exception
 
 
 _VALIDATORS = {}
@@ -104,8 +105,10 @@ class ValidationResource(object):
                     if service in _VALIDATORS:
                         # Validate all the enabled services, if there is a
                         # corresponding validator
-                        _VALIDATORS[service].validate(review_request, response)
-                        if not response.is_allowed:
+                        try:
+                            _VALIDATORS[service].validate(review_request)
+                        except exception.OsDplValidationFailed as e:
+                            response.set_error(e.code, e.message)
                             break
         resp.body = json.dumps(response.to_json())
 
