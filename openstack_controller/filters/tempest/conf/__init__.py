@@ -20,6 +20,7 @@ from openstack_controller.filters.tempest.conf import image_feature_enabled
 from openstack_controller.filters.tempest.conf import load_balancer
 from openstack_controller.filters.tempest.conf import network
 from openstack_controller.filters.tempest.conf import network_feature_enabled
+from openstack_controller.filters.tempest.conf import neutron_plugin_options
 from openstack_controller.filters.tempest.conf import object_storage
 from openstack_controller.filters.tempest.conf import (
     object_storage_feature_enabled,
@@ -57,6 +58,7 @@ SECTIONS = [
     load_balancer.LoadBalancer,
     network.Network,
     network_feature_enabled.NetworkFeatureEnabled,
+    neutron_plugin_options.NeutronPluginOptions,
     object_storage.ObjectStorage,
     object_storage_feature_enabled.ObjectStorageFeatureEnabled,
     orchestration.Orchestration,
