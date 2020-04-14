@@ -189,6 +189,11 @@ services:
                 - standard-attr-tag
                 - dns-domain-ports
                 - dns-integration
+                - qos
+                - qos-default
+                - qos-rule-type-details
+                - qos-bw-limit-direction
+                - qos-fip
             volume-feature-enabled:
               api_v1: false
               api_v2: false

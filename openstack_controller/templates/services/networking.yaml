@@ -6,7 +6,7 @@
 {%- set stacklight_enabled = spec.get('features', {}).get('stacklight', {}).get('enabled', False) %}
 {%- set tungstenfabric_enabled = spec.features.neutron.get('backend', 'ml2') == 'tungstenfabric' %}
 {%- set notification_topics = ['notifications'] %}
-{%- set service_plugins = ['<None>'] if tungstenfabric_enabled else ['router', 'metering'] %}
+{%- set service_plugins = ['<None>'] if tungstenfabric_enabled else ['router', 'metering', 'qos'] %}
 {%- do notification_topics.append('stacklight_notifications') if stacklight_enabled %}
 {%- set floating_network = spec.features.neutron.get('floating_network', {}) %}
 
@@ -341,6 +341,9 @@ spec:
         logging:
           logger_neutron:
             level: {{ spec.get('features', {}).get('logging', {}).get('neutron', {}).get('level', 'INFO') }}
+        l3_agent:
+          agent:
+            extensions: fip_qos,gateway_ip_qos
         metadata_agent:
           DEFAULT:
             metadata_proxy_shared_secret: {{ credentials.metadata_secret }}
@@ -375,6 +378,7 @@ spec:
             {%- endif %}
               extension_drivers:
                 - port_security
+                - qos
               {%- if 'dns' in spec.features.services %}
                 - dns_domain_ports
               {%- endif %}
@@ -387,6 +391,7 @@ spec:
               {%- if spec.get('features', {}).get('neutron', {}).get('dvr', {}).get('enabled', False) %}
               enable_distributed_routing: True
               {%- endif %}
+              extensions: qos
             ovs:
               bridge_mappings: {{ ','.join(bridge_mappings) }}
             securitygroup:
