@@ -50,7 +50,7 @@ OPENSTACK_SERVICES_UPGRADE_ORDER = [
     "image",
     "networking",
     "compute",
-    "volume",
+    "block-storage",
     "load-balancer",
     "dns",
     "key-manager",
