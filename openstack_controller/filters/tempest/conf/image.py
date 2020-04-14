@@ -41,7 +41,10 @@ class Image(base_section.BaseSection):
 
     @property
     def http_image(self):
-        pass
+        images = self.get_values_item("glance", "bootstrap.structured.images")
+        if images:
+            image = list(images.values())[0]
+            return image["source_url"] + image["image_file"]
 
     @property
     def region(self):
