@@ -10,3 +10,4 @@ falcon
 jsonschema
 uwsgi
 prometheus_client
+openstacksdk

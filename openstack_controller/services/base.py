@@ -420,6 +420,22 @@ class Service:
             openstack_version=openstack_version,
         )
 
+    @classmethod
+    async def remove_node_from_scheduling(cls, node_metadata):
+        pass
+
+    @classmethod
+    async def prepare_for_node_reboot(cls, node_metadata):
+        pass
+
+    @classmethod
+    async def prepare_node_after_reboot(cls, node_metadata):
+        pass
+
+    @classmethod
+    async def add_node_to_scheduling(cls, node_metadata):
+        pass
+
 
 class OpenStackService(Service):
     openstack_chart = None

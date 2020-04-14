@@ -1,14 +1,37 @@
+#    Copyright 2020 Mirantis, Inc.
+#
+#    Licensed under the Apache License, Version 2.0 (the "License"); you may
+#    not use this file except in compliance with the License. You may obtain
+#    a copy of the License at
+#
+#         http://www.apache.org/licenses/LICENSE-2.0
+#
+#    Unless required by applicable law or agreed to in writing, software
+#    distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+#    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+#    License for the specific language governing permissions and limitations
+#    under the License.
+
 import asyncio
 import base64
+
 import kopf
+import openstack
+from openstack import exceptions
+import pykube
 
 from openstack_controller import constants
 from openstack_controller import layers
 from openstack_controller import kube
+from openstack_controller import openstack_utils
 from openstack_controller import secrets
 from openstack_controller import settings
 from openstack_controller import utils
-from .base import Service, OpenStackService, OpenStackServiceWithCeph
+from openstack_controller.services.base import (
+    Service,
+    OpenStackService,
+    OpenStackServiceWithCeph,
+)
 
 
 LOG = utils.get_logger(__name__)
@@ -894,6 +917,177 @@ class Nova(OpenStackServiceWithCeph):
             child_obj = self.get_child_object(kind, obj_name)
             await child_obj.purge()
             await child_obj.enable(self.openstack_version, True)
+
+    @classmethod
+    async def remove_node_from_scheduling(cls, node_metadata):
+        node_name = node_metadata["name"]
+        openstack_connection = await openstack_utils.get_openstack_connection()
+        try:
+            target_service = openstack_utils.get_single_service(
+                openstack_connection, host=node_name
+            )
+            if target_service and target_service["state"] == "up":
+                openstack_connection.compute.disable_service(
+                    target_service["id"], node_name, "nova-compute"
+                )
+
+                def wait_for_service_disabled():
+                    service = openstack_utils.get_single_service(
+                        openstack_connection, host=node_name
+                    )
+                    if service and service["status"] == "disabled":
+                        return service
+
+                try:
+                    await asyncio.wait_for(
+                        utils.async_retry(wait_for_service_disabled),
+                        timeout=60,
+                    )
+                except asyncio.TimeoutError:
+                    raise kopf.TemporaryError(
+                        "Can not remove host from scheduling as "
+                        "compute service can not be disabled"
+                    )
+        except exceptions.SDKException as e:
+            LOG.error(f"Cannot execute openstack commands, error: {e}")
+            raise kopf.TemporaryError(
+                "Can not disable compute service on a host to be deleted"
+            )
+
+    @classmethod
+    async def prepare_for_node_reboot(cls, node_metadata):
+        node_name = node_metadata["name"]
+        openstack_connection = await openstack_utils.get_openstack_connection()
+        try:
+            target_service = openstack_utils.get_single_service(
+                openstack_connection, host=node_name
+            )
+            if target_service and target_service["state"] == "up":
+                migrate_func = openstack_connection.compute.live_migrate_server
+            else:
+                if not settings.OSCTL_ALLOW_EVACUATION:
+                    raise kopf.PermanentError(
+                        "Can not live migrate instances off of host being "
+                        "deleted as it is down"
+                    )
+                migrate_func = openstack_connection.compute.evacuate_server
+            servers_to_migrate = list(
+                openstack_connection.compute.servers(
+                    details=False, all_projects=True, host=node_name
+                )
+            )
+            await openstack_utils.migrate_servers(
+                openstack_connection=openstack_connection,
+                migrate_func=migrate_func,
+                servers=servers_to_migrate,
+                migrating_off=node_name,
+                concurrency=settings.OSCTL_MIGRATE_CONCURRENCY,
+            )
+        except exceptions.SDKException as e:
+            LOG.error(f"Cannot execute openstack commands, error: {e}")
+            raise kopf.TemporaryError(
+                "Can not move instances off of deleted host"
+            )
+
+    @classmethod
+    async def prepare_node_after_reboot(cls, node_metadata):
+        node_name = node_metadata["name"]
+        openstack_connection = await openstack_utils.get_openstack_connection()
+        try:
+
+            def wait_for_service_found():
+                return openstack_utils.get_single_service(
+                    openstack_connection, host=node_name
+                )
+
+            try:
+                await asyncio.wait_for(
+                    utils.async_retry(wait_for_service_found),
+                    timeout=300,
+                )
+            except asyncio.TimeoutError:
+                raise kopf.TemporaryError(
+                    "compute service not found, can not discover the newly "
+                    "added compute host"
+                )
+        except openstack.exceptions.SDKException as e:
+            LOG.error(f"Cannot execute openstack commands, error: {e}")
+            raise kopf.TemporaryError(
+                "can not discover the newly added compute host"
+            )
+        try:
+            osdpl = kube.resource_list(
+                kube.OpenStackDeployment,
+                None,
+                settings.OSCTL_OS_DEPLOYMENT_NAMESPACE,
+            ).get()
+        except Exception as e:
+            LOG.error(f"Can not find OpenStackDeployment, error is: {e}")
+            raise kopf.PermanentError(
+                "OpenStackDeployment not found, can not discover the newly "
+                "added compute host"
+            )
+        job = await openstack_utils.find_nova_cell_setup_cron_job(
+            node_uid=node_metadata["uid"]
+        )
+        kopf.adopt(job, osdpl.obj)
+        kube_job = kube.Job(kube.api, job)
+        try:
+            try:
+                kube_job.create()
+                # TODO(vdrok): wait for job completion
+            except pykube.exceptions.HTTPError as e:
+                if e.code == 409:
+                    # Job already exists, recreate it just in case
+                    kube_job.delete()
+                    raise kopf.TemporaryError(
+                        "Nova cell-setup job is being deleted, will retry "
+                        "in a while"
+                    )
+                else:
+                    raise
+        except pykube.exceptions.HTTPError as e:
+            LOG.error(
+                f"Cannot create job {job['metadata']['name']}, error: {e}"
+            )
+            raise kopf.PermanentError(
+                f"Cannot create job {job['metadata']['name']}"
+            )
+
+    @classmethod
+    async def add_node_to_scheduling(cls, node_metadata):
+        node_name = node_metadata["name"]
+        openstack_connection = await openstack_utils.get_openstack_connection()
+        try:
+            service = openstack_utils.get_single_service(
+                openstack_connection, host=node_name
+            )
+            # Enable service, in case this is a compute that was previously
+            # removed and now is being added back
+            openstack_connection.compute.enable_service(
+                service["id"], node_name, "nova-compute"
+            )
+
+            def wait_for_service_enabled():
+                service = openstack_utils.get_single_service(
+                    openstack_connection, host=node_name
+                )
+                if service and service["status"] == "enabled":
+                    return service
+
+            try:
+                await asyncio.wait_for(
+                    utils.async_retry(wait_for_service_enabled),
+                    timeout=60,
+                )
+            except asyncio.TimeoutError:
+                raise kopf.TemporaryError(
+                    "compute service can not be enabled, can not bring node "
+                    "back to scheduling"
+                )
+        except openstack.exceptions.SDKException as e:
+            LOG.error(f"Cannot execute openstack commands, error: {e}")
+            raise kopf.TemporaryError("can not bring node back to scheduling")
 
 
 class Placement(OpenStackService):
