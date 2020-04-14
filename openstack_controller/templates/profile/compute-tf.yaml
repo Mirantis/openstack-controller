@@ -82,8 +82,8 @@ services:
             network:
               public_network_id: public
             compute:
-              image_ref: Cirros-4.0
-              image_ref_alt: Cirros-4.0
+              image_ref: Cirros-5.1
+              image_ref_alt: Cirros-5.1
               flavor_ref:  m1.extra_tiny_test
               flavor_ref_alt: m1.tiny_test
           blacklist:

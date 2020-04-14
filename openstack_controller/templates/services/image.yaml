@@ -119,14 +119,14 @@ spec:
           images:
             cirros:
               container_format: bare
-              image_file: cirros-0.4.0-x86_64-disk.img
+              image_file: cirros-0.5.1-x86_64-disk.img
               image_type: qcow2
               min_disk: 1
-              name: Cirros-4.0
+              name: Cirros-5.1
               private: false
               properties:
                 os_distro: cirros
-              source_url: {{ spec.artifacts.binary_base_url }}/openstack/bin/cirros/0.4.0/
+              source_url: {{ spec.artifacts.binary_base_url }}/openstack/bin/cirros/0.5.1/
             fedora:
               container_format: bare
               image_file: Fedora-Cloud-Base-27-1.6.x86_64.qcow2

@@ -145,7 +145,7 @@ spec:
             admin:
               username: {{ admin_creds.database.username }}
               password: {{ admin_creds.database.password }}
-            user:
+            designate:
               username: {{ credentials.database.user.username }}
               password: {{ credentials.database.user.password }}
         oslo_db_powerdns:

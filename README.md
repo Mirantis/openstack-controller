@@ -88,12 +88,12 @@ Generate certs with correct domain
    kubect -n openstack exec -it keystone-client-8987f9985-h7c2l -- bash
 
 
-   wget https://binary.mirantis.com/openstack/bin/cirros/0.4.0/cirros-0.4.0-x86_64-disk.img
+   wget https://binary.mirantis.com/openstack/bin/cirros/0.5.1/cirros-0.5.1-x86_64-disk.img
 
-   openstack image create cirros-0.4.0-x86_64-disk --file cirros-0.4.0-x86_64-disk.img --disk-format qcow2 --container-format bare --public
+   openstack image create cirros-0.5.1-x86_64-disk --file cirros-0.5.1-x86_64-disk.img --disk-format qcow2 --container-format bare --public
    openstack network create demoNetwork
    openstack subnet create demoSubnet --network demoNetwork --subnet-range 10.11.12.0/24
-   openstack server create --image cirros-0.4.0-x86_64-disk --flavor m1.tiny --nic net-id=demoNetwork DemoVM
+   openstack server create --image cirros-0.5.1-x86_64-disk --flavor m1.tiny --nic net-id=demoNetwork DemoVM
 
 ## Barbican installation
 ###Simple_crypto backend configuration

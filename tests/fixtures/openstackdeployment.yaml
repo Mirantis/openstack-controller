@@ -122,14 +122,14 @@ spec:
               images:
                 cirros:
                   container_format: bare
-                  image_file: cirros-0.4.0-x86_64-disk.img
+                  image_file: cirros-0.5.1-x86_64-disk.img
                   image_type: qcow2
                   min_disk: 1
-                  name: Cirros-4.0
+                  name: Cirros-5.1
                   private: false
                   properties:
                     os_distro: cirros
-                  source_url: https://binary.mirantis.com/openstack/bin/cirros/0.4.0/
+                  source_url: https://binary.mirantis.com/openstack/bin/cirros/0.5.1/
                 fedora:
                   container_format: bare
                   image_file: Fedora-Cloud-Base-27-1.6.x86_64.qcow2
@@ -169,8 +169,8 @@ spec:
               compute:
                 flavor_ref: m1.extra_tiny_test
                 flavor_ref_alt: m1.tiny_test
-                image_ref: Cirros-4.0
-                image_ref_alt: Cirros-4.0
+                image_ref: Cirros-5.1
+                image_ref_alt: Cirros-5.1
               network:
                 public_network_id: public
             script: 'tempest run --config-file /etc/tempest/tempest.conf -w 4 --smoke
