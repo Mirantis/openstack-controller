@@ -1,0 +1,17 @@
+        oslo_messaging:
+          auth:
+            user:
+              username: {{ admin_creds.messaging.username }}
+              password: {{ admin_creds.messaging.password }}
+            {{ service }}:
+              username: {{ credentials.messaging.user.username }}
+              password: {{ credentials.messaging.user.password }}
+          statefulset:
+            replicas: 1
+            name: openstack-{{ service }}-rabbitmq-rabbitmq
+          hosts:
+            default: rabbitmq-{{ service }}
+          path: /{{ service }}
+        prometheus_rabbitmq_exporter:
+          hosts:
+            default: rabbitmq-exporter-{{ service }}

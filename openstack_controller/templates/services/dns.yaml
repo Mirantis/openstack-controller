@@ -2,13 +2,14 @@
 #kind: HelmBundle
 
 {%- set service = 'designate' %}
-{%- set messaging = spec.get('features', {}).get('messaging', {}) %}
+{%- set components_with_dedicated_messaging = spec.get('features', {}).get('messaging', {}).get('components_with_dedicated_messaging', []) %}
 {%- set stacklight_enabled = spec.get('features', {}).get('stacklight', {}).get('enabled', False) %}
 {%- set notification_topics = ['notifications'] %}
 {%- do notification_topics.append('stacklight_notifications') if stacklight_enabled %}
 
 spec:
   releases:
+{%- if 'dns' in components_with_dedicated_messaging %}
   - name: openstack-designate-rabbitmq
     chart: {{spec.common.infra.repo}}/rabbitmq
     values:
@@ -28,23 +29,7 @@ spec:
         enabled: false
       endpoints:
         cluster_domain_suffix: {{ spec.internal_domain_name }}
-        oslo_messaging: &designate_endpoints_oslo_messaging
-          auth:
-            user:
-              username: {{ admin_creds.messaging.username }}
-              password: {{ admin_creds.messaging.password }}
-            designate:
-              username: {{ credentials.messaging.user.username }}
-              password: {{ credentials.messaging.user.password }}
-          statefulset:
-            replicas: 1
-            name: openstack-designate-rabbitmq-rabbitmq
-          hosts:
-            default: rabbitmq-designate
-            path: /designate
-        prometheus_rabbitmq_exporter:
-          hosts:
-            default: rabbitmq-exporter-designate
+{% include 'base/_messaging_dedicated.yaml' %}
       conf:
         users:
           designate:
@@ -76,6 +61,7 @@ spec:
         prometheus_exporter:
           rabbit_exporters: "overview,exchange,node"
   {%- endif %}
+{%- endif %}
 {%- if spec.get('migration', {}).get('designate', {}).get('deploy_main_service', True) %}
   - name: openstack-designate
     chart: {{spec.common.openstack.repo}}/designate
@@ -156,8 +142,11 @@ spec:
             powerdns:
               username: {{ powerdns.database.username }}
               password: {{ powerdns.database.password }}
-        oslo_messaging:
-          <<: *designate_endpoints_oslo_messaging
+{%- if 'dns' in components_with_dedicated_messaging %}
+{% include 'base/_messaging_dedicated.yaml' %}
+{%- else %}
+{% include 'base/_messaging_shared.yaml' %}
+{%- endif %}
 {% include 'base/_notifications.yaml' %}
         powerdns:
           auth:

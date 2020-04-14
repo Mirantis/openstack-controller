@@ -2,7 +2,7 @@
 #kind: HelmBundle
 
 {%- set service = 'neutron' %}
-{%- set messaging = spec.get('features', {}).get('messaging', {}) %}
+{%- set components_with_dedicated_messaging = spec.get('features', {}).get('messaging', {}).get('components_with_dedicated_messaging', []) %}
 {%- set stacklight_enabled = spec.get('features', {}).get('stacklight', {}).get('enabled', False) %}
 {%- set tungstenfabric_enabled = spec.features.neutron.get('backend', 'ml2') == 'tungstenfabric' %}
 {%- set notification_topics = ['notifications'] %}
@@ -12,6 +12,7 @@
 
 spec:
   releases:
+{%- if 'networking' in components_with_dedicated_messaging %}
   - name: openstack-neutron-rabbitmq
     chart: {{spec.common.infra.repo}}/rabbitmq
     values:
@@ -31,23 +32,7 @@ spec:
         enabled: false
       endpoints:
         cluster_domain_suffix: {{ spec.internal_domain_name }}
-        oslo_messaging: &neutron_endpoints_oslo_messaging
-          auth:
-            user:
-              username: {{ admin_creds.messaging.username }}
-              password: {{ admin_creds.messaging.password }}
-            neutron:
-              username: {{ credentials.messaging.user.username }}
-              password: {{ credentials.messaging.user.password }}
-          statefulset:
-            replicas: 1
-            name: openstack-neutron-rabbitmq-rabbitmq
-          hosts:
-            default: rabbitmq-neutron
-          path: /neutron
-        prometheus_rabbitmq_exporter:
-          hosts:
-            default: rabbitmq-exporter-neutron
+{% include 'base/_messaging_dedicated.yaml' %}
       conf:
         users:
           neutron:
@@ -79,6 +64,7 @@ spec:
         prometheus_exporter:
           rabbit_exporters: "overview,exchange,node"
   {%- endif %}
+{%- endif %}
   {%- if not tungstenfabric_enabled %}
   - name: openstack-openvswitch
     chart: {{spec.common.infra.repo}}/openvswitch
@@ -233,8 +219,11 @@ spec:
             neutron:
               username: {{ credentials.database.user.username }}
               password: {{ credentials.database.user.password }}
-        oslo_messaging:
-          <<: *neutron_endpoints_oslo_messaging
+{%- if 'networking' in components_with_dedicated_messaging %}
+{% include 'base/_messaging_dedicated.yaml' %}
+{%- else %}
+{% include 'base/_messaging_shared.yaml' %}
+{%- endif %}
 {% include 'base/_notifications.yaml' %}
         network:
           host_fqdn_override:

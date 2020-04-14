@@ -2,7 +2,7 @@
 #kind: HelmBundle
 
 {%- set service = 'nova' %}
-{%- set messaging = spec.get('features', {}).get('messaging', {}) %}
+{%- set components_with_dedicated_messaging = spec.get('features', {}).get('messaging', {}).get('components_with_dedicated_messaging', []) %}
 {%- set stacklight_enabled = spec.get('features', {}).get('stacklight', {}).get('enabled', False) %}
 {%- set notification_topics = ['notifications'] %}
 {%- do notification_topics.append('stacklight_notifications') if stacklight_enabled %}
@@ -10,6 +10,7 @@
 
 spec:
   releases:
+{%- if 'compute' in components_with_dedicated_messaging %}
   - name: openstack-nova-rabbitmq
     chart: {{spec.common.infra.repo}}/rabbitmq
     values:
@@ -29,23 +30,7 @@ spec:
         enabled: false
       endpoints:
         cluster_domain_suffix: {{ spec.internal_domain_name }}
-        oslo_messaging: &nova_endpoints_oslo_messaging
-          auth:
-            user:
-              username: {{ admin_creds.messaging.username }}
-              password: {{ admin_creds.messaging.password }}
-            nova:
-              username: {{ credentials.messaging.user.username }}
-              password: {{ credentials.messaging.user.password }}
-          statefulset:
-            replicas: 1
-            name: openstack-nova-rabbitmq-rabbitmq
-          hosts:
-            default: rabbitmq-nova
-          path: /nova
-        prometheus_rabbitmq_exporter:
-          hosts:
-            default: rabbitmq-exporter-nova
+{% include 'base/_messaging_dedicated.yaml' %}
       conf:
         users:
           nova:
@@ -77,6 +62,7 @@ spec:
         prometheus_exporter:
           rabbit_exporters: "overview,exchange,node"
   {%- endif %}
+{%- endif %}
   - name: openstack-libvirt
     chart: {{spec.common.infra.repo}}/libvirt
     values:
@@ -279,8 +265,11 @@ spec:
             nova:
               username: {{ credentials.database.user.username }}
               password: {{ credentials.database.user.password }}
-        oslo_messaging:
-          <<: *nova_endpoints_oslo_messaging
+{%- if 'compute' in components_with_dedicated_messaging %}
+{% include 'base/_messaging_dedicated.yaml' %}
+{%- else %}
+{% include 'base/_messaging_shared.yaml' %}
+{%- endif %}
 {% include 'base/_notifications.yaml' %}
         compute:
           host_fqdn_override:

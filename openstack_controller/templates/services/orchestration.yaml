@@ -2,13 +2,14 @@
 #kind: HelmBundle
 
 {%- set service = 'heat' %}
-{%- set messaging = spec.get('features', {}).get('messaging', {}) %}
+{%- set components_with_dedicated_messaging = spec.get('features', {}).get('messaging', {}).get('components_with_dedicated_messaging', []) %}
 {%- set stacklight_enabled = spec.get('features', {}).get('stacklight', {}).get('enabled', False) %}
 {%- set notification_topics = ['notifications'] %}
 {%- do notification_topics.append('stacklight_notifications') if stacklight_enabled %}
 
 spec:
   releases:
+{%- if 'orchestration' in components_with_dedicated_messaging %}
   - name: openstack-heat-rabbitmq
     chart: {{spec.common.infra.repo}}/rabbitmq
     values:
@@ -28,23 +29,7 @@ spec:
         enabled: false
       endpoints:
         cluster_domain_suffix: {{ spec.internal_domain_name }}
-        oslo_messaging: &heat_endpoints_oslo_messaging
-          auth:
-            user:
-              username: {{ admin_creds.messaging.username }}
-              password: {{ admin_creds.messaging.password }}
-            heat:
-              username: {{ credentials.messaging.user.username }}
-              password: {{ credentials.messaging.user.password }}
-          statefulset:
-            replicas: 1
-            name: openstack-heat-rabbitmq-rabbitmq
-          hosts:
-            default: rabbitmq-heat
-            path: /heat
-        prometheus_rabbitmq_exporter:
-          hosts:
-            default: rabbitmq-exporter-heat
+{% include 'base/_messaging_dedicated.yaml' %}
       conf:
         users:
           heat:
@@ -88,6 +73,7 @@ spec:
         prometheus_exporter:
           rabbit_exporters: "overview,exchange,node"
   {%- endif %}
+{%- endif %}
 {%- if spec.get('migration', {}).get('heat', {}).get('deploy_main_service', True) %}
   - name: openstack-heat
     chart: {{spec.common.openstack.repo}}/heat
@@ -146,8 +132,11 @@ spec:
             heat:
               username: {{ credentials.database.user.username }}
               password: {{ credentials.database.user.password }}
-        oslo_messaging:
-          <<: *heat_endpoints_oslo_messaging
+{%- if 'orchestration' in components_with_dedicated_messaging %}
+{% include 'base/_messaging_dedicated.yaml' %}
+{%- else %}
+{% include 'base/_messaging_shared.yaml' %}
+{%- endif %}
 {% include 'base/_notifications.yaml' %}
         orchestration:
           host_fqdn_override:

@@ -2,7 +2,6 @@
 #kind: HelmBundle
 
 {%- set service = 'keystone' %}
-{%- set messaging = spec.get('features', {}).get('messaging', {}) %}
 {%- set keystone_keycloak = spec.get('features', {}).get('keystone', {}).get('keycloak', {}) %}
 {%- set stacklight_enabled = spec.get('features', {}).get('stacklight', {}).get('enabled', False) %}
 {%- set notification_topics = ['notifications'] %}
@@ -180,20 +179,7 @@ spec:
         secret_ca_bundle: true
       endpoints:
         cluster_domain_suffix: {{ spec.internal_domain_name }}
-        oslo_messaging:
-          auth:
-            user:
-              username: {{ admin_creds.messaging.username }}
-              password: {{ admin_creds.messaging.password }}
-            keystone:
-              username: {{ credentials.messaging.user.username }}
-              password: {{ credentials.messaging.user.password }}
-          statefulset:
-            replicas: 1
-            name: openstack-rabbitmq-rabbitmq
-          hosts:
-            default: rabbitmq
-          path: /keystone
+{% include 'base/_messaging_shared.yaml' %}
 {% include 'base/_admin_identity.yaml' %}
           host_fqdn_override:
             public:

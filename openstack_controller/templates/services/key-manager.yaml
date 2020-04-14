@@ -2,13 +2,14 @@
 #kind: HelmBundle
 
 {%- set service = 'barbican' %}
-{%- set messaging = spec.get('features', {}).get('messaging', {}) %}
+{%- set components_with_dedicated_messaging = spec.get('features', {}).get('messaging', {}).get('components_with_dedicated_messaging', []) %}
 {%- set stacklight_enabled = spec.get('features', {}).get('stacklight', {}).get('enabled', False) %}
 {%- set notification_topics = ['notifications'] %}
 {%- do notification_topics.append('stacklight_notifications') if stacklight_enabled %}
 
 spec:
   releases:
+{%- if 'key-manager' in components_with_dedicated_messaging %}
   - name: openstack-barbican-rabbitmq
     chart: {{spec.common.infra.repo}}/rabbitmq
     values:
@@ -28,23 +29,7 @@ spec:
         enabled: false
       endpoints:
         cluster_domain_suffix: {{ spec.internal_domain_name }}
-        oslo_messaging: &barbican_endpoints_oslo_messaging
-          auth:
-            user:
-              username: {{ admin_creds.messaging.username }}
-              password: {{ admin_creds.messaging.password }}
-            barbican:
-              username: {{ credentials.messaging.user.username }}
-              password: {{ credentials.messaging.user.password }}
-          statefulset:
-            replicas: 1
-            name: openstack-barbican-rabbitmq-rabbitmq
-          hosts:
-            default: rabbitmq-barbican
-            path: /barbican
-        prometheus_rabbitmq_exporter:
-          hosts:
-            default: rabbitmq-exporter-barbican
+{% include 'base/_messaging_dedicated.yaml' %}
       conf:
         users:
           barbican:
@@ -76,6 +61,7 @@ spec:
         prometheus_exporter:
           rabbit_exporters: "overview,exchange,node"
   {%- endif %}
+{%- endif %}
 {%- if spec.get('migration', {}).get('barbican', {}).get('deploy_main_service', True) %}
   - name: openstack-barbican
     chart: {{spec.common.openstack.repo}}/barbican
@@ -154,8 +140,11 @@ spec:
             barbican:
               username: {{ credentials.database.user.username }}
               password: {{ credentials.database.user.password }}
-        oslo_messaging:
-          <<: *barbican_endpoints_oslo_messaging
+{%- if 'key-manager' in components_with_dedicated_messaging %}
+{% include 'base/_messaging_dedicated.yaml' %}
+{%- else %}
+{% include 'base/_messaging_shared.yaml' %}
+{%- endif %}
 {% include 'base/_notifications.yaml' %}
         key_manager:
           host_fqdn_override:

@@ -1,0 +1,14 @@
+        oslo_messaging:
+          auth:
+            user:
+              username: {{ admin_creds.messaging.username }}
+              password: {{ admin_creds.messaging.password }}
+            {{ service }}:
+              username: {{ credentials.messaging.user.username }}
+              password: {{ credentials.messaging.user.password }}
+          statefulset:
+            replicas: 1
+            name: openstack-rabbitmq-rabbitmq
+          hosts:
+            default: rabbitmq
+          path: /{{ service }}

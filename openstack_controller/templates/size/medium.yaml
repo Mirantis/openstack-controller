@@ -2,6 +2,17 @@
 # Optimized for the following cloud configuration
 # controllers: >=3
 # computes: <=100
+features:
+  messaging:
+    components_with_dedicated_messaging:
+      - block-storage
+      - compute
+      - dns
+      - image
+      - networking
+      - orchestration
+      - load-balancer
+      - key-manager
 services:
   database:
     mariadb:

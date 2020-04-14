@@ -2,13 +2,14 @@
 #kind: HelmBundle
 
 {%- set service = 'octavia' %}
-{%- set messaging = spec.get('features', {}).get('messaging', {}) %}
+{%- set components_with_dedicated_messaging = spec.get('features', {}).get('messaging', {}).get('components_with_dedicated_messaging', []) %}
 {%- set stacklight_enabled = spec.get('features', {}).get('stacklight', {}).get('enabled', False) %}
 {%- set notification_topics = ['notifications'] %}
 {%- do notification_topics.append('stacklight_notifications') if stacklight_enabled %}
 
 spec:
   releases:
+{%- if 'load-balancer' in components_with_dedicated_messaging %}
   - name: openstack-octavia-rabbitmq
     chart: {{spec.common.infra.repo}}/rabbitmq
     values:
@@ -28,23 +29,7 @@ spec:
         enabled: false
       endpoints:
         cluster_domain_suffix: {{ spec.internal_domain_name }}
-        oslo_messaging: &octavia_endpoints_oslo_messaging
-          auth:
-            user:
-              username: {{ admin_creds.messaging.username }}
-              password: {{ admin_creds.messaging.password }}
-            octavia:
-              username: {{ credentials.messaging.user.username }}
-              password: {{ credentials.messaging.user.password }}
-          statefulset:
-            replicas: 1
-            name: openstack-octavia-rabbitmq-rabbitmq
-          hosts:
-            default: rabbitmq-octavia
-          path: /octavia
-        prometheus_rabbitmq_exporter:
-          hosts:
-            default: rabbitmq-exporter-octavia
+{% include 'base/_messaging_dedicated.yaml' %}
       conf:
         users:
           octavia:
@@ -76,6 +61,7 @@ spec:
         prometheus_exporter:
           rabbit_exporters: "overview,exchange,node"
   {%- endif %}
+{%- endif %}
 {%- if spec.get('migration', {}).get('octavia', {}).get('deploy_main_service', True) %}
   - name: openstack-octavia
     chart: {{spec.common.openstack.get('repo', spec.common.charts.repo)}}/octavia
@@ -247,8 +233,11 @@ spec:
             octavia:
               username: {{ credentials.database.user.username }}
               password: {{ credentials.database.user.password }}
-        oslo_messaging:
-          <<: *octavia_endpoints_oslo_messaging
+{%- if 'load-balancer' in components_with_dedicated_messaging %}
+{% include 'base/_messaging_dedicated.yaml' %}
+{%- else %}
+{% include 'base/_messaging_shared.yaml' %}
+{%- endif %}
 {% include 'base/_notifications.yaml' %}
         load_balancer:
           host_fqdn_override:
