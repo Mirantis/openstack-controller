@@ -115,6 +115,8 @@ services:
             - (?:neutron_tempest_plugin.api.test_subnetpool_prefix_ops)
             - (?:neutron_tempest_plugin.api.test_subnetpools)
             - (?:neutron_tempest_plugin.api.test_subnetpools_negative)
+            # TODO: remove when PRODX-4076 resolved.
+            - (?:tempest.api.network.test_networks.Networks(|IpV6)Test.test_external_network_visibility)
           script: |
             tempest run --config-file /etc/tempest/tempest.conf -w 4 --smoke --blacklist-file  /etc/tempest/test-blacklist
           tempest:
