@@ -2,14 +2,6 @@
 #kind: HelmBundle
 
 {%- set keystone_keycloak_enabled = spec.get('features', {}).get('keystone', {}).get('keycloak', {}).get('enabled', False) %}
-#The list of extra panels in Horizon helm-chart is overwritten in case 'extra_panels' is defined in openstack-controller.
-{%- set horizon_extra_panels = ['neutron_taas_dashboard', 'heat_dashboard'] %}
-{%- if 'load-balancer' in spec.features.services %}
-  {%- do horizon_extra_panels.append('octavia_dashboard') %}
-{%- endif %}
-{%- if 'dns' in spec.features.services %}
-  {%- do horizon_extra_panels.append('designatedashboard') %}
-{%- endif %}
 
 spec:
   releases:
@@ -85,7 +77,6 @@ spec:
 {{ spec.features.ssl.public_endpoints.api_key | indent( width=18, first=True) }}
       conf:
         horizon:
-          extra_panels: {{ horizon_extra_panels }}
           local_settings:
             config:
               horizon_secret_key: {{ credentials.secret_key }}

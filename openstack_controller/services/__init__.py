@@ -676,9 +676,9 @@ class Placement(OpenStackService):
                     )
                     await child_obj.purge()
                 raise kopf.TemporaryError(f"{e}") from e
+            LOG.info(f"Upgrading {self.service} done")
         else:
             await super().upgrade(event, **kwargs)
-        LOG.info(f"Upgrading {self.service} done")
 
 
 class Octavia(OpenStackService):
