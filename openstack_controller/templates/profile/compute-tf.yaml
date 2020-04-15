@@ -117,6 +117,11 @@ services:
             - (?:neutron_tempest_plugin.api.test_subnetpools_negative)
             # TODO: remove when PRODX-4076 resolved.
             - (?:tempest.api.network.test_networks.Networks(|IpV6)Test.test_external_network_visibility)
+            # TODO(ibumarskov): remove when PRODX-3815 (VSRx configuration) resolved.
+            - (?:tempest.api.compute.servers.test_attach_interfaces.AttachInterfacesUnderV243Test.test_add_remove_fixed_ip)
+            - (?:tempest.api.compute.servers.test_server_actions.ServerActionsTestJSON.test_reboot_server_hard)
+            - (?:tempest.scenario.test_network_basic_ops.TestNetworkBasicOps.test_network_basic_ops)
+            - (?:tempest.scenario.test_server_basic_ops.TestServerBasicOps.test_server_basic_ops)
           script: |
             tempest run --config-file /etc/tempest/tempest.conf -w 4 --smoke --blacklist-file  /etc/tempest/test-blacklist
           tempest:
