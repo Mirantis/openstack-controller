@@ -168,10 +168,14 @@ def merge_osdpl_into_helmbundle(service, spec, service_helmbundle):
         )
         for group, charts in constants.CHART_GROUP_MAPPING.items():
             if chart_name in charts:
-                merger.merge(
-                    release,
-                    spec.get("common", {}).get(group, {}).get("releases", {}),
+                common_releases = (
+                    spec.get("common", {}).get(group, {}).get("releases", {})
                 )
+                if chart_name in common_releases:
+                    merger.merge(release, common_releases[chart_name])
+                else:
+                    merger.merge(release, common_releases)
+
                 merger.merge(
                     release["values"],
                     spec.get("common", {}).get(group, {}).get("values", {}),

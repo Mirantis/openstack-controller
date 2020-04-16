@@ -20,4 +20,5 @@ common:
   incubator:
     repo: incubator
     releases:
-      version: 0.7.3
+      etcd:
+        version: 0.7.3
