@@ -183,7 +183,7 @@ services:
               api_workers: 16
               rpc_state_report_workers: 4
               agent_down_time: 30
-              max_l3_agents_per_router: 0
+              max_l3_agents_per_router: 3
               executor_thread_pool_size: 70
             agent:
               report_interval: 10
