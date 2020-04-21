@@ -145,6 +145,10 @@ services:
             network:
               shared_physical_network: false
               floating_network_name: public
+              #TODO(ibumarskov): limitation from commit of https://bugs.launchpad.net/juniperopenstack/+bug/1720118
+              project_network_cidr: 10.100.0.0/24
+              project_network_v6_cidr: 2003::/120
+              project_network_v6_mask_bits: 124
             #TODO: Will be automated soon in filters.
             network-feature-enabled:
               api_extensions:
