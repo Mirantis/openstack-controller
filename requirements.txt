@@ -1,7 +1,7 @@
 pbr!=2.1.0,>=2.0.0 # Apache-2.0
 # TODO(vsaienko) switch to 0.27 release when available as it contains fix for
 # https://github.com/zalando-incubator/kopf/issues/119
-kopf==0.27rc3
+kopf==0.27rc4
 Jinja2>2.10
 jsonpath-rw
 deepmerge>=0.0.5
