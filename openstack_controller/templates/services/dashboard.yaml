@@ -2,6 +2,7 @@
 #kind: HelmBundle
 
 {%- set keystone_keycloak_enabled = spec.get('features', {}).get('keystone', {}).get('keycloak', {}).get('enabled', False) %}
+{%- set neutron_backend = spec.features.neutron.get('backend', 'ml2') %}
 
 spec:
   releases:
@@ -94,3 +95,5 @@ spec:
                   enabled: true
                   initial_choice: mapped
 {%- endif %}
+              tungstenfabric:
+                enabled: {{ neutron_backend == 'tungstenfabric' }}
