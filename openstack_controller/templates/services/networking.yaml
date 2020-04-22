@@ -282,8 +282,10 @@ spec:
         enabled: true
         script: |
           openstack network show {{ floating_network.get('name', 'public') }} || openstack network create \
+            {%- if not tungstenfabric_enabled %}
             --provider-network-type flat \
             --provider-physical-network {{ floating_network.get('physnet', 'physnet1') }} \
+            {%- endif %}
             --external \
             {{ floating_network.get('name', 'public') }}
           # set default gateway via any non-master/worker node to get into ingress controller
@@ -294,7 +296,7 @@ spec:
             --network {{ floating_network.get('name', 'public') }}
           openstack router show {{ floating_network.get('router', {}).get('name', 'r1') }} || openstack router create {{ floating_network.get('router', {}).get('name', 'r1') }}
           openstack router set --external-gateway {{ floating_network.get('name', 'public') }} {{ floating_network.get('router', {}).get('name', 'r1') }}
-          openstack network set {{ floating_network.get('name', 'public') }} --external {% if not tungstenfabric_enabled %} --default{% endif %}
+          openstack network set {{ floating_network.get('name', 'public') }} --external {% if not tungstenfabric_enabled %} --default {% endif %}
       {%- endif %}
       conf:
         paste:
