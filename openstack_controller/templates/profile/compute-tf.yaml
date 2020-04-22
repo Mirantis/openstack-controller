@@ -165,6 +165,7 @@ services:
                 # - dhcp_agent_scheduler
                 # - extraroute
                 # - dvr
+                # - net-mtu
                 - network-ip-availability
                 - network_availability_zone
                 - auto-allocated-topology
@@ -173,7 +174,6 @@ services:
                 - tag
                 - external-net
                 - flavors
-                - net-mtu
                 - availability_zone
                 - quotas
                 - l3-ha
