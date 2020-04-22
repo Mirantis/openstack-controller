@@ -126,6 +126,9 @@ services:
             - (?:tempest.api.network.test_networks.Networks(|IpV6)Test.test_update_subnet_gw_dns_host_routes_dhcp)
             # TODO(ibumarskov): not supported by TF (PRODX-4417)
             - (?:tempest.api.network.test_ports.Ports(|IpV6)TestJSON.test_create_update_port_with_second_ip)
+            # TODO(ibumarskov): functionality isn't implemented (PRODX-4419, PROD-21671)
+            - (?:tempest.api.network.test_ports.Ports(|IpV6)TestJSON.test_update_port_with_security_group_and_extra_attributes)
+            - (?:tempest.api.network.test_ports.Ports(|IpV6)TestJSON.test_update_port_with_two_security_groups_and_extra_attributes)
           script: |
             tempest run --config-file /etc/tempest/tempest.conf -w 4 --smoke --blacklist-file  /etc/tempest/test-blacklist
           tempest:
