@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 import argparse
+import asyncio
 import sys
-import time
 
-import pykube
+from openstack_controller import kube
 
 
 def parse_args():
@@ -15,35 +15,13 @@ def parse_args():
     return parser.parse_args()
 
 
-def purge_job_meta(job):
-    # cleanup the object of runtime stuff
-    job.obj.pop("status", None)
-    job.obj["metadata"].pop("creationTimestamp", None)
-    job.obj["metadata"].pop("resourceVersion", None)
-    job.obj["metadata"].pop("selfLink", None)
-    job.obj["metadata"].pop("uid", None)
-    job.obj["metadata"]["labels"].pop("controller-uid", None)
-    job.obj["spec"]["template"]["metadata"].pop("creationTimestamp", None)
-    job.obj["spec"]["template"]["metadata"]["labels"].pop(
-        "controller-uid", None
-    )
-    job.obj["spec"].pop("selector", None)
-
-
 def main():
     args = parse_args()
-    api = pykube.HTTPClient(pykube.KubeConfig.from_env())
-    try:
-        job = pykube.Job.objects(api, namespace=args.namespace).get_by_name(
-            args.name
-        )
-    except pykube.exceptions.ObjectDoesNotExist:
+    job = kube.find(kube.Job, args.name, args.namespace, silent=True)
+    if not job:
         sys.exit(f"Job {args.namespace}/{args.name} was not found!")
-    purge_job_meta(job)
-    job.delete(propagation_policy="Backgound")
-    while job.exists():
-        time.sleep(3)
+    loop = asyncio.get_event_loop()
     try:
-        job.create()
+        loop.run_until_complete(job.rerun())
     except Exception as e:
         sys.exit(f"Failed to create job {job.namespace}/{job.name}: {e}")

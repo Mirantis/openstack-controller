@@ -10,13 +10,19 @@ from mcp_k8s_lib import utils
 LOG = utils.get_logger(__name__)
 
 
-async def nova_daemonset_created(osdpl, name, namespace, meta, **kwargs):
-    LOG.info("Start nova daemonset created hook")
+def new_node_added(**kwargs):
     if (
         kwargs["new"]["desiredNumberScheduled"]
         <= kwargs["OK_desiredNumberScheduled"]
     ):
         LOG.info("The number of computes was not increased. Skipping hook...")
+        return False
+    return True
+
+
+async def run_nova_cell_setup(osdpl, name, namespace, meta, **kwargs):
+    LOG.info("Start nova daemonset created hook")
+    if not new_node_added(**kwargs):
         return
     cronjob = kube.find(pykube.CronJob, "nova-cell-setup", namespace)
     job = {
@@ -43,6 +49,20 @@ async def nova_daemonset_created(osdpl, name, namespace, meta, **kwargs):
         if kube_job.ready:
             kube_job.delete()
             await asyncio.sleep(1)
-            await nova_daemonset_created(
-                osdpl, name, namespace, meta, **kwargs
-            )
+            await run_nova_cell_setup(osdpl, name, namespace, meta, **kwargs)
+
+
+async def run_octavia_create_resources(osdpl, name, namespace, meta, **kwargs):
+    LOG.info("Start rerun_octavia_create_resources_job hook")
+    if not new_node_added(**kwargs):
+        return
+    try:
+        job = kube.find(kube.Job, "octavia-create-resources", namespace)
+    except pykube.exceptions.ObjectDoesNotExist:
+        # TODO(avolkov): create job manually?
+        LOG.warning("Original octavia_create_resources job is not found")
+        return
+    if not job.ready:
+        LOG.warning("Original octavia_create_resources job is not ready")
+        return
+    await job.rerun()

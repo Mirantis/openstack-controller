@@ -22,7 +22,10 @@ LOG = mcp_utils.get_logger(__name__)
 # 2. from Progressing to Ready
 DAEMONSET_HOOKS = {
     (constants.BAD, constants.OK): {
-        "nova-compute-default": hooks.nova_daemonset_created
+        "nova-compute-default": hooks.run_nova_cell_setup
+    },
+    (constants.BAD, constants.OK): {
+        "octavia-health-manager-default": hooks.run_octavia_create_resources
     },
 }
 
