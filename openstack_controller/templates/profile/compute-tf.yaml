@@ -122,6 +122,8 @@ services:
             - (?:tempest.api.compute.servers.test_server_actions.ServerActionsTestJSON.test_reboot_server_hard)
             - (?:tempest.scenario.test_network_basic_ops.TestNetworkBasicOps.test_network_basic_ops)
             - (?:tempest.scenario.test_server_basic_ops.TestServerBasicOps.test_server_basic_ops)
+            # TODO(ibumarskov): not supported by TF (PRODX-4410)
+            - (?:tempest.api.network.test_networks.Networks(|IpV6)Test.test_update_subnet_gw_dns_host_routes_dhcp)
           script: |
             tempest run --config-file /etc/tempest/tempest.conf -w 4 --smoke --blacklist-file  /etc/tempest/test-blacklist
           tempest:
