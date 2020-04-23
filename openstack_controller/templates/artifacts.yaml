@@ -12,11 +12,11 @@ common:
   openstack:
     repo: osh
     releases:
-      version: 0.1.0-mcp-3297
+      version: 0.1.0-mcp-3301
   infra:
     repo: osh-infra
     releases:
-      version: 0.1.0-mcp-2229
+      version: 0.1.0-mcp-2230
   incubator:
     repo: incubator
     releases:
