@@ -173,12 +173,12 @@ services:
                 # - extraroute
                 # - dvr
                 # - net-mtu
+                # - tag
                 - network-ip-availability
                 - network_availability_zone
                 - auto-allocated-topology
                 - binding
                 - subnet_allocation
-                - tag
                 - external-net
                 - flavors
                 - availability_zone
