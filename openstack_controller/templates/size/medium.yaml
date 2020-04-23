@@ -26,7 +26,7 @@ services:
       values:
         pod:
           replicas:
-            api: 30
+            api: 15
           lifecycle:
             upgrades:
               deployments:
