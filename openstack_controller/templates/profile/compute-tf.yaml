@@ -134,6 +134,11 @@ services:
           script: |
             tempest run --config-file /etc/tempest/tempest.conf -w 4 --smoke --blacklist-file  /etc/tempest/test-blacklist
           tempest:
+            heat_plugin:
+              image_ref: Fedora-27-1.6
+              instance_type: m1.tiny_test
+              minimal_image_ref: Cirros-5.1
+              minimal_instance_type: m1.extra_tiny_test
             identity:
               ca_certificates_file: /certs/ca-bundle.pem
             #TODO(mshalamov): Will be removed during process of completing PRODX-1192

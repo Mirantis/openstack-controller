@@ -1,11 +1,9 @@
 from openstack_controller.filters.tempest import base_section
 
-
 DEFAULT_HEAT_PLUGIN_PARAMETERS = {"auth_version": 3}
 
 
 class HeatPlugin(base_section.BaseSection):
-
     name = "heat_plugin"
     options = [
         "admin_password",
@@ -149,17 +147,11 @@ class HeatPlugin(base_section.BaseSection):
 
     @property
     def minimal_image_ref(self):
-        images = self.get_values_item("glance", "bootstrap.structured.images")
-        if images:
-            return list(images.values())[0]["name"]
+        pass
 
     @property
     def minimal_instance_type(self):
-        flavors = self.get_values_item(
-            "nova", "bootstrap.structured.flavors.options"
-        )
-        if flavors:
-            return list(flavors.values())[0]["name"]
+        pass
 
     @property
     def network_for_ssh(self):
