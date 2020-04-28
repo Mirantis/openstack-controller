@@ -19,35 +19,29 @@ For ceph we will require the following labels:
 Apply all the required labels to all the nodes except of master k8s node
 (**only for dev envs!**):
 
-.. code-block:: bash
-
    kubectl label node -l node-role.kubernetes.io/master!= openstack-control-plane=enabled openstack-compute-node=enabled openvswitch=enabled role=ceph-osd-node
 
 ## Usage
 
 ### Download release-openstack-k8s repo
 
-.. code-block:: bash
-
-   git clone "https://gerrit.mcp.mirantis.com/mcp/release-openstack-k8s"
-   cd release-openstack-k8s
-   git tag -n
-   git checkout 0.1.10
+    git clone "https://gerrit.mcp.mirantis.com/mcp/release-openstack-k8s"
+    cd release-openstack-k8s
+    git tag -n
+    git checkout 0.1.10
 
 ### Deploy openstack-controller (crds, operator, helmbundlecontroller)
 
 Create resources one by one with small delay to ensure kopfpeering is created by ceph.
 
-.. code-block:: bash
-
-   for d in release 3rd-party ci; do
-     pushd release
-     for i in $(ls -1 ./*); do
-       kubectl apply -f $i
-       sleep 10
-     done
-     popd
-   done
+    for d in release 3rd-party ci; do
+      pushd release
+      for i in $(ls -1 ./*); do
+        kubectl apply -f $i
+        sleep 10
+      done
+      popd
+    done
 
 Deploy ceph-kaas-controller to deploy Ceph related CRDs
 
@@ -55,78 +49,70 @@ Update node names in examples/miraceph/ceph_local_folder_openstack.yaml
 
 Deploy ceph cluster
 
-.. code-block:: bash
-
-   kubectl apply -f examples/miraceph/ceph_local_folder_openstack.yaml
+    kubectl apply -f examples/miraceph/ceph_local_folder_openstack.yaml
 
 
 ### Deploy OpenStack
 
 Update DNS to match currently configured by kaas
 
-.. code-block:: bash
 
-   sed -i "s/kaas-kubernetes-3af5ae538cf411e9a6c7fa163e5a4837/$(kubectl get configmap -n kube-system coredns -o jsonpath='{.data.Corefile}' |grep -oh kaas-kubernetes-[[:alnum:]]*)/g" examples/osdpl/core-ceph-local-non-dvr.yaml
+    sed -i "s/kaas-kubernetes-3af5ae538cf411e9a6c7fa163e5a4837/$(kubectl get configmap -n kube-system coredns -o jsonpath='{.data.Corefile}' |grep -oh kaas-kubernetes-[[:alnum:]]*)/g" examples/osdpl/core-ceph-local-non-dvr.yaml
 
 #### Generate Certs for public endpoints
 Generate certs with correct domain
 
-.. code-block:: bash
 
-   relase_repo_path=~/release-openstack-k8s
-   pushd openstack-controller/tools/ssl
-     bash/makecerts.sh $relase_repo_path/examples/osdpl/core-ceph-local-non-dvr.yaml
-   popd
+    relase_repo_path=~/release-openstack-k8s
+    pushd openstack-controller/tools/ssl
+      bash/makecerts.sh $relase_repo_path/examples/osdpl/core-ceph-local-non-dvr.yaml
+    popd
 
-   kubectl apply -f $relase_repo_path/examples/osdpl/core-ceph-local-non-dvr.yaml
+    kubectl apply -f $relase_repo_path/examples/osdpl/core-ceph-local-non-dvr.yaml
 
 
 ## Validate OpenStack
 
-.. code-block:: bash
 
-   kubect -n openstack exec -it keystone-client-8987f9985-h7c2l -- bash
+    kubect -n openstack exec -it keystone-client-8987f9985-h7c2l -- bash
 
 
-   wget https://binary.mirantis.com/openstack/bin/cirros/0.5.1/cirros-0.5.1-x86_64-disk.img
+    wget https://binary.mirantis.com/openstack/bin/cirros/0.5.1/cirros-0.5.1-x86_64-disk.img
 
-   openstack image create cirros-0.5.1-x86_64-disk --file cirros-0.5.1-x86_64-disk.img --disk-format qcow2 --container-format bare --public
-   openstack network create demoNetwork
-   openstack subnet create demoSubnet --network demoNetwork --subnet-range 10.11.12.0/24
-   openstack server create --image cirros-0.5.1-x86_64-disk --flavor m1.tiny --nic net-id=demoNetwork DemoVM
+    openstack image create cirros-0.5.1-x86_64-disk --file cirros-0.5.1-x86_64-disk.img --disk-format qcow2 --container-format bare --public
+    openstack network create demoNetwork
+    openstack subnet create demoSubnet --network demoNetwork --subnet-range 10.11.12.0/24
+    openstack server create --image cirros-0.5.1-x86_64-disk --flavor m1.tiny --nic net-id=demoNetwork DemoVM
 
 ## Barbican installation
 ###Simple_crypto backend configuration
 
-.. code-block:: yaml
 
-   barbican:
-     backend:
-       simple_crypto:
-         enabled: True
+    barbican:
+      backend:
+        simple_crypto:
+          enabled: True
 
 ## Advanced Usage
 
 ### Connect to helm directly
 
-.. code-block:: bash
+    # Download helm client with your version:
+    wget https://get.helm.sh/helm-v2.13.1-linux-amd64.tar.gz
+    tar -xf helm-v2.13.1-linux-amd64.tar.gz
+    mv linux-amd64/helm /usr/local/bin/helm
 
-   # Download helm client with your version:
-   wget https://get.helm.sh/helm-v2.13.1-linux-amd64.tar.gz
-   tar -xf helm-v2.13.1-linux-amd64.tar.gz
-   mv linux-amd64/helm /usr/local/bin/helm
+    # Setup port forwarding to tiller service
+    kubectl port-forward -n osh-system helm-controller-0 44134:44134
 
-   # Setup port forwarding to tiller service
-   kubectl port-forward -n osh-system helm-controller-0 44134:44134
+    # Setup alias for bash command, or add `--host=localhost:44134` to each command
+    alias helm="helm --host=localhost:44134"
 
-   # Setup alias for bash command, or add `--host=localhost:44134` to each command
-   alias helm="helm --host=localhost:44134"
+    # Init helm
+    helm init
 
-   # Init helm
-   helm init
-
-   # Use helm as always :)
-   helm list
+    # Use helm as always :)
+    helm list
 
 # Admission Controller for Kubernetes OpenStackDeployment
 
