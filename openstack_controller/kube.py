@@ -216,6 +216,29 @@ class Job(pykube.Job, HelmBundleMixin):
         )
         return False
 
+    def _prepare_for_rerun(self):
+        # cleanup the object of runtime stuff
+        self.obj.pop("status", None)
+        self.obj["metadata"].pop("creationTimestamp", None)
+        self.obj["metadata"].pop("resourceVersion", None)
+        self.obj["metadata"].pop("selfLink", None)
+        self.obj["metadata"].pop("uid", None)
+        self.obj["metadata"]["labels"].pop("controller-uid", None)
+        self.obj["spec"]["template"]["metadata"].pop("creationTimestamp", None)
+        self.obj["spec"]["template"]["metadata"]["labels"].pop(
+            "controller-uid", None
+        )
+        self.obj["spec"].pop("selector", None)
+
+    async def rerun(self):
+        self.delete(propagation_policy="Background")
+        if not await wait_for_deleted(self):
+            LOG.warning("Failed to delete job %s", self.name)
+            return
+        self._prepare_for_rerun()
+        self.create()
+        LOG.info("New job created: %s", self.name)
+
 
 class Deployment(pykube.Deployment, HelmBundleMixin):
     @property
@@ -285,8 +308,12 @@ def dummy(klass, name, namespace=None):
     return klass(api, {"metadata": meta})
 
 
-def find(klass, name, namespace=None):
-    return klass.objects(api).filter(namespace=namespace).get(name=name)
+def find(klass, name, namespace=None, silent=False):
+    try:
+        return klass.objects(api).filter(namespace=namespace).get(name=name)
+    except pykube.exceptions.ObjectDoesNotExist:
+        if not silent:
+            raise
 
 
 def resource_list(klass, selector, namespace=None):
@@ -341,6 +368,18 @@ def save_secret_data(namespace: str, name: str, data: Dict[str, str]):
         pykube.Secret(api, secret).create()
     else:
         pykube.Secret(api, secret).update()
+
+
+async def wait_for_deleted(
+    obj,
+    times=settings.OSCTL_RESOURCE_DELETED_WAIT_RETRIES,
+    seconds=settings.OSCTL_RESOURCE_DELETED_WAIT_TIMEOUT,
+):
+    for i in range(times):
+        if not obj.exists():
+            return True
+        await asyncio.sleep(seconds)
+    return False
 
 
 find_osdpl = functools.partial(find, OpenStackDeployment)

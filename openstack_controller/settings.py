@@ -70,6 +70,16 @@ OSCTL_OS_DEPLOYMENT_NAMESPACE = os.environ.get(
     "OSCTL_OS_DEPLOYMENT_NAMESPACE", "openstack"
 )
 
+# The number of retries while waiting a resouce deleted
+OSCTL_RESOURCE_DELETED_WAIT_RETRIES = int(
+    os.environ.get("OSCTL_RESOURCE_DELETED_WAIT_RETRIES", 120)
+)
+
+# The number of seconds to sleep while waiting a resouce deleted
+OSCTL_RESOURCE_DELETED_WAIT_TIMEOUT = int(
+    os.environ.get("OSCTL_RESOURCE_DELETED_WAIT_TIMEOUT", 1)
+)
+
 
 @kopf.on.startup()
 def configure(settings: kopf.OperatorSettings, **_):
