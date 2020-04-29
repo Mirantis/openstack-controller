@@ -145,7 +145,33 @@ class Cinder(OpenStackServiceWithCeph):
                     "images": ["cinder_storage_init"],
                     "manifest": "job_storage_init",
                 },
-            }
+                "cinder-db-sync-online": {
+                    "images": ["cinder_db_sync_online"],
+                    "manifest": "job_db_sync_online",
+                },
+                "cinder-db-sync": {
+                    "images": ["cinder_db_sync"],
+                    "manifest": "job_db_sync",
+                },
+            },
+            "Deployment": {
+                "cinder-api": {
+                    "images": ["cinder_api"],
+                    "manifest": "deployment_api",
+                },
+                "cinder-scheduler": {
+                    "images": ["cinder_scheduler"],
+                    "manifest": "deployment_scheduler",
+                },
+                "cinder-volume": {
+                    "images": ["cinder_volume"],
+                    "manifest": "deployment_volume",
+                },
+                "cinder-backup": {
+                    "images": ["cinder_backup"],
+                    "manifest": "deployment_backup",
+                },
+            },
         },
         "rabbitmq": {
             "Job": {
@@ -156,6 +182,20 @@ class Cinder(OpenStackServiceWithCeph):
             }
         },
     }
+
+    @layers.kopf_exception
+    async def _upgrade(self, event, **kwargs):
+        upgrade_map = [
+            ("Job", "cinder-db-sync"),
+            ("Deployment", "cinder-scheduler"),
+            ("Deployment", "cinder-volume"),
+            ("Deployment", "cinder-backup"),
+            ("Deployment", "cinder-api"),
+            ("Job", "cinder-db-sync-online"),
+        ]
+        for kind, obj_name in upgrade_map:
+            child_obj = self.get_child_object(kind, obj_name)
+            await child_obj.enable(self.openstack_version, True)
 
 
 class DashboardSelenium(OpenStackService):
