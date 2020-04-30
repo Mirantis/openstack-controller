@@ -195,6 +195,8 @@ class Cinder(OpenStackServiceWithCeph):
         ]
         for kind, obj_name in upgrade_map:
             child_obj = self.get_child_object(kind, obj_name)
+            if kind == "Job":
+                await child_obj.purge()
             await child_obj.enable(self.openstack_version, True)
 
 
