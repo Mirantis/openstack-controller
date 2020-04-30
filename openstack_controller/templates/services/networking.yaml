@@ -328,7 +328,11 @@ spec:
             {%- if spec.get('features', {}).get('neutron', {}).get('dvr', {}).get('enabled', False) %}
             router_distributed: True
             {%- endif %}
+            {%- if spec.get('features', {}).get('neutron', {}).get('dns_servers', []) %}
+            dnsmasq_dns_servers: {{ spec.features.neutron.dns_servers |join(',') }}
+            {%- else %}
             dnsmasq_local_resolv: true
+            {%- endif %}
             service_plugins: {{ service_plugins|join(',') }}
           {%- if tungstenfabric_enabled %}
             core_plugin: neutron_plugin_contrail.plugins.opencontrail.contrail_plugin.NeutronPluginContrailCoreV2
