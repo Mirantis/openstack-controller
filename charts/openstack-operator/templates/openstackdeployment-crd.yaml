@@ -295,6 +295,10 @@ spec:
                     tunnel_interface:
                       type: string
                       description: "Physical interface used for tunnel traffic"
+                    dns_servers:
+                      type: array
+                      description: >
+                        The list with the IP addresses of DNS servers reachable from Virtual Networks
                     backend:
                       type: string
                       description: Neutron backend
