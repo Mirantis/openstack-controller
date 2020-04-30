@@ -15,7 +15,64 @@ class NetworkFeatureEnabled(base_section.BaseSection):
 
     @property
     def api_extensions(self):
-        pass
+        api_extensions_default = [
+            "network-ip-availability",
+            "network_availability_zone",
+            "auto-allocated-topology",
+            "binding",
+            "subnet_allocation",
+            "external-net",
+            "flavors",
+            "availability_zone",
+            "quotas",
+            "l3-ha",
+            "provider",
+            "multi-provider",
+            "subnet-service-types",
+            "standard-attr-timestamp",
+            "service-type",
+            "l3-flavors",
+            "port-security",
+            "extra_dhcp_opt",
+            "standard-attr-revisions",
+            "pagination",
+            "sorting",
+            "security-group",
+            "router_availability_zone",
+            "standard-attr-description",
+            "router",
+            "allowed-address-pairs",
+            "project-id",
+            "filter-validation",
+            "dns-domain-ports",
+            "dns-integration",
+            "qos",
+            "qos-default",
+            "qos-rule-type-details",
+            "qos-bw-limit-direction",
+            "qos-fip",
+        ]
+
+        if self.get_spec_item("features.neutron.dvr.enabled", False):
+            api_extensions_default.append("dvr")
+
+        if self.get_spec_item("features.neutron.backend") == "ml2":
+            api_extensions_default.extend(
+                [
+                    "default-subnetpools",
+                    "ext-gw-mode",
+                    "agent",
+                    "l3_agent_scheduler",
+                    "net-mtu",
+                    "address-scope",
+                    "extraroute",
+                    "dhcp_agent_scheduler",
+                    "rbac-policies",
+                    "standard-attr-tag",
+                ]
+            )
+
+        return ", ".join(api_extensions_default)
 
     @property
     def floating_ips(self):

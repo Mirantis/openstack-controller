@@ -145,55 +145,6 @@ services:
             network:
               shared_physical_network: false
               floating_network_name: public
-            #TODO: Will be automated soon in filters.
-            network-feature-enabled:
-              api_extensions:
-                - default-subnetpools
-                - network-ip-availability
-                - network_availability_zone
-                - auto-allocated-topology
-                - ext-gw-mode
-                - binding
-                - agent
-                - subnet_allocation
-                - l3_agent_scheduler
-                - external-net
-                - flavors
-                - net-mtu
-                - availability_zone
-                - quotas
-                - l3-ha
-                - provider
-                - multi-provider
-                - address-scope
-                - extraroute
-                - subnet-service-types
-                - standard-attr-timestamp
-                - service-type
-                - l3-flavors
-                - port-security
-                - extra_dhcp_opt
-                - standard-attr-revisions
-                - pagination
-                - sorting
-                - security-group
-                - dhcp_agent_scheduler
-                - router_availability_zone
-                - rbac-policies
-                - standard-attr-description
-                - router
-                - allowed-address-pairs
-                - project-id
-                - dvr
-                - filter-validation
-                - standard-attr-tag
-                - dns-domain-ports
-                - dns-integration
-                - qos
-                - qos-default
-                - qos-rule-type-details
-                - qos-bw-limit-direction
-                - qos-fip
             volume-feature-enabled:
               api_v1: false
               api_v2: false
