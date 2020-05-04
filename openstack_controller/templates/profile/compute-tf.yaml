@@ -158,52 +158,6 @@ services:
               project_network_v6_mask_bits: 124
               #TODO(ibumarskov): feature not implemented https://bugs.launchpad.net/juniperopenstack/+bug/1604568
               ipv6_subnet_attributes: false
-            #TODO: Will be automated soon in filters.
-            network-feature-enabled:
-              api_extensions:
-                # not supported by TungstenFabric
-                # - address-scope
-                # - default-subnetpools
-                # - standard-attr-tag
-                # - rbac-policies
-                # - l3_agent_scheduler
-                # - ext-gw-mode
-                # - agent
-                # - dhcp_agent_scheduler
-                # - extraroute
-                # - dvr
-                # - net-mtu
-                # - tag
-                - network-ip-availability
-                - network_availability_zone
-                - auto-allocated-topology
-                - binding
-                - subnet_allocation
-                - external-net
-                - flavors
-                - availability_zone
-                - quotas
-                - l3-ha
-                - provider
-                - multi-provider
-                - subnet-service-types
-                - standard-attr-timestamp
-                - service-type
-                - l3-flavors
-                - port-security
-                - extra_dhcp_opt
-                - standard-attr-revisions
-                - pagination
-                - sorting
-                - security-group
-                - router_availability_zone
-                - standard-attr-description
-                - router
-                - allowed-address-pairs
-                - project-id
-                - filter-validation
-                - dns-domain-ports
-                - dns-integration
             volume-feature-enabled:
               api_v1: false
               api_v2: false
