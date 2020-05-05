@@ -290,7 +290,13 @@ class Glance(OpenStackServiceWithCeph):
                     "images": ["glance_db_contract"],
                     "manifest": "job_db_contract",
                 },
-            }
+            },
+            "Deployment": {
+                "glance-api": {
+                    "images": ["glance_api"],
+                    "manifest": "deployment_api",
+                }
+            },
         },
         "rabbitmq": {
             "Job": {
@@ -302,20 +308,17 @@ class Glance(OpenStackServiceWithCeph):
         },
     }
 
-
-# TODO(vsaienko): revert when PRODX-4275 is fixed
-#    @layers.kopf_exception
-#    async def _upgrade(self, event, **kwargs):
-#        upgrade_map = [
-#            ("Job", "glance-db-expand"),
-#            ("Job", "glance-db-migrate"),
-#            ("Deployment", "glance-api"),
-#            ("Job", "glance-db-contract"),
-#        ]
-#        for kind, obj_name in upgrade_map:
-#            child_obj = self.get_child_object(kind, obj_name)
-#            await child_obj.enable(self.openstack_version, True)
-#
+    @layers.kopf_exception
+    async def _upgrade(self, event, **kwargs):
+        upgrade_map = [
+            ("Job", "glance-db-expand"),
+            ("Job", "glance-db-migrate"),
+            ("Deployment", "glance-api"),
+            ("Job", "glance-db-contract"),
+        ]
+        for kind, obj_name in upgrade_map:
+            child_obj = self.get_child_object(kind, obj_name)
+            await child_obj.enable(self.openstack_version, True)
 
 
 class Heat(OpenStackService):
