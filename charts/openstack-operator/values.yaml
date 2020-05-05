@@ -14,7 +14,7 @@ image:
   pullPolicy: IfNotPresent
 
 nameOverride: ""
-fullnameOverride: ""
+fullnameOverride: "openstack-controller"
 
 kopf:
   enabled: true
