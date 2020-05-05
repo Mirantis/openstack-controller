@@ -128,6 +128,8 @@ spec:
               source_url: {{ spec.artifacts.binary_base_url }}/openstack/bin/Fedora/27/
       conf:
         glance:
+          cors:
+            allow_headers: Content-Type,Cache-Control,Content-Language,Expires,Last-Modified,Pragma,X-Custom-Header,X-Auth-Token
           keystone_authtoken:
             memcache_security_strategy: ENCRYPT
             memcache_secret_key: {{ credentials.memcached }}
@@ -211,4 +213,27 @@ spec:
           scheme:
             default: http
             public: https
+        # NOTE(vsaienko): the horizon endpoint is needed to generate correct cors:allowed_origins
+        dashboard:
+          host_fqdn_override:
+            public:
+              host: horizon.{{ spec.public_domain_name }}
+              tls:
+                ca: |
+{{ spec.features.ssl.public_endpoints.ca_cert | indent( width=18, first=True) }}
+                crt: |
+{{ spec.features.ssl.public_endpoints.api_cert | indent( width=18, first=True) }}
+                key: |
+{{ spec.features.ssl.public_endpoints.api_key | indent( width=18, first=True) }}
+          hosts:
+            default: horizon-int
+            public:
+              host: horizon
+              tls:
+                ca: |
+{{ spec.features.ssl.public_endpoints.ca_cert | indent( width=18, first=True) }}
+                crt: |
+{{ spec.features.ssl.public_endpoints.api_cert | indent( width=18, first=True) }}
+                key: |
+{{ spec.features.ssl.public_endpoints.api_key | indent( width=18, first=True) }}
 {%- endif %}
