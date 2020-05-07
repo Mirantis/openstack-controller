@@ -12,6 +12,7 @@
 # limitations under the License.
 
 import json
+import logging
 import os
 
 import falcon
@@ -19,7 +20,9 @@ import jsonschema
 
 from openstack_controller.admission import validators
 from openstack_controller import exception
+from openstack_controller import layers
 
+LOG = logging.getLogger(__name__)
 
 _VALIDATORS = {}
 for validator in validators.__all__:
@@ -31,6 +34,7 @@ class RootResource(object):
         pass
 
 
+# TODO(pas-ha) move the low-level request/response mangling to middleware
 class ReviewResponse(object):
     def __init__(self):
         self.api_version = ""
@@ -96,20 +100,19 @@ class ValidationResource(object):
                 review_request.get("kind", {}).get("kind")
                 == "OpenStackDeployment"
             ):
-                features = (
-                    review_request.get("object", {})
-                    .get("spec", {})
-                    .get("features", {})
-                )
-                for service in features.get("services", []):
-                    if service in _VALIDATORS:
-                        # Validate all the enabled services, if there is a
-                        # corresponding validator
-                        try:
-                            _VALIDATORS[service].validate(review_request)
-                        except exception.OsDplValidationFailed as e:
-                            response.set_error(e.code, e.message)
-                            break
+                _VALIDATORS["openstack"].validate(review_request)
+                spec = review_request.get("object", {}).get("spec", {})
+                # Validate all the enabled services, if there is a
+                # corresponding validator.
+                # Not validating services that are about to be deleted
+                for service in (
+                    layers.services(spec, LOG)[0] & _VALIDATORS.keys()
+                ):
+                    try:
+                        _VALIDATORS[service].validate(review_request)
+                    except exception.OsDplValidationFailed as e:
+                        response.set_error(e.code, e.message)
+                        break
         resp.body = json.dumps(response.to_json())
 
 
