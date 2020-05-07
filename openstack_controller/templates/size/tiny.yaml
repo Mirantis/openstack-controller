@@ -171,7 +171,7 @@ services:
         conf:
           neutron:
             DEFAULT:
-              dhcp_lease_duration: 600
+              dhcp_lease_duration: 86400
               rpc_workers: 4
               api_workers: 4
               rpc_state_report_workers: 2
