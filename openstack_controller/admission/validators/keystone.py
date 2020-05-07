@@ -12,12 +12,13 @@
 # limitations under the License.
 
 from openstack_controller.admission.validators import base
+from openstack_controller import exception
 
 
 class KeystoneValidator(base.BaseValidator):
     service = "identity"
 
-    def validate(self, review_request, response):
+    def validate(self, review_request):
         keycloak_section = (
             review_request.get("object", {})
             .get("spec", {})
@@ -30,11 +31,8 @@ class KeystoneValidator(base.BaseValidator):
             and keycloak_section.get("oidc", {}).get("OIDCSSLValidateServer")
             is None
         ):
-            response.set_error(
-                400,
-                (
-                    "Malformed OpenStackDeployment spec, if keycloak is "
-                    "enabled for identity service, you need to specify if "
-                    "you want to enable OIDC SSL validation."
-                ),
+            raise exception.OsDplValidationFailed(
+                "Malformed OpenStackDeployment spec, if keycloak is "
+                "enabled for identity service, you need to specify if "
+                "you want to enable OIDC SSL validation."
             )
