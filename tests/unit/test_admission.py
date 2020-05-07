@@ -20,6 +20,7 @@ from unittest import mock
 from openstack_controller.admission import controller
 from openstack_controller.admission.validators import base
 from openstack_controller.admission.validators import openstack as osv
+from openstack_controller.admission.validators import neutron
 from openstack_controller import exception
 
 
@@ -179,3 +180,20 @@ class TestOpenStackValidator(unittest.TestCase):
                     osv.OpenStackVersion.master,
                     "openstack/master is not the largest possible version",
                 )
+
+
+class TestNeutronValidator(unittest.TestCase):
+    def setUp(self):
+        super().setUp()
+        self.validate = neutron.NeutronValidator().validate
+        self.req = {"object": {"spec": {"features": {"neutron": {}}}}}
+
+    def test_physnet_required_no_tf(self):
+        with self.assertRaises(exception.OsDplValidationFailed):
+            self.validate(self.req)
+
+    def test_tf_physnet_optional(self):
+        self.req["object"]["spec"]["features"]["neutron"] = {
+            "backend": "tungstenfabric"
+        }
+        self.assertIsNone(self.validate(self.req))
