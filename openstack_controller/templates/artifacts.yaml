@@ -16,7 +16,7 @@ common:
   infra:
     repo: osh-infra
     releases:
-      version: 0.1.0-mcp-2234
+      version: 0.1.0-mcp-2235
   incubator:
     repo: incubator
     releases:
