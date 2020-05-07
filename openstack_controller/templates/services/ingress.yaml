@@ -34,6 +34,18 @@ spec:
           {{ image }}: {{ images[image] }}
         {%- endif %}
 {%- endfor %}
+      pod:
+        probes:
+          server:
+            ingress:
+              readiness:
+                enabled: true
+                params: {}
+              liveness:
+                enabled: true
+                params:
+                  initialDelaySeconds: 10
+                  timeoutSeconds: 5
       manifests:
         network_policy: false
       endpoints:
