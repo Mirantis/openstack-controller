@@ -194,6 +194,12 @@ class Cinder(OpenStackServiceWithCeph):
             ("Job", "cinder-db-sync-online"),
         ]
         for kind, obj_name in upgrade_map:
+            # NOTE(mpolenchuk): turn off until PRODX-4746 got fixed
+            if (
+                self.openstack_version in ["rocky", "stein"]
+                and obj_name == "cinder-db-sync-online"
+            ):
+                continue
             child_obj = self.get_child_object(kind, obj_name)
             if kind == "Job":
                 await child_obj.purge()
