@@ -217,6 +217,7 @@ spec:
                       - coordination
                       - dashboard-selenium
                       - baremetal
+                      - redis-telemetry
                 nova:
                   type: object
                   required:

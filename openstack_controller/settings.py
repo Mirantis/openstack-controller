@@ -80,6 +80,10 @@ OSCTL_RESOURCE_DELETED_WAIT_TIMEOUT = int(
     os.environ.get("OSCTL_RESOURCE_DELETED_WAIT_TIMEOUT", 1)
 )
 
+OSCTL_REDIS_NAMESPACE = os.environ.get(
+    "OSCTL_REDIS_NAMESPACE", "openstack-redis"
+)
+
 
 @kopf.on.startup()
 def configure(settings: kopf.OperatorSettings, **_):

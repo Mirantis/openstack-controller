@@ -1,0 +1,54 @@
+spec:
+  redis:
+    affinity:
+      podAntiAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+        - labelSelector:
+            matchExpressions:
+              - key: app.kubernetes.io/component
+                operator: In
+                values:
+                - redis
+          topologyKey: "kubernetes.io/hostname"
+#TODO: research parameters for redis optimization
+#    customConfig:
+#    - save 1 2
+{%- if "redis-failover" in images %}
+    image: {{ images["redis-failover"] }}
+{%- endif %}
+    replicas: 3
+    storage:
+      keepAfterDeletion: true
+      persistentVolumeClaim:
+        metadata:
+          name: lvp-fake-root
+        spec:
+          accessModes:
+          - ReadWriteOnce
+          resources:
+            requests:
+              storage: 1Gi
+          storageClassName: lvp-fake-root
+  sentinel:
+    affinity:
+      podAntiAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+        - labelSelector:
+            matchExpressions:
+              - key: app.kubernetes.io/component
+                operator: In
+                values:
+                - sentinel
+          topologyKey: "kubernetes.io/hostname"
+#TODO: research timings for optimal failover delays
+#    customConfig:
+#    - down-after-milliseconds 2000
+#    - failover-timeout 4000
+{%- if "redis-failover" in images %}
+    image: {{ images["redis-failover"] }}
+{%- endif %}
+    replicas: 3
+  auth:
+    secretPath: generated-redis-password
+  labelWhitelist:
+  - ^app.*

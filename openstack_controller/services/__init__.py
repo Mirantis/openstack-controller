@@ -32,6 +32,76 @@ class Coordination(Service):
         return ["etcd"]
 
 
+class Redis(Service):
+    service = "redis-telemetry"
+    group = "databases.spotahome.com"
+    version = "v1"
+    kind = "RedisFailover"
+    namespace = settings.OSCTL_REDIS_NAMESPACE
+
+    def template_args(self):
+        redis_secret = secrets.RedisSecret(self.namespace)
+        redis_creds = redis_secret.ensure()
+        return {"redis_creds": redis_creds}
+
+    def render(self, openstack_version=""):
+        template_args = self.template_args()
+        images = layers.render_artifacts(self.mspec)
+        data = layers.render_service_template(
+            self.service,
+            self.body,
+            self.body["metadata"],
+            self.mspec,
+            self.logger,
+            images=images,
+            **template_args,
+        )
+
+        data.update(self.resource_def)
+
+        return data
+
+    async def apply(self, event, **kwargs):
+        # ensure child ref exists in the current status of osdpl object
+        if self.resource_name not in self._get_osdpl().obj.get(
+            "status", {}
+        ).get("children", {}):
+            status_patch = {"children": {self.resource_name: True}}
+            self.update_status(status_patch)
+        LOG.info(f"Applying config for {self.service}")
+        data = self.render()
+        LOG.info(f"Config applied for {self.service}")
+
+        # kopf.adopt is not used as kubernetes doesn't allow to use
+        # cross namespace ownerReference
+        data["apiVersion"] = "{0}/{1}".format(self.group, self.version)
+        data["kind"] = self.kind
+        data["name"] = "openstack-{0}".format(self.service)
+        data["metadata"]["namespace"] = self.namespace
+        redisfailover_obj = kube.resource(data)
+
+        # apply state of the object
+        if redisfailover_obj.exists():
+            redisfailover_obj.reload()
+            redisfailover_obj.set_obj(data)
+            redisfailover_obj.update()
+            LOG.debug(
+                f"{redisfailover_obj.kind} child is updated: %s",
+                redisfailover_obj.obj,
+            )
+        else:
+            redisfailover_obj.create()
+            LOG.debug(
+                f"{redisfailover_obj.kind} child is created: %s",
+                redisfailover_obj.obj,
+            )
+        kopf.info(
+            self.osdpl.obj,
+            reason=event.capitalize(),
+            message=f"{event}d {redisfailover_obj.kind} for {self.service}",
+        )
+
+
 class MariaDB(Service):
     service = "database"
 

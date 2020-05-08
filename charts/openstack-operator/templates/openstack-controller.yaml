@@ -107,6 +107,18 @@ rules:
     verbs: [list, get, create, patch, update]
 ---
 apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: Role
+metadata:
+  namespace: {{ .Values.osdpl.settings.raw.OSCTL_REDIS_NAMESPACE }}
+  name: "openstack-controller-role-{{ .Values.osdpl.settings.raw.OSCTL_REDIS_NAMESPACE }}"
+rules:
+
+  # Application: manage redis failovers from shared namespace.
+  - apiGroups: [databases.spotahome.com]
+    resources: [redisfailovers]
+    verbs: [list, get, create, patch, update]
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: ClusterRoleBinding
 metadata:
   name: openstack-controller-rolebinding-cluster
@@ -156,6 +168,20 @@ roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
   name: "openstack-controller-role-{{ .Values.osdpl.cephSharedNamespace }}"
+subjects:
+  - kind: ServiceAccount
+    name: openstack-controller-account
+    namespace: osh-system
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: RoleBinding
+metadata:
+  namespace: {{ .Values.osdpl.settings.raw.OSCTL_REDIS_NAMESPACE }}
+  name: "openstack-controller-rolebinding-{{ .Values.osdpl.settings.raw.OSCTL_REDIS_NAMESPACE }}"
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: "openstack-controller-role-{{ .Values.osdpl.settings.raw.OSCTL_REDIS_NAMESPACE }}"
 subjects:
   - kind: ServiceAccount
     name: openstack-controller-account

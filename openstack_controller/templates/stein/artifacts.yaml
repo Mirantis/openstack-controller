@@ -162,3 +162,4 @@ aodh_evaluator: '{{ images_base_url }}/openstack/aodh:stein-bionic-2020052318001
 aodh_listener: '{{ images_base_url }}/openstack/aodh:stein-bionic-20200523180015'
 aodh_notifier: '{{ images_base_url }}/openstack/aodh:stein-bionic-20200523180015'
 aodh_alarms_cleaner: '{{ images_base_url }}/openstack/aodh:stein-bionic-20200523180015'
+redis-failover: '{{ images_base_url }}/openstack/extra/redis:5.0-alpine'

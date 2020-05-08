@@ -161,3 +161,4 @@ gnocchi_api: '{{ images_base_url }}/openstack/gnocchi:train-bionic-2020052318001
 gnocchi_statsd: '{{ images_base_url }}/openstack/gnocchi:train-bionic-20200523180015'
 gnocchi_metricd: '{{ images_base_url }}/openstack/gnocchi:train-bionic-20200523180015'
 gnocchi_resources_cleaner: '{{ images_base_url }}/openstack/heat:train-bionic-20200523180015'
+redis-failover: '{{ images_base_url }}/openstack/extra/redis:5.0-alpine'
