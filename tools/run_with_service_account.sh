@@ -5,12 +5,12 @@ set -o pipefail
 
 command -v jq >/dev/null && echo "'jq' is installed. Configuring service token..." || { echo "Please, install 'jq' before running this script."; exit 1; }
 
-REPLICAS=`kubectl -n osh-system get deployment openstack-operator -o jsonpath='{.spec.replicas}' || echo 0`
+REPLICAS=`kubectl -n osh-system get deployment openstack-controller -o jsonpath='{.spec.replicas}' || echo 0`
 if [ $REPLICAS -gt 0 ];
 then
 	echo "Found running OpenStack Operator inststance."
 	echo "Please, scale down openstack-operator deployment using the following command:"
-	echo "kubectl -n osh-system scale deployment openstack-operator --replicas 0"
+	echo "kubectl -n osh-system scale deployment openstack-controller --replicas 0"
 	exit 1
 fi
 
