@@ -18,7 +18,6 @@ class NetworkFeatureEnabled(base_section.BaseSection):
         api_extensions_default = [
             "network-ip-availability",
             "network_availability_zone",
-            "auto-allocated-topology",
             "binding",
             "subnet_allocation",
             "external-net",
@@ -59,6 +58,7 @@ class NetworkFeatureEnabled(base_section.BaseSection):
         if self.get_spec_item("features.neutron.backend") == "ml2":
             api_extensions_default.extend(
                 [
+                    "auto-allocated-topology",
                     "default-subnetpools",
                     "ext-gw-mode",
                     "agent",
