@@ -4,12 +4,23 @@
 spec:
   releases:
   - name: etcd
-    chart: {{spec.common.incubator.repo}}/etcd
+    chart: {{spec.common.infra.repo}}/etcd
     values:
-      replicas: 3
-{%- if "etcd" in images %}
-    {% set imageList = images['etcd'].split(':') %}
-      image:
-        repository: "{{ imageList[-2] }}"
-        tag: "{{ imageList[-1] }}"
-{%- endif %}
+      images:
+        tags:
+{%- for image in [
+    "etcd",
+    "dep_check",
+    "image_repo_sync",] %}
+        {%- if image in images %}
+          {{ image }}: {{ images[image] }}
+        {%- endif %}
+{%- endfor %}
+      endpoints:
+        cluster_domain_suffix: {{ spec.internal_domain_name }}
+      pod:
+        replicas:
+          etcd: 3
+      volume:
+        class_name: lvp-fake-root
+
