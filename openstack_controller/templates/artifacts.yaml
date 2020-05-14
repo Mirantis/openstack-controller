@@ -7,8 +7,6 @@ common:
       url: '{{ binary_base_url }}/openstack/helm/openstack-helm'
     - name: osh-infra
       url: '{{ binary_base_url }}/openstack/helm/openstack-helm-infra'
-    - name: incubator
-      url: '{{ binary_base_url }}/kubernetes/helm/incubator'
   openstack:
     repo: osh
     releases:
@@ -17,8 +15,3 @@ common:
     repo: osh-infra
     releases:
       version: 0.1.0-mcp-2236
-  incubator:
-    repo: incubator
-    releases:
-      etcd:
-        version: 0.7.3
