@@ -1,3 +1,5 @@
+import base64
+import configparser
 import kopf
 from mcp_k8s_lib import ceph_api, utils
 
@@ -57,6 +59,34 @@ async def handle_neutron_secret(
     for key in AUTH_KEYS:
         secret_data[key[3:].lower()] = body["data"][key]
 
+    tfs = secrets.TungstenFabricSecret()
+    tfs.save(secret_data)
+
+
+@kopf.on.create(
+    "",
+    "v1",
+    "secrets",
+    labels={"application": "neutron", "component": "configmap_etc"},
+)
+async def handle_neutron_configmap_secret(
+    body, meta, name, status, logger, diff, **kwargs,
+):
+    METADATA_OPTS = (
+        ("nova_metadata_port", "nova_metadata_port"),
+        ("nova_metadata_host", "nova_metadata_host"),
+        ("metadata_proxy_secret", "metadata_proxy_shared_secret"),
+    )
+
+    LOG.debug(f"Handling secret create {name}")
+    metadata = base64.b64decode(body["data"]["metadata_agent.ini"]).decode()
+    config = configparser.ConfigParser()
+    config.read_string(metadata)
+
+    secret_data = {
+        key: base64.b64encode(config["DEFAULT"][opt].encode()).decode()
+        for key, opt in METADATA_OPTS
+    }
     tfs = secrets.TungstenFabricSecret()
     tfs.save(secret_data)
 
