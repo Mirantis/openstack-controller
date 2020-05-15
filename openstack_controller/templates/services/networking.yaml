@@ -313,6 +313,7 @@ spec:
             # Combined DVR + L3 HA is not recommended until load tested (had issues in the past)
             {%- if spec.get('features', {}).get('neutron', {}).get('dvr', {}).get('enabled', False) %}
             l3_ha: False
+            allow_automatic_l3agent_failover: True
             {%- else %}
             l3_ha: True
             {%- endif %}
