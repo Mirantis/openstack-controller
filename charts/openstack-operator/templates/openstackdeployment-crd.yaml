@@ -70,6 +70,7 @@ spec:
                 - rocky # not supported, only for migration
                 - stein # not supported, only for migration
                 - train
+                - ussuri # under development
                 - master # not supported, only for example
             profile:
               description: profile to deploy

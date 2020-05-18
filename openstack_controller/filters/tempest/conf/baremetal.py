@@ -2,6 +2,7 @@ from openstack_controller.filters.tempest import base_section
 
 
 IRONIC_MICROVERSION_RELEASE_MAPPING = {
+    "ussuri": {"min_microversion": "1.1", "max_microversion": "1.65"},
     "train": {"min_microversion": "1.1", "max_microversion": "1.58"},
     "stein": {"min_microversion": "1.1", "max_microversion": "1.56"},
     "rocky": {"min_microversion": "1.1", "max_microversion": "1.46"},

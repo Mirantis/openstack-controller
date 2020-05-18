@@ -27,8 +27,9 @@ class OpenStackVersion(enum.IntEnum):
     rocky = 2
     stein = 3
     train = 4
+    ussuri = 5
     # TODO(pas-ha) update this when adding new supported OpenStack releases
-    latest = 4
+    latest = 5
 
 
 class OpenStackValidator(base.BaseValidator):

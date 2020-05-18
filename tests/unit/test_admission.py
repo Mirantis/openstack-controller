@@ -168,8 +168,8 @@ class TestOpenStackValidator(unittest.TestCase):
     def test_openstackversion_latest(self):
         self.assertEqual(
             osv.OpenStackVersion.latest,
-            osv.OpenStackVersion.train,
-            "Latest version is not Train",
+            osv.OpenStackVersion.ussuri,
+            "Latest version is not Ussuri",
         )
 
     def test_openstackversion_master(self):
