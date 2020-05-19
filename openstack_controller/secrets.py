@@ -213,13 +213,12 @@ class Secret(abc.ABC):
 
     def ensure(self):
         try:
-            data = get_secret_data(self.namespace, self.secret_name)
-            return self.decode(data)
+            secret = self.get()
         except pykube.exceptions.ObjectDoesNotExist:
             secret = self.create()
             if secret:
                 self.save(secret)
-            return secret
+        return secret
 
     def save(self, secret) -> None:
         data = asdict(secret)
@@ -230,6 +229,10 @@ class Secret(abc.ABC):
             ).decode()
 
         kube.save_secret_data(self.namespace, self.secret_name, data)
+
+    def get(self):
+        data = get_secret_data(self.namespace, self.secret_name)
+        return self.decode(data)
 
 
 class OpenStackAdminSecret(Secret):
