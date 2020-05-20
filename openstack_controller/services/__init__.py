@@ -2,6 +2,7 @@ import asyncio
 import base64
 import kopf
 from mcp_k8s_lib import utils
+import pykube
 
 from openstack_controller import constants
 from openstack_controller import layers
@@ -621,7 +622,13 @@ class Nova(OpenStackServiceWithCeph):
 
         neutron_secret = secrets.NeutronSecret(self.namespace, "networking")
         kube.wait_for_secret(self.namespace, neutron_secret.secret_name)
-        neutron_creds = neutron_secret.ensure()
+        try:
+            neutron_creds = neutron_secret.get()
+        except pykube.exceptions.ObjectDoesNotExist:
+            raise kopf.TemporaryError(
+                f"The Neutron secret: {neutron_secret.secret_name} is not found yet."
+            )
+
         t_args["metadata_secret"] = neutron_creds.metadata_secret
 
         return t_args
