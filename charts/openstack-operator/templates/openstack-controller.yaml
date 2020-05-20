@@ -228,6 +228,12 @@ spec:
         app.kubernetes.io/instance: {{ .Release.Name }}
     spec:
       serviceAccountName: openstack-controller-account
+      securityContext:
+        # NOTE(vsaienko): The range 32768 60999 is default range used by application
+        # to bind on local ports. Exclude 32768 - 32799 and use them for health probes
+        sysctls:
+        - name: net.ipv4.ip_local_port_range
+          value: 32800 60999
       containers:
         - name: osdpl
           image: {{ tuple . .Values.image | include "getImageUrl" }}
@@ -244,7 +250,7 @@ spec:
             - '-m'
             - openstack_controller.controllers.probe
             - '-L'
-            - 'http://0.0.0.0:44090/healthz'
+            - 'http://0.0.0.0:32768/healthz'
           env:
             {{- range $optionName, $optionValue := .Values.osdpl.settings.raw }}
             - name: {{ $optionName }}
@@ -253,7 +259,7 @@ spec:
           livenessProbe:
             httpGet:
               path: /healthz
-              port: 44090
+              port: 32768
             periodSeconds: 120
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
@@ -272,7 +278,7 @@ spec:
             - '-m'
             - openstack_controller.controllers.probe
             - '-L'
-            - 'http://0.0.0.0:44091/healthz'
+            - 'http://0.0.0.0:32769/healthz'
           env:
             {{- range $optionName, $optionValue := .Values.osdpl.settings.raw }}
             - name: {{ $optionName }}
@@ -281,7 +287,7 @@ spec:
           livenessProbe:
             httpGet:
               path: /healthz
-              port: 44091
+              port: 32769
             periodSeconds: 120
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
@@ -300,7 +306,7 @@ spec:
             - '-m'
             - openstack_controller.controllers.probe
             - '-L'
-            - 'http://0.0.0.0:44092/healthz'
+            - 'http://0.0.0.0:32770/healthz'
           env:
             {{- range $optionName, $optionValue := .Values.osdpl.settings.raw }}
             - name: {{ $optionName }}
@@ -309,7 +315,7 @@ spec:
           livenessProbe:
             httpGet:
               path: /healthz
-              port: 44092
+              port: 32770
             periodSeconds: 120
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
@@ -328,7 +334,7 @@ spec:
             - '-m'
             - openstack_controller.controllers.probe
             - '-L'
-            - 'http://0.0.0.0:44093/healthz'
+            - 'http://0.0.0.0:32771/healthz'
           env:
             {{- range $optionName, $optionValue := .Values.osdpl.settings.raw }}
             - name: {{ $optionName }}
@@ -337,7 +343,7 @@ spec:
           livenessProbe:
             httpGet:
               path: /healthz
-              port: 44093
+              port: 32771
             periodSeconds: 120
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
@@ -356,7 +362,7 @@ spec:
             - '-m'
             - openstack_controller.controllers.probe
             - '-L'
-            - 'http://0.0.0.0:44094/healthz'
+            - 'http://0.0.0.0:32772/healthz'
           env:
             {{- range $optionName, $optionValue := .Values.osdpl.settings.raw }}
             - name: {{ $optionName }}
@@ -365,7 +371,7 @@ spec:
           livenessProbe:
             httpGet:
               path: /healthz
-              port: 44094
+              port: 32772
             periodSeconds: 120
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
