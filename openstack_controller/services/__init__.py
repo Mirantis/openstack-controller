@@ -2,7 +2,6 @@ import asyncio
 import base64
 import kopf
 from mcp_k8s_lib import utils
-import pykube
 
 from openstack_controller import constants
 from openstack_controller import layers
@@ -98,8 +97,9 @@ class RabbitMQ(Service):
         for s in services:
             if s not in constants.OS_SERVICES_MAP:
                 continue
-            # TODO: 'use get or wait' approach for generated credential here
-            secret = secrets.OpenStackServiceSecret(self.namespace, s)
+            # NOTE(vsaienko): use secret_class from exact service as additional
+            # passwords might be added like metadata password.
+            secret = Service.registry[s]._secret_class(self.namespace, s)
             credentials[s] = secret.ensure()
 
         return {
@@ -622,12 +622,7 @@ class Nova(OpenStackServiceWithCeph):
 
         neutron_secret = secrets.NeutronSecret(self.namespace, "networking")
         kube.wait_for_secret(self.namespace, neutron_secret.secret_name)
-        try:
-            neutron_creds = neutron_secret.get()
-        except pykube.exceptions.ObjectDoesNotExist:
-            raise kopf.TemporaryError(
-                f"The Neutron secret: {neutron_secret.secret_name} is not found yet."
-            )
+        neutron_creds = neutron_secret.get()
 
         t_args["metadata_secret"] = neutron_creds.metadata_secret
 
