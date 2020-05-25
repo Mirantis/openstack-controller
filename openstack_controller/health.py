@@ -21,11 +21,11 @@ class DeploymentStatusCondition:
 
 @dataclass(frozen=True)
 class StatefulSetStatus:
-    observedGeneration: int
     replicas: int
-    currentRevision: str
-    updateRevision: str  # optional?
-    collisionCount: int
+    observedGeneration: int = 0
+    currentRevision: str = ""
+    updateRevision: str = ""
+    collisionCount: int = 0
     readyReplicas: int = 0
     updatedReplicas: int = 0
     currentReplicas: int = 0
@@ -37,7 +37,7 @@ class DaemonSetStatus:
     numberMisscheduled: int
     desiredNumberScheduled: int
     numberReady: int
-    observedGeneration: int
+    observedGeneration: int = 0
     numberAvailable: int = 0
     numberUnavailable: int = 0
     updatedNumberScheduled: int = 0

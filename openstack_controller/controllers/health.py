@@ -67,10 +67,16 @@ def _delete(osdpl, kind, meta, application, component):
 # better let kopf's handler deduplicaiton handle it, and
 # manually discern what to do in a single handler.
 
+
+def deployment_status_conditions(conditions):
+    conds = conditions or []
+    return [health.DeploymentStatusCondition(**c) for c in conds]
+
+
 # NOTE(pas-ha) it turns out Deployment is sensitive to annotation changes as
 # it bumps metadata.generation and status.observedGeneration on any
 # change to annotations
-# However, kopf stores its last handled state in the annotations
+# However, kopf stores its last hand led state in the annotations
 # of the resources the handler watches.
 # Thus if we subscribe to whole 'status' field, we end up with infinite loop:
 # kopf sees status change -> kopf handler handles this change ->
@@ -96,14 +102,19 @@ async def deployments(name, namespace, meta, status, new, event, **kwargs):
     # TODO(pas-ha) investigate if we can use status.conditions
     # just for aggroing, but derive health from other status fields
     # which are available.
-    conds = [health.DeploymentStatusCondition(**c) for c in new]
+    avail_cond = None
+    progr_cond = None
+    conds = deployment_status_conditions(new)
     for c in conds:
         if c.type == "Available":
             avail_cond = c
         elif c.type == "Progressing":
             progr_cond = c
-    res_health = constants.UNKNOWN
-    if avail_cond.status == "True" and (
+    conditions_available = avail_cond is not None and progr_cond is not None
+    res_health = None
+    if not conditions_available:
+        res_health = constants.UNKNOWN
+    elif avail_cond.status == "True" and (
         progr_cond.status == "True"
         and progr_cond.reason == "NewReplicaSetAvailable"
     ):
