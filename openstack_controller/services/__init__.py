@@ -370,6 +370,12 @@ class Horizon(OpenStackService):
 class Ironic(OpenStackService):
     service = "baremetal"
     openstack_chart = "ironic"
+
+    @property
+    def _required_accounts(self):
+        r_accounts = {"networking": ["neutron"], "image": ["glance"]}
+        return r_accounts
+
     _child_objects = {
         "ironic": {
             "Job": {
@@ -532,12 +538,15 @@ class Nova(OpenStackServiceWithCeph):
 
     @property
     def _required_accounts(self):
-        r_accounts = {"networking": ["neutron"]}  # ironic
+        r_accounts = {"networking": ["neutron"]}
         if self.openstack_version not in [
             "queens",
             "rocky",
         ]:
             r_accounts["placement"] = ["placement"]
+        services = self.mspec["features"]["services"]
+        if "baremetal" in services:
+            r_accounts["baremetal"] = ["ironic"]
         return r_accounts
 
     @property
