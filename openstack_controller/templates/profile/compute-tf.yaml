@@ -131,6 +131,8 @@ services:
             - (?:tempest.api.network.test_ports.Ports(|IpV6)TestJSON.test_update_port_with_two_security_groups_and_extra_attributes)
             # TODO(ibumarskov): not supported by TF (PRODX-4003)
             - (?:tempest.api.network.test_routers.RoutersIpV6Test)
+            # TODO(ibumarskov): not supported by TF (PRODX-5181)
+            - (?:neutron_tempest_plugin.scenario.test_connectivity.NetworkConnectivityTest.test_connectivity_through_2_routers)
           script: |
             tempest run --config-file /etc/tempest/tempest.conf -w 4 --smoke --blacklist-file  /etc/tempest/test-blacklist
           tempest:
