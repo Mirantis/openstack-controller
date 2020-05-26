@@ -159,3 +159,4 @@ gnocchi_api: '{{ images_base_url }}/openstack/gnocchi:queens-bionic-202005231800
 gnocchi_statsd: '{{ images_base_url }}/openstack/gnocchi:queens-bionic-20200523180015'
 gnocchi_metricd: '{{ images_base_url }}/openstack/gnocchi:queens-bionic-20200523180015'
 gnocchi_resources_cleaner: '{{ images_base_url }}/openstack/heat:queens-bionic-20200523180015'
+redis-failover: '{{ images_base_url }}/openstack/extra/redis:5.0-alpine'

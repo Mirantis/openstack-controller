@@ -161,3 +161,4 @@ aodh_notifier: '{{ images_base_url }}/openstack/aodh:master-bionic-2020052318001
 aodh_alarms_cleaner: '{{ images_base_url }}/openstack/aodh:master-bionic-20200523180015'
 gnocchi_storage_init: '{{ images_base_url }}/openstack/extra/ceph-config-helper:nautilus-bionic-20191203060056'
 gnocchi_resources_cleaner: '{{ images_base_url }}/openstack/heat:master-bionic-20200523180015'
+redis-failover: '{{ images_base_url }}/openstack/extra/redis:5.0-alpine'

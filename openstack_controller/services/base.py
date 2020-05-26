@@ -69,6 +69,7 @@ class GenericChildObject:
 class Service:
 
     service = None
+    namespace = None
     group = "lcm.mirantis.com"
     version = "v1alpha1"
     kind = "HelmBundle"
@@ -109,7 +110,8 @@ class Service:
         # We have to use self._get_osdpl() method instead of it.
         self.osdpl = kube.OpenStackDeployment(kube.api, body)
         self.body = body
-        self.namespace = body["metadata"]["namespace"]
+        if self.namespace is None:
+            self.namespace = body["metadata"]["namespace"]
         self.logger = logger
         self.openstack_version = self.body["spec"]["openstack_version"]
         self.mspec = layers.merge_spec(self.body["spec"], self.logger)
@@ -271,6 +273,7 @@ class Service:
             self.update_status(status_patch)
         LOG.info(f"Applying config for {self.service}")
         data = self.render()
+        LOG.info(f"Config applied for {self.service}")
 
         # NOTE(pas-ha) this sets the parent refs in child
         # to point to our resource so that cascading delete

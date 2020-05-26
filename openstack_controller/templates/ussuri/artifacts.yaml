@@ -161,3 +161,4 @@ gnocchi_api: '{{ images_base_url }}/openstack/gnocchi:ussuri-bionic-202005221800
 gnocchi_statsd: '{{ images_base_url }}/openstack/gnocchi:ussuri-bionic-20200522180014'
 gnocchi_metricd: '{{ images_base_url }}/openstack/gnocchi:ussuri-bionic-20200522180014'
 gnocchi_resources_cleaner: '{{ images_base_url }}/openstack/heat:ussuri-bionic-20200522180014'
+redis-failover: '{{ images_base_url }}/openstack/extra/redis:5.0-alpine'

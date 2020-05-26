@@ -109,6 +109,11 @@ class GaleraCredentials:
 
 
 @dataclass
+class RedisCredentials:
+    password: str
+
+
+@dataclass
 class PowerDnsCredentials:
     api_key: str
     database: OSSytemCreds
@@ -329,6 +334,30 @@ class GaleraSecret(Secret):
             exporter=self._generate_credentials("exporter", 8),
             audit=self._generate_credentials("audit", 8),
         )
+
+
+class RedisSecret(Secret):
+    secret_name = "generated-redis-password"
+    secret_class = RedisCredentials
+
+    def create(self) -> RedisCredentials:
+        return RedisCredentials(password=generate_password(length=32))
+
+    def decode(self, data):
+        params = {}
+        for kind, creds in data.items():
+            decoded = base64.b64decode(creds)
+            params[kind] = decoded
+
+        return self.secret_class(**params)
+
+    def save(self, secret) -> None:
+        data = asdict(secret)
+
+        for key in data.keys():
+            data[key] = base64.b64encode(data[key].encode("ascii")).decode()
+
+        kube.save_secret_data(self.namespace, self.secret_name, data)
 
 
 class PowerDNSSecret(Secret):
