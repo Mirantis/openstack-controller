@@ -121,7 +121,7 @@ spec:
           shared: {{ network.get('shared', true) }}
           subnets:
             {%- set bm_subnet = network.subnets.baremetal_subnet %}
-            cleaning-subnet:
+            baremetal:
               name: "{{ network.get('name', 'baremetal') }}-subnet"
               ip_version: 4
               range: {{ bm_subnet.range }}
@@ -140,7 +140,7 @@ spec:
           oslo_messaging_notifications:
             topics: {{ notification_topics|join(',') }}
           conductor:
-            automated_clean: false
+            automated_clean: true
             default_deploy_interface: iscsi
             enabled_hardware_types: ipmi
             enabled_boot_interfaces: pxe
