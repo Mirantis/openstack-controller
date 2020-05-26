@@ -165,6 +165,7 @@ services:
               project_network_cidr: 10.100.0.0/24
               project_network_v6_cidr: 2003::/120
               project_network_v6_mask_bits: 124
+            network-feature-enabled:
               #TODO(ibumarskov): feature not implemented https://bugs.launchpad.net/juniperopenstack/+bug/1604568
               ipv6_subnet_attributes: false
             volume-feature-enabled:
