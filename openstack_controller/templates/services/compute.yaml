@@ -139,6 +139,11 @@ spec:
           {{ image }}: {{ images[image] }}
         {%- endif %}
 {%- endfor %}
+      labels:
+        agent:
+          compute_ironic:
+            node_selector_key: openstack-control-plane
+            node_selector_value: enabled
       pod:
         # NOTE(vsaienko): don't use host networking to be able to
         # update pods with surge (when node hostport is used)
