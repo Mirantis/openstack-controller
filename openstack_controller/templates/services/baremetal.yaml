@@ -141,14 +141,17 @@ spec:
             topics: {{ notification_topics|join(',') }}
           conductor:
             automated_clean: true
-            default_deploy_interface: iscsi
+            default_deploy_interface: direct
             enabled_hardware_types: ipmi
             enabled_boot_interfaces: pxe
             enabled_management_interfaces: ipmitool
             enabled_power_interfaces: ipmitool
             enabled_network_interfaces: flat,neutron
+            enabled_deploy_interfaces: direct
           pxe:
             pxe_append_params: nofb nomodeset vga=normal ipa-insecure=1 ipa-debug=1
+          agent:
+            image_download_source: http
           deploy:
             erase_devices_priority: 0
             erase_devices_metadata_priority: 1
