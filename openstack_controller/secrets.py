@@ -547,6 +547,15 @@ class TungstenFabricSecret(SecretCopy):
         super().__init__(namespace)
 
 
+class StackLightSecret(SecretCopy):
+    secret_name = constants.OPENSTACK_STACKLIGHT_SECRET
+
+    def __init__(
+        self, namespace=constants.OPENSTACK_STACKLIGHT_SHARED_NAMESPACE
+    ):
+        super().__init__(namespace)
+
+
 class KeystoneAdminSecret(SecretCopy):
     secret_name = constants.KEYSTONE_ADMIN_SECRET
 
