@@ -364,6 +364,47 @@ services:
           replicas:
             api: 3
             conductor: 3
+  alarming:
+    aodh:
+      values:
+        pod:
+          replicas:
+            api: 3
+            evaluator: 3
+            listener: 3
+            notifier: 3
+        conf:
+          aodh:
+            database:
+              connection_recycle_time: 300
+              max_overflow: 30
+              max_pool_size: 10
+  metric:
+    gnocchi:
+      values:
+        pod:
+          replicas:
+            api: 3
+        conf:
+          gnocchi:
+            database:
+              connection_recycle_time: 300
+              max_overflow: 30
+              max_pool_size: 10
+  event:
+    panko:
+      values:
+        pod:
+          replicas:
+            api: 3
+  metering:
+    ceilometer:
+      values:
+        pod:
+          replicas:
+            central: 3
+            collector: 3
+            notification: 3
 timeouts:
   applicaion_readiness:
     nova:

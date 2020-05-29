@@ -183,6 +183,36 @@ spec:
                 password: {{ credentials['baremetal'].notifications.user.password }}
             path: /openstack
           {%- endif %}
+          {%- if 'alarming' in services %}
+          {%- do enabled_vhosts.append('aodh') %}
+          alarming_service:
+            auth:
+              alarming:
+                username: {{ credentials['alarming'].messaging.user.username }}
+                password: {{ credentials['alarming'].messaging.user.password }}
+            path: /aodh
+          alarming_service_notifications:
+            auth:
+              alarming:
+                username: {{ credentials['alarming'].notifications.user.username }}
+                password: {{ credentials['alarming'].notifications.user.password }}
+            path: /openstack
+          {%- endif %}
+          {%- if 'metering' in services %}
+          {%- do enabled_vhosts.append('ceilometer') %}
+          metering_service:
+            auth:
+              metering:
+                username: {{ credentials['metering'].messaging.user.username }}
+                password: {{ credentials['metering'].messaging.user.password }}
+            path: /ceilometer
+          metering_service_notifications:
+            auth:
+              metering:
+                username: {{ credentials['metering'].notifications.user.username }}
+                password: {{ credentials['metering'].notifications.user.password }}
+            path: /openstack
+          {%- endif %}
         aux_conf:
           policies:
   {%- if 'orchestration' in services %}

@@ -1,0 +1,12 @@
+        event_pipeline:
+          sinks:
+            - name: event_sink
+              publishers:
+                - gnocchi://
+              transformers: null
+          sources:
+            - events:
+                - '*'
+              name: event_source
+              sinks:
+                - event_sink

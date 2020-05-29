@@ -408,6 +408,10 @@ spec:
             catalog_info: volumev3:cinderv3:internalURL
           neutron:
             metadata_proxy_shared_secret: {{ metadata_secret }}
+ {%- if 'metering' in services %}
+          notifications:
+            notify_on_state_change: vm_and_task_state
+{%- endif %}
           libvirt:
             cpu_mode: custom
             cpu_model: kvm64

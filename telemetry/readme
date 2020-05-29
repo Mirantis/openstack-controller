@@ -1,0 +1,26 @@
+Create a simple alarm:
+
+aodh alarm create \
+    --name test_cpu_aggregation \
+    --type gnocchi_aggregation_by_resources_threshold \
+    --metric cpu --threshold 3000000000 \
+    --comparison-operator gt \
+    --aggregation-method rate:mean \
+    --granularity 300 \
+    --evaluation-periods 1 \
+    --alarm-action 'log://alarm' \
+    --resource-type instance \
+    --repeat-actions True \
+    --query '{"=": {"server_group": "myapp"}}'
+
+Show metric:
+
+gnocchi aggregates '(* (/ (aggregate mean (metric cpu rate:mean)) 300000000000.0) 100)' server_group=9154e0ba-1594-47b4-9980-8ddf0caabbe5 --resource-type instance
+or
+gnocchi aggregates '(* (/ (aggregate mean (metric cpu rate:mean)) 300000000000.0) 100)' --resource-type instance id=resource_uuid
+or
+gnocchi aggregates '(aggregate mean (metric cpu rate:mean))' server_group=9154e0ba-1594-47b4-9980-8ddf0caabbe5 --resource-type instance
+
+Create autoscalable stack:
+
+openstack stack create  -t template.yaml -e environment.yaml example-stack-name
