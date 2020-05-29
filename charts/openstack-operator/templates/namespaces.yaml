@@ -17,6 +17,11 @@ kind: Namespace
 metadata:
   name: {{ .Values.tf.sharedNamespace }}
 {{ end }}
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: {{ .Values.osdpl.settings.raw.OSCTL_REDIS_NAMESPACE }}
 {{ if .Values.kopf.enabled }}
 # NOTE(vsaienko): create shared namespace to make sure roles and
 # rolebindings can be created succesfully. The kopfpeerings and
