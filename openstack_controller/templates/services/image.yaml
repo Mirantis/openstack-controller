@@ -126,6 +126,16 @@ spec:
               properties:
                 os_distro: fedora
               source_url: {{ spec.artifacts.binary_base_url }}/openstack/bin/Fedora/27/
+            ubuntu:
+              container_format: bare
+              image_file: bionic-server-cloudimg-amd64.img
+              image_type: qcow2
+              min_disk: 1
+              name: Ubuntu-18.04
+              private: false
+              properties:
+                os_distro: ubuntu
+              source_url: {{ spec.artifacts.binary_base_url }}/openstack/bin/ubuntu/18.04/
       conf:
         glance:
           cors:
