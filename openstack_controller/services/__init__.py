@@ -1009,7 +1009,10 @@ class Tempest(Service):
         secret = secrets.OpenStackServiceSecret(self.namespace, self.service)
         credentials = secret.ensure()
         helmbundles_body = {}
-        for s in set(self.mspec["features"]["services"]) - {"tempest"}:
+        for s in set(self.mspec["features"]["services"]) - {
+            "tempest",
+            "redis-telemetry",
+        }:
             template_args = Service.registry[s](
                 self.body, self.logger
             ).template_args()
