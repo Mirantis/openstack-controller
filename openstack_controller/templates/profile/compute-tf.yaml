@@ -140,6 +140,10 @@ services:
           script: |
             tempest run --config-file /etc/tempest/tempest.conf -w 4 --smoke --blacklist-file  /etc/tempest/test-blacklist
           tempest:
+            tungsten_plugin:
+              service_name: tungstenfabric
+              catalog_type: sdn
+              endpoint_type: internal
             heat_plugin:
               image_ref: Fedora-27-1.6
               instance_type: m1.tiny_test
