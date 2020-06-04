@@ -137,6 +137,9 @@ services:
             - (?:heat_tempest_plugin.tests.functional.test_create_update_neutron_subnet.UpdateSubnetTest.test_update_gateway_ip)
             - (?:heat_tempest_plugin.tests.functional.test_create_update_neutron_subnet.UpdateSubnetTest.test_update_gateway_ip_to_empty)
             - (?:heat_tempest_plugin.tests.functional.test_create_update_neutron_subnet.UpdateSubnetTest.test_update_to_no_gateway_ip)
+            # Skip SoftwareConfigIntegrationTest because it requires a custom image
+            # https://github.com/openstack/heat/blob/stable/train/heat_integrationtests/prepare_test_env.sh
+            - (?:heat_tempest_plugin.tests.scenario.test_server_software_config.SoftwareConfigIntegrationTest)
           script: |
             tempest run --config-file /etc/tempest/tempest.conf -w 4 --smoke --blacklist-file  /etc/tempest/test-blacklist
           tempest:
