@@ -44,7 +44,7 @@ class ServiceAvailable(base_section.BaseSection):
 
     @property
     def contrail(self):
-        return self.is_service_enabled("opencontrail")
+        return self.is_service_enabled("tungstenfabric-operator")
 
     @property
     def designate(self):
