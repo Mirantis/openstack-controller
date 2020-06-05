@@ -518,6 +518,16 @@ spec:
                                 gateway:
                                   type: string
                                   description: the gateway for baremetal network
+                    agent_images:
+                      type: object
+                      properties:
+                        base_url:
+                          description: base URL for ironic agent images
+                          type: string
+                        initramfs:
+                          type: string
+                        kernel:
+                          type: string
                 octavia:
                   type: object
                   properties:

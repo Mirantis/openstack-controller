@@ -105,12 +105,13 @@ spec:
         object_store:
           enabled: false
         image:
-          source_base: {{ spec.artifacts.binary_base_url }}/openstack/bin/ironic/tinyipa
+          {%- set agent_images = spec.features.ironic.get('agent_images', {}) %}
+          source_base: {{ agent_images.get('base_url', spec.artifacts.binary_base_url ~ '/openstack/bin/ironic/tinyipa') }}
           structured:
             ironic-agent.initramfs:
-              source: tinyipa-stable-{{ spec.openstack_version }}.gz
+              source:  {{ agent_images.get('initramfs', 'tinyipa-stable-' ~ spec.openstack_version ~ '.gz') }}
             ironic-agent.kernel:
-              source: tinyipa-stable-{{ spec.openstack_version }}.vmlinuz
+              source:  {{ agent_images.get('kernel', 'tinyipa-stable-' ~ spec.openstack_version ~ '.vmlinuz') }}
       network:
         cleaning: &bm_network
           name: {{ network.get('name', 'baremetal') }}
