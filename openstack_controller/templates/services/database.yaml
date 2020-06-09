@@ -8,6 +8,17 @@ spec:
   - name: openstack-mariadb
     chart: {{spec.common.infra.repo}}/mariadb
     values:
+      conf:
+        database_conf:
+          mysqld:
+            wsrep_provider_options:
+              # Controls parallel applying of slave actions.
+              # When enabled allows full range of parallelization as determined by certification algorithm.
+              # When disabled limits parallel applying window to not exceed that seen on master.
+              # In other words, the action starts applying no sooner than all actions it has seen on the master are committed.
+              # The default value is YES, and it causes the issue described - here https://jira.mariadb.org/browse/MDEV-22766
+              # Once the issue is fixed, this can be removed. Option can be set only starting galera 3.25.
+              cert.optimistic_pa: "NO"
       images:
         tags:
 {%- for image in [
