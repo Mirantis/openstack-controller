@@ -56,7 +56,9 @@ class Redis(Service):
             images=images,
             **template_args,
         )
-
+        data = layers.merge_service_layer(
+            self.service, self.mspec, self.kind.lower(), data,
+        )
         data.update(self.resource_def)
 
         return data
