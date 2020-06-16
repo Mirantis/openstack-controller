@@ -26,6 +26,7 @@ features:
     - placement
 {%- endif %}
     - coordination
+    - key-manager
   glance:
     backend: ceph
   cinder:

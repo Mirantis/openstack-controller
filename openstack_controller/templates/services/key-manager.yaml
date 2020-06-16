@@ -103,7 +103,16 @@ spec:
             sql_retry_interval: 1
 {%- if spec.get('features', {}).get('barbican', {}).get('backends', {}).get('vault', {}).get('enabled', False) %}
           secretstore:
-            enabled_secretstore_plugins: vault_plugin
+            enable_multiple_secret_stores: True
+            stores_lookup_suffix: software, vault
+          secretstore:software:
+            secret_store_plugin: store_crypto
+            crypto_plugin: simple_crypto
+          secretstore:vault:
+            secret_store_plugin: vault_plugin
+            global_default: True
+          simple_crypto_plugin:
+            kek: {{ credentials.kek }}
           vault_plugin:
             approle_role_id: {{ spec.features.barbican.backends.vault.approle_role_id }}
             approle_secret_id: {{ spec.features.barbican.backends.vault.approle_secret_id }}
@@ -112,6 +121,13 @@ spec:
     {%- if spec.features.barbican.backends.vault.ssl_ca_crt_file is defined %}
             ssl_ca_crt_file: {{ spec.features.barbican.backends.vault.ssl_ca_crt_file }}
     {%- endif %}
+{%- else %}
+          secretstore:
+            enabled_secretstore_plugins: store_crypto
+          crypto:
+            enabled_crypto_plugins: simple_crypto
+          simple_crypto_plugin:
+            kek: {{ credentials.kek }}
 {%- endif %}
         logging:
           logger_barbican:
