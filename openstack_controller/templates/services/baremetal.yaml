@@ -158,6 +158,7 @@ spec:
             erase_devices_metadata_priority: 1
             shred_final_overwrite_with_zeros: false
           neutron:
+            port_setup_delay: 30
             cleaning_network: {{ network.get('name', 'baremetal') }}
             provisioning_network: {{ network.get('name', 'baremetal') }}
         logging:
