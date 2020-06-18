@@ -146,6 +146,10 @@ spec:
             enabled_power_interfaces: ipmitool
             enabled_network_interfaces: flat,neutron
             enabled_deploy_interfaces: direct
+            # NOTE(vsaienko): the cinder + ceph can't advertise ISCSI targets,
+            # while ironic BFV supports only ISCSI or FiberChannel
+            enabled_storage_interfaces: noop
+            default_storage_interface: noop
           oslo_messaging_notifications:
             topics: {{ notification_topics|join(',') }}
           conductor:
