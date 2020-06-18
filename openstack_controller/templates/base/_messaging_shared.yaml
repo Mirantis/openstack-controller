@@ -1,5 +1,8 @@
         oslo_messaging:
           auth:
+            admin:
+              username: {{ admin_creds.messaging.username }}
+              password: {{ admin_creds.messaging.password }}
             user:
               username: {{ admin_creds.messaging.username }}
               password: {{ admin_creds.messaging.password }}
