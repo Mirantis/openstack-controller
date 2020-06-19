@@ -238,7 +238,8 @@ def merge_spec(spec, logger):
 
     base = yaml.safe_load(
         ENV.get_template(f"profile/{profile}.yaml").render(
-            openstack_version=os_release
+            openstack_version=os_release,
+            services=spec.get("features", {}).get("services", []),
         )
     )
     profile_binary_base_url = base["artifacts"]["binary_base_url"]
