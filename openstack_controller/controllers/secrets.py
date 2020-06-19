@@ -1,7 +1,10 @@
 import base64
 import configparser
+import json
 import kopf
+import pykube
 from mcp_k8s_lib import ceph_api, utils
+from urllib.parse import urlsplit
 
 from openstack_controller import constants
 from openstack_controller import kube
@@ -111,3 +114,54 @@ async def handle_keystone_secret(
 
     ksadmin_secret = secrets.KeystoneAdminSecret(meta["namespace"])
     ksadmin_secret.save(secret_data)
+
+
+@kopf.on.create(
+    "",
+    "v1",
+    "secrets",
+    labels={"application": "rabbitmq", "component": "server"},
+)
+async def handle_rabbitmq_secret(
+    body, meta, name, status, logger, diff, **kwargs,
+):
+    if name != constants.RABBITMQ_USERS_CREDENTIALS_SECRET:
+        return
+
+    LOG.debug(f"Handling secret create {name}")
+
+    credentials = {
+        key: base64.b64encode(value.encode()).decode()
+        for key, value in json.loads(
+            base64.b64decode(body["data"]["RABBITMQ_USERS"]).decode()
+        )["stacklight_service_notifications"]["auth"]["stacklight"].items()
+    }
+
+    kube.wait_for_secret(meta["namespace"], constants.KEYSTONE_CONFIG_SECRET)
+    keystone_config_secret = kube.find(
+        pykube.Secret, constants.KEYSTONE_CONFIG_SECRET, meta["namespace"]
+    )
+    keystone_conf = base64.b64decode(
+        keystone_config_secret.obj["data"]["keystone.conf"]
+    ).decode()
+    config = configparser.ConfigParser()
+    config.read_string(keystone_conf)
+
+    transport_url = urlsplit(
+        config["oslo_messaging_notifications"]["transport_url"]
+    )
+    location_path = {
+        key: base64.b64encode(value.encode()).decode()
+        for key, value in {
+            "hosts": json.dumps(
+                [
+                    host.split("@")[1]
+                    for host in transport_url.netloc.split(",")
+                ]
+            ),
+            "vhost": transport_url.path,
+        }.items()
+    }
+
+    sls = secrets.StackLightSecret()
+    sls.save({**credentials, **location_path})

@@ -17,6 +17,13 @@ kind: Namespace
 metadata:
   name: {{ .Values.tf.sharedNamespace }}
 {{ end }}
+{{ if .Values.stacklight.createSharedNamespace }}
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: {{ .Values.stacklight.sharedNamespace }}
+{{ end }}
 ---
 apiVersion: v1
 kind: Namespace

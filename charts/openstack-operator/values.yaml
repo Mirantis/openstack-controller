@@ -32,6 +32,10 @@ tf:
   createSharedNamespace: true
   sharedNamespace: openstack-tf-shared
 
+stacklight:
+  createSharedNamespace: true
+  sharedNamespace: openstack-lma-shared
+
 helmbundle:
   # unless we deploy it via kaas management cluster
   enabled: false
