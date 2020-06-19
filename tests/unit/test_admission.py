@@ -152,12 +152,7 @@ class TestOpenStackValidator(unittest.TestCase):
         with self.assertRaises(exception.OsDplValidationFailed):
             self.validate(self.req)
 
-    def upgrade_to_master(self):
-        self.req["object"] = {"spec": {"openstack_version": "master"}}
-        self.req["oldObject"] = {"spec": {"openstack_version": "train"}}
-        self.assertIsNone(self.validate(self.req))
-
-    def upgrade_with_extra_changes(self):
+    def test_upgrade_with_extra_changes(self):
         self.req["object"] = {"spec": {"openstack_version": "train"}}
         self.req["oldObject"] = {
             "spec": {"openstack_version": "stein", "spam": "ham"}
@@ -165,21 +160,17 @@ class TestOpenStackValidator(unittest.TestCase):
         with self.assertRaises(exception.OsDplValidationFailed):
             self.validate(self.req)
 
-    def test_openstackversion_latest(self):
-        self.assertEqual(
-            osv.OpenStackVersion.latest,
-            osv.OpenStackVersion.ussuri,
-            "Latest version is not Ussuri",
-        )
+    def test_upgrade_to_master(self):
+        self.req["object"] = {"spec": {"openstack_version": "master"}}
+        self.req["oldObject"] = {"spec": {"openstack_version": "ussuri"}}
+        with self.assertRaises(exception.OsDplValidationFailed):
+            self.validate(self.req)
 
-    def test_openstackversion_master(self):
-        for v in osv.OpenStackVersion:
-            if v != osv.OpenStackVersion.master:
-                self.assertLess(
-                    v,
-                    osv.OpenStackVersion.master,
-                    "openstack/master is not the largest possible version",
-                )
+    def test_create_master(self):
+        self.req = {"operation": "CREATE"}
+        self.req["object"] = {"spec": {"openstack_version": "master"}}
+        with self.assertRaises(exception.OsDplValidationFailed):
+            self.validate(self.req)
 
 
 class TestNeutronValidator(unittest.TestCase):
