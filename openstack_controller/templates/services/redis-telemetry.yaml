@@ -10,9 +10,13 @@ spec:
                 values:
                 - redis
           topologyKey: "kubernetes.io/hostname"
-#TODO: research parameters for redis optimization
-#    customConfig:
-#    - save 1 2
+    customConfig:
+      - "save 600 1"
+      - "save 300 10"
+      - "save 60 1000"
+      - "save 10 10000"
+#increase hard and soft memory limits for slave replication
+      - "client-output-buffer-limit slave 512mb 512mb 0"
 {%- if "redis-failover" in images %}
     image: {{ images["redis-failover"] }}
 {%- endif %}
@@ -40,10 +44,10 @@ spec:
                 values:
                 - sentinel
           topologyKey: "kubernetes.io/hostname"
-#TODO: research timings for optimal failover delays
-#    customConfig:
-#    - down-after-milliseconds 2000
-#    - failover-timeout 4000
+    customConfig:
+      - "down-after-milliseconds 2000"
+      - "failover-timeout 10000"
+      - "parallel-syncs 1"
 {%- if "redis-failover" in images %}
     image: {{ images["redis-failover"] }}
 {%- endif %}
