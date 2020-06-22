@@ -134,6 +134,45 @@ spec:
                 - neutron
                 - nova
               properties:
+                database:
+                  type: object
+                  properties:
+                    backup:
+                      type: object
+                      required:
+                        - enabled
+                        - schedule_time
+                        - backup_type
+                      properties:
+                        enabled:
+                          description: >
+                            Indicates whether physical backup cron job is enabled
+                          type: boolean
+                        schedule_time:
+                          description: >
+                            Unix style cron expression indicates how often to run backup
+                            cron job, e.g '0 0 * * *' - every day at 00:00.
+                          type: string
+                        backup_type:
+                          description: >
+                            Type of backup. Possible values: incremental or full.
+                            incremental: If newest full backup is older then full_backup_cycle seconds,
+                            perform full backup, else perform incremental backup to the newest full.
+                            full: perform always only full backup.
+                          type: string
+                        backups_to_keep:
+                          description: >
+                            How many full backups to keep.
+                          type: integer
+                        full_backup_cycle:
+                          description: >
+                            Number of seconds that defines a period between 2 full backups.
+                            During this period incremental backups will be performed. The parameter
+                            is taken into account only if backup_type is set to 'incremental', otherwise
+                            it is ignored. For example with full_backup_cycle set to 604800 seconds full
+                            backup will be taken every week and if cron is set to 0 0 * * *, incremental backup
+                            will be performed on daily basis.
+                          type: integer
                 telemetry:
                   type: object
                   required:
