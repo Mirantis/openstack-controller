@@ -1,3 +1,4 @@
+{%- set ironic_enabled = 'baremetal' in services %}
 artifacts:
   images_base_url: docker-kaas-local.artifactory.mirantis.com
   binary_base_url: https://binary.mirantis.com
@@ -92,8 +93,14 @@ services:
             compute:
               image_ref: Cirros-5.1
               image_ref_alt: Cirros-5.1
+            {%- if ironic_enabled %}
+              # TODO(vsaienko): change name to more generic
+              flavor_ref:  baremetal-ram1024-cpus2-disk10
+              flavor_ref_alt: baremetal-ram1024-cpus2-disk10
+            {%- else %}
               flavor_ref:  m1.extra_tiny_test
               flavor_ref_alt: m1.tiny_test
+            {%- endif %}
           blacklist:
             - (?:tempest\.fake\.test)
             # Skip neutron tempest plugin tests that are already contains in tempest
@@ -129,6 +136,10 @@ services:
           script: |
             tempest run --config-file /etc/tempest/tempest.conf -w 4 --smoke --blacklist-file  /etc/tempest/test-blacklist
           tempest:
+          {%- if ironic_enabled %}
+            auth:
+              create_isolated_networks: false
+          {%- endif %}
             heat_plugin:
               image_ref: Fedora-27-1.6
               instance_type: m1.tiny_test
@@ -140,12 +151,32 @@ services:
               build_timeout: 600
             #TODO(mshalamov): Will be removed during process of completing PRODX-1192
             compute:
+            {%- if ironic_enabled %}
+              fixed_network_name: ironic-provisioning
+            {%- endif %}
               min_compute_nodes: 2
               build_timeout: 600
             #TODO(mshalamov): Will be removed during process of completing PRODX-1192
             compute-feature-enabled:
+            {%- if ironic_enabled %}
+              attach_encrypted_volume: false
+              block_migration_for_live_migration: false
+              change_password: false
+              console_output: false
+              interface_attach: false
+              live_migrate_back_and_forth: false
+              live_migration: false
+              pause: false
+              personality: false
+              rescue: false
+              resize: false
+              shelve: false
+              snapshot: false
+              suspend: false
+            {%- else %}
               cold_migration: true
               resize: true
+            {%- endif %}
             image:
               build_timeout: 600
             load_balancer:
@@ -154,7 +185,11 @@ services:
               image_ssh_password: gocubsgo
               image_ssh_user: cirros
             network:
+            {%- if ironic_enabled %}
+              shared_physical_network: true
+            {%- else %}
               shared_physical_network: false
+            {%- endif %}
               floating_network_name: public
             volume-feature-enabled:
               api_v1: false
