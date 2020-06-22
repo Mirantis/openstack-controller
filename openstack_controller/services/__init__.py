@@ -1,13 +1,13 @@
 import asyncio
 import base64
 import kopf
-from mcp_k8s_lib import utils
 
 from openstack_controller import constants
 from openstack_controller import layers
 from openstack_controller import kube
 from openstack_controller import secrets
 from openstack_controller import settings
+from openstack_controller import utils
 from .base import Service, OpenStackService, OpenStackServiceWithCeph
 
 

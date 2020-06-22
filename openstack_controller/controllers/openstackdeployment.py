@@ -11,8 +11,7 @@ from openstack_controller import secrets
 from openstack_controller import services
 from openstack_controller import settings  # noqa
 from openstack_controller import version
-
-from mcp_k8s_lib import utils
+from openstack_controller import utils
 
 
 LOG = utils.get_logger(__name__)

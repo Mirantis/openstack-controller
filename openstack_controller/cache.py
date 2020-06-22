@@ -4,8 +4,7 @@ import pykube
 from . import constants
 from . import kube
 from . import layers
-
-from mcp_k8s_lib import utils
+from . import utils
 
 
 LOG = utils.get_logger(__name__)

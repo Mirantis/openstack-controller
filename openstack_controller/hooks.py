@@ -4,8 +4,8 @@ import kopf
 import pykube
 
 from openstack_controller import kube
+from openstack_controller import utils
 
-from mcp_k8s_lib import utils
 
 LOG = utils.get_logger(__name__)
 

@@ -11,9 +11,9 @@ import jinja2
 import kopf
 import yaml
 
-from mcp_k8s_lib import utils
 from openstack_controller import constants
 from openstack_controller.filters.tempest import generate_tempest_config
+from openstack_controller import utils
 
 LOG = utils.get_logger(__name__)
 

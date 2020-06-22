@@ -3,13 +3,14 @@ import configparser
 import json
 import kopf
 import pykube
-from mcp_k8s_lib import ceph_api, utils
 from urllib.parse import urlsplit
 
+from openstack_controller import ceph_api
 from openstack_controller import constants
 from openstack_controller import kube
 from openstack_controller import secrets
 from openstack_controller import settings  # noqa
+from openstack_controller import utils
 
 LOG = utils.get_logger(__name__)
 

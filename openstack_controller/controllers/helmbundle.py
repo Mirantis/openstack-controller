@@ -1,11 +1,11 @@
 import copy
 
 import kopf
-from mcp_k8s_lib import utils
 import pykube
 
 from openstack_controller import kube
 from openstack_controller import settings  # noqa
+from openstack_controller import utils
 
 LOG = utils.get_logger(__name__)
 
