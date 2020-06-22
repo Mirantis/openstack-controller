@@ -129,7 +129,7 @@ async def deployments(name, namespace, meta, status, new, event, **kwargs):
         component,
         namespace,
         res_health,
-        status["observedGeneration"],
+        status.get("observedGeneration", 0),
     )
 
 
@@ -166,7 +166,7 @@ async def statefulsets(name, namespace, meta, status, event, **kwargs):
         component,
         namespace,
         res_health,
-        status["observedGeneration"],
+        status.get("observedGeneration", 0),
     )
 
 
@@ -225,7 +225,7 @@ async def daemonsets(name, namespace, meta, status, event, **kwargs):
         component,
         namespace,
         res_health,
-        status["observedGeneration"],
+        status.get("observedGeneration", 0),
         {"OK_desiredNumberScheduled": st.desiredNumberScheduled}
         if res_health == constants.OK
         else {},
