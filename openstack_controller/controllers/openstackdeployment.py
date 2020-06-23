@@ -220,3 +220,15 @@ async def delete(name, logger, **kwargs):
     # TODO(pas-ha) wait for children to be deleted
     # TODO(pas-ha) remove secrets and so on?
     LOG.info(f"deleting {name}")
+
+
+@kopf.on.field(*kube.OpenStackDeployment.kopf_on_args, field="status.children")
+async def status_children(body, meta, name, namespace, status, **kwargs):
+    LOG.info(f"Handling osdpl status event.")
+    status_patch = {
+        "deployed": all(
+            [c for c in status.get("children", {}).values() if c == True]
+        )
+    }
+    update_status(body, status_patch)
+    LOG.debug(f"Updated status for osdpl {name} to {status}")
