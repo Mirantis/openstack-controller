@@ -128,6 +128,9 @@ services:
             # Kubernetes but the modes is supported from 1.16 version of Kubernetes. The test will be removed from the list once Kubernetes server
             # will be at or later than version v1.16. The bug is described more comprehensively in PRODX-2330
             - (?:octavia_tempest_plugin.tests.scenario.v2.test_ipv6_traffic_ops.IPv6TrafficOperationsScenarioTest)
+            # These tests require four pre-created compute availability zones in a cluster
+            - (?:octavia_tempest_plugin.tests.api.v2.test_availability_zone)
+            - (?:octavia_tempest_plugin.tests.api.v2.test_availability_zone_profile)
             # Skip SoftwareConfigIntegrationTest because it requires a custom image
             # https://github.com/openstack/heat/blob/stable/train/heat_integrationtests/prepare_test_env.sh
             - (?:heat_tempest_plugin.tests.scenario.test_server_software_config.SoftwareConfigIntegrationTest)
