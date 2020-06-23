@@ -412,6 +412,10 @@ spec:
           notifications:
             notify_on_state_change: vm_and_task_state
 {%- endif %}
+{%- if neutron_backend == 'tungstenfabric' %}
+          compute:
+            live_migration_wait_for_vif_plug: false
+{%- endif %}
           libvirt:
             cpu_mode: custom
             cpu_model: kvm64
