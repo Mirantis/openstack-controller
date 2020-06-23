@@ -12,7 +12,6 @@ RUN apt-get update; \
         git; \
     python3.7 /tmp/get-pip.py
 ADD . /opt/operator
-RUN pip wheel --wheel-dir /opt/wheels /opt/operator/data/*
 RUN pip wheel --wheel-dir /opt/wheels --find-links /opt/wheels /opt/operator
 
 FROM $FROM
