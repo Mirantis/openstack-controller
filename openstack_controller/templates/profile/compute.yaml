@@ -133,6 +133,10 @@ services:
             - (?:heat_tempest_plugin.tests.scenario.test_server_software_config.SoftwareConfigIntegrationTest)
             # Skip BasicResourcesTest until PRODX-5495 will be resolved
             - (?:heat_tempest_plugin.tests.scenario.test_base_resources.BasicResourcesTest.test_base_resources_integration)
+          {%- if ironic_enabled %}
+            # Skip schedule to all nodes, as in case of concurrent tests, this will highly likely to fail
+            - (?:tempest.scenario.test_server_multinode.TestServerMultinode.test_schedule_to_all_nodes)
+          {%- endif %}
           script: |
             tempest run --config-file /etc/tempest/tempest.conf -w 4 --smoke --blacklist-file  /etc/tempest/test-blacklist
           tempest:
@@ -196,6 +200,9 @@ services:
               api_v2: false
               api_v3: true
               cluster_active_active: true
+            {%- if ironic_enabled %}
+              boot_from_volume: false
+            {%- endif %}
           tempest_logging:
               handler_file:
                 args: ('/var/lib/tempest/data/tempest.log',)
