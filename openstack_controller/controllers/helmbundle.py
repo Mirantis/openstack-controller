@@ -1,5 +1,3 @@
-import copy
-
 import kopf
 from mcp_k8s_lib import utils
 import pykube
@@ -31,13 +29,7 @@ def update_status(owner, name, namespace, status):
         else {name: "Unknown"}
     )
     status_patch = {"children": child_status}
-    new_children_status = copy.deepcopy(
-        osdpl.obj["status"].get("children", {})
-    )
-    new_children_status.update(child_status)
-    status_patch["deployed"] = all(
-        s is True for c, s in new_children_status.items()
-    )
+    LOG.debug(f"Updating owner {owner} status {status_patch}")
     osdpl.patch({"status": status_patch})
     LOG.info(f"Updated {name} status in {owner}")
 
