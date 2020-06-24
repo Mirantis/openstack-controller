@@ -1,5 +1,4 @@
 import kopf
-from mcp_k8s_lib import utils as mcp_utils
 
 from openstack_controller import constants
 from openstack_controller import health
@@ -9,7 +8,7 @@ from openstack_controller import settings  # noqa
 from openstack_controller import utils
 
 
-LOG = mcp_utils.get_logger(__name__)
+LOG = utils.get_logger(__name__)
 
 # DAEMONSET_HOOKS format
 # {(transition state from, transition state to):

@@ -5,11 +5,11 @@ from typing import List
 import functools
 
 import kopf
-from mcp_k8s_lib import utils
 import pykube
 from typing import Dict
 
 from . import settings
+from . import utils
 
 LOG = utils.get_logger(__name__)
 

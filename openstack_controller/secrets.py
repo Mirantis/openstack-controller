@@ -6,7 +6,6 @@ import json
 from os import urandom
 from typing import Dict, List, Optional
 
-from mcp_k8s_lib import utils
 import pykube
 
 from cryptography import x509
@@ -22,6 +21,7 @@ from cryptography.hazmat.backends import (
 
 from openstack_controller import constants
 from openstack_controller import kube
+from openstack_controller import utils
 
 LOG = utils.get_logger(__name__)
 

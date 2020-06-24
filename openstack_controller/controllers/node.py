@@ -1,10 +1,10 @@
 import datetime
 
 import kopf
-from mcp_k8s_lib import utils
 
 from openstack_controller import kube
 from openstack_controller import settings
+from openstack_controller import utils
 
 LOG = utils.get_logger(__name__)
 
