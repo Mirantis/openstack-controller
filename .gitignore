@@ -109,9 +109,6 @@ venv.bak/
 # mypy
 .mypy_cache/
 
-#local libraries
-data/
-
 #vim
 .swo
 .swp
