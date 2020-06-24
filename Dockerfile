@@ -18,6 +18,7 @@ FROM $FROM
 COPY --from=builder /tmp/get-pip.py /tmp/get-pip.py
 COPY --from=builder /opt/wheels /opt/wheels
 COPY --from=builder /opt/operator/uwsgi.ini /opt/operator/uwsgi.ini
+ADD kopf-session-timeout.path /tmp/kopf-session-timeout.path
 # NOTE(pas-ha) apt-get download + dpkg-deb -x is a dirty hack
 # to fetch distutils w/o pulling in most of python3.6
 # FIXME(pas-ha) strace/gdb is installed only temporary for now for debugging
@@ -28,13 +29,18 @@ RUN set -ex; \
         python3.7-dbg \
         libpython3.7 \
         gdb \
+        patch \
         strace \
         ca-certificates; \
     apt-get download python3-distutils; \
     dpkg-deb -x python3-distutils*.deb /; \
     rm -vf python3-distutils*.deb; \
     python3.7 /tmp/get-pip.py; \
-    pip install --no-index --no-cache --find-links /opt/wheels openstack-controller
+    pip install --no-index --no-cache --find-links /opt/wheels openstack-controller; \
+    cd /usr/local/lib/python3.7/dist-packages; \
+    patch -p1 < /tmp/kopf-session-timeout.path; \
+    cd -
+RUN rm -rvf /tmp/kopf-session-timeout.path
 RUN rm -rvf /opt/wheels; \
     apt-get -q clean; \
     rm -rvf /var/lib/apt/lists/*; \
