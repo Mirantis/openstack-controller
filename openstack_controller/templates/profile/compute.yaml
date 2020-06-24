@@ -180,6 +180,7 @@ services:
               shelve: false
               snapshot: false
               suspend: false
+              boot_from_volume: false
             {%- else %}
               cold_migration: true
               resize: true
@@ -203,9 +204,6 @@ services:
               api_v2: false
               api_v3: true
               cluster_active_active: true
-            {%- if ironic_enabled %}
-              boot_from_volume: false
-            {%- endif %}
           tempest_logging:
               handler_file:
                 args: ('/var/lib/tempest/data/tempest.log',)
