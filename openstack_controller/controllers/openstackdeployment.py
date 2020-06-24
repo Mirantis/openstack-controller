@@ -224,10 +224,11 @@ async def delete(name, logger, **kwargs):
 @kopf.on.field(*kube.OpenStackDeployment.kopf_on_args, field="status.children")
 async def status_children(body, meta, name, namespace, status, **kwargs):
     LOG.info(f"Handling osdpl status event.")
+    children = status.get("children", {})
     status_patch = {
-        "deployed": all(
-            [c for c in status.get("children", {}).values() if c == True]
-        )
+        "deployed": all([c for c in children.values() if c in [True, False]])
+        if len(children) != 0
+        else False
     }
     update_status(body, status_patch)
     LOG.debug(f"Updated status for osdpl {name} to {status}")
