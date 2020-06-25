@@ -466,6 +466,7 @@ spec:
           os_compute_api:os-attach-interfaces:delete: rule:system_admin_or_owner
           os_compute_api:os-attach-interfaces:list: rule:system_or_project_reader
           os_compute_api:os-attach-interfaces:show: rule:system_or_project_reader
+          os_compute_api:os-availability-zone:list: "@"
           os_compute_api:os-deferred-delete:force: rule:system_admin_or_owner
           os_compute_api:os-deferred-delete:restore: rule:system_admin_or_owner
           os_compute_api:os-hypervisors:list: rule:system_reader_api
