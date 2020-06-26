@@ -44,7 +44,12 @@ class ServiceAvailable(base_section.BaseSection):
 
     @property
     def contrail(self):
-        return self.is_service_enabled("tungstenfabric-operator")
+        try:
+            if self.spec["features"]["neutron"]["backend"] == "tungstenfabric":
+                return True
+        except:
+            return False
+        return False
 
     @property
     def designate(self):
