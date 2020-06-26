@@ -493,7 +493,25 @@ class Heat(OpenStackService):
                     "manifest": "job_ks_user_trustee",
                 },
                 "heat-trusts": {"images": ["ks_user"], "manifest": ""},
-            }
+                "heat-db-sync": {
+                    "images": ["heat_db_sync"],
+                    "manifest": "job_db_sync",
+                },
+            },
+            "Deployment": {
+                "heat-api": {
+                    "images": ["heat_api"],
+                    "manifest": "deployment_api",
+                },
+                "heat-cfn": {
+                    "images": ["heat_cfn"],
+                    "manifest": "deployment_cfn",
+                },
+                "heat-engine": {
+                    "images": ["heat_engine"],
+                    "manifest": "deployment_engine",
+                },
+            },
         },
         "rabbitmq": {
             "Job": {
@@ -504,6 +522,20 @@ class Heat(OpenStackService):
             }
         },
     }
+
+    @layers.kopf_exception
+    async def _upgrade(self, event, **kwargs):
+        upgrade_map = [
+            ("Job", "heat-db-sync"),
+            ("Deployment", "heat-api"),
+            ("Deployment", "heat-cfn"),
+            ("Deployment", "heat-engine"),
+        ]
+        for kind, obj_name in upgrade_map:
+            child_obj = self.get_child_object(kind, obj_name)
+            if kind == "Job":
+                await child_obj.purge()
+            await child_obj.enable(self.openstack_version, True)
 
 
 class Horizon(OpenStackService):

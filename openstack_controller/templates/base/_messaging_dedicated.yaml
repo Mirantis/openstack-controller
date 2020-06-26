@@ -14,7 +14,7 @@
             name: openstack-{{ service }}-rabbitmq-rabbitmq
           hosts:
             default: rabbitmq-{{ service }}
-          path: /{{ service }}
+          path: /{{ service }}{% if service == 'heat' %}_{{ spec.openstack_version }}{% endif %}
         prometheus_rabbitmq_exporter:
           hosts:
             default: rabbitmq-exporter-{{ service }}

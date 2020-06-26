@@ -3,6 +3,7 @@
 
 {%- set service = 'heat' %}
 {%- set components_with_dedicated_messaging = spec.get('features', {}).get('messaging', {}).get('components_with_dedicated_messaging', []) %}
+{%- set latest_openstack_versions = openstack_versions[openstack_versions.index(spec.openstack_version):] %}
 {%- set stacklight_enabled = spec.get('features', {}).get('stacklight', {}).get('enabled', False) %}
 {%- set notification_topics = ['notifications'] %}
 {%- do notification_topics.append('stacklight_notifications') if stacklight_enabled %}
@@ -37,38 +38,40 @@ spec:
               service_user:
                 username: {{ credentials.messaging.user.username }}
                 password: {{ credentials.messaging.user.password }}
-            path: /heat
+            path: /heat_{{ spec.openstack_version }}
         aux_conf:
           policies:
-          - vhost: heat
+  {%- for version in latest_openstack_versions %}
+          - vhost: heat_{{ version }}
             name: heat_engine_rpc_expire
             pattern: '^heat-engine-listener\.'
             definition:
               expires: 3600000
             priority: 1
-          - vhost: heat
+          - vhost: heat_{{ version }}
             name: heat_worker_rpc_expire
             pattern: '^engine_worker\.'
             definition:
               expires: 3600000
             priority: 1
-          - vhost: heat
+          - vhost: heat_{{ version }}
             name: results_expire
             pattern: '^results\.'
             definition:
               expires: 3600000
             priority: 1
-          - vhost: heat
+          - vhost: heat_{{ version }}
             name: tasks_expire
             pattern: '^tasks\.'
             definition:
               expires: 3600000
             priority: 1
-          - vhost: heat
+          - vhost: heat_{{ version }}
             name: default-policy
             pattern: '^(?!amq\.).*'
             definition:
               message-ttl: 120000
+  {%- endfor %}
   {%- if stacklight_enabled %}
         prometheus_exporter:
           rabbit_exporters: "overview,exchange,node"

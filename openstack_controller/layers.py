@@ -142,7 +142,16 @@ def render_service_template(
     tpl = ENV.get_template(f"services/{service}.yaml")
     LOG.debug(f"Using template {tpl.filename}")
 
-    text = tpl.render(body=body, meta=meta, spec=spec, **template_args)
+    # get supported openstack versions
+    openstack_versions = [v for v in constants.OpenStackVersion.__members__]
+
+    text = tpl.render(
+        body=body,
+        meta=meta,
+        spec=spec,
+        openstack_versions=openstack_versions,
+        **template_args,
+    )
     data = yaml.safe_load(text)
     return data
 
