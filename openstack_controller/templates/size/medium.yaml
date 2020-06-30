@@ -413,7 +413,7 @@ services:
             collector: 5
             notification: 5
 timeouts:
-  applicaion_readiness:
+  application_readiness:
     nova:
       timeout: 2400
       delay: 15
