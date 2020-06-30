@@ -406,7 +406,7 @@ services:
             collector: 3
             notification: 3
 timeouts:
-  applicaion_readiness:
+  application_readiness:
     nova:
       timeout: 600
       delay: 10

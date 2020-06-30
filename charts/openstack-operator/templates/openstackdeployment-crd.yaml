@@ -616,7 +616,7 @@ spec:
             timeouts:
               type: object
               properties:
-                applicaion_readiness:
+                application_readiness:
                   type: object
                   properties:
                     nova: &application_readiness

@@ -323,7 +323,7 @@ class Service:
             LOG.info(f"Checking {health_group} health.")
             readiness_timeouts = (
                 self.mspec.get("timeouts", {})
-                .get("applicaion_readiness", {})
+                .get("application_readiness", {})
                 .get(health_group, {})
             )
             delay = readiness_timeouts.get(
