@@ -89,6 +89,11 @@ OSCTL_REDIS_NAMESPACE = os.environ.get(
 def configure(settings: kopf.OperatorSettings, **_):
     settings.watching.connect_timeout = 1 * 60
     settings.watching.server_timeout = os.environ.get(
-        "KOPF_WATCH_STREAM_TIMEOUT", 10 * 60
+        "KOPF_WATCH_STREAM_TIMEOUT", 1 * 60
     )
-    settings.watching.client_timeout = 10 * 60
+    settings.watching.client_timeout = 1 * 60
+
+    settings.session.total_timeout = 1 * 60
+    settings.session.sock_connect_timeout = 1 * 30
+    settings.session.sock_read_timeout = 1 * 10
+    settings.session.connect = 1 * 30
