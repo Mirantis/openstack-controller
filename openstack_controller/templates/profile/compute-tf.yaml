@@ -146,7 +146,7 @@ services:
           script: |
             tempest run --config-file /etc/tempest/tempest.conf -w 4 --smoke --blacklist-file  /etc/tempest/test-blacklist
           tempest:
-            tungsten_plugin:
+            sdn:
               service_name: tungstenfabric
               catalog_type: sdn
               endpoint_type: internal
