@@ -136,6 +136,8 @@ services:
             - (?:heat_tempest_plugin.tests.scenario.test_server_software_config.SoftwareConfigIntegrationTest)
             # Skip BasicResourcesTest until PRODX-5495 will be resolved
             - (?:heat_tempest_plugin.tests.scenario.test_base_resources.BasicResourcesTest.test_base_resources_integration)
+            # Skip patrole tempest plugin tests until PRODX-5954 will be resolved
+            - (?:patrole_tempest_plugin)
           {%- if ironic_enabled %}
             # Skip schedule to all nodes, as in case of concurrent tests, this will highly likely to fail
             - (?:tempest.scenario.test_server_multinode.TestServerMultinode.test_schedule_to_all_nodes)
