@@ -2,6 +2,8 @@
 #kind: HelmBundle
 
 {%- set service = 'octavia' %}
+{%- set provider_map = {'amphora': 'amphora:The Octavia Amphora driver.',
+                        'octavia': 'octavia:Deprecated alias of the Octavia Amphora driver.'} %}
 {%- set components_with_dedicated_messaging = spec.get('features', {}).get('messaging', {}).get('components_with_dedicated_messaging', []) %}
 {%- set stacklight_enabled = spec.get('features', {}).get('stacklight', {}).get('enabled', False) %}
 {%- set notification_topics = ['notifications'] %}
@@ -66,12 +68,14 @@ spec:
   - name: openstack-octavia
     chart: {{spec.common.openstack.get('repo', spec.common.charts.repo)}}/octavia
     values:
+{%- if 'amphora' in spec.features.get('octavia', {}).get('providers', []) %}
       octavia:
         settings:
           lbmgmt_cidr: {{ spec.features.octavia.lb_network.subnet.range }}
           lbmgmt_subnet_start: {{ spec.features.octavia.lb_network.subnet.pool_start }}
           lbmgmt_subnet_end: {{ spec.features.octavia.lb_network.subnet.pool_end }}
           amphora_image_url: {{ images["octavia_amphora"] }}
+{%- endif %}
       images:
         tags:
 {%- for image in [
@@ -197,6 +201,13 @@ spec:
         secret_ca_bundle: true
       conf:
         octavia:
+          api_settings:
+            default_provider_driver: {{ spec.features.octavia.default_provider }}
+{%- set providers = [] %}
+{%- for provider in spec.features.get('octavia', {}).get('providers', []) %}
+{%- do providers.append(provider_map.get(provider)) %}
+{%- endfor %}
+            enabled_provider_drivers: {{ ','.join(providers) }}
           keystone_authtoken:
             memcache_security_strategy: ENCRYPT
             memcache_secret_key: {{ credentials.memcached }}

@@ -48,6 +48,10 @@ features:
     user:
       username: stacklight
   octavia:
+    default_provider: amphora
+    providers:
+      - amphora
+      - octavia
     lb_network:
       subnet:
         range: '10.255.0.0/16'
