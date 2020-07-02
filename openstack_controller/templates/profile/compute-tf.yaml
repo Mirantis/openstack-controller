@@ -146,6 +146,8 @@ services:
           script: |
             tempest run --config-file /etc/tempest/tempest.conf -w 4 --smoke --blacklist-file  /etc/tempest/test-blacklist
           tempest:
+            patrole:
+              custom_policy_files: /etc/tempest/policies/%s.json
             sdn:
               service_name: tungstenfabric
               catalog_type: sdn
