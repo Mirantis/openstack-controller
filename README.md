@@ -29,7 +29,7 @@ kubectl label node -l node-role.kubernetes.io/master!= openstack-control-plane=e
 git clone "https://gerrit.mcp.mirantis.com/mcp/release-openstack-k8s"
 cd release-openstack-k8s
 git tag -n
-git checkout 0.2.0
+git checkout 0.3.0
 ```
 
 ### Deploy infra parts
