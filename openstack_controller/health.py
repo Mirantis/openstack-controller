@@ -79,19 +79,11 @@ def ident(meta):
 
 
 def set_application_health(
-    osdpl,
-    application,
-    component,
-    namespace,
-    health,
-    observed_generation,
-    custom_data={},
+    osdpl, application, component, health, observed_generation, custom_data={},
 ):
     patch = {
         application: {
             component: {"status": health, "generation": observed_generation,}
-            if health is not None
-            else None
         }
     }
     if patch[application][component]:
