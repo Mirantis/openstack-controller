@@ -96,6 +96,7 @@ spec:
     "rabbit_init",
     "octavia_health_manager",
     "octavia_housekeeping",
+    "octavia_driver_agent",
     "create_resources",] %}
         {%- if image in images %}
           {{ image }}: {{ images[image] }}
@@ -114,6 +115,23 @@ spec:
         mounts:
           octavia_api:
             octavia_api:
+              volumeMounts:
+                - name: octavia-certs
+                  mountPath: /etc/octavia/certs/private/cakey.pem
+                  subPath: key
+                - name: octavia-certs
+                  mountPath: /etc/octavia/certs/ca_01.pem
+                  subPath: cert
+                - name: octavia-certs
+                  mountPath: /etc/octavia/certs/client.pem
+                  subPath: cert_all
+              volumes:
+                - name: octavia-certs
+                  secret:
+                    secretName: octavia-certs
+                    defaultMode: 0644
+          octavia_driver_agent:
+            octavia_driver_agent:
               volumeMounts:
                 - name: octavia-certs
                   mountPath: /etc/octavia/certs/private/cakey.pem
@@ -199,6 +217,9 @@ spec:
         secret_amphora_ssh_key: true
         secret_octavia_certs: false
         secret_ca_bundle: true
+{%- if spec.openstack_version not in ['queens', 'rocky'] %}
+        deployment_driver_agent: true
+{%- endif %}
       conf:
         octavia:
           api_settings:
