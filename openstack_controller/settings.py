@@ -12,8 +12,12 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 import os
+import time
 
 import kopf
+
+
+HEARTBEAT = time.time()
 
 # The number of seconds to wait for all component from application becomes ready
 OSCTL_WAIT_APPLICATION_READY_TIMEOUT = int(
@@ -83,6 +87,25 @@ OSCTL_RESOURCE_DELETED_WAIT_TIMEOUT = int(
 OSCTL_REDIS_NAMESPACE = os.environ.get(
     "OSCTL_REDIS_NAMESPACE", "openstack-redis"
 )
+
+OSCTL_HEARTBEAT_INTERVAL = int(os.environ.get("OSCTL_HEARTBEAT_INTERVAL", 1))
+
+OSCTL_HEARTBEAT_MAX_DELAY = int(
+    os.environ.get("OSCTL_HEARTBEAT_MAX_DELAY", 60)
+)
+
+
+if OSCTL_HEARTBEAT_INTERVAL:
+
+    @kopf.timer(
+        "lcm.mirantis.com",
+        "v1alpha1",
+        "openstackdeployments",
+        interval=OSCTL_HEARTBEAT_INTERVAL,
+    )
+    async def heartbeat(spec, **kwargs):
+        global HEARTBEAT
+        HEARTBEAT = time.time()
 
 
 @kopf.on.startup()
