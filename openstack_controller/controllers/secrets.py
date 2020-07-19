@@ -45,6 +45,18 @@ async def handle_rgw_secret(
     ceph_api.set_os_rgw_creds(os_rgw_creds, kube.save_secret_data)
 
 
+@kopf.on.resume(
+    "",
+    "v1",
+    "secrets",
+    labels={"application": "neutron", "component": "server"},
+)
+@kopf.on.update(
+    "",
+    "v1",
+    "secrets",
+    labels={"application": "neutron", "component": "server"},
+)
 @kopf.on.create(
     "",
     "v1",
@@ -67,6 +79,18 @@ async def handle_neutron_secret(
     tfs.save(secret_data)
 
 
+@kopf.on.resume(
+    "",
+    "v1",
+    "secrets",
+    labels={"application": "neutron", "component": "configmap_etc"},
+)
+@kopf.on.update(
+    "",
+    "v1",
+    "secrets",
+    labels={"application": "neutron", "component": "configmap_etc"},
+)
 @kopf.on.create(
     "",
     "v1",
