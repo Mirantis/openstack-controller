@@ -141,8 +141,6 @@ services:
             # Skip SoftwareConfigIntegrationTest because it requires a custom image
             # https://github.com/openstack/heat/blob/stable/train/heat_integrationtests/prepare_test_env.sh
             - (?:heat_tempest_plugin.tests.scenario.test_server_software_config.SoftwareConfigIntegrationTest)
-            # Skip BasicResourcesTest until PRODX-5495 will be resolved
-            - (?:heat_tempest_plugin.tests.scenario.test_base_resources.BasicResourcesTest.test_base_resources_integration)
             # Skip patrole tempest plugin tests until PRODX-5954 will be resolved
             - (?:patrole_tempest_plugin)
           script: |
