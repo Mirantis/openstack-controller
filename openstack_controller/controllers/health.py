@@ -30,6 +30,7 @@ DAEMONSET_HOOKS = {
 
 
 def get_osdpl(namespace):
+    LOG.debug("Getting osdpl object")
     osdpl = list(
         kube.OpenStackDeployment.objects(kube.api).filter(namespace=namespace)
     )
@@ -90,6 +91,7 @@ def deployment_status_conditions(conditions):
 @kopf.on.field("apps", "v1", "deployments", field="status.conditions")
 @kopf.on.delete("apps", "v1", "deployments")
 async def deployments(name, namespace, meta, status, new, event, **kwargs):
+    LOG.debug(f"Deployment {name} status.conditions is {status}")
     osdpl = get_osdpl(namespace)
     if not osdpl:
         return
@@ -97,7 +99,6 @@ async def deployments(name, namespace, meta, status, new, event, **kwargs):
     if event == "delete":
         _delete(osdpl, "Deployment", meta, application, component)
         return
-    LOG.debug(f"Deployment {name} status.conditions is {status}")
     # TODO(pas-ha) investigate if we can use status.conditions
     # just for aggroing, but derive health from other status fields
     # which are available.
@@ -135,6 +136,7 @@ async def deployments(name, namespace, meta, status, new, event, **kwargs):
 @kopf.on.field("apps", "v1", "statefulsets", field="status")
 @kopf.on.delete("apps", "v1", "statefulsets")
 async def statefulsets(name, namespace, meta, status, event, **kwargs):
+    LOG.debug(f"StatefulSet {name} status is {status}")
     osdpl = get_osdpl(namespace)
     if not osdpl:
         return
@@ -142,7 +144,6 @@ async def statefulsets(name, namespace, meta, status, event, **kwargs):
     if event == "delete":
         _delete(osdpl, "StatefulSet", meta, application, component)
         return
-    LOG.debug(f"StatefulSet {name} status is {status}")
     st = health.StatefulSetStatus(**status)
     res_health = constants.UNKNOWN
     if st.updateRevision:
@@ -180,7 +181,6 @@ async def daemonsets(name, namespace, meta, status, event, **kwargs):
     if event == "delete":
         _delete(osdpl, "DaemonSet", meta, application, component)
         return
-    LOG.debug(f"DaemonSet {name} status is {status}")
     st = health.DaemonSetStatus(**status)
     res_health = constants.UNKNOWN
     if (
@@ -217,6 +217,7 @@ async def daemonsets(name, namespace, meta, status, event, **kwargs):
         "OK_desiredNumberScheduled", 0
     )
     if hook:
+        LOG.debug(f"Daemonset {application}-{component} awaiting hook")
         await hook(osdpl, name, namespace, meta, **kwargs)
     health.set_application_health(
         osdpl,

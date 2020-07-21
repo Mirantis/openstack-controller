@@ -87,6 +87,7 @@ def set_application_health(
     observed_generation,
     custom_data={},
 ):
+    LOG.debug(f"Set application health for {application}-{component}")
     patch = {
         application: {
             component: {"status": health, "generation": observed_generation,}
