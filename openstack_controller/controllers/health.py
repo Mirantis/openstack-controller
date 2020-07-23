@@ -46,11 +46,8 @@ def get_osdpl(namespace):
 def _delete(osdpl, kind, meta, application, component):
     LOG.info(f"Handling delete event for {kind}")
     name = meta["name"]
-    namespace = meta["namespace"]
     LOG.debug(f"Cleaning health for {kind} {name}")
-    health.set_application_health(
-        osdpl, application, component, namespace, None, None
-    )
+    health.set_application_health(osdpl, application, component, None, None)
 
 
 # NOTE(vsaienko): for unknown reason when using optional=True, which have to
@@ -111,23 +108,21 @@ async def deployments(name, namespace, meta, status, new, event, **kwargs):
         elif c.type == "Progressing":
             progr_cond = c
     conditions_available = avail_cond is not None and progr_cond is not None
-    res_health = None
-    if not conditions_available:
-        res_health = constants.UNKNOWN
-    elif avail_cond.status == "True" and (
-        progr_cond.status == "True"
-        and progr_cond.reason == "NewReplicaSetAvailable"
-    ):
-        res_health = constants.OK
-    elif avail_cond.status == "False":
-        res_health = constants.BAD
-    elif progr_cond.reason == "ReplicaSetUpdated":
-        res_health = constants.PROGRESS
+    res_health = constants.UNKNOWN
+    if conditions_available:
+        if avail_cond.status == "True" and (
+            progr_cond.status == "True"
+            and progr_cond.reason == "NewReplicaSetAvailable"
+        ):
+            res_health = constants.OK
+        elif avail_cond.status == "False":
+            res_health = constants.BAD
+        elif progr_cond.reason == "ReplicaSetUpdated":
+            res_health = constants.PROGRESS
     health.set_application_health(
         osdpl,
         application,
         component,
-        namespace,
         res_health,
         status.get("observedGeneration", 0),
     )
@@ -164,7 +159,6 @@ async def statefulsets(name, namespace, meta, status, event, **kwargs):
         osdpl,
         application,
         component,
-        namespace,
         res_health,
         status.get("observedGeneration", 0),
     )
@@ -223,7 +217,6 @@ async def daemonsets(name, namespace, meta, status, event, **kwargs):
         osdpl,
         application,
         component,
-        namespace,
         res_health,
         status.get("observedGeneration", 0),
         {"OK_desiredNumberScheduled": st.desiredNumberScheduled}
