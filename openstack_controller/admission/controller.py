@@ -83,7 +83,7 @@ class ValidationResource(object):
         resp.content_type = "application/json"
         response = ReviewResponse()
         try:
-            body = json.loads(req.stream.read())
+            body = json.loads(req.stream.read(req.content_length or 0))
             # Try to get apiVersion and uid even if request doesn't comply to
             # schema
             response.api_version = body.get("apiVersion")
