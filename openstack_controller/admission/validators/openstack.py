@@ -12,20 +12,10 @@
 # limitations under the License.
 
 import copy
-import enum
 
 from openstack_controller.admission.validators import base
+from openstack_controller import constants
 from openstack_controller import exception
-
-
-class OpenStackVersion(enum.IntEnum):
-    """Ordered OpenStack version"""
-
-    queens = 1
-    rocky = 2
-    stein = 3
-    train = 4
-    ussuri = 5
 
 
 class OpenStackValidator(base.BaseValidator):
@@ -52,8 +42,12 @@ class OpenStackValidator(base.BaseValidator):
 
     def _validate_openstack_upgrade(self, old_obj, new_obj):
         # NOTE(pas-ha) this logic relies on 'master' already has been denied
-        old_version = OpenStackVersion[old_obj["spec"]["openstack_version"]]
-        new_version = OpenStackVersion[new_obj["spec"]["openstack_version"]]
+        old_version = constants.OpenStackVersion[
+            old_obj["spec"]["openstack_version"]
+        ]
+        new_version = constants.OpenStackVersion[
+            new_obj["spec"]["openstack_version"]
+        ]
         # not an upgrade
         if new_version == old_version:
             return

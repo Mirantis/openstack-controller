@@ -1,3 +1,7 @@
+import enum
+import sys
+
+
 ADMIN_SECRET_NAME = "openstack-admin-users"
 
 CACHE_NAME = "image-precaching"
@@ -83,3 +87,14 @@ OPENSTACK_STACKLIGHT_SHARED_NAMESPACE = "openstack-lma-shared"
 OPENSTACK_STACKLIGHT_SECRET = "rabbitmq-creds"
 
 COMPUTE_NODE_CONTROLLER_SECRET_NAME = "compute-node-controller-openstack-creds"
+
+
+class OpenStackVersion(enum.IntEnum):
+    """Ordered OpenStack version"""
+
+    queens = 1
+    rocky = 2
+    stein = 3
+    train = 4
+    ussuri = 5
+    master = sys.maxsize

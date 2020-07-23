@@ -1,3 +1,4 @@
+from openstack_controller import constants
 from openstack_controller.filters.tempest import base_section
 
 
@@ -71,6 +72,11 @@ class NetworkFeatureEnabled(base_section.BaseSection):
                     "standard-attr-tag",
                 ]
             )
+            if (
+                constants.OpenStackVersion[self.spec["openstack_version"]]
+                >= constants.OpenStackVersion["ussuri"]
+            ):
+                api_extensions_default.append("rbac-address-scope")
 
         return ", ".join(api_extensions_default)
 
