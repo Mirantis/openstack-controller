@@ -88,12 +88,13 @@ OSCTL_REDIS_NAMESPACE = os.environ.get(
 @kopf.on.startup()
 def configure(settings: kopf.OperatorSettings, **_):
     settings.watching.connect_timeout = 1 * 60
+    # NOTE(vsaienko): The watching.server_timeout is used to set timeoutSeconds
+    # for kubernetes watching request.
+    # Timeout for the list/watch call. This limits the duration of the call,
+    # regardless of any activity or inactivity.
+    # IMPORTANT: this timeout have to be less than aiohttp client.timeout
     settings.watching.server_timeout = os.environ.get(
-        "KOPF_WATCH_STREAM_TIMEOUT", 1 * 60
+        "KOPF_WATCH_STREAM_TIMEOUT", 1 * 300
     )
-    settings.watching.client_timeout = 1 * 60
-
-    settings.session.total_timeout = 1 * 60
-    settings.session.sock_connect_timeout = 1 * 30
-    settings.session.sock_read_timeout = 1 * 10
-    settings.session.connect = 1 * 30
+    # Defines total timeout for aiohttp watching session.
+    settings.watching.client_timeout = 1 * 600

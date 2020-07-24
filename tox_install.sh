@@ -11,7 +11,10 @@ $install_cmd $@
 
 # Apply kopf patches
 pushd $VIRTUAL_ENV/lib/python3.7/site-packages
-patch -p1 --forward < $WORKDIR/kopf-session-timeout.path || true
+if [[ -d kopf && ! -f kopf/kopf-session-timeout.path_applied ]]; then
+patch -p1 --forward < $WORKDIR/kopf-session-timeout.path
+touch kopf/kopf-session-timeout.path_applied
+fi
 popd
 
 exit $?
