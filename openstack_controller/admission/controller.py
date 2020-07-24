@@ -100,14 +100,15 @@ class ValidationResource(object):
                 review_request.get("kind", {}).get("kind")
                 == "OpenStackDeployment"
             ):
-                _VALIDATORS["openstack"].validate(review_request)
+                validators = ["openstack"]
                 spec = review_request.get("object", {}).get("spec", {})
                 # Validate all the enabled services, if there is a
                 # corresponding validator.
                 # Not validating services that are about to be deleted
-                for service in (
+                validators.extend(
                     layers.services(spec, LOG)[0] & _VALIDATORS.keys()
-                ):
+                )
+                for service in validators:
                     try:
                         _VALIDATORS[service].validate(review_request)
                     except exception.OsDplValidationFailed as e:
