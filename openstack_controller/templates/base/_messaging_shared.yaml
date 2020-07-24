@@ -14,4 +14,4 @@
             name: openstack-rabbitmq-rabbitmq
           hosts:
             default: rabbitmq
-          path: /{{ service }}
+          path: /{{ service }}{% if service == 'heat' %}_{{ spec.openstack_version }}{% endif %}
