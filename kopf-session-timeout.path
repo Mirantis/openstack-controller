@@ -51,23 +51,23 @@ index b06bfa8..71eb4f6 100644
  @dataclasses.dataclass
 +class SessionSettings:
 +
-+    total_timeout: Optional[float] = None
++    total_timeout: Optional[float] = 1 * 600
 +    """
 +    An HTTP/HTTPS session Total timeout for the whole request.
 +    """
 +
-+    sock_connect_timeout: Optional[float] = None
++    sock_connect_timeout: Optional[float] = 1 * 60
 +    """
 +    An HTTP/HTTPS session timeout for connecting to a peer for a new connection,
 +    not given from a pool. See also connect.
 +    """
 +
-+    sock_read_timeout: Optional[float] = None
++    sock_read_timeout: Optional[float] = 1 * 60
 +    """
 +    An HTTP/HTTPS session timeout for reading a portion of data from a peer.
 +    """
 +
-+    connect_timeout: Optional[float] = None
++    connect_timeout: Optional[float] = 1 * 60
 +    """
 +    An HTTP/HTTPS session timeout for acquiring a connection from pool.
 +    """
