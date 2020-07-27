@@ -340,17 +340,24 @@ class Service:
         pass
 
     async def upgrade(self, event, **kwargs):
-        await self.wait_service_healthy()
-        LOG.info(f"Upgrading {self.service} started.")
-        await self._upgrade(event, **kwargs)
+        try:
+            await self.wait_service_healthy()
+            LOG.info(f"Upgrading {self.service} started.")
+            await self._upgrade(event, **kwargs)
 
-        await self.apply(event, **kwargs)
-        # TODO(vsaienko): implement logic that will check that changes made in helmbundle
-        # object were handled by tiller/helmcontroller
-        # can be done only once https://mirantis.jira.com/browse/PRODX-2283 is implemented.
-        await asyncio.sleep(settings.OSCTL_HELMBUNDLE_APPLY_DELAY)
+            await self.apply(event, **kwargs)
+            # TODO(vsaienko): implement logic that will check that changes made in helmbundle
+            # object were handled by tiller/helmcontroller
+            # can be done only once https://mirantis.jira.com/browse/PRODX-2283 is implemented.
+            await asyncio.sleep(settings.OSCTL_HELMBUNDLE_APPLY_DELAY)
 
-        await self.wait_service_healthy()
+            await self.wait_service_healthy()
+        except Exception as e:
+            # NOTE(vsaienko): always raise temporary error here, to ensure we retry upgrade from
+            # failed service only. The whole upgrade restart might be done by restarting openstack
+            # controller.
+            LOG.exception(f"Got {e} when upgrading service {self.service}.")
+            raise kopf.TemporaryError(f"Retrying to upgrade {self.service}")
         LOG.info(f"Upgrading {self.service} done")
 
     def template_args(self):
