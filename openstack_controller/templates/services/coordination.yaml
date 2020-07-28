@@ -10,12 +10,15 @@ spec:
         tags:
 {%- for image in [
     "etcd",
+    "etcd_db_compact",
     "dep_check",
     "image_repo_sync",] %}
         {%- if image in images %}
           {{ image }}: {{ images[image] }}
         {%- endif %}
 {%- endfor %}
+      manifests:
+        cron_job_db_compact: true
       endpoints:
         cluster_domain_suffix: {{ spec.internal_domain_name }}
       pod:
