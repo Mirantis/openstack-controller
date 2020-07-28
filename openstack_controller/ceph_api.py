@@ -21,7 +21,7 @@ CEPH_OPENSTACK_TARGET_CONFIGMAP = "rook-ceph-config"
 
 CEPH_POOL_ROLE_SERVICES_MAP = {
     "cinder": ["volumes", "backup"],
-    "nova": ["ephemeral"],
+    "nova": ["ephemeral", "vms"],
     "glance": ["images"],
 }
 
@@ -39,6 +39,7 @@ class PoolRole(Enum):
     images = auto()
     rgw = auto()
     kubernetes = auto()
+    vms = auto()
     other = auto()
 
 
@@ -90,7 +91,7 @@ class OSCephParams:
     admin_key: str
     mon_endpoints: List[Tuple[IPv4Address, int]]
     services: List[OSServiceCreds]
-    rgw: RGWParams
+    rgw: RGWParams = None
 
 
 class CephStatus:
@@ -140,10 +141,12 @@ def _os_ceph_params_from_secret(secret: Dict[str, str]) -> OSCephParams:
     mon_endpoints = list(
         _unpack_ips(from_base64(local_secret.pop("mon_endpoints")))
     )
-    rgw = RGWParams(
-        internal_url=from_base64(local_secret.pop("rgw_internal")),
-        external_url=from_base64(local_secret.pop("rgw_external")),
-    )
+    rgw = None
+    if "rgw_internal" in local_secret and "rgw_external" in local_secret:
+        rgw = RGWParams(
+            internal_url=from_base64(local_secret.pop("rgw_internal")),
+            external_url=from_base64(local_secret.pop("rgw_external")),
+        )
 
     services: List[OSServiceCreds] = []
     for os_user, val in local_secret.items():
