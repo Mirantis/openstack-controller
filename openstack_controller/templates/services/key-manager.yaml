@@ -140,6 +140,11 @@ spec:
           secret_creator_user: user_id:%(target.secret.creator_id)s
           container_project_match: project_id:%(target.container.project_id)s
           container_creator_user: user_id:%(target.container.creator_id)s
+        {%- else %}
+          secret_project_match: project:%(target.secret.project_id)s
+          secret_creator_user: user:%(target.secret.creator_id)s
+          container_project_match: project:%(target.container.project_id)s
+          container_creator_user: user:%(target.container.creator_id)s
         {%- endif %}
       manifests:
         network_policy: false
