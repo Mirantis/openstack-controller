@@ -6,6 +6,10 @@
 {%- set stacklight_enabled = spec.get('features', {}).get('stacklight', {}).get('enabled', False) %}
 {%- set notification_topics = ['notifications'] %}
 {%- do notification_topics.append('stacklight_notifications') if stacklight_enabled %}
+{%- set enabled_boot_interfaces = ['pxe'] %}
+{%- if spec.openstack_version not in ['queens', 'rocky'] %}
+{%- do enabled_boot_interfaces.append('ipxe') %}
+{%- endif %}
 {%- set network = spec.features.ironic.networks.baremetal %}
 
 spec:
@@ -141,7 +145,12 @@ spec:
           DEFAULT:
             default_deploy_interface: direct
             enabled_hardware_types: ipmi
-            enabled_boot_interfaces: pxe
+            enabled_boot_interfaces: {{ enabled_boot_interfaces|join(',') }}
+            {%- if 'ipxe' in enabled_boot_interfaces %}
+            # NOTE(vsaienko): we prefer to use chainloading to ipxe as it is much faster and stable
+            # for file downloads that UDP based pxe
+            default_boot_interface: ipxe
+            {%- endif %}
             enabled_management_interfaces: ipmitool
             enabled_power_interfaces: ipmitool
             enabled_network_interfaces: flat,neutron
