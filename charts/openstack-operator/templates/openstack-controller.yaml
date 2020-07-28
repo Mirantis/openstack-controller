@@ -282,6 +282,10 @@ spec:
             - name: {{ $optionName }}
               value: "{{ $optionValue }}"
             {{- end }}
+            {{- range $optionName, $optionValue := .Values.osdpl.settings.osdpl.raw }}
+            - name: {{ $optionName }}
+              value: "{{ $optionValue }}"
+            {{- end }}
           livenessProbe:
             httpGet:
               path: /healthz
@@ -307,6 +311,10 @@ spec:
             - 'http://0.0.0.0:32769/healthz'
           env:
             {{- range $optionName, $optionValue := .Values.osdpl.settings.raw }}
+            - name: {{ $optionName }}
+              value: "{{ $optionValue }}"
+            {{- end }}
+            {{- range $optionName, $optionValue := .Values.osdpl.settings.helmbundle.raw }}
             - name: {{ $optionName }}
               value: "{{ $optionValue }}"
             {{- end }}
@@ -338,6 +346,10 @@ spec:
             - name: {{ $optionName }}
               value: "{{ $optionValue }}"
             {{- end }}
+            {{- range $optionName, $optionValue := .Values.osdpl.settings.secrets.raw }}
+            - name: {{ $optionName }}
+              value: "{{ $optionValue }}"
+            {{- end }}
           livenessProbe:
             httpGet:
               path: /healthz
@@ -366,6 +378,10 @@ spec:
             - name: {{ $optionName }}
               value: "{{ $optionValue }}"
             {{- end }}
+            {{- range $optionName, $optionValue := .Values.osdpl.settings.health.raw }}
+            - name: {{ $optionName }}
+              value: "{{ $optionValue }}"
+            {{- end }}
           livenessProbe:
             httpGet:
               path: /healthz
@@ -391,6 +407,10 @@ spec:
             - 'http://0.0.0.0:32772/healthz'
           env:
             {{- range $optionName, $optionValue := .Values.osdpl.settings.raw }}
+            - name: {{ $optionName }}
+              value: "{{ $optionValue }}"
+            {{- end }}
+            {{- range $optionName, $optionValue := .Values.osdpl.settings.node.raw }}
             - name: {{ $optionName }}
               value: "{{ $optionValue }}"
             {{- end }}

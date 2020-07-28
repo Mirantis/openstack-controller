@@ -27,6 +27,18 @@ osdpl:
       OSCTL_NODE_NOT_READY_FLAPPING_TIMEOUT: 120
       OSCTL_HELMBUNDLE_APPLY_DELAY: 10
       OSCTL_REDIS_NAMESPACE: "openstack-redis"
+    osdpl:
+      raw: {}
+    node:
+      raw: {}
+    secrets:
+      raw: {}
+    helmbundle:
+      raw: {}
+    health:
+      raw:
+        PYTHONASYNCIODEBUG: 1
+        KOPF_RUN_DEBUG: 1
 
 tf:
   createSharedNamespace: true
