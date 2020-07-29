@@ -137,6 +137,7 @@ keystone_db_sync_migrate: '{{ images_base_url }}/openstack/keystone:ussuri-bioni
 keystone_db_sync_contract: '{{ images_base_url }}/openstack/keystone:ussuri-bionic-20200720180014'
 octavia_amphora: '{{ binary_base_url }}/openstack/bin/octavia/amphora-x64-haproxy-ussuri-20200721005814.qcow2'
 etcd: '{{ images_base_url }}/openstack/extra/etcd:3.2.26'
+etcd_db_compact: '{{ images_base_url }}/openstack/extra/etcd:3.2.26'
 cinder_db_sync_online: '{{ images_base_url }}/openstack/cinder:ussuri-bionic-20200720180014'
 cinder_db_purge: '{{ images_base_url }}/openstack/cinder:ussuri-bionic-20200720180014'
 aodh_db_sync: '{{ images_base_url }}/openstack/aodh:ussuri-bionic-20200720180014'
