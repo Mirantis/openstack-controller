@@ -290,7 +290,7 @@ spec:
             httpGet:
               path: /healthz
               port: 32768
-            periodSeconds: 120
+            {{- toYaml .Values.osdpl.pod.controller.secrets.liveness.params | nindent 12}}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
         - name: helmbundle
@@ -322,7 +322,7 @@ spec:
             httpGet:
               path: /healthz
               port: 32769
-            periodSeconds: 120
+            {{- toYaml .Values.osdpl.pod.controller.health.liveness.params | nindent 12}}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
         - name: secrets
@@ -354,7 +354,7 @@ spec:
             httpGet:
               path: /healthz
               port: 32770
-            periodSeconds: 120
+            {{- toYaml .Values.osdpl.pod.controller.secrets.liveness.params | nindent 12}}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
         - name: health
@@ -386,7 +386,7 @@ spec:
             httpGet:
               path: /healthz
               port: 32771
-            periodSeconds: 120
+            {{- toYaml .Values.osdpl.pod.controller.health.liveness.params | nindent 12}}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
         - name: node
@@ -418,7 +418,7 @@ spec:
             httpGet:
               path: /healthz
               port: 32772
-            periodSeconds: 120
+            {{- toYaml .Values.osdpl.pod.controller.node.liveness.params | nindent 12}}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       {{- with .Values.nodeSelector }}
