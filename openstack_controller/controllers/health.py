@@ -47,7 +47,7 @@ def _delete(osdpl, kind, meta, application, component):
     LOG.info(f"Handling delete event for {kind}")
     name = meta["name"]
     LOG.debug(f"Cleaning health for {kind} {name}")
-    health.set_application_health(osdpl, application, component, None, None)
+    osdpl.patch({"status": {"health": {application: {component: None}}}})
 
 
 # NOTE(vsaienko): for unknown reason when using optional=True, which have to
