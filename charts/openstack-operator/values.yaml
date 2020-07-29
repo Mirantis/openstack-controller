@@ -39,6 +39,38 @@ osdpl:
       raw:
         PYTHONASYNCIODEBUG: 1
         KOPF_RUN_DEBUG: 1
+  pod:
+    controller:
+      osdpl:
+       liveness:
+         params:
+           initialDelaySeconds: 120
+           periodSeconds: 15
+           timeoutSeconds: 5
+      health:
+        liveness:
+          params:
+            initialDelaySeconds: 120
+            periodSeconds: 15
+            timeoutSeconds: 5
+      node:
+        liveness:
+          params:
+            initialDelaySeconds: 120
+            periodSeconds: 15
+            timeoutSeconds: 5
+      secrets:
+        liveness:
+          params:
+            initialDelaySeconds: 120
+            periodSeconds: 15
+            timeoutSeconds: 5
+      helmbundle:
+        liveness:
+          params:
+            initialDelaySeconds: 120
+            periodSeconds: 15
+            timeoutSeconds: 5
 
 tf:
   createSharedNamespace: true
