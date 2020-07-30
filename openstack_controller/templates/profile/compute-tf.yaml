@@ -134,6 +134,8 @@ services:
             - (?:tempest.api.network.test_routers.RoutersIpV6Test)
             # TODO(ibumarskov): not supported by TF (PRODX-5181)
             - (?:neutron_tempest_plugin.scenario.test_connectivity.NetworkConnectivityTest.test_connectivity_through_2_routers)
+            # TODO(ibumarskov): not supported by TF (PRODX-4831)
+            - (?:neutron_tempest_plugin.api.admin.test_ports.PortTestCasesAdmin.test_update_mac_address)
             # TODO(ibumarskov): not supported by TF (PRODX-5284)
             - (?:heat_tempest_plugin.tests.functional.test_create_update_neutron_subnet.UpdateSubnetTest.test_update_gateway_ip)
             - (?:heat_tempest_plugin.tests.functional.test_create_update_neutron_subnet.UpdateSubnetTest.test_update_gateway_ip_to_empty)
