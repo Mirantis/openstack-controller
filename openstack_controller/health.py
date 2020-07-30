@@ -2,6 +2,8 @@ import asyncio
 from dataclasses import dataclass
 import logging
 
+import pykube
+
 from openstack_controller import constants
 from openstack_controller import kube
 from openstack_controller import settings
@@ -143,3 +145,98 @@ async def wait_application_ready(
         _wait_application_ready(application, osdpl, delay=delay),
         timeout=timeout,
     )
+
+
+def get_osdpl(namespace):
+    LOG.debug("Getting osdpl object")
+    osdpl = list(
+        kube.OpenStackDeployment.objects(kube.api).filter(namespace=namespace)
+    )
+    if len(osdpl) != 1:
+        LOG.warning(
+            f"Could not find unique OpenStackDeployment resource "
+            f"in namespace {namespace}, skipping health report processing."
+        )
+        return
+    return osdpl[0]
+
+
+def daemonset_health_status(obj):
+    st = DaemonSetStatus(**obj["status"])
+    res_health = constants.UNKNOWN
+    if (
+        st.currentNumberScheduled
+        == st.desiredNumberScheduled
+        == st.numberReady
+        == st.updatedNumberScheduled
+        == st.numberAvailable
+    ):
+        if not st.numberMisscheduled:
+            res_health = constants.OK
+        else:
+            res_health = constants.PROGRESS
+    elif st.updatedNumberScheduled < st.desiredNumberScheduled:
+        res_health = constants.PROGRESS
+    elif st.numberReady < st.desiredNumberScheduled:
+        res_health = constants.BAD
+    return res_health
+
+
+def statefulset_health_status(obj):
+    st = StatefulSetStatus(**obj["status"])
+    res_health = constants.UNKNOWN
+    if st.updateRevision:
+        # updating, created new ReplicaSet
+        if st.currentRevision == st.updateRevision:
+            if st.replicas == st.readyReplicas == st.currentReplicas:
+                res_health = constants.OK
+            else:
+                res_health = constants.BAD
+        else:
+            res_health = constants.PROGRESS
+    else:
+        if st.replicas == st.readyReplicas == st.currentReplicas:
+            res_health = constants.OK
+        else:
+            res_health = constants.BAD
+    return res_health
+
+
+def deployment_status_conditions(conditions):
+    conds = conditions or []
+    return [DeploymentStatusCondition(**c) for c in conds]
+
+
+def deployment_health_status(obj):
+    # TODO(pas-ha) investigate if we can use status.conditions
+    # just for aggroing, but derive health from other status fields
+    # which are available.
+    avail_cond = None
+    progr_cond = None
+    conds = deployment_status_conditions(obj["status"].get("conditions"))
+    for c in conds:
+        if c.type == "Available":
+            avail_cond = c
+        elif c.type == "Progressing":
+            progr_cond = c
+    conditions_available = avail_cond is not None and progr_cond is not None
+    res_health = constants.UNKNOWN
+    if conditions_available:
+        if avail_cond.status == "True" and (
+            progr_cond.status == "True"
+            and progr_cond.reason == "NewReplicaSetAvailable"
+        ):
+            res_health = constants.OK
+        elif avail_cond.status == "False":
+            res_health = constants.BAD
+        elif progr_cond.reason == "ReplicaSetUpdated":
+            res_health = constants.PROGRESS
+    return res_health
+
+
+def health_status(obj):
+    return {
+        pykube.Deployment: deployment_health_status,
+        pykube.DaemonSet: daemonset_health_status,
+        pykube.StatefulSet: statefulset_health_status,
+    }[type(obj)](obj.obj)

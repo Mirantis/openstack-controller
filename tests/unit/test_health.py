@@ -49,17 +49,31 @@ async def test_hook_called():
 
     # failed to patch as function decorator probably due to asynio decorator
     # so let's patch with the context manager
-    with mock.patch.object(health, "get_osdpl") as o, mock.patch(
+    with mock.patch("openstack_controller.health.get_osdpl") as o, mock.patch(
         "kopf.adopt"
     ), mock.patch("openstack_controller.kube.resource"), mock.patch(
         "openstack_controller.kube.find"
     ) as find:
         find.return_value.obj = cronjob
         o.return_value.obj = osdpl
-        await health.daemonsets(meta["name"], "openstack", meta, status, "")
+        await health.daemonsets(
+            meta["name"],
+            "openstack",
+            meta,
+            status,
+            "",
+            body={"status": status},
+        )
         health.DAEMONSET_HOOKS = {
             (constants.PROGRESS, constants.OK): {
                 "nova-compute-default": fake_hook
             },
         }
-        await health.daemonsets(meta["name"], "openstack", meta, status, "")
+        await health.daemonsets(
+            meta["name"],
+            "openstack",
+            meta,
+            status,
+            "",
+            body={"status": status},
+        )
