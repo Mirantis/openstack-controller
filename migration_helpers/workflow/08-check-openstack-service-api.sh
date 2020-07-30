@@ -9,7 +9,7 @@ TOP_DIR=$( cd $(dirname $RUN_DIR/../../) && pwd)
 
 function get_service_public_base_url_mcp1 {
   local service_name=$1
-  echo "$(get_mcp1_public_endpoint):$(get_service_port $service_name)"
+  echo "$(get_mcp1_public_endpoint):$(get_service_by name $service_name)"
 }
 
 function get_service_public_base_url_mcp2 {

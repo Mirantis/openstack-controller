@@ -212,26 +212,6 @@ function get_mcp2_public_endpoint {
  echo "https://${service_name}.$(get_mcp2_public_domain_name)"
 }
 
-function get_service_port {
-  local service_name="$1"
-  case "$service_name" in
-      "keystone" )
-          echo "5000";;
-      "heat" )
-          echo "8004" ;;
-      "glance" )
-          echo "9292" ;;
-      "nova" )
-          echo "8774" ;;
-      "cinder" )
-          echo "8776" ;;
-      "neutron" )
-          echo "9696" ;;
-      *)
-          exit 1 ;;
-  esac
-}
-
 function get_check_endpoint {
   local service_name="$1"
   local project="$2"
@@ -255,3 +235,46 @@ function get_check_endpoint {
   echo $endpoint
 }
 
+PORT_SERVICE_MAPPING=(
+"5000:keystone"
+"8004:heat"
+"8000:heat-cfn"
+"9292:glance"
+"8774:nova"
+"8776:cinder"
+"8778:placement"
+"9696:neutron"
+"9001:designate"
+"8977:panko"
+"8041:gnocchi"
+"8042:aodh"
+"9311:barbican"
+"9876:octavia"
+)
+
+function get_service_by {
+    local variable
+    local value
+    local res
+    variable=$1
+    value=$2
+    for mapping in "${PORT_SERVICE_MAPPING[@]}" ; do
+        local port
+        local name
+        port="${mapping%%:*}"
+        name="${mapping##*:}"
+        if [[ "$value" == "${!variable}" ]]; then
+            if [[ "${variable}" == "port" ]]; then
+                res="$name"
+            else
+                res="$port"
+            fi
+            break
+        fi
+    done
+    if [[ ! -z "$res" ]]; then
+        echo "$res"
+    else
+        die $LINENO "ONLY port or name have to be passed as parameter."
+    fi
+}
