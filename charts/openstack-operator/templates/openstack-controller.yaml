@@ -5,7 +5,7 @@ metadata:
   namespace: osh-system
   name: openstack-controller-account
 ---
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   name: openstack-controller-role-cluster
@@ -33,7 +33,7 @@ rules:
     resources: [helmbundles]
     verbs: [list, get, watch]
 ---
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
   namespace: "{{ .Values.osdpl.namespace }}"
@@ -82,7 +82,7 @@ rules:
     resources: [deployments, statefulsets, daemonsets, jobs]
     verbs: [list, get, create, watch, patch, delete]
 ---
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
   namespace: {{ .Values.osdpl.cephSharedNamespace }}
@@ -94,7 +94,7 @@ rules:
     resources: [secrets,configmaps]
     verbs: [list, get, create, patch, update]
 ---
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
   namespace: {{ .Values.osdpl.tfSharedNamespace }}
@@ -106,7 +106,7 @@ rules:
     resources: [secrets,configmaps]
     verbs: [list, get, create, patch, update]
 ---
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
   namespace: {{ .Values.osdpl.settings.raw.OSCTL_REDIS_NAMESPACE }}
@@ -118,7 +118,7 @@ rules:
     resources: [redisfailovers]
     verbs: [list, get, create, patch, update]
 ---
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
   name: openstack-controller-rolebinding-cluster
@@ -145,7 +145,7 @@ subjects:
   name: openstack-controller-account
   namespace: osh-system
 ---
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   namespace: "{{ .Values.osdpl.namespace }}"
@@ -159,7 +159,7 @@ subjects:
     name: openstack-controller-account
     namespace: osh-system
 ---
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   namespace: {{ .Values.osdpl.cephSharedNamespace }}
@@ -173,7 +173,7 @@ subjects:
     name: openstack-controller-account
     namespace: osh-system
 ---
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   namespace: {{ .Values.osdpl.settings.raw.OSCTL_REDIS_NAMESPACE }}
@@ -187,7 +187,7 @@ subjects:
     name: openstack-controller-account
     namespace: osh-system
 ---
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   namespace: {{ .Values.osdpl.tfSharedNamespace }}

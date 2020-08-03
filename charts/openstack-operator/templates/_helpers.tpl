@@ -43,3 +43,11 @@ Generate full image paths for KaaS CDN
 {{- printf "%s/%s/%s:%s" $context.Values.global.dockerBaseUrl $imageContext.repository $imageContext.name $imageContext.tag -}}
 {{- end -}}
 {{- end -}}
+
+{{- define "template" -}}
+{{- $name := index . 0 -}}
+{{- $context := index . 1 -}}
+{{- $last := base $context.Template.Name }}
+{{- $wtf := $context.Template.Name | replace $last $name -}}
+{{ include $wtf $context }}
+{{- end -}}

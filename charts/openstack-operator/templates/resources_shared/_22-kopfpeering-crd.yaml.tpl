@@ -1,5 +1,3 @@
-{{ if .Values.kopf.enabled }}
-
 ---
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
@@ -7,6 +5,7 @@ metadata:
   name: clusterkopfpeerings.zalando.org
   annotations:
     "helm.sh/hook": crd-install
+    "openstackdeployments.lcm.mirantis.com/shared_resource_action": {{ if .Values.kopf.enabled }}"create"{{ else }}"wait"{{ end }}
 spec:
   scope: Cluster
   group: zalando.org
@@ -25,6 +24,7 @@ metadata:
   name: kopfpeerings.zalando.org
   annotations:
     "helm.sh/hook": crd-install
+    "openstackdeployments.lcm.mirantis.com/shared_resource_action": {{ if .Values.kopf.enabled }}"create"{{ else }}"wait"{{ end }}
 spec:
   scope: Namespaced
   group: zalando.org
@@ -36,11 +36,3 @@ spec:
     kind: KopfPeering
     plural: kopfpeerings
     singular: kopfpeering
----
-apiVersion: zalando.org/v1
-kind: ClusterKopfPeering
-metadata:
-  name: openstack-controller
-...
-
-{{ end }}

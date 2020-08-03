@@ -61,12 +61,10 @@ def object_factory(api, api_version, kind):
        2. Objects from pykube.objects
        3. Generic kubernetes object
     """
-    resource = KUBE_OBJECTS.get((api_version, kind), None)
-    if resource is not None:
-        return resource
-    else:
-        LOG.debug(f"Use pykube object definition for {kind}")
-    return pykube.object_factory(api, api_version, kind)
+    resource = KUBE_OBJECTS.get(
+        (api_version, kind), pykube.object_factory(api, api_version, kind)
+    )
+    return resource
 
 
 class OpenStackDeployment(pykube.objects.NamespacedAPIObject):

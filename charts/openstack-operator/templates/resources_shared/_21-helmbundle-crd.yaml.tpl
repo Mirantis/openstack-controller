@@ -1,4 +1,3 @@
-{{ if .Values.helmbundle.enabled }}
 ---
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
@@ -9,6 +8,7 @@ metadata:
   name: helmbundles.lcm.mirantis.com
   annotations:
     "helm.sh/hook": crd-install
+    "openstackdeployments.lcm.mirantis.com/shared_resource_action": {{ if .Values.helmbundle.enabled }}"create"{{ else }}"wait"{{ end }}
 spec:
   group: lcm.mirantis.com
   names:
@@ -98,4 +98,3 @@ status:
   conditions: []
   storedVersions: []
 ...
-{{ end }}
