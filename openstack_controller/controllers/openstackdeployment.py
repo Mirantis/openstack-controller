@@ -2,7 +2,6 @@ import asyncio
 
 import kopf
 
-from openstack_controller import exception
 from openstack_controller import cache
 from openstack_controller import constants
 from openstack_controller import kube
@@ -44,17 +43,15 @@ async def run_task(task_def):
     * In case of permanent error retry all the tasks that finished with
       TemporaryError and fail permanently.
 
-    * In case of unknown error retry all the tasks that finished with
-      TemporaryError and raise TaskException. In this case kpof will
-      retry whole handler by default.
+    * In case of unknown error retry the task as we and kopf treat error as
+      environment issue which is self-recoverable. Do retries by our own
+      to avoid dead locks between dependent tasks.
 
-    :param task_def: Dictionary with the task definitision.
-    :raises: kopf.PermanentError when permanent error occured.
-    :raises: TaskException when unknown exception occured.
+    :param task_def: Dictionary with the task definitions.
+    :raises: kopf.PermanentError when permanent error occur.
     """
 
     permanent_exception = None
-    unknown_exception = None
 
     while task_def:
         # NOTE(e0ne): we can switch to asyncio.as_completed to run tasks
@@ -63,10 +60,17 @@ async def run_task(task_def):
         for task in done:
             coro, event, body, meta, spec, logger, kwargs = task_def.pop(task)
             if task.exception():
-                if isinstance(task.exception(), kopf.TemporaryError):
+                if isinstance(task.exception(), kopf.PermanentError):
+                    LOG.error(f"Failed to apply {coro} permanently.")
+                    LOG.error(task.print_stack())
+                    permanent_exception = kopf.PermanentError(
+                        "Permanent error occured."
+                    )
+                else:
                     LOG.warning(
                         f"Got retriable exception when applying {coro}, retrying..."
                     )
+                    LOG.warning(task.print_stack())
                     task_def[
                         asyncio.create_task(
                             coro(
@@ -79,31 +83,13 @@ async def run_task(task_def):
                             )
                         )
                     ] = (coro, event, body, meta, spec, logger, kwargs)
-                    LOG.debug(task.print_stack())
-                elif isinstance(task.exception(), kopf.PermanentError):
-                    LOG.error(f"Failed to apply {coro} permanently.")
-                    LOG.error(task.print_stack())
-                    permanent_exception = kopf.PermanentError(
-                        "Permanent error occured."
-                    )
-                else:
-                    LOG.warning(
-                        f"Got unknown exception while applying {coro}."
-                    )
-                    LOG.warning(task.print_stack())
-                    unknown_exception = exception.TaskException(
-                        "Unknown error occured."
-                    )
+
         # Let's wait for 10 second before retry to not introduce a lot of
         # task scheduling in case of some depended task is slow.
         await asyncio.sleep(10)
 
     if permanent_exception:
         raise permanent_exception
-    if unknown_exception:
-        # NOTE(vsaienko): raise unknown for kopf to keep default exception retry behaviour
-        # https://github.com/zalando-incubator/kopf/blob/351bf5/docs/errors.rst#regular-errors
-        raise unknown_exception
 
 
 def discover_images(mspec, logger):
