@@ -1,41 +1,4 @@
-{{ if .Values.helmbundle.enabled }}
----
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: osh-system
-{{ end }}
----
 apiVersion: v1
 kind: Namespace
 metadata:
   name: {{ .Values.osdpl.namespace }}
-{{ if .Values.tf.createSharedNamespace }}
----
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: {{ .Values.tf.sharedNamespace }}
-{{ end }}
-{{ if .Values.stacklight.createSharedNamespace }}
----
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: {{ .Values.stacklight.sharedNamespace }}
-{{ end }}
----
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: {{ .Values.osdpl.settings.raw.OSCTL_REDIS_NAMESPACE }}
-{{ if .Values.kopf.enabled }}
-# NOTE(vsaienko): create shared namespace to make sure roles and
-# rolebindings can be created succesfully. The kopfpeerings and
-# shared namespace will be created by ceph operator by default.
----
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: {{ .Values.osdpl.cephSharedNamespace }}
-{{ end }}
