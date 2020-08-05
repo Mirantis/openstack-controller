@@ -106,6 +106,9 @@ class GaleraCredentials:
     sst: OSSytemCreds
     exporter: OSSytemCreds
     audit: OSSytemCreds
+    # Backup field is optional till PRODX-6506
+    # is fixed properly
+    backup: Optional[OSSytemCreds] = None
 
 
 @dataclass
@@ -333,7 +336,23 @@ class GaleraSecret(Secret):
             sst=self._generate_credentials("sst", 3),
             exporter=self._generate_credentials("exporter", 8),
             audit=self._generate_credentials("audit", 8),
+            backup=self._generate_credentials("backup", 8),
         )
+
+    def ensure(self):
+        try:
+            secret = self.get()
+            # To avoid breaking updates backup field will be ensured here
+            # till PRODX-6506 is fixed properly
+            if not getattr(secret, "backup"):
+                backup_creds = self._generate_credentials("backup", 8)
+                setattr(secret, "backup", backup_creds)
+                self.save(secret)
+        except pykube.exceptions.ObjectDoesNotExist:
+            secret = self.create()
+            if secret:
+                self.save(secret)
+        return secret
 
 
 class RedisSecret(Secret):

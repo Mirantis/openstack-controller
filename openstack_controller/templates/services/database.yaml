@@ -2,6 +2,8 @@
 #kind: HelmBundle
 
 {%- set stacklight_enabled = spec.get('features', {}).get('stacklight', {}).get('enabled', False) %}
+{%- set backup_params = spec.get('features', {}).get('database', {}).get('backup', {}) %}
+{%- set backup_enabled = backup_params.get('enabled', False) %}
 
 spec:
   releases:
@@ -19,6 +21,16 @@ spec:
               # The default value is YES, and it causes the issue described - here https://jira.mariadb.org/browse/MDEV-22766
               # Once the issue is fixed, this can be removed. Option can be set only starting galera 3.25.
               cert.optimistic_pa: "NO"
+{%- if backup_enabled %}
+        phy_backup:
+          backup_type: {{ backup_params['backup_type'] }}
+          {%- if backup_params.get('full_backup_cycle') %}
+          full_backup_cycle: {{ backup_params['full_backup_cycle'] }}
+          {%- endif %}
+          {%- if backup_params.get('backups_to_keep') %}
+          backups_to_keep: {{ backup_params['backups_to_keep'] }}
+          {%- endif %}
+{%- endif %}
       images:
         tags:
 {%- for image in [
@@ -28,6 +40,8 @@ spec:
     "image_repo_sync",
     "error_pages",
     "mariadb_backup",
+    "mariadb_phy_backup",
+    "mariadb_phy_restore",
     "prometheus_mysql_exporter",
     "prometheus_mysql_exporter_helm_tests",
     "dep_check",
@@ -45,6 +59,9 @@ spec:
       manifests:
         network_policy: false
         job_cluster_wait: true
+{%- if backup_enabled %}
+        cron_job_mariadb_phy_backup: true
+{%- endif %}
       endpoints:
         cluster_domain_suffix: {{ spec.internal_domain_name }}
         oslo_db:
@@ -62,6 +79,14 @@ spec:
             audit:
               username: {{ galera_creds.audit.username }}
               password: {{ galera_creds.audit.password }}
+            mariabackup:
+              username: {{ galera_creds.backup.username }}
+              password: {{ galera_creds.backup.password }}
+{%- if backup_enabled %}
+      jobs:
+        phy_backup_mariadb:
+          cron: "{{ backup_params['schedule_time'] }}"
+{%- endif %}
       pod:
         replicas:
           server: 3
@@ -77,5 +102,11 @@ spec:
 {%- if spec.get('features', {}).get('database', {}).get('local_volumes', {}).get('enabled', False) %}
         class_name: lvp-fake-root
 {%- else %}
-        class_name: rook-ceph-block
+        class_name: mirablock-k8s-block-hdd
 {%- endif %}
+{%- if backup_enabled %}
+        phy_backup:
+          class_name: mirablock-k8s-block-hdd
+          enabled: true
+{%- endif %}
+

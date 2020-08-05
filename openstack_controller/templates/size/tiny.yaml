@@ -14,6 +14,11 @@ services:
           ingress_conf:
             proxy-buffer-size: "20m"
             proxy-connect-timeout: "600"
+          phy_backup:
+            backup_timeout: 3600
+        volume:
+          phy_backup:
+            size: "20Gi"
   identity:
     keystone:
       values:
