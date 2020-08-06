@@ -100,8 +100,6 @@ spec:
         network_policy: false
         job_rabbit_init: false
         secret_ca_bundle: true
-        ingress_api: false
-        service_ingress_api: false
         job_storage_init: false
         job_db_init_indexer: false
         job_db_init: true
