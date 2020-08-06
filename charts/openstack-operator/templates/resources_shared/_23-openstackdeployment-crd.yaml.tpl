@@ -3,8 +3,6 @@ kind: CustomResourceDefinition
 metadata:
   # name must match the spec fields below, and be in the form: <plural>.<group>
   name: openstackdeployments.lcm.mirantis.com
-  annotations:
-    "helm.sh/hook": crd-install
 spec:
   # group name to use for REST API: /apis/<group>/<version>
   group: lcm.mirantis.com

@@ -7,7 +7,6 @@ metadata:
     controller-tools.k8s.io: "1.0"
   name: helmbundles.lcm.mirantis.com
   annotations:
-    "helm.sh/hook": crd-install
     "openstackdeployments.lcm.mirantis.com/shared_resource_action": {{ if .Values.helmbundle.enabled }}"create"{{ else }}"wait"{{ end }}
 spec:
   group: lcm.mirantis.com
