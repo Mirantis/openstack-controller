@@ -59,6 +59,7 @@ webhooks:
         scope: "Namespaced"
     sideEffects: None
     admissionReviewVersions: ["v1"]
+    timeoutSeconds: 30
 ---
 apiVersion: apps/v1
 kind: Deployment
