@@ -26,6 +26,7 @@ features:
 {%- endif %}
     - coordination
     - key-manager
+    - load-balancer
   glance:
     backend: ceph
   cinder:
@@ -46,6 +47,28 @@ features:
     user:
       username: stacklight
 services:
+  load-balancer:
+    octavia:
+      values:
+        manifests:
+          daemonset_health_manager: false
+          deployment_worker: false
+          deployment_housekeeping: false
+          job_create_resources: false
+          secret_octavia_certs: false
+        conf:
+          octavia:
+            apiserver:
+              api_server_ip: tf-config-api.tf.svc.cluster.local
+              api_server_port: 8082
+            driver_agent:
+              enabled_provider_agents: tungstenfabric-agent
+              max_process_warning_percent: 0.75
+              provider_agent_shutdown_timeout: 60
+              stats_max_processes: 50
+              stats_request_timeout: 5
+              status_max_processes: 50
+              status_request_timeout: 5
   database:
     mariadb:
       values:
