@@ -26,7 +26,6 @@ spec:
     "db_init",
     "db_drop",
     "horizon",
-    "horizon_clean_cache",
     "image_repo_sync",
     "test",
     "dep_check",] %}
