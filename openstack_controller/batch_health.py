@@ -1,3 +1,5 @@
+import collections
+
 import pykube
 
 from openstack_controller import health
@@ -36,7 +38,12 @@ def calculate_statuses(k8s_objects):
 def update_health_statuses():
     osdpl = health.get_osdpl(settings.OSCTL_OS_DEPLOYMENT_NAMESPACE)
     statuses = calculate_statuses(get_k8s_objects(osdpl.namespace))
+    health_all = collections.defaultdict(dict)
     for ident, status in statuses.items():
         LOG.debug(f"Update status for {ident} to {status}")
-        health.set_application_health(osdpl, *ident, *status)
+        health_all[ident[0]][ident[1]] = {
+            "status": status[0],
+            "generation": status[1],
+        }
+    health.set_multi_application_health(osdpl, health_all)
     LOG.info("Health statuses updated %d", len(statuses))
