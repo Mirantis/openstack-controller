@@ -34,3 +34,8 @@ metadata:
   name: {{ .Values.osdpl.cephSharedNamespace }}
   annotations:
     "openstackdeployments.lcm.mirantis.com/shared_resource_action": {{ if .Values.kopf.enabled }}"create"{{ else }}"wait"{{ end }}
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: {{ .Values.osdpl.namespace }}
