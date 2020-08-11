@@ -12,179 +12,224 @@
 # limitations under the License.
 
 import copy
-import io
 import json
-import unittest
-from unittest import mock
+
+import falcon
+from falcon import testing
+import pytest
 
 from openstack_controller.admission import controller
-from openstack_controller.admission.validators import base
-from openstack_controller.admission.validators import openstack as osv
-from openstack_controller.admission.validators import neutron
-from openstack_controller import exception
 
 
-REQ_BODY_DICT = {
-    "apiVersion": "admission.k8s.io/v1beta1",
+# https://kubernetes.io/docs/reference/access-authn-authz/extensible-admission-controllers/#request
+ADMISSION_REQ_JSON = """
+{
+    "apiVersion": "admission.k8s.io/v1",
     "kind": "AdmissionReview",
     "request": {
-        "uid": "705ab4f5-6393-11e8-b7cc-42010a800002",
+        "uid": "00000000-0000-0000-0000-000000000000",
         "kind": {
             "group": "lcm.mirantis.com",
             "version": "v1alpha1",
-            "kind": "OpenStackDeployment",
+            "kind": "OpenStackDeployment"
         },
-        "object": {"spec": {"features": {"services": []}}},
-    },
+        "resource": {
+            "group": "lcm.mirantis.com",
+            "version": "v1alpha1",
+            "resource": "openstackdeployments"
+        },
+        "name": "osh-dev",
+        "namespace": "openstack",
+        "operation": "CREATE",
+        "object": {
+            "apiVersion": "lcm.mirantis.com/v1alpha1",
+            "kind": "OpenStackDeployment",
+            "spec": {
+                "openstack_version": "ussuri",
+                "profile": "compute",
+                "size": "tiny",
+                "features": {
+                    "neutron": {
+                        "floating_network": {
+                            "physnet": "physnet1"
+                        }
+                    }
+                }
+            }
+        },
+        "oldObject": null,
+        "dryRun": false
+    }
 }
+"""
 
-TEST_SCHEMA = {
-    "$schema": "http://json-schema.org/draft-03/schema#",
-    "type": "object",
-    "properties": {"apiVersion": {"type": "string", "required": True}},
-    "additionalProperties": True,
-}
+ADMISSION_REQ = json.loads(ADMISSION_REQ_JSON)
 
 
-class OkValidator(base.BaseValidator):
-    def validate(self, review_request):
-        pass
+@pytest.fixture
+def client():
+    return testing.TestClient(controller.create_api())
 
 
-class FailValidator(base.BaseValidator):
-    def validate(self, review_request):
-        raise exception.OsDplValidationFailed("VIKINGS!")
+def test_root(client):
+    response = client.simulate_get("/")
+    assert response.status == falcon.HTTP_OK
 
 
-FAKE_VALIDATORS = {
-    "openstack": OkValidator(),
-    "ok": OkValidator(),
-    "fail": FailValidator(),
-}
-
-FAKE_SERVICES = ({"ok", "fail"}, set())
+def test_minimal_validation_response(client):
+    req = copy.deepcopy(ADMISSION_REQ)
+    response = client.simulate_post("/validate", json=req)
+    assert response.status == falcon.HTTP_OK
+    assert response.json["response"]["allowed"] is True
 
 
-class TestRootController(unittest.TestCase):
-    def setUp(self):
-        self.controller = controller.RootResource()
-
-    def test_root(self):
-        self.controller.on_get(None, None)
-
-
-@mock.patch.object(controller, "_load_schema", TEST_SCHEMA)
-class TestValidationController(unittest.TestCase):
-    def setUp(self):
-        self.req_body_dict = copy.deepcopy(REQ_BODY_DICT)
-        self.resp = mock.MagicMock(body="")
-        self.controller = controller.ValidationResource()
-
-    def test_validate_invalid_request_body(self):
-        req = mock.MagicMock(stream=io.StringIO("boo"))
-        self.controller.on_post(req, self.resp)
-        self.assertIn("400", self.resp.body)
-        self.assertIn(
-            "Exception parsing the body of request: Expecting value",
-            self.resp.body,
-        )
-
-    def test_validate_not_satisfying_schema(self):
-        self.req_body_dict.pop("apiVersion")
-        req_body = json.dumps(self.req_body_dict)
-        req = mock.MagicMock(stream=io.StringIO(req_body))
-        self.controller.on_post(req, self.resp)
-        self.assertIn("400", self.resp.body)
-        self.assertIn("'apiVersion' is a required property", self.resp.body)
-
-    @mock.patch.object(
-        FAKE_VALIDATORS["ok"], "validate",
+def test_validate_invalid_request_body(client):
+    req = "Boo!"
+    response = client.simulate_post("/validate", body=req)
+    assert response.status == falcon.HTTP_OK
+    assert response.json["response"]["allowed"] is False
+    assert response.json["response"]["status"]["code"] == 400
+    assert (
+        "Exception parsing the body of request: Expecting value"
+        in response.json["response"]["status"]["message"]
     )
-    @mock.patch.object(
-        FAKE_VALIDATORS["fail"],
-        "validate",
-        wraps=FAKE_VALIDATORS["fail"].validate,
+
+
+def test_validate_not_satisfying_schema(client):
+    req = copy.deepcopy(ADMISSION_REQ)
+    req.pop("apiVersion")
+    response = client.simulate_post("/validate", json=req)
+    assert response.status == falcon.HTTP_OK
+    assert response.json["response"]["allowed"] is False
+    assert response.json["response"]["status"]["code"] == 400
+    assert (
+        "'apiVersion' is a required property"
+        in response.json["response"]["status"]["message"]
     )
-    @mock.patch.object(controller, "_VALIDATORS", FAKE_VALIDATORS)
-    @mock.patch.object(
-        controller.layers, "services", return_value=FAKE_SERVICES
+
+
+def test_openstack_create_master_fail(client):
+    req = copy.deepcopy(ADMISSION_REQ)
+    req["request"]["object"]["spec"]["openstack_version"] = "master"
+    response = client.simulate_post("/validate", json=req)
+    assert response.status == falcon.HTTP_OK
+    assert response.json["response"]["allowed"] is False
+    assert response.json["response"]["status"]["code"] == 400
+    assert (
+        "Using master of OpenStack is not permitted"
+        in response.json["response"]["status"]["message"]
     )
-    def test_validate_validators_stop_after_first_fail(
-        self, svc_mock, fail_mock, ok_mock
-    ):
-        ok_mock.side_effect = exception.OsDplValidationFailed("VIKINGS!")
-        # Since we use sets, we don't know the order in which validators
-        # will be applied.
-        # we've set both validators to fail, and we'll check that only one
-        # of them was called
-        self.req_body_dict["request"]["object"]["spec"]["features"][
-            "services"
-        ] = ["ok", "fail"]
-        req_body = json.dumps(self.req_body_dict)
-        req = mock.MagicMock(stream=io.StringIO(req_body))
-        self.controller.on_post(req, self.resp)
-        self.assertIn("400", self.resp.body)
-        self.assertIn("VIKINGS!", self.resp.body)
-        # check that only one validator was called
-        self.assertEqual(1, ok_mock.call_count + fail_mock.call_count)
 
 
-class TestOpenStackValidator(unittest.TestCase):
-    def setUp(self):
-        super().setUp()
-        self.validate = osv.OpenStackValidator().validate
-        self.req = {"operation": "UPDATE", "object": {}, "oldObject": {}}
-
-    def test_upgrade(self):
-        self.req["object"] = {"spec": {"openstack_version": "train"}}
-        self.req["oldObject"] = {"spec": {"openstack_version": "stein"}}
-        self.assertIsNone(self.validate(self.req))
-
-    def test_downgrade(self):
-        self.req["object"] = {"spec": {"openstack_version": "stein"}}
-        self.req["oldObject"] = {"spec": {"openstack_version": "train"}}
-        with self.assertRaises(exception.OsDplValidationFailed):
-            self.validate(self.req)
-
-    def test_skiplevel_upgrade(self):
-        self.req["object"] = {"spec": {"openstack_version": "train"}}
-        self.req["oldObject"] = {"spec": {"openstack_version": "rocky"}}
-        with self.assertRaises(exception.OsDplValidationFailed):
-            self.validate(self.req)
-
-    def test_upgrade_with_extra_changes(self):
-        self.req["object"] = {"spec": {"openstack_version": "train"}}
-        self.req["oldObject"] = {
-            "spec": {"openstack_version": "stein", "spam": "ham"}
-        }
-        with self.assertRaises(exception.OsDplValidationFailed):
-            self.validate(self.req)
-
-    def test_upgrade_to_master(self):
-        self.req["object"] = {"spec": {"openstack_version": "master"}}
-        self.req["oldObject"] = {"spec": {"openstack_version": "ussuri"}}
-        with self.assertRaises(exception.OsDplValidationFailed):
-            self.validate(self.req)
-
-    def test_create_master(self):
-        self.req = {"operation": "CREATE"}
-        self.req["object"] = {"spec": {"openstack_version": "master"}}
-        with self.assertRaises(exception.OsDplValidationFailed):
-            self.validate(self.req)
+def test_openstack_upgrade_ok(client):
+    req = copy.deepcopy(ADMISSION_REQ)
+    req["request"]["operation"] = "UPDATE"
+    req["request"]["oldObject"] = copy.deepcopy(req["request"]["object"])
+    req["request"]["oldObject"]["spec"]["openstack_version"] = "train"
+    response = client.simulate_post("/validate", json=req)
+    assert response.status == falcon.HTTP_OK
+    assert response.json["response"]["allowed"] is True
 
 
-class TestNeutronValidator(unittest.TestCase):
-    def setUp(self):
-        super().setUp()
-        self.validate = neutron.NeutronValidator().validate
-        self.req = {"object": {"spec": {"features": {"neutron": {}}}}}
+def test_openstack_upgrade_to_master_fail(client):
+    req = copy.deepcopy(ADMISSION_REQ)
+    req["request"]["operation"] = "UPDATE"
+    req["request"]["oldObject"] = copy.deepcopy(req["request"]["object"])
+    req["request"]["object"]["spec"]["openstack_version"] = "master"
+    response = client.simulate_post("/validate", json=req)
+    assert response.status == falcon.HTTP_OK
+    assert response.json["response"]["allowed"] is False
+    assert response.json["response"]["status"]["code"] == 400
+    assert (
+        "Using master of OpenStack is not permitted"
+        in response.json["response"]["status"]["message"]
+    )
 
-    def test_physnet_required_no_tf(self):
-        with self.assertRaises(exception.OsDplValidationFailed):
-            self.validate(self.req)
 
-    def test_tf_physnet_optional(self):
-        self.req["object"]["spec"]["features"]["neutron"] = {
-            "backend": "tungstenfabric"
-        }
-        self.assertIsNone(self.validate(self.req))
+def test_validator_single_fail(client):
+    """Test that validation stops on first error"""
+    req = copy.deepcopy(ADMISSION_REQ)
+    req["request"]["operation"] = "UPDATE"
+    req["request"]["oldObject"] = copy.deepcopy(req["request"]["object"])
+    # set up for both master failure and neutron physnet required failure
+    # openstack check must be called first and only its failure returned
+    req["request"]["object"]["spec"]["openstack_version"] = "master"
+    req["request"]["object"]["spec"]["features"]["neutron"] = {}
+
+    response = client.simulate_post("/validate", json=req)
+    assert response.status == falcon.HTTP_OK
+    assert response.json["response"]["allowed"] is False
+    assert response.json["response"]["status"]["code"] == 400
+    assert (
+        "Using master of OpenStack is not permitted"
+        in response.json["response"]["status"]["message"]
+    )
+
+
+def test_openstack_skiplevel_upgrade_fail(client):
+    req = copy.deepcopy(ADMISSION_REQ)
+    req["request"]["operation"] = "UPDATE"
+    req["request"]["oldObject"] = copy.deepcopy(req["request"]["object"])
+    req["request"]["oldObject"]["spec"]["openstack_version"] = "stein"
+    response = client.simulate_post("/validate", json=req)
+    assert response.status == falcon.HTTP_OK
+    assert response.json["response"]["allowed"] is False
+    assert response.json["response"]["status"]["code"] == 400
+    assert (
+        "Skip-level OpenStack version upgrade is not permitted"
+        in response.json["response"]["status"]["message"]
+    )
+
+
+def test_openstack_downgrade_fail(client):
+    req = copy.deepcopy(ADMISSION_REQ)
+    req["request"]["operation"] = "UPDATE"
+    req["request"]["oldObject"] = copy.deepcopy(req["request"]["object"])
+    req["request"]["object"]["spec"]["openstack_version"] = "train"
+    response = client.simulate_post("/validate", json=req)
+    assert response.status == falcon.HTTP_OK
+    assert response.json["response"]["allowed"] is False
+    assert response.json["response"]["status"]["code"] == 400
+    assert (
+        "downgrade is not permitted"
+        in response.json["response"]["status"]["message"]
+    )
+
+
+def test_upgrade_with_extra_changes_fail(client):
+    req = copy.deepcopy(ADMISSION_REQ)
+    req["request"]["operation"] = "UPDATE"
+    req["request"]["oldObject"] = copy.deepcopy(req["request"]["object"])
+    req["request"]["oldObject"]["spec"]["openstack_version"] = "train"
+    req["request"]["object"]["spec"]["size"] = "small"
+    response = client.simulate_post("/validate", json=req)
+    assert response.status == falcon.HTTP_OK
+    assert response.json["response"]["allowed"] is False
+    assert response.json["response"]["status"]["code"] == 400
+    assert (
+        "changing other values in the spec is not permitted"
+        in response.json["response"]["status"]["message"]
+    )
+
+
+def test_physnet_required_no_tf(client):
+    req = copy.deepcopy(ADMISSION_REQ)
+    req["request"]["object"]["spec"]["features"]["neutron"] = {}
+    response = client.simulate_post("/validate", json=req)
+    assert response.status == falcon.HTTP_OK
+    assert response.json["response"]["allowed"] is False
+    assert response.json["response"]["status"]["code"] == 400
+    assert (
+        "physnet needs to be specified"
+        in response.json["response"]["status"]["message"]
+    )
+
+
+def test_physnet_optional_tf(client):
+    req = copy.deepcopy(ADMISSION_REQ)
+    req["request"]["object"]["spec"]["features"]["neutron"] = {
+        "backend": "tungstenfabric"
+    }
+    response = client.simulate_post("/validate", json=req)
+    assert response.status == falcon.HTTP_OK
+    assert response.json["response"]["allowed"] is True
