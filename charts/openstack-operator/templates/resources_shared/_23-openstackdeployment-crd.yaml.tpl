@@ -512,49 +512,49 @@ spec:
                       properties:
                         baremetal:
                           type: object
-                        properties:
-                          name:
-                            type: string
-                            description: name of baremetal network
-                          physnet:
-                            type: string
-                            description: name of physical network to associate
-                          network_type:
-                            type: string
-                            enum:
-                              - flat
-                              - vlan
-                            description: type of provisioning/cleaning baremetal network
-                          segmentation_id:
-                            type: integer
-                            description: the vlan number of cleaning network in case of VLAN segmentation is used
-                          mtu:
-                            type: integer
-                            description: the MTU for cleaning network
-                          subnets:
-                            type: object
-                            required:
-                              - baremetal_subnet
-                            properties:
-                              baremetal_subnet:
-                                type: object
-                                required:
-                                  - range
-                                  - pool_start
-                                  - pool_end
-                                  - gateway
-                                range:
-                                  type: string
-                                  description: the cidr of baremetal network
-                                pool_start:
-                                  type: string
-                                  description: the start range of allocation pool for baremetal network
-                                pool_end:
-                                  type: string
-                                  description: the end range of allocation pool for baremetal network
-                                gateway:
-                                  type: string
-                                  description: the gateway for baremetal network
+                          properties:
+                            name:
+                              type: string
+                              description: name of baremetal network
+                            physnet:
+                              type: string
+                              description: name of physical network to associate
+                            network_type:
+                              type: string
+                              enum:
+                                - flat
+                                - vlan
+                              description: type of provisioning/cleaning baremetal network
+                            segmentation_id:
+                              type: integer
+                              description: the vlan number of cleaning network in case of VLAN segmentation is used
+                            mtu:
+                              type: integer
+                              description: the MTU for cleaning network
+                            subnets:
+                              type: object
+                              required:
+                                - baremetal_subnet
+                              properties:
+                                baremetal_subnet:
+                                  type: object
+                                  required:
+                                    - range
+                                    - pool_start
+                                    - pool_end
+                                    - gateway
+                                  range:
+                                    type: string
+                                    description: the cidr of baremetal network
+                                  pool_start:
+                                    type: string
+                                    description: the start range of allocation pool for baremetal network
+                                  pool_end:
+                                    type: string
+                                    description: the end range of allocation pool for baremetal network
+                                  gateway:
+                                    type: string
+                                    description: the gateway for baremetal network
                     agent_images:
                       type: object
                       properties:
