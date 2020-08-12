@@ -94,6 +94,11 @@ def set_application_health(
     osdpl.patch({"status": {"health": patch}})
 
 
+def set_multi_application_health(osdpl, patch):
+    LOG.debug(f"Set multi application health")
+    osdpl.patch({"status": {"health": patch}})
+
+
 def is_application_ready(application, osdpl):
     osdpl = kube.OpenStackDeployment(kube.api, osdpl.obj)
     osdpl.reload()
