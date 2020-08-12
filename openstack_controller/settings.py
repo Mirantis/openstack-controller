@@ -112,6 +112,11 @@ if OSCTL_HEARTBEAT_INTERVAL:
         HEARTBEAT = time.time()
 
 
+OSCTL_PYKUBE_HTTP_REQUEST_TIMEOUT = float(
+    os.environ.get("OSCTL_PYKUBE_HTTP_REQUEST_TIMEOUT", 60)
+)
+
+
 @kopf.on.startup()
 def configure(settings: kopf.OperatorSettings, **_):
     settings.watching.connect_timeout = 1 * 60

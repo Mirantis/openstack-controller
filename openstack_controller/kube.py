@@ -18,7 +18,9 @@ LOG = utils.get_logger(__name__)
 
 def login():
     config = pykube.KubeConfig.from_env()
-    client = pykube.HTTPClient(config)
+    client = pykube.HTTPClient(
+        config=config, timeout=settings.OSCTL_PYKUBE_HTTP_REQUEST_TIMEOUT
+    )
     LOG.info(f"Created k8s api client from context {config.current_context}")
     return client
 
