@@ -211,7 +211,7 @@ spec:
               raw:
                 # NOTE(vsaienko): there is no guarantee that during update/upgrade horizon works with previous
                 # cache. To allow rolling upgrade work we need to have uniq prefix for cache keys.
-                KEY_PREFIX: {{ images['horizon'].split(':') | last }}
+                KEY_PREFIX: "'{{ images['horizon'].split(':') | last }}'"
 {%- if keystone_keycloak_enabled %}
               auth:
                 idp_mapping:
