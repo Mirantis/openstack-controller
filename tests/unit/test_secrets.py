@@ -49,3 +49,39 @@ def test_keycloak_secret_serialization(mock_password, mock_data):
 
     assert created == passphrase
     assert created == from_secret
+
+
+@mock.patch("openstack_controller.secrets.get_secret_data")
+@mock.patch("openstack_controller.secrets.generate_password")
+@mock.patch("openstack_controller.secrets.generate_name")
+def test_galera_secret(mock_name, mock_password, mock_secret_data):
+    creds_b64 = base64.b64encode(
+        json.dumps({"username": "username", "password": "password"}).encode()
+    )
+
+    mock_name.return_value = "username"
+    mock_password.return_value = "password"
+
+    mock_secret_data.return_value = {
+        "sst": creds_b64,
+        "exporter": creds_b64,
+        "audit": creds_b64,
+    }
+    galera_secret = secrets.GaleraSecret("ns")
+    actual = galera_secret.get()
+
+    system_creds = secrets.OSSytemCreds(
+        username="username", password="password"
+    )
+    expected = secrets.GaleraCredentials(
+        sst=system_creds,
+        exporter=system_creds,
+        audit=system_creds,
+        backup=system_creds,
+    )
+
+    mock_name.assert_called_once_with(prefix="backup", length=8)
+    mock_password.assert_called_once_with(length=32)
+    mock_secret_data.assert_called_once_with("ns", galera_secret.secret_name)
+
+    assert actual == expected
