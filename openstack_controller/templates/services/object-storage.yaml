@@ -94,3 +94,5 @@ spec:
                 api:
                   default: 8088
                   public: 80
+      jobs:
+{% include 'base/_ks_jobs.yaml' %}

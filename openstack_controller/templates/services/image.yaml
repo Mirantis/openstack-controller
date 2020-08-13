@@ -250,4 +250,6 @@ spec:
 {{ spec.features.ssl.public_endpoints.api_cert | indent( width=18, first=True) }}
                 key: |
 {{ spec.features.ssl.public_endpoints.api_key | indent( width=18, first=True) }}
+      jobs:
+{% include 'base/_ks_jobs.yaml' %}
 {%- endif %}

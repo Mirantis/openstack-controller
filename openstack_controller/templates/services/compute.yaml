@@ -497,4 +497,6 @@ spec:
         {%- endif %}
         sshd:
           enabled: true
+      jobs:
+{% include 'base/_ks_jobs.yaml' %}
 {%- endif %}

@@ -201,4 +201,6 @@ spec:
           scheme:
             default: http
             public: https
+      jobs:
+{% include 'base/_ks_jobs.yaml' %}
 {%- endif %}

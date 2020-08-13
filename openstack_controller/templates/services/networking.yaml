@@ -453,4 +453,6 @@ spec:
                   DEFAULT:
                     agent_mode: dvr_snat
         {%- endif %}
+      jobs:
+{% include 'base/_ks_jobs.yaml' %}
 {%- endif %}
