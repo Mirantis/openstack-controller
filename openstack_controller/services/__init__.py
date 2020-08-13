@@ -543,30 +543,9 @@ class Horizon(OpenStackService):
     openstack_chart = "horizon"
     _secret_class = secrets.HorizonSecret
 
-    _child_objects = {
-        "horizon": {
-            "Job": {
-                "horizon-clean-cache": {
-                    "images": ["horizon_clean_cache"],
-                    "manifest": "job_clean_cache",
-                }
-            }
-        }
-    }
-
     @property
     def _child_generic_objects(self):
         return {"horizon": {"job_db_init", "job_db_sync", "job_db_drop"}}
-
-    @layers.kopf_exception
-    async def _upgrade(self, event, **kwargs):
-        upgrade_map = [
-            ("Job", "horizon-clean-cache"),
-        ]
-        for kind, obj_name in upgrade_map:
-            child_obj = self.get_child_object(kind, obj_name)
-            await child_obj.purge()
-            await child_obj.enable(self.openstack_version, True)
 
 
 class Ironic(OpenStackService):
