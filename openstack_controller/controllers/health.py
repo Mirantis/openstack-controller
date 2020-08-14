@@ -38,6 +38,7 @@ def _delete(osdpl, kind, meta, application, component):
 
 
 @kopf.on.delete("apps", "v1", "deployments")
+@utils.collect_handler_metrics
 async def deployments(name, namespace, meta, status, new, event, **kwargs):
     LOG.debug(f"Deployment {name} status.conditions is {status}")
     osdpl = health.get_osdpl(namespace)
@@ -48,6 +49,7 @@ async def deployments(name, namespace, meta, status, new, event, **kwargs):
 
 
 @kopf.on.delete("apps", "v1", "statefulsets")
+@utils.collect_handler_metrics
 async def statefulsets(name, namespace, meta, status, event, **kwargs):
     LOG.debug(f"StatefulSet {name} status is {status}")
     osdpl = health.get_osdpl(namespace)
@@ -59,6 +61,7 @@ async def statefulsets(name, namespace, meta, status, event, **kwargs):
 
 @kopf.on.field("apps", "v1", "daemonsets", field="status")
 @kopf.on.delete("apps", "v1", "daemonsets")
+@utils.collect_handler_metrics
 async def daemonsets(name, namespace, meta, status, event, **kwargs):
     LOG.debug(f"DaemonSet {name} status is {status}")
     osdpl = health.get_osdpl(namespace)

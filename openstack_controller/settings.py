@@ -16,6 +16,7 @@ import time
 
 import kopf
 from kopf.engines.posting import event_queue_var
+from prometheus_client import start_http_server, Gauge, Counter, Summary
 
 
 HEARTBEAT = time.time()
@@ -100,7 +101,38 @@ OSCTL_BATCH_HEATH_UPDATER_PERIOD = int(
     os.environ.get("OSCTL_BATCH_HEATH_UPDATER_PERIOD", 60)
 )
 
+OSCTL_PYKUBE_HTTP_REQUEST_TIMEOUT = float(
+    os.environ.get("OSCTL_PYKUBE_HTTP_REQUEST_TIMEOUT", 60)
+)
+
 OSCTL_MAX_TASKS = int(os.environ.get("OSCTL_MAX_TASKS", 150))
+
+# The port number for /metrics endpoint. If the value is less or equal to zero
+# metrics http server will not start.
+OSCTL_METRICS_PORT = int(os.environ.get("OSCTL_METRICS_PORT", -1))
+
+METRICS = {
+    "queue": Gauge(
+        "openstack_controller_task_queue_size", "The size of task queue."
+    ),
+    "threads": Gauge("openstack_controller_threads", "The number of threads."),
+    "handler_latency": Summary(
+        "openstack_controller_handler_latency_seconds",
+        "Time for a handler.",
+        labelnames=["handler"],
+    ),
+    "handler_errors": Counter(
+        "openstack_controller_handler_errors_total",
+        "The nubmer of errors for a handler.",
+        labelnames=["handler"],
+    ),
+    "handler_last": Gauge(
+        "openstack_controller_handler_last_time_seconds",
+        "The last time a k8s event was served by openstack-controller specific handler.",
+        labelnames=["handler"],
+    ),
+}
+
 
 if OSCTL_HEARTBEAT_INTERVAL:
 
@@ -117,11 +149,6 @@ if OSCTL_HEARTBEAT_INTERVAL:
         CURRENT_NUMBER_OF_TASKS = event_queue_var.get().qsize()
 
 
-OSCTL_PYKUBE_HTTP_REQUEST_TIMEOUT = float(
-    os.environ.get("OSCTL_PYKUBE_HTTP_REQUEST_TIMEOUT", 60)
-)
-
-
 @kopf.on.startup()
 def configure(settings: kopf.OperatorSettings, **_):
     settings.watching.connect_timeout = 1 * 60
@@ -135,3 +162,5 @@ def configure(settings: kopf.OperatorSettings, **_):
     )
     # Defines total timeout for aiohttp watching session.
     settings.watching.client_timeout = 1 * 600
+    if OSCTL_METRICS_PORT > 0:
+        start_http_server(OSCTL_METRICS_PORT)

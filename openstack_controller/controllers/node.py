@@ -10,6 +10,7 @@ LOG = utils.get_logger(__name__)
 
 
 @kopf.on.field("", "v1", "nodes", field="status.conditions")
+@utils.collect_handler_metrics
 async def node_status_update_handler(name, body, old, new, event, **kwargs):
     LOG.debug(f"Handling node status {event} event.")
     LOG.debug(f"The new state is {new}")
