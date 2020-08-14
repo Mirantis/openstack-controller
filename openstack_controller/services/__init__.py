@@ -674,6 +674,36 @@ class Neutron(OpenStackService):
     _secret_class = secrets.NeutronSecret
 
     @property
+    def _required_accounts(self):
+        r_accounts = {"compute": ["nova"], "dns": ["designate"]}
+        services = self.mspec["features"]["services"]
+        if "baremetal" in services:
+            r_accounts["baremetal"] = ["ironic"]
+        return r_accounts
+
+    def template_args(self):
+        t_args = super().template_args()
+
+        ngs_ssh_keys = {}
+        if "baremetal" in self.mspec["features"]["services"]:
+            for device in (
+                self.mspec["features"]
+                .get("neutron", {})
+                .get("baremetal", {})
+                .get("ngs", {})
+                .get("devices", [])
+            ):
+                if "ssh_private_key" in device:
+                    ngs_ssh_keys[f"{device['name']}_ssh_private_key"] = device[
+                        "ssh_private_key"
+                    ]
+        if ngs_ssh_keys:
+            ngs_secret = secrets.NgsSSHSecret(self.namespace)
+            ngs_secret.save(ngs_ssh_keys)
+
+        return t_args
+
+    @property
     def health_groups(self):
         return [self.openstack_chart, "openvswitch"]
 
