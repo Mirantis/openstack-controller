@@ -38,7 +38,10 @@ spec:
               service_user:
                 username: {{ credentials.messaging.user.username }}
                 password: {{ credentials.messaging.user.password }}
-            path: /heat_{{ spec.openstack_version }}
+            path:
+            {%- for version in latest_openstack_versions %}
+            - /heat_{{ version }}
+            {%- endfor %}
         aux_conf:
           policies:
   {%- for version in latest_openstack_versions %}
