@@ -196,6 +196,10 @@ services:
             validation:
               image_ssh_password: gocubsgo
               image_ssh_user: cirros
+            {%- if ironic_enabled %}
+              ssh_timeout: 420
+              connect_timeout: 90
+            {%- endif %}
             network:
             {%- if ironic_enabled %}
               shared_physical_network: true
