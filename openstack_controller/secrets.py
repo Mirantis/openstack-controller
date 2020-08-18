@@ -433,6 +433,18 @@ class SSHSecret(Secret):
         return SshKey(public=public_key.decode(), private=private_key.decode())
 
 
+class NgsSSHSecret:
+    def __init__(self, namespace):
+        self.namespace = namespace
+        self.secret_name = f"ngs-ssh-keys"
+
+    def save(self, secret) -> None:
+        for key in secret.keys():
+            secret[key] = base64.b64encode(secret[key].encode()).decode()
+
+        kube.save_secret_data(self.namespace, self.secret_name, secret)
+
+
 class SignedCertificateSecret(Secret):
     secret_class = SignedCertificate
 

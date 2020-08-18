@@ -470,30 +470,25 @@ spec:
                                   device_type:
                                     type: string
                                     description: Netmiko device type
-                                  ngs_mac_address:
-                                    type: string
-                                    description: Switch mac address
                                   ip:
                                     type: string
                                     description: IP address of switch
-                                  port:
-                                    type: integer
-                                    description: SSH port
                                   username:
                                     type: string
                                     description: Credential username
                                   password:
                                     type: string
                                     description: Credential password
-                                  key_file:
+                                  ssh_private_key:
                                     type: string
-                                    description: SSH key file
+                                    description:  SSH private key for switch.
                                   secret:
                                     type: string
                                     description: Enable secret
-                                  ngs_port_default_vlan:
-                                    type: integer
-                                    description: Port default vlan
+                                  raw:
+                                    type: object
+                                    description: RAW config for device.
+
                 ironic:
                   type: object
                   required:

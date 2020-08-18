@@ -9,7 +9,7 @@
 {%- set service_plugins = ['<None>'] if tungstenfabric_enabled else ['router', 'metering', 'qos'] %}
 {%- do notification_topics.append('stacklight_notifications') if stacklight_enabled %}
 {%- set floating_network = spec.features.neutron.get('floating_network', {}) %}
-{%- set baremetal_enabled = 'baremetal' in services %}
+{%- set baremetal_enabled = 'baremetal' in spec.features.get('services', []) %}
 
 spec:
   releases:
@@ -204,6 +204,24 @@ spec:
                   initialDelaySeconds: 10
                   periodSeconds: 50
                   timeoutSeconds: 40
+      {%- if baremetal_enabled %}
+        mounts:
+          neutron_server:
+            neutron_server:
+            {%- for gs_dev in spec.features.neutron.get('baremetal', {}).get('ngs', {}).get('devices', []) %}
+              {%- if gs_dev.ssh_private_key is defined %}
+              volumeMounts:
+                - name: ngs-{{ gs_dev.name }}-ssh-private
+                  mountPath: /etc/neutron/ngs/{{ gs_dev.name }}.key
+                  subPath: {{ gs_dev.name }}_ssh_private_key
+              volumes:
+                - name: ngs-{{ gs_dev.name }}-ssh-private
+                  secret:
+                    secretName: ngs-ssh-keys
+                    defaultMode: 0400
+              {%- endif %}
+            {%- endfor %}
+      {%- endif %}
       dependencies:
         static:
           db_init:
@@ -362,6 +380,10 @@ spec:
         metadata_agent:
           DEFAULT:
             metadata_proxy_shared_secret: {{ credentials.metadata_secret }}
+        ironic:
+          # TODO(vsaienko): figure out why specifying endpoint type via valid_interfaces or interface
+          # or endpoint_typedoes not work.
+          insecure: True
 # TODO: make other networks types configurable
 {%- set networks = {'flat': [], 'vlan': []} %}
 {%- set bridge_mappings = [] %}
@@ -405,6 +427,13 @@ spec:
               ip: {{ gs_dev.ip }}
               username: {{ gs_dev.username }}
               {% if gs_dev.password is defined %}password: {{ gs_dev.password }}{% endif %}
+              {% if gs_dev.secret is defined %}password: {{ gs_dev.secret }}{% endif %}
+              {%- if gs_dev.ssh_private_key is defined %}
+              key_file: {{ gs_dev.name }}_ssh_private_key
+              {%- endif %}
+              {%- for key, val in  gs_dev.get('raw', {}).items() %}
+              {{ key }}: {{ val }}
+              {%- endfor %}
             {%- endfor %}
           {%- endif %}
           openvswitch_agent:
