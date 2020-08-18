@@ -130,7 +130,6 @@ spec:
                   secret:
                     secretName: octavia-certs
                     defaultMode: 0644
-          octavia_driver_agent:
             octavia_driver_agent:
               volumeMounts:
                 - name: octavia-certs
@@ -218,7 +217,7 @@ spec:
         secret_octavia_certs: false
         secret_ca_bundle: true
 {%- if spec.openstack_version not in ['queens', 'rocky'] %}
-        deployment_driver_agent: true
+        octavia_driver_agent: true
 {%- endif %}
       conf:
         octavia:
