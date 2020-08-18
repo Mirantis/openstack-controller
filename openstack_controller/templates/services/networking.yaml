@@ -429,7 +429,7 @@ spec:
               {% if gs_dev.password is defined %}password: {{ gs_dev.password }}{% endif %}
               {% if gs_dev.secret is defined %}password: {{ gs_dev.secret }}{% endif %}
               {%- if gs_dev.ssh_private_key is defined %}
-              key_file: {{ gs_dev.name }}_ssh_private_key
+              key_file: /etc/neutron/ngs/{{ gs_dev.name }}.key
               {%- endif %}
               {%- for key, val in  gs_dev.get('raw', {}).items() %}
               {{ key }}: {{ val }}
