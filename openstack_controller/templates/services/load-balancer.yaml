@@ -3,6 +3,7 @@
 
 {%- set service = 'octavia' %}
 {%- set provider_map = {'amphora': 'amphora:The Octavia Amphora driver.',
+                        'amphorav2': 'amphorav2:Extented Octavia Amphora driver with jobboard support.',
                         'octavia': 'octavia:Deprecated alias of the Octavia Amphora driver.'} %}
 {%- set components_with_dedicated_messaging = spec.get('features', {}).get('messaging', {}).get('components_with_dedicated_messaging', []) %}
 {%- set stacklight_enabled = spec.get('features', {}).get('stacklight', {}).get('enabled', False) %}
@@ -75,6 +76,9 @@ spec:
           lbmgmt_subnet_start: {{ spec.features.octavia.lb_network.subnet.pool_start }}
           lbmgmt_subnet_end: {{ spec.features.octavia.lb_network.subnet.pool_end }}
           amphora_image_url: {{ images["octavia_amphora"] }}
+          {%- endif %}
+{%- if 'amphorav2' in spec.features.get('octavia', {}).get('providers', []) %}
+          enable_amphorav2: true
 {%- endif %}
       images:
         tags:
@@ -91,6 +95,7 @@ spec:
     "ks_user",
     "ks_service",
     "octavia_db_sync",
+    "octavia_db_sync_persistence",
     "octavia_health_manager_init",
     "bootstrap",
     "rabbit_init",
@@ -229,6 +234,14 @@ spec:
 {%- do providers.append(provider_map.get(provider)) %}
 {%- endfor %}
             enabled_provider_drivers: {{ ','.join(providers) }}
+{%- if 'amphorav2' in spec.features.get('octavia', {}).get('providers', []) %}
+          task_flow:
+            jobboard_backend_hosts: rfs-openstack-redis-telemetry.{{ redis_namespace }}
+            jobboard_backend_port: 26379
+            jobboard_backend_password: {{ redis_secret }}
+            jobboard_redis_sentinel: 'mymaster'
+            jobboard_expiration_time: 90
+{%- endif %}
           keystone_authtoken:
             memcache_security_strategy: ENCRYPT
             memcache_secret_key: {{ credentials.memcached }}
@@ -258,6 +271,14 @@ spec:
         cluster_domain_suffix: {{ spec.internal_domain_name }}
 {% include 'base/_admin_identity.yaml' %}
         oslo_db:
+          auth:
+            admin:
+              username: {{ admin_creds.database.username }}
+              password: {{ admin_creds.database.password }}
+            octavia:
+              username: {{ credentials.database.user.username }}
+              password: {{ credentials.database.user.password }}
+        oslo_db_persistence:
           auth:
             admin:
               username: {{ admin_creds.database.username }}

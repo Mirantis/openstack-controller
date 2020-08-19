@@ -1007,6 +1007,16 @@ class Octavia(OpenStackService):
         cert_secret.ensure()
         ssh_secret = secrets.SSHSecret(self.namespace, self.service)
         t_args["ssh_credentials"] = ssh_secret.ensure()
+
+        if "redis-telemetry" in self.mspec["features"]["services"]:
+            t_args["redis_namespace"] = settings.OSCTL_REDIS_NAMESPACE
+
+            redis_secret = secrets.RedisSecret(settings.OSCTL_REDIS_NAMESPACE)
+            kube.wait_for_secret(
+                settings.OSCTL_REDIS_NAMESPACE, redis_secret.secret_name
+            )
+            redis_creds = redis_secret.get()
+            t_args["redis_secret"] = redis_creds.password.decode()
         return t_args
 
     async def cleanup_immutable_resources(self, new_obj, rendered_spec):

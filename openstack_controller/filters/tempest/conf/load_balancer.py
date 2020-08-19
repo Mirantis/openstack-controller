@@ -96,7 +96,9 @@ class LoadBalancer(base_section.BaseSection):
 
     @property
     def provider(self):
-        pass
+        return self.get_spec_item(
+            "features.octavia.default_provider", "amphora"
+        )
 
     @property
     def RBAC_test_type(self):
@@ -104,7 +106,12 @@ class LoadBalancer(base_section.BaseSection):
 
     @property
     def enabled_provider_drivers(self):
-        pass
+        providers = self.get_values_item(
+            "octavia",
+            "conf.octavia.api_settings.enabled_provider_drivers",
+            "amphora:amphora:The Octavia Amphora driver.",
+        )
+        return providers
 
     @property
     def loadbalancer_topology(self):
