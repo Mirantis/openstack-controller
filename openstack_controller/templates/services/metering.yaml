@@ -80,6 +80,7 @@ spec:
         secret_mongodb: false
         deployment_api: false
         deployment_collector: false
+        job_db_init: false
         job_rabbit_init: false
         job_db_init_mongodb: false
         job_ks_endpoints: false
