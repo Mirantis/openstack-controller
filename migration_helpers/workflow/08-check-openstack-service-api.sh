@@ -39,7 +39,7 @@ function check_api {
   info "Getting endpoint for $service"
   url="$(get_check_url $service $project $env)"
   set -x
-  curl --show-error -f -H "X-Auth-Token: $token" $url -k
+  curl --show-error -f -H "X-Auth-Token: $token" $url -k -L
   set +x
 }
 
