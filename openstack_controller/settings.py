@@ -15,9 +15,11 @@ import os
 import time
 
 import kopf
+from kopf.engines.posting import event_queue_var
 
 
 HEARTBEAT = time.time()
+CURRENT_NUMBER_OF_TASKS = -1
 
 # The number of seconds to wait for all component from application becomes ready
 OSCTL_WAIT_APPLICATION_READY_TIMEOUT = int(
@@ -98,6 +100,7 @@ OSCTL_BATCH_HEATH_UPDATER_PERIOD = int(
     os.environ.get("OSCTL_BATCH_HEATH_UPDATER_PERIOD", 60)
 )
 
+OSCTL_MAX_TASKS = int(os.environ.get("OSCTL_MAX_TASKS", 150))
 
 if OSCTL_HEARTBEAT_INTERVAL:
 
@@ -109,7 +112,9 @@ if OSCTL_HEARTBEAT_INTERVAL:
     )
     async def heartbeat(spec, **kwargs):
         global HEARTBEAT
+        global CURRENT_NUMBER_OF_TASKS
         HEARTBEAT = time.time()
+        CURRENT_NUMBER_OF_TASKS = event_queue_var.get().qsize()
 
 
 OSCTL_PYKUBE_HTTP_REQUEST_TIMEOUT = float(
