@@ -212,6 +212,7 @@ function get_mcp2_public_endpoint {
  echo "https://${service_name}.$(get_mcp2_public_domain_name)"
 }
 
+
 function get_check_endpoint {
   local service_name="$1"
   local project="$2"
@@ -251,6 +252,15 @@ PORT_SERVICE_MAPPING=(
 "9311:barbican"
 "9876:octavia"
 )
+
+function get_available_service {
+    local services=""
+    for mapping in "${PORT_SERVICE_MAPPING[@]}"; do
+        service="${mapping##*:}"
+        services="$services $service"
+    done
+    echo $services
+}
 
 function get_service_by {
     local variable
