@@ -53,13 +53,13 @@ function get_service_dbs {
 }
 
 function get_database_size {
+  info "Calculating database size for $component"
   local component="$1"
   local host="$2"
   local db_admin="$3"
   local db_password="$4"
 
   component_dbs=$(get_service_dbs $component)
-  info "Calculating database size for $component"
   for database in component_dbs; do
     timeout 60 mysql -u${db_admin} -p$db_password  -h${host} -e "SELECT table_schema \"$database\", \
       ROUND(SUM(data_length + index_length) / 1024 / 1024, 1) \"DB Size in MB\" \
@@ -80,6 +80,7 @@ function check_database_connection {
 }
 
 function dump_openstack_component_dbs {
+  info "Preparing variables for ${FUNCNAME[*]}"
   local component="$1"
   local host=$(get_mcp1_database_address)
   local db_admin=$(get_mcp1_database_username $component)
@@ -93,6 +94,7 @@ function dump_openstack_component_dbs {
 }
 
 function import_openstack_component_dbs {
+  info "Preparing variables for ${FUNCNAME[*]}"
   local component="$1"
   local host=$(get_mcp2_database_address)
   local db_admin=$(get_mcp2_database_username $component)
@@ -104,14 +106,21 @@ function import_openstack_component_dbs {
 }
 
 function drop_database_on_target {
+  info "Preparing variables for ${FUNCNAME[*]}"
   local component="$1"
   local host=$(get_mcp2_database_address)
   local db_admin=$(get_mcp2_database_username $component)
   local db_password=$(get_mcp2_database_password $component)
 
   component_dbs=$(get_service_dbs $component)
+  local current_databases
   for database in $component_dbs; do
-      info "Removing database $database on $host"
-      mysql -u ${db_admin} -h ${host} -p${db_password} -e "drop database $database;" || die $LINENO "Failed to drop database ${database}"
+      info "Checking database $database on $host"
+      if mysql -u ${db_admin} -h ${host} -p${db_password} -e "use $database;" > /dev/null 2>&1; then
+          info "Removing database $database on $host"
+          mysql -u ${db_admin} -h ${host} -p${db_password} -e "drop database $database;" || die $LINENO "Failed to drop database ${database}"
+      else
+         info "Database $database on $host not present."
+      fi
   done
 }
