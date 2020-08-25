@@ -342,6 +342,28 @@ spec:
                               OIDCSSLValidateServer:
                                 type: boolean
                                 description: Require a valid SSL server certificate when communicating with the OP
+                    domain_specific_configuration:
+                      type: object
+                      properties:
+                        enabled:
+                          type: boolean
+                          description: Enable domain specific keystone configuration
+                        domains:
+                          type: array
+                          description: >
+                            The list of domain specific configuration options.
+                          items:
+                            type: object
+                            properties:
+                              enabled:
+                                type: boolean
+                                description: Enable domain specific keystone configuration
+                              name:
+                                type: string
+                                description: Domain name
+                              config:
+                                type: object
+                                description: Domain specific configuration options.
                 neutron:
                   type: object
                   required:
