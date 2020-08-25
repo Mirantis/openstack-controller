@@ -55,6 +55,7 @@ spec:
         logging:
           logger_panko:
             level: {{ spec.get('features', {}).get('logging', {}).get('panko', {}).get('level', 'INFO') }}
+            propagate: 0
       dependencies:
         static:
           db_init:

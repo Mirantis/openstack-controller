@@ -374,6 +374,7 @@ spec:
         logging:
           logger_neutron:
             level: {{ spec.get('features', {}).get('logging', {}).get('neutron', {}).get('level', 'INFO') }}
+            propagate: 0
         l3_agent:
           agent:
             extensions: fip_qos,gateway_ip_qos

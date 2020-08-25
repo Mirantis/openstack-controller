@@ -446,6 +446,7 @@ spec:
         logging:
           logger_nova:
             level: {{ spec.get('features', {}).get('logging', {}).get('nova', {}).get('level', 'INFO') }}
+            propagate: 0
         {%- if spec.get('features', {}).get('nova', {}).get('live_migration_interface') %}
         libvirt:
           live_migration_interface: {{ spec.features.nova.live_migration_interface }}

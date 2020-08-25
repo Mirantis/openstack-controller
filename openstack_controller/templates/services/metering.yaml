@@ -72,6 +72,7 @@ spec:
         logging:
           logger_ceilometer:
             level: {{ spec.get('features', {}).get('logging', {}).get('ceilometer', {}).get('level', 'INFO') }}
+            propagate: 0
       manifests:
         network_policy: false
         secret_ca_bundle: true

@@ -132,6 +132,7 @@ spec:
         logging:
           logger_barbican:
             level: {{ spec.get('features', {}).get('logging', {}).get('barbican', {}).get('level', 'INFO') }}
+            propagate: 0
         policy:
         {%- if spec.openstack_version not in ['queens', 'rocky'] %}
         # TODO(vsaienko): drop policy settings in upstream values.yaml to ensure in-code policy

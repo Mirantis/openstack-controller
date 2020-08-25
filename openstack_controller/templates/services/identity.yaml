@@ -92,6 +92,7 @@ spec:
         logging:
           logger_keystone:
             level: {{ spec.get('features', {}).get('logging', {}).get('keystone', {}).get('level', 'INFO') }}
+            propagate: 0
         keystone:
           cache:
             backend: oslo_cache.memcache_pool
