@@ -1,0 +1,16 @@
+parameters:
+  haproxy:
+    proxy:
+      listen:
+        nova_api:
+          redirects:
+           - code: 301
+             location: nova.${_param:mcp2_public_domain_name}
+        nova_metadata_api:
+          redirects:
+           - code: 301
+             location: metadata.${_param:mcp2_public_domain_name}
+        nova_placement_api:
+           redirects:
+           - code: 301
+             location: placement.${_param:mcp2_public_domain_name}

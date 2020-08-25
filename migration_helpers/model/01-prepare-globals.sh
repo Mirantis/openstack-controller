@@ -116,6 +116,10 @@ EOF
   local mcp2_mariadb_address=$(get_mcp2_external_ip mariadb)
 
 cat <<EOF >> $RUN_DIR/cluster/migration/init.yml
+    mcp2_public_domain_name: ${mcp2_public_domain_name}
+EOF
+
+cat <<EOF >> $RUN_DIR/cluster/migration/init.yml
   linux:
     network:
       host:
