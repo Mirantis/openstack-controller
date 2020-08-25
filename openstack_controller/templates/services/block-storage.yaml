@@ -158,6 +158,7 @@ spec:
         logging:
           logger_cinder:
             level: {{ spec.get('features', {}).get('logging', {}).get('cinder', {}).get('level', 'INFO') }}
+            propagate: 0
       # NOTE(vsaienko): do not create backends from .Values.conf.cinder.DEFAULT.backends
       # as we have default backend in chart values rbd1 which is not used.
       # Do not create volume type for backup, as user can't use this backend directly.

@@ -178,6 +178,7 @@ spec:
         logging:
           logger_ironic:
             level: {{ spec.get('features', {}).get('logging', {}).get('ironic', {}).get('level', 'INFO') }}
+            propagate: 0
       endpoints:
         cluster_domain_suffix: {{ spec.internal_domain_name }}
 {% include 'base/_admin_identity.yaml' %}
