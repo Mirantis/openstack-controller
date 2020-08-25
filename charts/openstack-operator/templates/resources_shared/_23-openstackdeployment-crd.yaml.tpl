@@ -139,24 +139,23 @@ spec:
                       type: object
                       required:
                         - enabled
-                        - schedule_time
-                        - backup_type
                       properties:
                         enabled:
                           description: >
-                            Indicates whether physical backup cron job is enabled
+                            Indicates whether cron job will launch backup jobs. When set to true suspend
+                            flag in cron job will be switched to false.
                           type: boolean
                         schedule_time:
                           description: >
                             Unix style cron expression indicates how often to run backup
-                            cron job, e.g '0 0 * * *' - every day at 00:00.
+                            cron job. Default is '0 1 * * *' - every day at 01:00.
                           type: string
                         backup_type:
                           description: >
                             Type of backup. Possible values: incremental or full.
                             incremental: If newest full backup is older then full_backup_cycle seconds,
                             perform full backup, else perform incremental backup to the newest full.
-                            full: perform always only full backup.
+                            full: perform always only full backup. Default is incremental.
                           type: string
                         backups_to_keep:
                           description: >
