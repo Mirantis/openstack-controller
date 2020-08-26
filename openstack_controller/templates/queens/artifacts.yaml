@@ -39,7 +39,7 @@ keystone_credential_cleanup: '{{ images_base_url }}/openstack/heat:queens-bionic
 keystone_credential_rotate: '{{ images_base_url }}/openstack/keystone:queens-bionic-20200816180015'
 keystone_credential_setup: '{{ images_base_url }}/openstack/keystone:queens-bionic-20200816180015'
 keystone_db_sync: '{{ images_base_url }}/openstack/keystone:queens-bionic-20200816180015'
-keystone_domain_manage: '{{ images_base_url }}/openstack/keystone:queens-bionic-20200816180015'
+keystone_domain_manage: '{{ images_base_url }}/openstack/heat:queens-bionic-20200816180015'
 keystone_fernet_rotate: '{{ images_base_url }}/openstack/keystone:queens-bionic-20200816180015'
 keystone_fernet_setup: '{{ images_base_url }}/openstack/keystone:queens-bionic-20200816180015'
 ks_endpoints: '{{ images_base_url }}/openstack/heat:queens-bionic-20200816180015'
