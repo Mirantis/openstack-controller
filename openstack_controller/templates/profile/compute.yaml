@@ -48,7 +48,11 @@ features:
     user:
       username: stacklight
   octavia:
+  {%- if openstack_version == 'queens' %}
+    default_provider: octavia
+  {%- else %}
     default_provider: amphora
+  {%- endif %}
     providers:
       - amphora
       - octavia
