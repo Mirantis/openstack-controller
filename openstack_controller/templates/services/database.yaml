@@ -3,7 +3,6 @@
 
 {%- set stacklight_enabled = spec.get('features', {}).get('stacklight', {}).get('enabled', False) %}
 {%- set backup_params = spec.get('features', {}).get('database', {}).get('backup', {}) %}
-{%- set backup_enabled = backup_params.get('enabled', False) %}
 
 spec:
   releases:
@@ -21,16 +20,14 @@ spec:
               # The default value is YES, and it causes the issue described - here https://jira.mariadb.org/browse/MDEV-22766
               # Once the issue is fixed, this can be removed. Option can be set only starting galera 3.25.
               cert.optimistic_pa: "NO"
-{%- if backup_enabled %}
         phy_backup:
-          backup_type: {{ backup_params['backup_type'] }}
+          backup_type: {{ backup_params.get('backup_type', 'incremental') }}
           {%- if backup_params.get('full_backup_cycle') %}
           full_backup_cycle: {{ backup_params['full_backup_cycle'] }}
           {%- endif %}
           {%- if backup_params.get('backups_to_keep') %}
           backups_to_keep: {{ backup_params['backups_to_keep'] }}
           {%- endif %}
-{%- endif %}
       images:
         tags:
 {%- for image in [
@@ -59,9 +56,7 @@ spec:
       manifests:
         network_policy: false
         job_cluster_wait: true
-{%- if backup_enabled %}
         cron_job_mariadb_phy_backup: true
-{%- endif %}
       endpoints:
         cluster_domain_suffix: {{ spec.internal_domain_name }}
         oslo_db:
@@ -82,11 +77,10 @@ spec:
             mariabackup:
               username: {{ galera_creds.backup.username }}
               password: {{ galera_creds.backup.password }}
-{%- if backup_enabled %}
       jobs:
         phy_backup_mariadb:
-          cron: "{{ backup_params['schedule_time'] }}"
-{%- endif %}
+          cron: "{{ backup_params.get('schedule_time', '0 1 * * *') }}"
+          suspend: {{ not backup_params.get('enabled', false) }}
       pod:
         replicas:
           server: 3
@@ -104,9 +98,6 @@ spec:
 {%- else %}
         class_name: mirablock-k8s-block-hdd
 {%- endif %}
-{%- if backup_enabled %}
         phy_backup:
           class_name: mirablock-k8s-block-hdd
           enabled: true
-{%- endif %}
-
