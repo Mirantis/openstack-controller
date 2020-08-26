@@ -3,6 +3,7 @@
 
 {%- set service = 'keystone' %}
 {%- set keystone_keycloak = spec.get('features', {}).get('keystone', {}).get('keycloak', {}) %}
+{%- set keystone_domain_specific_config = spec.get('features', {}).get('keystone', {}).get('domain_specific_configuration', {}) %}
 {%- set stacklight_enabled = spec.get('features', {}).get('stacklight', {}).get('enabled', False) %}
 {%- set notification_topics = ['notifications'] %}
 {%- do notification_topics.append('stacklight_notifications') if stacklight_enabled %}
@@ -89,6 +90,14 @@ spec:
                 idp_id: "keycloak"
                 mapping_id: "keycloak_mapping"
 {%- endif %}
+{%- if keystone_domain_specific_config.get("enabled", False) %}
+        ks_domains:
+{%- for domain in keystone_domain_specific_config.get('domains', []) %}
+  {%- if domain.get('enabled', True) %}
+          {{ domain.name }}: {{ domain.config }}
+  {%- endif %}
+{%- endfor %}
+{%- endif %}
         logging:
           logger_keystone:
             level: {{ spec.get('features', {}).get('logging', {}).get('keystone', {}).get('level', 'INFO') }}
@@ -98,6 +107,13 @@ spec:
             backend: oslo_cache.memcache_pool
           oslo_messaging_notifications:
             topics: {{ notification_topics|join(',') }}
+{%- if keystone_domain_specific_config.get("enabled", False) %}
+          identity:
+            driver: sql
+            default_domain_id: default
+            domain_specific_drivers_enabled: True
+            domain_config_dir: /etc/keystonedomains
+{%- endif %}
 {%- if keystone_keycloak.get('enabled', False) %}
           federation:
             # TODO: move this logic to keystone helm chart
