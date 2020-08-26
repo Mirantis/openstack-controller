@@ -5,8 +5,8 @@ parameters:
         heat_api:
           redirects:
            - code: 301
-             location: heat.${_param:mcp2_public_domain_name}
+             location: https://heat.${_param:mcp2_public_domain_name}
         heat_cfn_api:
           redirects:
            - code: 301
-             location: cloudformation.${_param:mcp2_public_domain_name}
+             location: https://cloudformation.${_param:mcp2_public_domain_name}

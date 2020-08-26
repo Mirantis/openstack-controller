@@ -5,4 +5,4 @@ parameters:
         octavia_api:
           redirects:
            - code: 301
-             location: octavia.${_param:mcp2_public_domain_name}
+             location: https://octavia.${_param:mcp2_public_domain_name}
