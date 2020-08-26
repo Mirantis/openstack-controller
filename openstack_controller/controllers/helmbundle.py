@@ -36,6 +36,7 @@ def update_status(owner, name, namespace, status):
 
 @kopf.on.field("lcm.mirantis.com", "v1alpha1", "helmbundles", field="status")
 @kopf.on.create("lcm.mirantis.com", "v1alpha1", "helmbundles")
+@utils.collect_handler_metrics
 async def helmbundle_status(body, meta, name, namespace, status, **kwargs):
     owners = [
         o["name"]

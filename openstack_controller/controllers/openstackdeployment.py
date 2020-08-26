@@ -107,6 +107,7 @@ def discover_images(mspec, logger):
 @kopf.on.resume(*kube.OpenStackDeployment.kopf_on_args)
 @kopf.on.update(*kube.OpenStackDeployment.kopf_on_args)
 @kopf.on.create(*kube.OpenStackDeployment.kopf_on_args)
+@utils.collect_handler_metrics
 async def apply(body, meta, spec, logger, event, **kwargs):
     event = kwargs["cause"].event
     namespace = meta["namespace"]
@@ -201,6 +202,7 @@ async def apply(body, meta, spec, logger, event, **kwargs):
 
 
 @kopf.on.delete(*kube.OpenStackDeployment.kopf_on_args)
+@utils.collect_handler_metrics
 async def delete(name, logger, **kwargs):
     # TODO(pas-ha) wait for children to be deleted
     # TODO(pas-ha) remove secrets and so on?
@@ -208,6 +210,7 @@ async def delete(name, logger, **kwargs):
 
 
 @kopf.on.field(*kube.OpenStackDeployment.kopf_on_args, field="status.children")
+@utils.collect_handler_metrics
 async def status_children(body, meta, name, namespace, status, **kwargs):
     LOG.info(f"Handling osdpl status event.")
     children = status.get("children", {})

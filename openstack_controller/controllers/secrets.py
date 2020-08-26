@@ -30,6 +30,7 @@ AUTH_KEYS = [
 @kopf.on.create(
     "", "v1", "secrets", labels={"application": "ceph", "component": "rgw"}
 )
+@utils.collect_handler_metrics
 async def handle_rgw_secret(
     body, meta, name, status, logger, diff, **kwargs,
 ):
@@ -63,6 +64,7 @@ async def handle_rgw_secret(
     "secrets",
     labels={"application": "neutron", "component": "server"},
 )
+@utils.collect_handler_metrics
 async def handle_neutron_secret(
     body, meta, name, status, logger, diff, **kwargs,
 ):
@@ -97,6 +99,7 @@ async def handle_neutron_secret(
     "secrets",
     labels={"application": "neutron", "component": "configmap_etc"},
 )
+@utils.collect_handler_metrics
 async def handle_neutron_configmap_secret(
     body, meta, name, status, logger, diff, **kwargs,
 ):
@@ -125,6 +128,7 @@ async def handle_neutron_configmap_secret(
     "secrets",
     labels={"application": "keystone", "component": "server"},
 )
+@utils.collect_handler_metrics
 async def handle_keystone_secret(
     body, meta, name, status, logger, diff, **kwargs,
 ):
@@ -147,6 +151,7 @@ async def handle_keystone_secret(
     "secrets",
     labels={"application": "rabbitmq", "component": "server"},
 )
+@utils.collect_handler_metrics
 async def handle_rabbitmq_secret(
     body, meta, name, status, logger, diff, **kwargs,
 ):
