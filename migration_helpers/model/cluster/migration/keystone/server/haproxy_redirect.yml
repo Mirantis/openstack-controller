@@ -5,8 +5,8 @@ parameters:
         keystone_public_api:
           redirects:
            - code: 301
-             location: keystone.${_param:mcp2_public_domain_name}
+             location: https://keystone.${_param:mcp2_public_domain_name}
         keystone_admin_api:
           redirects:
            - code: 301
-             location: keystone.${_param:mcp2_public_domain_name}
+             location: https://keystone.${_param:mcp2_public_domain_name}
