@@ -202,7 +202,8 @@ def merge_osdpl_into_helmbundle(service, spec, service_helmbundle):
 
 def merge_service_layer(service, spec, kind, data):
     merger.merge(
-        data["spec"], spec.get("services", {}).get(service, {}).get(kind, {}),
+        data["spec"],
+        spec.get("services", {}).get(service, {}).get(kind, {}),
     )
 
     return data

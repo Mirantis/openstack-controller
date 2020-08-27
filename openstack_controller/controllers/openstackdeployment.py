@@ -36,7 +36,7 @@ def get_os_services_for_upgrade(enabled_services):
 
 
 async def run_task(task_def):
-    """ Run OpenStack controller tasks
+    """Run OpenStack controller tasks
 
     Runs tasks passed as `task_def` with implementing the following logic:
 

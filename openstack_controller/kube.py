@@ -29,7 +29,7 @@ api = login()
 
 
 def get_kubernetes_objects():
-    """ Return all classes that are subclass of pykube.objects.APIObject.
+    """Return all classes that are subclass of pykube.objects.APIObject.
 
     The following order is used:
     1. openstack_controller.pykube classes
@@ -59,9 +59,9 @@ KUBE_OBJECTS = get_kubernetes_objects()
 def object_factory(api, api_version, kind):
     """Dynamically builds kubernetes objects python class.
 
-       1. Objects from openstack_operator.pykube.KUBE_OBJECTS
-       2. Objects from pykube.objects
-       3. Generic kubernetes object
+    1. Objects from openstack_operator.pykube.KUBE_OBJECTS
+    2. Objects from pykube.objects
+    3. Generic kubernetes object
     """
     resource = KUBE_OBJECTS.get(
         (api_version, kind), pykube.object_factory(api, api_version, kind)

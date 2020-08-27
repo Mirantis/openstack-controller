@@ -16,7 +16,7 @@ RECV_QUEUE = deque(RECV_QUEUE_LEN * [0], RECV_QUEUE_LEN)
 
 @kopf.on.probe(id="recv_q")
 def check_recv_queue(**kwargs):
-    """ Check if tcp recieve queue is not processing.
+    """Check if tcp recieve queue is not processing.
 
     When tcp queue is not equal to 0 and growing during last 3 times
     or not changing raise error.

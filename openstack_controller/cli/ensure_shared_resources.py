@@ -15,8 +15,7 @@ WAIT_FOR_RESOURCE_DELAY = 5
 
 
 def _wait_for_obj(obj):
-    """ Continiously wait for obj.
-    """
+    """Continiously wait for obj."""
     while not obj.exists():
         LOG.info(f"Still waiting for resource: {obj.kind}:{obj.name}")
         time.sleep(WAIT_FOR_RESOURCE_DELAY)

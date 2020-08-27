@@ -32,7 +32,13 @@ AUTH_KEYS = [
 )
 @utils.collect_handler_metrics
 async def handle_rgw_secret(
-    body, meta, name, status, logger, diff, **kwargs,
+    body,
+    meta,
+    name,
+    status,
+    logger,
+    diff,
+    **kwargs,
 ):
     # TODO: unhardcode secret name
     LOG.debug(f"Handling secret create {name}")
@@ -66,7 +72,13 @@ async def handle_rgw_secret(
 )
 @utils.collect_handler_metrics
 async def handle_neutron_secret(
-    body, meta, name, status, logger, diff, **kwargs,
+    body,
+    meta,
+    name,
+    status,
+    logger,
+    diff,
+    **kwargs,
 ):
     if name != constants.NEUTRON_KEYSTONE_SECRET:
         return
@@ -101,7 +113,13 @@ async def handle_neutron_secret(
 )
 @utils.collect_handler_metrics
 async def handle_neutron_configmap_secret(
-    body, meta, name, status, logger, diff, **kwargs,
+    body,
+    meta,
+    name,
+    status,
+    logger,
+    diff,
+    **kwargs,
 ):
     METADATA_OPTS = (
         ("nova_metadata_port", "nova_metadata_port"),
@@ -130,7 +148,13 @@ async def handle_neutron_configmap_secret(
 )
 @utils.collect_handler_metrics
 async def handle_keystone_secret(
-    body, meta, name, status, logger, diff, **kwargs,
+    body,
+    meta,
+    name,
+    status,
+    logger,
+    diff,
+    **kwargs,
 ):
     if name != constants.KEYSTONE_ADMIN_SECRET:
         return
@@ -153,7 +177,13 @@ async def handle_keystone_secret(
 )
 @utils.collect_handler_metrics
 async def handle_rabbitmq_secret(
-    body, meta, name, status, logger, diff, **kwargs,
+    body,
+    meta,
+    name,
+    status,
+    logger,
+    diff,
+    **kwargs,
 ):
     if name != constants.RABBITMQ_USERS_CREDENTIALS_SECRET:
         return

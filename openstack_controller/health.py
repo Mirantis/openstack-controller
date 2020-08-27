@@ -81,12 +81,20 @@ def ident(meta):
 
 
 def set_application_health(
-    osdpl, application, component, health, observed_generation, custom_data={},
+    osdpl,
+    application,
+    component,
+    health,
+    observed_generation,
+    custom_data={},
 ):
     LOG.debug(f"Set application health for {application}-{component}")
     patch = {
         application: {
-            component: {"status": health, "generation": observed_generation,}
+            component: {
+                "status": health,
+                "generation": observed_generation,
+            }
         }
     }
     if patch[application][component]:

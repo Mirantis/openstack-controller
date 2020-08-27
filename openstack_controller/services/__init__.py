@@ -57,7 +57,10 @@ class Redis(Service):
             **template_args,
         )
         data = layers.merge_service_layer(
-            self.service, self.mspec, self.kind.lower(), data,
+            self.service,
+            self.mspec,
+            self.kind.lower(),
+            data,
         )
         data.update(self.resource_def)
 
@@ -228,7 +231,13 @@ class Metering(OpenStackService):
 
     @property
     def _child_generic_objects(self):
-        return {"ceilometer": {"job_db_init", "job_db_sync", "job_db_drop",}}
+        return {
+            "ceilometer": {
+                "job_db_init",
+                "job_db_sync",
+                "job_db_drop",
+            }
+        }
 
 
 class Metric(OpenStackService):
@@ -837,7 +846,10 @@ class Nova(OpenStackServiceWithCeph):
             }
             nova_ingresses = {
                 **nova_ingresses,
-                "placement": {"manifest": "ingress_placement", "images": [],},
+                "placement": {
+                    "manifest": "ingress_placement",
+                    "images": [],
+                },
             }
         return {
             "nova": {
