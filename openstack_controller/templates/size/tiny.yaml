@@ -369,6 +369,13 @@ services:
           replicas:
             api: 3
             conductor: 3
+        conf:
+          ironic:
+            database:
+              max_pool_size: 10
+              max_retries: -1
+              max_overflow: 30
+              connection_recycle_time: 300
   alarming:
     aodh:
       values:
