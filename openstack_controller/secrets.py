@@ -552,7 +552,9 @@ class KeycloakSecret(Secret):
     secret_class = KeycloackCreds
 
     def decode(self, data):
-        data["passphrase"] = base64.b64decode(data["passphrase"]).decode()
+        data["passphrase"] = json.loads(
+            base64.b64decode(data["passphrase"]).decode()
+        )
         return self.secret_class(**data)
 
     def create(self):
