@@ -2,13 +2,6 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: osh-system
-  annotations:
-    "openstackdeployments.lcm.mirantis.com/shared_resource_action": {{ if .Values.helmbundle.enabled }}"create"{{ else }}"wait"{{ end }}
----
-apiVersion: v1
-kind: Namespace
-metadata:
   name: {{ .Values.tf.sharedNamespace }}
   annotations:
     "openstackdeployments.lcm.mirantis.com/shared_resource_action": {{ if .Values.tf.createSharedNamespace }}"create"{{ else }}"wait"{{ end }}
