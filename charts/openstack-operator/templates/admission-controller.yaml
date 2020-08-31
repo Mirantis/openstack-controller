@@ -1,6 +1,6 @@
 {{- if .Values.admission.enabled -}}
-{{- $cn1 := printf "%s-admission.osh-system.svc" (include "openstack-controller.fullname" .) }}
-{{- $cn2 := printf "%s-admission.osh-system.svc.%s" (include "openstack-controller.fullname" .) (.Values.admission.cluster_domain_suffix) }}
+{{- $cn1 := printf "%s-admission.%s.svc" (include "openstack-controller.fullname" .) (.Release.Namespace) }}
+{{- $cn2 := printf "%s-admission.%s.svc.%s" (include "openstack-controller.fullname" .) (.Release.Namespace) (.Values.admission.cluster_domain_suffix) }}
 {{- $cabundle := genCA $cn1 3650 }}
 {{- $client := genSignedCert $cn1  nil (list $cn1 $cn2) 365 $cabundle }}
 ---
@@ -8,7 +8,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: {{ include "openstack-controller.fullname" . }}-admission
-  namespace: osh-system
+  namespace: {{ .Release.Namespace }}
 spec:
   type: ClusterIP
   ports:
@@ -24,7 +24,7 @@ apiVersion: v1
 kind: Secret
 metadata:
   name: {{ include "openstack-controller.fullname" . }}-admission-tls
-  namespace: osh-system
+  namespace: {{ .Release.Namespace }}
 data:
 {{- if empty .Values.admission.tls }}
   oac.crt: {{ $client.Cert  | b64enc }}
@@ -40,11 +40,11 @@ kind: ValidatingWebhookConfiguration
 metadata:
   name: {{ include "openstack-controller.fullname" . }}-admission
 webhooks:
-  - name: {{ include "openstack-controller.fullname" . }}-admission.osh-system.svc
+  - name: {{ include "openstack-controller.fullname" . }}-admission.{{ .Release.Namespace }}.svc
     clientConfig:
       service:
         name: {{ include "openstack-controller.fullname" . }}-admission
-        namespace: osh-system
+        namespace: {{ .Release.Namespace }}
         path: "/validate"
 {{- if empty .Values.admission.tls }}
       caBundle: {{ $cabundle.Cert | b64enc }}
@@ -65,7 +65,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ include "openstack-controller.fullname" . }}-admission
-  namespace: osh-system
+  namespace: {{ .Release.Namespace }}
 spec:
   replicas: {{ .Values.admission.replicaCount }}
   selector:

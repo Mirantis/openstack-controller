@@ -80,21 +80,6 @@ stacklight:
   createSharedNamespace: true
   sharedNamespace: openstack-lma-shared
 
-helmbundle:
-  # unless we deploy it via kaas management cluster
-  enabled: false
-  image:
-    repository: lcm
-    name: lcm-controller
-    tag: v0.2.0-43
-    pullPolicy: IfNotPresent
-  tiller:
-    image:
-      repository: lcm/helm
-      name: tiller
-      tag: v2.15.2-1
-      pullPolicy: IfNotPresent
-
 admission:
   enabled: true
 
