@@ -205,22 +205,29 @@ spec:
                   periodSeconds: 50
                   timeoutSeconds: 40
       {%- if baremetal_enabled %}
+        {%- set ssh_private_key = { 'defined': False } %}
+        {%- for gs_dev in spec.features.neutron.get('baremetal', {}).get('ngs', {}).get('devices', []) %}
+          {%- if gs_dev.ssh_private_key is defined %}
+            {%- do ssh_private_key.update({ 'defined': True }) %}
+            {%- break %}
+          {%- endif %}
+        {%- endfor %}
+        {%- if ssh_private_key['defined'] %}
         mounts:
           neutron_server:
             neutron_server:
-            {%- for gs_dev in spec.features.neutron.get('baremetal', {}).get('ngs', {}).get('devices', []) %}
-              {%- if gs_dev.ssh_private_key is defined %}
               volumeMounts:
-                - name: ngs-{{ gs_dev.name }}-ssh-private
+              {%- for gs_dev in spec.features.neutron.get('baremetal', {}).get('ngs', {}).get('devices', []) %}
+                - name: ngs-ssh-private
                   mountPath: /etc/neutron/ngs/{{ gs_dev.name }}.key
                   subPath: {{ gs_dev.name }}_ssh_private_key
+              {%- endfor %}
               volumes:
-                - name: ngs-{{ gs_dev.name }}-ssh-private
+                - name: ngs-ssh-private
                   secret:
                     secretName: ngs-ssh-keys
-                    defaultMode: 0400
-              {%- endif %}
-            {%- endfor %}
+                    defaultMode: 0444
+        {%- endif %}
       {%- endif %}
       dependencies:
         static:
