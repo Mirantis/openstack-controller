@@ -327,5 +327,7 @@ spec:
             default: http
             public: https
       jobs:
+        create_resources:
+          restartPolicy: Never
 {% include 'base/_ks_jobs.yaml' %}
 {%- endif %}
