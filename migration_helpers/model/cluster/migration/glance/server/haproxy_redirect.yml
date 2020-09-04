@@ -5,4 +5,4 @@ parameters:
         glance_api:
           redirects:
            - code: 301
-             location: https://glance.${_param:mcp2_public_domain_name}
+             location: https://glance.${_param:mcp2_public_domain_name}%[path]

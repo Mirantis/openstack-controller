@@ -5,4 +5,4 @@ parameters:
         neutron_api:
           redirects:
            - code: 301
-             location: https://neutron.${_param:mcp2_public_domain_name}
+             location: https://neutron.${_param:mcp2_public_domain_name}%[path]
