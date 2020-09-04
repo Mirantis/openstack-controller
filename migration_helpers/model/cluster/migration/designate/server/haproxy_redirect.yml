@@ -5,4 +5,4 @@ parameters:
         designate_api:
           redirects:
            - code: 301
-             location: https://designate.${_param:mcp2_public_domain_name}
+             location: https://designate.${_param:mcp2_public_domain_name}%[path]

@@ -5,12 +5,12 @@ parameters:
         nova_api:
           redirects:
            - code: 301
-             location: https://nova.${_param:mcp2_public_domain_name}
+             location: https://nova.${_param:mcp2_public_domain_name}%[path]
         nova_metadata_api:
           redirects:
            - code: 301
-             location: https://metadata.${_param:mcp2_public_domain_name}
+             location: https://metadata.${_param:mcp2_public_domain_name}%[path]
         nova_placement_api:
            redirects:
            - code: 301
-             location: https://placement.${_param:mcp2_public_domain_name}
+             location: https://placement.${_param:mcp2_public_domain_name}%[path]
