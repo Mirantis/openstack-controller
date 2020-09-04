@@ -140,6 +140,8 @@ services:
             - (?:heat_tempest_plugin.tests.functional.test_create_update_neutron_subnet.UpdateSubnetTest.test_update_gateway_ip)
             - (?:heat_tempest_plugin.tests.functional.test_create_update_neutron_subnet.UpdateSubnetTest.test_update_gateway_ip_to_empty)
             - (?:heat_tempest_plugin.tests.functional.test_create_update_neutron_subnet.UpdateSubnetTest.test_update_to_no_gateway_ip)
+            # not supported by TF (PRODX-4801)
+            - (?:neutron_tempest_plugin.api.admin.test_floating_ips_admin_actions.FloatingIPAdminTestJSON.test_create_floatingip_with_specified_ip_address)
             # Skip SoftwareConfigIntegrationTest because it requires a custom image
             # https://github.com/openstack/heat/blob/stable/train/heat_integrationtests/prepare_test_env.sh
             - (?:heat_tempest_plugin.tests.scenario.test_server_software_config.SoftwareConfigIntegrationTest)
