@@ -149,6 +149,13 @@ if OSCTL_HEARTBEAT_INTERVAL:
         CURRENT_NUMBER_OF_TASKS = event_queue_var.get().qsize()
 
 
+# Number of instances to migrate off node concurrently
+OSCTL_MIGRATE_CONCURRENCY = int(os.environ.get("OSCTL_MIGRATE_CONCURRENCY", 5))
+
+# Whether to perform evacuation if compute node is down, or just error out
+OSCTL_ALLOW_EVACUATION = bool(os.environ.get("OSCTL_ALLOW_EVACUATION", False))
+
+
 @kopf.on.startup()
 def configure(settings: kopf.OperatorSettings, **_):
     settings.watching.connect_timeout = 1 * 60

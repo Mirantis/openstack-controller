@@ -97,6 +97,15 @@ extract_ca_crt_from_secret
 get_user_token_from_secret
 set_kube_config_values
 
+available_controllers=(
+    "-m openstack_controller.controllers.node"
+    "-m openstack_controller.controllers.openstackdeployment"
+    "-m openstack_controller.controllers.helmbundle"
+    "-m openstack_controller.controllers.secrets"
+    "-m openstack_controller.controllers.health"
+    "-m openstack_controller.controllers.probe"
+)
 
-kopf run --dev -m openstack_controller.controllers.node -m openstack_controller.controllers.openstackdeployment -m openstack_controller.controllers.helmbundle -m openstack_controller.controllers.secrets -m openstack_controller.controllers.health -m openstack_controller.controllers.probe -n openstack -P openstack-controller.osdpl --liveness=http://:8090/healthz
+controllers="${available_controllers[*]}"
 
+kopf run --dev -n openstack -P openstack-controller.osdpl --liveness=http://:8090/healthz $controllers

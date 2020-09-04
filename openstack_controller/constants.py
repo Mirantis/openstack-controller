@@ -86,7 +86,7 @@ OPENSTACK_TF_SECRET = "tf-data"
 OPENSTACK_STACKLIGHT_SHARED_NAMESPACE = "openstack-lma-shared"
 OPENSTACK_STACKLIGHT_SECRET = "rabbitmq-creds"
 
-COMPUTE_NODE_CONTROLLER_SECRET_NAME = "compute-node-controller-openstack-creds"
+COMPUTE_NODE_CONTROLLER_SECRET_NAME = "nova-keystone-admin"
 
 
 class OpenStackVersion(enum.IntEnum):

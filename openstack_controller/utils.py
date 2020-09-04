@@ -1,3 +1,18 @@
+#    Copyright 2020 Mirantis, Inc.
+#
+#    Licensed under the Apache License, Version 2.0 (the "License"); you may
+#    not use this file except in compliance with the License. You may obtain
+#    a copy of the License at
+#
+#         http://www.apache.org/licenses/LICENSE-2.0
+#
+#    Unless required by applicable law or agreed to in writing, software
+#    distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+#    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+#    License for the specific language governing permissions and limitations
+#    under the License.
+
+import asyncio
 import base64
 import functools
 import logging
@@ -69,3 +84,21 @@ def collect_handler_metrics(func):
         return r
 
     return wrapper
+
+
+def divide_into_groups_of(group_len, collection):
+    groups = []
+    for i in range(len(collection) // group_len):
+        groups.append(collection[i * group_len : i * group_len + group_len])
+    if len(collection) % group_len:
+        groups.append(collection[-(len(collection) % group_len) :])
+    return groups
+
+
+async def async_retry(function, *args, **kwargs):
+    result = None
+    while not result:
+        result = function(*args, **kwargs)
+        if result:
+            return result
+        await asyncio.sleep(10)
