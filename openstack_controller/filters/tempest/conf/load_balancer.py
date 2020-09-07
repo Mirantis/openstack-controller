@@ -24,6 +24,7 @@ class LoadBalancer(base_section.BaseSection):
         "enabled_provider_drivers",
         "loadbalancer_topology",
         "expected_flavor_capability",
+        "test_with_ipv6",
         "disable_boot_network",
         "enable_security_groups",
         "vip_subnet_cidr",
@@ -104,7 +105,11 @@ class LoadBalancer(base_section.BaseSection):
 
     @property
     def RBAC_test_type(self):
-        pass
+        try:
+            if self.spec["features"]["neutron"]["backend"] == "tungstenfabric":
+                return "none"
+        except:
+            pass
 
     @property
     def enabled_provider_drivers(self):
@@ -126,6 +131,14 @@ class LoadBalancer(base_section.BaseSection):
     @property
     def disable_boot_network(self):
         pass
+
+    @property
+    def test_with_ipv6(self):
+        try:
+            if self.spec["features"]["neutron"]["backend"] == "tungstenfabric":
+                return False
+        except:
+            pass
 
     @property
     def enable_security_groups(self):
