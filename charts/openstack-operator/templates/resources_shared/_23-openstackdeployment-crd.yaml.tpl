@@ -89,6 +89,16 @@ spec:
             internal_domain_name:
               type: string
               description: internal k8s domain name
+            local_volume_storage_class:
+              type: string
+              description: >
+                Default storage class with local volumes, used by services with built in clustering
+                mechanism like mariadb, etcd, redis.
+            persistent_volume_storage_class:
+              type: string
+              description: >
+                Default storage class with persistence, for example ceph. Used by services that require
+                persistence on filesystem level like backups for mariadb.
             common:
               type: object
               properties:

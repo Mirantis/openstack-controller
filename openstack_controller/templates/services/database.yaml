@@ -94,10 +94,10 @@ spec:
 {%- endif %}
       volume:
 {%- if spec.get('features', {}).get('database', {}).get('local_volumes', {}).get('enabled', False) %}
-        class_name: lvp-fake-root
+        class_name: {{ spec.get('local_volume_storage_class', 'lvp-fake-root') }}
 {%- else %}
-        class_name: mirablock-k8s-block-hdd
+        class_name: {{ spec.get('persistent_volume_storage_class', 'mirablock-k8s-block-hdd') }}
 {%- endif %}
         phy_backup:
-          class_name: mirablock-k8s-block-hdd
+          class_name: {{ spec.get('persistent_volume_storage_class', 'mirablock-k8s-block-hdd') }}
           enabled: true

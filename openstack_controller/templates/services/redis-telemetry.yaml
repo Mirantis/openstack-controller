@@ -25,14 +25,14 @@ spec:
       keepAfterDeletion: true
       persistentVolumeClaim:
         metadata:
-          name: lvp-fake-root
+          name: {{ spec.get('local_volume_storage_class', 'lvp-fake-root') }}
         spec:
           accessModes:
           - ReadWriteOnce
           resources:
             requests:
               storage: 1Gi
-          storageClassName: lvp-fake-root
+          storageClassName: {{ spec.get('local_volume_storage_class', 'lvp-fake-root') }}
   sentinel:
     affinity:
       podAntiAffinity:
