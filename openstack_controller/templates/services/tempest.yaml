@@ -28,7 +28,7 @@ spec:
         replicas:
           server: 1
       pvc:
-        storage_class: mirablock-k8s-block-hdd
+        storage_class: {{ spec.get('persistent_volume_storage_class', 'mirablock-k8s-block-hdd') }}
       endpoints:
         cluster_domain_suffix: {{ spec.internal_domain_name }}
 {% include 'base/_admin_identity.yaml' %}
