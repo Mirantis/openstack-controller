@@ -215,7 +215,7 @@ async def status_children(body, meta, name, namespace, status, **kwargs):
     LOG.info(f"Handling osdpl status event.")
     children = status.get("children", {})
     status_patch = {
-        "deployed": all([c for c in children.values() if c in [True, False]])
+        "deployed": all([c is True for c in children.values()])
         if len(children) != 0
         else False
     }
