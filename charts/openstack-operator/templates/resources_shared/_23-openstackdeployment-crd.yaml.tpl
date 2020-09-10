@@ -594,8 +594,6 @@ spec:
                 octavia:
                   type: object
                   properties:
-                    default_provider:
-                      type: string
                     lb_network:
                       type: object
                       required:
@@ -617,14 +615,6 @@ spec:
                             pool_end:
                               type: string
                               description: "end IP address ie: 1.2.3.200"
-                    providers:
-                      type: array
-                      description: "List of enabled providers names"
-                      items:
-                        type: string
-                        enum:
-                          - amphora
-                          - octavia
                 stacklight:
                   type: object
                   required:
