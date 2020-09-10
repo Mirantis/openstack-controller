@@ -250,6 +250,12 @@ def merge_spec(spec, logger):
         ENV.get_template(f"profile/{profile}.yaml").render(
             openstack_version=os_release,
             services=spec.get("features", {}).get("services", []),
+            ironic_mt_enabled=spec.get("features", {})
+            .get("ironic", {})
+            .get("networks", {})
+            .get("baremetal", {})
+            .get("network_type")
+            == "vlan",
         )
     )
     profile_binary_base_url = base["artifacts"]["binary_base_url"]

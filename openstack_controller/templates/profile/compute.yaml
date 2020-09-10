@@ -143,7 +143,7 @@ services:
           script: |
             tempest run --config-file /etc/tempest/tempest.conf -w 4 --smoke --blacklist-file  /etc/tempest/test-blacklist
           tempest:
-          {%- if ironic_enabled %}
+          {%- if ironic_enabled and not ironic_mt_enabled %}
             auth:
               create_isolated_networks: false
           {%- endif %}
@@ -158,7 +158,7 @@ services:
               build_timeout: 600
             #TODO(mshalamov): Will be removed during process of completing PRODX-1192
             compute:
-            {%- if ironic_enabled %}
+            {%- if ironic_enabled and not ironic_mt_enabled %}
               fixed_network_name: ironic-provisioning
             {%- endif %}
               min_compute_nodes: 2
@@ -197,7 +197,7 @@ services:
               connect_timeout: 90
             {%- endif %}
             network:
-            {%- if ironic_enabled %}
+            {%- if ironic_enabled and not ironic_mt_enabled %}
               shared_physical_network: true
             {%- else %}
               shared_physical_network: false
