@@ -3,10 +3,13 @@
 
 {%- set service = 'octavia' %}
 {%- set provider_map = {'amphora': 'amphora:The Octavia Amphora driver.',
-                        'amphorav2': 'amphorav2:Extented Octavia Amphora driver with jobboard support.',
                         'octavia': 'octavia:Deprecated alias of the Octavia Amphora driver.'} %}
+# NOTE(vsaienko): we do not deploy redis with persistant storage, so can't use amphorav2 in production
+# remove it from the list unless it is resolved
+# 'amphorav2': 'amphorav2:Extented Octavia Amphora driver with jobboard support.',
 {%- set components_with_dedicated_messaging = spec.get('features', {}).get('messaging', {}).get('components_with_dedicated_messaging', []) %}
 {%- set stacklight_enabled = spec.get('features', {}).get('stacklight', {}).get('enabled', False) %}
+{%- set tungstenfabric_enabled = spec.features.neutron.get('backend', 'ml2') == 'tungstenfabric' %}
 {%- set notification_topics = ['notifications'] %}
 {%- do notification_topics.append('stacklight_notifications') if stacklight_enabled %}
 
@@ -69,15 +72,15 @@ spec:
   - name: openstack-octavia
     chart: {{spec.common.openstack.get('repo', spec.common.charts.repo)}}/octavia
     values:
-{%- if 'amphora' in spec.features.get('octavia', {}).get('providers', []) %}
+{%- if 'amphora' in provider_map.keys() %}
       octavia:
         settings:
           lbmgmt_cidr: {{ spec.features.octavia.lb_network.subnet.range }}
           lbmgmt_subnet_start: {{ spec.features.octavia.lb_network.subnet.pool_start }}
           lbmgmt_subnet_end: {{ spec.features.octavia.lb_network.subnet.pool_end }}
           amphora_image_url: {{ images["octavia_amphora"] }}
-          {%- endif %}
-{%- if 'amphorav2' in spec.features.get('octavia', {}).get('providers', []) %}
+{%- endif %}
+{%- if 'amphorav2' in provider_map.keys() %}
           enable_amphorav2: true
 {%- endif %}
       images:
@@ -221,19 +224,19 @@ spec:
         secret_amphora_ssh_key: true
         secret_octavia_certs: false
         secret_ca_bundle: true
-{%- if spec.openstack_version not in ['queens', 'rocky'] %}
+{%- if spec.openstack_version not in ['queens', 'rocky'] and tungstenfabric_enabled %}
         octavia_driver_agent: true
 {%- endif %}
       conf:
         octavia:
           api_settings:
-            default_provider_driver: {{ spec.features.octavia.default_provider }}
-{%- set providers = [] %}
-{%- for provider in spec.features.get('octavia', {}).get('providers', []) %}
-{%- do providers.append(provider_map.get(provider)) %}
-{%- endfor %}
-            enabled_provider_drivers: {{ ','.join(providers) }}
-{%- if 'amphorav2' in spec.features.get('octavia', {}).get('providers', []) %}
+{% set _default_provider_driver = 'amphora' %}
+{%- if spec.openstack_version in ['queens'] %}
+  {% set _default_provider_driver = 'octavia' %}
+{%- endif %}
+            default_provider_driver: {{ _default_provider_driver }}
+            enabled_provider_drivers: {{ ','.join(provider_map.values()) }}
+{%- if 'amphorav2' in provider_map.keys() %}
           task_flow:
             jobboard_backend_hosts: rfs-openstack-redis-telemetry.{{ redis_namespace }}
             jobboard_backend_port: 26379
