@@ -26,6 +26,7 @@ from openstack_controller import kube
 from openstack_controller import openstack_utils
 from openstack_controller import secrets
 from openstack_controller import services
+from . import CREDS_KWARGS
 
 
 # TODO(vdrok): Remove with switch to python3.8 as mock itself will be able
@@ -575,3 +576,47 @@ async def test_nova_prepare_for_node_reboot_sdk_exception(
         await services.Nova.prepare_for_node_reboot(
             {"name": "host1", "uid": "42"}
         )
+
+
+async def empty(*args, **kwargs):
+    pass
+
+
+@pytest.fixture
+def pykube_reload(mocker):
+    m = mocker.patch("pykube.objects.APIObject.reload")
+    yield m
+    mocker.stopall()
+
+
+@pytest.fixture
+def kube_purge(mocker):
+    m = mocker.patch("openstack_controller.kube.HelmBundleMixin._purge", empty)
+    yield m
+    mocker.stopall()
+
+
+@pytest.mark.asyncio
+async def test_service_uprade_use_new_unique_value_after_failure(
+    openstackdeployment, pykube_reload, kube_purge
+):
+    service = services.registry["compute"](
+        openstackdeployment, logging.getLogger(__name__)
+    )
+
+    def set_release_values(*args, **kwargs):
+        assert "unique_value_for_update" in args[0]
+
+    service.template_args = lambda: CREDS_KWARGS
+    osdpl = kube.OpenStackDeployment(kube.api, openstackdeployment)
+    service._get_osdpl = mock.MagicMock(return_value=osdpl)
+    service.set_release_values = mock.Mock(side_effect=set_release_values)
+    service.apply = empty
+    with mock.patch(
+        "openstack_controller.kube.HelmBundleMixin.image_applied",
+        result_value=True,
+    ):
+        with mock.patch(
+            "openstack_controller.kube.Job.ready", side_effect=True
+        ):
+            await service.upgrade(event="update")

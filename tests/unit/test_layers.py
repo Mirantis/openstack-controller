@@ -7,25 +7,7 @@ import kopf
 import pytest
 
 from openstack_controller import layers
-
-
-CREDS_KWARGS = {
-    "ssh_credentials": {"private": "", "public": ""},
-    "credentials": {
-        "memcached": "",
-        "database": {"user": {"username": "", "password": ""}},
-        "messaging": {"user": {"username": "", "password": ""}},
-        "notifications": {"user": {"username": "", "password": ""}},
-    },
-    "admin_creds": {
-        "database": {"username": "", "password": ""},
-        "identity": {"password": "", "username": ""},
-        "messaging": {"password": "", "username": ""},
-    },
-    "ceph": {
-        "nova": {"username": "", "secrets": "", "keyring": "", "pools": {}}
-    },
-}
+from . import CREDS_KWARGS
 
 
 def test_apply_list_empty_stein(osdpl_min_stein):
