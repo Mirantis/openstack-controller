@@ -15,3 +15,5 @@ export FORWARDER_NS='mcp1'
 export MCP2_PUBLIC_DOMAIN_NAME=${MCP2_PUBLIC_DOMAIN_NAME:-it.just.works}
 export HELMBUNDLE_CR='mcp1-forwarder-cr.yaml'
 export HELMBUNDLE_NS=${HELMBUNDLE_NS:-${FORWARDER_NS}}
+# 8080 - switf not supported
+export IGNORE_PUBLIC_PORTS=${IGNORE_PUBLIC_PORTS:-'8080'}

@@ -7,7 +7,8 @@ TOP_DIR=$(cd $(dirname $RUN_DIR/../../) && pwd)
 . $TOP_DIR/functions-common
 . $TOP_DIR/database/functions
 
-PORTS=$(openstack endpoint list --interface public -f value -c "URL" | sed -r 's/.*:([0-9]+).*/\1/' | sort | uniq)
+PORTS=$(echo -ne $(salt -C 'I@keystone:server:role:primary' cmd.run ". /root/keystonercv3; openstack endpoint list --interface public -f value -c "URL" | sed -r 's/.*:([0-9]+).*/\1/' | sort | uniq" --out json | jq '.[]' | tr -d '"')| grep -v $IGNORE_PUBLIC_PORTS)
+
 
 cat << EOF > ${HELMBUNDLE_CR}
 apiVersion: lcm.mirantis.com/v1alpha1
@@ -49,8 +50,7 @@ spec:
         ports:
 EOF
 
-for port in $PORTS
-do
+for port in $PORTS; do
 cat << EOF >> ${HELMBUNDLE_CR}
           - name: $(get_service_by port ${port})
             port: ${port}
@@ -58,14 +58,29 @@ cat << EOF >> ${HELMBUNDLE_CR}
 EOF
 done
 
+# Redirect for horizon
+_horizon_port_tmp=8443
+_horizon_port=$(salt prx01* pillar.items haproxy:proxy:listen:openstack_web:binds:port --out json | jq '.[][]')
+cat << EOF >> ${HELMBUNDLE_CR}
+          - name: horizon
+            port: ${_horizon_port}
+            protocol: TCP
+            targetPort: ${_horizon_port_tmp}
+EOF
+# Redirect for novnc
+_novnc_port=6080
+cat << EOF >> ${HELMBUNDLE_CR}
+          - name: novnc
+            port: ${_novnc_port}
+            protocol: TCP
+EOF
 cat << EOF >> ${HELMBUNDLE_CR}
       serverBlock: |-
         ssl_certificate     public-endpoints-tls.crt;
         ssl_certificate_key public-endpoints-tls.key;
 EOF
 
-for port in $PORTS
-do
+for port in $PORTS; do
 cat << EOF >> ${HELMBUNDLE_CR}
         server {
           listen 0.0.0.0:${port} ssl;
@@ -76,3 +91,21 @@ cat << EOF >> ${HELMBUNDLE_CR}
 EOF
 done
 
+
+cat << EOF >> ${HELMBUNDLE_CR}
+        server {
+          listen 0.0.0.0:${_horizon_port_tmp} ssl;
+          location / {
+            return 301 https://horizon.${MCP2_PUBLIC_DOMAIN_NAME}\$request_uri;
+          }
+        }
+EOF
+
+cat << EOF >> ${HELMBUNDLE_CR}
+        server {
+          listen 0.0.0.0:${_novnc_port} ssl;
+          location / {
+            return 301 https://novncproxy.${MCP2_PUBLIC_DOMAIN_NAME}\$request_uri;
+          }
+        }
+EOF
