@@ -116,10 +116,7 @@ async def apply(body, meta, spec, logger, event, **kwargs):
         LOG.info("OpenStack deployment is in draft mode, skipping handling...")
         return {"lastStatus": f"{event} drafted"}
 
-    # TODO(e0ne): change to use 'create' method once kube.save_secret_data
-    # won't update secrets
     secrets.OpenStackAdminSecret(namespace).ensure()
-    kube.wait_for_secret(namespace, constants.ADMIN_SECRET_NAME)
 
     fingerprint = layers.spec_hash(body["spec"])
     version_patch = {

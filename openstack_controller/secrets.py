@@ -1,6 +1,6 @@
 import abc
 import base64
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, fields
 import datetime
 import json
 from os import urandom
@@ -106,9 +106,7 @@ class GaleraCredentials:
     sst: OSSytemCreds
     exporter: OSSytemCreds
     audit: OSSytemCreds
-    # Backup field is optional till PRODX-6506
-    # is fixed properly
-    backup: Optional[OSSytemCreds] = None
+    backup: OSSytemCreds
 
 
 @dataclass
@@ -207,6 +205,9 @@ class Secret(abc.ABC):
         username = generate_name(prefix=prefix, length=username_length)
         return OSSytemCreds(username=username, password=password)
 
+    def _genereate_new_fields(self, *args):
+        return {}
+
     @abc.abstractmethod
     def create(self):
         pass
@@ -217,7 +218,18 @@ class Secret(abc.ABC):
             decoded = json.loads(base64.b64decode(creds))
             params[kind] = OSSytemCreds(**decoded)
 
-        return self.secret_class(**params)
+        try:
+            return self.secret_class(**params)
+        except TypeError:
+            LOG.info(
+                f"Secret {self.secret_name} has incorrect format. Updating it..."
+            )
+            all_fields = [f.name for f in fields(self.secret_class)]
+            new_fields = set(all_fields) - set(params)
+            params.update(self._genereate_new_fields(*new_fields))
+            secret = self.secret_class(**params)
+            self.save(secret)
+            return secret
 
     def ensure(self):
         try:
@@ -331,12 +343,27 @@ class GaleraSecret(Secret):
     secret_name = "generated-galera-passwords"
     secret_class = GaleraCredentials
 
+    def _generate_backup_creds(self):
+        return self._generate_credentials("backup", 8)
+
+    def _genereate_new_fields(self, *args):
+        creds = {}
+        for field in args:
+            if field == "backup":
+                creds["backup"] = self._generate_backup_creds()
+            else:
+                LOG.warning(
+                    f"Not supported field '{field}' requested for secret "
+                    f"'{self.secret_name}'."
+                )
+        return creds
+
     def create(self) -> GaleraCredentials:
         return GaleraCredentials(
             sst=self._generate_credentials("sst", 3),
             exporter=self._generate_credentials("exporter", 8),
             audit=self._generate_credentials("audit", 8),
-            backup=self._generate_credentials("backup", 8),
+            backup=self._generate_backup_creds(),
         )
 
     def ensure(self):
