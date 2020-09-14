@@ -904,6 +904,25 @@ class Nova(OpenStackServiceWithCeph):
 
         t_args["metadata_secret"] = neutron_creds.metadata_secret
 
+        neutron_features = self.mspec["features"].get("neutron", {})
+
+        # Read secret from shared namespace with TF deployment to
+        # get value of vrouter port for setting it as env variable
+        # in nova-compute container
+        if neutron_features.get("backend", "") == "tungstenfabric":
+            kube.wait_for_secret(
+                constants.OPENSTACK_TF_SHARED_NAMESPACE,
+                constants.TF_OPENSTACK_SECRET,
+            )
+            vrouter_port = base64.b64decode(
+                secrets.get_secret_data(
+                    constants.OPENSTACK_TF_SHARED_NAMESPACE,
+                    constants.TF_OPENSTACK_SECRET,
+                )["vrouter_port"]
+            ).decode()
+
+            t_args["vrouter_port"] = vrouter_port
+
         return t_args
 
     @layers.kopf_exception
