@@ -75,9 +75,12 @@ spec:
 {%- if 'amphora' in provider_map.keys() %}
       octavia:
         settings:
-          lbmgmt_cidr: {{ spec.features.octavia.lb_network.subnet.range }}
-          lbmgmt_subnet_start: {{ spec.features.octavia.lb_network.subnet.pool_start }}
-          lbmgmt_subnet_end: {{ spec.features.octavia.lb_network.subnet.pool_end }}
+          lbmgmt_subnets:
+  {%- for subnet in spec.features.octavia.lb_network.subnets %}
+            - range: {{ subnet.range }}
+              pool_start: {{ subnet.pool_start }}
+              pool_end: {{ subnet.pool_end }}
+  {%- endfor %}
           amphora_image_url: {{ images["octavia_amphora"] }}
 {%- endif %}
 {%- if 'amphorav2' in provider_map.keys() %}
