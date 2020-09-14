@@ -1,6 +1,14 @@
 spec:
   redis:
     affinity:
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+            - matchExpressions:
+                - key: openstack-control-plane
+                  operator: In
+                  values:
+                    - enabled
       podAntiAffinity:
         requiredDuringSchedulingIgnoredDuringExecution:
         - labelSelector:
@@ -35,6 +43,14 @@ spec:
           storageClassName: {{ spec.get('local_volume_storage_class', 'lvp-fake-root') }}
   sentinel:
     affinity:
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+            - matchExpressions:
+                - key: openstack-control-plane
+                  operator: In
+                  values:
+                    - enabled
       podAntiAffinity:
         requiredDuringSchedulingIgnoredDuringExecution:
         - labelSelector:
