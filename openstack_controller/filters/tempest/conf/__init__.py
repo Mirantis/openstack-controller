@@ -18,6 +18,9 @@ from openstack_controller.filters.tempest.conf import identity_feature_enabled
 from openstack_controller.filters.tempest.conf import image
 from openstack_controller.filters.tempest.conf import image_feature_enabled
 from openstack_controller.filters.tempest.conf import load_balancer
+from openstack_controller.filters.tempest.conf import (
+    loadbalancer_feature_enabled,
+)
 from openstack_controller.filters.tempest.conf import network
 from openstack_controller.filters.tempest.conf import network_feature_enabled
 from openstack_controller.filters.tempest.conf import neutron_plugin_options
@@ -56,6 +59,7 @@ SECTIONS = [
     image.Image,
     image_feature_enabled.ImageFeatureEnabled,
     load_balancer.LoadBalancer,
+    loadbalancer_feature_enabled.LoadBalancerFeatureEnabled,
     network.Network,
     network_feature_enabled.NetworkFeatureEnabled,
     neutron_plugin_options.NeutronPluginOptions,
