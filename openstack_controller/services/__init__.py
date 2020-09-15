@@ -1284,16 +1284,14 @@ class Tempest(Service):
     }
 
     def template_args(self):
-        # TODO: add wait for generated credential here
-        admin_creds = self._get_admin_creds()
-        secret = secrets.OpenStackServiceSecret(self.namespace, self.service)
-        credentials = secret.ensure()
+        template_args = super().template_args()
+
         helmbundles_body = {}
         for s in set(self.mspec["features"]["services"]) - {
             "tempest",
             "redis-telemetry",
         }:
-            template_args = Service.registry[s](
+            service_template_args = Service.registry[s](
                 self.body, self.logger
             ).template_args()
             try:
@@ -1303,18 +1301,16 @@ class Tempest(Service):
                     self.body["metadata"],
                     self.mspec,
                     self.logger,
-                    **template_args,
+                    **service_template_args,
                 )
             except Exception as e:
                 raise kopf.PermanentError(
                     f"Error while rendering HelmBundle for {self.service} "
                     f"service: {e}"
                 )
-        return {
-            "helmbundles_body": helmbundles_body,
-            "admin_creds": admin_creds,
-            "credentials": credentials,
-        }
+
+        template_args["helmbundles_body"] = helmbundles_body
+        return template_args
 
 
 registry = Service.registry

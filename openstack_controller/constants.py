@@ -56,6 +56,7 @@ OS_SERVICES_MAP = {
     "event": "panko",
     "metering": "ceilometer",
     "metric": "gnocchi",
+    "tempest": "tempest",
 }
 
 OPENSTACK_SERVICES_UPGRADE_ORDER = [
