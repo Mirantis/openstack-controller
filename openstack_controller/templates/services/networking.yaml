@@ -427,7 +427,7 @@ spec:
               {%- if 'dns' in spec.features.services %}
                 - dns_domain_ports
               {%- endif %}
-              tenant_network_types: {{ spec.features.neutron.get('tenant_network_types', 'vxlan') }}
+              tenant_network_types: {{ spec.features.neutron.get('tenant_network_types', ['vxlan'])|join(',') }}
           {%- if baremetal_enabled %}
             {%- for gs_dev in spec.features.neutron.get('baremetal', {}).get('ngs', {}).get('devices', []) %}
             genericswitch:{{ gs_dev.name }}:
