@@ -5,6 +5,7 @@ import json
 import sys
 from typing import List
 import functools
+import uuid
 
 import kopf
 import pykube
@@ -118,6 +119,7 @@ class HelmBundleMixin:
         diff["manifests"][self.helmbundle_ext.manifest] = True
         i = 1
         while True:
+            diff["unique_value_for_update"] = str(uuid.uuid4())
             self.service.set_release_values(diff)
             if not wait_completion:
                 return
@@ -165,6 +167,7 @@ class HelmBundleMixin:
         diff["manifests"][self.helmbundle_ext.manifest] = False
         i = 1
         while True:
+            diff["unique_value_for_update"] = str(uuid.uuid4())
             self.service.set_release_values(diff)
             if not wait_completion:
                 return

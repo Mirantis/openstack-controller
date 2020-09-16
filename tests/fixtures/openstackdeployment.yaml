@@ -198,4 +198,24 @@ spec:
               validation:
                 image_ssh_password: gocubsgo
                 image_ssh_user: cirros
-
+status:
+  health:
+    nova:
+      api-metadata:
+        generation: 2
+        status: Ready
+      api-osapi:
+        generation: 2
+        status: Ready
+      compute-default:
+        generation: 1
+        status: Ready
+      conductor:
+        generation: 2
+        status: Ready
+      novncproxy:
+        generation: 2
+        status: Ready
+      scheduler:
+        generation: 2
+        status: Ready
