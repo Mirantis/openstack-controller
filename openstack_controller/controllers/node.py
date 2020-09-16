@@ -98,7 +98,8 @@ async def _run_methods_async(
     watched_ann_value = watched_annotation.watched_value
     status_annotation = watched_annotation.status_annotation
     if (
-        old.get(watched_ann_string) != watched_ann_value
+        (old is None or old.get(watched_ann_string) != watched_ann_value)
+        and new
         and new.get(watched_ann_string) == watched_ann_value
     ):
         node = _get_node_if_annotation_still_present(
