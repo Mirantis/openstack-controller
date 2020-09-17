@@ -2,7 +2,6 @@ import asyncio
 import base64
 import json
 from typing import List
-import uuid
 
 import kopf
 import pykube
@@ -186,19 +185,15 @@ class Service:
                     res.append(child_obj)
         return res + self._get_generic_child_objects()
 
-    def _merge_release_values(self, data, values):
-        """Update service releases with values"""
-        for release in data["spec"]["releases"]:
-            layers.merger.merge(release["values"], values)
-
     def set_release_values(self, values):
-        """Load service and set new values for each release"""
         data = self.resource_def
         kopf.adopt(data, self.osdpl.obj)
         obj = kube.resource(data)
         obj.reload()
         data = obj.obj
-        self._merge_release_values(data, values)
+
+        for release in data["spec"]["releases"]:
+            layers.merger.merge(release["values"], values)
         obj.update()
         LOG.info(f"Update {self.service} with {values}")
 
@@ -276,10 +271,8 @@ class Service:
         ).get("children", {}):
             status_patch = {"children": {self.resource_name: "Unknown"}}
             self.update_status(status_patch)
-        values = {}
-        values["unique_value_for_update"] = str(uuid.uuid4())
-        LOG.info(f"Applying config for {self.service}, values {values}")
-        data = self.render(values=values)
+        LOG.info(f"Applying config for {self.service}")
+        data = self.render()
         LOG.info(f"Config applied for {self.service}")
 
         # NOTE(pas-ha) this sets the parent refs in child
@@ -389,7 +382,7 @@ class Service:
         return template_args
 
     @layers.kopf_exception
-    def render(self, openstack_version="", values={}):
+    def render(self, openstack_version=""):
         if openstack_version:
             self.mspec["openstack_version"] = openstack_version
         template_args = self.template_args()
@@ -402,7 +395,7 @@ class Service:
             **template_args,
         )
         data.update(self.resource_def)
-        self._merge_release_values(data, values)
+
         return data
 
     def get_chart_value_or_none(
