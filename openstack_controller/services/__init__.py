@@ -56,7 +56,7 @@ class Coordination(Service):
 
 
 class Redis(Service):
-    service = "redis-telemetry"
+    service = "redis"
     group = "databases.spotahome.com"
     version = "v1"
     kind = "RedisFailover"
@@ -1272,7 +1272,7 @@ class Octavia(OpenStackService):
         ssh_secret = secrets.SSHSecret(self.namespace, self.service)
         t_args["ssh_credentials"] = ssh_secret.ensure()
 
-        if "redis-telemetry" in self.mspec["features"]["services"]:
+        if "redis" in self.mspec["features"]["services"]:
             t_args["redis_namespace"] = settings.OSCTL_REDIS_NAMESPACE
 
             redis_secret = secrets.RedisSecret(settings.OSCTL_REDIS_NAMESPACE)
@@ -1347,7 +1347,7 @@ class Tempest(Service):
         helmbundles_body = {}
         for s in set(self.mspec["features"]["services"]) - {
             "tempest",
-            "redis-telemetry",
+            "redis",
         }:
             service_template_args = Service.registry[s](
                 self.body, self.logger

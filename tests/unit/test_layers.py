@@ -46,6 +46,7 @@ def test_apply_list_empty_stein(osdpl_min_stein):
         "load-balancer",
         "coordination",
         "key-manager",
+        "redis",
     }
     ta, td = layers.services(osdpl_min_stein["spec"], mock.Mock())
     assert ta == compute_services
@@ -70,6 +71,7 @@ def test_apply_list_empty_train(osdpl_min_train):
         "load-balancer",
         "coordination",
         "key-manager",
+        "redis",
     }
     ta, td = layers.services(osdpl_min_train["spec"], mock.Mock())
     assert ta == compute_services
@@ -93,6 +95,7 @@ def test_apply_list_empty_rocky(osdpl_min_rocky):
         "load-balancer",
         "coordination",
         "key-manager",
+        "redis",
     }
     ta, td = layers.services(osdpl_min_rocky["spec"], mock.Mock())
     assert ta == compute_services

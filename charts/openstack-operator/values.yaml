@@ -26,6 +26,7 @@ osdpl:
     raw:
       OSCTL_NODE_NOT_READY_FLAPPING_TIMEOUT: 120
       OSCTL_HELMBUNDLE_APPLY_DELAY: 10
+      #Redis namespace, should be different from osdpl namespace to avoid conflicts.
       OSCTL_REDIS_NAMESPACE: "openstack-redis"
     osdpl:
       raw: {}
