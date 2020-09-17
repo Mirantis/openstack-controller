@@ -142,6 +142,8 @@ services:
             - (?:heat_tempest_plugin.tests.functional.test_create_update_neutron_subnet.UpdateSubnetTest.test_update_to_no_gateway_ip)
             # TODO(ibumarskov): not supported by TF (PRODX-5188)
             - (?:neutron_tempest_plugin.scenario.test_floatingip.DefaultSnatToExternal.test_snat_external_ip)
+            # TODO(ibumarskov): not supported by TF (PRODX-5252)
+            - (?:tempest.scenario.test_network_basic_ops.TestNetworkBasicOps.test_port_security_macspoofing_port)
             # not supported by TF (PRODX-4801)
             - (?:neutron_tempest_plugin.api.admin.test_floating_ips_admin_actions.FloatingIPAdminTestJSON.test_create_floatingip_with_specified_ip_address)
             # Skip SoftwareConfigIntegrationTest because it requires a custom image
