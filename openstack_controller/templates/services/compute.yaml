@@ -431,6 +431,8 @@ spec:
 {%- endfor %}
           oslo_messaging_notifications:
             topics: {{ notification_topics|join(',') }}
+          service_user:
+            send_service_user_token: true
       {%- if baremetal_enabled %}
         nova_ironic:
           DEFAULT:

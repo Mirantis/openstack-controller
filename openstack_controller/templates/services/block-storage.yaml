@@ -155,6 +155,8 @@ spec:
             topics: {{ notification_topics|join(',') }}
           coordination:
             backend_url: "etcd3+http://etcd:2379"
+          service_user:
+            send_service_user_token: true
         logging:
           logger_cinder:
             level: {{ spec.get('features', {}).get('logging', {}).get('cinder', {}).get('level', 'INFO') }}
