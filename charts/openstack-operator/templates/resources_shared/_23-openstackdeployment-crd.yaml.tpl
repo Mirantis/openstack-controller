@@ -597,24 +597,26 @@ spec:
                     lb_network:
                       type: object
                       required:
-                        - subnet
+                        - subnets
                       properties:
-                        subnet:
-                          type: object
-                          required:
-                            - range
-                            - pool_start
-                            - pool_end
-                          properties:
-                            range:
-                              type: string
-                              description: "IP address range ie: 1.2.3.0/24"
-                            pool_start:
-                              type: string
-                              description: "start IP address ie: 1.2.3.100"
-                            pool_end:
-                              type: string
-                              description: "end IP address ie: 1.2.3.200"
+                        subnets:
+                          type: array
+                          items:
+                            type: object
+                            required:
+                              - range
+                              - pool_start
+                              - pool_end
+                            properties:
+                              range:
+                                type: string
+                                description: "IP address range ie: 1.2.3.0/24"
+                              pool_start:
+                                type: string
+                                description: "start IP address ie: 1.2.3.100"
+                              pool_end:
+                                type: string
+                                description: "end IP address ie: 1.2.3.200"
                 stacklight:
                   type: object
                   required:
