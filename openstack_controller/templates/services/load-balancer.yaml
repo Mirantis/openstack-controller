@@ -120,13 +120,6 @@ spec:
             jobs:
               - openstack-mariadb-cluster-wait
       pod:
-        probes:
-          octavia_api:
-            octavia_driver_agent:
-              liveness:
-                enabled: false
-              readiness:
-                enabled: false
         replicas:
           worker: 3
           housekeeping: 3
