@@ -84,6 +84,7 @@ KEYSTONE_CONFIG_SECRET = "keystone-etc"
 RABBITMQ_USERS_CREDENTIALS_SECRET = "openstack-rabbitmq-users-credentials"
 OPENSTACK_TF_SHARED_NAMESPACE = "openstack-tf-shared"
 OPENSTACK_TF_SECRET = "tf-data"
+TF_OPENSTACK_SECRET = "ost-data"
 OPENSTACK_STACKLIGHT_SHARED_NAMESPACE = "openstack-lma-shared"
 OPENSTACK_STACKLIGHT_SECRET = "rabbitmq-creds"
 
