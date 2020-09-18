@@ -108,6 +108,7 @@ class HelmBundleMixin:
         self,
         version,
         wait_completion=False,
+        extra_values=None,
         delay=settings.OSCTL_HELMBUNLE_MANIFEST_ENABLE_DELAY,
     ):
         diff = {"images": {"tags": {}}, "manifests": {}}
@@ -116,6 +117,9 @@ class HelmBundleMixin:
                 image, self.helmbundle_ext.chart, version
             )
         diff["manifests"][self.helmbundle_ext.manifest] = True
+        if extra_values is not None:
+            diff.update(extra_values)
+
         i = 1
         while True:
             self.service.set_release_values(diff)
@@ -146,12 +150,16 @@ class HelmBundleMixin:
         self,
         version,
         wait_completion=False,
+        extra_values=None,
         timeout=settings.OSCTL_HELMBUNLE_MANIFEST_ENABLE_TIMEOUT,
         delay=settings.OSCTL_HELMBUNLE_MANIFEST_ENABLE_DELAY,
     ):
         await asyncio.wait_for(
             self._enable(
-                version, wait_completion=wait_completion, delay=delay
+                version,
+                wait_completion=wait_completion,
+                extra_values=extra_values,
+                delay=delay,
             ),
             timeout=timeout,
         )
