@@ -684,6 +684,32 @@ class Keystone(OpenStackService):
         keycloak_salt = secrets.KeycloakSecret(self.namespace)
         t_args["oidc_crypto_passphrase"] = keycloak_salt.ensure().passphrase
 
+        # Create openstack IAM shared secret
+        oidc_settings = (
+            self.mspec.get("features", {})
+            .get("keystone", {})
+            .get("keycloak", {})
+            .get("oidc", {})
+        )
+        public_domain = self.mspec["public_domain_name"]
+        keystone_base = f"https://keystone.{public_domain}"
+        redirect_uris_default = [
+            f"{keystone_base}/v3/OS-FEDERATION/identity_providers/keycloak/protocols/mapped/auth",
+            f"{keystone_base}/v3/auth/OS-FEDERATION/websso/",
+            f"{keystone_base}/v3/auth/OS-FEDERATION/identity_providers/keycloak/protocols/mapped/websso/",
+            f"https://horizon.{public_domain}/auth/websso/",
+        ]
+        redirect_uris = oidc_settings.get(
+            "OIDCRedirectURI", redirect_uris_default
+        )
+
+        iam_secret = secrets.IAMSecret(self.namespace)
+        iam_data = secrets.OpenStackIAMData(
+            clientId=oidc_settings.get("OIDCClientID", "os"),
+            redirectUris=redirect_uris,
+        )
+        iam_secret.save(iam_data)
+
         return t_args
 
     @layers.kopf_exception
