@@ -9,7 +9,6 @@
 - nova_service_cleaner
 - rabbitmq
 - mariadb
-- mariadb_ingress
 - powerdns
 - rabbit_init
 - ingress

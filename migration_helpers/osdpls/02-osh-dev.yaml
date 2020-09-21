@@ -13,7 +13,7 @@ spec:
         manifests:
           service_external: true
         network:
-          mariadb_ingress:
+          mariadb_master:
             service:
               type: LoadBalancer
     openstack:
