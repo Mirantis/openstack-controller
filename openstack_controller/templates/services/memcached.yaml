@@ -26,5 +26,10 @@ spec:
   {%- endif %}
       manifests:
         network_policy: false
+        statefulset: true
+        deployment: false
       endpoints:
         cluster_domain_suffix: {{ spec.internal_domain_name }}
+      pod:
+        replicas:
+          server: 3
