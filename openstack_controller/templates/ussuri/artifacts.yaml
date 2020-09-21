@@ -168,3 +168,4 @@ octavia_driver_agent: '{{ images_base_url }}/openstack/octavia:ussuri-bionic-202
 octavia_db_sync_persistence: '{{ images_base_url }}/openstack/octavia:ussuri-bionic-20200913180042'
 mariadb_phy_backup: '{{ images_base_url }}/general/mariadb:10.4.14-bionic-20200812025059'
 mariadb_phy_restore: '{{ images_base_url }}/general/mariadb:10.4.14-bionic-20200812025059'
+mariadb_controller: '{{ images_base_url }}/general/mariadb:10.4.14-bionic-20200812025059'
