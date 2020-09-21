@@ -1,5 +1,6 @@
 import asyncio
 from dataclasses import dataclass
+from hashlib import sha256
 import inspect
 import json
 import sys
@@ -348,6 +349,61 @@ class Node(pykube.Node):
                 )
 
 
+class NodeWorkloadLock(pykube.objects.APIObject, HelmBundleMixin):
+    version = "lcm.mirantis.com/v1alpha1"
+    endpoint = "nodeworkloadlocks"
+    kind = "NodeWorkloadLock"
+    workload = "openstack"
+
+    @classmethod
+    def definition_exists(cls):
+        name = cls.endpoint + "." + cls.version.split("/")[0]
+        return find(
+            pykube.CustomResourceDefinition, name, silent=True, cluster=True
+        )
+
+    @classmethod
+    def _lock_name(cls, node):
+        hash = sha256(node.encode()).hexdigest()[:8]
+        return f"{cls.workload}-{hash}"
+
+    @classmethod
+    def ensure(cls, node):
+        name = cls._lock_name(node)
+        obj = find(cls, name, silent=True)
+        if not obj:
+            LOG.info(f"Node workload lock not found {name}")
+            data = {
+                "apiVersion": cls.version,
+                "kind": cls.kind,
+                "metadata": {
+                    "name": name,
+                },
+                "spec": {
+                    "nodeName": node,
+                    "controllerName": cls.workload,
+                },
+            }
+            obj = cls(api, data)
+            obj.create()
+            status = {"status": {"state": "active"}}
+            obj.patch(status, subresource="status")
+            LOG.info(f"Node workload created {name}")
+        return obj
+
+    @classmethod
+    def get(cls, node):
+        name = cls._lock_name(node)
+        return find(cls, name, silent=True)
+
+    @staticmethod
+    def required_for_node(node_body):
+        for k, v in settings.OSCTL_OPENSTACK_NODE_LABELS.items():
+            if node_body["metadata"]["labels"].get(k) == v:
+                return True
+        return False
+
+
 def resource(data):
     return object_factory(api, data["apiVersion"], data["kind"])(api, data)
 
@@ -359,8 +415,10 @@ def dummy(klass, name, namespace=None):
     return klass(api, {"metadata": meta})
 
 
-def find(klass, name, namespace=None, silent=False):
+def find(klass, name, namespace=None, silent=False, cluster=False):
     try:
+        if cluster:
+            return klass.objects(api).get(name=name)
         return klass.objects(api).filter(namespace=namespace).get(name=name)
     except pykube.exceptions.ObjectDoesNotExist:
         if not silent:
