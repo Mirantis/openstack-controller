@@ -145,6 +145,10 @@ spec:
             node_selector_key: openstack-control-plane
             node_selector_value: enabled
       pod:
+        # NOTE(ohryhorov): use_fqdn is disabled not to use FQDN
+        # in service hostnames
+        use_fqdn:
+          compute: false
         # NOTE(vsaienko): don't use host networking to be able to
         # update pods with surge (when node hostport is used)
         useHostNetwork:
