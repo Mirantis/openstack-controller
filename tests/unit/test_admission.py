@@ -46,7 +46,7 @@ ADMISSION_REQ_JSON = """
             "kind": "OpenStackDeployment",
             "spec": {
                 "openstack_version": "ussuri",
-                "profile": "compute",
+                "preset": "compute",
                 "size": "tiny",
                 "features": {
                     "neutron": {

@@ -98,7 +98,7 @@ spec:
     stacklight:
       enabled: true
   openstack_version: stein
-  profile: compute
+  preset: compute
   size: small
   services:
     compute:

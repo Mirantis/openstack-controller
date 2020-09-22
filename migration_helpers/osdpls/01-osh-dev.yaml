@@ -177,7 +177,7 @@ spec:
     octavia:
       deploy_main_service: false
   openstack_version: queens
-  profile: compute
+  preset: compute
   public_domain_name: it.just.works
   services:
     dns:

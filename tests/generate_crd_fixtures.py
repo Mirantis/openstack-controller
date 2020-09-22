@@ -13,10 +13,10 @@ def main(args):
         f"examples/{os_version}/core-ceph-local-non-dvr.yaml"
     )
     openstackdeployment = yaml.safe_load(open(openstackdeployment_file))
-    profile = openstackdeployment["spec"]["profile"]
+    preset = openstackdeployment["spec"]["preset"]
     size = openstackdeployment["spec"]["size"]
     base = yaml.safe_load(
-        layers.ENV.get_template(f"profile/{profile}.yaml").render()
+        layers.ENV.get_template(f"preset/{preset}.yaml").render()
     )
     artifacts = yaml.safe_load(
         layers.ENV.get_template("artifacts.yaml").render()

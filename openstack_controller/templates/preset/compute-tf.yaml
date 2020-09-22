@@ -48,6 +48,14 @@ features:
     user:
       username: stacklight
 services:
+  database:
+    mariadb:
+      values:
+        conf:
+          database_conf:
+            mysqld:
+              wsrep_provider_options:
+                gcache.size: 1024M
   load-balancer:
     octavia:
       values:
@@ -70,14 +78,6 @@ services:
               stats_request_timeout: 5
               status_max_processes: 50
               status_request_timeout: 5
-  database:
-    mariadb:
-      values:
-        conf:
-          database_conf:
-            mysqld:
-              wsrep_provider_options:
-                gcache.size: 1024M
   compute:
     nova:
       values:

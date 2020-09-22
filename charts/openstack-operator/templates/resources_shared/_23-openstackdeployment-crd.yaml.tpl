@@ -70,8 +70,8 @@ spec:
                 - train
                 - ussuri # under development
                 - master # not supported, only for example
-            profile:
-              description: profile to deploy
+            preset:
+              description: Preset of features to deploy
               type: string
               enum:
                 - compute
@@ -697,7 +697,7 @@ spec:
                       <<: *application_readiness
           required:
             - openstack_version
-            - profile
+            - preset
             - size
             - public_domain_name
             - internal_domain_name

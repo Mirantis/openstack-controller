@@ -39,7 +39,7 @@ def _osdpl_minimal(os_release):
         "spec": {
             "openstack_version": os_release,
             "size": "tiny",
-            "profile": "compute",
+            "preset": "compute",
         }
     }
 
