@@ -35,6 +35,14 @@ rules:
   - apiGroups: [lcm.mirantis.com]
     resources: [helmbundles]
     verbs: [list, get, watch]
+
+  # Application: node maintenance related access
+  - apiGroups: [lcm.mirantis.com]
+    resources: [nodemaintenancerequests]
+    verbs: [list, get, watch]
+  - apiGroups: [lcm.mirantis.com]
+    resources: [nodeworkloadlocks]
+    verbs: [list, get, watch, create, update, patch, delete]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
@@ -397,6 +405,39 @@ spec:
               path: /healthz
               port: 32772
             {{- toYaml .Values.osdpl.pod.controller.node.liveness.params | nindent 12}}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+        - name: nodemaintenancerequest
+          image: {{ tuple . .Values.image | include "getImageUrl" }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command:
+            - kopf
+            - run
+            - '-n'
+            - {{ .Values.osdpl.namespace }}
+            - '-P'
+            - openstack-controller.nodemaintenancerequest
+            - '-m'
+            - openstack_controller.controllers.node_maintenance_request
+            - '-m'
+            - openstack_controller.controllers.probe
+            - '-L'
+            - 'http://0.0.0.0:32773/healthz'
+          env:
+            {{- range $optionName, $optionValue := .Values.osdpl.settings.raw }}
+            - name: {{ $optionName }}
+              value: "{{ $optionValue }}"
+            {{- end }}
+            {{- range $optionName, $optionValue := .Values.osdpl.settings.node_maintenance_request.raw }}
+            - name: {{ $optionName }}
+              value: "{{ $optionValue }}"
+            {{- end }}
+{{ tuple . | include "openstack-controller.common_env" | indent 12 }}
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 32773
+            {{- toYaml .Values.osdpl.pod.controller.node_maintenance_request.liveness.params | nindent 12}}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       {{- with .Values.nodeSelector }}

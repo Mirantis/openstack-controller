@@ -40,6 +40,8 @@ osdpl:
       raw:
         PYTHONASYNCIODEBUG: 1
         KOPF_RUN_DEBUG: 1
+    node_maintenance_request:
+      raw: {}
   pod:
     controller:
       osdpl:
@@ -67,6 +69,12 @@ osdpl:
             periodSeconds: 15
             timeoutSeconds: 5
       helmbundle:
+        liveness:
+          params:
+            initialDelaySeconds: 120
+            periodSeconds: 15
+            timeoutSeconds: 5
+      node_maintenance_request:
         liveness:
           params:
             initialDelaySeconds: 120
