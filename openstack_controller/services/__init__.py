@@ -563,11 +563,24 @@ class Heat(OpenStackService):
             ("Deployment", "heat-cfn"),
             ("Deployment", "heat-engine"),
         ]
+
+        extra_values = {
+            "endpoints": {
+                "oslo_messaging": {
+                    "path": self.get_chart_value_or_none(
+                        self.openstack_chart,
+                        ["endpoints", "oslo_messaging", "path"],
+                        self.openstack_version,
+                    )
+                }
+            }
+        }
+
         for kind, obj_name in upgrade_map:
             child_obj = self.get_child_object(kind, obj_name)
             if kind == "Job":
                 await child_obj.purge()
-            await child_obj.enable(self.openstack_version, True)
+            await child_obj.enable(self.openstack_version, True, extra_values)
 
 
 class Horizon(OpenStackService):
