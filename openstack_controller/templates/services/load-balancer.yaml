@@ -72,7 +72,7 @@ spec:
   - name: openstack-octavia
     chart: {{spec.common.openstack.get('repo', spec.common.charts.repo)}}/octavia
     values:
-{%- if 'amphora' in provider_map.keys() %}
+{%- if not tungstenfabric_enabled %}
       octavia:
         settings:
           lbmgmt_subnets:
@@ -243,6 +243,10 @@ spec:
 {% set _default_provider_driver = 'amphora' %}
 {%- if spec.openstack_version in ['queens'] %}
   {% set _default_provider_driver = 'octavia' %}
+{%- endif %}
+{%- if tungstenfabric_enabled %}
+  {% set _default_provider_driver = 'tungstenfabric' %}
+  {%- set provider_map = {'tungstenfabric': 'tungstenfabric:TungstenFabricProviderDriver'} %}
 {%- endif %}
             default_provider_driver: {{ _default_provider_driver }}
             enabled_provider_drivers: {{ ','.join(provider_map.values()) }}
