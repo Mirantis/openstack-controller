@@ -27,6 +27,7 @@ features:
     - coordination
     - key-manager
     - load-balancer
+    - redis
   glance:
     backend: ceph
   cinder:

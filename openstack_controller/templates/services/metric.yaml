@@ -87,7 +87,7 @@ spec:
             coordination_url: etcd3://etcd:2379
           storage:
             driver: redis
-            redis_url: redis://:{{ redis_secret }}@rfs-openstack-redis-telemetry.{{ redis_namespace }}:26379?sentinel=mymaster&db=0
+            redis_url: redis://:{{ redis_secret }}@rfs-openstack-redis.{{ redis_namespace }}:26379?sentinel=mymaster&db=0
           keystone_authtoken:
             memcache_security_strategy: ENCRYPT
             memcache_secret_key: {{ credentials.memcached }}

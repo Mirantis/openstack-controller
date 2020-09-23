@@ -1,3 +1,6 @@
+{{ if eq .Values.osdpl.namespace .Values.osdpl.settings.raw.OSCTL_REDIS_NAMESPACE }}
+  {{ fail "Osdpl namespace and Redis namespace should be different!" }}
+{{ end }}
 ---
 apiVersion: v1
 kind: ServiceAccount

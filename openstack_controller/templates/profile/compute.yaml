@@ -28,6 +28,7 @@ features:
 {%- endif %}
     - coordination
     - key-manager
+    - redis
   glance:
     backend: ceph
   cinder:

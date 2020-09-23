@@ -274,7 +274,7 @@ spec:
                       - coordination
                       - dashboard-selenium
                       - baremetal
-                      - redis-telemetry
+                      - redis
                       - alarming
                       - event
                       - metering
