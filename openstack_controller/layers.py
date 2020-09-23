@@ -165,8 +165,8 @@ def merge_osdpl_into_helmbundle(service, spec, service_helmbundle):
     # We have 4 level of hierarchy, in increasing priority order:
     # 1. helm values.yaml - which is default
     # 2. openstack_controller/templates/services/<helmbundle>.yaml
-    # 3. OpenstackDeployment or profile charts section
-    # 4. OpenstackDeployment or profile common/group section
+    # 3. OpenstackDeployment or preset charts section
+    # 4. OpenstackDeployment or preset common/group section
 
     # The values are merged in this specific order.
     for release in service_helmbundle["spec"]["releases"]:
@@ -225,7 +225,7 @@ def merge_all_layers(service, body, meta, spec, logger, **template_args):
     service_helmbundle["spec"]["repositories"] = spec["common"]["charts"][
         "repositories"
     ]
-    # first merge osdpl with profile and sizes
+    # first merge osdpl with preset and sizes
     service_helmbundle = merge_osdpl_into_helmbundle(
         service, spec, service_helmbundle
     )
@@ -238,16 +238,16 @@ def merge_all_layers(service, body, meta, spec, logger, **template_args):
 
 @kopf_exception
 def merge_spec(spec, logger):
-    """Merge user-defined OsDpl spec with base for profile and OS version"""
+    """Merge user-defined OsDpl spec with base for preset and OS version"""
     spec = copy.deepcopy(dict(spec))
-    profile = spec["profile"]
+    preset = spec["preset"]
     size = spec["size"]
     os_release = spec["openstack_version"]
-    LOG.debug(f"Using profile {profile}")
+    LOG.debug(f"Using preset {preset}")
     LOG.debug(f"Using size {size}")
 
     base = yaml.safe_load(
-        ENV.get_template(f"profile/{profile}.yaml").render(
+        ENV.get_template(f"preset/{preset}.yaml").render(
             openstack_version=os_release,
             services=spec.get("features", {}).get("services", []),
             ironic_mt_enabled=spec.get("features", {})
@@ -258,9 +258,9 @@ def merge_spec(spec, logger):
             == "vlan",
         )
     )
-    profile_binary_base_url = base["artifacts"]["binary_base_url"]
+    preset_binary_base_url = base["artifacts"]["binary_base_url"]
     binary_base_url = spec.get("artifacts", {}).get(
-        "binary_base_url", profile_binary_base_url
+        "binary_base_url", preset_binary_base_url
     )
     artifacts = yaml.safe_load(
         ENV.get_template("artifacts.yaml").render(
@@ -290,7 +290,7 @@ def render_cache_images():
 
 def render_artifacts(spec):
     os_release = spec["openstack_version"]
-    # values from profile were earlier merged to spec.
+    # values from preset were earlier merged to spec.
     images_base_url = spec["artifacts"]["images_base_url"]
     binary_base_url = spec["artifacts"]["binary_base_url"]
     return yaml.safe_load(
