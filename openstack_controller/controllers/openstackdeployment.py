@@ -16,11 +16,6 @@ from openstack_controller import utils
 LOG = utils.get_logger(__name__)
 
 
-def update_status(body, patch):
-    osdpl = kube.OpenStackDeployment(kube.api, body)
-    osdpl.patch({"status": patch})
-
-
 def is_openstack_version_changed(diff):
     for diff_item in diff:
         if diff_item.field == ("spec", "openstack_version"):
@@ -104,27 +99,38 @@ def discover_images(mspec, logger):
     }
 
 
+# on.field to force storing that field to be reacting on its changes
+@kopf.on.field(*kube.OpenStackDeployment.kopf_on_args, field="status.children")
 @kopf.on.resume(*kube.OpenStackDeployment.kopf_on_args)
 @kopf.on.update(*kube.OpenStackDeployment.kopf_on_args)
 @kopf.on.create(*kube.OpenStackDeployment.kopf_on_args)
 @utils.collect_handler_metrics
-async def apply(body, meta, spec, logger, event, **kwargs):
+async def handle(body, meta, spec, logger, event, **kwargs):
+    # TODO(pas-ha) "cause" is deprecated, replace with "reason"
     event = kwargs["cause"].event
+    # TODO(pas-ha) remove all this kwargs[*] nonsense, accept explicit args,
+    # pass further only those that are really needed
+    # actual **kwargs form is for forward-compat with kopf itself
     namespace = meta["namespace"]
     LOG.info(f"Got osdpl event {event}")
+
+    kwargs["patch"].setdefault("status", {})
+    kwargs["patch"]["status"]["version"] = version.release_string
+    kwargs["patch"]["status"]["fingerprint"] = layers.spec_hash(body["spec"])
+
+    # update overall deployed status based on children satuses
+    children = kwargs["status"].get("children", {})
+    kwargs["patch"]["status"]["deployed"] = (
+        all([c is True for c in children.values()]) if children else False
+    )
+    LOG.debug(f"Updated status for osdpl {kwargs['name']}")
+
     if spec.get("draft"):
         LOG.info("OpenStack deployment is in draft mode, skipping handling...")
         return {"lastStatus": f"{event} drafted"}
 
     secrets.OpenStackAdminSecret(namespace).ensure()
 
-    fingerprint = layers.spec_hash(body["spec"])
-    version_patch = {
-        "version": version.release_string,
-        "fingerprint": fingerprint,
-    }
-
-    update_status(body, version_patch)
     mspec = layers.merge_spec(body["spec"], logger)
     images = discover_images(mspec, logger)
     if images != await cache.images(meta["namespace"]):
@@ -204,17 +210,3 @@ async def delete(name, logger, **kwargs):
     # TODO(pas-ha) wait for children to be deleted
     # TODO(pas-ha) remove secrets and so on?
     LOG.info(f"deleting {name}")
-
-
-@kopf.on.field(*kube.OpenStackDeployment.kopf_on_args, field="status.children")
-@utils.collect_handler_metrics
-async def status_children(body, meta, name, namespace, status, **kwargs):
-    LOG.info(f"Handling osdpl status event.")
-    children = status.get("children", {})
-    status_patch = {
-        "deployed": all([c is True for c in children.values()])
-        if len(children) != 0
-        else False
-    }
-    update_status(body, status_patch)
-    LOG.debug(f"Updated status for osdpl {name} to {status}")
