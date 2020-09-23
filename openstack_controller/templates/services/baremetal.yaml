@@ -121,9 +121,11 @@ spec:
           name: {{ network.get('name', 'baremetal') }}
           physnet: {{ network.get('physnet', 'ironic') }}
           network_type: {{ network.get('network_type', 'vlan') }}
-          mtu: {{ network.get('mtu', 1400) }}
           external: {{ network.get('external', true) }}
           shared: {{ network.get('shared', true) }}
+          {%- if network.mtu is defined %}
+          mtu: {{ network.mtu }}
+          {%- endif %}
           subnets:
             {%- set bm_subnet = network.subnets.baremetal_subnet %}
             baremetal:
