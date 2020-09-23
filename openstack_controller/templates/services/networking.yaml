@@ -154,6 +154,10 @@ spec:
         {%- endif %}
 {%- endfor %}
       pod:
+        # NOTE(ohryhorov): use_fqdn is disabled not to use FQDN
+        # in agent hostnames
+        use_fqdn:
+          neutron_agent: false
         probes:
           rpc_timeout: 30
           rpc_retries: 2
