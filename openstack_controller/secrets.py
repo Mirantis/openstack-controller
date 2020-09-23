@@ -616,6 +616,32 @@ class StackLightSecret(SecretCopy):
         super().__init__(namespace)
 
 
+@dataclass
+class OpenStackIAMData:
+    clientId: str
+    redirectUris: List[str]
+
+
+class IAMSecret:
+    secret_name = constants.OPENSTACK_IAM_SECRET
+
+    labels = {"kaas.mirantis.com/openstack-iam-shared": "True"}
+
+    def __init__(self, namespace: str):
+        self.namespace = namespace
+
+    def save(self, secret: OpenStackIAMData) -> None:
+        data = {"client": asdict(secret)}
+
+        data["client"] = base64.b64encode(
+            json.dumps(data["client"]).encode()
+        ).decode()
+
+        kube.save_secret_data(
+            self.namespace, self.secret_name, data, labels=self.labels
+        )
+
+
 class KeystoneAdminSecret(SecretCopy):
     secret_name = constants.KEYSTONE_ADMIN_SECRET
 

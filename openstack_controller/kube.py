@@ -411,8 +411,13 @@ def wait_for_secret(namespace, name):
     wait_for_resource(pykube.Secret, name, namespace)
 
 
-def save_secret_data(namespace: str, name: str, data: Dict[str, str]):
+def save_secret_data(
+    namespace: str, name: str, data: Dict[str, str], labels=None
+):
     secret = {"metadata": {"name": name, "namespace": namespace}, "data": data}
+    if labels is not None:
+        secret["metadata"]["labels"] = labels
+
     try:
         find(pykube.Secret, name, namespace)
     except pykube.exceptions.ObjectDoesNotExist:
