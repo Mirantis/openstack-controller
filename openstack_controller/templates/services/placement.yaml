@@ -48,6 +48,7 @@ spec:
       endpoints:
         cluster_domain_suffix: {{ spec.internal_domain_name }}
 {% include 'base/_admin_identity.yaml' %}
+{% include 'base/_cache.yaml' %}
         oslo_db:
           auth:
             admin:

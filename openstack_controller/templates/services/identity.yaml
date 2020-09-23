@@ -231,6 +231,7 @@ spec:
           scheme:
             default: http
             public: https
+{% include 'base/_cache.yaml' %}
         oslo_db:
           auth:
             admin:

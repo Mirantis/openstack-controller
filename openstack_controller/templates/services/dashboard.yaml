@@ -56,6 +56,7 @@ spec:
             api:
               internal: 443
 {%- endif %}
+{% include 'base/_cache.yaml' %}
         oslo_db:
           auth:
             admin:
