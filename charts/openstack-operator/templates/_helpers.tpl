@@ -51,3 +51,12 @@ Generate full image paths for KaaS CDN
 {{- $wtf := $context.Template.Name | replace $last $name -}}
 {{ include $wtf $context }}
 {{- end -}}
+
+{{/*
+Generate environment variables for osdpl containers
+*/}}
+{{- define "openstack-controller.common_env" }}
+{{- $context := index . 0 -}}
+- name: OSCTL_OS_DEPLOYMENT_NAMESPACE
+  value: {{ $context.Values.osdpl.namespace }}
+{{- end }}
