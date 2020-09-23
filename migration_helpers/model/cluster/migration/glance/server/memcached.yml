@@ -2,6 +2,4 @@ parameters:
   glance:
     server:
       cache:
-        ~members:
-        - host: ${_param:mcp2_memcached_glance_address}
-          port: 11211
+        ~members: ${_param:mcp2_memcached_glance_members}
