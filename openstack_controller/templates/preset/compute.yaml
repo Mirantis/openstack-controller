@@ -1,4 +1,5 @@
 {%- set ironic_enabled = 'baremetal' in services %}
+{%- set nginx_ingress_namespace_class = "openstack-ingress-nginx" %}
 artifacts:
   images_base_url: docker-kaas-local.artifactory.mirantis.com
   binary_base_url: https://binary.mirantis.com
@@ -7,7 +8,13 @@ common:
   charts:
     releases:
       namespace: openstack
-
+  openstack:
+    values:
+      network:
+        api:
+          ingress:
+            classes:
+              namespace: {{ nginx_ingress_namespace_class }}
 features:
   services:
     - block-storage
@@ -55,6 +62,15 @@ features:
           pool_start: '10.255.1.0'
           pool_end: '10.255.255.254'
 services:
+  ingress:
+    ingress:
+      values:
+        deployment:
+          # NOTE(vsaienko): deploy in cluster mode to allow handle ingress'es
+          # from TF namespace
+          mode: "cluster"
+          cluster:
+            class: {{ nginx_ingress_namespace_class }}
   database:
     mariadb:
       values:
@@ -63,9 +79,58 @@ services:
             mysqld:
               wsrep_provider_options:
                 gcache.size: 1024M
+  dashboard:
+    horizon:
+      values:
+        network:
+          dashboard:
+            ingress:
+              classes:
+                namespace: {{ nginx_ingress_namespace_class }}
+  networking:
+    neutron:
+      values:
+        network:
+          server:
+            ingress:
+              classes:
+                namespace: {{ nginx_ingress_namespace_class }}
+  orchestration:
+    heat:
+      values:
+        network:
+          cfn:
+            ingress:
+              classes:
+                namespace: {{ nginx_ingress_namespace_class }}
+          cloudwatch:
+            ingress:
+              classes:
+                namespace: {{ nginx_ingress_namespace_class }}
   compute:
     nova:
       values:
+        network:
+          api:
+            ingress:
+              classes:
+                namespace: {{ nginx_ingress_namespace_class }}
+          metadata:
+            ingress:
+              classes:
+                namespace: {{ nginx_ingress_namespace_class }}
+          osapi:
+            ingress:
+              classes:
+                namespace: {{ nginx_ingress_namespace_class }}
+          placement:
+            ingress:
+              classes:
+                namespace: {{ nginx_ingress_namespace_class }}
+          novncproxy:
+            ingress:
+              classes:
+                namespace: {{ nginx_ingress_namespace_class }}
         bootstrap:
           structured:
             flavors:
