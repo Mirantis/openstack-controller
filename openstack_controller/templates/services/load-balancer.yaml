@@ -3,10 +3,11 @@
 
 {%- set service = 'octavia' %}
 {%- set provider_map = {'amphora': 'amphora:The Octavia Amphora driver.',
-                        'octavia': 'octavia:Deprecated alias of the Octavia Amphora driver.'} %}
-# NOTE(vsaienko): we do not deploy redis with persistant storage, so can't use amphorav2 in production
-# remove it from the list unless it is resolved
-# 'amphorav2': 'amphorav2:Extented Octavia Amphora driver with jobboard support.',
+                        'octavia': 'octavia:Deprecated alias of the Octavia Amphora driver.'}%}
+# NOTE: amphorav2 is supported only from Ussuri
+{%- if spec.openstack_version not in ['queens', 'rocky', 'stein', 'train'] %}
+{%- do provider_map.update({'amphorav2': 'amphorav2:Extented Octavia Amphora driver with jobboard support.'})%}
+{%- endif %}
 {%- set components_with_dedicated_messaging = spec.get('features', {}).get('messaging', {}).get('components_with_dedicated_messaging', []) %}
 {%- set stacklight_enabled = spec.get('features', {}).get('stacklight', {}).get('enabled', False) %}
 {%- set tungstenfabric_enabled = spec.features.neutron.get('backend', 'ml2') == 'tungstenfabric' %}
