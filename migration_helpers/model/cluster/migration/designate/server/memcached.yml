@@ -2,6 +2,4 @@ parameters:
   designate:
     server:
       cache:
-        ~members:
-        - host: ${_param:mcp2_memcached_designate_address}
-          port: 11211
+        ~members: ${_param:mcp2_memcached_designate_members}

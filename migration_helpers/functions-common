@@ -173,6 +173,33 @@ function get_mcp2_external_ip {
   echo "$(kubectl -n openstack get services $service -o jsonpath='{.status.loadBalancer.ingress[0].ip}')"
 }
 
+function expose_mcp2_memcached {
+    local pod_names
+    pod_names=$(kubectl -n openstack get pods -l application=memcached -o name | cut -d/ -f 2)
+    local svc_names_ips=''
+    for pod_name in $pod_names; do
+        echo "
+        apiVersion: v1
+        kind: Service
+        metadata:
+          name: memcached-${pod_name##*-}-external
+        spec:
+          externalTrafficPolicy: Cluster
+          ports:
+          - name: memcached
+            port: 11211
+            protocol: TCP
+            targetPort: 11211
+          selector:
+            statefulset.kubernetes.io/pod-name: ${pod_name}
+          type: LoadBalancer
+        " | kubectl -n openstack apply --wait=true -f - $1>/dev/null
+        svc_names_ips="${svc_names_ips} memcached-${pod_name##*-}-external_$(get_mcp2_external_ip memcached-${pod_name##*-}-external)"
+    done
+    echo ${svc_names_ips}
+}
+
+
 function get_mcp2_internal_domain_name {
   echo $(kubectl get osdpl osh-dev -n openstack -o jsonpath='{.spec.internal_domain_name}')
 }

@@ -2,6 +2,4 @@ parameters:
   cinder:
     controller:
       cache:
-        ~members:
-        - host: ${_param:mcp2_memcached_cinder_address}
-          port: 11211
+        ~members: ${_param:mcp2_memcached_cinder_members}

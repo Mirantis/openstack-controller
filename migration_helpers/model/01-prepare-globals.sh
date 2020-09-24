@@ -81,16 +81,24 @@ cat <<EOF >> $RUN_DIR/cluster/migration/init.yml
 EOF
   done
 
-  local mcp2_internal_domain_name=$(get_mcp2_internal_domain_name)
-
-  local mcp2_memcached_address=$(get_mcp2_external_ip memcached-external)
+  local mcp2_memcached_names_addresses
+  mcp2_memcached_names_addresses=$(expose_mcp2_memcached)
+  local mcp2_internal_domain_name
+  mcp2_internal_domain_name=$(get_mcp2_internal_domain_name)
   # memcached
   # Use dns to make sure URL in mcp1 and mcp2 are the same
-  local mcp2_memcached_fqdn=memcached.openstack.svc.${mcp2_internal_domain_name}
   for component in $COMPONENTS_TO_MIGRATE; do
     local mcp2_memcached_component_secret_key=$(kubectl -n openstack get secrets generated-${service_type}-passwords -o jsonpath="{.data.memcached}" | base64 -d | tr -d '"')
 cat <<EOF >> $RUN_DIR/cluster/migration/init.yml
-    mcp2_memcached_${component}_address: $mcp2_memcached_fqdn
+    mcp2_memcached_${component}_members:
+EOF
+    for name in $mcp2_memcached_names_addresses; do
+cat <<EOF >> $RUN_DIR/cluster/migration/init.yml
+      - host: ${name%%_*}.openstack.svc.${mcp2_internal_domain_name}
+        port: 11211
+EOF
+    done
+cat <<EOF >> $RUN_DIR/cluster/migration/init.yml
     mcp2_memcached_${component}_secret_key: $mcp2_memcached_component_secret_key
 EOF
   done
@@ -127,10 +135,16 @@ cat <<EOF >> $RUN_DIR/cluster/migration/init.yml
           address: $mcp2_mariadb_address
           names:
           - mariadb.openstack.svc.${mcp2_internal_domain_name}
-        mcp2_memcached_public_api_host:
-          address: $mcp2_memcached_address
+EOF
+for name in $mcp2_memcached_names_addresses; do
+cat <<EOF >> $RUN_DIR/cluster/migration/init.yml
+        mcp2_memcached_${name%%_*}_public_api_host:
+          address: ${name##*_}
           names:
-          - $mcp2_memcached_fqdn
+          - ${name%%_*}.openstack.svc.${mcp2_internal_domain_name}
+EOF
+done
+cat <<EOF >> $RUN_DIR/cluster/migration/init.yml
         mcp2_openstack_public_api_host:
           address: $mcp2_ingress_address
           names:

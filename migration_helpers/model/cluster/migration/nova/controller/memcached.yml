@@ -2,6 +2,4 @@ parameters:
   nova:
     controller:
       cache:
-        ~members:
-        - host: ${_param:mcp2_memcached_nova_address}
-          port: 11211
+        ~members: ${_param:mcp2_memcached_nova_members}
