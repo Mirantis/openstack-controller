@@ -12,6 +12,7 @@ import kopf
 import yaml
 
 from openstack_controller import constants
+from openstack_controller import settings
 from openstack_controller.filters.tempest import generate_tempest_config
 from openstack_controller import utils
 
@@ -249,6 +250,7 @@ def merge_spec(spec, logger):
     base = yaml.safe_load(
         ENV.get_template(f"preset/{preset}.yaml").render(
             openstack_version=os_release,
+            openstack_namespace=settings.OSCTL_OS_DEPLOYMENT_NAMESPACE,
             services=spec.get("features", {}).get("services", []),
             ironic_mt_enabled=spec.get("features", {})
             .get("ironic", {})

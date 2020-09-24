@@ -7,7 +7,7 @@ artifacts:
 common:
   charts:
     releases:
-      namespace: openstack
+      namespace: {{ openstack_namespace }}
   openstack:
     values:
       network:
