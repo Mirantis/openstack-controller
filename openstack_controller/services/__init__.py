@@ -1244,24 +1244,34 @@ class Placement(OpenStackService):
 class Octavia(OpenStackService):
     service = "load-balancer"
     openstack_chart = "octavia"
-    _child_objects = {
-        "octavia": {
-            "Job": {
-                "octavia-create-resources": {
-                    "images": ["create_resources"],
-                    "manifest": "job_create_resources",
+
+    @property
+    def _child_objects(self):
+        ch_objects = {
+            "octavia": {
+                "Job": {
+                    "octavia-create-resources": {
+                        "images": ["create_resources"],
+                        "manifest": "job_create_resources",
+                    }
                 }
-            }
-        },
-        "rabbitmq": {
-            "Job": {
-                "openstack-octavia-rabbitmq-cluster-wait": {
-                    "images": ["rabbitmq_scripted_test"],
-                    "manifest": "job_cluster_wait",
+            },
+            "rabbitmq": {
+                "Job": {
+                    "openstack-octavia-rabbitmq-cluster-wait": {
+                        "images": ["rabbitmq_scripted_test"],
+                        "manifest": "job_cluster_wait",
+                    }
                 }
+            },
+        }
+
+        if self.openstack_version not in ["queens", "rocky", "stein", "train"]:
+            ch_objects["octavia"]["Job"]["octavia-db-sync-persistence"] = {
+                "images": ["octavia_db_sync_persistence"],
+                "manifest": "job_db_sync_persistence",
             }
-        },
-    }
+        return ch_objects
 
     def template_args(self):
         t_args = super().template_args()
