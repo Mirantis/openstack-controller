@@ -73,9 +73,9 @@ spec:
   - name: openstack-octavia
     chart: {{spec.common.openstack.get('repo', spec.common.charts.repo)}}/octavia
     values:
-{%- if not tungstenfabric_enabled %}
       octavia:
         settings:
+{%- if not tungstenfabric_enabled %}
           lbmgmt_subnets:
   {%- for subnet in spec.features.octavia.lb_network.subnets %}
             - range: {{ subnet.range }}
