@@ -1292,23 +1292,25 @@ class Octavia(OpenStackService):
         obj_name = "octavia-create-resources"
         resource = self.get_child_object("Job", obj_name)
 
-        for old_release in old_obj.obj["spec"]["releases"]:
-            if old_release["chart"].endswith(f"/{self.openstack_chart}"):
-                for new_release in new_obj.obj["spec"]["releases"]:
-                    if new_release["chart"].endswith(
-                        f"/{self.openstack_chart}"
-                    ):
-                        old_image = old_release["values"]["octavia"][
-                            "settings"
-                        ].get("amphora_image_url")
-                        new_image = new_release["values"]["octavia"][
-                            "settings"
-                        ]["amphora_image_url"]
-                        if old_image is None or old_image != new_image:
-                            LOG.info(
-                                f"Removing the following jobs: [{obj_name}]"
-                            )
-                            await resource.purge()
+        # NOTE(vsaienko): avoid unneded checks in case resource doesn't exist
+        if resource.exists():
+            for old_release in old_obj.obj["spec"]["releases"]:
+                if old_release["chart"].endswith(f"/{self.openstack_chart}"):
+                    for new_release in new_obj.obj["spec"]["releases"]:
+                        if new_release["chart"].endswith(
+                            f"/{self.openstack_chart}"
+                        ):
+                            old_image = old_release["values"]["octavia"][
+                                "settings"
+                            ].get("amphora_image_url")
+                            new_image = new_release["values"]["octavia"][
+                                "settings"
+                            ]["amphora_image_url"]
+                            if old_image is None or old_image != new_image:
+                                LOG.info(
+                                    f"Removing the following jobs: [{obj_name}]"
+                                )
+                                await resource.purge()
 
 
 class RadosGateWay(Service):
