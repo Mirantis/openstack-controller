@@ -238,6 +238,9 @@ spec:
 {%- if spec.openstack_version not in ['queens', 'rocky'] and tungstenfabric_enabled %}
         octavia_driver_agent: true
 {%- endif %}
+{%- if 'amphorav2' in provider_map.keys() %}
+        job_db_sync_persistence: true
+{%- endif %}
       conf:
         octavia:
           api_settings:
