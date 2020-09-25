@@ -169,6 +169,12 @@ async def handle_keystone_secret(
     ksadmin_secret.save(secret_data)
 
 
+@kopf.on.update(
+    "",
+    "v1",
+    "secrets",
+    labels={"application": "rabbitmq", "component": "server"},
+)
 @kopf.on.create(
     "",
     "v1",
@@ -190,11 +196,19 @@ async def handle_rabbitmq_secret(
 
     LOG.debug(f"Handling secret create {name}")
 
+    secret_data = json.loads(
+        base64.b64decode(body["data"]["RABBITMQ_USERS"]).decode()
+    )
+
+    if "stacklight_service_notifications" not in secret_data:
+        LOG.debug("The stacklight data is not present in secret.")
+        return
+
     credentials = {
         key: base64.b64encode(value.encode()).decode()
-        for key, value in json.loads(
-            base64.b64decode(body["data"]["RABBITMQ_USERS"]).decode()
-        )["stacklight_service_notifications"]["auth"]["stacklight"].items()
+        for key, value in secret_data["stacklight_service_notifications"][
+            "auth"
+        ]["stacklight"].items()
     }
 
     kube.wait_for_secret(meta["namespace"], constants.KEYSTONE_CONFIG_SECRET)
