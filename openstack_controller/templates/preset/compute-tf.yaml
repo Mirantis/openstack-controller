@@ -1,6 +1,6 @@
 {%- set nginx_ingress_namespace_class = "openstack-ingress-nginx" %}
 artifacts:
-  images_base_url: docker-kaas-local.artifactory.mirantis.com
+  images_base_url: mirantis.azurecr.io
   binary_base_url: https://binary.mirantis.com
 
 common:
