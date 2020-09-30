@@ -401,8 +401,13 @@ spec:
                             - ml2
                             - tungstenfabric
                         dvr:
-                          type: boolean
-                          description: Enable distributed routers
+                          type: object
+                          required:
+                            - enabled
+                          properties:
+                            enabled:
+                              type: boolean
+                              description: Enable distributed routers
                         tenant_network_types:
                           type: array
                           description: Ordered list of network_types to allocate as tenant networks
