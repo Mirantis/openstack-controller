@@ -28,11 +28,9 @@ class KeystoneValidator(base.BaseValidator):
         )
         if (
             keycloak_section.get("enabled", False)
-            and keycloak_section.get("oidc", {}).get("OIDCSSLValidateServer")
-            is None
+            and keycloak_section.get("url") is None
         ):
             raise exception.OsDplValidationFailed(
                 "Malformed OpenStackDeployment spec, if keycloak is "
-                "enabled for identity service, you need to specify if "
-                "you want to enable OIDC SSL validation."
+                "enabled for identity service, you need to specify url."
             )
