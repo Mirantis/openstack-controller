@@ -600,18 +600,19 @@ spec:
                                         - pool_start
                                         - pool_end
                                         - gateway
-                                      range:
-                                        type: string
-                                        description: the cidr of baremetal network
-                                      pool_start:
-                                        type: string
-                                        description: the start range of allocation pool for baremetal network
-                                      pool_end:
-                                        type: string
-                                        description: the end range of allocation pool for baremetal network
-                                      gateway:
-                                        type: string
-                                        description: the gateway for baremetal network
+                                      properties:
+                                        range:
+                                          type: string
+                                          description: the cidr of baremetal network
+                                        pool_start:
+                                          type: string
+                                          description: the start range of allocation pool for baremetal network
+                                        pool_end:
+                                          type: string
+                                          description: the end range of allocation pool for baremetal network
+                                        gateway:
+                                          type: string
+                                          description: the gateway for baremetal network
                         agent_images:
                           type: object
                           properties:
