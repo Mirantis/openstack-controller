@@ -340,26 +340,24 @@ spec:
                               description: Url for keycloak
                             oidc:
                               type: object
-                              items:
-                                type: object
-                                properties:
-                                  OIDCClientID:
+                              properties:
+                                OIDCClientID:
+                                  type: string
+                                  description: Client identifier used in calls to the statically configured OpenID Connect Provider
+                                OIDCProviderMetadataURL:
+                                  type: string
+                                  description: Override for URL where OpenID Connect Provider metadata can be found
+                                OIDCRedirectURI:
+                                  type: array
+                                  description: The redirect_uri for this OpenID Connect client
+                                  items:
                                     type: string
-                                    description: Client identifier used in calls to the statically configured OpenID Connect Provider
-                                  OIDCProviderMetadataURL:
-                                    type: string
-                                    description: Override for URL where OpenID Connect Provider metadata can be found
-                                  OIDCRedirectURI:
-                                    type: array
-                                    description: The redirect_uri for this OpenID Connect client
-                                    items:
-                                      type: string
-                                  OIDCSSLValidateServer:
-                                    type: boolean
-                                    description: Require a valid SSL server certificate when communicating with the OP
-                                  OIDCOAuthSSLValidateServer:
-                                    type: boolean
-                                    description: Require a valid SSL server certificate when communicating with the Authorization Server
+                                OIDCSSLValidateServer:
+                                  type: boolean
+                                  description: Require a valid SSL server certificate when communicating with the OP
+                                OIDCOAuthSSLValidateServer:
+                                  type: boolean
+                                  description: Require a valid SSL server certificate when communicating with the Authorization Server
                         domain_specific_configuration:
                           type: object
                           properties:
