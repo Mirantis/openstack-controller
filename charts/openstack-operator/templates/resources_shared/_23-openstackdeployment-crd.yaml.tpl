@@ -586,6 +586,10 @@ spec:
                                 mtu:
                                   type: integer
                                   description: the MTU for cleaning network
+                                external:
+                                  type: boolean
+                                shared:
+                                  type: boolean
                                 subnets:
                                   type: object
                                   required:
