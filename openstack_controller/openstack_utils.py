@@ -127,12 +127,12 @@ async def migrate_servers(
             ]
             LOG.info(
                 f"Migrating servers, they currently are in state: "
-                f"{[(s.hostname, s.status) for s in current_servers]}"
+                f"{[(s.hypervisor_hostname, s.status) for s in current_servers]}"
             )
             # TODO(vdrok): if any of the servers fall into error state,
             #              stop immediately and don't retry
             return all(
-                s.hostname != migrating_off and s.status == "ACTIVE"
+                s.hypervisor_hostname != migrating_off and s.status == "ACTIVE"
                 for s in current_servers
             )
 

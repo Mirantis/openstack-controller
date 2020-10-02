@@ -82,12 +82,21 @@ async def test_find_nova_cell_setup_cron_job_timeout(
         await openstack_utils.find_nova_cell_setup_cron_job(node_uid="ff")
 
 
+class _Server:
+    hypervisor_hostname = None
+    status = "None"
+
+
 @pytest.mark.asyncio
 async def test_migrate_servers():
     conn_mock = mock.Mock(
         compute=mock.Mock(
             get_server=mock.Mock(
-                return_value=mock.Mock(status="ACTIVE", hostname="buzz")
+                return_value=mock.Mock(
+                    status="ACTIVE",
+                    hypervisor_hostname="buzz",
+                    spec_set=_Server,
+                )
             )
         )
     )
@@ -110,7 +119,11 @@ async def test_migrate_servers_timeout(asyncio_wait_for_timeout):
     conn_mock = mock.Mock(
         compute=mock.Mock(
             get_server=mock.Mock(
-                return_value=mock.Mock(status="MIGRATING", hostname="bar")
+                return_value=mock.Mock(
+                    status="MIGRATING",
+                    hypervisor_hostname="bar",
+                    spec_set=_Server,
+                )
             )
         )
     )
