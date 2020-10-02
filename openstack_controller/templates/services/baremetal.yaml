@@ -127,9 +127,9 @@ spec:
           mtu: {{ network.mtu }}
           {%- endif %}
           subnets:
-            {%- set bm_subnet = network.subnets.baremetal_subnet %}
-            baremetal:
-              name: "{{ network.get('name', 'baremetal') }}-subnet"
+          {%- for bm_subnet in network.subnets %}
+            {{ bm_subnet.name }}:
+              name: "{{ bm_subnet.name }}"
               ip_version: 4
               range: {{ bm_subnet.range }}
               pool_start: {{ bm_subnet.pool_start }}
@@ -138,6 +138,7 @@ spec:
               {%- if spec.get('features', {}).get('neutron', {}).get('dns_servers', []) %}
               nameservers: {{ spec.features.neutron.dns_servers }}
               {%- endif %}
+          {%- endfor %}
         provisioning: *bm_network
         pxe:
           device: {{ spec.get('features', {}).get('ironic', {}).get('provisioning_interface', 'ironic-pxe') }}

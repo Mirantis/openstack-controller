@@ -594,30 +594,31 @@ spec:
                                 shared:
                                   type: boolean
                                 subnets:
-                                  type: object
-                                  required:
-                                    - baremetal_subnet
-                                  properties:
-                                    baremetal_subnet:
-                                      type: object
-                                      required:
-                                        - range
-                                        - pool_start
-                                        - pool_end
-                                        - gateway
-                                      properties:
-                                        range:
-                                          type: string
-                                          description: the cidr of baremetal network
-                                        pool_start:
-                                          type: string
-                                          description: the start range of allocation pool for baremetal network
-                                        pool_end:
-                                          type: string
-                                          description: the end range of allocation pool for baremetal network
-                                        gateway:
-                                          type: string
-                                          description: the gateway for baremetal network
+                                  type: array
+                                  items:
+                                    type: object
+                                    required:
+                                      - name
+                                      - range
+                                      - pool_start
+                                      - pool_end
+                                      - gateway
+                                    properties:
+                                      name:
+                                        type: string
+                                        description: baremetal subnet name
+                                      range:
+                                        type: string
+                                        description: the cidr of baremetal network
+                                      pool_start:
+                                        type: string
+                                        description: the start range of allocation pool for baremetal network
+                                      pool_end:
+                                        type: string
+                                        description: the end range of allocation pool for baremetal network
+                                      gateway:
+                                        type: string
+                                        description: the gateway for baremetal network
                         agent_images:
                           type: object
                           properties:
