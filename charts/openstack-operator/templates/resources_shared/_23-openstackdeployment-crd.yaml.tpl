@@ -534,6 +534,7 @@ spec:
                                         type: string
                                         description: Enable secret
                                       raw:
+                                        x-kubernetes-preserve-unknown-fields: true
                                         type: object
                                         description: RAW config for device.
                     messaging:
