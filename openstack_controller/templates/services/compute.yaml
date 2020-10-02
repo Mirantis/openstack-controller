@@ -459,6 +459,8 @@ spec:
         {%- if spec.get('features', {}).get('nova', {}).get('live_migration_interface') %}
         libvirt:
           live_migration_interface: {{ spec.features.nova.live_migration_interface }}
+        hypervisor:
+          host_interface: {{ spec.features.nova.live_migration_interface }}
         {%- endif %}
         ssh_private: |
           {{ ssh_credentials.private|indent(10)|trim }}
