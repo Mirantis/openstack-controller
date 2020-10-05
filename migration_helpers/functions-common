@@ -137,6 +137,8 @@ function service_name_to_type {
             echo "key-manager" ;;
         "neutron" )
             echo "networking" ;;
+        "ironic" )
+            echo "baremetal" ;;
         *)
             exit 1 ;;
     esac
@@ -278,6 +280,7 @@ PORT_SERVICE_MAPPING=(
 "8042:aodh"
 "9311:barbican"
 "9876:octavia"
+"6385:ironic"
 )
 
 function get_available_service {
