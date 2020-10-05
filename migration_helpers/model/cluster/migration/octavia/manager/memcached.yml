@@ -3,5 +3,4 @@ parameters:
     manager:
       cache:
         ~members:
-        - host: ${_param:mcp2_memcached_octavia_address}
-          port: 11211
+        - host: ${_param:mcp2_memcached_octavia_members}
