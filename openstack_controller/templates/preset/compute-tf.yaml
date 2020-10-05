@@ -161,6 +161,14 @@ services:
                   name: m1.tiny_test
                   ram: 512
                   vcpus: 1
+  metric:
+    gnocchi:
+      values:
+        network:
+          api:
+            ingress:
+              classes:
+                namespace: {{ nginx_ingress_namespace_class }}
   tempest:
     tempest:
       values:
