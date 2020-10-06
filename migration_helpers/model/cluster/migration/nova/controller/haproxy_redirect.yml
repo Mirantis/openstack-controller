@@ -10,7 +10,7 @@ parameters:
           redirects:
            - code: 301
              location: https://metadata.${_param:mcp2_public_domain_name}%[path]
-        nova_placement_api:
+        placement_api:
            redirects:
            - code: 301
              location: https://placement.${_param:mcp2_public_domain_name}%[path]
