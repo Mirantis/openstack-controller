@@ -262,6 +262,14 @@ class Metering(OpenStackService):
             }
         }
 
+    def template_args(self):
+        t_args = super().template_args()
+        panko_secret = secrets.OpenStackServiceSecret(self.namespace, "event")
+        kube.wait_for_secret(self.namespace, panko_secret.secret_name)
+        panko_creds = panko_secret.get()
+        t_args["event_credentials"] = panko_creds
+        return t_args
+
 
 class Metric(OpenStackService):
     service = "metric"

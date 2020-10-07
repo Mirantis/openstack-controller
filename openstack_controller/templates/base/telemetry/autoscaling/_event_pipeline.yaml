@@ -2,7 +2,7 @@
           sinks:
             - name: event_sink
               publishers:
-                - gnocchi://
+                - panko://
               transformers: null
           sources:
             - events:
