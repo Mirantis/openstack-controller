@@ -300,6 +300,8 @@ services:
               cluster_active_active: true
             telemetry:
               disable_ssl_certificate_validation: true
+            image-feature-enabled:
+              enabled_import_methods: 'web-download,glance-direct,copy-image'
           tempest_logging:
             handler_file:
               args: ('/var/lib/tempest/data/tempest.log',)
