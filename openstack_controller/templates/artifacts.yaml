@@ -14,4 +14,4 @@ common:
   infra:
     repo: osh-infra
     releases:
-      version: 0.1.0-mcp-2648
+      version: 0.1.0-mcp-2649
