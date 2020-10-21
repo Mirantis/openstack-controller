@@ -460,6 +460,7 @@ spec:
               tunnel_types: vxlan
               {%- if spec.get('features', {}).get('neutron', {}).get('dvr', {}).get('enabled', False) %}
               enable_distributed_routing: True
+              allowed_address_pair_arp_responder: True
               {%- endif %}
               extensions: qos
             ovs:
