@@ -1,0 +1,7 @@
+---
+fixes:
+  - |
+    Fixes ``osdpl`` schema validation to allow insert custom fields in
+    ``features:keystone:domain_specific_configuration``.
+    For more info see `PRODX-8382 <https://mirantis.jira.com/browse/PRODX-8382>`__
+
