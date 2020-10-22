@@ -378,6 +378,7 @@ spec:
                                     type: string
                                     description: Domain name
                                   config:
+                                    x-kubernetes-preserve-unknown-fields: true
                                     type: object
                                     description: Domain specific configuration options.
                     neutron:
