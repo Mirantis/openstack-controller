@@ -3,6 +3,7 @@
 
 {%- set keystone_keycloak = spec.get('features', {}).get('keystone', {}).get('keycloak', {}) %}
 {%- set keystone_keycloak_enabled = keystone_keycloak.get('enabled', False) %}
+{%- set horizon_features = spec.get('features', {}).get('horizon', {}) %}
 {%- set neutron_backend = spec.features.neutron.get('backend', 'ml2') %}
 #TODO: remove extra_panels when https://mirantis.jira.com/browse/PRODX-3037 is fixed
 #The list of extra panels in Horizon helm-chart is overwritten in case 'extra_panels' is defined in openstack-controller.
@@ -213,7 +214,22 @@ spec:
           {%- endif %}
           extra_panels: {{ horizon_extra_panels }}
           local_settings:
+            custom_themes:
+{%- set horizon_themes = horizon_features.get('themes', []) %}
+{%- do horizon_themes.append({'url': images["horizon_mirantis_theme_url"],
+                              'name': 'mirantis',
+                              'description': 'Mirantis',
+                              'sha256summ': images["horizon_mirantis_theme_sha256summ"]
+                             }) %}
+{%- for theme in horizon_themes %}
+              {{ theme.name }}:
+                url: {{ theme.url }}
+                sha256summ: {{ theme.sha256summ }}
+                description: {{ theme.description }}
+{%- endfor %}
             config:
+              raw:
+                DEFAULT_THEME: {{ horizon_features.get('default_theme', 'default') }}
               horizon_secret_key: {{ credentials.secret_key }}
 
               horizon_images_upload_mode: 'direct'

@@ -167,3 +167,5 @@ octavia_db_sync_persistence: '{{ images_base_url }}/openstack/octavia:queens-bio
 mariadb_phy_backup: '{{ images_base_url }}/general/mariadb:10.4.14-bionic-20200812025059'
 mariadb_phy_restore: '{{ images_base_url }}/general/mariadb:10.4.14-bionic-20200812025059'
 mariadb_controller: '{{ images_base_url }}/general/mariadb:10.4.14-bionic-20200812025059'
+horizon_mirantis_theme_sha256summ: '59afaec8b0b16041c05e23fe89118f3b1d60bb910143514b6e0ab8f4702124b1'
+horizon_mirantis_theme_url: '{{ binary_base_url }}/openstack/bin/horizon/mirantis-queens-21c1d6b.tar.gz'

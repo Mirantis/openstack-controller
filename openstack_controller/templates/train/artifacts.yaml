@@ -168,3 +168,5 @@ mariadb_phy_backup: '{{ images_base_url }}/general/mariadb:10.4.14-bionic-202008
 mariadb_phy_restore: '{{ images_base_url }}/general/mariadb:10.4.14-bionic-20200812025059'
 octavia_db_sync_persistence: '{{ images_base_url }}/openstack/octavia:train-bionic-20200920180012'
 mariadb_controller: '{{ images_base_url }}/general/mariadb:10.4.14-bionic-20200812025059'
+horizon_mirantis_theme_sha256summ: 'b5ea34ba69a57614cbc651be18be58c8d5dcfaa98f23f2690df278e57426e30a'
+horizon_mirantis_theme_url: '{{ binary_base_url }}/openstack/bin/horizon/mirantis-train-6171c30.tar.gz'

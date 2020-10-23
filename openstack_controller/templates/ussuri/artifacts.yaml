@@ -168,3 +168,5 @@ octavia_db_sync_persistence: '{{ images_base_url }}/openstack/octavia:ussuri-bio
 mariadb_phy_backup: '{{ images_base_url }}/general/mariadb:10.4.14-bionic-20200812025059'
 mariadb_phy_restore: '{{ images_base_url }}/general/mariadb:10.4.14-bionic-20200812025059'
 mariadb_controller: '{{ images_base_url }}/general/mariadb:10.4.14-bionic-20200812025059'
+horizon_mirantis_theme_sha256summ: '5afb0f593490ab2f56e0e639e6eb94b3beaf024c74e0953500f3eb1722d3bc60'
+horizon_mirantis_theme_url: '{{ binary_base_url }}/openstack/bin/horizon/mirantis-ussuri-26b0ff5.tar.gz'

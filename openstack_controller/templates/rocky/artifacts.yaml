@@ -167,3 +167,5 @@ octavia_db_sync_persistence: '{{ images_base_url }}/openstack/octavia:rocky-bion
 mariadb_phy_backup: '{{ images_base_url }}/general/mariadb:10.4.14-bionic-20200812025059'
 mariadb_phy_restore: '{{ images_base_url }}/general/mariadb:10.4.14-bionic-20200812025059'
 mariadb_controller: '{{ images_base_url }}/general/mariadb:10.4.14-bionic-20200812025059'
+horizon_mirantis_theme_sha256summ: 'ee9a965f23ad68c8f310b1661a6447c310a547e29be44b964d8ac651bc24a57c'
+horizon_mirantis_theme_url: '{{ binary_base_url }}/openstack/bin/horizon/mirantis-rocky-63ae344.tar.gz'

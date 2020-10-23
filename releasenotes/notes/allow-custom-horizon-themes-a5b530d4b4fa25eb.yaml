@@ -1,0 +1,4 @@
+---
+features:
+  - Allows to start horizon with custom user themes
+    `PRODX-7585 <https://mirantis.jira.com/browse/PRODX-7585>`__

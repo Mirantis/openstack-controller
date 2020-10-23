@@ -300,6 +300,34 @@ spec:
                               enum:
                                 - local
                                 - ceph
+                    horizon:
+                      type: object
+                      properties:
+                        default_theme:
+                          type: string
+                          description: The default theme name.
+                        themes:
+                          type: array
+                          items:
+                            type: object
+                            required:
+                              - name
+                              - url
+                              - sha256summ
+                              - description
+                            properties:
+                              name:
+                                type: string
+                                description: Custom theme name
+                              url:
+                                type: string
+                                description: Link to archive with theme
+                              sha256summ:
+                                type: string
+                                description: The sha256 checksumm of arhive with theme
+                              description:
+                                type: string
+                                description: Theme description showed to user
                     keystone:
                       type: object
                       properties:
