@@ -1,0 +1,6 @@
+---
+features:
+  - Adds ability to deploy OpenStack ``Victoria`` release.
+    The release is still under development. Not for production
+    usage.
+    For more information please see `PRODX-7960 <https://mirantis.jira.com/browse/PRODX-7960>`__

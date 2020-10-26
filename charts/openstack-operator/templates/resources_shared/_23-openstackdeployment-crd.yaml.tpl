@@ -47,6 +47,7 @@ spec:
                     - stein # not supported, only for migration
                     - train # not supported, only for migration
                     - ussuri # production version
+                    - victoria # not supported, under development
                     - master # not supported, only for example
                 preset:
                   description: Preset of features to deploy

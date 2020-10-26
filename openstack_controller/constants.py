@@ -100,4 +100,5 @@ class OpenStackVersion(enum.IntEnum):
     stein = 3
     train = 4
     ussuri = 5
+    victoria = 6
     master = sys.maxsize
