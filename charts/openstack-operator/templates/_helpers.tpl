@@ -60,3 +60,14 @@ Generate environment variables for osdpl containers
 - name: OSCTL_OS_DEPLOYMENT_NAMESPACE
   value: {{ $context.Values.osdpl.namespace }}
 {{- end }}
+
+{{/*
+Generate hash for resource.
+*/}}
+{{- define "opentsack-controller.utils.hash" -}}
+{{- $name := index . 0 -}}
+{{- $context := index . 1 -}}
+{{- $last := base $context.Template.Name }}
+{{- $wtf := $context.Template.Name | replace $last $name -}}
+{{- include $wtf $context | sha256sum | quote -}}
+{{- end -}}

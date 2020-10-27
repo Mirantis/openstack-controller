@@ -1,8 +1,4 @@
 {{- if .Values.admission.enabled -}}
-{{- $cn1 := printf "%s-admission.%s.svc" (include "openstack-controller.fullname" .) (.Release.Namespace) }}
-{{- $cn2 := printf "%s-admission.%s.svc.%s" (include "openstack-controller.fullname" .) (.Release.Namespace) (.Values.admission.cluster_domain_suffix) }}
-{{- $cabundle := genCA $cn1 3650 }}
-{{- $client := genSignedCert $cn1  nil (list $cn1 $cn2) 365 $cabundle }}
 ---
 apiVersion: v1
 kind: Service
@@ -20,47 +16,6 @@ spec:
     app.kubernetes.io/name: {{ include "openstack-controller.fullname" . }}-admission
     app.kubernetes.io/instance: {{ .Release.Name }}
 ---
-apiVersion: v1
-kind: Secret
-metadata:
-  name: {{ include "openstack-controller.fullname" . }}-admission-tls
-  namespace: {{ .Release.Namespace }}
-data:
-{{- if empty .Values.admission.tls }}
-  oac.crt: {{ $client.Cert  | b64enc }}
-  oac.key: {{ $client.Key  | b64enc }}
-{{- else }}
-  oac.crt: {{ .Values.admission.tls.crt | b64enc }}
-  oac.key: {{ .Values.admission.tls.key | b64enc }}
-{{- end }}
-type: Opaque
----
-apiVersion: admissionregistration.k8s.io/v1
-kind: ValidatingWebhookConfiguration
-metadata:
-  name: {{ include "openstack-controller.fullname" . }}-admission
-webhooks:
-  - name: {{ include "openstack-controller.fullname" . }}-admission.{{ .Release.Namespace }}.svc
-    clientConfig:
-      service:
-        name: {{ include "openstack-controller.fullname" . }}-admission
-        namespace: {{ .Release.Namespace }}
-        path: "/validate"
-{{- if empty .Values.admission.tls }}
-      caBundle: {{ $cabundle.Cert | b64enc }}
-{{- else }}
-      caBundle: {{ .Values.admission.tls.ca | b64enc }}
-{{- end }}
-    rules:
-      - operations: [ "CREATE", "UPDATE" ]
-        apiGroups: ["lcm.mirantis.com"]
-        apiVersions: ["v1alpha1"]
-        resources: ["openstackdeployments"]
-        scope: "Namespaced"
-    sideEffects: None
-    admissionReviewVersions: ["v1"]
-    timeoutSeconds: 30
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -77,6 +32,8 @@ spec:
       labels:
         app.kubernetes.io/name: {{ include "openstack-controller.fullname" . }}-admission
         app.kubernetes.io/instance: {{ .Release.Name }}
+      annotations:
+        admission-tls-hash: {{ tuple "admission-controller-tls-secret.yaml" . | include "opentsack-controller.utils.hash" }}
     spec:
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
