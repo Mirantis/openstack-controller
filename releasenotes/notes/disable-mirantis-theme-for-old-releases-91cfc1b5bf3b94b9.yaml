@@ -1,0 +1,7 @@
+---
+fixes:
+  - On some intermediate Openstack releases static
+    collection triggered due to mirantis theme presence
+    can take long time. Disabling mirantis theme for old
+    releases by default fixes this behaviour. Related bug
+    `PRODX-8553 <https://mirantis.jira.com/browse/PRODX-8553>`__
