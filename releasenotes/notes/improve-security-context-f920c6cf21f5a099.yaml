@@ -1,0 +1,11 @@
+---
+security:
+  - |
+    Improved security context for the charts listed below.
+    The improvements included read-only root file system,
+    running processes under non-root user.
+
+    - designate
+      `PRODX-7836 <https://mirantis.jira.com/browse/PRODX-7836>`__
+    - placement
+      `PRODX-7835 <https://mirantis.jira.com/browse/PRODX-7835>`__
