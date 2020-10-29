@@ -233,3 +233,76 @@ def test_physnet_optional_tf(client):
     response = client.simulate_post("/validate", json=req)
     assert response.status == falcon.HTTP_OK
     assert response.json["response"]["allowed"] is True
+
+
+def _node_specific_request(client, node_override, result):
+    req = copy.deepcopy(ADMISSION_REQ)
+    req["request"]["object"]["spec"]["nodes"] = node_override
+    response = client.simulate_post("/validate", json=req)
+    assert response.status == falcon.HTTP_OK
+    if result:
+        assert response.json["response"]["allowed"]
+    else:
+        assert response.json["response"]["allowed"] is False
+
+
+def test_nodes_node_label(client):
+    _node_specific_request(client, {"wrong:label": {"features": {}}}, False)
+    _node_specific_request(
+        client, {"good::label": {"daemonset_overrides": {}}}, True
+    )
+
+
+def test_nodes_top_keys(client):
+    allowed_top_keys = ["daemonset_overrides", "features"]
+    for top_key in allowed_top_keys:
+        _node_specific_request(client, {"good::label": {top_key: {}}}, True)
+    _node_specific_request(client, {"good::label": {"fake": {}}}, False)
+
+
+def test_nodes_allowed_keys(client):
+    allowed_value_override = {"chart_daemonset": {"root": {"conf": {}}}}
+    allowed_services = [
+        {
+            "load-balancer": {"octavia": allowed_value_override},
+        },
+        {
+            "networking": {
+                "neutron": allowed_value_override,
+                "openvswitch": allowed_value_override,
+            }
+        },
+        {"metering": {"ceilometer": allowed_value_override}},
+        {"metric": {"gnocchi": allowed_value_override}},
+        {"compute": {"nova": allowed_value_override}},
+    ]
+    for service in allowed_services:
+        _node_specific_request(
+            client,
+            {"good::label": {"daemonset_overrides": service}},
+            True,
+        )
+
+
+def test_nodes_wrong_key(client):
+    allowed_value_override = {"chart_daemonset": {"root": {"conf": {}}}}
+    wrong_service = {
+        "identity": {"keystone": allowed_value_override},
+    }
+    _node_specific_request(
+        client,
+        {"good::label": {"daemonset_overrides": wrong_service}},
+        False,
+    )
+
+
+def test_nodes_wrong_chart_value_key(client):
+    wrong_value_override = {"chart_daemonset": {"wrong": {"conf": {}}}}
+    allowed_service = {
+        "compute": {"nova": wrong_value_override},
+    }
+    _node_specific_request(
+        client,
+        {"good::label": {"daemonset_overrides": allowed_service}},
+        False,
+    )

@@ -220,6 +220,32 @@ def merge_osdpl_into_helmbundle(service, spec, service_helmbundle):
             .get(chart_name, {})
             .get("values", {}),
         )
+
+        # Merge nodes settings
+        chart_normalized_override = {}
+        for label_tag, override in spec.get("nodes", {}).items():
+            daemonset_override = (
+                override.get("daemonset_overrides", {})
+                .get(service, {})
+                .get(chart_name, {})
+            )
+            if daemonset_override:
+                for daemonset_name, override in daemonset_override.items():
+                    if daemonset_name not in chart_normalized_override:
+                        chart_normalized_override[daemonset_name] = {}
+                    merger.merge(
+                        chart_normalized_override[daemonset_name],
+                        {"labels": {label_tag: override}},
+                    )
+
+        if chart_normalized_override:
+            LOG.debug(
+                f"Applying node specific override for {service}:{chart_name}"
+            )
+            merger.merge(
+                release["values"], {"overrides": chart_normalized_override}
+            )
+
     return service_helmbundle
 
 

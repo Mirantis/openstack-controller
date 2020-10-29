@@ -139,6 +139,11 @@ spec:
                           x-kubernetes-preserve-unknown-fields: true
                           type: object
                           description: JSON of values passed to all openstack charts
+                nodes:
+                  type: object
+                  # NOTE(vsaienko): the schema is validated by admission controller
+                  description: Object that describes node specific overrides.
+                  x-kubernetes-preserve-unknown-fields: true
                 features:
                   type: object
                   required:

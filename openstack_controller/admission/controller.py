@@ -100,7 +100,7 @@ class ValidationResource(object):
                 review_request.get("kind", {}).get("kind")
                 == "OpenStackDeployment"
             ):
-                validators = ["openstack"]
+                validators = ["openstack", "nodes"]
                 spec = review_request.get("object", {}).get("spec", {})
                 # Validate all the enabled services, if there is a
                 # corresponding validator.

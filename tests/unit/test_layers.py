@@ -306,6 +306,152 @@ def test_merge_all_float_int(
     mock_log.assert_not_called()
 
 
+@mock.patch.object(layers, "LOG")
+def test_merge_all_nodes(mock_log, openstackdeployment, compute_helmbundle):
+    spec = copy.deepcopy(openstackdeployment["spec"])
+    openstackdeployment["spec"]["nodes"] = {
+        "mylabel::myvalue": {
+            "daemonset_overrides": {
+                "compute": {
+                    "nova": {
+                        "nova_compute": {
+                            "root": {
+                                "root_override": "root",
+                                "conf": {"nova": {"DEFAULT": {"foo": "bar"}}},
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    helmbundle = layers.merge_all_layers(
+        "compute",
+        openstackdeployment,
+        openstackdeployment["metadata"],
+        spec,
+        logging,
+        **CREDS_KWARGS,
+    )
+    assert helmbundle["spec"]["releases"][2]["values"]["overrides"][
+        "nova_compute"
+    ]["labels"]["mylabel::myvalue"]["root"] == {
+        "conf": {"nova": {"DEFAULT": {"foo": "bar"}}},
+        "root_override": "root",
+    }
+    mock_log.assert_not_called()
+
+
+@mock.patch.object(layers, "LOG")
+def test_merge_all_nodes_multiple_labels(
+    mock_log, openstackdeployment, compute_helmbundle
+):
+    spec = copy.deepcopy(openstackdeployment["spec"])
+    openstackdeployment["spec"]["nodes"] = {
+        "mylabel::myvalue": {
+            "daemonset_overrides": {
+                "networking": {
+                    "openvswitch": {
+                        "openvswitch-db": {
+                            "root": {
+                                "root_override": "root",
+                                "conf": {"openvswitch": {"foo": "bar"}},
+                            }
+                        }
+                    },
+                    "neutron": {
+                        "ovs-agent": {
+                            "root": {
+                                "root_override": "root-ovs-agent",
+                                "conf": {
+                                    "neutron": {"DEFAULT": {"foo": "ovs"}}
+                                },
+                            }
+                        },
+                        "l3-agent": {
+                            "root": {
+                                "root_override": "root-l3-agent",
+                                "conf": {
+                                    "neutron": {"DEFAULT": {"foo": "l3"}}
+                                },
+                            }
+                        },
+                    },
+                }
+            }
+        },
+        "mylabel2::myvalue": {
+            "daemonset_overrides": {
+                "networking": {
+                    "neutron": {
+                        "ovs-agent": {
+                            "root": {
+                                "root_override": "root-ovs-agent-2",
+                                "conf": {
+                                    "neutron": {"DEFAULT": {"foo": "ovs-2"}}
+                                },
+                            }
+                        },
+                        "l3-agent": {
+                            "root": {
+                                "root_override": "root-l3-agent-2",
+                                "conf": {
+                                    "neutron": {"DEFAULT": {"foo": "l3-2"}}
+                                },
+                            }
+                        },
+                    }
+                }
+            }
+        },
+    }
+    helmbundle = layers.merge_all_layers(
+        "networking",
+        openstackdeployment,
+        openstackdeployment["metadata"],
+        spec,
+        logging,
+        **CREDS_KWARGS,
+    )
+    assert helmbundle["spec"]["releases"][2]["values"]["overrides"][
+        "ovs-agent"
+    ]["labels"]["mylabel::myvalue"]["root"] == {
+        "conf": {"neutron": {"DEFAULT": {"foo": "ovs"}}},
+        "root_override": "root-ovs-agent",
+    }
+    assert helmbundle["spec"]["releases"][1]["values"]["overrides"][
+        "openvswitch-db"
+    ]["labels"]["mylabel::myvalue"]["root"] == {
+        "conf": {"openvswitch": {"foo": "bar"}},
+        "root_override": "root",
+    }
+    assert helmbundle["spec"]["releases"][2]["values"]["overrides"][
+        "ovs-agent"
+    ]["labels"]["mylabel2::myvalue"]["root"] == {
+        "conf": {"neutron": {"DEFAULT": {"foo": "ovs-2"}}},
+        "root_override": "root-ovs-agent-2",
+    }
+    assert helmbundle["spec"]["releases"][2]["values"]["overrides"][
+        "l3-agent"
+    ]["labels"]["mylabel::myvalue"]["root"] == {
+        "conf": {"neutron": {"DEFAULT": {"foo": "l3"}}},
+        "root_override": "root-l3-agent",
+    }
+    assert helmbundle["spec"]["releases"][2]["values"]["overrides"][
+        "l3-agent"
+    ]["labels"]["mylabel2::myvalue"]["root"] == {
+        "conf": {"neutron": {"DEFAULT": {"foo": "l3-2"}}},
+        "root_override": "root-l3-agent-2",
+    }
+    assert (
+        "mylabel2::myvalue"
+        not in helmbundle["spec"]["releases"][1]["values"]["overrides"][
+            "openvswitch-db"
+        ]["labels"]
+    )
+    mock_log.assert_not_called()
+
+
 def test_spec_hash():
     obj1 = """{
 "spec": {
