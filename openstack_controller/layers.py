@@ -6,6 +6,8 @@ import hashlib
 
 import deepmerge
 import deepmerge.exception
+from deepmerge.strategy import dict as merge_dict
+from deepmerge.strategy import list as merge_list
 import deepmerge.strategy.type_conflict
 import jinja2
 import kopf
@@ -44,7 +46,27 @@ class TypeConflictFail(
         )
 
 
+class CustomListStrategies(merge_list.ListStrategies):
+    """
+    Contains the strategies provided for lists.
+    """
+
+    @staticmethod
+    def strategy_merge(config, path, base, nxt):
+        """ merge base with nxt, adds new elements from nxt. """
+        merged = copy.deepcopy(base)
+        for el in nxt:
+            if el not in merged:
+                merged.append(el)
+        return merged
+
+
 class CustomMerger(deepmerge.Merger):
+    PROVIDED_TYPE_STRATEGIES = {
+        list: CustomListStrategies,
+        dict: merge_dict.DictStrategies,
+    }
+
     def __init__(
         self, type_strategies, fallback_strategies, type_conflict_strategies
     ):
@@ -65,7 +87,7 @@ merger = CustomMerger(
     # NOTE(pas-ha) We are handling results of yaml.safe_load and k8s api
     # exclusively, thus only standard json-compatible collection data types
     # will be present, so not botherting with collections.abc for now.
-    [(list, ["append"]), (dict, ["merge"])],
+    [(list, ["merge"]), (dict, ["merge"])],
     # next, choose the fallback strategies, applied to all other types:
     ["override"],
     # finally, choose the strategies in the case where the types conflict:

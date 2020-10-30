@@ -394,3 +394,21 @@ def test_merge_all_two_layers():
         "placement", l2, meta, l1, logger, **CREDS_KWARGS
     )
     assert helmbundle["spec"]["releases"][0]["values"]["d"] == 1
+
+
+def test_merge_list_with_duplicates():
+    merger = layers.merger
+    l = [
+        {
+            "conf": {
+                "nova": {
+                    "DEFAULT": {
+                        "passthrough_whitelist": '[{ "devname": "enp5s0f2", "physical_network": "physnet2"}]'
+                    }
+                }
+            },
+            "label": {"key": "devname", "values": ["enp5s0f1"]},
+        }
+    ]
+    new_list = merger.merge(l, copy.deepcopy(l))
+    assert new_list == l
