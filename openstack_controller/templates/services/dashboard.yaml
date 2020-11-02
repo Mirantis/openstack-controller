@@ -216,7 +216,7 @@ spec:
           local_settings:
             custom_themes:
 {%- set horizon_themes = horizon_features.get('themes', []) %}
-{%- if openstack_version not in ['queens', 'rocky', 'stein', 'train'] %}
+{%- if spec.openstack_version not in ['queens', 'rocky', 'stein', 'train'] %}
 {%- do horizon_themes.append({'url': images["horizon_mirantis_theme_url"],
                               'name': 'mirantis',
                               'description': 'Mirantis',
