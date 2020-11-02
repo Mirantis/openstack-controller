@@ -126,6 +126,17 @@ services:
   compute:
     nova:
       values:
+        conf:
+          nova:
+            filter_scheduler:
+              enabled_filters:
+              - AvailabilityZoneFilter
+              - ComputeFilter
+              - ComputeCapabilitiesFilter
+              - ImagePropertiesFilter
+              - ServerGroupAntiAffinityFilter
+              - ServerGroupAffinityFilter
+              - NUMATopologyFilter
         network:
           api:
             ingress:
