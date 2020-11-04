@@ -238,9 +238,11 @@ spec:
       conf:
         octavia:
           api_settings:
-{% set _default_provider_driver = 'amphora' %}
+{% set _default_provider_driver = 'amphorav2' %}
 {%- if spec.openstack_version in ['queens'] %}
   {% set _default_provider_driver = 'octavia' %}
+{%- elif spec.openstack_version in ['rocky', 'stein', 'train'] %}
+  {% set _default_provider_driver = 'amphora' %}
 {%- endif %}
 {%- if tungstenfabric_enabled %}
   {% set _default_provider_driver = 'tungstenfabric' %}
