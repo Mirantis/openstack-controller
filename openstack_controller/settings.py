@@ -22,6 +22,34 @@ from prometheus_client import start_http_server, Gauge, Counter, Summary
 HEARTBEAT = time.time()
 CURRENT_NUMBER_OF_TASKS = -1
 
+TRUE_STRINGS = {"1", "t", "true", "on", "y", "yes"}
+FALSE_STRINGS = {"0", "f", "false", "off", "n", "no"}
+
+
+def bool_from_env(env_name, default):
+    """Convert env variable into boolean
+    :param env_name: the name of environment variable
+    :param default: the default value to return
+    :returns True: when value of env is in TRUE_STRINGS
+    :returns False: when value of env is in FALSE_STRINGS
+    :raise kopf.PermanentError: when value not in TRUE_STRINGS or FALSE_STRINGS
+    """
+
+    data = os.environ.get(env_name)
+
+    if data is None:
+        return default
+
+    lowered = data.strip().lower()
+
+    if lowered in TRUE_STRINGS:
+        return True
+    elif lowered in FALSE_STRINGS:
+        return False
+
+    raise kopf.PermanentError(f"Failed to convert {data} into boolean.")
+
+
 # The number of seconds to wait for all component from application becomes ready
 OSCTL_WAIT_APPLICATION_READY_TIMEOUT = int(
     os.environ.get("OSCTL_WAIT_APPLICATION_READY_TIMEOUT", 1200)
@@ -153,7 +181,7 @@ if OSCTL_HEARTBEAT_INTERVAL:
 OSCTL_MIGRATE_CONCURRENCY = int(os.environ.get("OSCTL_MIGRATE_CONCURRENCY", 5))
 
 # Whether to perform evacuation if compute node is down, or just error out
-OSCTL_ALLOW_EVACUATION = bool(os.environ.get("OSCTL_ALLOW_EVACUATION", False))
+OSCTL_ALLOW_EVACUATION = bool_from_env("OSCTL_ALLOW_EVACUATION", False)
 
 
 @kopf.on.startup()

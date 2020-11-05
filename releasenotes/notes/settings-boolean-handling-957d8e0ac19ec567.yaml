@@ -1,0 +1,5 @@
+---
+fixes:
+  - |
+    Fixes passing negative values for boolean  openstack controller settings
+    like OSCTL_ALLOW_EVACUATION
