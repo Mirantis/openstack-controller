@@ -1,0 +1,4 @@
+---
+fixes:
+  - Enable stacklight integration explicitly for compute-tf preset.
+    Related bug `PRODX-8833 <https://mirantis.jira.com/browse/PRODX-8833>`__

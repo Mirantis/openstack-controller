@@ -52,7 +52,7 @@ features:
     public_endpoints:
       enabled: true
   stacklight:
-    enabled: false
+    enabled: true
     user:
       username: stacklight
 services:
