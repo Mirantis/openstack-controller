@@ -1,0 +1,9 @@
+---
+features:
+  - |
+    Adds integration for Ceph RGW and OpenStack controllers using data
+    exchange mechanism via kubernetes secrets. The data provided by
+    OpenStack controller consists of keystone credentials used in Ceph
+    RGW. The data provided by Ceph operator consists of connection
+    details used by keystone to register object store in the catalog.
+    Related task `PRODX-8612 <https://mirantis.jira.com/browse/PRODX-8612>`__
