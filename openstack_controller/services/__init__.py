@@ -798,12 +798,38 @@ class Neutron(OpenStackService):
     }
 
     async def apply(self, event, **kwargs):
-        features = self.mspec["features"].get("neutron", {})
-        if features.get("backend", "") == "tungstenfabric":
+        neutron_features = self.mspec["features"].get("neutron", {})
+        if neutron_features.get("backend", "") == "tungstenfabric":
+            ssl_public_endpoints = (
+                self.mspec["features"]
+                .get("ssl", {})
+                .get("public_endpoints", {})
+            )
+            b64encode = lambda v: base64.b64encode(v.encode()).decode()
             secret_data = {
-                "tunnel_interface": base64.b64encode(
-                    features.get("tunnel_interface", "").encode()
-                ).decode()
+                "tunnel_interface": b64encode(
+                    neutron_features.get("tunnel_interface", "")
+                ),
+                "public_domain": b64encode(self.mspec["public_domain_name"]),
+                "certificate_authority": b64encode(
+                    ssl_public_endpoints.get("ca_cert")
+                ),
+                "certificate": b64encode(ssl_public_endpoints.get("api_cert")),
+                "private_key": b64encode(ssl_public_endpoints.get("api_key")),
+                "ingress_namespace_class": b64encode(
+                    utils.get_in(
+                        self.mspec["services"],
+                        [
+                            "ingress",
+                            "ingress",
+                            "values",
+                            "deployment",
+                            "cluster",
+                            "class",
+                        ],
+                        "nginx-cluster",
+                    )
+                ),
             }
 
             tfs = secrets.TungstenFabricSecret()
