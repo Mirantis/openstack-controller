@@ -1,0 +1,58 @@
+type: object
+additionalProperties: False
+patternProperties:
+  ".*::.*":
+    type: object
+    additionalProperties: False
+    properties:
+      features:
+        additionalProperties: False
+        type: object
+        description: Reserved for future.
+      daemonset_overrides:
+        additionalProperties: False
+        type: object
+        properties:
+          load-balancer:
+            type: object
+            additionalProperties: False
+            properties:
+              octavia: &chart_override
+                type: object
+                additionalProperties: False
+                patternProperties:
+                  ".*":
+                    type: object
+                    additionalProperties: False
+                    properties:
+                      root:
+                        type: object
+                        additionalProperties: True
+          networking:
+            type: object
+            additionalProperties: False
+            properties:
+              openvswitch:
+                <<: *chart_override
+              neutron:
+                <<: *chart_override
+          metering:
+            type: object
+            additionalProperties: False
+            properties:
+              ceilometer:
+                <<: *chart_override
+          metric:
+            type: object
+            additionalProperties: False
+            properties:
+              gnocchi:
+                <<: *chart_override
+          compute:
+            type: object
+            additionalProperties: False
+            properties:
+              nova:
+                <<: *chart_override
+              libvirt:
+                <<: *chart_override

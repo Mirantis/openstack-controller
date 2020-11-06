@@ -1,0 +1,6 @@
+---
+features:
+  - |
+    Adds new ``spec:nodes`` item into osdpl resource. Which allows to
+    override some specific features per node.
+    For more details please see `PRODX-7835 <https://mirantis.jira.com/browse/PRODX-7835>`__
