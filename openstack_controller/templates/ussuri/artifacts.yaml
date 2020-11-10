@@ -79,8 +79,8 @@ octavia_db_sync: '{{ images_base_url }}/openstack/octavia:ussuri-bionic-20201108
 octavia_health_manager: '{{ images_base_url }}/openstack/octavia:ussuri-bionic-20201108180019'
 octavia_hm_port: '{{ images_base_url }}/openstack/octavia:ussuri-bionic-20201108180019'
 octavia_housekeeping: '{{ images_base_url }}/openstack/octavia:ussuri-bionic-20201108180019'
-openvswitch_db_server: '{{ images_base_url }}/general/openvswitch:2.11-bionic-20201105044832'
-openvswitch_vswitchd: '{{ images_base_url }}/general/openvswitch:2.11-bionic-20201105044832'
+openvswitch_db_server: '{{ images_base_url }}/general/openvswitch:2.11-bionic-20201109141859'
+openvswitch_vswitchd: '{{ images_base_url }}/general/openvswitch:2.11-bionic-20201109141859'
 openvswitch_vswitchd_dpdk: '{{ images_base_url }}/general/openvswitch-dpdk:2.11-bionic-20201109141858'
 create_resources: '{{ images_base_url }}/openstack/extra/ceph-config-helper:nautilus-bionic-20200810084204'
 octavia_worker: '{{ images_base_url }}/openstack/octavia:ussuri-bionic-20201108180019'
@@ -171,3 +171,4 @@ mariadb_phy_restore: '{{ images_base_url }}/general/mariadb:10.4.16-bionic-20201
 mariadb_controller: '{{ images_base_url }}/general/mariadb:10.4.16-bionic-20201105025052'
 horizon_mirantis_theme_sha256summ: 5afb0f593490ab2f56e0e639e6eb94b3beaf024c74e0953500f3eb1722d3bc60
 horizon_mirantis_theme_url: '{{ binary_base_url }}/openstack/bin/horizon//mirantis-ussuri-26b0ff5.tar.gz'
+ceph_config_helper: '{{ images_base_url }}/openstack/extra/ceph-config-helper:nautilus-bionic-20200810084204'
