@@ -1,0 +1,3 @@
+---
+fixes:
+  - Fix setting ceph_config_helper image for libvirt.

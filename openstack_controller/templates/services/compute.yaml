@@ -71,6 +71,7 @@ spec:
         tags:
 {%- for image in ["image_repo_sync",
                  "libvirt",
+                 "ceph_config_helper",
                  "dep_check",] %}
         {%- if image in images %}
           {{ image }}: {{ images[image] }}
