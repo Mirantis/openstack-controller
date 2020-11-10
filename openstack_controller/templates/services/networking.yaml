@@ -109,6 +109,7 @@ spec:
 {%- for image in [
     "openvswitch_db_server",
     "openvswitch_vswitchd",
+    "openvswitch_vswitchd_dpdk",
     "dep_check",
     "image_repo_sync",] %}
         {%- if image in images %}
