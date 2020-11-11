@@ -9,7 +9,7 @@ patternProperties:
         additionalProperties: False
         type: object
         description: Reserved for future.
-      daemonset_overrides:
+      services:
         additionalProperties: False
         type: object
         properties:
@@ -25,7 +25,7 @@ patternProperties:
                     type: object
                     additionalProperties: False
                     properties:
-                      root:
+                      values:
                         type: object
                         additionalProperties: True
           networking:

@@ -248,20 +248,18 @@ def _node_specific_request(client, node_override, result):
 
 def test_nodes_node_label(client):
     _node_specific_request(client, {"wrong:label": {"features": {}}}, False)
-    _node_specific_request(
-        client, {"good::label": {"daemonset_overrides": {}}}, True
-    )
+    _node_specific_request(client, {"good::label": {"services": {}}}, True)
 
 
 def test_nodes_top_keys(client):
-    allowed_top_keys = ["daemonset_overrides", "features"]
+    allowed_top_keys = ["services", "features"]
     for top_key in allowed_top_keys:
         _node_specific_request(client, {"good::label": {top_key: {}}}, True)
     _node_specific_request(client, {"good::label": {"fake": {}}}, False)
 
 
 def test_nodes_allowed_keys(client):
-    allowed_value_override = {"chart_daemonset": {"root": {"conf": {}}}}
+    allowed_value_override = {"chart_daemonset": {"values": {"conf": {}}}}
     allowed_services = [
         {
             "load-balancer": {"octavia": allowed_value_override},
@@ -279,19 +277,19 @@ def test_nodes_allowed_keys(client):
     for service in allowed_services:
         _node_specific_request(
             client,
-            {"good::label": {"daemonset_overrides": service}},
+            {"good::label": {"services": service}},
             True,
         )
 
 
 def test_nodes_wrong_key(client):
-    allowed_value_override = {"chart_daemonset": {"root": {"conf": {}}}}
+    allowed_value_override = {"chart_daemonset": {"values": {"conf": {}}}}
     wrong_service = {
         "identity": {"keystone": allowed_value_override},
     }
     _node_specific_request(
         client,
-        {"good::label": {"daemonset_overrides": wrong_service}},
+        {"good::label": {"services": wrong_service}},
         False,
     )
 
@@ -303,6 +301,6 @@ def test_nodes_wrong_chart_value_key(client):
     }
     _node_specific_request(
         client,
-        {"good::label": {"daemonset_overrides": allowed_service}},
+        {"good::label": {"services": allowed_service}},
         False,
     )

@@ -311,11 +311,11 @@ def test_merge_all_nodes(mock_log, openstackdeployment, compute_helmbundle):
     spec = copy.deepcopy(openstackdeployment["spec"])
     openstackdeployment["spec"]["nodes"] = {
         "mylabel::myvalue": {
-            "daemonset_overrides": {
+            "services": {
                 "compute": {
                     "nova": {
                         "nova_compute": {
-                            "root": {
+                            "values": {
                                 "root_override": "root",
                                 "conf": {"nova": {"DEFAULT": {"foo": "bar"}}},
                             }
@@ -335,7 +335,7 @@ def test_merge_all_nodes(mock_log, openstackdeployment, compute_helmbundle):
     )
     assert helmbundle["spec"]["releases"][2]["values"]["overrides"][
         "nova_compute"
-    ]["labels"]["mylabel::myvalue"]["root"] == {
+    ]["labels"]["mylabel::myvalue"]["values"] == {
         "conf": {"nova": {"DEFAULT": {"foo": "bar"}}},
         "root_override": "root",
     }
@@ -349,11 +349,11 @@ def test_merge_all_nodes_multiple_labels(
     spec = copy.deepcopy(openstackdeployment["spec"])
     openstackdeployment["spec"]["nodes"] = {
         "mylabel::myvalue": {
-            "daemonset_overrides": {
+            "services": {
                 "networking": {
                     "openvswitch": {
                         "openvswitch-db": {
-                            "root": {
+                            "values": {
                                 "root_override": "root",
                                 "conf": {"openvswitch": {"foo": "bar"}},
                             }
@@ -361,7 +361,7 @@ def test_merge_all_nodes_multiple_labels(
                     },
                     "neutron": {
                         "ovs-agent": {
-                            "root": {
+                            "values": {
                                 "root_override": "root-ovs-agent",
                                 "conf": {
                                     "neutron": {"DEFAULT": {"foo": "ovs"}}
@@ -369,7 +369,7 @@ def test_merge_all_nodes_multiple_labels(
                             }
                         },
                         "l3-agent": {
-                            "root": {
+                            "values": {
                                 "root_override": "root-l3-agent",
                                 "conf": {
                                     "neutron": {"DEFAULT": {"foo": "l3"}}
@@ -381,11 +381,11 @@ def test_merge_all_nodes_multiple_labels(
             }
         },
         "mylabel2::myvalue": {
-            "daemonset_overrides": {
+            "services": {
                 "networking": {
                     "neutron": {
                         "ovs-agent": {
-                            "root": {
+                            "values": {
                                 "root_override": "root-ovs-agent-2",
                                 "conf": {
                                     "neutron": {"DEFAULT": {"foo": "ovs-2"}}
@@ -393,7 +393,7 @@ def test_merge_all_nodes_multiple_labels(
                             }
                         },
                         "l3-agent": {
-                            "root": {
+                            "values": {
                                 "root_override": "root-l3-agent-2",
                                 "conf": {
                                     "neutron": {"DEFAULT": {"foo": "l3-2"}}
@@ -415,31 +415,31 @@ def test_merge_all_nodes_multiple_labels(
     )
     assert helmbundle["spec"]["releases"][2]["values"]["overrides"][
         "ovs-agent"
-    ]["labels"]["mylabel::myvalue"]["root"] == {
+    ]["labels"]["mylabel::myvalue"]["values"] == {
         "conf": {"neutron": {"DEFAULT": {"foo": "ovs"}}},
         "root_override": "root-ovs-agent",
     }
     assert helmbundle["spec"]["releases"][1]["values"]["overrides"][
         "openvswitch-db"
-    ]["labels"]["mylabel::myvalue"]["root"] == {
+    ]["labels"]["mylabel::myvalue"]["values"] == {
         "conf": {"openvswitch": {"foo": "bar"}},
         "root_override": "root",
     }
     assert helmbundle["spec"]["releases"][2]["values"]["overrides"][
         "ovs-agent"
-    ]["labels"]["mylabel2::myvalue"]["root"] == {
+    ]["labels"]["mylabel2::myvalue"]["values"] == {
         "conf": {"neutron": {"DEFAULT": {"foo": "ovs-2"}}},
         "root_override": "root-ovs-agent-2",
     }
     assert helmbundle["spec"]["releases"][2]["values"]["overrides"][
         "l3-agent"
-    ]["labels"]["mylabel::myvalue"]["root"] == {
+    ]["labels"]["mylabel::myvalue"]["values"] == {
         "conf": {"neutron": {"DEFAULT": {"foo": "l3"}}},
         "root_override": "root-l3-agent",
     }
     assert helmbundle["spec"]["releases"][2]["values"]["overrides"][
         "l3-agent"
-    ]["labels"]["mylabel2::myvalue"]["root"] == {
+    ]["labels"]["mylabel2::myvalue"]["values"] == {
         "conf": {"neutron": {"DEFAULT": {"foo": "l3-2"}}},
         "root_override": "root-l3-agent-2",
     }
