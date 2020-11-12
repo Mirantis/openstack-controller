@@ -10,6 +10,12 @@
 {%- do notification_topics.append('stacklight_notifications') if stacklight_enabled %}
 {%- set floating_network = spec.features.neutron.get('floating_network', {}) %}
 {%- set baremetal_enabled = 'baremetal' in spec.features.get('services', []) %}
+{%- set neutron_node_specific = {} %}
+{%- for label, node_features in spec.get("nodes", {}).items() %}
+  {%- if node_features.get("features", {}).get("neutron", {}) %}
+    {%- do neutron_node_specific.update({label: node_features.features.neutron}) %}
+  {%- endif %}
+{%- endfor %}
 
 spec:
   releases:
@@ -119,6 +125,35 @@ spec:
       endpoints:
         cluster_domain_suffix: {{ spec.internal_domain_name }}
   {%- endif %}
+  # NODE SPECIFIC START
+  {%- if neutron_node_specific %}
+      overrides:
+       openvswitch_openvswitch-vswitchd:
+          labels:
+    {%- for label, override in neutron_node_specific.items() %}
+      {%- if override.get("dpdk", {}).get("enabled", False) %}
+      {%- set hp_size = override.get("dpdk", {}).get("hugepages", {}).get("size", "2Mi") %}
+      {%- set hp_amount = override.get("dpdk", {}).get("hugepages", {}).get("amount", "1Gi") %}
+            {{ label }}:
+              values:
+                pod:
+                  resources:
+                    enabled: true
+                    ovs:
+                      vswitchd:
+                        limits:
+                          hugepages-{{ hp_size }}: {{ hp_amount }}
+                          memory: {{ hp_amount }}
+                conf:
+                  ovs_dpdk:
+                    enabled: true
+                    hugepages_mountpath: /dev/hugepages
+                    socket_memory: 1024
+                    vhostuser_socket_dir: vhostuser
+      {%- endif %}
+    {%- endfor %}
+  {%- endif %}
+  # NODE SPECIFIC END
 {%- if spec.get('migration', {}).get('neutron', {}).get('deploy_main_service', true) %}
   - name: openstack-neutron
     chart: {{spec.common.openstack.repo}}/neutron
@@ -394,6 +429,10 @@ spec:
         l3_agent:
           agent:
             extensions: fip_qos,gateway_ip_qos
+          {%- if spec.get('features', {}).get('neutron', {}).get('dvr', {}).get('enabled', False) %}
+          DEFAULT:
+            agent_mode: dvr_snat
+          {%- endif %}
         metadata_agent:
           DEFAULT:
             metadata_proxy_shared_secret: {{ credentials.metadata_secret }}
@@ -478,28 +517,50 @@ spec:
 {%- for network in spec.features.neutron.external_networks %}
           {{ network.bridge }}: {{ network.interface }}
 {%- endfor %}
-        {%- if spec.get('features', {}).get('neutron', {}).get('dvr', {}).get('enabled', False) %}
-        overrides:
-          neutron_l3-agent:
-            overrides_default: false
-            labels:
-            - label:
-                key: openstack-compute-node
-                values:
-                - "enabled"
-              conf:
-                l3_agent:
-                  DEFAULT:
-                    agent_mode: dvr
-            - label:
-                key: openstack-gateway
-                values:
-                - "enabled"
-              conf:
-                l3_agent:
-                  DEFAULT:
-                    agent_mode: dvr_snat
+      # NODE SPECIFIC START
+      overrides:
+      {%- if spec.get('features', {}).get('neutron', {}).get('dvr', {}).get('enabled', False) %}
+        neutron_l3-agent:
+          labels:
+            openstack-compute-node::enabled:
+              values:
+                labels:
+                  agent:
+                    l3:
+                      node_selector_key: openstack-compute-node
+                      value: enabled
+                conf:
+                  l3_agent:
+                    DEFAULT:
+                      agent_mode: dvr
+      {%- endif %}
+        neutron_ovs-agent:
+          labels:
+      {%- for label, override in neutron_node_specific.items() %}
+        {%- if override.get("dpdk", {}).get("enabled", False) or override.get('tunnel_interface') %}
+            {{ label }}:
+              values:
+                {%- if override.get('tunnel_interface') %}
+                network:
+                  interface:
+                    tunnel: {{  override.tunnel_interface }}
+                {%- endif %}
+                {%- if override.get("dpdk", {}).get("enabled", False) %}
+                conf:
+                  ovs_dpdk:
+                    bonds: {{ override.dpdk.get("bonds", []) }}
+                    bridges: {{ override.dpdk.bridges }}
+                    driver: {{ override.dpdk.driver }}
+                    nics: {{ override.dpdk.get("nics", []) }}
+                    enabled: true
+                  plugins:
+                    ovs:
+                      datapath_type: netdev
+                      vhostuser_socket_dir: /var/run/openvswitch/vhostuser
+                {%- endif %}
         {%- endif %}
+      {%- endfor %}
+      # NODE SPECIFIC END
       jobs:
 {% include 'base/_ks_jobs.yaml' %}
 {%- endif %}

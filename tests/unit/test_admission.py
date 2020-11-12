@@ -304,3 +304,171 @@ def test_nodes_wrong_chart_value_key(client):
         {"good::label": {"services": allowed_service}},
         False,
     )
+
+
+def test_nodes_features_top_keys(client):
+    allowed_top_keys = [("neutron", {})]
+    for top_key, top_value in allowed_top_keys:
+        _node_specific_request(
+            client, {"good::label": {"features": {top_key: {}}}}, True
+        )
+    _node_specific_request(
+        client, {"good::label": {"features": {"fake": {}}}}, False
+    )
+
+
+def test_nodes_features_neutron_keys(client):
+    neutron_required = {"dpdk": {"enabled": True, "driver": "igb_uio"}}
+    _node_specific_request(
+        client,
+        {"good::label": {"features": {"neutron": neutron_required}}},
+        True,
+    )
+
+    # Bridges valid
+    _node_specific_request(
+        client,
+        {
+            "good::label": {
+                "features": {
+                    "neutron": {
+                        "dpdk": {
+                            "enabled": True,
+                            "driver": "igb_uio",
+                            "bridges": [
+                                {"name": "br1", "ip_address": "1.2.3.4/24"}
+                            ],
+                        }
+                    }
+                }
+            }
+        },
+        True,
+    )
+
+    # Bridges valid additional fields
+    _node_specific_request(
+        client,
+        {
+            "good::label": {
+                "features": {
+                    "neutron": {
+                        "dpdk": {
+                            "enabled": True,
+                            "driver": "igb_uio",
+                            "bridges": [
+                                {
+                                    "name": "br1",
+                                    "ip_address": "1.2.3.4/24",
+                                    "additional": "",
+                                }
+                            ],
+                        }
+                    }
+                }
+            }
+        },
+        True,
+    )
+
+    # Bridges missing IP
+    _node_specific_request(
+        client,
+        {
+            "good::label": {
+                "features": {
+                    "neutron": {
+                        "dpdk": {
+                            "enabled": True,
+                            "driver": "igb_uio",
+                            "bridges": [{"name": "br1"}],
+                        }
+                    }
+                }
+            }
+        },
+        False,
+    )
+
+    # Bonds valid
+    _node_specific_request(
+        client,
+        {
+            "good::label": {
+                "features": {
+                    "neutron": {
+                        "dpdk": {
+                            "enabled": True,
+                            "driver": "igb_uio",
+                            "bonds": [
+                                {
+                                    "name": "foo",
+                                    "bridge": "br1",
+                                    "nics": [
+                                        {"name": "br1", "pci_id": "1.2.3:00.1"}
+                                    ],
+                                }
+                            ],
+                        }
+                    }
+                }
+            }
+        },
+        True,
+    )
+
+    # Bonds valid additional fields
+    _node_specific_request(
+        client,
+        {
+            "good::label": {
+                "features": {
+                    "neutron": {
+                        "dpdk": {
+                            "enabled": True,
+                            "driver": "igb_uio",
+                            "bonds": [
+                                {
+                                    "name": "foo",
+                                    "bridge": "br1",
+                                    "nics": [
+                                        {
+                                            "name": "br1",
+                                            "pci_id": "1.2.3:00.1",
+                                            "additional": "option",
+                                        }
+                                    ],
+                                }
+                            ],
+                        }
+                    }
+                }
+            }
+        },
+        True,
+    )
+
+    # Bonds Missing PCI_ID
+    _node_specific_request(
+        client,
+        {
+            "good::label": {
+                "features": {
+                    "neutron": {
+                        "dpdk": {
+                            "enabled": True,
+                            "driver": "igb_uio",
+                            "bonds": [
+                                {
+                                    "name": "foo",
+                                    "bridge": "br1",
+                                    "nics": [{"name": "br1"}],
+                                }
+                            ],
+                        }
+                    }
+                }
+            }
+        },
+        False,
+    )

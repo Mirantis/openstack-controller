@@ -8,7 +8,102 @@ patternProperties:
       features:
         additionalProperties: False
         type: object
-        description: Reserved for future.
+        properties:
+          neutron:
+            type: object
+            additionalProperties: False
+            properties:
+              dpdk:
+                type: object
+                additionalProperties: False
+                required:
+                  - enabled
+                  - driver
+                properties:
+                  additionalProperties: True
+                  enabled:
+                    type: boolean
+                    description: Trigger to enable dpdk on the node.
+                  driver:
+                    type: string
+                    description: The dpdk driver to use for NICs
+                  bridges:
+                    type: array
+                    items:
+                      type: object
+                      required:
+                        - ip_address
+                        - name
+                      properties:
+                        name:
+                          type: string
+                          description: The name of dpdk bridge
+                        ip_address:
+                          type: string
+                          description: IP address to assign to the bridge.
+
+                  nics:
+                    type: array
+                    items:
+                      type: object
+                      required:
+                        - name
+                        - pci_id
+                        - bridge
+                      properties:
+                        name:
+                          type: string
+                          description: The name of ovs port created for corresponding NIC
+                        pci_id:
+                          type: string
+                          description: The PCI id of NIC
+                        bridge:
+                          type: string
+                          description: The name of bridge to plug NIC
+                  bonds:
+                     type: array
+                     items:
+                       type: object
+                       required:
+                         - name
+                         - bridge
+                         - nics
+                       properties:
+                         name:
+                           type: string
+                           description: The name of dpdk bond.
+                         bridge:
+                           type: string
+                           description: The name of bridge to plug bond.
+                         ovs_options:
+                           type: string
+                           description: Bond openvswitch options, for example bond_mode=active-backup
+                         nics:
+                           type: array
+                           items:
+                             type: object
+                             required:
+                               - name
+                               - pci_id
+                             properties:
+                               name:
+                                 type: string
+                                 description: The name of ovs port created for corresponding NIC
+                               pci_id:
+                                 type: string
+                                 description: The PCI id of NIC
+                  hugepages:
+                    type: object
+                    properties:
+                      size:
+                        type: string
+                        description: The page size to use, default 2Mi
+                        enum:
+                          - 1Gi
+                          - 2Mi
+                      amount:
+                        type: string
+                        description: The amount of hugepages, default 1Gi
       services:
         additionalProperties: False
         type: object

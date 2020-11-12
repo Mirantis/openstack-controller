@@ -1,0 +1,5 @@
+---
+features:
+  - |
+    Adds support configuring neutron with dpdk support by using ``spec:nodes``
+    section. For more information please refer to `PRODX-7346 <https://mirantis.jira.com/browse/PRODX-7346>`__
