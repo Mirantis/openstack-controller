@@ -20,6 +20,7 @@ import openstack
 from openstack import exceptions
 import pykube
 
+from openstack_controller import ceph_api
 from openstack_controller import constants
 from openstack_controller import layers
 from openstack_controller import kube
@@ -32,6 +33,7 @@ from openstack_controller.services.base import (
     OpenStackService,
     OpenStackServiceWithCeph,
 )
+from urllib.parse import urlsplit
 
 
 LOG = utils.get_logger(__name__)
@@ -1359,6 +1361,75 @@ class Octavia(OpenStackService):
 
 class RadosGateWay(Service):
     service = "object-storage"
+
+    def template_args(self):
+        t_args = super().template_args()
+
+        auth_url = "https://keystone." + self.mspec["public_domain_name"]
+
+        kube.wait_for_secret(
+            ceph_api.SHARED_SECRET_NAMESPACE,
+            ceph_api.OPENSTACK_KEYS_SECRET,
+        )
+
+        for rgw_key in ["rgw_internal", "rgw_external"]:
+            rgw_url = base64.b64decode(
+                secrets.get_secret_data(
+                    ceph_api.SHARED_SECRET_NAMESPACE,
+                    ceph_api.OPENSTACK_KEYS_SECRET,
+                ).get(rgw_key)
+            ).decode()
+
+            urlparsed = urlsplit(rgw_url)
+            rgw_port = urlparsed.netloc.partition(":")[-1]
+            if not rgw_port:
+                if urlparsed.scheme == "http":
+                    rgw_port = "80"
+                if urlparsed.scheme == "https":
+                    rgw_port = "443"
+
+            t_args[rgw_key] = {
+                "host": urlparsed.netloc,
+                "port": rgw_port,
+                "scheme": urlparsed.scheme,
+            }
+
+        for service_cred in t_args["service_creds"]:
+            if service_cred.account == "ceph-rgw":
+                rgw_creds = {
+                    "auth_url": auth_url,
+                    "default_domain": "default",
+                    "interface": "public",
+                    "password": service_cred.password,
+                    "project_domain_name": "service",
+                    "project_name": "service",
+                    "region_name": "RegionOne",
+                    "user_domain_name": "default",
+                    "username": service_cred.username,
+                    "ca_cert": self.mspec.get("features", {})
+                    .get("ssl", {})
+                    .get("public_endpoints", {})
+                    .get("ca_cert"),
+                }
+
+                # encode values from rgw_creds
+                for key in rgw_creds.keys():
+                    rgw_creds[key] = base64.b64encode(
+                        rgw_creds[key].encode()
+                    ).decode()
+
+                os_rgw_creds = ceph_api.OSRGWCreds(**rgw_creds)
+
+                ceph_api.set_os_rgw_creds(
+                    os_rgw_creds=os_rgw_creds,
+                    save_secret=kube.save_secret_data,
+                )
+                LOG.info(
+                    "Secret with RGW creds has been created successfully."
+                )
+                break
+
+        return t_args
 
 
 class Tempest(Service):

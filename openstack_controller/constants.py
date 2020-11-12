@@ -17,7 +17,6 @@ CHART_GROUP_MAPPING = {
         "neutron",
         "nova",
         "octavia",
-        "ceph-rgw",
         "designate",
         "barbican",
         "placement",
@@ -36,6 +35,7 @@ CHART_GROUP_MAPPING = {
         "ingress",
         "etcd",
         "gnocchi",
+        "ceph-rgw",
     ],
 }
 
@@ -57,6 +57,7 @@ OS_SERVICES_MAP = {
     "metering": "ceilometer",
     "metric": "gnocchi",
     "tempest": "tempest",
+    "object-storage": "ceph-rgw",
 }
 
 OPENSTACK_SERVICES_UPGRADE_ORDER = [
@@ -71,6 +72,7 @@ OPENSTACK_SERVICES_UPGRADE_ORDER = [
     "key-manager",
     "orchestration",
     "dashboard",
+    "object-storage",
 ]
 
 RGW_KEYSTONE_SECRET = "ceph-keystone-user"
