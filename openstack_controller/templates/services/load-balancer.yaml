@@ -125,6 +125,19 @@ spec:
           worker: 3
           housekeeping: 3
           health_manager: 3
+        robes:
+          octavia_api:
+            octavia_api:
+              readiness:
+                enabled: true
+                params:
+                  initialDelaySeconds: 15
+                  timeoutSeconds: 5
+              liveness:
+                enabled: true
+                params:
+                  initialDelaySeconds: 15
+                  timeoutSeconds: 5
         mounts:
           octavia_api:
             octavia_api:

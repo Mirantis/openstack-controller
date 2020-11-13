@@ -1,0 +1,5 @@
+---
+fixes:
+  - An issue when octavia API went into CrashLoopBack as liveness
+    probes timing out. For more information please see
+    `PRODX-8808 <https://mirantis.jira.com/browse/PRODX-8808>`__
