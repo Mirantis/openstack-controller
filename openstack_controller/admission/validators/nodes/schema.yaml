@@ -13,6 +13,9 @@ patternProperties:
             type: object
             additionalProperties: False
             properties:
+              tunnel_interface:
+                type: string
+                description: Physical interface used for tunnel traffic
               dpdk:
                 type: object
                 additionalProperties: False

@@ -440,7 +440,8 @@ def test_nodes_features_neutron_keys(client):
                                     ],
                                 }
                             ],
-                        }
+                        },
+                        "tunnel_interface": "br-phy",
                     }
                 }
             }
