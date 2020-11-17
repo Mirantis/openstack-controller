@@ -1,0 +1,43 @@
+spec:
+  releases:
+  - chart: osh-infra/ingress
+    name: ingress-openstack
+    values:
+      conf:
+        ingress:
+          nginx-status-ipv4-whitelist: 0.0.0.0/0
+      deployment:
+        type: DaemonSet
+      endpoints:
+        cluster_domain_suffix: cluster.local
+      images:
+        tags:
+          dep_check: dep-check:latest
+          entrypoint: entrypoint:latest
+          error_pages: error-pages:latest
+          image_repo_sync: image-repo-sync:latest
+          ingress: ingress:latest
+          ingress_module_init: ingress-module-init:latest
+          ingress_routed_vip: ingress-routed-vip:latest
+      labels:
+        server:
+          node_selector_key: openstack-control-plane
+          node_selector_value: enabled
+      manifests:
+        network_policy: false
+      network:
+        service:
+          externalTrafficPolicy: Local
+          type: LoadBalancer
+      pod:
+        probes:
+          server:
+            ingress:
+              liveness:
+                enabled: true
+                params:
+                  initialDelaySeconds: 10
+                  timeoutSeconds: 5
+              readiness:
+                enabled: true
+                params: {}

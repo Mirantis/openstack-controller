@@ -34,6 +34,15 @@ def openstackdeployment():
     yield yaml.safe_load(open("tests/fixtures/openstackdeployment.yaml"))
 
 
+@pytest.fixture
+def common_template_args():
+    yield yaml.safe_load(
+        open(
+            "tests/fixtures/render_service_template/input/common_template_args.yaml"
+        )
+    )
+
+
 def _osdpl_minimal(os_release):
     return {
         "spec": {

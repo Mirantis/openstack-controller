@@ -1,0 +1,107 @@
+spec:
+  releases:
+  - chart: osh/placement
+    name: openstack-placement
+    values:
+      conf:
+        logging:
+          logger_placement:
+            level: INFO
+            propagate: 0
+        placement:
+          keystone_authtoken:
+            memcache_secret_key: 0NZmrV1NcBFwzDmv
+            memcache_security_strategy: ENCRYPT
+      dependencies:
+        static:
+          db_init:
+            jobs:
+            - openstack-mariadb-cluster-wait
+      endpoints:
+        cluster_domain_suffix: cluster.local
+        identity:
+          auth:
+            admin:
+              default_domain_id: default
+              password: ZUqTyP2XwsgEGKZ7qNhhecYyq9NLkGE6
+              project_domain_name: default
+              project_name: admin
+              region_name: RegionOne
+              user_domain_name: default
+              username: admin
+            placement:
+              password: AEYVXR3LFUbLcePQlkxSFvbQ1WyWtaiY
+              username: placementR3AqaC4te
+            test:
+              password: b1szm2wvF9n2tdCvDQQZEZM5GzpVtQkP
+              username: testXByW
+        oslo_cache:
+          statefulset:
+            name: openstack-memcached-memcached
+            replicas: 3
+        oslo_db:
+          auth:
+            admin:
+              password: QACDSM6FBTH2LuXjTuRQ6DXhD8bSgPbn
+              username: root
+            placement:
+              password: FdmszFTEuCvADMYGShqdBqLzuczyZf4c
+              username: placementEqEMt8aUc
+        placement:
+          host_fqdn_override:
+            public:
+              host: placement.it.just.works
+              tls:
+                ca: |
+                  TEST CA
+                crt: |
+                  TEST CRT
+                key: |
+                  TEST KEY
+          hosts:
+            admin:
+              host: placement-api
+            default: placement
+            internal: placement-api
+            public:
+              host: placement
+              tls:
+                ca: |
+                  TEST CA
+                crt: |
+                  TEST CRT
+                key: |
+                  TEST KEY
+          port:
+            api:
+              admin: 8778
+              default: 80
+              internal: 8778
+              public: 443
+          scheme:
+            default: http
+            public: https
+      images:
+        tags:
+          db_drop: db-drop:latest
+          db_init: db-init:latest
+          dep_check: dep-check:latest
+          image_repo_sync: image-repo-sync:latest
+          ks_endpoints: ks-endpoints:latest
+          ks_service: ks-service:latest
+          ks_user: ks-user:latest
+          placement: placement:latest
+          placement_db_sync: placement-db-sync:latest
+      jobs:
+        ks_endpoints:
+          restartPolicy: Never
+        ks_service:
+          restartPolicy: Never
+        ks_user:
+          restartPolicy: Never
+      manifests:
+        network_policy: false
+        secret_ca_bundle: true
+      pod:
+        replicas:
+          api: 1
