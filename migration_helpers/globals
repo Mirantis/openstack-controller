@@ -17,3 +17,6 @@ export HELMBUNDLE_CR='mcp1-forwarder-cr.yaml'
 export HELMBUNDLE_NS=${HELMBUNDLE_NS:-${FORWARDER_NS}}
 # 8080 - switf not supported
 export IGNORE_PUBLIC_PORTS=${IGNORE_PUBLIC_PORTS:-'8080'}
+export COREDNS_HELMBUNDLE_CR='coredns-cr.yaml'
+export COREDNS_NS='coredns-mcp1'
+export HOST_ALIAS_FILE='host-alias.yaml'

@@ -175,6 +175,20 @@ cat <<EOF >> $RUN_DIR/cluster/migration/init.yml
 EOF
 fi
 
+  #get mcp2 nodes
+  local mcp2_nodes=$(kubectl get nodes -o wide | awk '{print $1" "$6}' | column -t | awk 'NR>1')
+  echo  "$mcp2_nodes" | while read line; do
+    local mcp2_node_name=$(echo "$line" | awk '{print $1}')
+    local mcp2_node_ip=$(echo "$line" | awk '{print $2}')
+
+cat <<EOF >> $RUN_DIR/cluster/migration/init.yml
+        ${mcp2_node_name}:
+          address: ${mcp2_node_ip}
+          names:
+          - ${mcp2_node_name}
+EOF
+  done
+
   # get public cert from MCP2
   local mcp2_public_ca=$(kubectl get osdpl osh-dev -n openstack -o jsonpath='{.spec.features.ssl.public_endpoints.ca_cert}')
 
@@ -183,7 +197,6 @@ cat <<EOF >> $RUN_DIR/cluster/migration/init.yml
       ca_certificates:
         mcp2_public_ca: \${_param:mcp2_public_ca}
 EOF
-
 
 }
 
