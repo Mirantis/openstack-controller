@@ -14,6 +14,7 @@
 import os
 import time
 
+import json
 import kopf
 from kopf.engines.posting import event_queue_var
 from prometheus_client import start_http_server, Gauge, Counter, Summary
@@ -48,6 +49,24 @@ def bool_from_env(env_name, default):
         return False
 
     raise kopf.PermanentError(f"Failed to convert {data} into boolean.")
+
+
+def json_from_env(env_name, default):
+    """Load a json string from an env variable
+
+    :param env_name: the name of environment variable
+    :param default: the default value to return
+    :returns True: when value of env is in TRUE_STRINGS
+    :returns False: when value of env is in FALSE_STRINGS
+    :raise kopf.PermanentError: when value not in TRUE_STRINGS or FALSE_STRINGS
+
+    """
+    data = os.environ.get(env_name)
+
+    if data is None:
+        return default
+
+    return json.loads(data)
 
 
 # The number of seconds to wait for all component from application becomes ready
@@ -182,6 +201,20 @@ OSCTL_MIGRATE_CONCURRENCY = int(os.environ.get("OSCTL_MIGRATE_CONCURRENCY", 5))
 
 # Whether to perform evacuation if compute node is down, or just error out
 OSCTL_ALLOW_EVACUATION = bool_from_env("OSCTL_ALLOW_EVACUATION", False)
+
+# A dict of OpenStack node labels in json format.
+# For example `OSCTL_OPENSTACK_NODE_LABELS={"openstack-compute-node":"enabled","openstack-control-plane":"enabled"}`
+# If a node has one of specified labels with the matching value an appropriate NodeWorkloadLock object will be created.
+OSCTL_OPENSTACK_NODE_LABELS = json_from_env(
+    "OSCTL_OPENSTACK_NODE_LABELS", {"openstack-compute-node": "enabled"}
+)
+try:
+    for x, y in OSCTL_OPENSTACK_NODE_LABELS.items():
+        pass
+except Exception:
+    raise kopf.PermanentError(
+        f"OSCTL_OPENSTACK_NODE_LABELS invalid format, should be a dict with node labels and values"
+    )
 
 
 @kopf.on.startup()

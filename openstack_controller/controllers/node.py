@@ -208,3 +208,32 @@ async def node_status_update_handler(name, body, old, new, event, **kwargs):
         f"Removing pods..."
     )
     node.remove_pods(settings.OSCTL_OS_DEPLOYMENT_NAMESPACE)
+
+
+# NOTE(avolkov): watching for update events covers
+# the case when node is relabeled and NodeWorkloadLock
+# has to be created/deleted accordingly
+@kopf.on.create("", "v1", "nodes")
+@kopf.on.update("", "v1", "nodes")
+@kopf.on.resume("", "v1", "nodes")
+async def node_change_handler(body, event, **kwargs):
+    name = body["metadata"]["name"]
+    LOG.info(f"Got event {event} for node {name}")
+    if not kube.NodeWorkloadLock.definition_exists():
+        LOG.warning("No custom resource definition")
+        return
+    if kube.NodeWorkloadLock.required_for_node(body):
+        kube.NodeWorkloadLock.ensure(name)
+    else:
+        nwl = kube.NodeWorkloadLock.get(name)
+        if nwl:
+            await nwl.purge()
+
+
+@kopf.on.delete("", "v1", "nodes")
+async def node_delete_handler(body, **kwargs):
+    name = body["metadata"]["name"]
+    LOG.info(f"Got delete event for node {name}")
+    nwl = kube.NodeWorkloadLock.get(name)
+    if nwl:
+        await nwl.purge()
