@@ -93,7 +93,7 @@ class ServiceAvailable(base_section.BaseSection):
 
     @property
     def swift(self):
-        pass
+        return self.is_service_enabled("ceph-rgw")
 
     @property
     def horizon(self):
