@@ -43,7 +43,7 @@ class ObjectStorage(base_section.BaseSection):
 
     @property
     def operator_role(self):
-        pass
+        return "admin"
 
     @property
     def realm_name(self):
@@ -55,4 +55,4 @@ class ObjectStorage(base_section.BaseSection):
 
     @property
     def reseller_admin_role(self):
-        pass
+        return "admin"
