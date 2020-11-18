@@ -24,11 +24,7 @@ class LoadBalancerFeatureEnabled(base_section.BaseSection):
 
     @property
     def l7_protocol_enabled(self):
-        try:
-            if self.spec["features"]["neutron"]["backend"] == "tungstenfabric":
-                return False
-        except:
-            pass
+        pass
 
     @property
     def pool_algorithms_enabled(self):
