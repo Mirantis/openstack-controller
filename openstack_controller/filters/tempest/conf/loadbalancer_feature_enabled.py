@@ -20,7 +20,11 @@ class LoadBalancerFeatureEnabled(base_section.BaseSection):
 
     @property
     def terminated_tls_enabled(self):
-        pass
+        try:
+            if self.spec["features"]["neutron"]["backend"] == "tungstenfabric":
+                return False
+        except:
+            pass
 
     @property
     def l7_protocol_enabled(self):
