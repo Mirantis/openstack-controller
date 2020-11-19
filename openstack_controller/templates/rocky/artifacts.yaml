@@ -122,7 +122,7 @@ prometheus_memcached_exporter: '{{ images_base_url }}/stacklight/memcached-expor
 cinder_backup_storage_init: '{{ images_base_url }}/openstack/extra/ceph-config-helper:nautilus-bionic-20200810084204'
 cinder_storage_init: '{{ images_base_url }}/openstack/extra/ceph-config-helper:nautilus-bionic-20200810084204'
 glance_storage_init: '{{ images_base_url }}/openstack/extra/ceph-config-helper:nautilus-bionic-20200810084204'
-test: '{{ images_base_url }}/openstack/extra/xrally-openstack:1.5.0'
+test: '{{ images_base_url }}/openstack/extra/xrally-openstack:2.1.0'
 pause: '{{ images_base_url }}/general/external/pause:3.1'
 keystone_client: '{{ images_base_url }}/openstack/heat:rocky-bionic-20201026180012'
 neutron_rpc_server: '{{ images_base_url }}/openstack/neutron:rocky-bionic-20201026180012'
