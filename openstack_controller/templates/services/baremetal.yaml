@@ -6,7 +6,7 @@
 {%- set stacklight_enabled = spec.get('features', {}).get('stacklight', {}).get('enabled', False) %}
 {%- set notification_topics = ['notifications'] %}
 {%- do notification_topics.append('stacklight_notifications') if stacklight_enabled %}
-{%- set enabled_boot_interfaces = ['pxe'] %}
+{%- set enabled_boot_interfaces = ['pxe', 'fake'] %}
 {%- if spec.openstack_version not in ['queens', 'rocky'] %}
 {%- do enabled_boot_interfaces.append('ipxe') %}
 {%- endif %}
@@ -146,22 +146,26 @@ spec:
       conf:
         ironic:
           DEFAULT:
-            default_deploy_interface: direct
-            enabled_hardware_types: ipmi
+            enabled_hardware_types: ipmi,fake-hardware
             enabled_boot_interfaces: {{ enabled_boot_interfaces|join(',') }}
             {%- if 'ipxe' in enabled_boot_interfaces %}
             # NOTE(vsaienko): we prefer to use chainloading to ipxe as it is much faster and stable
             # for file downloads that UDP based pxe
             default_boot_interface: ipxe
             {%- endif %}
-            enabled_management_interfaces: ipmitool
-            enabled_power_interfaces: ipmitool
-            enabled_network_interfaces: flat,neutron
-            enabled_deploy_interfaces: direct
+            enabled_management_interfaces: fake,ipmitool,noop
+            enabled_power_interfaces: fake,ipmitool
+            enabled_network_interfaces: flat,neutron,noop
+            enabled_deploy_interfaces: fake,direct
             # NOTE(vsaienko): the cinder + ceph can't advertise ISCSI targets,
             # while ironic BFV supports only ISCSI or FiberChannel
-            enabled_storage_interfaces: noop
-            default_storage_interface: noop
+            enabled_storage_interfaces: fake,cinder,noop
+            enabled_bios_interfaces: fake,no-bios
+            enabled_console_interfaces: fake,no-console
+            enabled_inspect_interfaces: fake,no-inspect
+            enabled_raid_interfaces: fake,agent,no-raid
+            enabled_rescue_interfaces: fake,no-rescue
+            enabled_vendor_interfaces: fake,ipmitool,no-vendor
           oslo_messaging_notifications:
             topics: {{ notification_topics|join(',') }}
           conductor:
@@ -174,6 +178,8 @@ spec:
             erase_devices_priority: 0
             erase_devices_metadata_priority: 1
             shred_final_overwrite_with_zeros: false
+            default_boot_option: local
+            fast_track: false
           neutron:
             port_setup_delay: 30
             cleaning_network: {{ network.get('name', 'baremetal') }}
