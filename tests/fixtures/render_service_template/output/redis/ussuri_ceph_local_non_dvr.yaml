@@ -1,0 +1,69 @@
+spec:
+  auth:
+    secretPath: generated-redis-password
+  labelWhitelist:
+  - ^app.*
+  redis:
+    affinity:
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+          - matchExpressions:
+            - key: openstack-control-plane
+              operator: In
+              values:
+              - enabled
+      podAntiAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+        - labelSelector:
+            matchExpressions:
+            - key: app.kubernetes.io/component
+              operator: In
+              values:
+              - redis
+          topologyKey: kubernetes.io/hostname
+    customConfig:
+    - save 600 1
+    - save 300 10
+    - save 60 1000
+    - save 10 10000
+    - client-output-buffer-limit slave 512mb 512mb 0
+    image: redis-failover:latest
+    replicas: 3
+    storage:
+      keepAfterDeletion: true
+      persistentVolumeClaim:
+        metadata:
+          name: lvp-fake-root
+        spec:
+          accessModes:
+          - ReadWriteOnce
+          resources:
+            requests:
+              storage: 1Gi
+          storageClassName: lvp-fake-root
+  sentinel:
+    affinity:
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+          - matchExpressions:
+            - key: openstack-control-plane
+              operator: In
+              values:
+              - enabled
+      podAntiAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+        - labelSelector:
+            matchExpressions:
+            - key: app.kubernetes.io/component
+              operator: In
+              values:
+              - sentinel
+          topologyKey: kubernetes.io/hostname
+    customConfig:
+    - down-after-milliseconds 2000
+    - failover-timeout 10000
+    - parallel-syncs 1
+    image: redis-failover:latest
+    replicas: 3
