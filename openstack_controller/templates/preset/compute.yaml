@@ -224,6 +224,8 @@ services:
           {%- if ironic_enabled %}
             # Skip schedule to all nodes, as in case of concurrent tests, this will highly likely to fail
             - (?:tempest.scenario.test_server_multinode.TestServerMultinode.test_schedule_to_all_nodes)
+            # Skip ironic boot from volume
+            - (?:ironic_tempest_plugin.tests.scenario.test_baremetal_boot_from_volume.BaremetalBFV.test_baremetal_boot_from_volume)
           {%- endif %}
           script: |
             tempest run --config-file /etc/tempest/tempest.conf -w 4 --smoke --blacklist-file  /etc/tempest/test-blacklist
