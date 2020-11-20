@@ -225,6 +225,9 @@ services:
             # Skip schedule to all nodes, as in case of concurrent tests, this will highly likely to fail
             - (?:tempest.scenario.test_server_multinode.TestServerMultinode.test_schedule_to_all_nodes)
           {%- endif %}
+            # AccountQuotas tests are skipped due to this is an known issue.
+            - (?:tempest.api.object_storage.test_account_quotas.AccountQuotasTest.test_upload_valid_object)
+            - (?:tempest.api.object_storage.test_account_quotas.AccountQuotasTest.test_admin_modify_quota)
           script: |
             tempest run --config-file /etc/tempest/tempest.conf -w 4 --smoke --blacklist-file  /etc/tempest/test-blacklist
           tempest:
