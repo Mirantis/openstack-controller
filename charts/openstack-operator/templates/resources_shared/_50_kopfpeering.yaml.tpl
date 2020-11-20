@@ -33,3 +33,9 @@ kind: KopfPeering
 metadata:
   namespace: "{{ .Values.osdpl.namespace }}"
   name: openstack-controller.node
+---
+apiVersion: zalando.org/v1
+kind: KopfPeering
+metadata:
+  namespace: "{{ .Values.osdpl.namespace }}"
+  name: openstack-controller.nodemaintenancerequest

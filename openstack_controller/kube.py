@@ -386,9 +386,8 @@ class NodeWorkloadLock(pykube.objects.APIObject, HelmBundleMixin):
             }
             obj = cls(api, data)
             obj.create()
-            status = {"status": {"state": "active"}}
-            obj.patch(status, subresource="status")
-            LOG.info(f"Node workload created {name}")
+            obj.set_state("active")
+            LOG.info(f"Node workload created {name} {data}")
         return obj
 
     @classmethod
@@ -402,6 +401,22 @@ class NodeWorkloadLock(pykube.objects.APIObject, HelmBundleMixin):
             if node_body["metadata"]["labels"].get(k) == v:
                 return True
         return False
+
+    def is_active(self):
+        return self.obj["status"]["state"] == "active"
+
+    def is_maintenance(self):
+        return self.obj["status"]["state"] == "inactive"
+
+    def set_state(self, state):
+        self.patch({"status": {"state": state}}, subresource="status")
+
+
+class NodeMaintenanceRequest(pykube.objects.APIObject, HelmBundleMixin):
+    version = "lcm.mirantis.com/v1alpha1"
+    endpoint = "nodemaintenancerequests"
+    kind = "NodeMaintenanceRequest"
+    kopf_on_args = *version.split("/"), endpoint
 
 
 def resource(data):
