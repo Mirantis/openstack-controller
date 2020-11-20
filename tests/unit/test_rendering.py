@@ -5,6 +5,8 @@ import yaml
 from openstack_controller import constants
 from openstack_controller import layers
 
+logger = logging.getLogger(__name__)
+
 OUTPUT_DIR = "tests/fixtures/render_service_template/output"
 INPUT_DIR = "tests/fixtures/render_service_template/input"
 
@@ -42,21 +44,31 @@ def get_render_kwargs(service, context, default_args):
 
 def test_render_service_template(common_template_args):
     # Remove excluded services once contexts with these services are added
-    excluded_services = [
+    excluded_services = {
         "tempest",
-        "event",
         "baremetal",
-        "metric",
-        "alarming",
-        "metering",
         "object-storage",
-    ]
-    for service in constants.OS_SERVICES_MAP.keys() - excluded_services:
+    }
+    infra_services = {
+        "messaging",
+        "database",
+        "memcached",
+        "ingress",
+        "redis",
+        "coordination",
+    }
+    all_services = (
+        set(constants.OS_SERVICES_MAP.keys())
+        .union(infra_services)
+        .difference(excluded_services)
+    )
+    for service in all_services:
         srv_dir = f"{OUTPUT_DIR}/{service}"
         contexts = [name.split(".")[0] for name in os.listdir(srv_dir)]
         if not contexts:
             raise RuntimeError(f"No contexts provided for service {service}")
         for context in contexts:
+            logger.debug(f"Rendering service {service} for context {context}")
             spec, kwargs = get_render_kwargs(
                 service, context, common_template_args
             )

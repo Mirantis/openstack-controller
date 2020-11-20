@@ -1,0 +1,459 @@
+spec:
+  releases:
+  - chart: osh-infra/rabbitmq
+    name: openstack-rabbitmq
+    values:
+      conf:
+        aux_conf:
+          policies:
+          - definition:
+              expires: 3600000
+            name: heat_engine_rpc_expire
+            pattern: ^heat-engine-listener\.
+            priority: 1
+            vhost: heat_ussuri
+          - definition:
+              expires: 3600000
+            name: heat_worker_rpc_expire
+            pattern: ^engine_worker\.
+            priority: 1
+            vhost: heat_ussuri
+          - definition:
+              expires: 3600000
+            name: results_expire
+            pattern: ^results\.
+            priority: 1
+            vhost: heat_ussuri
+          - definition:
+              expires: 3600000
+            name: tasks_expire
+            pattern: ^tasks\.
+            priority: 1
+            vhost: heat_ussuri
+          - definition:
+              message-ttl: 120000
+            name: default-policy
+            pattern: ^(?!amq\.).*
+            vhost: heat_ussuri
+          - definition:
+              expires: 3600000
+            name: heat_engine_rpc_expire
+            pattern: ^heat-engine-listener\.
+            priority: 1
+            vhost: heat_victoria
+          - definition:
+              expires: 3600000
+            name: heat_worker_rpc_expire
+            pattern: ^engine_worker\.
+            priority: 1
+            vhost: heat_victoria
+          - definition:
+              expires: 3600000
+            name: results_expire
+            pattern: ^results\.
+            priority: 1
+            vhost: heat_victoria
+          - definition:
+              expires: 3600000
+            name: tasks_expire
+            pattern: ^tasks\.
+            priority: 1
+            vhost: heat_victoria
+          - definition:
+              message-ttl: 120000
+            name: default-policy
+            pattern: ^(?!amq\.).*
+            vhost: heat_victoria
+          - definition:
+              expires: 3600000
+            name: heat_engine_rpc_expire
+            pattern: ^heat-engine-listener\.
+            priority: 1
+            vhost: heat_master
+          - definition:
+              expires: 3600000
+            name: heat_worker_rpc_expire
+            pattern: ^engine_worker\.
+            priority: 1
+            vhost: heat_master
+          - definition:
+              expires: 3600000
+            name: results_expire
+            pattern: ^results\.
+            priority: 1
+            vhost: heat_master
+          - definition:
+              expires: 3600000
+            name: tasks_expire
+            pattern: ^tasks\.
+            priority: 1
+            vhost: heat_master
+          - definition:
+              message-ttl: 120000
+            name: default-policy
+            pattern: ^(?!amq\.).*
+            vhost: heat_master
+          - definition:
+              message-ttl: 120000
+            name: default-policy-openstack
+            pattern: ^(?!amq\.).*
+            vhost: openstack
+          - definition:
+              expires: 3600000
+            name: results_expire_openstack
+            pattern: ^results\.
+            priority: 1
+            vhost: openstack
+          - definition:
+              expires: 3600000
+            name: tasks_expire_openstack
+            pattern: ^tasks\.
+            priority: 1
+            vhost: openstack
+          - definition:
+              message-ttl: 120000
+            name: default-policy-keystone
+            pattern: ^(?!amq\.).*
+            vhost: keystone
+          - definition:
+              expires: 3600000
+            name: results_expire_keystone
+            pattern: ^results\.
+            priority: 1
+            vhost: keystone
+          - definition:
+              expires: 3600000
+            name: tasks_expire_keystone
+            pattern: ^tasks\.
+            priority: 1
+            vhost: keystone
+          - definition:
+              message-ttl: 120000
+            name: default-policy-glance
+            pattern: ^(?!amq\.).*
+            vhost: glance
+          - definition:
+              expires: 3600000
+            name: results_expire_glance
+            pattern: ^results\.
+            priority: 1
+            vhost: glance
+          - definition:
+              expires: 3600000
+            name: tasks_expire_glance
+            pattern: ^tasks\.
+            priority: 1
+            vhost: glance
+          - definition:
+              message-ttl: 120000
+            name: default-policy-cinder
+            pattern: ^(?!amq\.).*
+            vhost: cinder
+          - definition:
+              expires: 3600000
+            name: results_expire_cinder
+            pattern: ^results\.
+            priority: 1
+            vhost: cinder
+          - definition:
+              expires: 3600000
+            name: tasks_expire_cinder
+            pattern: ^tasks\.
+            priority: 1
+            vhost: cinder
+          - definition:
+              message-ttl: 120000
+            name: default-policy-neutron
+            pattern: ^(?!amq\.).*
+            vhost: neutron
+          - definition:
+              expires: 3600000
+            name: results_expire_neutron
+            pattern: ^results\.
+            priority: 1
+            vhost: neutron
+          - definition:
+              expires: 3600000
+            name: tasks_expire_neutron
+            pattern: ^tasks\.
+            priority: 1
+            vhost: neutron
+          - definition:
+              message-ttl: 120000
+            name: default-policy-nova
+            pattern: ^(?!amq\.).*
+            vhost: nova
+          - definition:
+              expires: 3600000
+            name: results_expire_nova
+            pattern: ^results\.
+            priority: 1
+            vhost: nova
+          - definition:
+              expires: 3600000
+            name: tasks_expire_nova
+            pattern: ^tasks\.
+            priority: 1
+            vhost: nova
+          - definition:
+              message-ttl: 120000
+            name: default-policy-octavia
+            pattern: ^(?!amq\.).*
+            vhost: octavia
+          - definition:
+              expires: 3600000
+            name: results_expire_octavia
+            pattern: ^results\.
+            priority: 1
+            vhost: octavia
+          - definition:
+              expires: 3600000
+            name: tasks_expire_octavia
+            pattern: ^tasks\.
+            priority: 1
+            vhost: octavia
+          - definition:
+              message-ttl: 120000
+            name: default-policy-designate
+            pattern: ^(?!amq\.).*
+            vhost: designate
+          - definition:
+              expires: 3600000
+            name: results_expire_designate
+            pattern: ^results\.
+            priority: 1
+            vhost: designate
+          - definition:
+              expires: 3600000
+            name: tasks_expire_designate
+            pattern: ^tasks\.
+            priority: 1
+            vhost: designate
+          - definition:
+              message-ttl: 120000
+            name: default-policy-barbican
+            pattern: ^(?!amq\.).*
+            vhost: barbican
+          - definition:
+              expires: 3600000
+            name: results_expire_barbican
+            pattern: ^results\.
+            priority: 1
+            vhost: barbican
+          - definition:
+              expires: 3600000
+            name: tasks_expire_barbican
+            pattern: ^tasks\.
+            priority: 1
+            vhost: barbican
+          - vhost: aodh
+            name: default-policy-aodh
+            pattern: '^(?!amq\.).*'
+            definition:
+              message-ttl: 120000
+          - vhost: aodh
+            name: results_expire_aodh
+            pattern: '^results\.'
+            definition:
+              expires: 3600000
+            priority: 1
+          - vhost: aodh
+            name: tasks_expire_aodh
+            pattern: '^tasks\.'
+            definition:
+              expires: 3600000
+            priority: 1
+          - vhost: ceilometer
+            name: default-policy-ceilometer
+            pattern: '^(?!amq\.).*'
+            definition:
+              message-ttl: 120000
+          - vhost: ceilometer
+            name: results_expire_ceilometer
+            pattern: '^results\.'
+            definition:
+              expires: 3600000
+            priority: 1
+          - vhost: ceilometer
+            name: tasks_expire_ceilometer
+            pattern: '^tasks\.'
+            definition:
+              expires: 3600000
+            priority: 1
+        prometheus_exporter:
+          rabbit_exporters: overview,exchange,node
+        users:
+          barbican_service:
+            auth:
+              barbican:
+                password: iHMN1WsAMxAi8G4d0r64iggSdedSRR1p
+                username: barbicanVuqCvFid
+            path: /barbican
+          barbican_service_notifications:
+            auth:
+              barbican:
+                password: acH2p6deh90bDJWlRDzFE7wptqgQgVc7
+                username: barbicanyfHtXhiq
+            path: /openstack
+          cinder_service:
+            auth:
+              cinder:
+                password: KgjY6ghlVbGSKJL6DH2jQXH50EtBVsiC
+                username: cinder0Jhxmf
+            path: /cinder
+          cinder_service_notifications:
+            auth:
+              cinder:
+                password: ptehSf4lZxF0TAs16INhV9XmuVXHbL6R
+                username: cinderU5dqXt
+            path: /openstack
+          designate_service:
+            auth:
+              designate:
+                password: tBFq4j3X2PdA5Jh9x2kkR0Hgs7FZhdFE
+                username: designatePLbJrH4JP
+            path: /designate
+          designate_service_notifications:
+            auth:
+              designate:
+                password: nzsKJHIGHIwsildBgpfmZQDan7Cexzc1
+                username: designateUMq5w6Q7G
+            path: /openstack
+          glance_service:
+            auth:
+              glance_username:
+                password: a1tgZk2bR7f5WyweUt2a4PuFYEty6Igv
+                username: glanceFjTBUv
+            path: /glance
+          glance_service_notifications:
+            auth:
+              glance_username:
+                password: uYRL35JdXg39DumFdDG8xdJeqvL0cswM
+                username: glancejdih0V
+            path: /openstack
+          heat_service:
+            auth:
+              heat:
+                password: BY5CvE9aGG3jUkQghTCACvcDZbp6VcUI
+                username: heatekEb
+            path:
+            - /heat_ussuri
+            - /heat_victoria
+            - /heat_master
+          heat_service_notifications:
+            auth:
+              heat:
+                password: GPQzkiL39fEDGEWn6DIZGBxkjXBuDpQe
+                username: heatKQF7
+            path: /openstack
+          keystone_service:
+            auth:
+              keystone_username:
+                password: i1LUJuYCIEeUdpKbztpemVvIQhmJ56cn
+                username: keystoneeYwYK03G
+            path: /keystone
+          keystone_service_notifications:
+            auth:
+              keystone_username:
+                password: TzLbvAXVJKzX4klDdVWEuYnWf35hVBTf
+                username: keystonefz7wkYYH
+            path: /openstack
+          neutron_service:
+            auth:
+              neutron:
+                password: TRRhbnUMsepnqSzyJngJtgZD9gRu0Fwy
+                username: neutronx7uHpit
+            path: /neutron
+          neutron_service_notifications:
+            auth:
+              neutron:
+                password: hL3STFyPBLCdR2qUCdaGEUeRB5jRIFPf
+                username: neutrontvAcFA3
+            path: /openstack
+          nova_service:
+            auth:
+              nova:
+                password: tuzgvismPceyDLXGeq1cpQcDIQDwIyhr
+                username: nova27zb
+            path: /nova
+          nova_service_notifications:
+            auth:
+              nova:
+                password: 55HghKuwQUTPlVFt8UKM6JhIGQ8egSLP
+                username: novauvhH
+            path: /openstack
+          octavia_service:
+            auth:
+              octavia:
+                password: P4tAIFt2fRzEddPyPmfCmBcInbNdCI9S
+                username: octaviaGrHbrrp
+            path: /octavia
+          octavia_service_notifications:
+            auth:
+              octavia:
+                password: xcKEJVAYZflpAmEWcyzTKpvNlJycCLvc
+                username: octaviadRDTSj1
+            path: /openstack
+          stacklight_service_notifications:
+            auth:
+              stacklight:
+                password: stacklight
+                username: stacklight
+            path: /openstack
+          alarming_service:
+            auth:
+              alarming:
+                username: aodhfe3v
+                password: D3R9K371zxx2bygGZRXgz2Mrp2XsL1P6
+            path: /aodh
+          alarming_service_notifications:
+            auth:
+              alarming:
+                username: aodh3FeH
+                password: dxDZQgkkcVjGQAQw5dfZKSlpbHlMpxlA
+            path: /openstack
+          metering_service:
+            auth:
+              metering:
+                username: ceilometerdNwnaAFUJC
+                password: VCBEs3bsRHNqXjDFRBEABAqqhsAgcK1E
+            path: /ceilometer
+          metering_service_notifications:
+            auth:
+              metering:
+                username: ceilometerxkaMcrLDm7
+                password: PYVPcRruzubVN2sguGarI6rbgFTb7FSd
+            path: /openstack
+      endpoints:
+        cluster_domain_suffix: cluster.local
+        oslo_messaging:
+          auth:
+            user:
+              password: 2tnAuP0j9MsgaVHErehZkC5HCK3ZxYLr
+              username: rabbitmq
+          hosts:
+            default: rabbitmq
+          path: /openstack
+          statefulset:
+            name: openstack-rabbitmq-rabbitmq
+            replicas: 1
+      images:
+        tags:
+          dep_check: dep-check:latest
+          image_repo_sync: image-repo-sync:latest
+          prometheus_rabbitmq_exporter: prometheus-rabbitmq-exporter:latest
+          prometheus_rabbitmq_exporter_helm_tests: prometheus-rabbitmq-exporter-helm-tests:latest
+          rabbitmq: rabbitmq:latest
+          rabbitmq_init: rabbitmq-init:latest
+          rabbitmq_scripted_test: rabbitmq-scripted-test:latest
+      manifests:
+        job_users_create: true
+        network_policy: false
+      monitoring:
+        prometheus:
+          enabled: true
+      pod:
+        replicas:
+          server: 1
+      volume:
+        enabled: false
