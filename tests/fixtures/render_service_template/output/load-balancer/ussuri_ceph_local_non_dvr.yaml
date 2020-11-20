@@ -297,7 +297,7 @@ spec:
           health_manager: 3
           housekeeping: 3
           worker: 3
-        robes:
+        probes:
           octavia_api:
             octavia_api:
               liveness:
