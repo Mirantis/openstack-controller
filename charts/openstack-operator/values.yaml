@@ -96,6 +96,9 @@ admission:
 
   cluster_domain_suffix: cluster.local
 
+node_maintenance:
+  enabled: false
+
   # webhook needs to run with TLS. By default certificates are generated automatically,
   # if needed can be overridden manually here
   #tls:

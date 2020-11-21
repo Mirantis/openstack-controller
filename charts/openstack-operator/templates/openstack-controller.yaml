@@ -407,6 +407,7 @@ spec:
             {{- toYaml .Values.osdpl.pod.controller.node.liveness.params | nindent 12}}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
+{{ if .Values.node_maintenance.enabled }}
         - name: nodemaintenancerequest
           image: {{ tuple . .Values.image | include "getImageUrl" }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
@@ -440,6 +441,7 @@ spec:
             {{- toYaml .Values.osdpl.pod.controller.node_maintenance_request.liveness.params | nindent 12}}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
+{{ end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

@@ -216,11 +216,6 @@ except Exception:
         f"OSCTL_OPENSTACK_NODE_LABELS invalid format, should be a dict with node labels and values"
     )
 
-# Whether to perform actions related to maintenance e.g. migration of VMs from a node
-OSCTL_ENABLE_NODE_MAINTENANCE_REQUEST_PROCESSING = bool_from_env(
-    "OSCTL_ENABLE_NODE_MAINTENANCE_REQUEST_PROCESSING", False
-)
-
 
 @kopf.on.startup()
 def configure(settings: kopf.OperatorSettings, **_):

@@ -17,12 +17,8 @@ from unittest import mock
 import kopf
 import pytest
 
-from openstack_controller import kube
-from openstack_controller import settings
-
-settings.OSCTL_ENABLE_NODE_MAINTENANCE_REQUEST_PROCESSING = True
-
 from openstack_controller.controllers import node_maintenance_request
+from openstack_controller import kube
 
 
 # TODO(vdrok): Remove with switch to python3.8 as mock itself will be able
