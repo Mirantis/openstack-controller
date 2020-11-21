@@ -1,0 +1,6 @@
+---
+fixes:
+  - |
+    Two QuotaTest used in smoke for rados-gw have been added to tempest smoke
+    due to the fact that rados-gw not fully supported SWIFT object storage API
+    therefore this is an known issue for this. 
