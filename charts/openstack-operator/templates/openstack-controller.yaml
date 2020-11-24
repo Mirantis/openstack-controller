@@ -267,6 +267,8 @@ spec:
             - name: {{ $optionName }}
               value: "{{ $optionValue }}"
             {{- end }}
+            - name: OSDPL_IAM_DATA
+              value: '{{ toJson .Values.iam }}'
 {{ tuple . | include "openstack-controller.common_env" | indent 12 }}
           livenessProbe:
             httpGet:
