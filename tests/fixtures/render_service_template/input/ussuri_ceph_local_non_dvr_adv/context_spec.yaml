@@ -81,6 +81,35 @@ features:
     user:
       password: stacklight
       username: stacklight
+nodes:
+  openstack-compute-node-dpdk-1::enabled:
+    features:
+      neutron:
+        dpdk:
+          bridges:
+          - ip_address: 10.15.0.8/24
+            name: br-phy
+          driver: igb_uio
+          enabled: true
+          nics:
+          - bridge: br-phy
+            name: ens8
+            pci_id: "0000:00:08.0"
+        tunnel_interface: br-phy
+  openstack-compute-node-dpdk-2::enabled:
+    features:
+      neutron:
+        dpdk:
+          bridges:
+          - ip_address: 10.15.0.51/24
+            name: br-phy
+          driver: igb_uio
+          enabled: true
+          nics:
+          - bridge: br-phy
+            name: ens8
+            pci_id: "0000:00:08.0"
+        tunnel_interface: br-phy
 artifacts:
   binary_base_url: https://artifactory.mcp.mirantis.net/binary-dev-kaas-local
   images_base_url: docker-dev-kaas-local.docker.mirantis.net
@@ -94,8 +123,3 @@ persistent_volume_storage_class: mirablock-k8s-block-hdd
 public_domain_name: it.just.works
 internal_domain_name: cluster.local
 local_volume_storage_class: lvp-fake-root
-migration:
-  nova:
-    deploy_main_service: false
-  neutron:
-    deploy_main_service: false

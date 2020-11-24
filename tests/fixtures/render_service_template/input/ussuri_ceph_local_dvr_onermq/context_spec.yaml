@@ -18,9 +18,6 @@ features:
       enabled: true
   glance:
     backend: ceph
-  messaging:
-    components_with_dedicated_messaging:
-    - networking
   neutron:
     backend: ml2
     dns_servers:
@@ -42,6 +39,8 @@ features:
         pool_start: 10.11.12.100
         range: 10.11.12.0/24
     tunnel_interface: ens3
+    dvr:
+      enabled: true
   nova:
     images:
       backend: local
@@ -94,8 +93,3 @@ persistent_volume_storage_class: mirablock-k8s-block-hdd
 public_domain_name: it.just.works
 internal_domain_name: cluster.local
 local_volume_storage_class: lvp-fake-root
-migration:
-  nova:
-    deploy_main_service: false
-  neutron:
-    deploy_main_service: false

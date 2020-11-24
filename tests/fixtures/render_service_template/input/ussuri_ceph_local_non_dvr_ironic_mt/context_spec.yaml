@@ -33,6 +33,12 @@ features:
       - flat
       physnet: physnet1
       vlan_ranges: null
+    - physnet: ironic
+      interface: veth-bm
+      bridge: ironic-pxe
+      network_types:
+      - vlan
+      vlan_ranges: 1000:1099
     floating_network:
       enabled: true
       physnet: physnet1
@@ -42,6 +48,20 @@ features:
         pool_start: 10.11.12.100
         range: 10.11.12.0/24
     tunnel_interface: ens3
+    tenant_network_types:
+    - vlan
+    baremetal:
+      ngs:
+        devices:
+        - name: br-host
+          ip: 10.10.0.64
+          ssh_private_key: |
+            -----BEGIN RSA PRIVATE KEY-----
+            -----END RSA PRIVATE KEY-----
+          device_type: netmiko_ovs_linux
+          username: vbmc
+          raw:
+            port: 8022
   nova:
     images:
       backend: local
@@ -52,6 +72,27 @@ features:
       - pool_end: 10.255.255.254
         pool_start: 10.255.1.0
         range: 10.255.0.0/16
+  ironic:
+    provisioning_interface: pxe.1000
+    baremetal_network_name: ironic-provisioning
+    networks:
+      baremetal:
+        physnet: ironic
+        name: ironic-provisioning
+        network_type: vlan
+        segmentation_id: 1000
+        external: true
+        shared: false
+        subnets:
+          - name: baremetal-subnet
+            range: 10.13.0.0/24
+            pool_start: 10.13.0.100
+            pool_end: 10.13.0.254
+            gateway: 10.13.0.11
+    agent_images:
+      base_url: https://binary.mirantis.com/openstack/bin/ironic/tinyipa
+      initramfs: tinyipa-stable-ussuri-20201008064914.gz
+      kernel: tinyipa-stable-ussuri-20201008064914.vmlinuz
   services:
   - block-storage
   - compute
@@ -70,6 +111,7 @@ features:
   - coordination
   - key-manager
   - redis
+  - baremetal
   ssl:
     public_endpoints:
       api_cert: "TEST CRT"
@@ -94,8 +136,3 @@ persistent_volume_storage_class: mirablock-k8s-block-hdd
 public_domain_name: it.just.works
 internal_domain_name: cluster.local
 local_volume_storage_class: lvp-fake-root
-migration:
-  nova:
-    deploy_main_service: false
-  neutron:
-    deploy_main_service: false
