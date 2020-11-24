@@ -1,0 +1,6 @@
+---
+features:
+  - Adds ability to specify major IAM settings via
+    .Values.iam section. The user defined options in
+    ``osdpl`` object still have priority.
+    For more information please see `PRODX-8246 <https://mirantis.jira.com/browse/PRODX-8246>`__

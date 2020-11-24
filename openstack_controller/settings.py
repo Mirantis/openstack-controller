@@ -216,6 +216,9 @@ except Exception:
         f"OSCTL_OPENSTACK_NODE_LABELS invalid format, should be a dict with node labels and values"
     )
 
+# The dict defining IAM data {"client": "os", "enabled": True, "oidcCASecret": "oidc-cert", url: "https://1.2.3.4"}
+OSDPL_IAM_DATA = json_from_env("OSDPL_IAM_DATA", {"enabled": False})
+
 
 @kopf.on.startup()
 def configure(settings: kopf.OperatorSettings, **_):
