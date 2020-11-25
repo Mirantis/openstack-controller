@@ -1,0 +1,24 @@
+spec:
+  releases:
+  - chart: osh-infra/libvirt
+    name: openstack-libvirt
+    values:
+      ceph_client:
+        configmap: rook-ceph-config
+        user_secret_name: nova-rbd-keyring
+      conf:
+        ceph:
+          cinder:
+            keyring: AQDNZLJf8S+fORAA6hg50Jo+vBq07kxtBXB9PQ==
+            user: nova
+          enabled: true
+        libvirt:
+          listen_addr: 0.0.0.0
+      images:
+        tags:
+          ceph_config_helper: ceph-config-helper:latest
+          dep_check: dep-check:latest
+          image_repo_sync: image-repo-sync:latest
+          libvirt: libvirt:latest
+      manifests:
+        network_policy: false

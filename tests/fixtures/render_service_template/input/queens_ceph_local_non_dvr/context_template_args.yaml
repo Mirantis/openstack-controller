@@ -20,7 +20,7 @@ block-storage:
         username: cinder1rKIan
     memcached: 76HsSsABaJvTQU6I
     messaging:
-      user:
+      user: 
         password: KgjY6ghlVbGSKJL6DH2jQXH50EtBVsiC
         username: cinder0Jhxmf
     notifications:
@@ -71,9 +71,6 @@ compute:
   - account: neutron
     password: 9d4CIP5ismqTa7l5N5FdD8MAuFMXx9EV
     username: neutronnmAhFsr
-  - account: placement
-    password: AEYVXR3LFUbLcePQlkxSFvbQ1WyWtaiY
-    username: placementR3AqaC4te
   ssh_credentials:
     private: COMPUTE TEST SSH PRIVATE KEY
     public: COMPUTE TEST SSH PUBLIC KEY
@@ -312,28 +309,6 @@ orchestration:
   - account: test
     password: nDsJytWemY6VcFv0jxqsg7QHBRgetQF7
     username: testyRGH
-placement:
-  credentials: &credentials_placement
-    database:
-      user:
-        password: FdmszFTEuCvADMYGShqdBqLzuczyZf4c
-        username: placementEqEMt8aUc
-    memcached: 0NZmrV1NcBFwzDmv
-    messaging:
-      user:
-        password: fHqGcwsr7qzdy0taDQliyRMzA7S6xgYg
-        username: placementwB77qXfl0
-    notifications:
-      user:
-        password: UBrmnWdChvZA5gEFum07AM7Ba6nExCc2
-        username: placement9lrJ9dNfe
-  service_creds:
-  - account: placement
-    password: AEYVXR3LFUbLcePQlkxSFvbQ1WyWtaiY
-    username: placementR3AqaC4te
-  - account: test
-    password: b1szm2wvF9n2tdCvDQQZEZM5GzpVtQkP
-    username: testXByW
 redis:
   redis_creds:
     password: |
@@ -350,7 +325,6 @@ messaging:
     load-balancer: *credentials_load-balancer
     networking: *credentials_networking
     orchestration: *credentials_orchestration
-    placement: *credentials_placement
   services:
     block-storage: null
     compute: null
@@ -367,5 +341,4 @@ messaging:
     messaging: null
     networking: null
     orchestration: null
-    placement: null
     redis: null
