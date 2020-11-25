@@ -20,6 +20,9 @@ ORDERED_SERVICES = list(
     )
 )
 
+MAINTENANCE = "maintenance"
+OPERATIONAL = "operational"
+
 
 async def _run_service_methods(services, methods, node_metadata):
     for service, service_class in services:
@@ -27,10 +30,53 @@ async def _run_service_methods(services, methods, node_metadata):
             await getattr(service_class, method_name)(node_metadata)
 
 
+async def _make_state_transition(operation, nwl, node, retry):
+    name = node.obj["metadata"]["name"]
+    if operation == MAINTENANCE:
+        args = [
+            ORDERED_SERVICES,
+            ["remove_node_from_scheduling", "prepare_for_node_reboot"],
+            node.obj["metadata"],
+        ]
+        states = {
+            "prepare": "prepare_inactive",
+            "temporary_failure": "active",
+            "final": "inactive",
+        }
+    elif operation == OPERATIONAL:
+        args = [
+            list(reversed(ORDERED_SERVICES)),
+            ["prepare_node_after_reboot", "add_node_to_scheduling"],
+            node.obj["metadata"],
+        ]
+        states = {
+            "prepare": "prepare_active",
+            "temporary_failure": "inactive",
+            "final": "active",
+        }
+    else:
+        raise kopf.PermanentError("Got unknown operation")
+
+    LOG.info(f"Preparing node {name} for {operation} state")
+    nwl.set_state(states["prepare"])
+    try:
+        await _run_service_methods(*args)
+    except Exception:
+        nwl.set_state(states["temporary_failure"])
+        LOG.exception(
+            f"Failed to get node {name} to {operation} state, attempt number {retry}"
+        )
+        raise kopf.TemporaryError(
+            "Maintenance request processing temporarily failed"
+        )
+    nwl.set_state(states["final"])
+    LOG.info(f"{operation} state is applied for node {name}")
+
+
 @kopf.on.create(*kube.NodeMaintenanceRequest.kopf_on_args)
 @kopf.on.update(*kube.NodeMaintenanceRequest.kopf_on_args)
 @kopf.on.resume(*kube.NodeMaintenanceRequest.kopf_on_args)
-async def node_maintenance_request_change_handler(body, **kwargs):
+async def node_maintenance_request_change_handler(body, retry, **kwargs):
     name = body["metadata"]["name"]
     node_name = body["spec"]["nodeName"]
     LOG.info(f"Got node maintenance request change event {name}")
@@ -41,29 +87,11 @@ async def node_maintenance_request_change_handler(body, **kwargs):
     nwl = kube.NodeWorkloadLock.ensure(node_name)
 
     if nwl.is_active():
-        LOG.info(f"Preparing for maintenance for node {name}")
-        nwl.set_state("prepare_inactive")
-        try:
-            await _run_service_methods(
-                ORDERED_SERVICES,
-                ["prepare_node_after_reboot", "add_node_to_scheduling"],
-                node.obj["metadata"],
-            )
-        except Exception:
-            nwl.set_state("failed")
-            LOG.exception(f"Failed to get node {name} to maintenance state")
-            # NOTE(avolkov): in case of errors with resource evacuation
-            # NodeWorkloadLock moves to a failed state and operator
-            # should manually resolve the issues and set lock back to an active state
-            raise kopf.PermanentError(
-                "Operator attention is required to continue maintenance"
-            )
-        nwl.set_state("inactive")
-        LOG.info(f"Maintenance started for node {name}")
+        await _make_state_transition(MAINTENANCE, nwl, node, retry)
 
 
 @kopf.on.delete(*kube.NodeMaintenanceRequest.kopf_on_args)
-async def node_maintenance_request_delete_handler(body, **kwargs):
+async def node_maintenance_request_delete_handler(body, retry, **kwargs):
     name = body["metadata"]["name"]
     node_name = body["spec"]["nodeName"]
     LOG.info(f"Got node maintenance request delete event {name}")
@@ -74,17 +102,4 @@ async def node_maintenance_request_delete_handler(body, **kwargs):
     nwl = kube.NodeWorkloadLock.ensure(node_name)
 
     if nwl.is_maintenance():
-        LOG.info(f"Preparing to stop maintenance for node {name}")
-        nwl.set_state("prepare_active")
-        try:
-            await _run_service_methods(
-                list(reversed(ORDERED_SERVICES)),
-                ["remove_node_from_scheduling", "prepare_for_node_reboot"],
-                node.obj["metadata"],
-            )
-        except Exception:
-            nwl.set_state("failed")
-            LOG.exception(f"Failed to get node {name} to active state")
-            raise
-        nwl.set_state("active")
-        LOG.info(f"Maintenance stopped for node {name}")
+        await _make_state_transition(OPERATIONAL, nwl, node, retry)

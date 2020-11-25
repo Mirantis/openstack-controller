@@ -74,7 +74,7 @@ async def test_maintenance_start(nova_registry_service):
 
     with mock.patch.object(kube, "find", return_value=nwl):
         await node_maintenance_request.node_maintenance_request_change_handler(
-            nmr
+            nmr, 0
         )
 
     assert values == ["prepare_inactive", "inactive"]
@@ -107,7 +107,7 @@ async def test_maintenance_stop(nova_registry_service):
 
     with mock.patch.object(kube, "find", return_value=nwl):
         await node_maintenance_request.node_maintenance_request_delete_handler(
-            nmr
+            nmr, 0
         )
 
     assert values == ["prepare_active", "active"]
@@ -115,7 +115,7 @@ async def test_maintenance_stop(nova_registry_service):
 
 @pytest.mark.asyncio
 async def test_maintenance_preparation_failure(nova_registry_service):
-    nova_registry_service.prepare_node_after_reboot = AsyncMock(
+    nova_registry_service.remove_node_from_scheduling = AsyncMock(
         side_effect=kopf.PermanentError
     )
 
@@ -142,10 +142,10 @@ async def test_maintenance_preparation_failure(nova_registry_service):
 
     nwl.set_state = set_state
 
-    with pytest.raises(kopf.PermanentError):
+    with pytest.raises(kopf.TemporaryError):
         with mock.patch.object(kube, "find", return_value=nwl):
             await node_maintenance_request.node_maintenance_request_change_handler(
-                nmr
+                nmr, 1000
             )
 
-    assert values == ["prepare_inactive", "failed"]
+    assert values == ["prepare_inactive", "active"]
