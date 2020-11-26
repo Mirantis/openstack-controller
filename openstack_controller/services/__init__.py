@@ -1362,6 +1362,12 @@ class Octavia(OpenStackService):
 class RadosGateWay(Service):
     service = "object-storage"
 
+    @layers.kopf_exception
+    async def upgrade(self, event, **kwargs):
+        LOG.info(
+            f"Skipping upgrade for Object Storage, as no upgradable resources are managed by operator"
+        )
+
     def template_args(self):
         t_args = super().template_args()
 
