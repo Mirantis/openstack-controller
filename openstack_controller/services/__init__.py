@@ -729,22 +729,67 @@ class Neutron(OpenStackService):
             ngs_secret = secrets.NgsSSHSecret(self.namespace)
             ngs_secret.save(ngs_ssh_keys)
 
+        # Get Tungsten Fabric API endpoint
+        if (
+            utils.get_in(self.mspec["features"], ["neutron", "backend"])
+            == "tungstenfabric"
+        ):
+            kube.wait_for_secret(
+                constants.OPENSTACK_TF_SHARED_NAMESPACE,
+                constants.TF_OPENSTACK_SECRET,
+            )
+            tf_secret = secrets.get_secret_data(
+                constants.OPENSTACK_TF_SHARED_NAMESPACE,
+                constants.TF_OPENSTACK_SECRET,
+            )
+
+            tf_api_keys = ["tf_api_service", "tf_api_port"]
+            if all([k in tf_secret for k in tf_api_keys]):
+                t_args.update(
+                    {
+                        key: base64.b64decode(tf_secret[key]).decode()
+                        for key in tf_api_keys
+                    }
+                )
+
         return t_args
 
     @property
     def health_groups(self):
         return [self.openstack_chart, "openvswitch"]
 
-    _child_objects = {
-        "rabbitmq": {
-            "Job": {
-                "openstack-neutron-rabbitmq-cluster-wait": {
-                    "images": ["rabbitmq_scripted_test"],
-                    "manifest": "job_cluster_wait",
-                }
+    @property
+    def _child_objects(self):
+        neutron_jobs = {}
+
+        if (
+            utils.get_in(self.mspec["features"], ["neutron", "backend"])
+            == "tungstenfabric"
+        ):
+            neutron_jobs = {
+                "tungstenfabric-ks-service": {
+                    "images": ["ks_service"],
+                    "manifest": "job_ks_service",
+                },
+                "tungstenfabric-ks-endpoints": {
+                    "images": ["ks_endpoints"],
+                    "manifest": "job_ks_endpoints",
+                },
             }
+
+        return {
+            "neutron": {
+                "Job": neutron_jobs,
+            },
+            "rabbitmq": {
+                "Job": {
+                    "openstack-neutron-rabbitmq-cluster-wait": {
+                        "images": ["rabbitmq_scripted_test"],
+                        "manifest": "job_cluster_wait",
+                    }
+                }
+            },
         }
-    }
 
     async def apply(self, event, **kwargs):
         neutron_features = self.mspec["features"].get("neutron", {})
