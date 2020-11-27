@@ -1412,6 +1412,7 @@ class RadosGateWay(Service):
                     "region_name": "RegionOne",
                     "user_domain_name": "default",
                     "username": service_cred.username,
+                    "public_domain": self.mspec["public_domain_name"],
                     "ca_cert": self.mspec.get("features", {})
                     .get("ssl", {})
                     .get("public_endpoints", {})
