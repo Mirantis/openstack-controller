@@ -1,0 +1,6 @@
+---
+fixes:
+  - Add mandotory fields for domain specific config to
+    fail earlier when applying ``osdpl`` with wrong
+    configuration. For more information please see
+    `PRODX-9446 <https://mirantis.jira.com/browse/PRODX-9446>`__
