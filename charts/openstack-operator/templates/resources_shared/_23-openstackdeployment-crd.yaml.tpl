@@ -404,6 +404,10 @@ spec:
                                 The list of domain specific configuration options.
                               items:
                                 type: object
+                                required:
+                                - enabled
+                                - name
+                                - config
                                 properties:
                                   enabled:
                                     type: boolean
