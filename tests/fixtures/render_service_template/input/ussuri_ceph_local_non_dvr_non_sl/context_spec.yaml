@@ -77,10 +77,7 @@ features:
       ca_cert: "TEST CA"
       enabled: true
   stacklight:
-    enabled: true
-    user:
-      password: stacklight
-      username: stacklight
+    enabled: false
 artifacts:
   binary_base_url: https://artifactory.mcp.mirantis.net/binary-dev-kaas-local
   images_base_url: docker-dev-kaas-local.docker.mirantis.net
@@ -94,10 +91,3 @@ persistent_volume_storage_class: mirablock-k8s-block-hdd
 public_domain_name: it.just.works
 internal_domain_name: cluster.local
 local_volume_storage_class: lvp-fake-root
-migration:
-  nova:
-    deploy_main_service: false
-  neutron:
-    deploy_main_service: false
-  glance:
-    deploy_main_service: false
