@@ -159,6 +159,7 @@ spec:
               OIDCCryptoPassphrase {{ oidc_crypto_passphrase }}
               OIDCSSLValidateServer {% if keystone_keycloak.get('oidc',{}).get('OIDCSSLValidateServer', true) %}On{%- else %}Off{%- endif %}
               OIDCOAuthSSLValidateServer {% if keystone_keycloak.get('oidc',{}).get('OIDCOAuthSSLValidateServer', true) %}On{%- else %}Off{%- endif %}
+              OIDCRedirectURLsAllowed {{ keystone_keycloak.get('oidc',{}).get('OIDCRedirectURLsAllowed', "^https://horizon."+ spec.public_domain_name +"/auth/logout$") }}
               {%- if keystone_keycloak.get('oidc', {}).get('OIDCRedirectURI', []) %}
               {%- for uri in keystone_keycloak.oidc.OIDCRedirectURI %}
               OIDCRedirectURI {{ uri }}

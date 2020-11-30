@@ -58,6 +58,7 @@ spec:
               OIDCCryptoPassphrase zQGr6LP7k9wgTBjGF6uJr8Bw0bwKbN1Z
               OIDCSSLValidateServer Off
               OIDCOAuthSSLValidateServer Off
+              OIDCRedirectURLsAllowed ^https://horizon.it.just.works/auth/logout$
               OIDCRedirectURI {{ $keystoneProtocol }}://{{ $keystoneHost }}/v3/OS-FEDERATION/identity_providers/keycloak/protocols/mapped/auth
               OIDCRedirectURI {{ $keystoneProtocol }}://{{ $keystoneHost }}/v3/auth/OS-FEDERATION/websso/
               OIDCRedirectURI {{ $keystoneProtocol }}://{{ $keystoneHost }}/v3/auth/OS-FEDERATION/identity_providers/keycloak/protocols/mapped/websso/

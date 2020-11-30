@@ -393,6 +393,11 @@ spec:
                                 OIDCOAuthSSLValidateServer:
                                   type: boolean
                                   description: Require a valid SSL server certificate when communicating with the Authorization Server
+                                OIDCRedirectURLsAllowed:
+                                  type: string
+                                  description: >
+                                    Define one or more regular expressions that specify URLs (or domains) allowed for post logout and
+                                    other redirects such as the "return_to" value on refresh token requests
                         domain_specific_configuration:
                           type: object
                           properties:

@@ -1,0 +1,6 @@
+---
+fixes:
+  - |
+    Add support for SSO logout in dashboard service template along with new
+    parameter OIDCRedirectURLsAllowed into OSDPL CRD file which is also used
+    in keystone service template. Related bug `PRODX-8573 <https://mirantis.jira.com/browse/PRODX-8573>`__

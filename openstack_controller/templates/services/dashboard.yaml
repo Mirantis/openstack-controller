@@ -232,6 +232,12 @@ spec:
             config:
               raw:
                 DEFAULT_THEME: {{ horizon_features.get('default_theme', 'default') }}
+{%- if keystone_keycloak_enabled %}
+{%- set sso_logout_url = "https://keystone." + spec.public_domain_name + "/v3/auth/OS-FEDERATION/identity_providers/keycloak/protocols/mapped/websso/?logout=https://horizon." + spec.public_domain_name + "/auth/logout" %}
+                LOGOUT_URL: {{ sso_logout_url }}
+                WEBSSO_DEFAULT_REDIRECT_LOGOUT: {{ sso_logout_url }}
+                WEBSSO_DEFAULT_REDIRECT_PROTOCOL: mapped
+{%- endif %}
               horizon_secret_key: {{ credentials.secret_key }}
 
               horizon_images_upload_mode: 'direct'
