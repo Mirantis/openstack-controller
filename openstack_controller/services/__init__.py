@@ -1373,33 +1373,8 @@ class RadosGateWay(Service):
 
         auth_url = "https://keystone." + self.mspec["public_domain_name"]
 
-        kube.wait_for_secret(
-            ceph_api.SHARED_SECRET_NAMESPACE,
-            ceph_api.OPENSTACK_KEYS_SECRET,
-        )
-
-        for rgw_key in ["rgw_internal", "rgw_external"]:
-            rgw_url = base64.b64decode(
-                secrets.get_secret_data(
-                    ceph_api.SHARED_SECRET_NAMESPACE,
-                    ceph_api.OPENSTACK_KEYS_SECRET,
-                ).get(rgw_key)
-            ).decode()
-
-            urlparsed = urlsplit(rgw_url)
-            rgw_port = urlparsed.netloc.partition(":")[-1]
-            if not rgw_port:
-                if urlparsed.scheme == "http":
-                    rgw_port = "80"
-                if urlparsed.scheme == "https":
-                    rgw_port = "443"
-
-            t_args[rgw_key] = {
-                "host": urlparsed.netloc,
-                "port": rgw_port,
-                "scheme": urlparsed.scheme,
-            }
-
+        # NOTE(vsaienko): share date with ceph first so it can construct correct
+        # public endpoint
         for service_cred in t_args["service_creds"]:
             if service_cred.account == "ceph-rgw":
                 rgw_creds = {
@@ -1435,6 +1410,33 @@ class RadosGateWay(Service):
                     "Secret with RGW creds has been created successfully."
                 )
                 break
+
+        kube.wait_for_secret(
+            ceph_api.SHARED_SECRET_NAMESPACE,
+            ceph_api.OPENSTACK_KEYS_SECRET,
+        )
+
+        for rgw_key in ["rgw_internal", "rgw_external"]:
+            rgw_url = base64.b64decode(
+                secrets.get_secret_data(
+                    ceph_api.SHARED_SECRET_NAMESPACE,
+                    ceph_api.OPENSTACK_KEYS_SECRET,
+                ).get(rgw_key)
+            ).decode()
+
+            urlparsed = urlsplit(rgw_url)
+            rgw_port = urlparsed.netloc.partition(":")[-1]
+            if not rgw_port:
+                if urlparsed.scheme == "http":
+                    rgw_port = "80"
+                if urlparsed.scheme == "https":
+                    rgw_port = "443"
+
+            t_args[rgw_key] = {
+                "host": urlparsed.netloc,
+                "port": rgw_port,
+                "scheme": urlparsed.scheme,
+            }
 
         return t_args
 
