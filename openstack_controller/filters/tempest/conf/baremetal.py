@@ -21,18 +21,26 @@ class Baremetal(base_section.BaseSection):
         "active_timeout",
         "adjusted_root_disk_size_gb",
         "association_timeout",
+        "available_nodes",
+        "boot_mode",
         "catalog_type",
+        "default_rescue_interface",
         "deploywait_timeout",
         "driver",
+        "enabled_bios_interfaces",
+        "enabled_boot_interfaces",
         "enabled_deploy_interfaces",
         "enabled_drivers",
         "enabled_hardware_types",
+        "enabled_rescue_interfaces",
         "endpoint_type",
         "max_microversion",
         "min_microversion",
         "partition_image_ref",
         "power_timeout",
+        "rescue_timeout",
         "unprovision_timeout",
+        "unrescue_timeout",
         "use_provision_network",
         "whole_disk_image_checksum",
         "whole_disk_image_ref",
@@ -48,11 +56,23 @@ class Baremetal(base_section.BaseSection):
         pass
 
     @property
+    def available_nodes(self):
+        pass
+
+    @property
     def association_timeout(self):
         pass
 
     @property
+    def boot_mode(self):
+        pass
+
+    @property
     def catalog_type(self):
+        pass
+
+    @property
+    def default_rescue_interface(self):
         pass
 
     @property
@@ -64,8 +84,25 @@ class Baremetal(base_section.BaseSection):
         pass
 
     @property
+    def enabled_bios_interfaces(self):
+        if self.is_service_enabled("ironic"):
+            return self.get_values_item(
+                "ironic", "conf.ironic.DEFAULT.enabled_bios_interfaces"
+            )
+
+    @property
+    def enabled_boot_interfaces(self):
+        if self.is_service_enabled("ironic"):
+            return self.get_values_item(
+                "ironic", "conf.ironic.DEFAULT.enabled_boot_interfaces"
+            )
+
+    @property
     def enabled_deploy_interfaces(self):
-        pass
+        if self.is_service_enabled("ironic"):
+            return self.get_values_item(
+                "ironic", "conf.ironic.DEFAULT.enabled_deploy_interfaces"
+            )
 
     @property
     def enabled_drivers(self):
@@ -73,7 +110,17 @@ class Baremetal(base_section.BaseSection):
 
     @property
     def enabled_hardware_types(self):
-        pass
+        if self.is_service_enabled("ironic"):
+            return self.get_values_item(
+                "ironic", "conf.ironic.DEFAULT.enabled_hardware_types"
+            )
+
+    @property
+    def enabled_rescue_interfaces(self):
+        if self.is_service_enabled("ironic"):
+            return self.get_values_item(
+                "ironic", "conf.ironic.DEFAULT.enabled_rescue_interfaces"
+            )
 
     @property
     def endpoint_type(self):
@@ -114,7 +161,15 @@ class Baremetal(base_section.BaseSection):
         pass
 
     @property
+    def rescue_timeout(self):
+        pass
+
+    @property
     def unprovision_timeout(self):
+        pass
+
+    @property
+    def unrescue_timeout(self):
         pass
 
     @property
