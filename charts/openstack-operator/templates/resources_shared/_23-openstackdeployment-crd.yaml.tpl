@@ -59,6 +59,7 @@ spec:
                   description: timeout and sizing parameters
                   type: string
                   enum:
+                    - single
                     - tiny
                     - small
                     - medium
