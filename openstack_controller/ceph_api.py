@@ -146,14 +146,21 @@ def _os_ceph_params_from_secret(secret: Dict[str, str]) -> OSCephParams:
         _unpack_ips(from_base64(local_secret.pop("mon_endpoints")))
     )
     rgw = None
-    if "rgw_internal" in local_secret and "rgw_external" in local_secret:
+
+    # NOTE(vsaienko): pop fields not represent pools always.
+    rgw_internal = local_secret.pop("rgw_internal", None)
+    rgw_external = local_secret.pop("rgw_external", None)
+    if rgw_internal and rgw_external:
         rgw = RGWParams(
-            internal_url=from_base64(local_secret.pop("rgw_internal")),
-            external_url=from_base64(local_secret.pop("rgw_external")),
+            internal_url=from_base64(rgw_internal),
+            external_url=from_base64(rgw_external),
         )
 
     services: List[OSServiceCreds] = []
     for os_user, val in local_secret.items():
+        # NOTE(vsaienko): do not handle unknow keys for pools.
+        if os_user not in CEPH_POOL_ROLE_SERVICES_MAP:
+            continue
         key_name, key, *pools_descr = from_base64(val).split(";")
 
         pools: List[PoolDescription] = []
