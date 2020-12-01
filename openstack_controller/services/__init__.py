@@ -1372,7 +1372,9 @@ class RadosGateWay(Service):
         t_args = super().template_args()
 
         auth_url = "https://keystone." + self.mspec["public_domain_name"]
-
+        ssl_public_endpoints = self.mspec["features"]["ssl"][
+            "public_endpoints"
+        ]
         # NOTE(vsaienko): share date with ceph first so it can construct correct
         # public endpoint
         for service_cred in t_args["service_creds"]:
@@ -1388,10 +1390,9 @@ class RadosGateWay(Service):
                     "user_domain_name": "default",
                     "username": service_cred.username,
                     "public_domain": self.mspec["public_domain_name"],
-                    "ca_cert": self.mspec.get("features", {})
-                    .get("ssl", {})
-                    .get("public_endpoints", {})
-                    .get("ca_cert"),
+                    "ca_cert": ssl_public_endpoints["ca_cert"],
+                    "tls_crt": ssl_public_endpoints["api_cert"],
+                    "tls_key": ssl_public_endpoints["api_key"],
                 }
 
                 # encode values from rgw_creds

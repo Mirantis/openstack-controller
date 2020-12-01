@@ -112,6 +112,8 @@ class OSRGWCreds:
     username: str
     ca_cert: str
     public_domain: str
+    tls_crt: str
+    tls_key: str
 
 
 def get_os_user_keyring_name(user: OSUser) -> str:
