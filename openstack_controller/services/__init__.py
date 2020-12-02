@@ -1362,11 +1362,30 @@ class Octavia(OpenStackService):
 class RadosGateWay(Service):
     service = "object-storage"
 
-    @layers.kopf_exception
-    async def upgrade(self, event, **kwargs):
-        LOG.info(
-            f"Skipping upgrade for Object Storage, as no upgradable resources are managed by operator"
-        )
+    _child_objects = {
+        "ceph-rgw": {
+            "Job": {
+                "ceph-ks-endpoints": {
+                    "images": ["ks_endpoints"],
+                    "manifest": "job_ks_endpoints",
+                },
+                "ceph-ks-service": {
+                    "images": ["ks_service"],
+                    "manifest": "job_ks_service",
+                },
+                "ceph-rgw-ks-user": {
+                    "images": ["ks_user"],
+                    "manifest": "job_ks_user",
+                },
+            }
+        }
+    }
+
+    # override health groups to skip wait for healthy service check
+    # as ceph rgw contain only jobs
+    @property
+    def health_groups(self):
+        return []
 
     def template_args(self):
         t_args = super().template_args()
