@@ -207,23 +207,38 @@ class Service:
     def update_status(self, patch):
         self.osdpl.patch({"status": patch})
 
-    async def cleanup_immutable_resources(self, new_obj, rendered_spec):
+    async def cleanup_immutable_resources(
+        self, new_obj, rendered_spec, force=False
+    ):
+        """
+        Remove immmutable resources for helmbundle object when:
+            1. The image of immutable object is changed
+            2. The chart version for helmbundle is changed
+            3. The force flag is set to True
+        :param new_obj: the new helmbundle object representation
+        :param rendered_spec: the current representation of helmbundle
+        :param force: the flag to force remove all immutable objects that we know about.
+        """
         old_obj = kube.resource(rendered_spec)
         old_obj.reload()
 
         to_cleanup = []
 
-        def _is_image_changed(image, chart):
+        def _is_immutable_changed(image, chart):
             for old_release in old_obj.obj["spec"]["releases"]:
                 if old_release["chart"].endswith(f"/{chart}"):
                     for new_release in new_obj.obj["spec"]["releases"]:
                         if new_release["chart"].endswith(f"/{chart}"):
+                            old_version = old_release["version"]
+                            new_version = new_release["version"]
                             old_image = old_release["values"]["images"][
                                 "tags"
                             ].get(image)
                             new_image = new_release["values"]["images"][
                                 "tags"
                             ][image]
+                            if old_version != new_version:
+                                return True
                             # When image name is changed it will not present in helmbundle object
                             # on deployed environmet. At the same time in current version of code
                             # we will use new name of image.
@@ -235,7 +250,9 @@ class Service:
         for resource in self.child_objects:
             if resource.immutable:
                 for image in resource.helmbundle_ext.images:
-                    if _is_image_changed(image, resource.helmbundle_ext.chart):
+                    if force or _is_immutable_changed(
+                        image, resource.helmbundle_ext.chart
+                    ):
                         to_cleanup.append(resource)
                         # Break on first image match.
                         break
