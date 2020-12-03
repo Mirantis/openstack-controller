@@ -248,6 +248,22 @@ services:
               ca_certificates_file: /certs/ca-bundle.pem
             volume:
               build_timeout: 600
+            {%- if ironic_enabled %}
+            baremetal:
+              active_timeout: 2700
+              adjusted_root_disk_size_gb: 4
+              available_nodes: 2
+              boot_mode: bios
+              default_rescue_interface: ''
+              deploywait_timeout: 2700
+              driver: fake-hardware
+              power_timeout: 2700
+              rescue_timeout: 2700
+              unprovision_timeout: 2700
+              unrescue_timeout: 2700
+            baremetal_feature_enabled:
+              adoption: true
+            {%- endif %}
             #TODO(mshalamov): Will be removed during process of completing PRODX-1192
             compute:
             {%- if ironic_enabled and not ironic_mt_enabled %}
