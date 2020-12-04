@@ -2,6 +2,12 @@
 # Optimized for the following cloud configuration
 # all-in-one
 services:
+  redis:
+    redisfailover:
+      redis:
+        replicas: 1
+      sentinel:
+        replicas: 1
   database:
     mariadb:
       values:

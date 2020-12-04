@@ -7,6 +7,12 @@ features:
     components_with_dedicated_messaging:
       - networking
 services:
+  redis:
+    redisfailover:
+      redis:
+        replicas: 3
+      sentinel:
+        replicas: 3
   database:
     mariadb:
       values:

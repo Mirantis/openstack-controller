@@ -8,6 +8,12 @@ features:
       - compute
       - networking
 services:
+  redis:
+    redisfailover:
+      redis:
+        replicas: 3
+      sentinel:
+        replicas: 3
   database:
     mariadb:
       values:
