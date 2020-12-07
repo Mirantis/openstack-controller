@@ -795,6 +795,20 @@ spec:
               x-kubernetes-preserve-unknown-fields: true
               type: object
               description: this is arbitrary JSON
+      additionalPrinterColumns:
+      - name: OpenStack
+        type: string
+        description: OpenStack release
+        jsonPath: .spec.openstack_version
+      - name: Age
+        type: date
+        jsonPath: .metadata.creationTimestamp
+      - name: Draft
+        type: boolean
+        jsonPath: .spec.draft
+      - name: Deployed
+        type: boolean
+        jsonPath: .status.deployed
   # either Namespaced or Cluster
   scope: Namespaced
   names:
@@ -809,13 +823,3 @@ spec:
       - osdpl
     categories:
       - all
-  additionalPrinterColumns:
-    - name: Age
-      type: date
-      JSONPath: .metadata.creationTimestamp
-    - name: Deployed
-      type: boolean
-      JSONPath: .status.deployed
-    - name: Draft
-      type: boolean
-      JSONPath: .spec.draft
