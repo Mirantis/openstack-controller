@@ -423,6 +423,9 @@ spec:
             live_migration_wait_for_vif_plug: false
           workarounds:
             skip_migration_revert_events: true
+{%- else %}
+          os_vif_ovs:
+            isolate_vif: true
 {%- endif %}
           libvirt:
             cpu_mode: custom

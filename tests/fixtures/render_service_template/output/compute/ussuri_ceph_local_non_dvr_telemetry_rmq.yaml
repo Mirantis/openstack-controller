@@ -126,6 +126,8 @@ spec:
           keystone_authtoken:
             memcache_secret_key: JinzIdQzLdIslgxu
             memcache_security_strategy: ENCRYPT
+          os_vif_ovs:
+            isolate_vif: true 
           libvirt:
             cpu_mode: custom
             cpu_model: kvm64
