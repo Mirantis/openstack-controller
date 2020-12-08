@@ -333,6 +333,7 @@ def merge_spec(spec, logger):
                         "url": settings.OSDPL_IAM_DATA["url"],
                         "oidc": {
                             "OIDCSSLValidateServer": False,
+                            "OIDCOAuthSSLValidateServer": False,
                             "OIDCClientID": settings.OSDPL_IAM_DATA["client"],
                         },
                     }
