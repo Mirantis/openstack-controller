@@ -1,0 +1,5 @@
+---
+fixes:
+  - Adds OIDCOAuthSSLValidateServer to apache configuration
+    when access to oidc provider. For more information please
+    see `PRODX-8672 <https://mirantis.jira.com/browse/PRODX-8672>`__
