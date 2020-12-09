@@ -28,6 +28,7 @@ RUN set -ex; \
         python3.7 \
         python3.7-dbg \
         libpython3.7 \
+        net-tools \
         gdb \
         patch \
         strace \
