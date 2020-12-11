@@ -8,7 +8,7 @@ class ImageFeatureEnabled(base_section.BaseSection):
 
     @property
     def api_v1(self):
-        pass
+        return False
 
     @property
     def api_v2(self):
