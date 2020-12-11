@@ -16,6 +16,8 @@ services:
             disruption_budget:
               mariadb:
                 min_available: 0
+          replicas:
+            server: 1
         conf:
           ingress_conf:
             proxy-buffer-size: "20m"
@@ -237,6 +239,8 @@ services:
         pod:
           replicas:
             api: 1
+            worker: 1
+            housekeeping: 1
   load-balancer:
     octavia:
       values:
@@ -354,6 +358,12 @@ services:
             central: 1
             collector: 1
             notification: 1
+  memcached:
+    memcached:
+      values:
+        pod:
+          replicas:
+            server: 1
 timeouts:
   application_readiness:
     nova:
