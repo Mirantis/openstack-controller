@@ -23,6 +23,11 @@ services:
   database:
     mariadb:
       values:
+        pod:
+          lifecycle:
+            disruption_budget:
+              mariadb:
+                min_available: 2
         conf:
           ingress_conf:
             proxy-buffer-size: "20m"

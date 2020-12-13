@@ -11,6 +11,11 @@ services:
   database:
     mariadb:
       values:
+        pod:
+          lifecycle:
+            disruption_budget:
+              mariadb:
+                min_available: 0
         conf:
           ingress_conf:
             proxy-buffer-size: "20m"
@@ -20,6 +25,8 @@ services:
         volume:
           phy_backup:
             size: "20Gi"
+        manifests:
+          pdb_server: false
   identity:
     keystone:
       values:
