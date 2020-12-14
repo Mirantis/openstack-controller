@@ -209,60 +209,19 @@ class RabbitMQ(Service):
         }
 
 
-class Alarming(OpenStackService):
+class Aodh(OpenStackService):
     service = "alarming"
-
-    @property
-    def health_groups(self):
-        return ["aodh"]
-
-    @property
-    def _child_generic_objects(self):
-        return {
-            "aodh": {
-                "job_db_init",
-                "job_db_sync",
-                "job_db_drop",
-                "job_ks_endpoints",
-            }
-        }
+    openstack_chart = "aodh"
 
 
 class Panko(OpenStackService):
     service = "event"
-
-    @property
-    def health_groups(self):
-        return ["panko"]
-
-    @property
-    def _child_generic_objects(self):
-        return {
-            "panko": {
-                "job_db_init",
-                "job_db_sync",
-                "job_db_drop",
-                "job_ks_endpoints",
-            }
-        }
+    openstack_chart = "panko"
 
 
-class Metering(OpenStackService):
+class Ceilometer(OpenStackService):
     service = "metering"
-
-    @property
-    def health_groups(self):
-        return ["ceilometer"]
-
-    @property
-    def _child_generic_objects(self):
-        return {
-            "ceilometer": {
-                "job_db_init",
-                "job_db_sync",
-                "job_db_drop",
-            }
-        }
+    openstack_chart = "ceilometer"
 
     def template_args(self):
         t_args = super().template_args()
@@ -273,23 +232,9 @@ class Metering(OpenStackService):
         return t_args
 
 
-class Metric(OpenStackService):
+class Gnocchi(OpenStackService):
     service = "metric"
-
-    @property
-    def health_groups(self):
-        return ["gnocchi"]
-
-    @property
-    def _child_generic_objects(self):
-        return {
-            "gnocchi": {
-                "job_db_init",
-                "job_db_sync",
-                "job_db_drop",
-                "job_ks_endpoints",
-            }
-        }
+    openstack_chart = "gnocchi"
 
     def template_args(self):
         t_args = super().template_args()

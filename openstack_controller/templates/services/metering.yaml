@@ -17,6 +17,7 @@ spec:
         tags:
 {%- for image in [
     "test",
+    "bootstrap",
     "db_init",
     "db_drop",
     "ceilometer_db_sync",

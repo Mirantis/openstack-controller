@@ -6,6 +6,7 @@ spec:
       images:
         tags:
           test: test:latest
+          bootstrap: bootstrap:latest
           dep_check: dep-check:latest
           db_init: db-init:latest
           db_drop: db-drop:latest

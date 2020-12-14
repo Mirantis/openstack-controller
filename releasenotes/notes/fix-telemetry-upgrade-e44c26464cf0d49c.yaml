@@ -1,0 +1,6 @@
+---
+fixes:
+  - |
+    Fixed upgrade of telemetry services. Now all immutable objects are recreated
+    during upgrade.
+    More details `PRODX-9821 <https://mirantis.jira.com/browse/PRODX-9821>`__

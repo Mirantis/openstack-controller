@@ -17,6 +17,7 @@ spec:
         tags:
 {%- for image in [
     "dep_check",
+    "bootstrap",
     "db_init_indexer",
     "db_init",
     "db_drop",
