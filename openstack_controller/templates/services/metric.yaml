@@ -112,6 +112,7 @@ spec:
         job_db_init: true
         daemonset_statsd: false
         service_statsd: false
+        pod_gnocchi_test: false
       endpoints:
         cluster_domain_suffix: {{ spec.internal_domain_name }}
 {% include 'base/_admin_identity.yaml' %}
