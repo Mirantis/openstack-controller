@@ -717,6 +717,7 @@ spec:
         job_db_init_mongodb: false
         job_ks_endpoints: false
         job_ks_service: false
+        pdb_api: false
       endpoints:
         cluster_domain_suffix: cluster.local
         identity:
