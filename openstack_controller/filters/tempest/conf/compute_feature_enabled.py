@@ -140,7 +140,21 @@ class ComputeFeatureEnabled(base_section.BaseSection):
 
     @property
     def scheduler_available_filters(self):
-        pass
+        if self.get_spec_item("openstack_version").lower() in [
+            "queens",
+            "rocky",
+        ]:
+            return ",".join(
+                [
+                    "RetryFilter",
+                    "AvailabilityZoneFilter",
+                    "ComputeFilter",
+                    "ComputeCapabilitiesFilter",
+                    "ImagePropertiesFilter",
+                    "ServerGroupAntiAffinityFilter",
+                    "ServerGroupAffinityFilter",
+                ]
+            )
 
     @property
     def serial_console(self):
