@@ -269,7 +269,6 @@ services:
             {%- if ironic_enabled and not ironic_mt_enabled %}
               fixed_network_name: ironic-provisioning
             {%- endif %}
-              min_compute_nodes: 2
               build_timeout: 600
             #TODO(mshalamov): Will be removed during process of completing PRODX-1192
             compute-feature-enabled:

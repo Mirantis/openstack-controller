@@ -384,6 +384,14 @@ services:
         pod:
           replicas:
             server: 1
+  tempest:
+    tempest:
+      values:
+        conf:
+          tempest:
+            compute:
+              min_compute_nodes: 1
+
 timeouts:
   application_readiness:
     nova:
