@@ -38,6 +38,9 @@ services:
           replicas:
             api: 4
           lifecycle:
+            disruption_budget:
+              api:
+                min_available: 2
             upgrades:
               deployments:
                 pod_replacement_strategy: RollingUpdate
@@ -60,6 +63,9 @@ services:
           replicas:
             api: 3
           lifecycle:
+            disruption_budget:
+              api:
+                min_available: 2
             upgrades:
               deployments:
                 pod_replacement_strategy: RollingUpdate
@@ -74,6 +80,11 @@ services:
             api: 3
             registry: 3
           lifecycle:
+            disruption_budget:
+              api:
+                min_available: 2
+              registry:
+                min_available: 2
             upgrades:
               deployments:
                 pod_replacement_strategy: RollingUpdate
@@ -105,6 +116,13 @@ services:
             placement: 4
             compute_ironic: 3
           lifecycle:
+            disruption_budget:
+              metadata:
+                min_available: 2
+              placement:
+                min_available: 2
+              osapi:
+                min_available: 2
             upgrades:
               daemonsets:
                 pod_replacement_strategy: RollingUpdate
@@ -166,6 +184,9 @@ services:
           replicas:
             server: 3
           lifecycle:
+            disruption_budget:
+              server:
+                min_available: 2
             upgrades:
               deployments:
                 pod_replacement_strategy: RollingUpdate
@@ -225,6 +246,9 @@ services:
             scheduler: 3
             volume: 3
           lifecycle:
+            disruption_budget:
+              api:
+                min_available: 2
             upgrades:
               deployments:
                 pod_replacement_strategy: RollingUpdate
@@ -253,6 +277,13 @@ services:
             api: 3
             engine: 3
           lifecycle:
+            disruption_budget:
+              api:
+                min_available: 2
+              cfn:
+                min_available: 2
+              cloudwatch:
+                min_available: 2
             upgrades:
               deployments:
                 pod_replacement_strategy: RollingUpdate
@@ -300,6 +331,9 @@ services:
           replicas:
             api: 3
           lifecycle:
+            disruption_budget:
+              api:
+                min_available: 2
             upgrades:
               deployments:
                 pod_replacement_strategy: RollingUpdate
@@ -346,6 +380,19 @@ services:
             sink: 3
             worker: 3
           lifecycle:
+            disruption_budget:
+              api:
+                min_available: 2
+              central:
+                min_available: 2
+              mdns:
+                min_available: 2
+              worker:
+                min_available: 2
+              producer:
+                min_available: 2
+              sink:
+                min_available: 2
             upgrades:
               deployments:
                 pod_replacement_strategy: RollingUpdate
@@ -363,6 +410,9 @@ services:
           replicas:
             server: 3
           lifecycle:
+            disruption_budget:
+              horizon:
+                min_available: 2
             upgrades:
               deployments:
                 pod_replacement_strategy: RollingUpdate
@@ -378,6 +428,10 @@ services:
     ironic:
       values:
         pod:
+          lifecycle:
+            disruption_budget:
+              api:
+                min_available: 2
           replicas:
             api: 3
             conductor: 3
@@ -392,6 +446,10 @@ services:
     aodh:
       values:
         pod:
+          lifecycle:
+            disruption_budget:
+              api:
+                min_available: 2
           replicas:
             api: 3
             evaluator: 3
@@ -407,6 +465,10 @@ services:
     gnocchi:
       values:
         pod:
+          lifecycle:
+            disruption_budget:
+              api:
+                min_available: 2
           replicas:
             api: 3
         conf:
@@ -419,12 +481,20 @@ services:
     panko:
       values:
         pod:
+          lifecycle:
+            disruption_budget:
+              api:
+                min_available: 2
           replicas:
             api: 3
   metering:
     ceilometer:
       values:
         pod:
+          lifecycle:
+            disruption_budget:
+              api:
+                min_available: 2
           replicas:
             central: 3
             collector: 3

@@ -44,6 +44,9 @@ services:
           replicas:
             api: 15
           lifecycle:
+            disruption_budget:
+              api:
+                min_available: 2
             upgrades:
               deployments:
                 pod_replacement_strategy: RollingUpdate
@@ -66,6 +69,9 @@ services:
           replicas:
             api: 4
           lifecycle:
+            disruption_budget:
+              api:
+                min_available: 2
             upgrades:
               deployments:
                 pod_replacement_strategy: RollingUpdate
@@ -80,6 +86,11 @@ services:
             api: 3
             registry: 3
           lifecycle:
+            disruption_budget:
+              api:
+                min_available: 2
+              registry:
+                min_available: 2
             upgrades:
               deployments:
                 pod_replacement_strategy: RollingUpdate
@@ -111,6 +122,13 @@ services:
             placement: 4
             compute_ironic: 3
           lifecycle:
+            disruption_budget:
+              metadata:
+                min_available: 2
+              placement:
+                min_available: 2
+              osapi:
+                min_available: 2
             upgrades:
               daemonsets:
                 pod_replacement_strategy: RollingUpdate
@@ -172,6 +190,9 @@ services:
           replicas:
             server: 12
           lifecycle:
+            disruption_budget:
+              server:
+                min_available: 2
             upgrades:
               deployments:
                 pod_replacement_strategy: RollingUpdate
@@ -231,6 +252,9 @@ services:
             scheduler: 3
             volume: 6
           lifecycle:
+            disruption_budget:
+              api:
+                min_available: 2
             upgrades:
               deployments:
                 pod_replacement_strategy: RollingUpdate
@@ -259,6 +283,13 @@ services:
             api: 3
             engine: 15
           lifecycle:
+            disruption_budget:
+              api:
+                min_available: 2
+              cfn:
+                min_available: 2
+              cloudwatch:
+                min_available: 2
             upgrades:
               deployments:
                 pod_replacement_strategy: RollingUpdate
@@ -293,6 +324,9 @@ services:
           replicas:
             api: 4
           lifecycle:
+            disruption_budget:
+              api:
+                min_available: 2
             upgrades:
               deployments:
                 pod_replacement_strategy: RollingUpdate
@@ -306,6 +340,9 @@ services:
           replicas:
             api: 3
           lifecycle:
+            disruption_budget:
+              api:
+                min_available: 2
             upgrades:
               deployments:
                 pod_replacement_strategy: RollingUpdate
@@ -352,6 +389,11 @@ services:
             sink: 3
             worker: 3
           lifecycle:
+            disruption_budget:
+              api:
+                min_available: 2
+              registry:
+                min_available: 2
             upgrades:
               deployments:
                 pod_replacement_strategy: RollingUpdate
@@ -369,6 +411,13 @@ services:
           replicas:
             server: 5
           lifecycle:
+            disruption_budget:
+              metadata:
+                min_available: 2
+              placement:
+                min_available: 2
+              osapi:
+                min_available: 2
             upgrades:
               deployments:
                 pod_replacement_strategy: RollingUpdate
@@ -384,6 +433,10 @@ services:
     ironic:
       values:
         pod:
+          lifecycle:
+            disruption_budget:
+              api:
+                min_available: 2
           replicas:
             api: 5
             conductor: 5
@@ -398,6 +451,10 @@ services:
     aodh:
       values:
         pod:
+          lifecycle:
+            disruption_budget:
+              api:
+                min_available: 2
           replicas:
             api: 5
             evaluator: 5
@@ -413,6 +470,10 @@ services:
     gnocchi:
       values:
         pod:
+          lifecycle:
+            disruption_budget:
+              api:
+                min_available: 2
           replicas:
             api: 5
         conf:
@@ -425,12 +486,20 @@ services:
     panko:
       values:
         pod:
+          lifecycle:
+            disruption_budget:
+              api:
+                min_available: 2
           replicas:
             api: 5
   metering:
     ceilometer:
       values:
         pod:
+          lifecycle:
+            disruption_budget:
+              api:
+                min_available: 2
           replicas:
             central: 5
             collector: 5
