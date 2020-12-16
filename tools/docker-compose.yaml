@@ -1,0 +1,48 @@
+version: '3'
+
+services:
+  base:
+    build: ../
+    image: openstack-controller
+  osdpl:
+    &osctl
+    container_name: osdpl
+    depends_on:
+    - base
+    image: openstack-controller
+    environment:
+    - KUBECONFIG=/opt/kube.conf
+    - PYTHONWARNINGS
+    - OSCTL_NODE_NOT_READY_FLAPPING_TIMEOUT=120
+    - OSCTL_HELMBUNDLE_APPLY_DELAY=10
+      #Redis namespace, should be different from osdpl namespace to avoid conflicts.
+    - OSCTL_REDIS_NAMESPACE=openstack-redis
+    volumes:
+    - ${KUBECFG_FILE_NAME}:/opt/kube.conf:ro
+    command: kopf run --dev -n openstack --liveness=http://0.0.0.0:8090/healthz -m openstack_controller.controllers.probe -m openstack_controller.controllers.openstackdeployment -P openstack-controller.osdpl
+  node-maintenance:
+    <<: *osctl
+    container_name: node-maint
+    command: kopf run --dev -n openstack --liveness=http://0.0.0.0:8090/healthz -m openstack_controller.controllers.probe -m openstack_controller.controllers.node_maintenance_request -P openstack-controller.nodemaintenancerequest
+  node:
+    <<: *osctl
+    container_name: node
+    command: kopf run --dev -n openstack --liveness=http://0.0.0.0:8090/healthz -m openstack_controller.controllers.probe -m openstack_controller.controllers.node -P openstack-controller.node
+  helmbundle:
+    <<: *osctl
+    container_name: helmbundle
+    command: kopf run --dev -n openstack --liveness=http://0.0.0.0:8090/healthz -m openstack_controller.controllers.probe -m openstack_controller.controllers.helmbundle -P openstack-controller.helmbundle
+  secrets:
+    <<: *osctl
+    container_name: secrets
+    command: kopf run --dev -n openstack --liveness=http://0.0.0.0:8090/healthz -m openstack_controller.controllers.probe -m openstack_controller.controllers.secrets -P openstack-controller.secrets
+  health:
+    <<: *osctl
+    container_name: health
+    command: kopf run --dev -n openstack --liveness=http://0.0.0.0:8090/healthz -m openstack_controller.controllers.probe -m openstack_controller.controllers.health -P openstack-controller.health
+  probe:
+    <<: *osctl
+    container_name: probe
+    command: /usr/bin/python3.7 /opt/healthz 10 osdpl node-maintenance node secrets health helmbundle
+    volumes:
+    - ./healthz:/opt/healthz

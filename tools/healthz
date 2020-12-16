@@ -1,0 +1,16 @@
+#!/usr/bin/env python3
+
+import requests, time, sys
+
+poll_timeout = int(sys.argv[1])
+services = sys.argv[2:]
+
+while True:
+    for service in services:
+        try:
+            print("Polling osdpl...")
+            requests.get(f"http://{service}:8090/healthz",
+                         timeout=poll_timeout)
+        except Exception:
+            print("probe for {service} failed!")
+    time.sleep(poll_timeout)
