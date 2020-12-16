@@ -501,6 +501,14 @@ services:
             central: 3
             collector: 3
             notification: 3
+  tempest:
+    tempest:
+      values:
+        conf:
+          tempest:
+            compute:
+              min_compute_nodes: 2
+
 timeouts:
   application_readiness:
     nova:

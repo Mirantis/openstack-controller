@@ -287,7 +287,6 @@ services:
             #TODO(mshalamov): Will be removed during process of completing PRODX-1192
             compute:
               fixed_network_name: tempest-fixed-net
-              min_compute_nodes: 2
               build_timeout: 600
             #TODO(mshalamov): Will be removed during process of completing PRODX-1192
             compute-feature-enabled:
