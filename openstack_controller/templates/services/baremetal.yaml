@@ -8,7 +8,14 @@
 {%- do notification_topics.append('stacklight_notifications') if stacklight_enabled %}
 {%- set enabled_boot_interfaces = ['pxe', 'fake'] %}
 {%- if spec.openstack_version not in ['queens', 'rocky'] %}
-{%- do enabled_boot_interfaces.append('ipxe') %}
+# NOTE(vsaienko): we prefer to use chainloading to ipxe as it is much faster
+# and stable for file downloads that UDP based pxe, and most of the hardware
+# types give it higher priority than pxe already through the
+# supported_boot_interfaces property. Thus we only need to enable it, and
+# the proper value for node's boot interface will be selected automatically,
+# if not set, without the need to explicitly set the default_boot_interface
+# config option.
+{%- do enabled_boot_interfaces.prepend('ipxe') %}
 {%- endif %}
 {%- set network = spec.features.ironic.networks.baremetal %}
 
@@ -148,11 +155,6 @@ spec:
           DEFAULT:
             enabled_hardware_types: ipmi,fake-hardware
             enabled_boot_interfaces: {{ enabled_boot_interfaces|join(',') }}
-            {%- if 'ipxe' in enabled_boot_interfaces %}
-            # NOTE(vsaienko): we prefer to use chainloading to ipxe as it is much faster and stable
-            # for file downloads that UDP based pxe
-            default_boot_interface: ipxe
-            {%- endif %}
             enabled_management_interfaces: fake,ipmitool,noop
             enabled_power_interfaces: fake,ipmitool
             enabled_network_interfaces: flat,neutron,noop
