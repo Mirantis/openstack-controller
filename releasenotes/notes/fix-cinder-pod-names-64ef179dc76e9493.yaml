@@ -1,0 +1,5 @@
+---
+fixes:
+  - |
+    Adjust controller to work with cinder statefulsets to have static pod names.
+    More details - `PRODX-9794 <https://mirantis.jira.com/browse/PRODX-9794>`__

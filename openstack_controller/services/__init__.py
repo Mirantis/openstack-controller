@@ -302,17 +302,19 @@ class Cinder(OpenStackServiceWithCeph):
                     "images": ["cinder_api"],
                     "manifest": "deployment_api",
                 },
+            },
+            "StatefulSet": {
                 "cinder-scheduler": {
                     "images": ["cinder_scheduler"],
-                    "manifest": "deployment_scheduler",
+                    "manifest": "statefulset_scheduler",
                 },
                 "cinder-volume": {
                     "images": ["cinder_volume"],
-                    "manifest": "deployment_volume",
+                    "manifest": "statefulset_volume",
                 },
                 "cinder-backup": {
                     "images": ["cinder_backup"],
-                    "manifest": "deployment_backup",
+                    "manifest": "statefulset_backup",
                 },
             },
         },
@@ -330,9 +332,9 @@ class Cinder(OpenStackServiceWithCeph):
     async def _upgrade(self, event, **kwargs):
         upgrade_map = [
             ("Job", "cinder-db-sync"),
-            ("Deployment", "cinder-scheduler"),
-            ("Deployment", "cinder-volume"),
-            ("Deployment", "cinder-backup"),
+            ("StatefulSet", "cinder-scheduler"),
+            ("StatefulSet", "cinder-volume"),
+            ("StatefulSet", "cinder-backup"),
             ("Deployment", "cinder-api"),
             ("Job", "cinder-db-sync-online"),
         ]

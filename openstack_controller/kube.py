@@ -239,6 +239,17 @@ class Service(pykube.Service, HelmBundleMixin):
     pass
 
 
+class StatefulSet(pykube.StatefulSet, HelmBundleMixin):
+    @property
+    def ready(self):
+        return (
+            self.obj["status"]["observedGeneration"]
+            >= self.obj["metadata"]["generation"]
+            and self.obj["status"].get("updatedReplicas") == self.replicas
+            and self.obj["status"].get("readyReplicas") == self.replicas
+        )
+
+
 class Ingress(pykube.objects.NamespacedAPIObject, HelmBundleMixin):
     version = "extensions/v1beta1"
     endpoint = "ingresses"
