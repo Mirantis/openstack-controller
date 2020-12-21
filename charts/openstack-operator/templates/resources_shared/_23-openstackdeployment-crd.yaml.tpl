@@ -598,6 +598,7 @@ spec:
                               - orchestration
                               - compute
                               - image
+                              - baremetal
                     ironic:
                       type: object
                       required:
