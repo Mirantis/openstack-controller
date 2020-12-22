@@ -5,6 +5,7 @@
 {%- set components_with_dedicated_messaging = spec.get('features', {}).get('messaging', {}).get('components_with_dedicated_messaging', []) %}
 {%- set stacklight_enabled = spec.get('features', {}).get('stacklight', {}).get('enabled', False) %}
 {%- set tungstenfabric_enabled = spec.features.neutron.get('backend', 'ml2') == 'tungstenfabric' %}
+{%- set tungstenfabric_custom_api_opts = tf_api_service is defined and tf_api_port is defined %}
 {%- set notification_topics = ['notifications'] %}
 {%- set service_plugins = ['<None>'] if tungstenfabric_enabled else ['router', 'metering', 'qos'] %}
 {%- do notification_topics.append('stacklight_notifications') if stacklight_enabled %}
@@ -277,6 +278,12 @@ spec:
           db_init:
             jobs:
               - openstack-mariadb-cluster-wait
+      {%- if tungstenfabric_enabled and tungstenfabric_custom_api_opts %}
+          ks_endpoints:
+            jobs:
+              - neutron-ks-service
+              - tungstenfabric-ks-service
+      {%- endif %}
       endpoints:
         cluster_domain_suffix: {{ spec.internal_domain_name }}
 {% include 'base/_admin_identity.yaml' %}
@@ -329,6 +336,14 @@ spec:
           scheme:
             default: http
             public: https
+      {%- if tungstenfabric_enabled and tungstenfabric_custom_api_opts %}
+        tungstenfabric:
+          hosts:
+            default: {{ tf_api_service }}
+          port:
+            api:
+              default: {{ tf_api_port }}
+      {%- endif %}
       manifests:
         job_rabbit_init: false
       {%- if baremetal_enabled %}

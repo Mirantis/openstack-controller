@@ -20,7 +20,7 @@ block-storage:
         username: cinder1rKIan
     memcached: 76HsSsABaJvTQU6I
     messaging:
-      user: 
+      user:
         password: KgjY6ghlVbGSKJL6DH2jQXH50EtBVsiC
         username: cinder0Jhxmf
     notifications:
@@ -285,6 +285,8 @@ networking:
   - account: designate
     password: KBecvsPZsWBFzDqYnevHWArm7tFycZKr
     username: designateLeRjiDsyT
+  tf_api_service: tungstenfabric-api
+  tf_api_port: 8082
 orchestration:
   credentials: &credentials_orchestration
     database:
