@@ -15,7 +15,7 @@
 # the proper value for node's boot interface will be selected automatically,
 # if not set, without the need to explicitly set the default_boot_interface
 # config option.
-{%- do enabled_boot_interfaces.prepend('ipxe') %}
+{%- do enabled_boot_interfaces.insert(0, 'ipxe') %}
 {%- endif %}
 {%- set network = spec.features.ironic.networks.baremetal %}
 
