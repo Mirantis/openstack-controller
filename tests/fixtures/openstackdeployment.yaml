@@ -76,7 +76,7 @@ spec:
     - compute
     - identity
     - dashboard
-    - dashboard-selenium
+    - stepler
     - image
     - ingress
     - database

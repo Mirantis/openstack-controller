@@ -1,20 +1,19 @@
 #apiVersion: lcm.mirantis.com/v1alpha1
 #kind: HelmBundle
 
-{%- set service = 'dashboard-selenium' %}
+{%- set service = 'stepler' %}
 
 spec:
   releases:
-  - name: openstack-dashboard-selenium
-    chart: {{spec.common.openstack.repo}}/dashboard-selenium
+  - name: openstack-stepler
+    chart: {{spec.common.openstack.repo}}/stepler
     values:
       images:
         tags:
 {%- for image in [
-    "dashboardselenium_run_tests",
+    "stepler_run_tests",
     "ks_user",
     "dep_check",
-    "image_repo_sync",
     "bootstrap",] %}
         {%- if image in images %}
           {{ image }}: {{ images[image] }}
@@ -56,6 +55,8 @@ spec:
           scheme:
             default: http
             public: https
+      conf:
+        skiplist: |
+{% include 'base/_stepler_skiplist.yaml' %}
       bootstrap:
-        enabled: true
-
+        enabled: false

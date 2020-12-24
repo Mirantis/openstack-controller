@@ -136,7 +136,7 @@ keystone_db_sync_contract: '{{ images_base_url }}/openstack/keystone:queens-bion
 octavia_amphora: '{{ binary_base_url }}/openstack/bin/octavia/amphora-x64-haproxy-queens-20201028124258.qcow2'
 etcd: '{{ images_base_url }}/openstack/extra/etcd:3.2.26'
 etcd_db_compact: '{{ images_base_url }}/openstack/extra/etcd:3.2.26'
-dashboardselenium_run_tests: '{{ images_base_url }}/openstack/dashboard-selenium:queens-bionic-20200812034813'
+stepler_run_tests: '{{ images_base_url }}/openstack/stepler:ussuri-bionic-20201228075854'
 cinder_db_sync_online: '{{ images_base_url }}/openstack/cinder:queens-bionic-20201217180016'
 cinder_db_purge: '{{ images_base_url }}/openstack/cinder:queens-bionic-20201217180016'
 aodh_db_sync: '{{ images_base_url }}/openstack/aodh:queens-bionic-20201217180016'

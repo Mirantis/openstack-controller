@@ -345,25 +345,21 @@ class Cinder(OpenStackServiceWithCeph):
             await child_obj.enable(self.openstack_version, True)
 
 
-class DashboardSelenium(OpenStackService):
-    service = "dashboard-selenium"
+class Stepler(OpenStackService):
+    service = "stepler"
 
     _child_objects = {
-        "dashboard-selenium": {
+        "stepler": {
             "Job": {
-                "dashboardselenium-run-tests": {
-                    "images": ["dashboardselenium_run_tests"],
+                "stepler-run-tests": {
+                    "images": ["stepler_run_tests"],
                     "manifest": "job_run_tests",
                 },
-                "dashboardselenium-bootstrap": {
+                "stepler-bootstrap": {
                     "images": ["bootstrap"],
                     "manifest": "job_bootstrap",
                 },
-                "dashboardselenium-image-repo-sync": {
-                    "images": ["image_repo_sync"],
-                    "manifest": "job_image_repo_sync",
-                },
-                "dashboardselenium-ks-user": {
+                "stepler-ks-user": {
                     "images": ["ks_user"],
                     "manifest": "job_ks_user",
                 },

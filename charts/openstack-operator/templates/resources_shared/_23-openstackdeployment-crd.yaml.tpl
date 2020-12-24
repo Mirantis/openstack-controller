@@ -282,7 +282,7 @@ spec:
                           - key-manager
                           - placement
                           - coordination
-                          - dashboard-selenium
+                          - stepler
                           - baremetal
                           - redis
                           - alarming
