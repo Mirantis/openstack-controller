@@ -124,6 +124,11 @@ OSCTL_OS_DEPLOYMENT_NAMESPACE = os.environ.get(
     "OSCTL_OS_DEPLOYMENT_NAMESPACE", "openstack"
 )
 
+# The name of openstack deployment namespace
+OSCTL_CEPH_SHARED_NAMESPACE = os.environ.get(
+    "OSCTL_CEPH_SHARED_NAMESPACE", "openstack-ceph-shared"
+)
+
 # The number of retries while waiting a resouce deleted
 OSCTL_RESOURCE_DELETED_WAIT_RETRIES = int(
     os.environ.get("OSCTL_RESOURCE_DELETED_WAIT_RETRIES", 120)

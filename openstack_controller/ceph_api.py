@@ -9,12 +9,12 @@ from typing import Tuple, Iterable, Iterator, Callable, Dict, List, Any
 
 from dacite import from_dict
 
+from openstack_controller import settings
 from openstack_controller.utils import to_base64, from_base64
 
 
 OPENSTACK_KEYS_SECRET = "openstack-ceph-keys"
 OPENSTACK_RGW_SECRET = "openstack-rgw-creds"
-SHARED_SECRET_NAMESPACE = "openstack-ceph-shared"
 
 CEPH_OPENSTACK_TARGET_SECRET = "rook-ceph-admin-keyring"
 CEPH_OPENSTACK_TARGET_CONFIGMAP = "rook-ceph-config"
@@ -202,13 +202,15 @@ def get_os_ceph_params(
     read_secret: Callable[[str, str], Dict[str, str]]
 ) -> OSCephParams:
     """Get OpenStack Ceph parameters
-    Returns OpenStack Ceph parameters from secret OPENSTACK_KEYS_SECRET in SHARED_SECRET_NAMESPACE
+    Returns OpenStack Ceph parameters from secret OPENSTACK_KEYS_SECRET in shared ceph namespace
     :param read_secret: function to read secret, have to return secret['data'] dictionary
                         with base64 keys
     :returns: OSCephParams object
     """
     return _os_ceph_params_from_secret(
-        read_secret(SHARED_SECRET_NAMESPACE, OPENSTACK_KEYS_SECRET)
+        read_secret(
+            settings.OSCTL_CEPH_SHARED_NAMESPACE, OPENSTACK_KEYS_SECRET
+        )
     )
 
 
@@ -217,7 +219,7 @@ def set_os_ceph_params(
     save_secret: Callable[[str, str, Dict[str, str]], Any],
 ) -> None:
     save_secret(
-        SHARED_SECRET_NAMESPACE,
+        settings.OSCTL_CEPH_SHARED_NAMESPACE,
         OPENSTACK_KEYS_SECRET,
         _os_ceph_params_to_secret(os_params),
     )
@@ -227,7 +229,10 @@ def get_os_rgw_creds(
     read_secret: Callable[[str, str], Dict[str, str]]
 ) -> OSRGWCreds:
     return from_dict(
-        OSRGWCreds, read_secret(SHARED_SECRET_NAMESPACE, OPENSTACK_RGW_SECRET)
+        OSRGWCreds,
+        read_secret(
+            settings.OSCTL_CEPH_SHARED_NAMESPACE, OPENSTACK_RGW_SECRET
+        ),
     )
 
 
@@ -236,5 +241,7 @@ def set_os_rgw_creds(
     save_secret: Callable[[str, str, Dict[str, str]], Any],
 ) -> None:
     save_secret(
-        SHARED_SECRET_NAMESPACE, OPENSTACK_RGW_SECRET, asdict(os_rgw_creds)
+        settings.OSCTL_CEPH_SHARED_NAMESPACE,
+        OPENSTACK_RGW_SECRET,
+        asdict(os_rgw_creds),
     )

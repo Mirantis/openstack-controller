@@ -1424,14 +1424,14 @@ class RadosGateWay(Service):
                 break
 
         kube.wait_for_secret(
-            ceph_api.SHARED_SECRET_NAMESPACE,
+            settings.OSCTL_CEPH_SHARED_NAMESPACE,
             ceph_api.OPENSTACK_KEYS_SECRET,
         )
 
         for rgw_key in ["rgw_internal", "rgw_external"]:
             rgw_url = base64.b64decode(
                 secrets.get_secret_data(
-                    ceph_api.SHARED_SECRET_NAMESPACE,
+                    settings.OSCTL_CEPH_SHARED_NAMESPACE,
                     ceph_api.OPENSTACK_KEYS_SECRET,
                 ).get(rgw_key)
             ).decode()
