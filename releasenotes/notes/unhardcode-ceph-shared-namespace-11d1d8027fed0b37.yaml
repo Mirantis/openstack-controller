@@ -1,0 +1,5 @@
+---
+fixes:
+  - Hardcoded ceph shared namespace, can be passed via OSCTL_CEPH_SHARED_NAMESPACE
+    env variable to openstack-controller. For more information please see
+    `PRODX-10306 <https://mirantis.jira.com/browse/PRODX-10306>`__

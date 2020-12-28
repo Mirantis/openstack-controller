@@ -514,7 +514,8 @@ class OpenStackServiceWithCeph(OpenStackService):
             }
         )
         kube.wait_for_secret(
-            ceph_api.SHARED_SECRET_NAMESPACE, ceph_api.OPENSTACK_KEYS_SECRET
+            settings.OSCTL_CEPH_SHARED_NAMESPACE,
+            ceph_api.OPENSTACK_KEYS_SECRET,
         )
         oscp = ceph_api.get_os_ceph_params(secrets.get_secret_data)
         # TODO(vsaienko): the subset of secrets might be changed after
