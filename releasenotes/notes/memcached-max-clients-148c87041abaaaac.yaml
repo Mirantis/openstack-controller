@@ -1,0 +1,4 @@
+---
+fixes:
+  - Increase default number memcached max clients according
+    to size. For more information please see `PRODX-10195 <https://mirantis.jira.com/browse/PRODX-10195>`__
