@@ -506,6 +506,12 @@ services:
           tempest:
             compute:
               min_compute_nodes: 2
+  memcached:
+    memcached:
+      values:
+        conf:
+          memcached:
+            max_connections: 16384
 
 timeouts:
   application_readiness:
