@@ -708,12 +708,21 @@ class Keystone(OpenStackService):
 class Neutron(OpenStackService):
     service = "networking"
     openstack_chart = "neutron"
-    _required_accounts = {"compute": ["nova"], "dns": ["designate"]}
     _secret_class = secrets.NeutronSecret
 
     @property
     def _required_accounts(self):
-        r_accounts = {"compute": ["nova"], "dns": ["designate"]}
+        r_accounts = {"dns": ["designate"]}
+        compute_accounts = ["nova"]
+        if self.openstack_version in [
+            "queens",
+            "rocky",
+        ]:
+            compute_accounts.append("placement")
+        else:
+            r_accounts["placement"] = ["placement"]
+
+        r_accounts["compute"] = compute_accounts
         services = self.mspec["features"]["services"]
         if "baremetal" in services:
             r_accounts["baremetal"] = ["ironic"]
