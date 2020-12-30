@@ -157,6 +157,10 @@ spec:
             backend_url: "etcd3+http://etcd:2379"
           service_user:
             send_service_user_token: true
+          backend_defaults:
+            # NOTE(vsaienko): Use dedicated pool for cinder only, this will allow to improve
+            # scale characteristics
+            rbd_exclusive_cinder_pool: true
         logging:
           logger_cinder:
             level: {{ spec.get('features', {}).get('logging', {}).get('cinder', {}).get('level', 'INFO') }}
