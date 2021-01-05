@@ -129,7 +129,7 @@ neutron_rpc_server: '{{ images_base_url }}/openstack/neutron:rocky-bionic-202010
 keystone_db_sync_expand: '{{ images_base_url }}/openstack/keystone:rocky-bionic-20201026180012'
 keystone_db_sync_migrate: '{{ images_base_url }}/openstack/keystone:rocky-bionic-20201026180012'
 keystone_db_sync_contract: '{{ images_base_url }}/openstack/keystone:rocky-bionic-20201026180012'
-octavia_amphora: '{{ binary_base_url }}/openstack/bin/octavia/amphora-x64-haproxy-rocky-20200512070545.qcow2'
+octavia_amphora: '{{ binary_base_url }}/openstack/bin/octavia/amphora-x64-haproxy-rocky-20210104115711.qcow2'
 etcd: '{{ images_base_url }}/openstack/extra/etcd:3.2.26'
 etcd_db_compact: '{{ images_base_url }}/openstack/extra/etcd:3.2.26'
 stepler_run_tests: '{{ images_base_url }}/openstack/stepler:ussuri-bionic-20201228075854'
