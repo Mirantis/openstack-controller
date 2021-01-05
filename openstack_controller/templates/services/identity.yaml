@@ -3,6 +3,7 @@
 
 {%- set service = 'keystone' %}
 {%- set keystone_keycloak = spec.get('features', {}).get('keystone', {}).get('keycloak', {}) %}
+{%- set ssl_validate_server =  keystone_keycloak.get('oidc', {}).get('OIDCSSLValidateServer', True) or keystone_keycloak.get('oidc', {}).get('OIDCOAuthSSLValidateServer', True) %}
 {%- set keystone_domain_specific_config = spec.get('features', {}).get('keystone', {}).get('domain_specific_configuration', {}) %}
 {%- set stacklight_enabled = spec.get('features', {}).get('stacklight', {}).get('enabled', False) %}
 {%- set notification_topics = ['notifications'] %}
@@ -159,6 +160,9 @@ spec:
               OIDCCryptoPassphrase {{ oidc_crypto_passphrase }}
               OIDCSSLValidateServer {% if keystone_keycloak.get('oidc',{}).get('OIDCSSLValidateServer', true) %}On{%- else %}Off{%- endif %}
               OIDCOAuthSSLValidateServer {% if keystone_keycloak.get('oidc',{}).get('OIDCOAuthSSLValidateServer', true) %}On{%- else %}Off{%- endif %}
+              {%- if ssl_validate_server %}
+              OIDCCABundlePath /usr/local/share/ca-certificates/openstack-iam-api.crt
+              {%- endif %}
               OIDCRedirectURLsAllowed {{ keystone_keycloak.get('oidc',{}).get('OIDCRedirectURLsAllowed', "^https://horizon."+ spec.public_domain_name +"/auth/logout$") }}
               {%- if keystone_keycloak.get('oidc', {}).get('OIDCRedirectURI', []) %}
               {%- for uri in keystone_keycloak.oidc.OIDCRedirectURI %}
@@ -242,3 +246,11 @@ spec:
               username: {{ credentials.database.user.username }}
               password: {{ credentials.database.user.password }}
 {% include 'base/_notifications.yaml' %}
+{%- if keystone_keycloak.get('enabled', False) and ssl_validate_server %}
+        oidc:
+          auth:
+            client:
+              tls:
+                ca: |
+{{ oidc_ca | indent(width=18, first=True) }}
+{%- endif %}

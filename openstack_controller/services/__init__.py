@@ -676,6 +676,18 @@ class Keystone(OpenStackService):
         )
         iam_secret.save(iam_data)
 
+        # Get IAM CA certificate
+        kube.wait_for_secret(
+            constants.IAM_NAMESPACE,
+            constants.IAM_API_SECRET,
+        )
+        t_args["oidc_ca"] = base64.b64decode(
+            secrets.get_secret_data(
+                constants.IAM_NAMESPACE,
+                constants.IAM_API_SECRET,
+            )["keycloakCA.pem"]
+        ).decode()
+
         return t_args
 
     @layers.kopf_exception
