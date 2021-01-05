@@ -47,6 +47,8 @@ spec:
             topics: notifications,stacklight_notifications
           service_user:
             send_service_user_token: true
+          backend_defaults:
+            rbd_exclusive_cinder_pool: true
         logging:
           logger_cinder:
             level: INFO

@@ -1,0 +1,5 @@
+---
+fixes:
+  - Enable rbd_exclusive_cinder_pool to allow cinder do not calculate
+    pool usage on every request and startup. For more information
+    please see `PRODX-10368 <https://mirantis.jira.com/browse/PRODX-10368>`__
