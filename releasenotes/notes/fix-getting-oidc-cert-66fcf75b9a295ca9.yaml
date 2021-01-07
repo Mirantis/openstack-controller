@@ -1,0 +1,4 @@
+---
+fixes:
+  - Fix metadata sources for iam oidc cert secret.
+    For more information please refer to `PRODX-9377 <https://mirantis.jira.com/browse/PRODX-9377>`__

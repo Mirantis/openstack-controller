@@ -170,5 +170,5 @@ mariadb_phy_restore: '{{ images_base_url }}/general/mariadb:10.4.17-bionic-20201
 octavia_db_sync_persistence: '{{ images_base_url }}/openstack/octavia:train-bionic-20201229084319'
 mariadb_controller: '{{ images_base_url }}/general/mariadb:10.4.17-bionic-20201214104859'
 horizon_mirantis_theme_sha256summ: aea34ad5ae8bc85616bddd65d03d20a904357697f3a39aa46507ea7e64669b06
-horizon_mirantis_theme_url: '{{ binary_base_url }}/openstack/bin/horizon//mirantis-train-984f74c-20201121205942.tar.gz'
+horizon_mirantis_theme_url: '{{ binary_base_url }}/openstack/bin/horizon/mirantis-train-984f74c-20201121205942.tar.gz'
 ceph_config_helper: '{{ images_base_url }}/openstack/extra/ceph-config-helper:nautilus-bionic-20200810084204'

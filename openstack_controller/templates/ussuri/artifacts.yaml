@@ -170,5 +170,5 @@ mariadb_phy_backup: '{{ images_base_url }}/general/mariadb:10.4.17-bionic-202012
 mariadb_phy_restore: '{{ images_base_url }}/general/mariadb:10.4.17-bionic-20201214104859'
 mariadb_controller: '{{ images_base_url }}/general/mariadb:10.4.17-bionic-20201214104859'
 horizon_mirantis_theme_sha256summ: c39fac66c19a2e3996d56e8a17d161f305fb1391eca8826bd2a3ebc24674848a
-horizon_mirantis_theme_url: '{{ binary_base_url }}/openstack/bin/horizon//mirantis-ussuri-43c3886-20201121205800.tar.gz'
+horizon_mirantis_theme_url: '{{ binary_base_url }}/openstack/bin/horizon/mirantis-ussuri-43c3886-20201121205800.tar.gz'
 ceph_config_helper: '{{ images_base_url }}/openstack/extra/ceph-config-helper:nautilus-bionic-20200810084204'
