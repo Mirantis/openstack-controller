@@ -35,6 +35,12 @@ services:
             size: "20Gi"
         manifests:
           pdb_server: false
+  ingress:
+    ingress:
+      values:
+        pod:
+          replicas:
+            ingress: 1
   identity:
     keystone:
       values:
