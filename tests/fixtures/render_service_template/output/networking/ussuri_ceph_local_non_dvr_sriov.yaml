@@ -77,6 +77,9 @@ spec:
   - chart: osh-infra/openvswitch
     name: openstack-openvswitch
     values:
+      overrides:
+        openvswitch_openvswitch-vswitchd:
+          labels: null
       endpoints:
         cluster_domain_suffix: cluster.local
       images:
@@ -120,41 +123,6 @@ spec:
                   initialDelaySeconds: 0
                   periodSeconds: 10
                   timeoutSeconds: 5
-      overrides:
-        openvswitch_openvswitch-vswitchd:
-           labels:
-             openstack-compute-node-dpdk-1::enabled:
-               values:
-                 pod:
-                   resources:
-                     enabled: true
-                     ovs:
-                       vswitchd:
-                         limits:
-                           hugepages-2Mi: 1Gi
-                           memory: 1Gi
-                 conf:
-                   ovs_dpdk:
-                     enabled: true
-                     hugepages_mountpath: /dev/hugepages
-                     socket_memory: 1024
-                     vhostuser_socket_dir: vhostuser
-             openstack-compute-node-dpdk-2::enabled:
-               values:
-                 pod:
-                   resources:
-                     enabled: true
-                     ovs:
-                       vswitchd:
-                         limits:
-                           hugepages-2Mi: 1Gi
-                           memory: 1Gi
-                 conf:
-                   ovs_dpdk:
-                     enabled: true
-                     hugepages_mountpath: /dev/hugepages
-                     socket_memory: 1024
-                     vhostuser_socket_dir: vhostuser
   - chart: osh/neutron
     name: openstack-neutron
     values:
@@ -172,6 +140,7 @@ spec:
       conf:
         auto_bridge_add:
           br-ex: veth-phy
+          br-sriov: ens7
         ironic:
           insecure: true
         l3_agent:
@@ -208,7 +177,7 @@ spec:
         plugins:
           linuxbridge_agent:
             linux_bridge:
-              bridge_mappings: physnet1:br-ex
+              bridge_mappings: physnet1:br-ex,sriov01:br-sriov
           ml2_conf:
             ml2:
               extension_drivers:
@@ -218,13 +187,15 @@ spec:
               tenant_network_types: vxlan
             ml2_type_flat:
               flat_networks: physnet1
+            ml2_type_vlan:
+              network_vlan_ranges: sriov01:100:200
           openvswitch_agent:
             agent:
               extensions: qos
               tunnel_types: vxlan
               vxlan_udp_port: 4790
             ovs:
-              bridge_mappings: physnet1:br-ex
+              bridge_mappings: physnet1:br-ex,sriov01:br-sriov
             securitygroup:
               firewall_driver: openvswitch
       dependencies:
@@ -382,62 +353,32 @@ spec:
       manifests:
         job_rabbit_init: false
         secret_ca_bundle: true
+        daemonset_sriov_agent: true
       network:
         core_plugin: ml2
         interface:
           tunnel: ens3
         backend:
-          - openvswitch
+        - openvswitch
+        - sriovnicswitch
+      overrides:
+        neutron_ovs-agent:
+          labels: null
+        neutron_sriov-agent:
+          overrides_default: false
+          labels:
+            kubernetes.io/hostname::kaas-node-99ea7b55-0555-45f7-bdc5-f75da9f17c1a:
+              values:
+                network:
+                  interface:
+                    sriov:
+                      - device: enp0
+                        num_vfs: 7
+                        physnet: sriov01
       labels:
         sriov:
           node_selector_key: openstack-compute-node
           node_selector_value: enabled
-      overrides:
-        neutron_ovs-agent:
-          labels:
-            openstack-compute-node-dpdk-1::enabled:
-              values:
-                network:
-                  interface:
-                    tunnel: br-phy
-                conf:
-                  ovs_dpdk:
-                    bonds: []
-                    bridges: 
-                    - ip_address: 10.15.0.8/24
-                      name: br-phy
-                    driver: igb_uio
-                    driver: igb_uio
-                    nics: 
-                    - bridge: br-phy
-                      name: ens8
-                      pci_id: '0000:00:08.0'
-                    enabled: true
-                  plugins:
-                    ovs:
-                      datapath_type: netdev
-                      vhostuser_socket_dir: /var/run/openvswitch/vhostuser
-            openstack-compute-node-dpdk-2::enabled:
-              values:
-                network:
-                  interface:
-                    tunnel: br-phy
-                conf:
-                  ovs_dpdk:
-                    bonds: []
-                    bridges: 
-                    - ip_address: 10.15.0.51/24
-                      name: br-phy
-                    driver: igb_uio
-                    nics: 
-                    - bridge: br-phy
-                      name: ens8
-                      pci_id: '0000:00:08.0'
-                    enabled: true
-                  plugins:
-                    ovs:
-                      datapath_type: netdev
-                      vhostuser_socket_dir: /var/run/openvswitch/vhostuser
       pod:
         probes:
           dhcp_agent:

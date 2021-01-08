@@ -137,6 +137,7 @@ services:
               - ServerGroupAntiAffinityFilter
               - ServerGroupAffinityFilter
               - NUMATopologyFilter
+              - PciPassthroughFilter
             libvirt:
               live_migration_use_ip_to_scp_configdrive: true
         network:

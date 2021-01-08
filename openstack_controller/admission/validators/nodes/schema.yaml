@@ -16,6 +16,46 @@ patternProperties:
               tunnel_interface:
                 type: string
                 description: Physical interface used for tunnel traffic
+              sriov:
+                type: object
+                additionalProperties: False
+                required:
+                  - enabled
+                properties:
+                  additionalProperties: True
+                  enabled:
+                    type: boolean
+                    description: Trigger to enable sriov on the node.
+                  nics:
+                    type: array
+                    items:
+                      type: object
+                      required:
+                        - device
+                        - num_vfs
+                        - physnet
+                      properties:
+                        additionalProperties: True
+                        device:
+                          type: string
+                          description: The name of sriov NIC
+                        num_vfs:
+                          type: integer
+                          description: The number of VF to activate
+                        hooks:
+                          type: object
+                          description: The pre init hooks
+                          properties:
+                            additionalProperties: False
+                            init:
+                              type: string
+                              description: The init hook for specific NIC.
+                        physnet:
+                          type: string
+                          description: The name of neutron physnet for SRIOV NIC.
+                        mtu:
+                          type: integer
+                          description: The NIC MTU
               dpdk:
                 type: object
                 additionalProperties: False
