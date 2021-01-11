@@ -140,6 +140,7 @@ services:
               - PciPassthroughFilter
             libvirt:
               live_migration_use_ip_to_scp_configdrive: true
+          enable_iscsi: true
         network:
           api:
             ingress:
@@ -175,6 +176,19 @@ services:
                   name: m1.tiny_test
                   ram: 512
                   vcpus: 1
+  block-storage:
+    cinder:
+      values:
+        pod:
+          security_context:
+            cinder_volume:
+              container:
+                #(ogrudev): set container to privileged mode for bidirectional mounts
+                #needed by "enable_iscsi: true" option
+                cinder_volume:
+                  privileged: true
+        conf:
+          enable_iscsi: true
   metric:
     gnocchi:
       values:
