@@ -484,7 +484,9 @@ spec:
         {%- do networks[network_type].append(network.physnet) %}
     {%- endfor %}
     {%- if network.get('vlan_ranges') %}
-        {%- do physnet_vlan_mappings.append(network.physnet + ':' + network.vlan_ranges) %}
+        {%- for range in network.vlan_ranges.split(',') %}
+            {%- do physnet_vlan_mappings.append(network.physnet + ':' + range) %}
+        {%- endfor %}
     {%- endif %}
     {%- do bridge_mappings.append(network.physnet + ':' + network.bridge) %}
     {%- if network.get('mtu') %}
