@@ -185,7 +185,7 @@ spec:
             ml2_type_flat:
               flat_networks: physnet1
             ml2_type_vlan:
-              network_vlan_ranges: ironic:1000:1099
+              network_vlan_ranges: ironic:1000:1099,ironic:2000:2099
             genericswitch:br-host: 
               device_type: netmiko_ovs_linux
               ip: 10.10.0.64

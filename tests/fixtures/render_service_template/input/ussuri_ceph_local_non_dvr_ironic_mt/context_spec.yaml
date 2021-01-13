@@ -38,7 +38,7 @@ features:
       bridge: ironic-pxe
       network_types:
       - vlan
-      vlan_ranges: 1000:1099
+      vlan_ranges: 1000:1099,2000:2099
     floating_network:
       enabled: true
       physnet: physnet1
