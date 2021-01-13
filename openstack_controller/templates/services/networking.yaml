@@ -12,11 +12,21 @@
 {%- set floating_network = spec.features.neutron.get('floating_network', {}) %}
 {%- set baremetal_enabled = 'baremetal' in spec.features.get('services', []) %}
 {%- set neutron_node_specific = {} %}
+{%- set sriov = namespace(enabled=false) %}
+{%- set dpdk = namespace(enabled=false) %}
 {%- for label, node_features in spec.get("nodes", {}).items() %}
   {%- if node_features.get("features", {}).get("neutron", {}) %}
     {%- do neutron_node_specific.update({label: node_features.features.neutron}) %}
+    {%- if node_features.features.neutron.get("sriov", {}).get("enabled", false) %}
+        {%- set sriov.enabled = true %}
+    {%- endif %}
+    {%- if node_features.features.neutron.get("dpdk", {}).get("enabled", true) %}
+        {%- set dpdk.enabled = true %}
+    {%- endif %}
   {%- endif %}
 {%- endfor %}
+
+
 
 spec:
   releases:
@@ -129,6 +139,7 @@ spec:
   # NODE SPECIFIC START
   {%- if neutron_node_specific %}
       overrides:
+    {%- if dpdk.enabled %}
        openvswitch_openvswitch-vswitchd:
           labels:
     {%- for label, override in neutron_node_specific.items() %}
@@ -153,6 +164,7 @@ spec:
                     vhostuser_socket_dir: vhostuser
       {%- endif %}
     {%- endfor %}
+    {%- endif %}
   {%- endif %}
   # NODE SPECIFIC END
 {%- if spec.get('migration', {}).get('neutron', {}).get('deploy_main_service', true) %}
@@ -345,6 +357,9 @@ spec:
               default: {{ tf_api_port }}
       {%- endif %}
       manifests:
+      {%- if sriov.enabled %}
+        daemonset_sriov_agent: true
+      {%- endif %}
         job_rabbit_init: false
       {%- if baremetal_enabled %}
         deployment_ironic_agent: true
@@ -365,11 +380,15 @@ spec:
         interface:
           tunnel: {{ spec.features.neutron.tunnel_interface }}
       {%- endif %}
+      {%- set neutron_backends = ["openvswitch"] %}
       {%- if baremetal_enabled %}
-        backend:
-        - openvswitch
-        - baremetal
-        - genericswitch
+          {%- do neutron_backends.extend(["baremetal", "genericswitch"]) %}
+      {%- endif %}
+      {%- if sriov.enabled %}
+          {%- do neutron_backends.extend(["sriovnicswitch"]) %}
+      {%- endif %}
+      {%- if neutron_backends %}
+        backend: {{ neutron_backends }}
       {%- endif %}
       {%- if floating_network.get('enabled', False) %}
       bootstrap:
@@ -532,6 +551,10 @@ spec:
 {%- for network in spec.features.neutron.external_networks %}
           {{ network.bridge }}: {{ network.interface }}
 {%- endfor %}
+      labels:
+        sriov:
+          node_selector_key: openstack-compute-node
+          node_selector_value: enabled
       # NODE SPECIFIC START
       overrides:
       {%- if spec.get('features', {}).get('neutron', {}).get('dvr', {}).get('enabled', False) %}
@@ -575,6 +598,20 @@ spec:
                 {%- endif %}
         {%- endif %}
       {%- endfor %}
+      {%- if sriov.enabled %}
+        neutron_sriov-agent:
+          overrides_default: false
+          labels:
+        {%- for label, override in neutron_node_specific.items() %}
+          {%- if override.get("sriov", {}).get("enabled", False) %}
+            {{ label }}:
+              values:
+                network:
+                  interface:
+                    sriov: {{ override.sriov.nics }}
+          {%- endif %}
+        {%- endfor %}
+      {%- endif %}
       # NODE SPECIFIC END
       jobs:
 {% include 'base/_ks_jobs.yaml' %}

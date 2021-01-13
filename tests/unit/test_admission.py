@@ -473,3 +473,82 @@ def test_nodes_features_neutron_keys(client):
         },
         False,
     )
+
+
+def test_nodes_features_neutron_sriov_keys(client):
+    neutron_required = {"sriov": {"enabled": True}}
+    _node_specific_request(
+        client,
+        {"good::label": {"features": {"neutron": neutron_required}}},
+        True,
+    )
+    # nics valid
+    _node_specific_request(
+        client,
+        {
+            "good::label": {
+                "features": {
+                    "neutron": {
+                        "sriov": {
+                            "enabled": True,
+                            "nics": [
+                                {
+                                    "device": "enp1",
+                                    "num_vfs": 32,
+                                    "physnet": "tenant",
+                                }
+                            ],
+                        }
+                    }
+                }
+            }
+        },
+        True,
+    )
+    # nics valid additional fields
+    _node_specific_request(
+        client,
+        {
+            "good::label": {
+                "features": {
+                    "neutron": {
+                        "sriov": {
+                            "enabled": True,
+                            "nics": [
+                                {
+                                    "device": "enp1",
+                                    "num_vfs": 32,
+                                    "hooks": {"init": "echo 'Init hook'"},
+                                    "physnet": "tenant",
+                                    "mtu": 1500,
+                                }
+                            ],
+                        }
+                    }
+                }
+            }
+        },
+        True,
+    )
+    # NICS missing num_vfs
+    _node_specific_request(
+        client,
+        {
+            "good::label": {
+                "features": {
+                    "neutron": {
+                        "sriov": {
+                            "enabled": True,
+                            "nics": [
+                                {
+                                    "device": "enp1",
+                                    "physnet": "tenant",
+                                }
+                            ],
+                        }
+                    }
+                }
+            }
+        },
+        False,
+    )

@@ -8,6 +8,16 @@
 {%- do notification_topics.append('stacklight_notifications') if stacklight_enabled %}
 {%- set neutron_backend = spec.features.neutron.get('backend', 'ml2') %}
 {%- set baremetal_enabled = 'baremetal' in spec.features.services %}
+{%- set neutron_node_specific = {} %}
+{%- set sriov = namespace(enabled=false) %}
+{%- for label, node_features in spec.get("nodes", {}).items() %}
+  {%- if node_features.get("features", {}).get("neutron", {}) %}
+    {%- do neutron_node_specific.update({label: node_features.features.neutron}) %}
+    {%- if node_features.features.neutron.get("sriov", {}).get("enabled", false) %}
+      {% set sriov.enabled = true %}
+    {%- endif %}
+  {%- endif %}
+{%- endfor %}
 
 spec:
   releases:
@@ -145,6 +155,24 @@ spec:
           compute_ironic:
             node_selector_key: openstack-control-plane
             node_selector_value: enabled
+      # NODE SPECIFIC START
+      {%- if sriov.enabled %}
+      overrides:
+        nova_compute:
+          labels:
+        {%- for label, override in neutron_node_specific.items() %}
+          {%- if override.get("sriov", {}).get("enabled", False) %}
+            {{ label }}:
+              values:
+                network:
+                  backend:
+                    - sriovnicswitch
+                  interface:
+                    sriov: {{ override.sriov.nics }}
+          {%- endif %}
+        {%- endfor %}
+        {%- endif %}
+      # NODE SPECIFIC END
       pod:
         # NOTE(ohryhorov): use_fqdn is disabled not to use FQDN
         # in service hostnames
