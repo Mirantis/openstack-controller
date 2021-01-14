@@ -74,6 +74,7 @@ features:
   - coordination
   - key-manager
   - redis
+  - instance-ha
   ssl:
     public_endpoints:
       api_cert: "TEST CRT"

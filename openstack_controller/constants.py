@@ -25,6 +25,7 @@ CHART_GROUP_MAPPING = {
         "aodh",
         "panko",
         "ceilometer",
+        "masakari",
     ],
     "infra": [
         "rabbitmq",
@@ -58,6 +59,7 @@ OS_SERVICES_MAP = {
     "metric": "gnocchi",
     "tempest": "tempest",
     "object-storage": "ceph-rgw",
+    "instance-ha": "masakari",
 }
 
 OPENSTACK_SERVICES_UPGRADE_ORDER = [
@@ -73,6 +75,7 @@ OPENSTACK_SERVICES_UPGRADE_ORDER = [
     "orchestration",
     "dashboard",
     "object-storage",
+    "instance-ha",
 ]
 
 RGW_KEYSTONE_SECRET = "ceph-keystone-user"

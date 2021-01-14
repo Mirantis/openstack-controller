@@ -1501,4 +1501,9 @@ class Tempest(Service):
         return template_args
 
 
+class Masakari(OpenStackService):
+    service = "instance-ha"
+    openstack_chart = "masakari"
+
+
 registry = Service.registry

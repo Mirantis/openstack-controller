@@ -175,3 +175,7 @@ horizon_mirantis_theme_sha256summ: b1bab205a68770fc18cf4d1648a1b0a2c397af245d898
 horizon_mirantis_theme_url: '{{ binary_base_url }}/openstack/bin/horizon/mirantis-ussuri-48f346e-20210119132403.tar.gz'
 ceph_config_helper: '{{ images_base_url }}/openstack/extra/ceph-config-helper:nautilus-bionic-20210112174540'
 octavia_amphora_checksum: f8af9f0ee0fbe76e27f39d7892d51197
+masakari_db_sync: '{{ images_base_url }}/openstack/masakari:ussuri-bionic-20210127180024'
+masakari_api: '{{ images_base_url }}/openstack/masakari:ussuri-bionic-20210127180024'
+masakari_engine: '{{ images_base_url }}/openstack/masakari:ussuri-bionic-20210127180024'
+masakari_monitors: '{{ images_base_url }}/openstack/masakari-monitors:ussuri-bionic-20210127180024'

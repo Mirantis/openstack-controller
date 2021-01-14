@@ -338,6 +338,28 @@ redis:
   redis_creds:
     password: |
       Y2ZMRFlTc05idUN5d2E2Vm1Cdlo4aDJzSlh1Wm52cVc=
+instance-ha:
+  credentials: &credentials_instance-ha
+    database:
+      user:
+        password: R441HIJxfNF8iAfAfwxASnndFXqSBfVn
+        username: masakariteW3kGBC
+    memcached: 3vySYJq0rDZ32KGG
+    messaging:
+      user:
+        password: iHMN1WsAMxAi8G4d0r64iggSdedSRR1p
+        username: masakariVuqCvFid
+    notifications:
+      user:
+        password: acH2p6deh90bDJWlRDzFE7wptqgQgVc7
+        username: masakariyfHtXhiq
+  service_creds:
+  - account: masakari
+    password: fUPlF2xntwICHH8KDYEjuc4Seb1TNQ8d
+    username: masakari8Xfl6MhP
+  - account: test
+    password: KI40mJVQ9fZP3MBZLpgrFSf2nqZIbbqg
+    username: testC7BY
 messaging:
   credentials:
     block-storage: *credentials_block-storage
@@ -351,6 +373,7 @@ messaging:
     networking: *credentials_networking
     orchestration: *credentials_orchestration
     placement: *credentials_placement
+    instance-ha: *credentials_instance-ha
   services:
     block-storage: null
     compute: null
@@ -369,3 +392,4 @@ messaging:
     orchestration: null
     placement: null
     redis: null
+    instance-ha: null

@@ -289,6 +289,7 @@ spec:
                           - event
                           - metering
                           - metric
+                          - instance-ha
                     nova:
                       type: object
                       required:
@@ -762,6 +763,8 @@ spec:
                         gnocchi:
                           <<: *logging_level
                         ceilometer:
+                          <<: *logging_level
+                        masakari:
                           <<: *logging_level
                 migration:
                   x-kubernetes-preserve-unknown-fields: true

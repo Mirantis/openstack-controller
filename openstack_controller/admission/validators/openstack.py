@@ -30,6 +30,7 @@ class OpenStackValidator(base.BaseValidator):
         if review_request["operation"] == "UPDATE":
             # on update we deffinitely have both old and new as not empty
             self._validate_openstack_upgrade(old_obj, new_obj)
+        self._check_masakari_allowed(new_obj)
 
     def _deny_master(self, new_obj):
         new_version = new_obj.get("spec", {}).get("openstack_version")
@@ -38,6 +39,22 @@ class OpenStackValidator(base.BaseValidator):
                 "Using master of OpenStack is not permitted. "
                 "You must disable the OpenStackDeployment admission "
                 "controller to deploy, use or upgrade to master."
+            )
+
+    def _check_masakari_allowed(self, new_obj):
+        openstack_services = (
+            new_obj.get("spec", {}).get("features", {}).get("services")
+        )
+        os_num_version = constants.OpenStackVersion[
+            new_obj["spec"]["openstack_version"]
+        ].value
+        if (
+            "instance-ha" in openstack_services
+            and os_num_version < constants.OpenStackVersion["ussuri"].value
+        ):
+            raise exception.OsDplValidationFailed(
+                "This set of services is not permitted to use with"
+                "current OpenStack version."
             )
 
     def _validate_openstack_upgrade(self, old_obj, new_obj):

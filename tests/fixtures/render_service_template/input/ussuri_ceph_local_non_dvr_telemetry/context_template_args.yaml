@@ -429,6 +429,29 @@ metric:
     - account: test
       password: 5s94mESUaC5t4gTrNKmFIIEAVj3JEJ6p
       username: testSTmV
+instance-ha:
+  credentials: &credentials_instance-ha
+    database:
+      user:
+        password: R441HIJxfNF8iAfAfwxASnndFXqSBfVn
+        username: masakariteW3kGBC
+    kek: SDJTR0lEQVFXeFhkMjdyS05WVGxnR3MxbHkxWlNIaWg=
+    memcached: 3vySYJq0rDZ32KGG
+    messaging:
+      user:
+        password: iHMN1WsAMxAi8G4d0r64iggSdedSRR1p
+        username: masakariVuqCvFid
+    notifications:
+      user:
+        password: acH2p6deh90bDJWlRDzFE7wptqgQgVc7
+        username: masakariyfHtXhiq
+  service_creds:
+  - account: masakari
+    password: fUPlF2xntwICHH8KDYEjuc4Seb1TNQ8d
+    username: masakari8Xfl6MhP
+  - account: test
+    password: KI40mJVQ9fZP3MBZLpgrFSf2nqZIbbqg
+    username: testC7BY
 messaging:
   credentials:
     alarming: *credentials_alarming
@@ -446,6 +469,7 @@ messaging:
     networking: *credentials_networking
     orchestration: *credentials_orchestration
     placement: *credentials_placement
+    instance-ha: *credentials_instance-ha
   services:
     alarming: null
     block-storage: null
@@ -468,3 +492,4 @@ messaging:
     orchestration: null
     placement: null
     redis: null
+    instance-ha: null
