@@ -369,5 +369,5 @@
             reason: Locators update is needed
             # stepler/horizon/tests/test_volumes.py::TestAdminOnly::test_change_volume_type
           439e8ca5-0d87-49aa-9458-a239fa6ff1e1:
-            reason: Locators update is needed
+            reason: PRODX-10580, PRODX-10586
             # stepler/horizon/tests/test_volumes.py::TestUserOnly::test_launch_volume_as_instance
