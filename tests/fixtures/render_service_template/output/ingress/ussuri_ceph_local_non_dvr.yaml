@@ -6,8 +6,6 @@ spec:
       conf:
         ingress:
           nginx-status-ipv4-whitelist: 0.0.0.0/0
-      deployment:
-        type: DaemonSet
       endpoints:
         cluster_domain_suffix: cluster.local
       images:
@@ -27,7 +25,7 @@ spec:
         network_policy: false
       network:
         service:
-          externalTrafficPolicy: Local
+          externalTrafficPolicy: Cluster
           type: LoadBalancer
       pod:
         probes:

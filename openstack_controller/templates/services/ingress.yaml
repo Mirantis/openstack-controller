@@ -6,11 +6,6 @@ spec:
   - name: ingress-openstack
     chart: {{spec.common.infra.repo}}/ingress
     values:
-      # NOTE(vsaienko): run ingress as daemonset on control plane nodes with externalTrafficPolicy: Local
-      # For virtualized environment with Octavia need to run on all nodes
-      # For more details please see https://mirantis.jira.com/browse/PRODX-1321
-      deployment:
-        type: DaemonSet
       labels:
         server:
           node_selector_key: openstack-control-plane
@@ -18,7 +13,7 @@ spec:
       network:
         service:
           type: LoadBalancer
-          externalTrafficPolicy: Local
+          externalTrafficPolicy: Cluster
       images:
         tags:
 {%- for image in [

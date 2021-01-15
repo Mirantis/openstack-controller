@@ -31,6 +31,12 @@ services:
         volume:
           phy_backup:
             size: "40Gi"
+  ingress:
+    ingress:
+      values:
+        pod:
+          replicas:
+            ingress: 3
   identity:
     keystone:
       values:
