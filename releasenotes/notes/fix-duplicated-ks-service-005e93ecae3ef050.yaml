@@ -1,0 +1,5 @@
+---
+fixes:
+  - Avoid creating duplicated services in openstack, by
+    switching to new python scripts for ks-service jobs.
+    More details - `PRODX-9954 <https://mirantis.jira.com/browse/PRODX-9954>`__
