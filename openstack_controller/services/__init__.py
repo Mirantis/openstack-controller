@@ -477,7 +477,7 @@ class Heat(OpenStackService):
                     "images": ["ks_user"],
                     "manifest": "job_ks_user_trustee",
                 },
-                "heat-trusts": {"images": ["ks_user"], "manifest": ""},
+                "heat-trusts": {"images": ["ks_trusts"], "manifest": ""},
                 "heat-db-sync": {
                     "images": ["heat_db_sync"],
                     "manifest": "job_db_sync",

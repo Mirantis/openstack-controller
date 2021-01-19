@@ -46,6 +46,7 @@ keystone_fernet_setup: '{{ images_base_url }}/openstack/keystone:train-bionic-20
 ks_endpoints: '{{ images_base_url }}/openstack/heat:train-bionic-20201229084319'
 ks_service: '{{ images_base_url }}/openstack/heat:train-bionic-20201229084319'
 ks_user: '{{ images_base_url }}/openstack/heat:train-bionic-20201229084319'
+ks_trusts: '{{ images_base_url }}/openstack/heat:train-bionic-20201229084319'
 keystone_federations_create: '{{ images_base_url }}/openstack/heat:train-bionic-20201229084319'
 neutron_db_sync: '{{ images_base_url }}/openstack/neutron:train-bionic-20201229084319'
 neutron_dhcp: '{{ images_base_url }}/openstack/neutron:train-bionic-20201229084319'

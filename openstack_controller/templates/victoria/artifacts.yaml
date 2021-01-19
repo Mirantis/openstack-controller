@@ -46,6 +46,7 @@ keystone_fernet_setup: '{{ images_base_url }}/openstack/keystone:victoria-bionic
 ks_endpoints: '{{ images_base_url }}/openstack/heat:victoria-bionic-20210113180016'
 ks_service: '{{ images_base_url }}/openstack/heat:victoria-bionic-20210113180016'
 ks_user: '{{ images_base_url }}/openstack/heat:victoria-bionic-20210113180016'
+ks_trusts: '{{ images_base_url }}/openstack/heat:victoria-bionic-20210113180016'
 keystone_federations_create: '{{ images_base_url }}/openstack/heat:victoria-bionic-20210113180016'
 neutron_db_sync: '{{ images_base_url }}/openstack/neutron:victoria-bionic-20210113180016'
 neutron_dhcp: '{{ images_base_url }}/openstack/neutron:victoria-bionic-20210113180016'

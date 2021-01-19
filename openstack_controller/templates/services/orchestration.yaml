@@ -96,6 +96,7 @@ spec:
     "dep_check",
     "heat_engine_cleaner",
     "ks_service",
+    "ks_trusts",
     "heat_purge_deleted",
     "heat_db_sync",
     "bootstrap",

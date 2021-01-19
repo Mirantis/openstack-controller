@@ -1,0 +1,4 @@
+---
+fixes:
+  - Fix image for heat-trusts job. Now heat-trusts
+    job will use separate image.

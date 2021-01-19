@@ -46,6 +46,7 @@ keystone_fernet_setup: '{{ images_base_url }}/openstack/keystone:ussuri-bionic-2
 ks_endpoints: '{{ images_base_url }}/openstack/heat:ussuri-bionic-20210112180018'
 ks_service: '{{ images_base_url }}/openstack/heat:ussuri-bionic-20210112180018'
 ks_user: '{{ images_base_url }}/openstack/heat:ussuri-bionic-20210112180018'
+ks_trusts: '{{ images_base_url }}/openstack/heat:ussuri-bionic-20210112180018'
 keystone_federations_create: '{{ images_base_url }}/openstack/heat:ussuri-bionic-20210112180018'
 neutron_db_sync: '{{ images_base_url }}/openstack/neutron:ussuri-bionic-20210112180018'
 neutron_dhcp: '{{ images_base_url }}/openstack/neutron:ussuri-bionic-20210112180018'

@@ -106,6 +106,7 @@ images:
   ks_endpoints: ks-endpoints:latest
   ks_service: ks-service:latest
   ks_user: ks-user:latest
+  ks_trusts: ks-trusts:latest
   libvirt: libvirt:latest
   mariadb: mariadb:latest
   mariadb_backup: mariadb-backup:latest

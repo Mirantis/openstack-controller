@@ -173,6 +173,7 @@ spec:
           heat_purge_deleted: heat-purge-deleted:latest
           image_repo_sync: image-repo-sync:latest
           ks_endpoints: ks-endpoints:latest
+          ks_trusts: ks-trusts:latest
           ks_service: ks-service:latest
           ks_user: ks-user:latest
           rabbit_init: rabbit-init:latest

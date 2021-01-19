@@ -43,6 +43,7 @@ keystone_fernet_setup: '{{ images_base_url }}/openstack/keystone:master-bionic-2
 ks_endpoints: '{{ images_base_url }}/openstack/heat:master-bionic-20210114180017'
 ks_service: '{{ images_base_url }}/openstack/heat:master-bionic-20210114180017'
 ks_user: '{{ images_base_url }}/openstack/heat:master-bionic-20210114180017'
+ks_trusts: '{{ images_base_url }}/openstack/heat:master-bionic-20210114180017'
 keystone_federations_create: '{{ images_base_url }}/openstack/heat:master-bionic-20210114180017'
 neutron_db_sync: '{{ images_base_url }}/openstack/neutron:master-bionic-20210114180017'
 neutron_dhcp: '{{ images_base_url }}/openstack/neutron:master-bionic-20210114180017'

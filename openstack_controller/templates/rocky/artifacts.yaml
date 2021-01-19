@@ -42,6 +42,7 @@ keystone_fernet_setup: '{{ images_base_url }}/openstack/keystone:rocky-bionic-20
 ks_endpoints: '{{ images_base_url }}/openstack/heat:rocky-bionic-20201026180012'
 ks_service: '{{ images_base_url }}/openstack/heat:rocky-bionic-20201026180012'
 ks_user: '{{ images_base_url }}/openstack/heat:rocky-bionic-20201026180012'
+ks_trusts: '{{ images_base_url }}/openstack/heat:rocky-bionic-20201026180012'
 keystone_federations_create: '{{ images_base_url }}/openstack/heat:rocky-bionic-20201026180012'
 neutron_db_sync: '{{ images_base_url }}/openstack/neutron:rocky-bionic-20201026180012'
 neutron_dhcp: '{{ images_base_url }}/openstack/neutron:rocky-bionic-20201026180012'

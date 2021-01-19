@@ -45,6 +45,7 @@ keystone_fernet_setup: '{{ images_base_url }}/openstack/keystone:queens-bionic-2
 ks_endpoints: '{{ images_base_url }}/openstack/heat:queens-bionic-20210115100839'
 ks_service: '{{ images_base_url }}/openstack/heat:queens-bionic-20210115100839'
 ks_user: '{{ images_base_url }}/openstack/heat:queens-bionic-20210115100839'
+ks_trusts: '{{ images_base_url }}/openstack/heat:queens-bionic-20210115100839'
 keystone_federations_create: '{{ images_base_url }}/openstack/heat:queens-bionic-20210115100839'
 neutron_db_sync: '{{ images_base_url }}/openstack/neutron:queens-bionic-20210115100839'
 neutron_dhcp: '{{ images_base_url }}/openstack/neutron:queens-bionic-20210115100839'
