@@ -1456,7 +1456,7 @@ class RadosGateWay(Service):
             ).decode()
 
             urlparsed = urlsplit(rgw_url)
-            rgw_port = urlparsed.netloc.partition(":")[-1]
+            rgw_port = urlparsed.port
             if not rgw_port:
                 if urlparsed.scheme == "http":
                     rgw_port = "80"
@@ -1464,7 +1464,7 @@ class RadosGateWay(Service):
                     rgw_port = "443"
 
             t_args[rgw_key] = {
-                "host": urlparsed.netloc,
+                "host": urlparsed.hostname,
                 "port": rgw_port,
                 "scheme": urlparsed.scheme,
             }
