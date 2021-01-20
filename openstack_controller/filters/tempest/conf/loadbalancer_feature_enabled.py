@@ -5,6 +5,7 @@ class LoadBalancerFeatureEnabled(base_section.BaseSection):
 
     name = "loadbalancer-feature-enabled"
     options = [
+        "not_implemented_is_error",
         "health_monitor_enabled",
         "terminated_tls_enabled",
         "l7_protocol_enabled",
@@ -13,6 +14,14 @@ class LoadBalancerFeatureEnabled(base_section.BaseSection):
         "spare_pool_enabled",
         "session_persistence_enabled",
     ]
+
+    @property
+    def not_implemented_is_error(self):
+        try:
+            if self.spec["features"]["neutron"]["backend"] == "tungstenfabric":
+                return False
+        except:
+            pass
 
     @property
     def health_monitor_enabled(self):
