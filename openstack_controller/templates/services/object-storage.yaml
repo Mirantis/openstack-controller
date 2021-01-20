@@ -62,8 +62,8 @@ spec:
               host: {{ rgw_internal.host }}
           port:
             api:
-              default: {{ rgw_external.port }}
-              public: {{ rgw_internal.port }}
+              default: {{ rgw_internal.port }}
+              public: {{ rgw_external.port }}
           scheme:
             default: {{ rgw_internal.scheme }}
             public: {{ rgw_external.scheme }}
