@@ -129,7 +129,7 @@ prometheus_memcached_exporter: '{{ images_base_url }}/stacklight/memcached-expor
 cinder_backup_storage_init: '{{ images_base_url }}/openstack/extra/ceph-config-helper:nautilus-bionic-20210112174540'
 cinder_storage_init: '{{ images_base_url }}/openstack/extra/ceph-config-helper:nautilus-bionic-20210112174540'
 glance_storage_init: '{{ images_base_url }}/openstack/extra/ceph-config-helper:nautilus-bionic-20210112174540'
-test: '{{ images_base_url }}/openstack/extra/xrally-openstack:2.1.0'
+test: '{{ images_base_url }}/openstack/extra/xrally-openstack:2.1.0-20210115084431'
 keystone_client: '{{ images_base_url }}/openstack/heat:stein-bionic-20201229084319'
 pause: '{{ images_base_url }}/general/external/pause:3.1'
 neutron_rpc_server: '{{ images_base_url }}/openstack/neutron:stein-bionic-20201229084319'
@@ -171,6 +171,6 @@ octavia_db_sync_persistence: '{{ images_base_url }}/openstack/octavia:stein-bion
 mariadb_phy_backup: '{{ images_base_url }}/general/mariadb:10.4.17-bionic-20210106145941'
 mariadb_phy_restore: '{{ images_base_url }}/general/mariadb:10.4.17-bionic-20210106145941'
 mariadb_controller: '{{ images_base_url }}/general/mariadb:10.4.17-bionic-20210106145941'
-horizon_mirantis_theme_sha256summ: 340532a128aa79bb3ab36dd231f79dc9772d5d5221b23897fc81f5845ed6988d
-horizon_mirantis_theme_url: '{{ binary_base_url }}/openstack/bin/horizon/mirantis-stein-8a4d378-20201121210117.tar.gz'
+horizon_mirantis_theme_sha256summ: ae046e1aed6ceb28d5677127bdc1442030fa019f586a541553c1d4d4922fa12d
+horizon_mirantis_theme_url: '{{ binary_base_url }}/openstack/bin/horizon/mirantis-stein-677becb-20210119130025.tar.gz'
 ceph_config_helper: '{{ images_base_url }}/openstack/extra/ceph-config-helper:nautilus-bionic-20210112174540'
