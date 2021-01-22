@@ -1,7 +1,9 @@
 import asyncio
 import base64
 import json
+from jsonpath_ng import parse
 from typing import List
+import hashlib
 
 import kopf
 import pykube
@@ -26,11 +28,15 @@ class GenericChildObject:
         self.service = service
         self.namespace = service.namespace
 
-    def _get_job_object(self, suffix, manifest, images):
+    def _get_job_object(self, suffix, manifest, images, hash_fields=None):
         child_obj = kube.dummy(
             kube.Job, f"{self.chart}-{suffix}", self.namespace
         )
-        helmbundle_ext = kube.HelmBundleExt(self.chart, manifest, images)
+        if hash_fields is None:
+            hash_fields = []
+        helmbundle_ext = kube.HelmBundleExt(
+            self.chart, manifest, images, hash_fields=hash_fields
+        )
         child_obj.helmbundle_ext = helmbundle_ext
         child_obj.service = self.service
 
@@ -116,6 +122,11 @@ class Service:
         self.openstack_version = self.body["spec"]["openstack_version"]
         self.mspec = layers.merge_spec(self.body["spec"], self.logger)
 
+    def _get_helmbundle(self):
+        data = self.resource_def
+        kopf.adopt(data, self.osdpl.obj)
+        return kube.resource(data)
+
     def _get_osdpl(self):
         osdpl = kube.OpenStackDeployment(kube.api, self.body)
         osdpl.reload()
@@ -174,6 +185,8 @@ class Service:
                 child["kind"] = kind
                 for kind_name, meta in kinds.items():
                     m_ext = meta
+                    if "hash_fields" not in meta:
+                        m_ext["hash_fields"] = []
                     m_ext["chart"] = chart_name
                     m_ext_obj = kube.HelmBundleExt(**m_ext)
 
@@ -204,6 +217,105 @@ class Service:
             if child.kind == kind and child.name == name
         ][0]
 
+    def generate_child_object_hash(self, child_object, data):
+        """Generate stable hash of child object
+
+        The has takes into account hash_fileds and create stable hash
+        by taking values from release.
+
+        :param child_object: The child object
+        :param: data: The whole helmbundle object data.
+        :return: string with hash
+        """
+
+        def _get_release_values(data, chart_name):
+            for release in data["spec"]["releases"]:
+                if release["chart"].split("/")[1] == chart_name:
+                    return release["values"]
+
+        def _generate_child_object_hash(child_object, release_values):
+            if not child_object.helmbundle_ext.hash_fields:
+                return None
+
+            hasher = hashlib.sha256()
+            resource_hash_data = {}
+            for field in child_object.helmbundle_ext.hash_fields:
+                resource_hash_data[field] = [
+                    match.value for match in parse(field).find(release_values)
+                ]
+            hasher.update(
+                json.dumps(resource_hash_data, sort_keys=True).encode()
+            )
+            return hasher.hexdigest()
+
+        release_values = _get_release_values(
+            data, child_object.helmbundle_ext.chart
+        )
+        return _generate_child_object_hash(child_object, release_values)
+
+    def generate_child_object_hashes(self, data):
+        """Generate stable hash of child objects
+
+        The has takes into account hash_fileds and create stable hash
+        by taking values from release. Return json data with hashes.
+
+        :param: data: The whole helmbundle object data.
+        :return: json data with hash. Example
+            {"<obj-kind Job|Deployment>": {
+                "<job-name>": {
+                    "hash": "<sha256hash>"
+                    }
+                }
+            }
+        """
+        res = {}
+        for child_object in self.child_objects:
+            child_object_hash = self.generate_child_object_hash(
+                child_object, data
+            )
+            child_hash = {
+                child_object.helmbundle_ext.chart: {
+                    child_object.kind: {
+                        child_object.name: {"hash": child_object_hash}
+                    }
+                }
+            }
+            layers.merger.merge(res, child_hash)
+        return res
+
+    def get_child_object_current_hash(self, child_object):
+        """Get currently defined child object hash stored
+        in HelmBundle release annotations.
+
+        :param child_object: Child object
+        :returns: String with hash or None
+        """
+        hb = self._get_helmbundle()
+        hb.reload()
+        child_obj_metadata = json.loads(
+            hb.annotations.get(
+                f"{self.group}/openstack-controller-child-objects", "{}"
+            )
+        )
+        return (
+            child_obj_metadata.get(child_object.helmbundle_ext.chart, {})
+            .get(child_object.kind, {})
+            .get(child_object.name, {})
+            .get("hash", None)
+        )
+
+    def is_child_object_hash_changed(self, child_object, data):
+        """Check if object hash was changed
+
+        :param child_object: Child object
+        :param data: The whole helmbundle object data
+        :returns: True when current hash not equal to hash in annotation
+        """
+        current_hash = self.get_child_object_current_hash(child_object)
+        new_hash = self.generate_child_object_hash(child_object, data)
+
+        return new_hash != current_hash
+
     def update_status(self, patch):
         self.osdpl.patch({"status": patch})
 
@@ -212,9 +324,11 @@ class Service:
     ):
         """
         Remove immmutable resources for helmbundle object when:
-            1. The image of immutable object is changed
-            2. The chart version for helmbundle is changed
-            3. The force flag is set to True
+            1. The hash for release values fields used in child object
+               is changed.
+            2. The image of immutable object is changed
+            3. The chart version for helmbundle is changed
+            4. The force flag is set to True
         :param new_obj: the new helmbundle object representation
         :param rendered_spec: the current representation of helmbundle
         :param force: the flag to force remove all immutable objects that we know about.
@@ -222,7 +336,7 @@ class Service:
         old_obj = kube.resource(rendered_spec)
         old_obj.reload()
 
-        to_cleanup = []
+        to_cleanup = set()
 
         def _is_immutable_changed(image, chart):
             for old_release in old_obj.obj["spec"]["releases"]:
@@ -248,12 +362,15 @@ class Service:
                                 return True
 
         for resource in self.child_objects:
+            # NOTE(vsaienko): even the object is not immutable, it may have immutable fields.
+            if self.is_child_object_hash_changed(resource, new_obj.obj):
+                to_cleanup.add(resource)
             if resource.immutable:
                 for image in resource.helmbundle_ext.images:
                     if force or _is_immutable_changed(
                         image, resource.helmbundle_ext.chart
                     ):
-                        to_cleanup.append(resource)
+                        to_cleanup.add(resource)
                         # Break on first image match.
                         break
 
@@ -411,8 +528,20 @@ class Service:
             self.logger,
             **template_args,
         )
+
         data.update(self.resource_def)
 
+        child_hashes = self.generate_child_object_hashes(data)
+        child_hashes_data = {
+            "metadata": {
+                "annotations": {
+                    f"{self.group}/openstack-controller-child-objects": json.dumps(
+                        child_hashes
+                    )
+                }
+            }
+        }
+        layers.merger.merge(data, child_hashes_data)
         return data
 
     def get_chart_value_or_none(
@@ -478,41 +607,10 @@ class OpenStackService(Service):
 
 class OpenStackServiceWithCeph(OpenStackService):
     def ensure_ceph_secrets(self):
-        self.osdpl.reload()
-        if all(
-            self.osdpl.obj.get("status", {}).get("ceph", {}).get(res)
-            == "created"
-            for res in ("configmap", "secret")
-        ):
-            return
-        if not (
-            kube.dummy(
-                pykube.Secret,
-                ceph_api.CEPH_OPENSTACK_TARGET_SECRET,
-                self.namespace,
-            ).exists()
-            and kube.dummy(
-                pykube.ConfigMap,
-                ceph_api.CEPH_OPENSTACK_TARGET_CONFIGMAP,
-                self.namespace,
-            ).exists()
-        ):
-            self.create_ceph_secrets()
-        else:
-            LOG.info("Secret and Configmap are present.")
+        self.create_ceph_secrets()
 
     def create_ceph_secrets(self):
         LOG.info("Waiting for ceph resources.")
-        # FIXME(pas-ha) race? we can re-write result of parallel thread..
-        # but who cares TBH
-        self.update_status(
-            {
-                "ceph": {
-                    "secret": ceph_api.CephStatus.waiting,
-                    "configmap": ceph_api.CephStatus.waiting,
-                }
-            }
-        )
         kube.wait_for_secret(
             settings.OSCTL_CEPH_SHARED_NAMESPACE,
             ceph_api.OPENSTACK_KEYS_SECRET,
@@ -523,14 +621,6 @@ class OpenStackServiceWithCeph(OpenStackService):
         # we need to handle this.
         self.save_ceph_secrets(oscp)
         self.save_ceph_configmap(oscp)
-        self.update_status(
-            {
-                "ceph": {
-                    "secret": ceph_api.CephStatus.created,
-                    "configmap": ceph_api.CephStatus.created,
-                }
-            }
-        )
         LOG.info("Ceph resources were created successfully.")
 
     def save_ceph_secrets(self, params: ceph_api.OSCephParams):

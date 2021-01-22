@@ -95,6 +95,13 @@ def kube_resource_list(mocker):
 
 
 @pytest.fixture
+def kube_resource(mocker):
+    mock_res = mocker.patch("openstack_controller.kube.resource")
+    yield mock_res
+    mocker.stopall()
+
+
+@pytest.fixture
 def asyncio_wait_for_timeout(mocker):
     async def mock_wait(f, timeout):
         await f

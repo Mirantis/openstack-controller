@@ -1,5 +1,5 @@
 import abc
-import jsonpath_rw as jsonpath
+from jsonpath_ng import parse
 
 
 class BaseSection(object):
@@ -21,14 +21,14 @@ class BaseSection(object):
             for release in component.get("spec", {}).get("releases", []):
                 chart_name = release["chart"].split("/")[-1]
                 if chart_name == service_name:
-                    res = jsonpath.parse(item_path).find(release["values"])
+                    res = parse(item_path).find(release["values"])
                     if res:
                         return res[0].value
                     else:
                         return item_default
 
     def get_spec_item(self, item_path, item_default=None):
-        res = jsonpath.parse(item_path).find(self.spec)
+        res = parse(item_path).find(self.spec)
         if res:
             return res[0].value
         else:

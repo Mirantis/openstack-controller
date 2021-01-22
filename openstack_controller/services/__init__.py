@@ -1300,6 +1300,7 @@ class Octavia(OpenStackService):
                     "octavia-create-resources": {
                         "images": ["create_resources"],
                         "manifest": "job_create_resources",
+                        "hash_fields": ["octavia.settings.amphora_image_url"],
                     }
                 }
             },
@@ -1340,35 +1341,6 @@ class Octavia(OpenStackService):
             t_args["redis_secret"] = redis_creds.password.decode()
         return t_args
 
-    async def cleanup_immutable_resources(self, new_obj, rendered_spec):
-        await super().cleanup_immutable_resources(new_obj, rendered_spec)
-
-        old_obj = kube.resource(rendered_spec)
-        old_obj.reload()
-
-        obj_name = "octavia-create-resources"
-        resource = self.get_child_object("Job", obj_name)
-
-        # NOTE(vsaienko): avoid unneded checks in case resource doesn't exist
-        if resource.exists():
-            for old_release in old_obj.obj["spec"]["releases"]:
-                if old_release["chart"].endswith(f"/{self.openstack_chart}"):
-                    for new_release in new_obj.obj["spec"]["releases"]:
-                        if new_release["chart"].endswith(
-                            f"/{self.openstack_chart}"
-                        ):
-                            old_image = old_release["values"]["octavia"][
-                                "settings"
-                            ].get("amphora_image_url")
-                            new_image = new_release["values"]["octavia"][
-                                "settings"
-                            ]["amphora_image_url"]
-                            if old_image is None or old_image != new_image:
-                                LOG.info(
-                                    f"Removing the following jobs: [{obj_name}]"
-                                )
-                                await resource.purge()
-
 
 class RadosGateWay(Service):
     service = "object-storage"
@@ -1379,6 +1351,7 @@ class RadosGateWay(Service):
                 "ceph-ks-endpoints": {
                     "images": ["ks_endpoints"],
                     "manifest": "job_ks_endpoints",
+                    "hash_fields": ["endpoints.*"],
                 },
                 "ceph-ks-service": {
                     "images": ["ks_service"],

@@ -40,7 +40,7 @@ class MockOsdpl:
 
 
 @mock.patch.object(kube.OpenStackDeployment, "reload")
-def test_get_osdpl(mock_reload, openstackdeployment, kubeapi):
+def test_get_osdpl(mock_reload, openstackdeployment, kubeapi, kube_resource):
     service = services.Nova(openstackdeployment, logging)
     service._get_osdpl()
     mock_reload.assert_called_once()
@@ -182,6 +182,11 @@ async def test_service_apply(mocker, openstackdeployment, compute_helmbundle):
     mock_render.return_value = compute_helmbundle
 
     mock_update_status = mocker.patch.object(services.Nova, "update_status")
+    mock_cir = mocker.patch.object(
+        services.Nova,
+        "cleanup_immutable_resources",
+        AsyncMock(return_value=False),
+    )
     mocck_ceeph_secrets = mocker.patch.object(
         services.Nova, "ensure_ceph_secrets"
     )
@@ -198,7 +203,8 @@ async def test_service_apply(mocker, openstackdeployment, compute_helmbundle):
     mocck_ceeph_secrets.assert_called_once()
     mock_adopt.assert_called_once_with(compute_helmbundle, service.osdpl.obj)
     mock_resource.assert_called_with(compute_helmbundle)
-    assert mock_resource.call_count == 2
+    assert mock_resource.call_count == 1
+    assert mock_cir.call_count == 1
     mock_info.assert_called_once()
 
 

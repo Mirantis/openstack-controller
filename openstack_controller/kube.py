@@ -82,6 +82,9 @@ class HelmBundleExt:
     chart: str
     manifest: str
     images: List[str]
+    # List of jsonpath-ng expressions, describes values in release
+    # that modify immutable fields.
+    hash_fields: List[str]
 
 
 class HelmBundleMixin:

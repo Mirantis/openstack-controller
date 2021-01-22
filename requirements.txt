@@ -2,7 +2,7 @@ dacite
 pbr!=2.1.0,>=2.0.0 # Apache-2.0
 kopf<0.29
 Jinja2>2.10
-jsonpath-rw
+jsonpath-ng
 deepmerge>=0.0.5
 pykube-ng>=19.9.0
 cryptography
