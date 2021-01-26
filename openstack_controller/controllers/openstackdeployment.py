@@ -101,6 +101,7 @@ def discover_images(mspec, logger):
 
 # on.field to force storing that field to be reacting on its changes
 @kopf.on.field(*kube.OpenStackDeployment.kopf_on_args, field="status.children")
+@kopf.on.field(*kube.OpenStackDeployment.kopf_on_args, field="status.watched")
 @kopf.on.resume(*kube.OpenStackDeployment.kopf_on_args)
 @kopf.on.update(*kube.OpenStackDeployment.kopf_on_args)
 @kopf.on.create(*kube.OpenStackDeployment.kopf_on_args)

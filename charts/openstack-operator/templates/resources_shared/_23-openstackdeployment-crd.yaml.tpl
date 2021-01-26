@@ -801,6 +801,25 @@ spec:
               x-kubernetes-preserve-unknown-fields: true
               type: object
               description: this is arbitrary JSON
+              properties:
+                watched:
+                  type: object
+                  description: >
+                    The object that contains information of objects that openstack-controller
+                    is watching for. Changin fields of this object will trigger update of
+                    all children.
+                  properties:
+                    ceph:
+                      type: object
+                      properties:
+                        secret:
+                          type: object
+                          properties:
+                            hash:
+                              type: string
+                              description: >
+                                The hash value for secret, is a trigger to reload ceph
+                                metadata
       additionalPrinterColumns:
       - name: OpenStack
         type: string
