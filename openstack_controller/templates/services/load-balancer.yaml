@@ -83,7 +83,7 @@ spec:
               pool_end: {{ subnet.pool_end }}
   {%- endfor %}
           amphora_image_url: {{ images["octavia_amphora"] }}
-          amphora_image_checksum: {{ spec.features.octavia.get('amphora_image_checksum', '') }}
+          amphora_image_checksum: {{ images["octavia_amphora_checksum"] }}
 {%- endif %}
 {%- if 'amphorav2' in provider_map.keys() %}
           enable_amphorav2: true

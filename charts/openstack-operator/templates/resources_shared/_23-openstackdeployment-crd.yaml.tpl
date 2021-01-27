@@ -679,9 +679,6 @@ spec:
                     octavia:
                       type: object
                       properties:
-                        amphora_image_checksum:
-                          type: string
-                          description: MD5 checksum of Amphora image
                         lb_network:
                           type: object
                           required:
