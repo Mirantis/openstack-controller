@@ -324,7 +324,14 @@ def merge_spec(spec, logger):
     # Merge IAM data defined via values, the user defined via spec
     # still have priority
     if settings.OSDPL_IAM_DATA["enabled"]:
-        # TODO(vsaienko): pass odic certificate into keystone/horizon pods /etc/ssl/certs folder
+        validate_server_opts = (
+            {"oidcCASecret": settings.OSDPL_IAM_DATA["oidcCASecret"]}
+            if "oidcCASecret" in settings.OSDPL_IAM_DATA
+            else {
+                "OIDCSSLValidateServer": False,
+                "OIDCOAuthSSLValidateServer": False,
+            }
+        )
         iam_features = {
             "features": {
                 "keystone": {
@@ -332,9 +339,8 @@ def merge_spec(spec, logger):
                         "enabled": True,
                         "url": settings.OSDPL_IAM_DATA["url"],
                         "oidc": {
-                            "OIDCSSLValidateServer": False,
-                            "OIDCOAuthSSLValidateServer": False,
                             "OIDCClientID": settings.OSDPL_IAM_DATA["client"],
+                            **validate_server_opts,
                         },
                     }
                 }
