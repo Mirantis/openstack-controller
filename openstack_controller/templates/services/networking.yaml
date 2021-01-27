@@ -187,6 +187,7 @@ spec:
     "ks_user",
     "ks_service",
     "neutron_linuxbridge_agent",
+    "neutron_netns_cleanup_cron",
     "ks_endpoints",
     "neutron_l3",
     "neutron_sriov_agent_init",
@@ -556,6 +557,9 @@ spec:
       labels:
         sriov:
           node_selector_key: openstack-compute-node
+          node_selector_value: enabled
+        netns_cleanup_cron:
+          node_selector_key: openvswitch
           node_selector_value: enabled
       # NODE SPECIFIC START
       overrides:

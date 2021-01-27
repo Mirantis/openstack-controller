@@ -379,6 +379,9 @@ spec:
         sriov:
           node_selector_key: openstack-compute-node
           node_selector_value: enabled
+        netns_cleanup_cron:
+          node_selector_key: openvswitch
+          node_selector_value: enabled
       pod:
         probes:
           dhcp_agent:
