@@ -465,6 +465,8 @@ spec:
             - name: {{ $optionName }}
               value: "{{ $optionValue }}"
             {{- end }}
+            - name: OSCTL_HEARTBEAT_PEERING_OBJECT_NAME
+              value: openstack-controller.ceph.secrets
 {{ tuple . | include "openstack-controller.common_env" | indent 12 }}
           livenessProbe:
             httpGet:

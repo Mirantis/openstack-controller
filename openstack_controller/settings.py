@@ -185,14 +185,18 @@ METRICS = {
     ),
 }
 
+OSCTL_HEARTBEAT_PEERING_OBJECT_NAME = os.environ.get(
+    "OSCTL_HEARTBEAT_PEERING_OBJECT_NAME", "openstack-controller.osdpl"
+)
 
 if OSCTL_HEARTBEAT_INTERVAL:
 
     @kopf.timer(
-        "lcm.mirantis.com",
-        "v1alpha1",
-        "openstackdeployments",
+        "zalando.org",
+        "v1",
+        "kopfpeerings",
         interval=OSCTL_HEARTBEAT_INTERVAL,
+        when=lambda name, **_: OSCTL_HEARTBEAT_PEERING_OBJECT_NAME == name,
     )
     async def heartbeat(spec, **kwargs):
         global HEARTBEAT
