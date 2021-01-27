@@ -42,7 +42,7 @@ services:
       values:
         pod:
           replicas:
-            api: 4
+            api: 6
           lifecycle:
             disruption_budget:
               api:
@@ -114,7 +114,7 @@ services:
         pod:
           replicas:
             api_metadata: 3
-            osapi: 3
+            osapi: 6
             conductor: 3
             consoleauth: 3
             scheduler: 3
