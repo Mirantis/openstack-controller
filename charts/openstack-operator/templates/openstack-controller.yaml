@@ -103,7 +103,7 @@ rules:
   # Application: read ceph access data from shared namespace.
   - apiGroups: [""]
     resources: [secrets,configmaps]
-    verbs: [list, get, create, patch, update]
+    verbs: [list, get, create, watch, patch, update]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
@@ -444,6 +444,35 @@ spec:
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
 {{ end }}
+        - name: ceph-secrets
+          image: {{ tuple . .Values.image | include "getImageUrl" }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command:
+            - kopf
+            - run
+            - '-n'
+            - {{ .Values.osdpl.cephSharedNamespace}}
+            - '-P'
+            - openstack-controller.ceph.secrets
+            - '-m'
+            - openstack_controller.controllers.ceph.secrets
+            - '-m'
+            - openstack_controller.controllers.probe
+            - '-L'
+            - 'http://0.0.0.0:32774/healthz'
+          env:
+            {{- range $optionName, $optionValue := .Values.osdpl.settings.raw }}
+            - name: {{ $optionName }}
+              value: "{{ $optionValue }}"
+            {{- end }}
+{{ tuple . | include "openstack-controller.common_env" | indent 12 }}
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 32774
+            {{- toYaml .Values.osdpl.pod.controller.node_maintenance_request.liveness.params | nindent 12}}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
