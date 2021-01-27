@@ -43,7 +43,7 @@ keystone_domain_manage: '{{ images_base_url }}/openstack/heat:queens-bionic-2021
 keystone_fernet_rotate: '{{ images_base_url }}/openstack/keystone:queens-bionic-20210121134922'
 keystone_fernet_setup: '{{ images_base_url }}/openstack/keystone:queens-bionic-20210121134922'
 ks_endpoints: '{{ images_base_url }}/openstack/heat:queens-bionic-20210121134922'
-ks_service: '{{ images_base_url }}/openstack/openstack-tools:ussuri-bionic-20210121141935'
+ks_service: '{{ images_base_url }}/openstack/openstack-tools:ussuri-bionic-20210126180020'
 ks_user: '{{ images_base_url }}/openstack/heat:queens-bionic-20210121134922'
 ks_trusts: '{{ images_base_url }}/openstack/heat:queens-bionic-20210121134922'
 keystone_federations_create: '{{ images_base_url }}/openstack/heat:queens-bionic-20210121134922'
@@ -173,3 +173,4 @@ mariadb_controller: '{{ images_base_url }}/general/mariadb:10.4.17-bionic-202101
 horizon_mirantis_theme_sha256summ: 70e30878300bd097e15b9ad9a7a2d1488a0789844ef7621635b07fdd6d9a7826
 horizon_mirantis_theme_url: '{{ binary_base_url }}/openstack/bin/horizon/mirantis-queens-de828e6-20210119125114.tar.gz'
 ceph_config_helper: '{{ images_base_url }}/openstack/extra/ceph-config-helper:nautilus-bionic-20210112174540'
+octavia_amphora_checksum: d86e1ccf8f8ccbac1fe522231dd51182
