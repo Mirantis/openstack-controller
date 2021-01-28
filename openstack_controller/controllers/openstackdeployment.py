@@ -81,6 +81,7 @@ async def run_task(task_def):
 
         # Let's wait for 10 second before retry to not introduce a lot of
         # task scheduling in case of some depended task is slow.
+        LOG.info("Sleeping ...")
         await asyncio.sleep(10)
 
     if permanent_exception:
@@ -125,6 +126,7 @@ async def handle(body, meta, spec, logger, event, **kwargs):
     kwargs["patch"]["status"]["deployed"] = (
         all([c is True for c in children.values()]) if children else False
     )
+
     LOG.debug(f"Updated status for osdpl {kwargs['name']}")
 
     if spec.get("draft"):

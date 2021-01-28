@@ -36,51 +36,48 @@ osdpl:
       raw: {}
     secrets:
       raw: {}
-    helmbundle:
-      raw: {}
     health:
       raw:
         PYTHONASYNCIODEBUG: 1
         KOPF_RUN_DEBUG: 1
     node_maintenance_request:
       raw: {}
+    helm2to3:
+      raw:
+        TILLER_NAMESPACE: "stacklight"
+        RELEASE_STORAGE: "configmaps"
+        RELEASE_VERSION_MAX: "3"
   pod:
     controller:
       osdpl:
        liveness:
          params:
            initialDelaySeconds: 120
-           periodSeconds: 15
+           periodSeconds: 60
            timeoutSeconds: 5
       health:
         liveness:
           params:
             initialDelaySeconds: 120
-            periodSeconds: 15
+            periodSeconds: 60
             timeoutSeconds: 5
       node:
         liveness:
           params:
             initialDelaySeconds: 120
-            periodSeconds: 15
+            periodSeconds: 60
             timeoutSeconds: 5
       secrets:
         liveness:
           params:
             initialDelaySeconds: 120
-            periodSeconds: 15
-            timeoutSeconds: 5
-      helmbundle:
-        liveness:
-          params:
-            initialDelaySeconds: 120
-            periodSeconds: 15
+            periodSeconds: 60
             timeoutSeconds: 5
       node_maintenance_request:
         liveness:
           params:
             initialDelaySeconds: 120
-            periodSeconds: 15
+            periodSeconds: 60
             timeoutSeconds: 5
 
 tf:

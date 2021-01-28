@@ -94,11 +94,7 @@ class Redis(Service):
 
     async def apply(self, event, **kwargs):
         # ensure child ref exists in the current status of osdpl object
-        if self.resource_name not in self._get_osdpl().obj.get(
-            "status", {}
-        ).get("children", {}):
-            status_patch = {"children": {self.resource_name: True}}
-            self.update_status(status_patch)
+        self.set_children_status("Applying")
         LOG.info(f"Applying config for {self.service}")
         data = self.render()
         LOG.info(f"Config applied for {self.service}")
@@ -131,6 +127,7 @@ class Redis(Service):
             reason=event.capitalize(),
             message=f"{event}d {redisfailover_obj.kind} for {self.service}",
         )
+        self.set_children_status(True)
 
 
 class MariaDB(Service):
@@ -540,6 +537,13 @@ class Heat(OpenStackService):
                 }
             }
         }
+
+        # NOTE(vsaienko): we update endpoints which update configmap-etc hash
+        # so all heat jobs are affected. We need to purge them before doing
+        # first apply.
+        for resource in self.child_objects:
+            if resource.immutable:
+                await resource.purge()
 
         for kind, obj_name in upgrade_map:
             child_obj = self.get_child_object(kind, obj_name)

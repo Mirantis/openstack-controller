@@ -1,0 +1,11 @@
+---
+prelude: >
+    Usage of Helmbundles adds additional complexity into operator code.
+features:
+  - |
+    Adds support of direct communication with helm.
+upgrade:
+  - |
+    During the upgrade of openstack controller all helmbundles should be
+    removed and helmv2 releases converted to helm3 with help of helm-2to3
+    init container.

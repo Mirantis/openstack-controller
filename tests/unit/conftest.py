@@ -74,6 +74,11 @@ def compute_helmbundle():
 
 
 @pytest.fixture
+def compute_helmbundle_all():
+    yield yaml.safe_load(open("tests/fixtures/compute_helmbundle_all.yaml"))
+
+
+@pytest.fixture
 def kopf_adopt(mocker):
     mock_adopt = mocker.patch("kopf.adopt")
     yield mock_adopt

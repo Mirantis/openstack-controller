@@ -220,6 +220,9 @@ if OSCTL_HEARTBEAT_INTERVAL:
         CURRENT_NUMBER_OF_TASKS = event_queue_var.get().qsize()
 
 
+# The interval for periodic check of helm releases
+OSCTL_HEALTH_INTERVAL = int(os.environ.get("OSCTL_HEALTH_INTERVAL", 60))
+
 # Number of instances to migrate off node concurrently
 OSCTL_MIGRATE_CONCURRENCY = int(os.environ.get("OSCTL_MIGRATE_CONCURRENCY", 5))
 
@@ -266,7 +269,7 @@ LOGGING_CONFIG = {
         },
     },
     "loggers": {
-        "kopf.activities.prob": {
+        "kopf.activities.probe": {
             "handlers": ["default"],
             "level": "WARNING",
             "propagate": False,

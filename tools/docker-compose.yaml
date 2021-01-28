@@ -28,10 +28,6 @@ services:
     <<: *osctl
     container_name: node
     command: kopf run --dev -n openstack --liveness=http://0.0.0.0:8090/healthz -m openstack_controller.controllers.probe -m openstack_controller.controllers.node -P openstack-controller.node
-  helmbundle:
-    <<: *osctl
-    container_name: helmbundle
-    command: kopf run --dev -n openstack --liveness=http://0.0.0.0:8090/healthz -m openstack_controller.controllers.probe -m openstack_controller.controllers.helmbundle -P openstack-controller.helmbundle
   secrets:
     <<: *osctl
     container_name: secrets
