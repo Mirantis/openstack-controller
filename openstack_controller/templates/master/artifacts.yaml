@@ -40,7 +40,7 @@ keystone_db_sync: '{{ images_base_url }}/openstack/keystone:master-bionic-202101
 keystone_domain_manage: '{{ images_base_url }}/openstack/heat:master-bionic-20210127180024'
 keystone_fernet_rotate: '{{ images_base_url }}/openstack/keystone:master-bionic-20210127180024'
 keystone_fernet_setup: '{{ images_base_url }}/openstack/keystone:master-bionic-20210127180024'
-ks_endpoints: '{{ images_base_url }}/openstack/heat:master-bionic-20210127180024'
+ks_endpoints: '{{ images_base_url }}/openstack/openstack-tools:ussuri-bionic-20210126180020'
 ks_service: '{{ images_base_url }}/openstack/openstack-tools:ussuri-bionic-20210126180020'
 ks_user: '{{ images_base_url }}/openstack/heat:master-bionic-20210127180024'
 ks_trusts: '{{ images_base_url }}/openstack/heat:master-bionic-20210127180024'

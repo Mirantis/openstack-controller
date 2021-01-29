@@ -43,7 +43,7 @@ keystone_db_sync: '{{ images_base_url }}/openstack/keystone:victoria-bionic-2021
 keystone_domain_manage: '{{ images_base_url }}/openstack/heat:victoria-bionic-20210129120815'
 keystone_fernet_rotate: '{{ images_base_url }}/openstack/keystone:victoria-bionic-20210129120815'
 keystone_fernet_setup: '{{ images_base_url }}/openstack/keystone:victoria-bionic-20210129120815'
-ks_endpoints: '{{ images_base_url }}/openstack/heat:victoria-bionic-20210129120815'
+ks_endpoints: '{{ images_base_url }}/openstack/openstack-tools:ussuri-bionic-20210127180024'
 ks_service: '{{ images_base_url }}/openstack/openstack-tools:ussuri-bionic-20210127180024'
 ks_user: '{{ images_base_url }}/openstack/heat:victoria-bionic-20210129120815'
 ks_trusts: '{{ images_base_url }}/openstack/heat:victoria-bionic-20210129120815'
