@@ -223,6 +223,7 @@ services:
               agent_down_time: 30
               max_l3_agents_per_router: 3
               executor_thread_pool_size: 70
+              rpc_conn_pool_size: 80
             agent:
               report_interval: 10
             database:
