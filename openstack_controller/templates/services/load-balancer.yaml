@@ -265,6 +265,7 @@ spec:
             enabled_provider_drivers: {{ ','.join(provider_map.values()) }}
 {%- if 'amphorav2' in provider_map.keys() %}
           task_flow:
+            jobboard_enabled: true
             jobboard_backend_hosts: rfs-openstack-redis.{{ redis_namespace }}
             jobboard_backend_port: 26379
             jobboard_backend_password: {{ redis_secret }}

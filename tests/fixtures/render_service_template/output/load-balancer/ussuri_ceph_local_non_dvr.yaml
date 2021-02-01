@@ -33,6 +33,7 @@ spec:
             memcache_secret_key: cAZLeChP79lxHJ1Z
             memcache_security_strategy: ENCRYPT
           task_flow:
+            jobboard_enabled: true
             jobboard_backend_hosts: rfs-openstack-redis.openstack-redis
             jobboard_backend_password: cfLDYSsNbuCywa6VmBvZ8h2sJXuZnvqW
             jobboard_backend_port: 26379
