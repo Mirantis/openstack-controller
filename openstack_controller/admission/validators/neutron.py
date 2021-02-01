@@ -18,6 +18,23 @@ from openstack_controller import exception
 class NeutronValidator(base.BaseValidator):
     service = "networking"
 
+    def _check_bgpvpn(self, review_request):
+        bgpvpn = (
+            review_request.get("object", {})
+            .get("spec", {})
+            .get("features", {})
+            .get("neutron", {})
+            .get("bgpvpn", {})
+        )
+        if bgpvpn.get("enabled") is None:
+            return
+        if not bgpvpn.get("route_reflector", {}).get("enabled"):
+            if not bgpvpn.get("peers"):
+                raise exception.OsDplValidationFailed(
+                    "Either neutron:bgpvpn:peers or "
+                    "neutron:bgpvpn:route_reflector have to be specified"
+                )
+
     def validate(self, review_request):
         neutron_features = (
             review_request.get("object", {})
@@ -35,3 +52,4 @@ class NeutronValidator(base.BaseValidator):
                 "not used, physnet needs to be specified in "
                 "features.neutron.floating_network section."
             )
+        self._check_bgpvpn(review_request)

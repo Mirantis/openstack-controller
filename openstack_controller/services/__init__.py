@@ -774,6 +774,24 @@ class Neutron(OpenStackService):
                         for key in tf_api_keys
                     }
                 )
+        if (
+            utils.get_in(
+                self.mspec["features"], ["neutron", "bgpvpn", "enabled"]
+            )
+            == True
+            and utils.get_in(
+                self.mspec["features"], ["neutron", "bgpvpn", "peers"]
+            )
+            == None
+        ):
+            neighbors_secret = secrets.BGPVPNSecret()
+            peers = []
+            # NOTE(vsaienko) we deploy frr with networking helmbundle, so render
+            # first with empty peers, which will be updated once frr chart create
+            # secret
+            if neighbors_secret.kube_obj.exists():
+                peers = neighbors_secret.get_peer_ips()
+            self.mspec["features"]["neutron"]["bgpvpn"]["peers"] = peers
 
         return t_args
 

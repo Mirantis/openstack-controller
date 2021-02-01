@@ -37,6 +37,7 @@ CHART_GROUP_MAPPING = {
         "etcd",
         "gnocchi",
         "ceph-rgw",
+        "frr",
     ],
 }
 

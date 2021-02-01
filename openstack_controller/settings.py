@@ -129,6 +129,11 @@ OSCTL_CEPH_SHARED_NAMESPACE = os.environ.get(
     "OSCTL_CEPH_SHARED_NAMESPACE", "openstack-ceph-shared"
 )
 
+# The name of secret with BGP information
+OSCTL_BGPVPN_NEIGHBOR_INFO_SECRET_NAME = os.environ.get(
+    "OSCTL_BGPVPN_BGP_NEIGHBOR_INFO_SECRET_NAME", "frr-bgp-neighbors"
+)
+
 # The number of retries while waiting a resouce deleted
 OSCTL_RESOURCE_DELETED_WAIT_RETRIES = int(
     os.environ.get("OSCTL_RESOURCE_DELETED_WAIT_RETRIES", 120)

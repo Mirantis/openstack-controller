@@ -78,6 +78,11 @@ class NetworkFeatureEnabled(base_section.BaseSection):
             ):
                 api_extensions_default.append("rbac-address-scope")
 
+        if self.get_spec_item("features.neutron.bgpvpn.enabled"):
+            api_extensions_default.extend(
+                ["bgpvpn", "bgpvpn-routes-control", "bgpvpn-vni"]
+            )
+
         return ", ".join(api_extensions_default)
 
     @property

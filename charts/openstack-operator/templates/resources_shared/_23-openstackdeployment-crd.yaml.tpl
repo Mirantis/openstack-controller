@@ -583,6 +583,42 @@ spec:
                                         x-kubernetes-preserve-unknown-fields: true
                                         type: object
                                         description: RAW config for device.
+                        bgpvpn:
+                          type: object
+                          required:
+                            - enabled
+                            - as_number
+                          properties:
+                            enabled:
+                              type: boolean
+                              description: Enable BGPVPN plugin/service
+                            control_interface:
+                              type: string
+                              description: IP address or interface used for BGP peerings
+                            dataplane_interface:
+                              type: string
+                              description: IP address or interface used to send VPN traffic
+                            peers:
+                              type: array
+                              description: IP addresses of BGP peers, when not specified will be picked from secret
+                              items:
+                                type: string
+                            as_number:
+                              type: integer
+                              description: Autonomous System number
+                            evpn_vxlan_port:
+                              type: integer
+                              description: UDP port toward which send VXLAN traffic
+                            route_reflector:
+                              type: object
+                              description: The object describes RouteReflector settings
+                              properties:
+                                enabled:
+                                  type: boolean
+                                  description: Enable BGPVPN route reflector on controller nodes
+                                neighbor_subnet:
+                                  type: string
+                                  description: BGP sessions allowed from neighbors in this subnet
                     messaging:
                       type: object
                       properties:
@@ -820,6 +856,16 @@ spec:
                               description: >
                                 The hash value for secret, is a trigger to reload ceph
                                 metadata
+                    neutron:
+                      properties:
+                        bgpvpn_neighbor_secret:
+                          properties:
+                            hash:
+                              description: |
+                                The hash value for secret, is a trigger to reload neutron bgpvpn metadata
+                              type: string
+                          type: object
+                      type: object
       additionalPrinterColumns:
       - name: OpenStack
         type: string

@@ -3,10 +3,12 @@ import configparser
 import json
 import kopf
 import pykube
+import hashlib
 from urllib.parse import urlsplit
 
 from openstack_controller import ceph_api
 from openstack_controller import constants
+from openstack_controller import health
 from openstack_controller import kube
 from openstack_controller import secrets
 from openstack_controller import settings  # noqa
@@ -138,6 +140,51 @@ async def handle_neutron_configmap_secret(
     }
     tfs = secrets.TungstenFabricSecret()
     tfs.save(secret_data)
+
+
+# NOTE(vsaienko): we do not need to listen for resume event, as it will trigger
+# services update anyway
+@kopf.on.update(
+    "",
+    "v1",
+    "secrets",
+)
+@kopf.on.create(
+    "",
+    "v1",
+    "secrets",
+)
+@utils.collect_handler_metrics
+async def handle_bgpvpnsecret(
+    body,
+    meta,
+    name,
+    status,
+    logger,
+    diff,
+    **kwargs,
+):
+
+    if name != settings.OSCTL_BGPVPN_NEIGHBOR_INFO_SECRET_NAME:
+        return
+
+    osdpl = health.get_osdpl(settings.OSCTL_OS_DEPLOYMENT_NAMESPACE)
+
+    hasher = hashlib.sha256()
+    hasher.update(json.dumps(body["data"], sort_keys=True).encode())
+    secret_hash = hasher.hexdigest()
+
+    osdpl.patch(
+        {
+            "status": {
+                "watched": {
+                    "neutron": {
+                        "bgpvpn_neighbor_secret": {"hash": secret_hash}
+                    }
+                }
+            }
+        }
+    )
 
 
 @kopf.on.create(

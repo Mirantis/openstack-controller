@@ -6,8 +6,10 @@
 {%- set stacklight_enabled = spec.get('features', {}).get('stacklight', {}).get('enabled', False) %}
 {%- set tungstenfabric_enabled = spec.features.neutron.get('backend', 'ml2') == 'tungstenfabric' %}
 {%- set tungstenfabric_custom_api_opts = tf_api_service is defined and tf_api_port is defined %}
+{%- set bgpvpn = spec.features.neutron.get('bgpvpn', {'enabled': False}) %}
 {%- set notification_topics = ['notifications'] %}
 {%- set service_plugins = ['<None>'] if tungstenfabric_enabled else ['router', 'metering', 'qos'] %}
+{%- do service_plugins.append('bgpvpn') if bgpvpn.enabled %}
 {%- do notification_topics.append('stacklight_notifications') if stacklight_enabled %}
 {%- set floating_network = spec.features.neutron.get('floating_network', {}) %}
 {%- set baremetal_enabled = 'baremetal' in spec.features.get('services', []) %}
@@ -168,6 +170,30 @@ spec:
   {%- endif %}
   # NODE SPECIFIC END
 {%- if spec.get('migration', {}).get('neutron', {}).get('deploy_main_service', true) %}
+{%- if bgpvpn.get("route_reflector", {}).get("enabled", False) %}
+  - name: openstack-neutron-frrouting
+    chart: {{spec.common.infra.repo}}/frr
+    values:
+      images:
+        tags:
+          {%- for image in [
+          "frr",
+          "frr_init",
+          "frr_info",
+          "dep_check",
+          "image_repo_sync",] %}
+              {%- if image in images %}
+                {{ image }}: {{ images[image] }}
+              {%- endif %}
+          {%- endfor %}
+      conf:
+        bgp:
+          as_number: {{ bgpvpn.as_number }}
+          update_source_interface: {{ bgpvpn.get('control_interface', spec.features.neutron.tunnel_interface) }}
+          {%- if bgpvpn.route_reflector.get("neighbor_subnet") %}
+          neighbor_subnet: {{ bgpvpn.route_reflector.neighbor_subnet }}
+          {%- endif %}
+{%- endif %}
   - name: openstack-neutron
     chart: {{spec.common.openstack.repo}}/neutron
     values:
@@ -375,6 +401,9 @@ spec:
         daemonset_sriov_agent: false
         pod_rally_test: false
       {%- endif %}
+      {%- if bgpvpn.enabled %}
+        daemonset_bagpipe_bgp: true
+      {%- endif %}
       network:
         core_plugin: {{ spec.features.neutron.get('backend', 'ml2') }}
       {%- if spec.get('features', {}).get('neutron', {}).get('tunnel_interface') %}
@@ -457,6 +486,10 @@ spec:
           {%- endif %}
           oslo_messaging_notifications:
             topics: {{ notification_topics|join(',') }}
+          {%- if bgpvpn.enabled %}
+          service_providers:
+            service_provider: BGPVPN:BaGPipe:networking_bgpvpn.neutron.services.service_drivers.bagpipe.bagpipe_v2.BaGPipeBGPVPNDriver:default
+          {%- endif %}
         logging:
           logger_neutron:
             level: {{ spec.get('features', {}).get('logging', {}).get('neutron', {}).get('level', 'INFO') }}
@@ -554,6 +587,32 @@ spec:
 {%- for network in spec.features.neutron.external_networks %}
           {{ network.bridge }}: {{ network.interface }}
 {%- endfor %}
+      {%- if bgpvpn.enabled %}
+          br-mpls: 'null'
+        bagpipe_bgp:
+          bgp:
+            local_address: {{ bgpvpn.get('control_interface', spec.features.neutron.tunnel_interface) }}
+            {%- if bgpvpn.get("peers") %}
+            peers: {{ bgpvpn.peers | join(',') }}
+            {%- endif %}
+            my_as: {{ bgpvpn.as_number }}
+          common:
+            root_helper: sudo /var/lib/openstack/bin/neutron-rootwrap /etc/neutron/rootwrap.conf
+          api:
+            host: localhost
+            port: 8082
+          dataplane_driver_ipvpn:
+            dataplane_driver: ovs
+            dataplane_local_address: {{ bgpvpn.get('dataplane_interface', spec.features.neutron.tunnel_interface) }}
+            ovs_bridge: br-mpls
+            mpls_interface: '*gre*'
+            gre_tunnel_options: packet_type=legacy_l3
+            proxy_arp: false
+          dataplane_driver_evpn:
+            dataplane_driver: ovs
+            dataplane_local_address: {{ bgpvpn.get('dataplane_interface', spec.features.neutron.tunnel_interface) }}
+            vxlan_dst_port: {{ bgpvpn.get('evpn_vxlan_port', 4789) }}
+      {%- endif %}
       labels:
         sriov:
           node_selector_key: openstack-compute-node
@@ -581,7 +640,8 @@ spec:
         neutron_ovs-agent:
           labels:
       {%- for label, override in neutron_node_specific.items() %}
-        {%- if override.get("dpdk", {}).get("enabled", False) or override.get('tunnel_interface') %}
+        {%- set bagpipe_bgpvpn = override.get('bgpvpn', {}).get('enabled', False) %}
+        {%- if override.get("dpdk", {}).get("enabled", False) or override.get('tunnel_interface') or bagpipe_bgpvpn %}
             {{ label }}:
               values:
                 {%- if override.get('tunnel_interface') %}
@@ -589,18 +649,27 @@ spec:
                   interface:
                     tunnel: {{  override.tunnel_interface }}
                 {%- endif %}
-                {%- if override.get("dpdk", {}).get("enabled", False) %}
+                {%- if override.get("dpdk", {}).get("enabled", False) or bagpipe_bgpvpn %}
                 conf:
+                  {%- if override.get("dpdk", {}).get("enabled", False) %}
                   ovs_dpdk:
                     bonds: {{ override.dpdk.get("bonds", []) }}
                     bridges: {{ override.dpdk.bridges }}
                     driver: {{ override.dpdk.driver }}
                     nics: {{ override.dpdk.get("nics", []) }}
                     enabled: true
+                  {%- endif %}
                   plugins:
-                    ovs:
-                      datapath_type: netdev
-                      vhostuser_socket_dir: /var/run/openvswitch/vhostuser
+                    openvswitch_agent:
+                  {%- if override.get("dpdk", {}).get("enabled", False) %}
+                      ovs:
+                        datapath_type: netdev
+                        vhostuser_socket_dir: /var/run/openvswitch/vhostuser
+                  {%- endif %}
+                  {%- if bagpipe_bgpvpn %}
+                      agent:
+                        extensions: qos,bagpipe_bgpvpn
+                  {%- endif %}
                 {%- endif %}
         {%- endif %}
       {%- endfor %}

@@ -22,6 +22,7 @@ from cryptography.hazmat.backends import (
 from openstack_controller import constants
 from openstack_controller import kube
 from openstack_controller import utils
+from openstack_controller import settings
 
 LOG = utils.get_logger(__name__)
 
@@ -709,3 +710,43 @@ class ServiceAccountsSecrets:
                 ).decode()
             },
         )
+
+
+class JsonSecret:
+    """The secret where values of keys is in json format"""
+
+    def __init__(self, namespace: str, name: str):
+        self.namespace = namespace
+        self.name = name
+        meta = {"name": self.name, "namespace": self.namespace}
+        self.kube_obj = pykube.Secret(kube.api, {"metadata": meta})
+
+    def decode(self, data):
+        params = {}
+        for key, value in data.items():
+            decoded = json.loads(base64.b64decode(value))
+            params[key] = decoded
+        return params
+
+    def get(self):
+        decoded = self.decode(get_secret_data(self.namespace, self.name))
+        return decoded
+
+    def wait(self):
+        kube.wait_for_secret(self.namespace, self.name)
+
+
+class BGPVPNSecret(JsonSecret):
+    def __init__(self):
+        super().__init__(
+            namespace=settings.OSCTL_OS_DEPLOYMENT_NAMESPACE,
+            name=settings.OSCTL_BGPVPN_NEIGHBOR_INFO_SECRET_NAME,
+        )
+
+    def get_peer_ips(self):
+        data = self.get()
+        peers = []
+        for node_name, node_data in data.items():
+            peer = node_data["bgp"]["source_ip"]
+            peers.append(peer)
+        return peers

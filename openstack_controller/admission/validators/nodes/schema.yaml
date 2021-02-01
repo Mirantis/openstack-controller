@@ -147,6 +147,15 @@ patternProperties:
                       amount:
                         type: string
                         description: The amount of hugepages, default 1Gi
+              bgpvpn:
+                type: object
+                additionalProperties: False
+                required:
+                  - enabled
+                properties:
+                  enabled:
+                    type: boolean
+                    description: Enable BGPVPN plugin/service
       services:
         additionalProperties: False
         type: object

@@ -86,6 +86,9 @@ spec:
           openvswitch_db_server: openvswitch-db-server:latest
           openvswitch_vswitchd: openvswitch-vswitchd:latest
           openvswitch_vswitchd_dpdk: openvswitch-vswitchd-dpdk:latest
+      overrides:
+        openvswitch_openvswitch-vswitchd:
+          labels: null
       pod:
         probes:
           ovs_db:
@@ -120,41 +123,17 @@ spec:
                   initialDelaySeconds: 0
                   periodSeconds: 10
                   timeoutSeconds: 5
-      overrides:
-        openvswitch_openvswitch-vswitchd:
-           labels:
-             openstack-compute-node-dpdk-1::enabled:
-               values:
-                 pod:
-                   resources:
-                     enabled: true
-                     ovs:
-                       vswitchd:
-                         limits:
-                           hugepages-2Mi: 1Gi
-                           memory: 1Gi
-                 conf:
-                   ovs_dpdk:
-                     enabled: true
-                     hugepages_mountpath: /dev/hugepages
-                     socket_memory: 1024
-                     vhostuser_socket_dir: vhostuser
-             openstack-compute-node-dpdk-2::enabled:
-               values:
-                 pod:
-                   resources:
-                     enabled: true
-                     ovs:
-                       vswitchd:
-                         limits:
-                           hugepages-2Mi: 1Gi
-                           memory: 1Gi
-                 conf:
-                   ovs_dpdk:
-                     enabled: true
-                     hugepages_mountpath: /dev/hugepages
-                     socket_memory: 1024
-                     vhostuser_socket_dir: vhostuser
+  - chart: 'osh-infra/frr'
+    name: 'openstack-neutron-frrouting'
+    values:
+      conf:
+        bgp:
+          as_number: 64512
+          update_source_interface: 'ens3'
+      images: 
+        tags: 
+          dep_check: 'dep-check:latest'
+          image_repo_sync: 'image-repo-sync:latest'
   - chart: osh/neutron
     name: openstack-neutron
     values:
@@ -172,6 +151,27 @@ spec:
       conf:
         auto_bridge_add:
           br-ex: veth-phy
+          br-mpls: 'null'
+        bagpipe_bgp: 
+          api:
+            host: 'localhost'
+            port: 8082
+          bgp:
+            local_address: 'ens3'
+            my_as: 64512
+          common: 
+            root_helper: 'sudo /var/lib/openstack/bin/neutron-rootwrap /etc/neutron/rootwrap.conf'
+          dataplane_driver_evpn:
+            dataplane_driver: 'ovs'
+            dataplane_local_address: 'ens3'
+            vxlan_dst_port: 4789
+          dataplane_driver_ipvpn:
+            dataplane_driver: 'ovs'
+            dataplane_local_address: 'ens3'
+            gre_tunnel_options: 'packet_type=legacy_l3'
+            mpls_interface: '*gre*'
+            ovs_bridge: 'br-mpls'
+            proxy_arp: False
         ironic:
           insecure: true
         l3_agent:
@@ -194,7 +194,7 @@ spec:
             l3_ha: true
             l3_ha_network_type: vxlan
             max_l3_agents_per_router: 3
-            service_plugins: router,metering,qos
+            service_plugins: router,metering,qos,bgpvpn
           cache:
             backend: oslo_cache.memcache_pool
           keystone_authtoken:
@@ -202,6 +202,8 @@ spec:
             memcache_security_strategy: ENCRYPT
           oslo_messaging_notifications:
             topics: notifications,stacklight_notifications
+          service_providers:
+            service_provider: BGPVPN:BaGPipe:networking_bgpvpn.neutron.services.service_drivers.bagpipe.bagpipe_v2.BaGPipeBGPVPNDriver:default
         paste:
           app:neutronversions:
             paste.app_factory: neutron.pecan_wsgi.app:versions_factory
@@ -382,12 +384,23 @@ spec:
       manifests:
         job_rabbit_init: false
         secret_ca_bundle: true
+        daemonset_bagpipe_bgp: true
       network:
         core_plugin: ml2
         interface:
           tunnel: ens3
         backend:
           - openvswitch
+      overrides:
+        neutron_ovs-agent:
+          labels:
+            openstack-compute::enabled:
+              values:
+                conf:
+                  plugins:
+                    openvswitch_agent:
+                      agent:
+                        extensions: 'qos,bagpipe_bgpvpn'
       labels:
         sriov:
           node_selector_key: openstack-compute-node
@@ -395,54 +408,6 @@ spec:
         netns_cleanup_cron:
           node_selector_key: openvswitch
           node_selector_value: enabled
-      overrides:
-        neutron_ovs-agent:
-          labels:
-            openstack-compute-node-dpdk-1::enabled:
-              values:
-                network:
-                  interface:
-                    tunnel: br-phy
-                conf:
-                  ovs_dpdk:
-                    bonds: []
-                    bridges:
-                    - ip_address: 10.15.0.8/24
-                      name: br-phy
-                    driver: igb_uio
-                    driver: igb_uio
-                    nics:
-                    - bridge: br-phy
-                      name: ens8
-                      pci_id: '0000:00:08.0'
-                    enabled: true
-                  plugins:
-                    openvswitch_agent:
-                      ovs:
-                        datapath_type: netdev
-                        vhostuser_socket_dir: /var/run/openvswitch/vhostuser
-            openstack-compute-node-dpdk-2::enabled:
-              values:
-                network:
-                  interface:
-                    tunnel: br-phy
-                conf:
-                  ovs_dpdk:
-                    bonds: []
-                    bridges:
-                    - ip_address: 10.15.0.51/24
-                      name: br-phy
-                    driver: igb_uio
-                    nics:
-                    - bridge: br-phy
-                      name: ens8
-                      pci_id: '0000:00:08.0'
-                    enabled: true
-                  plugins:
-                    openvswitch_agent:
-                      ovs:
-                        datapath_type: netdev
-                        vhostuser_socket_dir: /var/run/openvswitch/vhostuser
       pod:
         probes:
           dhcp_agent:
