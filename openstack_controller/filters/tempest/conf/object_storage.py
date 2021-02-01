@@ -43,7 +43,7 @@ class ObjectStorage(base_section.BaseSection):
 
     @property
     def operator_role(self):
-        return "admin"
+        return "member"
 
     @property
     def realm_name(self):

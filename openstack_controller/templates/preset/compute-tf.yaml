@@ -277,10 +277,6 @@ services:
             - (?:heat_tempest_plugin.tests.scenario.test_server_software_config.SoftwareConfigIntegrationTest)
             # Skip patrole tempest plugin tests until PRODX-5954 will be resolved
             - (?:patrole_tempest_plugin)
-            # AccountQuotas tests are skipped due to this is an known issue.
-            - (?:tempest.api.object_storage.test_account_quotas.AccountQuotasTest.test_upload_valid_object)
-            - (?:tempest.api.object_storage.test_account_quotas.AccountQuotasTest.test_admin_modify_quota)
-
           script: |
             tempest run --config-file /etc/tempest/tempest.conf -w 4 --smoke --blacklist-file  /etc/tempest/test-blacklist
           tempest:

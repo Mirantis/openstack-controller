@@ -244,9 +244,6 @@ services:
             # Skip ironic boot from volume
             - (?:ironic_tempest_plugin.tests.scenario.test_baremetal_boot_from_volume.BaremetalBFV.test_baremetal_boot_from_volume)
           {%- endif %}
-            # AccountQuotas tests are skipped due to this is an known issue.
-            - (?:tempest.api.object_storage.test_account_quotas.AccountQuotasTest.test_upload_valid_object)
-            - (?:tempest.api.object_storage.test_account_quotas.AccountQuotasTest.test_admin_modify_quota)
           script: |
             tempest run --config-file /etc/tempest/tempest.conf -w 4 --smoke --blacklist-file  /etc/tempest/test-blacklist
           tempest:
