@@ -324,7 +324,7 @@
             reason: Locators update is needed
             # stepler/horizon/tests/test_keypairs.py::TestAdminOnly::test_import_key_pair_quota_exceeded
           9acd7607-d72f-4e8c-9b13-1a0728d56975:
-            reason: Locators update is needed
+            reason: PRODX-11366
             # stepler/horizon/tests/test_projects.py::TestAdminOnly::test_switch_projects
           8381d3ff-9f94-465f-a127-c84d328e14a4:
             reason: Locators update is needed
