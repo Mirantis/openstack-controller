@@ -44,6 +44,7 @@ spec:
         nova:
           DEFAULT:
             allow_resize_to_same_host: true
+            default_schedule_zone: nova
           cache:
             backend: oslo_cache.memcache_pool
           cinder:

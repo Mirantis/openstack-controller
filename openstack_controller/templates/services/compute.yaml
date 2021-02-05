@@ -428,6 +428,10 @@ spec:
 {%- endif %}
         nova:
           DEFAULT:
+            # TODO(ohryhorov): set default availability zone to schedule instances
+            # to regular computes if AZ is not set in case of advanced computes are
+            # deployed as well.
+            default_schedule_zone: nova
             allow_resize_to_same_host: true
           cache:
             backend: oslo_cache.memcache_pool
