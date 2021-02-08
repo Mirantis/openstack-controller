@@ -129,6 +129,10 @@ spec:
           logger_heat:
             level: {{ spec.get('features', {}).get('logging', {}).get('heat', {}).get('level', 'INFO') }}
             propagate: 0
+{%- if spec.features.neutron.get('bgpvpn', {}).get('enabled') %}
+        plugins:
+          - networking_bgpvpn_heat
+{%- endif %}
       endpoints:
         cluster_domain_suffix: {{ spec.internal_domain_name }}
 {% include 'base/_admin_identity.yaml' %}
