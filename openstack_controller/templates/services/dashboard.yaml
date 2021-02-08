@@ -5,15 +5,6 @@
 {%- set keystone_keycloak_enabled = keystone_keycloak.get('enabled', False) %}
 {%- set horizon_features = spec.get('features', {}).get('horizon', {}) %}
 {%- set neutron_backend = spec.features.neutron.get('backend', 'ml2') %}
-#TODO: remove extra_panels when https://mirantis.jira.com/browse/PRODX-3037 is fixed
-#The list of extra panels in Horizon helm-chart is overwritten in case 'extra_panels' is defined in openstack-controller.
-{%- set horizon_extra_panels = ['neutron_taas_dashboard', 'heat_dashboard', 'tf_dashboard'] %}
-{%- if 'load-balancer' in spec.features.services %}
-  {%- do horizon_extra_panels.append('octavia_dashboard') %}
-{%- endif %}
-{%- if 'dns' in spec.features.services %}
-  {%- do horizon_extra_panels.append('designatedashboard') %}
-{%- endif %}
 
 spec:
   releases:
@@ -212,7 +203,6 @@ spec:
               {% endif %}
               {%- endraw %}
           {%- endif %}
-          extra_panels: {{ horizon_extra_panels }}
           local_settings:
             custom_themes:
 {%- set horizon_themes = horizon_features.get('themes', []) %}

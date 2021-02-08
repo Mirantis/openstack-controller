@@ -5,12 +5,6 @@ spec:
     values:
       conf:
         horizon:
-          extra_panels:
-          - neutron_taas_dashboard
-          - heat_dashboard
-          - tf_dashboard
-          - octavia_dashboard
-          - designatedashboard
           local_settings:
             config:
               horizon_images_upload_mode: direct
