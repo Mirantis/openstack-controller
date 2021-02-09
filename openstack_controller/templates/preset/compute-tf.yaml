@@ -111,6 +111,11 @@ services:
             ingress:
               classes:
                 namespace: {{ nginx_ingress_namespace_class }}
+        {%- if openstack_version in ['queens', 'rocky'] %}
+        conf:
+          DEFAULT:
+            api_extensions_path: 'extensions:/var/lib/openstack/lib/python2.7/site-packages/neutron_plugin_contrail/extensions'
+        {%- endif %}
   orchestration:
     heat:
       values:
