@@ -538,6 +538,10 @@ spec:
           os_compute_api:os-services:update: rule:system_admin_api
           os_compute_api:os-unrescue: rule:system_admin_or_owner
 {%- endif %}
+{%- if spec.openstack_version not in ['queens', 'rocky', 'stein', 'train', 'ussuri'] %}
+          os_compute_api:extensions: '@'
+          os_compute_api:os-floating-ip-pools: '@'
+{%- endif %}
       network:
         core_plugin: {{ neutron_backend }}
         {%- if neutron_backend == 'tungstenfabric' %}
