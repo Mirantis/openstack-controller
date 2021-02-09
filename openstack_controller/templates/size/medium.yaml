@@ -524,6 +524,19 @@ services:
         conf:
           memcached:
             max_connections: 32768
+  instance-ha:
+    masakari:
+      values:
+        pod:
+          replicas:
+            api: 5
+            engine: 5
+          lifecycle:
+            disruption_budget:
+              api:
+                min_available: 2
+              engine:
+                min_available: 2
 
 timeouts:
   application_readiness:

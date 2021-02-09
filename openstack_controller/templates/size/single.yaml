@@ -403,6 +403,13 @@ services:
         conf:
           memcached:
             max_connections: 8192
+  instance-ha:
+    masakari:
+      values:
+        pod:
+          replicas:
+            api: 1
+            engine: 1
 
 timeouts:
   application_readiness:

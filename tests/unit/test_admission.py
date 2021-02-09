@@ -49,6 +49,10 @@ ADMISSION_REQ_JSON = """
                 "preset": "compute",
                 "size": "tiny",
                 "features": {
+                    "services": [
+                       "key-manager",
+                       "object-storage"
+                    ],
                     "neutron": {
                         "floating_network": {
                             "physnet": "physnet1"
@@ -223,6 +227,33 @@ def test_physnet_required_no_tf(client):
         "physnet needs to be specified"
         in response.json["response"]["status"]["message"]
     )
+
+
+def test_instance_ha_allow_in_services(client):
+    allow_in = ["ussuri", "victoria"]
+    for os_version in allow_in:
+        req = copy.deepcopy(ADMISSION_REQ)
+        req["request"]["object"]["spec"]["openstack_version"] = os_version
+        req["request"]["object"]["spec"]["features"]["services"].append(
+            "instance-ha"
+        )
+        response = client.simulate_post("/validate", json=req)
+        assert response.status == falcon.HTTP_OK
+        assert response.json["response"]["allowed"] is True
+
+
+def test_insance_ha_deny_in_services(client):
+    deny_in = ["queens", "rocky", "stein", "train"]
+    for os_version in deny_in:
+        req = copy.deepcopy(ADMISSION_REQ)
+        req["request"]["object"]["spec"]["openstack_version"] = os_version
+        req["request"]["object"]["spec"]["features"]["services"].append(
+            "instance-ha"
+        )
+        response = client.simulate_post("/validate", json=req)
+        assert response.status == falcon.HTTP_OK
+        assert response.json["response"]["allowed"] is False
+        assert response.json["response"]["status"]["code"] == 400
 
 
 def test_physnet_optional_tf(client):

@@ -184,3 +184,5 @@ images:
   tempest-uuids-init: tempest-uuids-init:latest
   tempest_run_tests: tempest-run-tests:latest
   test: test:latest
+  masakari_api: masakari-api:latest
+  masakari_db_sync: masakari-db-sync:latest

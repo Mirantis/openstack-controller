@@ -216,6 +216,21 @@ spec:
                 password: {{ credentials['metering'].notifications.user.password }}
             path: /openstack
           {%- endif %}
+          {%- if 'instance-ha' in services %}
+          {%- do enabled_vhosts.append('masakari') %}
+          masakari_service:
+            auth:
+              masakari:
+                username: {{ credentials['instance-ha'].messaging.user.username }}
+                password: {{ credentials['instance-ha'].messaging.user.password }}
+            path: /masakari
+          masakari_service_notifications:
+            auth:
+              masakari:
+                username: {{ credentials['instance-ha'].notifications.user.username }}
+                password: {{ credentials['instance-ha'].notifications.user.password }}
+            path: /openstack
+          {%- endif %}
         aux_conf:
           policies:
   {%- if 'orchestration' in services %}

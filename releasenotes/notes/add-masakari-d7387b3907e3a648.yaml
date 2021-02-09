@@ -1,0 +1,5 @@
+---
+features:
+  - |
+    Add ability to deploy masakari service if it is set in OSDPL service
+    section. `PRODX-6393 <https://mirantis.jira.com/browse/PRODX-6393>`__

@@ -246,6 +246,23 @@ spec:
             pattern: ^tasks\.
             priority: 1
             vhost: barbican
+          - definition:
+              message-ttl: 120000
+            name: default-policy-masakari
+            pattern: ^(?!amq\.).*
+            vhost: masakari
+          - definition:
+              expires: 3600000
+            name: results_expire_masakari
+            pattern: ^results\.
+            priority: 1
+            vhost: masakari
+          - definition:
+              expires: 3600000
+            name: tasks_expire_masakari
+            pattern: ^tasks\.
+            priority: 1
+            vhost: masakari
         prometheus_exporter:
           rabbit_exporters: overview,exchange,node
         users:
@@ -365,6 +382,18 @@ spec:
               stacklight:
                 password: stacklight
                 username: stacklight
+            path: /openstack
+          masakari_service:
+            auth:
+              masakari:
+                password: iHMN1WsAMxAi8G4d0r64iggSdedSRR1p
+                username: masakariVuqCvFid
+            path: /masakari
+          masakari_service_notifications:
+            auth:
+              masakari:
+                password: acH2p6deh90bDJWlRDzFE7wptqgQgVc7
+                username: masakariyfHtXhiq
             path: /openstack
       endpoints:
         cluster_domain_suffix: cluster.local
