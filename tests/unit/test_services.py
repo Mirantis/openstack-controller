@@ -224,23 +224,16 @@ def test_heat_service_account_list(openstackdeployment):
 def openstack_connect_with_compute_services(mocker):
     mock_connect = mocker.patch("openstack.connect")
     services_mock = mock.Mock(
-        get=mock.Mock(
-            return_value=mock.Mock(
-                json=mock.Mock(
-                    return_value={
-                        "services": [
-                            dict(
-                                id=1,
-                                binary="nova-compute",
-                                host="host1",
-                                status="enabled",
-                                state="up",
-                            )
-                        ]
-                    }
-                ),
-                status_code=200,
-            )
+        services=mock.Mock(
+            return_value=[
+                dict(
+                    id=1,
+                    binary="nova-compute",
+                    host="host1",
+                    status="enabled",
+                    state="up",
+                )
+            ]
         )
     )
     mock_connect.return_value = mock.Mock(compute=services_mock)
@@ -400,24 +393,11 @@ async def test_nova_remove_node_from_scheduling(
     get_keystone_admin_creds, openstack_connect
 ):
     services_mock = mock.Mock(
-        get=mock.Mock(
-            return_value=mock.Mock(
-                json=mock.Mock(
-                    side_effect=[
-                        {
-                            "services": [
-                                dict(id=1, state="up", status="enabled")
-                            ]
-                        },
-                        {
-                            "services": [
-                                dict(id=1, state="up", status="disabled")
-                            ]
-                        },
-                    ]
-                ),
-                status_code=200,
-            )
+        services=mock.Mock(
+            side_effect=[
+                [dict(id=1, state="up", status="enabled")],
+                [dict(id=1, state="up", status="disabled")],
+            ]
         )
     )
     openstack_connect.return_value = mock.Mock(compute=services_mock)
@@ -434,17 +414,8 @@ async def test_nova_remove_node_from_scheduling_service_down(
     get_keystone_admin_creds, openstack_connect
 ):
     services_mock = mock.Mock(
-        get=mock.Mock(
-            return_value=mock.Mock(
-                json=mock.Mock(
-                    return_value={
-                        "services": [
-                            dict(id=1, state="down", status="enabled")
-                        ]
-                    }
-                ),
-                status_code=200,
-            )
+        services=mock.Mock(
+            return_value=[dict(id=1, state="down", status="enabled")]
         )
     )
     openstack_connect.return_value = mock.Mock(compute=services_mock)
@@ -508,17 +479,8 @@ async def test_nova_prepare_for_node_reboot_evacuate_disabled_by_default(
     get_keystone_admin_creds, openstack_connect
 ):
     compute_mock = mock.Mock(
-        get=mock.Mock(
-            return_value=mock.Mock(
-                json=mock.Mock(
-                    return_value={
-                        "services": [
-                            dict(id=1, state="down", status="enabled")
-                        ]
-                    }
-                ),
-                status_code=200,
-            )
+        services=mock.Mock(
+            return_value=[dict(id=1, state="down", status="enabled")]
         ),
         servers=mock.Mock(return_value=["a", "b", "c"]),
     )
@@ -541,17 +503,8 @@ async def test_nova_prepare_for_node_reboot_evacuate(
     override_setting, get_keystone_admin_creds, openstack_connect
 ):
     compute_mock = mock.Mock(
-        get=mock.Mock(
-            return_value=mock.Mock(
-                json=mock.Mock(
-                    return_value={
-                        "services": [
-                            dict(id=1, state="down", status="enabled")
-                        ]
-                    }
-                ),
-                status_code=200,
-            )
+        services=mock.Mock(
+            return_value=[dict(id=1, state="down", status="enabled")]
         ),
         servers=mock.Mock(return_value=["a", "b", "c"]),
     )
@@ -574,7 +527,9 @@ async def test_nova_prepare_for_node_reboot_sdk_exception(
     get_keystone_admin_creds, openstack_connect
 ):
     compute_mock = mock.Mock(
-        get=mock.Mock(side_effect=openstack.exceptions.SDKException("foo"))
+        services=mock.Mock(
+            side_effect=openstack.exceptions.SDKException("foo")
+        )
     )
     openstack_connect.return_value = mock.Mock(compute=compute_mock)
     with pytest.raises(kopf.TemporaryError):

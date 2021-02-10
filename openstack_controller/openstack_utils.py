@@ -17,7 +17,6 @@ import base64
 
 import kopf
 import openstack
-import openstack.exceptions
 import pykube
 
 from openstack_controller import constants
@@ -90,11 +89,7 @@ async def get_openstack_connection():
 
 
 def get_single_service(os_connection, host=None, binary="nova-compute"):
-    response = os_connection.compute.get(
-        f"/os-services?host={host}&binary={binary}"
-    )
-    openstack.exceptions.raise_from_response(response)
-    services = response.json()["services"]
+    services = list(os_connection.compute.services(host=host, binary=binary))
     if len(services) == 1:
         return services[0]
 
