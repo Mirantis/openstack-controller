@@ -617,6 +617,10 @@ class Keystone(OpenStackService):
                     "images": ["keystone_db_sync_contract"],
                     "manifest": "job_db_sync_contract",
                 },
+                "keystone-federations-create": {
+                    "images": ["keystone_federations_create"],
+                    "manifest": "job_federations_create",
+                },
             },
             "Deployment": {
                 "keystone-api": {
