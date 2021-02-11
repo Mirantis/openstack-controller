@@ -87,9 +87,15 @@
             reason: Locators update is needed
             # stepler/horizon/tests/test_stacks.py::TestAnyOne::test_stacks_delete
           7f43197f-ba2c-4962-a07a-43cbf77a779b:
-            reason: Locators update is needed
-            # stepler/horizon/tests/test_volume_backups.py::TestAnyOne::test_volume_backups_pagination
+            reason: PRODX-11370
+            # stepler/horizon/tests/test_volume_backups.py::TestAnyOne::test_volume_backups_pagination[admin]
+          f49eef31-b26a-496c-8f0f-2465a97d04cf:
+            reason: PRODX-11370
+            # stepler/horizon/tests/test_volume_backups.py::TestAnyOne::test_volume_backups_pagination[user]
           dd3abd5c-0900-40a0-be3d-b284eeb6b5da:
+            reason: Locators update is needed
+            # stepler/horizon/tests/test_volume_backups.py::TestAnyOne::test_create_volume_backup
+          9cc2b22d-6234-4fb3-aad8-abe7d39cc870:
             reason: Locators update is needed
             # stepler/horizon/tests/test_volume_backups.py::TestAnyOne::test_create_volume_backup
           95a60e66-8e12-48ea-a7b2-c9b49ca35e45:
