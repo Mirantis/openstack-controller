@@ -43,8 +43,8 @@ keystone_db_sync: '{{ images_base_url }}/openstack/keystone:victoria-bionic-2021
 keystone_domain_manage: '{{ images_base_url }}/openstack/heat:victoria-bionic-20210213180019'
 keystone_fernet_rotate: '{{ images_base_url }}/openstack/keystone:victoria-bionic-20210213180019'
 keystone_fernet_setup: '{{ images_base_url }}/openstack/keystone:victoria-bionic-20210213180019'
-ks_endpoints: '{{ images_base_url }}/openstack/openstack-tools:ussuri-bionic-20210213180019'
-ks_service: '{{ images_base_url }}/openstack/openstack-tools:ussuri-bionic-20210213180019'
+ks_endpoints: '{{ images_base_url }}/openstack/openstack-tools:ussuri-bionic-20210214180013'
+ks_service: '{{ images_base_url }}/openstack/openstack-tools:ussuri-bionic-20210214180013'
 ks_user: '{{ images_base_url }}/openstack/heat:victoria-bionic-20210213180019'
 ks_trusts: '{{ images_base_url }}/openstack/heat:victoria-bionic-20210213180019'
 keystone_federations_create: '{{ images_base_url }}/openstack/heat:victoria-bionic-20210213180019'
@@ -175,3 +175,7 @@ horizon_mirantis_theme_sha256summ: 385cb60c460e29cff2b205f77528d3d80fe2ac2f36032
 horizon_mirantis_theme_url: '{{ binary_base_url }}/openstack/bin/horizon/mirantis-victoria-8f71802-20210119120707.tar.gz'
 ceph_config_helper: '{{ images_base_url }}/openstack/extra/ceph-config-helper:nautilus-bionic-20210202133935'
 octavia_amphora_checksum: 2639e75b3b51c5725372e74f8e3a9ed6
+masakari_db_sync: '{{ images_base_url }}/openstack/masakari:victoria-bionic-20210213180019'
+masakari_api: '{{ images_base_url }}/openstack/masakari:victoria-bionic-20210213180019'
+masakari_engine: '{{ images_base_url }}/openstack/masakari:victoria-bionic-20210213180019'
+masakari_monitors: '{{ images_base_url }}/openstack/masakari:victoria-bionic-20210213180019'
