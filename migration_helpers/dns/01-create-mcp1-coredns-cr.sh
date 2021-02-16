@@ -40,11 +40,11 @@ metadata:
 spec:
   repositories:
   - name: hub_stable
-    url: https://kubernetes-charts.storage.googleapis.com
+    url: https://binary.mirantis.com/kubernetes/helm/stable
   releases:
   - name: coredns-mcp1
     chart: hub_stable/coredns
-    version: 1.8.1
+    version: 1.10.1
     namespace: ${COREDNS_NS}
     values:
       isClusterService: false
