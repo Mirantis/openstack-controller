@@ -98,6 +98,14 @@ services:
   dashboard:
     horizon:
       values:
+        {%- if openstack_version in ['queens'] %}
+        conf:
+          horizon:
+            local_settings:
+              config:
+                tungstenfabric:
+                  dashboard_name: contrail_openstack_dashboard.overrides
+        {%- endif %}
         network:
           dashboard:
             ingress:
