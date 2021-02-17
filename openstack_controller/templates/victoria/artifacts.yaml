@@ -179,3 +179,4 @@ masakari_db_sync: '{{ images_base_url }}/openstack/masakari:victoria-bionic-2021
 masakari_api: '{{ images_base_url }}/openstack/masakari:victoria-bionic-20210213180019'
 masakari_engine: '{{ images_base_url }}/openstack/masakari:victoria-bionic-20210213180019'
 masakari_monitors: '{{ images_base_url }}/openstack/masakari:victoria-bionic-20210213180019'
+ironic_inspector: '{{ images_base_url }}/openstack/ironic-inspector:victoria-bionic-20210213180019'
