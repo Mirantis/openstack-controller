@@ -178,4 +178,4 @@ octavia_amphora_checksum: f8af9f0ee0fbe76e27f39d7892d51197
 masakari_db_sync: '{{ images_base_url }}/openstack/masakari:ussuri-bionic-20210214180013'
 masakari_api: '{{ images_base_url }}/openstack/masakari:ussuri-bionic-20210214180013'
 masakari_engine: '{{ images_base_url }}/openstack/masakari:ussuri-bionic-20210214180013'
-masakari_monitors: '{{ images_base_url }}/openstack/masakari:ussuri-bionic-20210214180013'
+masakari_monitors: '{{ images_base_url }}/openstack/masakari-monitors:ussuri-bionic-20210214180013'
