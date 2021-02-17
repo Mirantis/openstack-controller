@@ -175,3 +175,4 @@ horizon_mirantis_theme_sha256summ: 54436bca305177e3950f87aae8b702b4a94ff08791dfa
 horizon_mirantis_theme_url: '{{ binary_base_url }}/openstack/bin/horizon/mirantis-victoria-f9243a5-20201121205550.tar.gz'
 ceph_config_helper: '{{ images_base_url }}/openstack/extra/ceph-config-helper:nautilus-bionic-20210202133935'
 octavia_amphora_checksum: 589b0f588936b448c3773e420749b2cd
+ironic_inspector: '{{ images_base_url }}/openstack/ironic-inspector:master-bionic-20210201180026'

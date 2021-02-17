@@ -179,3 +179,4 @@ masakari_db_sync: '{{ images_base_url }}/openstack/masakari:ussuri-bionic-202102
 masakari_api: '{{ images_base_url }}/openstack/masakari:ussuri-bionic-20210214180013'
 masakari_engine: '{{ images_base_url }}/openstack/masakari:ussuri-bionic-20210214180013'
 masakari_monitors: '{{ images_base_url }}/openstack/masakari-monitors:ussuri-bionic-20210214180013'
+ironic_inspector: '{{ images_base_url }}/openstack/ironic-inspector:ussuri-bionic-20210214180013'
