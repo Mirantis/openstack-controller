@@ -33,6 +33,9 @@ spec:
       manifests:
         network_policy: false
         secret_ca_bundle: true
+      network:
+        proxy:
+{% include 'base/_proxy_vars.yaml' %}
       endpoints:
         cluster_domain_suffix: {{ spec.internal_domain_name }}
 {% include 'base/_admin_identity.yaml' %}

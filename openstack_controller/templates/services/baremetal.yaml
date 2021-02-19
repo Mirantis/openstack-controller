@@ -124,6 +124,8 @@ spec:
             ironic-agent.kernel:
               source:  {{ agent_images.get('kernel', 'tinyipa-stable-' ~ spec.openstack_version ~ '.vmlinuz') }}
       network:
+        proxy:
+{% include 'base/_proxy_vars.yaml' %}
         cleaning: &bm_network
           name: {{ network.get('name', 'baremetal') }}
           physnet: {{ network.get('physnet', 'ironic') }}
