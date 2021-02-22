@@ -113,12 +113,6 @@
           0dd311c9-c9cf-4860-a5a3-be01d3d209d2:
             reason: Locators update is needed
             # stepler/horizon/tests/test_volume_snapshots.py::TestAnyOne::test_create_volume_from_snapshot
-          e4c1eab9-ddf4-4a75-915e-81e3886ac27b:
-            reason: Locators update is needed
-            # stepler/horizon/tests/test_volumes.py::TestAnyOne::test_delete_volumes
-          5f7f4fac-a19b-481a-9c61-18c1923cfa7d:
-            reason: Locators update is needed
-            # stepler/horizon/tests/test_volumes.py::TestAnyOne::test_delete_volumes
           65272c3b-c2ea-42e6-91ac-f1daa43fdbfc:
             reason: Locators update is needed
             # stepler/horizon/tests/test_volumes.py::TestAnyOne::test_upload_volume_to_image
@@ -293,9 +287,6 @@
           8381d3ff-9f94-465f-a127-c84d328e14a4:
             reason: Locators update is needed
             # stepler/horizon/tests/test_stacks.py::TestAdminOnly::test_create_stack
-          b4249e0f-95eb-41cd-8d35-fccc21fdcbd1:
-            reason: Locators update is needed
-            # stepler/horizon/tests/test_users.py::TestAdminOnly::test_create_user
           b5116a31-404d-4391-b1d6-e35670dbadb3:
             reason: Locators update is needed
             # stepler/horizon/tests/test_users.py::TestAdminOnly::test_change_user_password
@@ -305,15 +296,6 @@
           0374870e-5d84-4574-a114-cf78db640c26:
             reason: Locators update is needed
             # stepler/horizon/tests/test_volumes.py::TestAdminOnly::test_launch_volume_as_instance
-          371badd3-a2f7-484d-9fdb-9ad06d431623:
-            reason: Locators update is needed
-            # stepler/horizon/tests/test_volumes.py::TestAdminOnly::test_manage_volume_attachments
-          32b295cd-fbd0-44c1-b7b9-175f5ad7434c:
-            reason: Locators update is needed
-            # stepler/horizon/tests/test_volumes.py::TestAdminOnly::test_transfer_volume
-          32b295cd-fbd0-44c1-b7b9-175f5ad7434c:
-            reason: Locators update is needed
-            # stepler/horizon/tests/test_volumes.py::TestAdminOnly::test_transfer_volume
           e585242-9443-4e78-a7fe-3ee6097459bb:
             reason: Locators update is needed
             # stepler/horizon/tests/test_volumes.py::TestAdminOnly::test_migrate_volume
