@@ -39,8 +39,8 @@ keystone_db_sync: '{{ images_base_url }}/openstack/keystone:rocky-bionic-2021020
 keystone_domain_manage: '{{ images_base_url }}/openstack/heat:rocky-bionic-20210204090950'
 keystone_fernet_rotate: '{{ images_base_url }}/openstack/keystone:rocky-bionic-20210204090950'
 keystone_fernet_setup: '{{ images_base_url }}/openstack/keystone:rocky-bionic-20210204090950'
-ks_endpoints: '{{ images_base_url }}/openstack/openstack-tools:ussuri-bionic-20210219180015'
-ks_service: '{{ images_base_url }}/openstack/openstack-tools:ussuri-bionic-20210219180015'
+ks_endpoints: '{{ images_base_url }}/openstack/openstack-tools:ussuri-bionic-20210222180014'
+ks_service: '{{ images_base_url }}/openstack/openstack-tools:ussuri-bionic-20210222180014'
 ks_user: '{{ images_base_url }}/openstack/heat:rocky-bionic-20210204090950'
 ks_trusts: '{{ images_base_url }}/openstack/heat:rocky-bionic-20210204090950'
 keystone_federations_create: '{{ images_base_url }}/openstack/heat:rocky-bionic-20210204090950'
@@ -174,3 +174,6 @@ horizon_mirantis_theme_sha256summ: ee9a965f23ad68c8f310b1661a6447c310a547e29be44
 horizon_mirantis_theme_url: '{{ binary_base_url }}/openstack/bin/horizon/mirantis-rocky-63ae344.tar.gz'
 ceph_config_helper: '{{ images_base_url }}/openstack/extra/ceph-config-helper:nautilus-bionic-20210202133935'
 octavia_amphora_checksum: 95205895c8afea2e0ad24e2773840571
+frr_init: '{{ images_base_url }}/openstack/extra/ceph-config-helper:nautilus-bionic-20210202133935'
+frr_info: '{{ images_base_url }}/openstack/extra/ceph-config-helper:nautilus-bionic-20210202133935'
+frr: '{{ images_base_url }}/general/external/docker.io/frrouting/frr:v7.5.0'
