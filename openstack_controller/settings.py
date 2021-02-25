@@ -230,6 +230,12 @@ except Exception:
         f"OSCTL_OPENSTACK_NODE_LABELS invalid format, should be a dict with node labels and values"
     )
 
+# The dict defining proxy settings
+OSCTL_PROXY_DATA = json_from_env("OSCTL_PROXY_DATA", {"enabled": False})
+OSCTL_PROXY_SECRET_NAMESPACE = os.environ.get(
+    "OSCTL_PROXY_SECRET_NAMESPACE", "osh-system"
+)
+
 # The dict defining IAM data {"client": "os", "enabled": True, "oidcCASecret": "oidc-cert", url: "https://1.2.3.4"}
 OSDPL_IAM_DATA = json_from_env("OSDPL_IAM_DATA", {"enabled": False})
 

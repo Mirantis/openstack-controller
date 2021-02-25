@@ -4,6 +4,8 @@
 global:
   dockerBaseUrl: mirantis.azurecr.io
   helmBaseUrl: https://binary.mirantis.com
+  proxy:
+    enabled: false
 
 replicaCount: 1
 

@@ -248,6 +248,9 @@ spec:
 {%- if 'amphorav2' in provider_map.keys() %}
         job_db_sync_persistence: true
 {%- endif %}
+      network:
+        proxy:
+{% include 'base/_proxy_vars.yaml' %}
       conf:
         octavia:
           api_settings:

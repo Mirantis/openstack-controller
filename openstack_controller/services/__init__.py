@@ -1322,7 +1322,10 @@ class Octavia(OpenStackService):
                     "octavia-create-resources": {
                         "images": ["create_resources"],
                         "manifest": "job_create_resources",
-                        "hash_fields": ["octavia.settings.amphora_image_url"],
+                        "hash_fields": [
+                            "octavia.settings.amphora_image_url",
+                            "network.proxy.*",
+                        ],
                     }
                 }
             },

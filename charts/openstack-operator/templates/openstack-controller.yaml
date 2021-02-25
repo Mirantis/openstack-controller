@@ -269,6 +269,8 @@ spec:
             {{- end }}
             - name: OSDPL_IAM_DATA
               value: '{{ toJson .Values.iam }}'
+            - name: OSCTL_PROXY_DATA
+              value: '{{ toJson .Values.global.proxy }}'
 {{ tuple . | include "openstack-controller.common_env" | indent 12 }}
           livenessProbe:
             httpGet:

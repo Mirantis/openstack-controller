@@ -3,6 +3,12 @@ spec:
   - chart: osh/horizon
     name: openstack-horizon
     values:
+      network:
+        proxy:
+          enabled: true
+          env_vars:
+            HTTP_PROXY: http://127.0.0.1:3128
+            NO_PROXY: .svc.cluster.local
       conf:
         horizon:
           local_settings:

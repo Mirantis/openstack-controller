@@ -68,7 +68,10 @@ class GenericChildObject:
 
     def job_bootstrap(self):
         return self._get_job_object(
-            "bootstrap", "job_bootstrap", ["bootstrap"]
+            "bootstrap",
+            "job_bootstrap",
+            ["bootstrap"],
+            hash_fields=["network.proxy.*"],
         )
 
 
@@ -513,6 +516,14 @@ class Service:
             "service_creds": service_creds,
         }
 
+        if settings.OSCTL_PROXY_DATA["enabled"]:
+            proxy_secret = secrets.ProxySecret()
+            proxy_secret.wait()
+            proxy_vars = proxy_secret.get_proxy_vars()
+            template_args["proxy_vars"] = proxy_vars
+            LOG.debug(
+                f"Set proxy variables for {self.service}: {template_args['proxy_vars']}"
+            )
         return template_args
 
     @layers.kopf_exception

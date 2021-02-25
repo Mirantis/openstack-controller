@@ -750,3 +750,39 @@ class BGPVPNSecret(JsonSecret):
             peer = node_data["bgp"]["source_ip"]
             peers.append(peer)
         return peers
+
+
+class ProxySecret:
+    """The secret supports next data format:
+    data:
+      HTTP_PROXY: {base64 encoded string}
+      http_proxy: {base64 encoded string}
+    """
+
+    def __init__(self):
+        self.namespace = settings.OSCTL_PROXY_SECRET_NAMESPACE
+        self.name = settings.OSCTL_PROXY_DATA["secretName"]
+
+    def decode(self, data):
+        params = {}
+        for key, value in data.items():
+            decoded = base64.b64decode(value).decode()
+            params[key] = decoded
+        return params
+
+    def wait(self):
+        kube.wait_for_secret(self.namespace, self.name)
+
+    def get_proxy_vars(self):
+        data = self.decode(get_secret_data(self.namespace, self.name))
+        proxy_vars = {}
+        for var, value in data.items():
+            # Different programs can parse upper or lower case
+            # proxy variables.
+            proxy_vars[var] = value
+            if var == var.lower():
+                converted = var.upper()
+            else:
+                converted = var.lower()
+            proxy_vars[converted] = value
+        return proxy_vars
