@@ -519,7 +519,11 @@ class Service:
         if settings.OSCTL_PROXY_DATA["enabled"]:
             proxy_secret = secrets.ProxySecret()
             proxy_secret.wait()
-            proxy_vars = proxy_secret.get_proxy_vars()
+            domain_names = [
+                self.mspec["public_domain_name"],
+                self.mspec["internal_domain_name"],
+            ]
+            proxy_vars = proxy_secret.get_proxy_vars(no_proxy=domain_names)
             template_args["proxy_vars"] = proxy_vars
             LOG.debug(
                 f"Set proxy variables for {self.service}: {template_args['proxy_vars']}"

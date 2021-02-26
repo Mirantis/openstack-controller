@@ -773,13 +773,15 @@ class ProxySecret:
     def wait(self):
         kube.wait_for_secret(self.namespace, self.name)
 
-    def get_proxy_vars(self):
+    def get_proxy_vars(self, no_proxy=None):
         data = self.decode(get_secret_data(self.namespace, self.name))
         proxy_vars = {}
         for var, value in data.items():
+            if var.lower() == "no_proxy" and no_proxy:
+                value = ",".join(sorted(set(value.split(",")).union(no_proxy)))
+            proxy_vars[var] = value
             # Different programs can parse upper or lower case
             # proxy variables.
-            proxy_vars[var] = value
             if var == var.lower():
                 converted = var.upper()
             else:
