@@ -15,7 +15,7 @@
             reason: PRODX-11068
             # stepler/horizon/tests/test_credentials.py::TestAnyOne::test_download_rc_v2
           9f0a85c2-8194-11e7-bbb2-bbb93bcf2e77:
-            reason: Locators update is needed
+            reason: Test case id depricated
             # stepler/horizon/tests/test_credentials.py::TestAnyOne::test_download_rc_v2_via_menu
           a6ed9d2a-ae40-45ca-92c9-0034cbb425b1:
             reason: Locators update is needed
@@ -132,7 +132,7 @@
             reason: Locators update is needed
             # stepler/horizon/tests/test_credentials.py::TestAnyOne::test_download_rc_v2
           9f83be74-8194-11e7-ba35-7700980b0d3f:
-            reason: Locators update is needed
+            reason: Test case id depricated
             # stepler/horizon/tests/test_credentials.py::TestAnyOne::test_download_rc_v2_via_menu
           596710b9-1f77-4db9-9a77-f5733a5708ff:
             reason: Locators update is needed
