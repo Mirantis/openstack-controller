@@ -154,7 +154,7 @@ spec:
           dataplane_driver_evpn:
             dataplane_driver: 'ovs'
             dataplane_local_address: 'ens3'
-            vxlan_dst_port: 4789
+            vxlan_dst_port: 4790
           dataplane_driver_ipvpn:
             dataplane_driver: 'ovs'
             dataplane_local_address: 'ens3'

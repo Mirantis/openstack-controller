@@ -611,7 +611,7 @@ spec:
           dataplane_driver_evpn:
             dataplane_driver: ovs
             dataplane_local_address: {{ bgpvpn.get('dataplane_interface', spec.features.neutron.tunnel_interface) }}
-            vxlan_dst_port: {{ bgpvpn.get('evpn_vxlan_port', 4789) }}
+            vxlan_dst_port: {{ bgpvpn.get('evpn_vxlan_port', 4790) }}
       {%- endif %}
       labels:
         sriov:
