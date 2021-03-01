@@ -3,6 +3,7 @@ import json
 from unittest import mock
 
 import pykube
+import pytest
 
 from openstack_controller import secrets
 
@@ -49,6 +50,41 @@ def test_keycloak_secret_serialization(mock_password, mock_data):
 
     assert created == passphrase
     assert created == from_secret
+
+
+@mock.patch("openstack_controller.secrets.get_secret_data")
+@pytest.mark.parametrize(
+    "override_setting",
+    [{"name": "OSCTL_PROXY_DATA", "value": {"secretName": "cc-proxy"}}],
+    indirect=["override_setting"],
+)
+def test_get_proxy_vars_from_secret(mock_data, override_setting):
+
+    mock_data.return_value = {
+        "HTTP_PROXY": "aHR0cDovL3NxdWlkLm9wZW5zdGFjay5zdmMuY2x1c3Rlci5sb2NhbDo4MA==",
+        "HTTPS_PROXY": "aHR0cDovL3NxdWlkLm9wZW5zdGFjay5zdmMuY2x1c3Rlci5sb2NhbDo4MA==",
+        # test.domain.local
+        "NO_PROXY": "dGVzdC5kb21haW4ubG9jYWw=",
+    }
+
+    secret = secrets.ProxySecret()
+
+    proxy_vars = secret.get_proxy_vars(
+        no_proxy=["svc.cluster.local", "it.just.works"]
+    )
+    expected_proxy = "http://squid.openstack.svc.cluster.local:80"
+    expected_no_proxy = "it.just.works,svc.cluster.local,test.domain.local"
+
+    expected_vars = {
+        "HTTP_PROXY": expected_proxy,
+        "HTTPS_PROXY": expected_proxy,
+        "NO_PROXY": expected_no_proxy,
+        "http_proxy": expected_proxy,
+        "https_proxy": expected_proxy,
+        "no_proxy": expected_no_proxy,
+    }
+
+    assert expected_vars == proxy_vars
 
 
 @mock.patch("openstack_controller.secrets.get_secret_data")
