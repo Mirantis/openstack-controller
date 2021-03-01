@@ -63,6 +63,10 @@ Generate environment variables for osdpl containers
   value: {{ $context.Values.osdpl.namespace }}
 - name: OSCTL_CEPH_SHARED_NAMESPACE
   value: {{ $context.Values.osdpl.cephSharedNamespace }}
+- name: OSCTL_IMAGES_BASE_URL
+  value: {{ $context.Values.global.dockerBaseUrl }}
+- name: OSCTL_BINARY_BASE_URL
+  value: {{ $context.Values.global.helmBaseUrl }}
 {{- end }}
 
 {{/*

@@ -1,9 +1,5 @@
 {%- set ironic_enabled = 'baremetal' in services %}
 {%- set nginx_ingress_namespace_class = "openstack-ingress-nginx" %}
-artifacts:
-  images_base_url: mirantis.azurecr.io
-  binary_base_url: https://binary.mirantis.com
-
 common:
   charts:
     releases:

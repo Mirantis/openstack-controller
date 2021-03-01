@@ -308,9 +308,15 @@ def merge_spec(spec, logger):
             == "vlan",
         )
     )
-    preset_binary_base_url = base["artifacts"]["binary_base_url"]
+    # Order for artifacts base urls overrides:
+    # 1. Url from controller settings
+    # 2. Url from Osdpl spec
+    base["artifacts"] = {
+        "binary_base_url": settings.OSCTL_BINARY_BASE_URL,
+        "images_base_url": settings.OSCTL_IMAGES_BASE_URL,
+    }
     binary_base_url = spec.get("artifacts", {}).get(
-        "binary_base_url", preset_binary_base_url
+        "binary_base_url", base["artifacts"]["binary_base_url"]
     )
     artifacts = yaml.safe_load(
         ENV.get_template("artifacts.yaml").render(
