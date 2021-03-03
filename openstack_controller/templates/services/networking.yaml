@@ -190,8 +190,8 @@ spec:
         bgp:
           as_number: {{ bgpvpn.as_number }}
           update_source_interface: {{ bgpvpn.get('control_interface', spec.features.neutron.tunnel_interface) }}
-          {%- if bgpvpn.route_reflector.get("neighbor_subnet") %}
-          neighbor_subnet: {{ bgpvpn.route_reflector.neighbor_subnet }}
+          {%- if bgpvpn.route_reflector.get("neighbor_subnets") %}
+          neighbor_subnets: {{ bgpvpn.route_reflector.neighbor_subnets }}
           {%- endif %}
 {%- endif %}
   - name: openstack-neutron

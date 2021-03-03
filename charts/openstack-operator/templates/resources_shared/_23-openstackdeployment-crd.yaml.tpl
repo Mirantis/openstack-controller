@@ -616,9 +616,11 @@ spec:
                                 enabled:
                                   type: boolean
                                   description: Enable BGPVPN route reflector on controller nodes
-                                neighbor_subnet:
-                                  type: string
+                                neighbor_subnets:
+                                  type: array
                                   description: BGP sessions allowed from neighbors in this subnet
+                                  items:
+                                    type: string
                     messaging:
                       type: object
                       properties:
