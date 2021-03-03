@@ -129,6 +129,13 @@ OSCTL_CEPH_SHARED_NAMESPACE = os.environ.get(
     "OSCTL_CEPH_SHARED_NAMESPACE", "openstack-ceph-shared"
 )
 
+# TODO(mkarpin): move openstack related settings to separate file
+# as settings.py is imported inside kube.py
+# Url for openstack binaries/helm charts
+OSCTL_BINARY_BASE_URL = os.environ.get("OSCTL_BINARY_BASE_URL", "")
+# Url for openstack docker images
+OSCTL_IMAGES_BASE_URL = os.environ.get("OSCTL_IMAGES_BASE_URL", "")
+
 # The name of secret with BGP information
 OSCTL_BGPVPN_NEIGHBOR_INFO_SECRET_NAME = os.environ.get(
     "OSCTL_BGPVPN_BGP_NEIGHBOR_INFO_SECRET_NAME", "frr-bgp-neighbors"
