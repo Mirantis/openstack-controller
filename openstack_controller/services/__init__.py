@@ -667,7 +667,7 @@ class Keystone(OpenStackService):
             f"{keystone_base}/v3/OS-FEDERATION/identity_providers/keycloak/protocols/mapped/auth",
             f"{keystone_base}/v3/auth/OS-FEDERATION/websso/",
             f"{keystone_base}/v3/auth/OS-FEDERATION/identity_providers/keycloak/protocols/mapped/websso/",
-            f"https://horizon.{public_domain}/auth/websso/",
+            f"https://horizon.{public_domain}/*",
         ]
         redirect_uris = oidc_settings.get(
             "OIDCRedirectURI", redirect_uris_default
