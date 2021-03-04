@@ -42,16 +42,16 @@ features:
         pool_start: 10.11.12.100
         range: 10.11.12.0/24
     tunnel_interface: ens3
+  octavia:
+    lb_network:
+      subnets:
+      - range: '192.168.0.0/24'
+        pool_start: '192.168.0.1'
+        pool_end: '192.168.0.254'
   nova:
     images:
       backend: local
     live_migration_interface: ens3
-  octavia:
-    lb_network:
-      subnets:
-      - pool_end: 10.255.255.254
-        pool_start: 10.255.1.0
-        range: 10.255.0.0/16
   services:
   - block-storage
   - compute

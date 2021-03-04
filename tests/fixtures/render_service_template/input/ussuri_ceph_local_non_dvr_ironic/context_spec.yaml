@@ -52,12 +52,6 @@ features:
     images:
       backend: local
     live_migration_interface: ens3
-  octavia:
-    lb_network:
-      subnets:
-      - pool_end: 10.255.255.254
-        pool_start: 10.255.1.0
-        range: 10.255.0.0/16
   ironic:
     provisioning_interface: ens7
     baremetal_network_name: ironic-provisioning

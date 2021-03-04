@@ -1,3 +1,5 @@
+# IMPORTANT: list items specified here is not possible to override as they
+# appended during merging
 {%- set ironic_enabled = 'baremetal' in services %}
 {%- set nginx_ingress_namespace_class = "openstack-ingress-nginx" %}
 common:
@@ -51,12 +53,6 @@ features:
     enabled: true
     user:
       username: stacklight
-  octavia:
-    lb_network:
-      subnets:
-        - range: '10.255.0.0/16'
-          pool_start: '10.255.1.0'
-          pool_end: '10.255.255.254'
 services:
   ingress:
     ingress:

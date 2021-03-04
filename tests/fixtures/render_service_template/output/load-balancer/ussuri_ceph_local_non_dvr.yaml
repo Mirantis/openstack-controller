@@ -211,9 +211,9 @@ spec:
           amphora_image_url: https://amphora-image-url/latest
           enable_amphorav2: true
           lbmgmt_subnets:
-          - pool_end: 10.255.255.254
-            pool_start: 10.255.1.0
-            range: 10.255.0.0/16
+            - pool_end: 192.168.0.254
+              pool_start: 192.168.0.1
+              range: 192.168.0.0/24
       pod:
         mounts:
           octavia_api:
