@@ -39,7 +39,7 @@
             reason: Locators update is needed
             # stepler/horizon/tests/test_images.py::TestAnyOne::test_remove_protected_image
           50dcf89e-370a-47d2-a0eb-c56dd77c968e:
-            reason: Locators update is needed
+            reason: PRODX-12232
             # stepler/horizon/tests/test_images.py::TestAnyOne::test_edit_image
           619298ae-f9f5-4afa-a50b-c3f5faa38c81:
             reason: Locators update is needed
@@ -156,7 +156,7 @@
             reason: Locators update is needed
             # stepler/horizon/tests/test_images.py::TestAnyOne::test_remove_protected_image
           8c85f869-993b-4447-98e4-fc1e4ebacb4e:
-            reason: Locators update is needed
+            reason: PRODX-12232
             # stepler/horizon/tests/test_images.py::TestAnyOne::test_edit_image
           f2bb54d2-f926-4c7c-85ce-2737e109000d:
             reason: Locators update is needed
@@ -297,7 +297,7 @@
             reason: Locators update is needed
             # stepler/horizon/tests/test_volumes.py::TestAdminOnly::test_launch_volume_as_instance
           e585242-9443-4e78-a7fe-3ee6097459bb:
-            reason: Locators update is needed
+            reason: The test will be removed as depricated
             # stepler/horizon/tests/test_volumes.py::TestAdminOnly::test_migrate_volume
           f9632117-d130-4171-8b61-2ada6c9e2f55:
             reason: Locators update is needed
