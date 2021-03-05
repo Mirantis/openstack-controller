@@ -7,6 +7,11 @@
 {%- set notification_topics = ['notifications'] %}
 {%- do notification_topics.append('stacklight_notifications') if stacklight_enabled %}
 {%- set enabled_boot_interfaces = ['pxe', 'fake'] %}
+{%- set default_binary_base_url = spec.artifacts.binary_base_url %}
+  {%- if local_proxy %}
+    {%- set default_binary_base_url = default_binary_base_url | update_url_hostname("${NODE_IP}") %}
+{%- endif %}
+
 {%- if spec.openstack_version not in ['queens', 'rocky'] %}
 # NOTE(vsaienko): we prefer to use chainloading to ipxe as it is much faster
 # and stable for file downloads that UDP based pxe, and most of the hardware
@@ -117,12 +122,12 @@ spec:
           enabled: false
         image:
           {%- set agent_images = spec.features.ironic.get('agent_images', {}) %}
-          source_base: {{ agent_images.get('base_url', spec.artifacts.binary_base_url ~ '/openstack/bin/ironic/tinyipa') }}
+          source_base: {{ agent_images.get('base_url', default_binary_base_url ~ '/openstack/bin/ironic/tinyipa') }}
           structured:
             ironic-agent.initramfs:
-              source:  {{ agent_images.get('initramfs', 'tinyipa-stable-' ~ spec.openstack_version ~ '.gz') }}
+              source: {{ agent_images.get('initramfs', 'tinyipa-stable-' ~ spec.openstack_version ~ '.gz') }}
             ironic-agent.kernel:
-              source:  {{ agent_images.get('kernel', 'tinyipa-stable-' ~ spec.openstack_version ~ '.vmlinuz') }}
+              source: {{ agent_images.get('kernel', 'tinyipa-stable-' ~ spec.openstack_version ~ '.vmlinuz') }}
       network:
         proxy:
 {% include 'base/_proxy_vars.yaml' %}

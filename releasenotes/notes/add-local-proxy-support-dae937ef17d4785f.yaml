@@ -1,0 +1,7 @@
+---
+features:
+  - Support case when each node contains reverse
+    proxy deployed locally. In this case artifacts
+    are downloaded through this proxy. K8s host ip is injected
+    as NODE_IP env variable in pods which require artifacts
+    download but has no hostnetworking enabled.

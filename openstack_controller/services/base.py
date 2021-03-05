@@ -7,6 +7,7 @@ import hashlib
 
 import kopf
 import pykube
+from urllib.parse import urlsplit
 
 from openstack_controller import ceph_api
 from openstack_controller import constants
@@ -71,7 +72,7 @@ class GenericChildObject:
             "bootstrap",
             "job_bootstrap",
             ["bootstrap"],
-            hash_fields=["network.proxy.*"],
+            hash_fields=["network.proxy.*", "bootstrap.*"],
         )
 
 
@@ -509,11 +510,14 @@ class Service:
             self._required_accounts,
         )
         service_creds = service_secrets.ensure()
+        binary_base_url = self.mspec["artifacts"]["binary_base_url"]
+        local_proxy = urlsplit(binary_base_url).hostname == "localhost"
 
         template_args = {
             "credentials": credentials,
             "admin_creds": admin_creds,
             "service_creds": service_creds,
+            "local_proxy": local_proxy,
         }
 
         if settings.OSCTL_PROXY_DATA["enabled"]:

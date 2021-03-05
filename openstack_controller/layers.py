@@ -16,6 +16,7 @@ import yaml
 from openstack_controller import constants
 from openstack_controller import settings
 from openstack_controller.filters.tempest import generate_tempest_config
+from openstack_controller.filters.common_filters import update_url_hostname
 from openstack_controller import utils
 
 LOG = utils.get_logger(__name__)
@@ -28,6 +29,7 @@ ENV = jinja2.Environment(
 LOG.info(f"found templates {ENV.list_templates()}")
 
 ENV.filters["generate_tempest_config"] = generate_tempest_config
+ENV.filters["update_url_hostname"] = update_url_hostname
 ENV.filters["b64encode"] = base64.b64encode
 ENV.filters["decode"] = lambda x: x.decode()
 ENV.filters["encode"] = lambda x: x.encode()

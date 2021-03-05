@@ -6,6 +6,10 @@
 {%- set stacklight_enabled = spec.get('features', {}).get('stacklight', {}).get('enabled', False) %}
 {%- set notification_topics = ['notifications'] %}
 {%- do notification_topics.append('stacklight_notifications') if stacklight_enabled %}
+{%- set default_binary_base_url = spec.artifacts.binary_base_url %}
+{%- if local_proxy %}
+  {%- set default_binary_base_url = default_binary_base_url | update_url_hostname("${NODE_IP}") %}
+{%- endif %}
 
 spec:
   releases:
@@ -115,7 +119,7 @@ spec:
               private: false
               properties:
                 os_distro: cirros
-              source_url: {{ spec.artifacts.binary_base_url }}/openstack/bin/cirros/0.5.1/
+              source_url: {{ default_binary_base_url }}/openstack/bin/cirros/0.5.1/
             fedora:
               container_format: bare
               image_file: Fedora-Cloud-Base-27-1.6.x86_64.qcow2
@@ -125,7 +129,7 @@ spec:
               private: false
               properties:
                 os_distro: fedora
-              source_url: {{ spec.artifacts.binary_base_url }}/openstack/bin/Fedora/27/
+              source_url: {{ default_binary_base_url }}/openstack/bin/Fedora/27/
             ubuntu:
               container_format: bare
               image_file: bionic-server-cloudimg-amd64.img
@@ -135,7 +139,7 @@ spec:
               private: false
               properties:
                 os_distro: ubuntu
-              source_url: {{ spec.artifacts.binary_base_url }}/openstack/bin/ubuntu/18.04/
+              source_url: {{ default_binary_base_url }}/openstack/bin/ubuntu/18.04/
       conf:
         glance:
           cors:
