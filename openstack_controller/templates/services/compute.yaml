@@ -423,7 +423,7 @@ spec:
           cinder:
             user: {{ ceph.nova.username }}
             keyring: {{ ceph.nova.keyring }}
-{%- elif spec.get('features', {}).get('nova', {}).get('images', {}).get('backend') == 'local' %}
+{%- else %}
           enabled: false
 {%- endif %}
         nova:
@@ -468,6 +468,9 @@ spec:
             images_type: rbd
 {%- elif spec.get('features', {}).get('nova', {}).get('images', {}).get('backend') == 'local' %}
             images_type: qcow2
+{%- elif spec.get('features', {}).get('nova', {}).get('images', {}).get('backend') == 'lvm' %}
+            images_type: lvm
+            images_volume_group: {{ spec.get('features', {}).get('nova', {}).get('images', {}).get('lvm', {}).get("volume_group", "nova-vol") }}
 {%- endif %}
 {%- for pools, pools_config in ceph.nova.pools.items() %}
             images_rbd_pool: {{ pools_config.name }}

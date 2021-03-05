@@ -303,11 +303,19 @@ spec:
                           properties:
                             backend:
                               description: >
-                                backend for nova images can be ceph or local
+                                Backend for nova images can be ceph or local
                               type: string
                               enum:
                                 - local
                                 - ceph
+                                - lvm
+                            lvm:
+                              type: object
+                              properties:
+                                volume_group:
+                                  type: string
+                                  description: >
+                                    Volume group used when images backend is lvm. Default to nova-vol
                     horizon:
                       type: object
                       properties:
