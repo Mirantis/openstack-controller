@@ -77,7 +77,15 @@ spec:
         settings:
 {%- if not tungstenfabric_enabled %}
           lbmgmt_subnets:
-  {%- for subnet in spec.features.octavia.lb_network.subnets %}
+  {%- set lb_subnets = [] %}
+  {%- if spec.features.get('octavia', {}).get('lb_network', {}).get('subnets', []) %}
+      {%- do lb_subnets.extend(spec.features.octavia.lb_network.subnets) %}
+  {%- else %}
+      {%- do lb_subnets.append({"range": "10.255.0.0/16",
+                                "pool_start": "10.255.1.0",
+                                "pool_end": "10.255.255.254"}) %}
+  {%- endif %}
+  {%- for subnet in lb_subnets %}
             - range: {{ subnet.range }}
               pool_start: {{ subnet.pool_start }}
               pool_end: {{ subnet.pool_end }}

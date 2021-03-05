@@ -1,3 +1,5 @@
+# IMPORTANT: list items specified here is not possible to override as they
+# appended during merging
 {%- set nginx_ingress_namespace_class = "openstack-ingress-nginx" %}
 common:
   charts:
