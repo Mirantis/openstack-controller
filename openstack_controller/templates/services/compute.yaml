@@ -457,6 +457,8 @@ spec:
             live_migration_wait_for_vif_plug: false
           workarounds:
             skip_migration_revert_events: true
+          os_vif_contrail_vrouter:
+            vrouter_port: {{ vrouter_port }}
 {%- else %}
           os_vif_ovs:
             isolate_vif: true
@@ -551,7 +553,6 @@ spec:
         core_plugin: {{ neutron_backend }}
         {%- if neutron_backend == 'tungstenfabric' %}
         backend: []
-        vrouter_port: {{ vrouter_port }}
         {%- endif %}
         sshd:
           enabled: true
