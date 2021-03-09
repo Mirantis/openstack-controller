@@ -149,7 +149,7 @@ cat <<EOF >> $RUN_DIR/cluster/migration/init.yml
           address: $mcp2_ingress_address
           names:
 EOF
-  for component in $COMPONENTS_TO_MIGRATE; do
+  for component in $COMPONENTS_TO_MIGRATE_PUBLIC_API; do
 cat <<EOF >> $RUN_DIR/cluster/migration/init.yml
           - ${component}.${mcp2_public_domain_name}
 EOF
