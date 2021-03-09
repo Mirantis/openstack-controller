@@ -230,9 +230,6 @@
           5d3a55ec-5100-11e7-83e0-b33e26fe0aed:
             reason: Locators update is needed
             # stepler/horizon/tests/test_credentials.py::TestAdminOnly::test_download_rc_v2_non_ascii_project_name
-          5b2ce43c-924c-4bae-bac0-f5d6ed69d72e:
-            reason: Locators update is needed
-            # stepler/horizon/tests/test_defaults.py::TestAdminOnly::test_update_defaults
           ccfeddd8-a21e-4224-9608-88aa700333d5:
             reason: Locators update is needed
             # stepler/horizon/tests/test_flavors.py::TestAdminOnly::test_flavor_update_metadata
