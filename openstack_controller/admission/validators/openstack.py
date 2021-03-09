@@ -42,8 +42,9 @@ class OpenStackValidator(base.BaseValidator):
             )
 
     def _check_masakari_allowed(self, new_obj):
+        # Do not call heavy render logic, assume default values in preset is ok
         openstack_services = (
-            new_obj.get("spec", {}).get("features", {}).get("services")
+            new_obj.get("spec", {}).get("features", {}).get("services", [])
         )
         os_num_version = constants.OpenStackVersion[
             new_obj["spec"]["openstack_version"]
