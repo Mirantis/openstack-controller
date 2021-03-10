@@ -42,7 +42,9 @@ class TypeConflictFail(
             return nxt
         raise deepmerge.exception.InvalidMerge(
             f"Trying to merge different types of objects, {type(base)} and "
-            f"{type(nxt)} at path {':'.join(path)}"
+            f"{type(nxt)} at path {':'.join(path)}",
+            base,
+            nxt,
         )
 
 
