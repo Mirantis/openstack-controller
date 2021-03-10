@@ -19,6 +19,8 @@
   {%- endif %}
 {%- endfor %}
 
+{%- set ceph_enabled = spec.get('features', {}).get('nova', {}).get('images', {}).get('backend') == 'ceph' or spec.get('features', {}).get('cinder', {}).get('volume', {}).get('backend') == 'ceph' %}
+
 spec:
   releases:
 {%- if 'compute' in components_with_dedicated_messaging %}
@@ -89,14 +91,14 @@ spec:
 {%- endfor %}
       manifests:
         network_policy: false
-{%- if (spec.get('features', {}).get('nova', {}).get('images', {}).get('backend') == 'ceph') or (spec.get('features', {}).get('cinder', {}).get('volume', {}).get('backend') == 'ceph') %}
+{%- if ceph_enabled %}
       ceph_client:
         configmap: rook-ceph-config
         user_secret_name: {{ ceph.nova.secrets }}
 {%- endif %}
       conf:
         ceph:
-{%- if (spec.get('features', {}).get('nova', {}).get('images', {}).get('backend') == 'ceph') or (spec.get('features', {}).get('cinder', {}).get('volume', {}).get('backend') == 'ceph') %}
+{%- if ceph_enabled %}
           enabled: true
           cinder:
             user: {{ ceph.nova.username }}
@@ -411,14 +413,14 @@ spec:
           scheme:
             default: http
             public: https
-{%- if spec.get('features', {}).get('nova', {}).get('images', {}).get('backend') == 'ceph' or (spec.get('features', {}).get('cinder', {}).get('volume', {}).get('backend') == 'ceph') %}
+{%- if ceph_enabled %}
       ceph_client:
         configmap: rook-ceph-config
         user_secret_name: {{ ceph.nova.secrets }}
 {%- endif %}
       conf:
         ceph:
-{%- if spec.get('features', {}).get('nova', {}).get('images', {}).get('backend') == 'ceph' %}
+{%- if ceph_enabled %}
           enabled: true
           cinder:
             user: {{ ceph.nova.username }}

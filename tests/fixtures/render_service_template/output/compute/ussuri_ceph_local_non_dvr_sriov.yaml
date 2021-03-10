@@ -43,7 +43,10 @@ spec:
         user_secret_name: nova-rbd-keyring
       conf:
         ceph:
-          enabled: false
+          cinder:
+            keyring: AQDNZLJf8S+fORAA6hg50Jo+vBq07kxtBXB9PQ==
+            user: nova
+          enabled: true
         hypervisor:
           host_interface: ens3
         libvirt:
