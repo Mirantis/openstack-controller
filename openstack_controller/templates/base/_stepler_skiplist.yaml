@@ -293,3 +293,6 @@
           439e8ca5-0d87-49aa-9458-a239fa6ff1e1:
             reason: PRODX-10580, PRODX-10586
             # stepler/horizon/tests/test_volumes.py::TestUserOnly::test_launch_volume_as_instance
+          9acd7607-d72f-4e8c-9b13-1a0728d56975:
+            reason: PRODX-11366
+            # stepler/horizon/tests/test_projects.py::TestAdminOnly::test_switch_projects
