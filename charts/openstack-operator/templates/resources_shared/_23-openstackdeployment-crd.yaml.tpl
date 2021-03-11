@@ -309,6 +309,18 @@ spec:
                                 - local
                                 - ceph
                                 - lvm
+                            encryption:
+                              type: object
+                              properties:
+                                enabled:
+                                  type: boolean
+                                  description: Enable ephemeral disk encryption, only available with lvm backend.
+                                cipher:
+                                  type: string
+                                  description: Cipher-mode string to be used.
+                                key_size:
+                                  type: integer
+                                  description: Encryption key length in bits.
                             lvm:
                               type: object
                               properties:

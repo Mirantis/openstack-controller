@@ -266,6 +266,38 @@ def test_physnet_optional_tf(client):
     assert response.json["response"]["allowed"] is True
 
 
+def test_nova_encryption(client):
+    req = copy.deepcopy(ADMISSION_REQ)
+    req["request"]["object"]["spec"]["features"]["nova"] = {
+        "images": {"backend": "local", "encryption": {"enabled": False}}
+    }
+    response = client.simulate_post("/validate", json=req)
+    assert response.status == falcon.HTTP_OK
+    assert response.json["response"]["allowed"] is True
+
+    req["request"]["object"]["spec"]["features"]["nova"] = {
+        "images": {"backend": "local", "encryption": {"enabled": True}}
+    }
+    response = client.simulate_post("/validate", json=req)
+    assert response.status == falcon.HTTP_OK
+    assert response.json["response"]["status"]["code"] == 400
+    assert response.json["response"]["allowed"] is False
+
+    req["request"]["object"]["spec"]["features"]["nova"] = {
+        "images": {"backend": "lvm", "encryption": {"enabled": True}}
+    }
+    response = client.simulate_post("/validate", json=req)
+    assert response.status == falcon.HTTP_OK
+    assert response.json["response"]["allowed"] is True
+
+    req["request"]["object"]["spec"]["features"]["nova"] = {
+        "images": {"backend": "lvm", "encryption": {"enabled": False}}
+    }
+    response = client.simulate_post("/validate", json=req)
+    assert response.status == falcon.HTTP_OK
+    assert response.json["response"]["allowed"] is True
+
+
 def _node_specific_request(client, node_override, result):
     req = copy.deepcopy(ADMISSION_REQ)
     req["request"]["object"]["spec"]["nodes"] = node_override

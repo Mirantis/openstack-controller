@@ -20,6 +20,7 @@
 {%- endfor %}
 
 {%- set ceph_enabled = spec.get('features', {}).get('nova', {}).get('images', {}).get('backend') == 'ceph' or spec.get('features', {}).get('cinder', {}).get('volume', {}).get('backend') == 'ceph' %}
+{%- set ephemeral_encryption = spec.get('features', {}).get('nova', {}).get('images', {}).get("encryption", {}) %}
 
 spec:
   releases:
@@ -448,9 +449,15 @@ spec:
             catalog_info: volumev3:cinderv3:internalURL
           neutron:
             metadata_proxy_shared_secret: {{ metadata_secret }}
- {%- if 'metering' in services %}
+{%- if 'metering' in services %}
           notifications:
             notify_on_state_change: vm_and_task_state
+{%- endif %}
+{%- if ephemeral_encryption.get("enabled", false) %}
+          ephemeral_storage_encryption:
+            enabled: true
+            cipher: {{ ephemeral_encryption.get("cipher", "aes-xts-plain64") }}
+            key_size: {{ ephemeral_encryption.get("key_size", 256) }}
 {%- endif %}
 {%- if neutron_backend == 'tungstenfabric' %}
           compute:
