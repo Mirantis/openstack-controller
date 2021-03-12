@@ -511,7 +511,7 @@ class Service:
         )
         service_creds = service_secrets.ensure()
         binary_base_url = self.mspec["artifacts"]["binary_base_url"]
-        local_proxy = urlsplit(binary_base_url).hostname == "localhost"
+        local_proxy = urlsplit(binary_base_url).hostname == "127.0.0.1"
 
         template_args = {
             "credentials": credentials,

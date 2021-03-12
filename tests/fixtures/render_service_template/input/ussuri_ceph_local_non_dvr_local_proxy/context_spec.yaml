@@ -83,7 +83,7 @@ features:
       password: stacklight
       username: stacklight
 artifacts:
-  binary_base_url: 'http://localhost:8282/bin'
+  binary_base_url: 'http://127.0.0.1:8282/bin'
 common:
   charts: {}
   infra:
