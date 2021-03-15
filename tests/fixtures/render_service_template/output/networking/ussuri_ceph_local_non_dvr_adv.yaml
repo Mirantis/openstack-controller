@@ -184,6 +184,8 @@ spec:
         metadata_agent:
           DEFAULT:
             metadata_proxy_shared_secret: mN0aLDTcg1AVqyLWNDjCd2Jz6DA61cZJ
+            nova_metadata_port: 8775
+            nova_metadata_protocol: http
         neutron:
           DEFAULT:
             api_workers: 4
@@ -234,6 +236,12 @@ spec:
             - openstack-mariadb-cluster-wait
       endpoints:
         cluster_domain_suffix: cluster.local
+        compute_metadata:
+          hosts:
+            default: nova-metadata
+            public: nova-metadata
+          scheme:
+            default: http
         identity:
           auth:
             admin:

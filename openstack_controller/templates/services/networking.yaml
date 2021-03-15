@@ -375,6 +375,12 @@ spec:
           scheme:
             default: http
             public: https
+        compute_metadata:
+          hosts:
+            default: nova-metadata
+            public: nova-metadata
+          scheme:
+            default: http
       {%- if tungstenfabric_enabled and tungstenfabric_custom_api_opts %}
         tungstenfabric:
           hosts:
@@ -504,6 +510,8 @@ spec:
         metadata_agent:
           DEFAULT:
             metadata_proxy_shared_secret: {{ credentials.metadata_secret }}
+            nova_metadata_port: 8775
+            nova_metadata_protocol: http
         ironic:
           # TODO(vsaienko): figure out why specifying endpoint type via valid_interfaces or interface
           # or endpoint_typedoes not work.

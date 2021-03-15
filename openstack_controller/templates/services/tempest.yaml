@@ -32,8 +32,17 @@ spec:
       endpoints:
         cluster_domain_suffix: {{ spec.internal_domain_name }}
 {% include 'base/_admin_identity.yaml' %}
+          scheme:
+            default: http
+          port:
+            api:
+              default: 5000
+          hosts:
+            default: keystone-api
+          path:
         dashboard:
           host_fqdn_override:
+            default: horizon.{{ spec.public_domain_name }}
             public:
               tls:
                 ca: |
