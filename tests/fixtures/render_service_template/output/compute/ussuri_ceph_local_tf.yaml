@@ -75,6 +75,8 @@ spec:
             live_migration_wait_for_vif_plug: false
           workarounds:
             skip_migration_revert_events: true
+          os_vif_contrail_vrouter:
+            vrouter_port: vrouter_port0
         policy:
           os_compute_api:limits: '@'
           os_compute_api:limits:other_project: rule:system_reader_api
@@ -373,7 +375,6 @@ spec:
         backend: []
         sshd:
           enabled: true
-        vrouter_port: vrouter_port0
       pod:
         probes:
           compute:
