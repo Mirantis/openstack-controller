@@ -68,9 +68,6 @@
           54a6c9d9-09c8-4f74-a670-b1c0d4bb1d74:
             reason: Locators update is needed
             # stepler/horizon/tests/test_instances.py::TestAnyOne::test_create_instance
-          57b7621f-174c-4373-8d6c-bbd6991172ff:
-            reason: Locators update is needed
-            # stepler/horizon/tests/test_keypairs.py::TestAnyOne::test_create_keypair
           bd1840c3-ac0c-4a36-ac63-d0182edfb6ec:
             reason: Locators update is needed
             # stepler/horizon/tests/test_security_groups.py::TestAnyOne::test_create_delete_security_group
@@ -182,9 +179,6 @@
           a3cd86a4-70c4-4a3e-b9b6-d9774d8aeae3:
             reason: Locators update is needed
             # stepler/horizon/tests/test_instances.py::TestAnyOne::test_create_instance
-          4e1445fd-c820-4d6b-a9a8-f95a764d7ec4:
-            reason: Locators update is needed
-            # stepler/horizon/tests/test_keypairs.py::TestAnyOne::test_create_keypair
           e41796c3-0f14-467c-80b0-98012d13bc1c:
             reason: Locators update is needed
             # stepler/horizon/tests/test_security_groups.py::TestAnyOne::test_create_delete_security_group
@@ -263,9 +257,6 @@
           df175266-3a05-11e7-9adf-2ba1863bd2b4:
             reason: Locators update is needed
             # stepler/horizon/tests/test_instances.py::TestUserOnly::test_nova_associate_ip
-          bbf4f0d8-527c-11e7-a611-a756d7b535ce:
-            reason: Locators update is needed
-            # stepler/horizon/tests/test_keypairs.py::TestAdminOnly::test_import_key_pair_quota_exceeded
           8381d3ff-9f94-465f-a127-c84d328e14a4:
             reason: Locators update is needed
             # stepler/horizon/tests/test_stacks.py::TestAdminOnly::test_create_stack
