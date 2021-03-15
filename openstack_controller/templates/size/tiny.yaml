@@ -420,7 +420,7 @@ services:
           lifecycle:
             disruption_budget:
               horizon:
-                min_available: 2
+                min_available: 1
             upgrades:
               deployments:
                 pod_replacement_strategy: RollingUpdate
