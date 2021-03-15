@@ -20,15 +20,6 @@
           a6ed9d2a-ae40-45ca-92c9-0034cbb425b1:
             reason: Locators update is needed
             # stepler/horizon/tests/test_credentials.py::TestAnyOne::test_download_ec2
-          c414f5b0-c098-48ea-b99b-6e37597bcd7a:
-            reason: Locators update is needed
-            # stepler/horizon/tests/test_credentials.py::TestAnyOne::test_view_credentials
-          a54b457e-f3b2-4903-9702-b9e75ede5830:
-            reason: Locators update is needed
-            # stepler/horizon/tests/test_images.py::TestAnyOne::test_delete_images
-          6094e9bf-67dd-4f19-a0a3-73cf7b91603a:
-            reason: Locators update is needed
-            # stepler/horizon/tests/test_images.py::TestAnyOne::test_delete_images
           c4cf3c6d-45d2-4629-b9fe-3e8eed3f1e59:
             reason: Locators update is needed
             # stepler/horizon/tests/test_images.py::TestAnyOne::test_view_image
@@ -131,15 +122,6 @@
           596710b9-1f77-4db9-9a77-f5733a5708ff:
             reason: Locators update is needed
             # stepler/horizon/tests/test_credentials.py::TestAnyOne::test_download_ec2
-          5bf8ab88-2839-42af-afa0-c2cc5211f774:
-            reason: Locators update is needed
-            # stepler/horizon/tests/test_credentials.py::TestAnyOne::test_view_credentials
-          083edf5e-ba16-414a-854d-d0ddcbbe7186:
-            reason: Locators update is needed
-            # stepler/horizon/tests/test_images.py::TestAnyOne::test_delete_images
-          ace4a999-9318-4446-a957-57143e52703d:
-            reason: Locators update is needed
-            # stepler/horizon/tests/test_images.py::TestAnyOne::test_delete_images
           a7330cae-30ea-4131-a819-42a71f87576d:
             reason: Locators update is needed
             # stepler/horizon/tests/test_images.py::TestAnyOne::test_view_image
@@ -206,12 +188,6 @@
           abb97b8e-6539-413a-b3b0-7e770eeb83e2:
             reason: Locators update is needed
             # stepler/horizon/tests/test_volume_backups.py::TestAnyOne::test_create_volume_backup_with_max_length_description
-          e71f4484-7c03-4dd9-a087-1217a86278a8:
-            reason: Locators update is needed
-            # stepler/horizon/tests/test_volumes.py::TestAnyOne::test_delete_volumes
-          d4258de3-ab3c-4460-986e-e68e8801c43f:
-            reason: Locators update is needed
-            # stepler/horizon/tests/test_volumes.py::TestAnyOne::test_delete_volumes
           a4ab8682-eed6-4d00-8975-4289e2aac4d3:
             reason: Locators update is needed
             # stepler/horizon/tests/test_volumes.py::TestAnyOne::test_upload_volume_to_image
@@ -230,18 +206,6 @@
           b846cf53-d3fa-4cca-8b10-fbaf50749f7c:
             reason: Locators update is needed
             # stepler/horizon/tests/test_images.py::TestUserOnly::test_big_image_create_delete
-          53c038f0-b63c-461c-983b-7db82fd0d626:
-            reason: Locators update is needed
-            # stepler/horizon/tests/test_instances.py::TestAdminOnly::test_delete_instances
-          ecb6230a-3062-46af-af06-4f9208ae2961:
-            reason: Locators update is needed
-            # stepler/horizon/tests/test_instances.py::TestAdminOnly::test_delete_instances
-          d6fc41ea-3a05-11e7-a867-ab2bfc1dfe61:
-            reason: Locators update is needed
-            # stepler/horizon/tests/test_instances.py::TestAdminOnly::test_nova_associate_ip
-          da7150fc-4ce5-11e7-bf78-c712da53935b:
-            reason: Locators update is needed
-            # stepler/horizon/tests/test_instances.py::TestAdminOnly::test_admin_delete_instance
           20d68874-4ce5-11e7-8c5a-c3a2b1dcfe6f:
             reason: Locators update is needed
             # stepler/horizon/tests/test_instances.py::TestAdminOnly::test_admin_delete_instances
@@ -254,9 +218,6 @@
           bf0ea67b-fe0a-4be3-bc83-e9ca8ba0b3e2:
             reason: Locators update is needed
             # stepler/horizon/tests/test_instances.py::TestUserOnly::test_delete_instances
-          df175266-3a05-11e7-9adf-2ba1863bd2b4:
-            reason: Locators update is needed
-            # stepler/horizon/tests/test_instances.py::TestUserOnly::test_nova_associate_ip
           8381d3ff-9f94-465f-a127-c84d328e14a4:
             reason: Locators update is needed
             # stepler/horizon/tests/test_stacks.py::TestAdminOnly::test_create_stack
