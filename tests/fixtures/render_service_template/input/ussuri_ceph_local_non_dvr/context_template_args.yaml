@@ -81,6 +81,7 @@ coordination:
   credentials: null
   service_creds: []
 dashboard:
+  rgw_internal_cacert: "RGW CRT"
   credentials: &credentials_dashboard
     database:
       user:
