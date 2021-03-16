@@ -545,6 +545,25 @@ class Horizon(OpenStackService):
     def _child_generic_objects(self):
         return {"horizon": {"job_db_init", "job_db_sync", "job_db_drop"}}
 
+    def template_args(self):
+        t_args = super().template_args()
+
+        kube.wait_for_secret(
+            settings.OSCTL_CEPH_SHARED_NAMESPACE,
+            ceph_api.OPENSTACK_KEYS_SECRET,
+        )
+        rgw_internal_cacert = secrets.get_secret_data(
+            settings.OSCTL_CEPH_SHARED_NAMESPACE,
+            ceph_api.OPENSTACK_KEYS_SECRET,
+        ).get("rgw_internal_cacert")
+        if rgw_internal_cacert:
+            rgw_internal_cacert = base64.b64decode(
+                rgw_internal_cacert
+            ).decode()
+            t_args["rgw_internal_cacert"] = rgw_internal_cacert
+
+        return t_args
+
 
 class Ironic(OpenStackService):
     service = "baremetal"
