@@ -58,7 +58,7 @@ Generate environment variables for osdpl containers
 {{- define "openstack-controller.common_env" }}
 {{- $context := index . 0 -}}
 - name: OSCTL_PROXY_SECRET_NAMESPACE
-  value: {{ $context.Release.Namespace }}
+  value: {{ index $context.Values.global.proxy "namespace" | default $context.Values.osdpl.namespace }}
 - name: OSCTL_OS_DEPLOYMENT_NAMESPACE
   value: {{ $context.Values.osdpl.namespace }}
 - name: OSCTL_CEPH_SHARED_NAMESPACE
