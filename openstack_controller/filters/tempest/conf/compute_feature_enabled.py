@@ -65,10 +65,10 @@ class ComputeFeatureEnabled(base_section.BaseSection):
 
     @property
     def block_migration_for_live_migration(self):
-        if (
-            self.get_values_item("nova", "conf.nova.libvirt.images_type")
-            == "qcow2"
-        ):
+        if self.get_values_item("nova", "conf.nova.libvirt.images_type") in [
+            "qcow2",
+            "lvm",
+        ]:
             return True
         else:
             return False
