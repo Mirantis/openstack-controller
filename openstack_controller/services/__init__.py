@@ -14,6 +14,7 @@
 
 import asyncio
 import base64
+import json
 
 import kopf
 import openstack
@@ -885,6 +886,18 @@ class Neutron(OpenStackService):
                     )
                 ),
             }
+
+            nodes = {}
+            if self.mspec.get("nodes"):
+                for label_key in self.mspec["nodes"]:
+                    if utils.get_in(
+                        self.mspec["nodes"][label_key], ["features", "neutron"]
+                    ):
+                        nodes[label_key] = utils.get_in(
+                            self.mspec["nodes"][label_key],
+                            ["features", "neutron"],
+                        )
+            secret_data["nodes"] = b64encode(json.dumps(nodes))
 
             tfs = secrets.TungstenFabricSecret()
             tfs.save(secret_data)
