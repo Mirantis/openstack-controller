@@ -281,11 +281,40 @@ spec:
           hosts:
             default: rabbitmq-exporter-neutron
         tungstenfabric:
+          host_fqdn_override:
+            public:
+              host: tungstenfabric-api.it.just.works
+              tls:
+                ca: 'TEST CA
+
+                  '
+                crt: 'TEST CRT
+
+                  '
+                key: 'TEST KEY
+
+                  '
           hosts:
             default: tungstenfabric-api
+            public:
+              host: tungstenfabric-api
+              tls:
+                ca: 'TEST CA
+
+                  '
+                crt: 'TEST CRT
+
+                  '
+                key: 'TEST KEY
+
+                  '
           port:
             api:
               default: 8082
+              public: 443
+          scheme:
+            default: http
+            public: https
       images:
         tags:
           bootstrap: bootstrap:latest

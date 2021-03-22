@@ -383,11 +383,34 @@ spec:
             default: http
       {%- if tungstenfabric_enabled and tungstenfabric_custom_api_opts %}
         tungstenfabric:
+          host_fqdn_override:
+            public:
+              host: {{ tf_api_service }}.{{ spec.public_domain_name }}
+              tls:
+                ca: |
+{{ spec.features.ssl.public_endpoints.ca_cert | indent( width=18, first=True) }}
+                crt: |
+{{ spec.features.ssl.public_endpoints.api_cert | indent( width=18, first=True) }}
+                key: |
+{{ spec.features.ssl.public_endpoints.api_key | indent( width=18, first=True) }}
           hosts:
             default: {{ tf_api_service }}
+            public:
+              host: {{ tf_api_service }}
+              tls:
+                ca: |
+{{ spec.features.ssl.public_endpoints.ca_cert | indent( width=18, first=True) }}
+                crt: |
+{{ spec.features.ssl.public_endpoints.api_cert | indent( width=18, first=True) }}
+                key: |
+{{ spec.features.ssl.public_endpoints.api_key | indent( width=18, first=True) }}
           port:
             api:
               default: {{ tf_api_port }}
+              public: 443
+          scheme:
+            default: http
+            public: https
       {%- endif %}
       manifests:
       {%- if sriov.enabled %}
