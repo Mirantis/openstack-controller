@@ -1,0 +1,5 @@
+---
+fixes:
+  - |
+    Fix passing to helm full_backup_cycle parameter for mariadb backup.
+    More details - `PRODX-12640 <https://mirantis.jira.com/browse/PRODX-12640>`__

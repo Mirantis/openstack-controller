@@ -28,7 +28,7 @@ spec:
         phy_backup:
           backup_type: {{ backup_params.get('backup_type', 'incremental') }}
           {%- if backup_params.get('full_backup_cycle') %}
-          full_backup_cycle: {{ backup_params['full_backup_cycle'] }}
+          full_backup_cycle: "{{ backup_params['full_backup_cycle'] }}"
           {%- endif %}
           {%- if backup_params.get('backups_to_keep') %}
           backups_to_keep: {{ backup_params['backups_to_keep'] }}
