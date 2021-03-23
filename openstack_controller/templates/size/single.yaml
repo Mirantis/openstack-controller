@@ -190,6 +190,8 @@ services:
               connection_recycle_time: 300
             oslo_messaging_rabbit:
               rabbit_qos_prefetch_count: 64
+            ovs:
+              ovsdb_timeout: 30
     openvswitch:
       values:
         pod:
