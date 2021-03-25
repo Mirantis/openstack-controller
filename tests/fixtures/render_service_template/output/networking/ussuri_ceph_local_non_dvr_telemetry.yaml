@@ -1,1 +1,426 @@
-./ussuri_ceph_local_non_dvr.yaml
+spec:
+  releases:
+  - chart: osh-infra/rabbitmq
+    name: openstack-neutron-rabbitmq
+    values:
+      conf:
+        aux_conf:
+          policies:
+          - definition:
+              message-ttl: 120000
+            name: default-policy
+            pattern: ^(?!amq\.).*
+            vhost: neutron
+          - definition:
+              expires: 3600000
+            name: results_expire
+            pattern: ^results\.
+            priority: 1
+            vhost: neutron
+          - definition:
+              expires: 3600000
+            name: tasks_expire
+            pattern: ^tasks\.
+            priority: 1
+            vhost: neutron
+        prometheus_exporter:
+          rabbit_exporters: overview,exchange,node
+        users:
+          neutron:
+            auth:
+              service_user:
+                password: TRRhbnUMsepnqSzyJngJtgZD9gRu0Fwy
+                username: neutronx7uHpit
+            path: /neutron
+      endpoints:
+        cluster_domain_suffix: cluster.local
+        oslo_messaging:
+          auth:
+            admin:
+              password: 2tnAuP0j9MsgaVHErehZkC5HCK3ZxYLr
+              username: rabbitmq
+            neutron:
+              password: TRRhbnUMsepnqSzyJngJtgZD9gRu0Fwy
+              username: neutronx7uHpit
+            user:
+              password: 2tnAuP0j9MsgaVHErehZkC5HCK3ZxYLr
+              username: rabbitmq
+          hosts:
+            default: rabbitmq-neutron
+          path: /neutron
+          statefulset:
+            name: openstack-neutron-rabbitmq-rabbitmq
+            replicas: 1
+        prometheus_rabbitmq_exporter:
+          hosts:
+            default: rabbitmq-exporter-neutron
+      images:
+        tags:
+          dep_check: dep-check:latest
+          image_repo_sync: image-repo-sync:latest
+          prometheus_rabbitmq_exporter: prometheus-rabbitmq-exporter:latest
+          prometheus_rabbitmq_exporter_helm_tests: prometheus-rabbitmq-exporter-helm-tests:latest
+          rabbitmq: rabbitmq:latest
+          rabbitmq_init: rabbitmq-init:latest
+          rabbitmq_scripted_test: rabbitmq-scripted-test:latest
+      manifests:
+        job_users_create: true
+        network_policy: false
+      monitoring:
+        prometheus:
+          enabled: true
+      pod:
+        replicas:
+          server: 1
+      volume:
+        enabled: false
+  - chart: osh-infra/openvswitch
+    name: openstack-openvswitch
+    values:
+      endpoints:
+        cluster_domain_suffix: cluster.local
+      images:
+        tags:
+          dep_check: dep-check:latest
+          image_repo_sync: image-repo-sync:latest
+          openvswitch_db_server: openvswitch-db-server:latest
+          openvswitch_vswitchd: openvswitch-vswitchd:latest
+          openvswitch_vswitchd_dpdk: openvswitch-vswitchd-dpdk:latest
+      pod:
+        probes:
+          ovs_db:
+            ovs_db:
+              liveness:
+                enabled: true
+                params:
+                  failureThreshold: 3
+                  initialDelaySeconds: 0
+                  periodSeconds: 30
+                  timeoutSeconds: 5
+              readiness:
+                enabled: true
+                params:
+                  failureThreshold: 3
+                  initialDelaySeconds: 0
+                  periodSeconds: 20
+                  timeoutSeconds: 5
+          ovs_vswitch:
+            ovs_vswitch:
+              liveness:
+                enabled: true
+                params:
+                  failureThreshold: 3
+                  initialDelaySeconds: 0
+                  periodSeconds: 30
+                  timeoutSeconds: 5
+              readiness:
+                enabled: true
+                params:
+                  failureThreshold: 3
+                  initialDelaySeconds: 0
+                  periodSeconds: 10
+                  timeoutSeconds: 5
+  - chart: osh/neutron
+    name: openstack-neutron
+    values:
+      bootstrap:
+        enabled: true
+        script: "openstack network show public || openstack network create \\\n  --provider-network-type\
+          \ flat \\\n  --provider-physical-network physnet1 \\\n  --external \\\n\
+          \  public\n# set default gateway via any non-master/worker node to get into\
+          \ ingress controller\nopenstack subnet show public-subnet || openstack subnet\
+          \ create  public-subnet \\\n  --no-dhcp --subnet-range  10.11.12.0/24 \\\
+          \n  --allocation-pool start=10.11.12.100,end=10.11.12.200 \\\n  --gateway\
+          \ 10.11.12.39 \\\n  --network public\nopenstack router show r1 || openstack\
+          \ router create r1\nopenstack router set --external-gateway public r1\n\
+          openstack network set public --external  --default \n"
+      conf:
+        auto_bridge_add:
+          br-ex: veth-phy
+        ironic:
+          insecure: true
+        l3_agent:
+          agent:
+            extensions: fip_qos,gateway_ip_qos
+        logging:
+          logger_neutron:
+            level: INFO
+            propagate: 0
+        metadata_agent:
+          DEFAULT:
+            metadata_proxy_shared_secret: mN0aLDTcg1AVqyLWNDjCd2Jz6DA61cZJ
+            nova_metadata_port: 8775
+            nova_metadata_protocol: http
+        neutron:
+          DEFAULT:
+            api_workers: 4
+            dhcp_agents_per_network: 2
+            dns_domain: openstack.internal.
+            dnsmasq_dns_servers: 10.172.1.100
+            external_dns_driver: designate
+            l3_ha: true
+            l3_ha_network_type: vxlan
+            max_l3_agents_per_router: 2
+            service_plugins: router,metering,qos
+          cache:
+            backend: oslo_cache.memcache_pool
+          keystone_authtoken:
+            memcache_secret_key: 4zDhycwch09UPx4j
+            memcache_security_strategy: ENCRYPT
+          oslo_messaging_notifications:
+            topics: notifications,stacklight_notifications
+        paste:
+          app:neutronversions:
+            paste.app_factory: neutron.pecan_wsgi.app:versions_factory
+        plugins:
+          linuxbridge_agent:
+            linux_bridge:
+              bridge_mappings: physnet1:br-ex
+          ml2_conf:
+            ml2:
+              extension_drivers:
+              - port_security
+              - qos
+              - dns_domain_ports
+              tenant_network_types: vxlan
+            ml2_type_flat:
+              flat_networks: physnet1
+          openvswitch_agent:
+            agent:
+              extensions: qos
+              tunnel_types: vxlan
+              vxlan_udp_port: 4790
+            ovs:
+              bridge_mappings: physnet1:br-ex
+            securitygroup:
+              firewall_driver: openvswitch
+      dependencies:
+        static:
+          db_init:
+            jobs:
+            - openstack-mariadb-cluster-wait
+      endpoints:
+        cluster_domain_suffix: cluster.local
+        compute_metadata:
+          hosts:
+            default: nova-metadata
+            public: nova-metadata
+          scheme:
+            default: http
+        identity:
+          auth:
+            admin:
+              default_domain_id: default
+              password: ZUqTyP2XwsgEGKZ7qNhhecYyq9NLkGE6
+              project_domain_name: default
+              project_name: admin
+              region_name: RegionOne
+              user_domain_name: default
+              username: admin
+            designate:
+              password: KBecvsPZsWBFzDqYnevHWArm7tFycZKr
+              username: designateLeRjiDsyT
+            neutron:
+              password: 9d4CIP5ismqTa7l5N5FdD8MAuFMXx9EV
+              username: neutronnmAhFsr
+            nova:
+              password: BLFKrb8JhAMBb1v9BnRGDckMaYY7XUbq
+              username: novaZzHG
+            test:
+              password: q38BqVBqRH8mwfvI3uZeTmwe7JhKm3q1
+              username: testLJtA
+        network:
+          host_fqdn_override:
+            public:
+              host: neutron.it.just.works
+              tls:
+                ca: 'TEST CA
+
+                  '
+                crt: 'TEST CRT
+
+                  '
+                key: 'TEST KEY
+
+                  '
+          hosts:
+            admin:
+              host: neutron-server
+            default: neutron
+            internal: neutron-server
+            public:
+              host: neutron
+              tls:
+                ca: 'TEST CA
+
+                  '
+                crt: 'TEST CRT
+
+                  '
+                key: 'TEST KEY
+
+                  '
+          port:
+            api:
+              admin: 9696
+              default: 80
+              internal: 9696
+              public: 443
+          scheme:
+            default: http
+            public: https
+        oslo_cache:
+          statefulset:
+            name: openstack-memcached-memcached
+            replicas: 3
+        oslo_db:
+          auth:
+            admin:
+              password: QACDSM6FBTH2LuXjTuRQ6DXhD8bSgPbn
+              username: root
+            neutron:
+              password: knwFGHdZ6KCqcKqBidXXEqiEpZhBD7h4
+              username: neutrondrGjrFm
+        oslo_messaging:
+          auth:
+            admin:
+              password: 2tnAuP0j9MsgaVHErehZkC5HCK3ZxYLr
+              username: rabbitmq
+            neutron:
+              password: TRRhbnUMsepnqSzyJngJtgZD9gRu0Fwy
+              username: neutronx7uHpit
+            user:
+              password: 2tnAuP0j9MsgaVHErehZkC5HCK3ZxYLr
+              username: rabbitmq
+          hosts:
+            default: rabbitmq-neutron
+          path: /neutron
+          statefulset:
+            name: openstack-neutron-rabbitmq-rabbitmq
+            replicas: 1
+        oslo_messaging_notifications:
+          auth:
+            neutron:
+              password: hL3STFyPBLCdR2qUCdaGEUeRB5jRIFPf
+              username: neutrontvAcFA3
+          host_fqdn_override: {}
+          hosts:
+            default: rabbitmq
+          path: /openstack
+          port:
+            amqp:
+              default: 5672
+            http:
+              default: 15672
+          scheme: rabbit
+          statefulset:
+            name: openstack-rabbitmq-rabbitmq
+            replicas: 1
+        prometheus_rabbitmq_exporter:
+          hosts:
+            default: rabbitmq-exporter-neutron
+      images:
+        tags:
+          bootstrap: bootstrap:latest
+          db_drop: db-drop:latest
+          db_init: db-init:latest
+          dep_check: dep-check:latest
+          image_repo_sync: image-repo-sync:latest
+          ks_endpoints: ks-endpoints:latest
+          ks_service: ks-service:latest
+          ks_user: ks-user:latest
+          neutron_bagpipe_bgp: neutron-bagpipe-bgp:latest
+          neutron_db_sync: neutron-db-sync:latest
+          neutron_dhcp: neutron-dhcp:latest
+          neutron_ironic_agent: neutron-ironic-agent:latest
+          neutron_l2gw: neutron-l2gw:latest
+          neutron_l3: neutron-l3:latest
+          neutron_linuxbridge_agent: neutron-linuxbridge-agent:latest
+          neutron_metadata: neutron-metadata:latest
+          neutron_openvswitch_agent: neutron-openvswitch-agent:latest
+          neutron_rpc_server: neutron-rpc-server:latest
+          neutron_server: neutron-server:latest
+          neutron_sriov_agent: neutron-sriov-agent:latest
+          neutron_sriov_agent_init: neutron-sriov-agent-init:latest
+          purge_test: purge-test:latest
+          rabbit_init: rabbit-init:latest
+          test: test:latest
+      jobs:
+        ks_endpoints:
+          restartPolicy: Never
+        ks_service:
+          restartPolicy: Never
+        ks_user:
+          restartPolicy: Never
+      manifests:
+        job_rabbit_init: false
+        secret_ca_bundle: true
+      network:
+        core_plugin: ml2
+        interface:
+          tunnel: ens3
+        backend:
+          - openvswitch
+      overrides:
+        neutron_ovs-agent:
+          labels: null
+      labels:
+        sriov:
+          node_selector_key: openstack-compute-node
+          node_selector_value: enabled
+        netns_cleanup_cron:
+          node_selector_key: openvswitch
+          node_selector_value: enabled
+      pod:
+        probes:
+          dhcp_agent:
+            dhcp_agent:
+              liveness:
+                enabled: true
+                params:
+                  initialDelaySeconds: 180
+                  periodSeconds: 90
+                  timeoutSeconds: 65
+          l3_agent:
+            l3_agent:
+              liveness:
+                enabled: true
+                params:
+                  initialDelaySeconds: 180
+                  periodSeconds: 90
+                  timeoutSeconds: 65
+              readiness:
+                enabled: true
+                params:
+                  failureThreshold: 240
+                  initialDelaySeconds: 60
+                  periodSeconds: 15
+          metadata_agent:
+            metadata_agent:
+              liveness:
+                enabled: true
+                params:
+                  initialDelaySeconds: 180
+                  periodSeconds: 90
+                  timeoutSeconds: 65
+              readiness:
+                enabled: true
+                params:
+                  initialDelaySeconds: 10
+                  periodSeconds: 50
+                  timeoutSeconds: 40
+          ovs_agent:
+            ovs_agent:
+              liveness:
+                enabled: true
+                params:
+                  initialDelaySeconds: 180
+                  periodSeconds: 90
+                  timeoutSeconds: 65
+              readiness:
+                params:
+                  initialDelaySeconds: 30
+          rpc_retries: 2
+          rpc_timeout: 30
+        use_fqdn:
+          neutron_agent: false
