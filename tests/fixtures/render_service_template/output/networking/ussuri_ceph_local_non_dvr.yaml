@@ -160,7 +160,7 @@ spec:
             external_dns_driver: designate
             l3_ha: true
             l3_ha_network_type: vxlan
-            max_l3_agents_per_router: 3
+            max_l3_agents_per_router: 2
             service_plugins: router,metering,qos
           cache:
             backend: oslo_cache.memcache_pool
