@@ -19,7 +19,7 @@ metadata:
 spec:
   repositories:
   - name: nginx-forwarder
-    url: https://artifactory.mcp.mirantis.net/binary-dev-kaas-local/kubernetes/helm/incubator
+    url: http://binary.mirantis.com/kubernetes/helm/incubator/
   releases:
   - name: mcp1-forwarder
     chart: nginx-forwarder/nginx
