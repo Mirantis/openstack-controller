@@ -15,6 +15,9 @@ spec:
           logger_masakari:
             level: INFO
             propagate: 0
+          logger_masakarimonitors:
+            level: INFO
+            propagate: 0
       dependencies:
         static:
           db_init:
