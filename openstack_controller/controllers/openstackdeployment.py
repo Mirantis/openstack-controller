@@ -211,3 +211,12 @@ async def delete(name, logger, **kwargs):
     # TODO(pas-ha) wait for children to be deleted
     # TODO(pas-ha) remove secrets and so on?
     LOG.info(f"deleting {name}")
+
+    redis_failover = kube.find(
+        kube.RedisFailover,
+        "openstack-redis",
+        settings.OSCTL_REDIS_NAMESPACE,
+        silent=True,
+    )
+    if redis_failover:
+        redis_failover.delete()
