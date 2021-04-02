@@ -817,7 +817,14 @@ class Neutron(OpenStackService):
 
     @property
     def health_groups(self):
-        return [self.openstack_chart, "openvswitch"]
+        health_groups = [self.openstack_chart]
+        if (
+            utils.get_in(self.mspec["features"], ["neutron", "backend"])
+            != "tungstenfabric"
+        ):
+            health_groups.append("openvswitch")
+
+        return health_groups
 
     @property
     def _child_objects(self):
