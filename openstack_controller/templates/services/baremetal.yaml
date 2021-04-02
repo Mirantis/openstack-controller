@@ -140,6 +140,9 @@ spec:
           {%- if network.mtu is defined %}
           mtu: {{ network.mtu }}
           {%- endif %}
+          {%- if network.segmentation_id is defined %}
+          segmentation_id: {{ network.segmentation_id }}
+          {%- endif %}
           subnets:
           {%- for bm_subnet in network.subnets %}
             {{ bm_subnet.name }}:
