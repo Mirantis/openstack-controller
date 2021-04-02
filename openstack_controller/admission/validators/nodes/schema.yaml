@@ -9,6 +9,42 @@ patternProperties:
         additionalProperties: False
         type: object
         properties:
+          nova:
+            type: object
+            additionalProperties: False
+            properties:
+              live_migration_interface:
+                type: string
+                description: "Physical interface used for live migration."
+              images:
+                type: object
+                properties:
+                  backend:
+                    description: Backend for nova images can be ceph, local or lvm
+                    type: string
+                    enum:
+                      - local
+                      - ceph
+                      - lvm
+                  encryption:
+                    type: object
+                    properties:
+                      enabled:
+                        type: boolean
+                        description: Enable ephemeral disk encryption, only available with lvm backend.
+                      cipher:
+                        type: string
+                        description: Cipher-mode string to be used.
+                      key_size:
+                        type: integer
+                        description: Encryption key length in bits.
+                  lvm:
+                    type: object
+                    properties:
+                      volume_group:
+                        type: string
+                        description: >
+                          Volume group used when images backend is lvm. Default to nova-vol
           neutron:
             type: object
             additionalProperties: False
