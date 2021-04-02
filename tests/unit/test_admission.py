@@ -370,13 +370,78 @@ def test_nodes_wrong_chart_value_key(client):
 
 
 def test_nodes_features_top_keys(client):
-    allowed_top_keys = [("neutron", {})]
+    allowed_top_keys = [("neutron", {}), ("nova", {})]
     for top_key, top_value in allowed_top_keys:
         _node_specific_request(
             client, {"good::label": {"features": {top_key: {}}}}, True
         )
     _node_specific_request(
         client, {"good::label": {"features": {"fake": {}}}}, False
+    )
+
+
+def test_nodes_features_nova_keys(client):
+    # Images valid
+    for backend in ["lvm", "ceph", "local"]:
+        _node_specific_request(
+            client,
+            {
+                "good::label": {
+                    "features": {
+                        "nova": {
+                            "images": {
+                                "backend": backend,
+                            }
+                        }
+                    }
+                }
+            },
+            True,
+        )
+
+    # Images invalid
+    _node_specific_request(
+        client,
+        {
+            "good::label": {
+                "features": {
+                    "nova": {
+                        "images": {
+                            "backend": "invalid",
+                        }
+                    }
+                }
+            }
+        },
+        False,
+    )
+
+    # Encryption
+    _node_specific_request(
+        client,
+        {
+            "good::label": {
+                "features": {
+                    "nova": {
+                        "images": {
+                            "encryption": {"enabled": True},
+                        }
+                    }
+                }
+            }
+        },
+        True,
+    )
+
+    # live_migration interface
+    _node_specific_request(
+        client,
+        {
+            "good::label": {
+                "features": {"nova": {"live_migration_interface": "live01"}}
+            }
+        },
+        True,
     )
 
 

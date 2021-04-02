@@ -8,14 +8,17 @@
 {%- do notification_topics.append('stacklight_notifications') if stacklight_enabled %}
 {%- set neutron_backend = spec.features.neutron.get('backend', 'ml2') %}
 {%- set baremetal_enabled = 'baremetal' in spec.features.services %}
-{%- set neutron_node_specific = {} %}
-{%- set sriov = namespace(enabled=false) %}
+{%- set node_specific = {} %}
+{%- set overrides = namespace(enabled=false) %}
 {%- for label, node_features in spec.get("nodes", {}).items() %}
-  {%- if node_features.get("features", {}).get("neutron", {}) %}
-    {%- do neutron_node_specific.update({label: node_features.features.neutron}) %}
-    {%- if node_features.features.neutron.get("sriov", {}).get("enabled", false) %}
-      {% set sriov.enabled = true %}
-    {%- endif %}
+  {%- if "nova" in node_features.get("features", {}).keys() %}
+    {% set overrides.enabled = true %}
+  {%- endif  %}
+  {%- if node_features.get("features", {}).get("neutron", {}).get("sriov", {}).get("enabled", false) %}
+    {% set overrides.enabled = true %}
+  {%- endif  %}
+  {%- if node_features.get("features", {}) %}
+    {%- do node_specific.update({label: node_features.features}) %}
   {%- endif %}
 {%- endfor %}
 
@@ -159,20 +162,52 @@ spec:
             node_selector_key: openstack-control-plane
             node_selector_value: enabled
       # NODE SPECIFIC START
-      {%- if sriov.enabled %}
+      {%- if overrides.enabled %}
       overrides:
         nova_compute:
           labels:
-        {%- for label, override in neutron_node_specific.items() %}
-          {%- if override.get("sriov", {}).get("enabled", False) %}
+        {%- for label, override in node_specific.items() %}
+          {%- set neutron_override = override.get("neutron", {}) %}
+          {%- set nova_override = override.get("nova", {}) %}
+          {%- if neutron_override.get("sriov", {}).get("enabled", False) or nova_override %}
             {{ label }}:
+          {%- endif %}
+          {%- if neutron_override.get("sriov", {}).get("enabled", False) %}
               values:
                 network:
                   backend:
                     - sriovnicswitch
                   interface:
-                    sriov: {{ override.sriov.nics }}
+                    sriov: {{ neutron_override.sriov.nics }}
           {%- endif %}
+          {%- if nova_override.get("images", {}).get("backend") or nova_override.get('live_migration_interface') %}
+                conf:
+            {%- if nova_override.get("images", {}).get("backend") %}
+                  nova:
+                    libvirt:
+              {%- if nova_override.images.backend == 'ceph' %}
+                      images_type: rbd
+              {%- elif nova_override.images.backend == 'local' %}
+                      images_type: qcow2
+              {%- elif nova_override.images.backend == 'lvm' %}
+                      images_type: lvm
+                      images_volume_group: {{ nova_override.images.get('lvm', {}).get("volume_group", "nova-vol") }}
+                {%- if nova_override.get("images", {}).get("encryption", {}).get("enabled", false) %}
+                    ephemeral_storage_encryption:
+                      enabled: true
+                      cipher: {{ nova_override.images.encryption.get("cipher", "aes-xts-plain64") }}
+                      key_size: {{ nova_override.images.encryption.get("key_size", 256) }}
+                {%- endif %}
+              {%- endif %}
+            {%- endif %}
+            {%- if nova_override.get('live_migration_interface') %}
+                  libvirt:
+                    live_migration_interface: {{ nova_override.live_migration_interface }}
+                  hypervisor:
+                    host_interface: {{ nova_override.live_migration_interface }}
+            {%- endif %}
+          {%- endif %}
+
         {%- endfor %}
         {%- endif %}
       # NODE SPECIFIC END
