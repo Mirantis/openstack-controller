@@ -87,6 +87,7 @@ spec:
     "bootstrap",
     "cinder_storage_init",
     "rabbit_init",
+    "cinder_services_cleaner",
     "cinder_volume",
     "test",] %}
         {%- if image in images %}
