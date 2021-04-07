@@ -616,6 +616,7 @@ class Keystone(OpenStackService):
                 "keystone-domain-manage": {
                     "images": ["keystone_domain_manage"],
                     "manifest": "job_domain_manage",
+                    "hash_fields": ["conf.ks_domains.*"],
                 },
                 "keystone-fernet-setup": {
                     "images": ["keystone_fernet_setup"],
