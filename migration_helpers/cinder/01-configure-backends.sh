@@ -35,7 +35,7 @@ function mcp2_import_cinder_backends_config {
                                                                    volume_backend_name: .backend,
                                                                    rbd_pool: .pool,
                                                                    rbd_user: .user,
-                                                                   rbd_secret_uuid: .secret_uuid,
+                                                                   rbd_secret_uuid_fake: .secret_uuid,
                                                                    backend_host: (if .backend_host then .backend_host
                                                                                   elif .host then .host
                                                                                   else "" end)
