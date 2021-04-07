@@ -704,6 +704,11 @@ spec:
           logger_ceilometer:
             level: INFO
             propagate: 0
+      dependencies:
+        static:
+          compute:
+            daemonset:
+              - libvirt-libvirt-default
       manifests:
         network_policy: false
         secret_ca_bundle: true
