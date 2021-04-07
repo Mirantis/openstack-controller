@@ -38,9 +38,6 @@
           3167e844-1d13-44d5-aa1e-85c58c086240:
             reason: Locators update is needed
             # stepler/horizon/tests/test_images.py::TestAnyOne::test_set_image_disk_and_ram_size
-          f5339379-2e89-4adf-9074-78ed3c7e9a4e:
-            reason: Locators update is needed
-            # stepler/horizon/tests/test_images.py::TestAnyOne::test_public_image_visibility
           3c98d922-df89-4701-a4b1-c5258fda5d7b:
             reason: Locators update is needed
             # stepler/horizon/tests/test_images.py::TestAnyOne::test_launch_instance_from_image
@@ -140,9 +137,6 @@
           db91fc36-89ce-49ed-95f5-34948cc70715:
             reason: Locators update is needed
             # stepler/horizon/tests/test_images.py::TestAnyOne::test_set_image_disk_and_ram_size
-          7187dbc4-6f56-4f5c-9e88-b61c3aed7b01:
-            reason: Locators update is needed
-            # stepler/horizon/tests/test_images.py::TestAnyOne::test_public_image_visibility
           782940f1-f958-4275-b716-232a56fea743:
             reason: Locators update is needed
             # stepler/horizon/tests/test_images.py::TestAnyOne::test_launch_instance_from_image
