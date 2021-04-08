@@ -66,6 +66,7 @@ spec:
               tls:
                 ca: |
                   TEST CA
+                  RGW CRT
                 crt: |
                   TEST CRT
                 key: |
@@ -80,6 +81,7 @@ spec:
               tls:
                 ca: |
                   TEST CA
+                  RGW CRT
                 crt: |
                   TEST CRT
                 key: |

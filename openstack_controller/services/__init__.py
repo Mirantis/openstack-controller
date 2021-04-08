@@ -714,6 +714,21 @@ class Keystone(OpenStackService):
                 )["ca-cert.pem"]
             ).decode()
 
+        # Get internal RGW secret
+        kube.wait_for_secret(
+            settings.OSCTL_CEPH_SHARED_NAMESPACE,
+            ceph_api.OPENSTACK_KEYS_SECRET,
+        )
+        rgw_internal_cacert = secrets.get_secret_data(
+            settings.OSCTL_CEPH_SHARED_NAMESPACE,
+            ceph_api.OPENSTACK_KEYS_SECRET,
+        ).get("rgw_internal_cacert")
+        if rgw_internal_cacert:
+            rgw_internal_cacert = base64.b64decode(
+                rgw_internal_cacert
+            ).decode()
+            t_args["rgw_internal_cacert"] = rgw_internal_cacert
+
         return t_args
 
     @layers.kopf_exception
