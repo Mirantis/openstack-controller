@@ -16,7 +16,7 @@ spec:
             propagate: 0
         octavia:
           api_settings:
-            default_provider_driver: amphorav2
+            default_provider_driver: amphora
             enabled_provider_drivers: amphora:The Octavia Amphora driver.,octavia:Deprecated
               alias of the Octavia Amphora driver.,amphorav2:Extented Octavia Amphora
               driver with jobboard support.
