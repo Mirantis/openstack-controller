@@ -1,0 +1,6 @@
+---
+security:
+  - Enable apparmor as security driver for qemu.
+    Now libvirt will generate apparmor profiles
+    for each spawned instance.
+    More details - ` <https://mirantis.jira.com/browse/PRODX-12466>`__

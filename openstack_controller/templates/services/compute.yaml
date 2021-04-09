@@ -112,6 +112,8 @@ spec:
 {%- endif %}
         libvirt:
           listen_addr: 0.0.0.0
+        qemu:
+          security_driver: apparmor
       {%- if neutron_backend == 'tungstenfabric' %}
       network:
         backend: []
