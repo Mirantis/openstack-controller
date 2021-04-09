@@ -12,9 +12,9 @@ kubectl create ns ${HELMBUNDLE_NS}
 cat << EOF | kubectl apply -f -
 apiVersion: v1
 data:
-  ca.crt: $(kubectl get osdpl osh-dev -n openstack -o jsonpath='{.spec.features.ssl.public_endpoints.ca_cert}' | base64 | tr -d '\n')
-  tls.crt: $(kubectl get osdpl osh-dev -n openstack -o jsonpath='{.spec.features.ssl.public_endpoints.api_cert}{"\n"}{.spec.features.ssl.public_endpoints.ca_cert}' | base64 | tr -d '\n')
-  tls.key: $(kubectl get osdpl osh-dev -n openstack -o jsonpath='{.spec.features.ssl.public_endpoints.api_key}' | base64 | tr -d '\n')
+  ca.crt: $(salt 'prx01*' pillar.items _param:apache_horizon_ssl:cert --out json | jq -r '.[][]' | base64 | tr -d '\n')
+  tls.crt: $(salt 'prx01*' pillar.items _param:apache_horizon_ssl:chain --out json | jq -r '.[][]' | base64 | tr -d '\n')
+  tls.key: $(salt 'prx01*' pillar.items _param:apache_horizon_ssl:key --out json | jq -r '.[][]' | base64 | tr -d '\n')
 kind: Secret
 metadata:
   annotations:
