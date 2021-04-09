@@ -81,7 +81,6 @@ coordination:
   credentials: null
   service_creds: []
 dashboard:
-  rgw_internal_cacert: "RGW CRT"
   credentials: &credentials_dashboard
     database:
       user:
@@ -146,7 +145,6 @@ dns:
     password: YspSgibZuHb2lFBxM8kzDDtstsrEqbWM
     username: testQuxr
 identity:
-  rgw_internal_cacert: "RGW CRT"
   credentials: &credentials_identity
     database:
       user:
