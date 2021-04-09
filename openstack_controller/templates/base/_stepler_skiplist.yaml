@@ -188,9 +188,6 @@
           e654d077-c645-4eb7-9a7b-763a1cee3a81:
             reason: Test case is depricated - will be removed from repo
             # stepler/horizon/tests/test_flavors.py::TestAdminOnly::test_update_flavor
-          9833c67c-9aff-416f-90f7-7eeadc29993c:
-            reason: Locators update is needed
-            # stepler/horizon/tests/test_flavors.py::TestAdminOnly::test_modify_flavor_access
           b846cf53-d3fa-4cca-8b10-fbaf50749f7c:
             reason: Locators update is needed
             # stepler/horizon/tests/test_images.py::TestUserOnly::test_big_image_create_delete
