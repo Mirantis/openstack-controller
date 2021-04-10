@@ -268,7 +268,9 @@ spec:
       conf:
         octavia:
           api_settings:
-{% set _default_provider_driver = 'amphorav2' %}
+# NOTE(vsaienko): amphorav2 is not production ready yet. For more info please see PRODX-13273
+# and PRODX-12922
+{% set _default_provider_driver = 'amphora' %}
 {%- if spec.openstack_version in ['queens'] %}
   {% set _default_provider_driver = 'octavia' %}
 {%- elif spec.openstack_version in ['rocky', 'stein', 'train'] %}
