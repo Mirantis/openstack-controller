@@ -205,13 +205,6 @@ spec:
           manifests:
             cron_credential_rotate: false
             cron_fernet_rotate: false
-    ingress:
-      ingress:
-        values:
-          labels:
-            server:
-              node_selector_key: kubernetes.io/os
-              node_selector_value: linux
     networking:
       neutron:
         values:
