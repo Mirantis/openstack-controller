@@ -1,0 +1,5 @@
+---
+features:
+  - |
+    Adds ability to configure cinder with LVM backend on group of nodes. The
+    Ceph is still deployed as main cinder backend.

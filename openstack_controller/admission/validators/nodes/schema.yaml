@@ -9,6 +9,39 @@ patternProperties:
         additionalProperties: False
         type: object
         properties:
+          cinder:
+            type: object
+            additionalProperties: False
+            required:
+              - volume
+            properties:
+              volume:
+                type: object
+                additionalProperties: True
+                required:
+                  - backends
+                properties:
+                  backends:
+                    type: object
+                    additionalProperties: False
+                    patternProperties:
+                      ".*":
+                        type: object
+                        additionalProperties: False
+                        properties:
+                          type:
+                            description: Backend type can be lvm
+                            type: string
+                            enum:
+                              - lvm
+                          lvm:
+                            type: object
+                            additionalProperties: True
+                            properties:
+                              volume_group:
+                                type: string
+                                description: >
+                                  Volume group used by lvm backend. Default to cinder-vol
           nova:
             type: object
             additionalProperties: False

@@ -7,6 +7,7 @@ cinder_backup: '{{ images_base_url }}/openstack/cinder:stein-bionic-202104051806
 cinder_db_sync: '{{ images_base_url }}/openstack/cinder:stein-bionic-20210405180644'
 cinder_scheduler: '{{ images_base_url }}/openstack/cinder:stein-bionic-20210405180644'
 cinder_volume: '{{ images_base_url }}/openstack/cinder:stein-bionic-20210405180644'
+cinder_volume_daemonset: '{{ images_base_url }}/openstack/cinder:stein-bionic-20210405180644'
 cinder_volume_usage_audit: '{{ images_base_url }}/openstack/cinder:stein-bionic-20210405180644'
 stepler_run_tests: '{{ images_base_url }}/openstack/stepler:ussuri-bionic-20201228075854'
 db_drop: '{{ images_base_url }}/openstack/heat:stein-bionic-20210405180644'

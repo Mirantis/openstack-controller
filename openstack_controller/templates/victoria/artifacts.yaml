@@ -7,6 +7,7 @@ cinder_backup: '{{ images_base_url }}/openstack/cinder:victoria-bionic-202104051
 cinder_db_sync: '{{ images_base_url }}/openstack/cinder:victoria-bionic-20210405180643'
 cinder_scheduler: '{{ images_base_url }}/openstack/cinder:victoria-bionic-20210405180643'
 cinder_volume: '{{ images_base_url }}/openstack/cinder:victoria-bionic-20210405180643'
+cinder_volume_daemonset: '{{ images_base_url }}/openstack/cinder:victoria-bionic-20210405180643'
 cinder_volume_usage_audit: '{{ images_base_url }}/openstack/cinder:victoria-bionic-20210405180643'
 stepler_run_tests: '{{ images_base_url }}/openstack/stepler:victoria-bionic-20210405114822'
 db_drop: '{{ images_base_url }}/openstack/heat:victoria-bionic-20210405180643'
