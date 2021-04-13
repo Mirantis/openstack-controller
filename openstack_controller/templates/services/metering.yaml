@@ -70,6 +70,8 @@ spec:
             topics: {{ notification_topics|join(',') }}
           cache:
             backend: oslo_cache.memcache_pool
+          polling:
+            fail_on_no_pollsters: "True"
         logging:
           logger_ceilometer:
             level: {{ spec.get('features', {}).get('logging', {}).get('ceilometer', {}).get('level', 'INFO') }}

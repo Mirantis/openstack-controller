@@ -700,6 +700,8 @@ spec:
             topics: notifications
           cache:
             backend: oslo_cache.memcache_pool
+          polling:
+            fail_on_no_pollsters: "True"
         logging:
           logger_ceilometer:
             level: INFO
