@@ -1,0 +1,7 @@
+---
+fixes:
+  - Now cinder services which are down in service list
+    and which have outdated names (not backed by any known pods)
+    will be cleaned up automatically by cron job every 4 hours
+    by default.
+    More details - `PRODX-11194 <https://mirantis.jira.com/browse/PRODX-11194>`__

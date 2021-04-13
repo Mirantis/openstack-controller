@@ -206,6 +206,7 @@ spec:
           cinder_storage_init: cinder-storage-init:latest
           cinder_volume: cinder-volume:latest
           cinder_volume_usage_audit: cinder-volume-usage-audit:latest
+          cinder_service_cleaner: cinder-service-cleaner:latest
           db_drop: db-drop:latest
           db_init: db-init:latest
           dep_check: dep-check:latest
@@ -228,6 +229,7 @@ spec:
         job_storage_init: false
         network_policy: false
         secret_ca_bundle: true
+        cron_service_cleaner: true
       pod:
         replicas:
           api: 1
