@@ -193,11 +193,24 @@ services:
         pod:
           security_context:
             cinder_volume:
+              # NOTE(vsaienko): run volume and backup with same user
+              # to allow collocate ceph based volume with backups and avoid issues
+              # with /var/lib/cinder shared state directory
+              pod:
+                runAsUser: 42424
               container:
-                #(ogrudev): set container to privileged mode for bidirectional mounts
-                #needed by "enable_iscsi: true" option
+                # NOTE(ogrudev): set container to privileged mode for bidirectional mounts
+                # needed by "enable_iscsi: true" option
                 cinder_volume:
                   privileged: true
+            cinder_backup:
+              pod:
+                runAsUser: 42424
+              container:
+                cinder_backup:
+                  runAsUser: 42424
+                  privileged: true
+
         conf:
           enable_iscsi: true
   metric:
