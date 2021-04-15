@@ -252,6 +252,7 @@ services:
             api: 3
             scheduler: 3
             volume: 3
+            backup: 3
           lifecycle:
             disruption_budget:
               api:
@@ -267,7 +268,7 @@ services:
             DEFAULT:
               rpc_response_timeout: 3600
               osapi_volume_workers: 1
-              backup_workers: 1
+              backup_workers: 4
             database:
               max_pool_size: 10
               max_retries: -1

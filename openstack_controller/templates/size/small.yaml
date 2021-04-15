@@ -254,6 +254,7 @@ services:
             api: 3
             scheduler: 3
             volume: 3
+            backup: 3
           lifecycle:
             disruption_budget:
               api:
