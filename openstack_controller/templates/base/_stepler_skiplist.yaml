@@ -20,15 +20,6 @@
           a6ed9d2a-ae40-45ca-92c9-0034cbb425b1:
             reason: Locators update is needed
             # stepler/horizon/tests/test_credentials.py::TestAnyOne::test_download_ec2
-          c4cf3c6d-45d2-4629-b9fe-3e8eed3f1e59:
-            reason: Locators update is needed
-            # stepler/horizon/tests/test_images.py::TestAnyOne::test_view_image
-          b835ce2b-41b2-4d7a-8b8f-139163234852:
-            reason: Locators update is needed
-            # stepler/horizon/tests/test_images.py::TestAnyOne::test_update_image_metadata
-          4016e9af-257b-4df2-8c63-5716f134e5bb:
-            reason: Locators update is needed
-            # stepler/horizon/tests/test_images.py::TestAnyOne::test_remove_protected_image
           50dcf89e-370a-47d2-a0eb-c56dd77c968e:
             reason: PRODX-12232
             # stepler/horizon/tests/test_images.py::TestAnyOne::test_edit_image
@@ -116,15 +107,6 @@
           596710b9-1f77-4db9-9a77-f5733a5708ff:
             reason: Locators update is needed
             # stepler/horizon/tests/test_credentials.py::TestAnyOne::test_download_ec2
-          a7330cae-30ea-4131-a819-42a71f87576d:
-            reason: Locators update is needed
-            # stepler/horizon/tests/test_images.py::TestAnyOne::test_view_image
-          1b439ae8-32aa-476d-abf9-3e2ae796de46:
-            reason: Locators update is needed
-            # stepler/horizon/tests/test_images.py::TestAnyOne::test_update_image_metadata
-          637b39da-5648-4d46-bf3f-d51ca858928f:
-            reason: Locators update is needed
-            # stepler/horizon/tests/test_images.py::TestAnyOne::test_remove_protected_image
           8c85f869-993b-4447-98e4-fc1e4ebacb4e:
             reason: PRODX-12232
             # stepler/horizon/tests/test_images.py::TestAnyOne::test_edit_image
@@ -182,9 +164,6 @@
           5d3a55ec-5100-11e7-83e0-b33e26fe0aed:
             reason: Locators update is needed
             # stepler/horizon/tests/test_credentials.py::TestAdminOnly::test_download_rc_v2_non_ascii_project_name
-          ccfeddd8-a21e-4224-9608-88aa700333d5:
-            reason: Locators update is needed
-            # stepler/horizon/tests/test_flavors.py::TestAdminOnly::test_flavor_update_metadata
           e654d077-c645-4eb7-9a7b-763a1cee3a81:
             reason: Test case is depricated - will be removed from repo
             # stepler/horizon/tests/test_flavors.py::TestAdminOnly::test_update_flavor
