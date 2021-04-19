@@ -179,3 +179,5 @@ frr_init: '{{ images_base_url }}/openstack/extra/ceph-config-helper:nautilus-bio
 frr_info: '{{ images_base_url }}/openstack/extra/ceph-config-helper:nautilus-bionic-20210331142153'
 frr: '{{ images_base_url }}/general/external/docker.io/frrouting/frr:v7.5.0'
 cinder_service_cleaner: '{{ images_base_url }}/openstack/cinder:queens-bionic-20210405180644'
+iscsi_iscsi: '{{ images_base_url }}/openstack/cinder:queens-bionic-20210405180644'
+iscsi_tgt: '{{ images_base_url }}/openstack/cinder:queens-bionic-20210405180644'

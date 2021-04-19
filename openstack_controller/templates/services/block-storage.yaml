@@ -73,6 +73,24 @@ spec:
           rabbit_exporters: "overview,exchange,node"
   {%- endif %}
 {%- endif %}
+{%- if overrides.enabled %}
+  - name: openstack-iscsi
+    chart: {{spec.common.infra.repo}}/iscsi
+    values:
+      images:
+        tags:
+{%- for image in [
+    "dep_check",
+    "iscsi_iscsi",
+    "iscsi_tgt",] %}
+        {%- if image in images %}
+          {{ image }}: {{ images[image] }}
+        {%- endif %}
+{%- endfor %}
+      manifests:
+        daemonset_tgt: true
+        daemonset_iscsi: false
+{%- endif %}
 {%- if spec.get('migration', {}).get('cinder', {}).get('deploy_main_service', True) %}
   - name: openstack-cinder
     chart: {{spec.common.openstack.repo}}/cinder

@@ -187,6 +187,8 @@ images:
   test: test:latest
   masakari_api: masakari-api:latest
   masakari_db_sync: masakari-db-sync:latest
+  iscsi_iscsi: cinder-volume:latest
+  iscsi_tgt: cinder-volume:latest
 proxy_vars:
   HTTP_PROXY: http://127.0.0.1:3128
   NO_PROXY: .svc.cluster.local

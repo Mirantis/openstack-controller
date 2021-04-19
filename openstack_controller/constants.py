@@ -38,6 +38,7 @@ CHART_GROUP_MAPPING = {
         "gnocchi",
         "ceph-rgw",
         "frr",
+        "iscsi",
     ],
 }
 

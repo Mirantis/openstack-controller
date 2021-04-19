@@ -1,5 +1,16 @@
 spec:
   releases:
+  - chart: osh-infra/iscsi
+    name: openstack-iscsi
+    values:
+      images:
+        tags:
+          iscsi_iscsi: cinder-volume:latest
+          iscsi_tgt: cinder-volume:latest
+          dep_check: dep-check:latest
+      manifests:
+        daemonset_iscsi: false
+        daemonset_tgt: true
   - chart: osh/cinder
     name: openstack-cinder
     values:
