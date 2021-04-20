@@ -29,11 +29,6 @@ patternProperties:
                         type: object
                         additionalProperties: False
                         properties:
-                          type:
-                            description: Backend type can be lvm
-                            type: string
-                            enum:
-                              - lvm
                           lvm:
                             type: object
                             additionalProperties: True

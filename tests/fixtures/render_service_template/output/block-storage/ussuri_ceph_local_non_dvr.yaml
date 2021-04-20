@@ -38,6 +38,7 @@ spec:
             default_volume_type: volumes-hdd
             enabled_backends: volumes-hdd
             host: <None>
+            scheduler_default_filters: AvailabilityZoneFilter,CapacityFilter,CapabilitiesFilter,InstanceLocalityFilter
           coordination:
             backend_url: etcd3+http://etcd:2379
           keystone_authtoken:

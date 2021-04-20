@@ -6,11 +6,9 @@ nodes:
         volume:
           backends:
             lvm_fast:
-              type: lvm
               lvm:
                 volume_group: "fast-vol"
             lvm_slow:
-              type: lvm
               lvm:
                 volume_group: "slow-vol"
 features:
