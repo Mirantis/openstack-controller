@@ -189,6 +189,7 @@ spec:
 {%- endif %}
             enabled_backends: {{ enabled_backends|join(',') }}
             default_volume_type: {{ enabled_backends[0] }}
+            scheduler_default_filters: AvailabilityZoneFilter,CapacityFilter,CapabilitiesFilter,InstanceLocalityFilter
           oslo_messaging_notifications:
             topics: {{ notification_topics|join(',') }}
           coordination:
@@ -243,7 +244,7 @@ spec:
                        {%- for backend_name,backend_opts in cinder_override.get("volume", {}).get("backends", {}).items() %}
                        {%- do enabled_backends.append(backend_name) %}
                        {{ backend_name }}:
-                         {%- if backend_opts.type == "lvm" %}
+                         {%- if "lvm" in backend_opts %}
                          volumes_dir: /var/lib/cinder/volumes
                          volume_driver: cinder.volume.drivers.lvm.LVMVolumeDriver
                          volume_backend_name: {{ backend_name }}

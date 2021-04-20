@@ -683,7 +683,9 @@ def test_nodes_features_neutron_sriov_keys(client):
 
 
 def test_nodes_features_cinder_keys(client):
-    cinder_required = {"volume": {"backends": {"lvm": {"type": "lvm"}}}}
+    cinder_required = {
+        "volume": {"backends": {"lvm_backend": {"lvm": {"option": "value"}}}}
+    }
     _node_specific_request(
         client,
         {"good::label": {"features": {"cinder": cinder_required}}},
@@ -699,11 +701,9 @@ def test_nodes_features_cinder_keys(client):
                         "volume": {
                             "backends": {
                                 "lvm_fast": {
-                                    "type": "lvm",
                                     "lvm": {"foo": "bar"},
                                 },
                                 "lvm_slow": {
-                                    "type": "lvm",
                                     "lvm": {"foo": "baz"},
                                 },
                             }
@@ -713,21 +713,4 @@ def test_nodes_features_cinder_keys(client):
             }
         },
         True,
-    )
-
-    # backend invalid
-    _node_specific_request(
-        client,
-        {
-            "good::label": {
-                "features": {
-                    "cinder": {
-                        "volume": {
-                            "backends": {"invalid": {"type": "invalid"}},
-                        }
-                    }
-                }
-            }
-        },
-        False,
     )
