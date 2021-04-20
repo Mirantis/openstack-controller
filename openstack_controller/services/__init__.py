@@ -184,6 +184,7 @@ class RabbitMQ(Service):
                 "openstack-rabbitmq-cluster-wait": {
                     "images": ["rabbitmq_scripted_test"],
                     "manifest": "job_cluster_wait",
+                    "hash_fields": ["endpoints.oslo_messaging.*"],
                 }
             }
         }
@@ -265,6 +266,7 @@ class Barbican(OpenStackService):
                 "openstack-barbican-rabbitmq-cluster-wait": {
                     "images": ["rabbitmq_scripted_test"],
                     "manifest": "job_cluster_wait",
+                    "hash_fields": ["endpoints.oslo_messaging.*"],
                 }
             }
         }
@@ -324,6 +326,7 @@ class Cinder(OpenStackServiceWithCeph):
                 "openstack-cinder-rabbitmq-cluster-wait": {
                     "images": ["rabbitmq_scripted_test"],
                     "manifest": "job_cluster_wait",
+                    "hash_fields": ["endpoints.oslo_messaging.*"],
                 }
             }
         },
@@ -391,6 +394,7 @@ class Designate(OpenStackService):
                 "openstack-designate-rabbitmq-cluster-wait": {
                     "images": ["rabbitmq_scripted_test"],
                     "manifest": "job_cluster_wait",
+                    "hash_fields": ["endpoints.oslo_messaging.*"],
                 }
             }
         },
@@ -445,6 +449,7 @@ class Glance(OpenStackServiceWithCeph):
                 "openstack-glance-rabbitmq-cluster-wait": {
                     "images": ["rabbitmq_scripted_test"],
                     "manifest": "job_cluster_wait",
+                    "hash_fields": ["endpoints.oslo_messaging.*"],
                 }
             }
         },
@@ -504,6 +509,7 @@ class Heat(OpenStackService):
                 "openstack-heat-rabbitmq-cluster-wait": {
                     "images": ["rabbitmq_scripted_test"],
                     "manifest": "job_cluster_wait",
+                    "hash_fields": ["endpoints.oslo_messaging.*"],
                 }
             }
         },
@@ -589,6 +595,7 @@ class Ironic(OpenStackService):
                 "openstack-ironic-rabbitmq-cluster-wait": {
                     "images": ["rabbitmq_scripted_test"],
                     "manifest": "job_cluster_wait",
+                    "hash_fields": ["endpoints.oslo_messaging.*"],
                 }
             }
         },
@@ -655,6 +662,7 @@ class Keystone(OpenStackService):
                 "openstack-keystone-rabbitmq-cluster-wait": {
                     "images": ["rabbitmq_scripted_test"],
                     "manifest": "job_cluster_wait",
+                    "hash_fields": ["endpoints.oslo_messaging.*"],
                 }
             }
         },
@@ -870,6 +878,7 @@ class Neutron(OpenStackService):
                     "openstack-neutron-rabbitmq-cluster-wait": {
                         "images": ["rabbitmq_scripted_test"],
                         "manifest": "job_cluster_wait",
+                        "hash_fields": ["endpoints.oslo_messaging.*"],
                     }
                 }
             },
@@ -1050,6 +1059,7 @@ class Nova(OpenStackServiceWithCeph):
                     "openstack-nova-rabbitmq-cluster-wait": {
                         "images": ["rabbitmq_scripted_test"],
                         "manifest": "job_cluster_wait",
+                        "hash_fields": ["endpoints.oslo_messaging.*"],
                     }
                 }
             },
@@ -1389,6 +1399,7 @@ class Octavia(OpenStackService):
                     "openstack-octavia-rabbitmq-cluster-wait": {
                         "images": ["rabbitmq_scripted_test"],
                         "manifest": "job_cluster_wait",
+                        "hash_fields": ["endpoints.oslo_messaging.*"],
                     }
                 }
             },
