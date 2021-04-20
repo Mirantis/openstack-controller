@@ -214,6 +214,15 @@ spec:
           {{ backend }}:
             volume_backend_name: {{ backend }}
 {%- endfor %}
+{%- for label, override in node_specific.items() %}
+  {%- set cinder_override = override.get("cinder", {}) %}
+    {%- if cinder_override %}
+      {%- for backend_name,backend_opts in cinder_override.get("volume", {}).get("backends", {}).items() %}
+          {{ backend_name }}:
+            volume_backend_name: {{ backend_name }}
+      {%- endfor %}
+    {%- endif %}
+{%- endfor %}
       secrets:
         rbd:
           volume: {{ ceph.cinder.secrets }}

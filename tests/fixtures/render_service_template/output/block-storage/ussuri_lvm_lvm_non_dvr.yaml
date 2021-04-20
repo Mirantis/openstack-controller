@@ -40,6 +40,10 @@ spec:
         volume_types:
           volumes-hdd:
             volume_backend_name: volumes-hdd
+          lvm_fast:
+            volume_backend_name: lvm_fast
+          lvm_slow:
+            volume_backend_name: lvm_slow
       ceph_client:
         configmap: rook-ceph-config
         user_secret_name: cinder-rbd-keyring
