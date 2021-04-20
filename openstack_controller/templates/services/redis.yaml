@@ -42,6 +42,9 @@ spec:
               storage: 1Gi
           storageClassName: {{ spec.get('local_volume_storage_class', 'openstack-operator-bind-mounts') }}
   sentinel:
+    rollingUpdate:
+      maxSurge: 0
+      maxUnavailable: 1
     affinity:
       nodeAffinity:
         requiredDuringSchedulingIgnoredDuringExecution:

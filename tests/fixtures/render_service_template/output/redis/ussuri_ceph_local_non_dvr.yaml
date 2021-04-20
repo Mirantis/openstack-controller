@@ -43,6 +43,9 @@ spec:
               storage: 1Gi
           storageClassName: lvp-fake-root
   sentinel:
+    rollingUpdate:
+      maxSurge: 0
+      maxUnavailable: 1
     affinity:
       nodeAffinity:
         requiredDuringSchedulingIgnoredDuringExecution:
