@@ -27,6 +27,7 @@ class Volume(base_section.BaseSection):
         "storage_protocol",
         "vendor_name",
         "volume_size",
+        "scheduler_default_filters",
     ]
 
     @property
@@ -113,3 +114,10 @@ class Volume(base_section.BaseSection):
             return flavors.get(flavor_ref, {}).get(
                 "disk"
             ) or default_flavors_disks.get(flavor_ref)
+
+    @property
+    def scheduler_default_filters(self):
+        scheduler_default_filters = self.get_values_item(
+            "cinder", "conf.cinder.DEFAULT.scheduler_default_filters", None
+        )
+        return scheduler_default_filters

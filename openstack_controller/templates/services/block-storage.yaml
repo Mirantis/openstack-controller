@@ -200,6 +200,10 @@ spec:
             # NOTE(vsaienko): Use dedicated pool for cinder only, this will allow to improve
             # scale characteristics
             rbd_exclusive_cinder_pool: true
+          # Needed for InstanceLocalityFilter
+          nova:
+            auth_section: keystone_authtoken
+            auth_type: password
         logging:
           logger_cinder:
             level: {{ spec.get('features', {}).get('logging', {}).get('cinder', {}).get('level', 'INFO') }}
