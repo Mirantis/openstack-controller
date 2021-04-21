@@ -266,6 +266,29 @@ def test_physnet_optional_tf(client):
     assert response.json["response"]["allowed"] is True
 
 
+def test_baremetal_tf(client):
+    req = copy.deepcopy(ADMISSION_REQ)
+    req["request"]["object"]["spec"]["preset"] = "compute-tf"
+    req["request"]["object"]["spec"]["features"]["services"].append(
+        "baremetal"
+    )
+    response = client.simulate_post("/validate", json=req)
+    assert response.status == falcon.HTTP_OK
+    assert response.json["response"]["status"]["code"] == 400
+    assert response.json["response"]["allowed"] is False
+
+
+def test_baremetal_ovs(client):
+    req = copy.deepcopy(ADMISSION_REQ)
+    req["request"]["object"]["spec"]["preset"] = "compute"
+    req["request"]["object"]["spec"]["features"]["services"].append(
+        "baremetal"
+    )
+    response = client.simulate_post("/validate", json=req)
+    assert response.status == falcon.HTTP_OK
+    assert response.json["response"]["allowed"] is True
+
+
 def test_nova_encryption(client):
     req = copy.deepcopy(ADMISSION_REQ)
     req["request"]["object"]["spec"]["features"]["nova"] = {

@@ -31,6 +31,7 @@ class OpenStackValidator(base.BaseValidator):
             # on update we deffinitely have both old and new as not empty
             self._validate_openstack_upgrade(old_obj, new_obj)
         self._check_masakari_allowed(new_obj)
+        self._check_baremetal_allowed(new_obj)
 
     def _deny_master(self, new_obj):
         new_version = new_obj.get("spec", {}).get("openstack_version")
@@ -56,6 +57,17 @@ class OpenStackValidator(base.BaseValidator):
             raise exception.OsDplValidationFailed(
                 "This set of services is not permitted to use with"
                 "current OpenStack version."
+            )
+
+    def _check_baremetal_allowed(self, new_obj):
+        preset = new_obj["spec"]["preset"]
+        if (
+            "baremetal" in new_obj["spec"]["features"].get("services", [])
+            and preset == "compute-tf"
+        ):
+            raise exception.OsDplValidationFailed(
+                "This OpenStack Baremetal services is not supported"
+                "with TungstenFabric networking."
             )
 
     def _validate_openstack_upgrade(self, old_obj, new_obj):
