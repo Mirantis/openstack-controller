@@ -116,6 +116,17 @@ spec:
       network:
         backend: []
       {%- endif %}
+{%- if spec.openstack_version in ['queens', 'rocky', 'stein', 'train'] %}
+      # in libvirt 4.0.0 there is no support of admin protocol to check virtlogd health
+      pod:
+        probes:
+          libvirt:
+            virtlogd:
+              readiness:
+                enabled: false
+              liveness:
+                enabled: false
+{%- endif %}
 {%- if spec.get('migration', {}).get('nova', {}).get('deploy_main_service', True) %}
   - name: openstack-nova
     chart: {{spec.common.openstack.repo}}/nova
