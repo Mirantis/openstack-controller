@@ -105,11 +105,10 @@ class LoadBalancer(base_section.BaseSection):
 
     @property
     def RBAC_test_type(self):
-        try:
-            if self.spec["features"]["neutron"]["backend"] == "tungstenfabric":
-                return "none"
-        except:
-            pass
+        # do not test rbac policies by octavia tempest plugin,
+        # current tests are not optimal.
+        # should be tested by separate project - patrole.
+        return "none"
 
     @property
     def enabled_provider_drivers(self):
