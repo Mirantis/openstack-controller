@@ -62,6 +62,8 @@ spec:
             memcache_security_strategy: ENCRYPT
           oslo_messaging_notifications:
             topics: notifications
+          import_filtering_opts:
+            allowed_ports: "[80,443,8801]"
         glance_registry:
           keystone_authtoken:
             memcache_secret_key: yXjj5J8Ad1hHdCCh
