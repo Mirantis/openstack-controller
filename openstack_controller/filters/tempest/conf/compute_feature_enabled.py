@@ -108,7 +108,10 @@ class ComputeFeatureEnabled(base_section.BaseSection):
 
     @property
     def live_migration(self):
-        pass
+        if self.get_values_item("nova", "conf.nova.libvirt.images_type") in [
+            "lvm",
+        ]:
+            return False
 
     @property
     def metadata_service(self):
