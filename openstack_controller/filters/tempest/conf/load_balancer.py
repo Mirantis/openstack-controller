@@ -97,6 +97,11 @@ class LoadBalancer(base_section.BaseSection):
 
     @property
     def provider(self):
+        version = self.spec["openstack_version"]
+        # NOTE(vsaienko): in Queens default_provider_driver was not exist
+        # do not handle this and return default value
+        if version == "queens":
+            return "octavia"
         return self.get_values_item(
             "octavia",
             "conf.octavia.api_settings.default_provider_driver",
