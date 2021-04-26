@@ -57,7 +57,7 @@ class CustomListStrategies(merge_list.ListStrategies):
 
     @staticmethod
     def strategy_merge(config, path, base, nxt):
-        """ merge base with nxt, adds new elements from nxt. """
+        """merge base with nxt, adds new elements from nxt."""
         merged = copy.deepcopy(base)
         for el in nxt:
             if el not in merged:
