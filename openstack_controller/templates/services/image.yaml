@@ -160,6 +160,10 @@ spec:
 {%- endfor %}
           oslo_messaging_notifications:
             topics: {{ notification_topics|join(',') }}
+          import_filtering_opts:
+            # NOTE(ohryhorov): port 8801 has been added in testing purposes to upload images
+            # "allowed_ports" value has to be inside square brackets.
+            allowed_ports: "[80,443,8801]"
         glance_registry:
           keystone_authtoken:
             memcache_security_strategy: ENCRYPT
