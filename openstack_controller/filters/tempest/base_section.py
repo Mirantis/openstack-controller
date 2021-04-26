@@ -10,11 +10,11 @@ class BaseSection(object):
 
     @abc.abstractproperty
     def name(self):
-        """"""
+        """ """
 
     @abc.abstractproperty
     def options():
-        """"""
+        """ """
 
     def get_values_item(self, service_name, item_path, item_default=None):
         for component_name, component in self.helmbundles_body.items():
