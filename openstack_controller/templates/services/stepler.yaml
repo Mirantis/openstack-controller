@@ -23,7 +23,7 @@ spec:
         network_policy: false
         secret_ca_bundle: true
       pvc:
-        storage_class: {{ spec.get('persistent_volume_storage_class', 'kubernetes-hdd') }}
+        storage_class: {{ spec.get('persistent_volume_storage_class', 'default') }}
       endpoints:
         cluster_domain_suffix: {{ spec.internal_domain_name }}
 {% include 'base/_admin_identity.yaml' %}

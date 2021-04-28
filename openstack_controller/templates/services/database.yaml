@@ -109,8 +109,8 @@ spec:
 {%- if spec.get('features', {}).get('database', {}).get('local_volumes', {}).get('enabled', False) %}
         class_name: {{ spec.get('local_volume_storage_class', 'openstack-operator-bind-mounts') }}
 {%- else %}
-        class_name: {{ spec.get('persistent_volume_storage_class', 'kubernetes-hdd') }}
+        class_name: {{ spec.get('persistent_volume_storage_class', 'default') }}
 {%- endif %}
         phy_backup:
-          class_name: {{ spec.get('persistent_volume_storage_class', 'kubernetes-hdd') }}
+          class_name: {{ spec.get('persistent_volume_storage_class', 'default') }}
           enabled: true
