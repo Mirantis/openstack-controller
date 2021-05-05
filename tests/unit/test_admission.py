@@ -266,6 +266,18 @@ def test_physnet_optional_tf(client):
     assert response.json["response"]["allowed"] is True
 
 
+def test_ipsec_tf(client):
+    req = copy.deepcopy(ADMISSION_REQ)
+    req["request"]["object"]["spec"]["features"]["neutron"] = {
+        "backend": "tungstenfabric",
+        "ipsec": {"enabled": True},
+    }
+    response = client.simulate_post("/validate", json=req)
+    assert response.status == falcon.HTTP_OK
+    assert response.json["response"]["allowed"] is False
+    assert response.json["response"]["status"]["code"] == 400
+
+
 def test_baremetal_tf(client):
     req = copy.deepcopy(ADMISSION_REQ)
     req["request"]["object"]["spec"]["preset"] = "compute-tf"

@@ -7,6 +7,7 @@
 {%- set tungstenfabric_enabled = spec.features.neutron.get('backend', 'ml2') == 'tungstenfabric' %}
 {%- set tungstenfabric_custom_api_opts = tf_api_service is defined and tf_api_port is defined %}
 {%- set bgpvpn = spec.features.neutron.get('bgpvpn', {'enabled': False}) %}
+{%- set ipsec = spec.features.neutron.get('ipsec', {'enabled': False}) %}
 {%- set notification_topics = ['notifications'] %}
 {%- set service_plugins = ['<None>'] if tungstenfabric_enabled else ['router', 'metering', 'qos'] %}
 {%- do service_plugins.append('bgpvpn') if bgpvpn.enabled %}
@@ -27,8 +28,9 @@
     {%- endif %}
   {%- endif %}
 {%- endfor %}
-
-
+# NOTE(vsaienko): change default 4789 port to do not conflict with docker swarm
+# overlay networks.
+{%- set vxlan_udp_port = 4790 %}
 
 spec:
   releases:
@@ -193,6 +195,33 @@ spec:
           {%- if bgpvpn.route_reflector.get("neighbor_subnets") %}
           neighbor_subnets: {{ bgpvpn.route_reflector.neighbor_subnets }}
           {%- endif %}
+{%- endif %}
+{%- if ipsec.enabled %}
+  - name: openstack-ipsec
+    chart: {{spec.common.infra.repo}}/strongswan
+    values:
+      images:
+        tags:
+          {%- for image in [
+          "strongswan",
+          "dep_check",
+          "image_repo_sync",] %}
+              {%- if image in images %}
+                {{ image }}: {{ images[image] }}
+              {%- endif %}
+          {%- endfor %}
+      conf:
+        ipsec:
+          conn %default:
+            authby: psk
+          conn vxlan-in:
+            leftsubnet: '0.0.0.0/0[udp/{{ vxlan_udp_port }}]'
+          conn vxlan-out:
+            rightsubnet: '%dynamic[udp/{{ vxlan_udp_port }}]'
+        ipsec_secrets:
+          config:
+            type: psk
+            key: {{ credentials.ipsec_secret_key }}
 {%- endif %}
   - name: openstack-neutron
     chart: {{spec.common.openstack.repo}}/neutron
@@ -595,9 +624,7 @@ spec:
           {%- endif %}
           openvswitch_agent:
             agent:
-              # NOTE(vsaienko): change default 4789 port to do not conflict with docker swarm
-              # overlay networks.
-              vxlan_udp_port: 4790
+              vxlan_udp_port: {{ vxlan_udp_port }}
               tunnel_types: vxlan
               {%- if spec.get('features', {}).get('neutron', {}).get('dvr', {}).get('enabled', False) %}
               enable_distributed_routing: True
@@ -642,7 +669,7 @@ spec:
           dataplane_driver_evpn:
             dataplane_driver: ovs
             dataplane_local_address: {{ bgpvpn.get('dataplane_interface', spec.features.neutron.tunnel_interface) }}
-            vxlan_dst_port: {{ bgpvpn.get('evpn_vxlan_port', 4790) }}
+            vxlan_dst_port: {{ bgpvpn.get('evpn_vxlan_port', vxlan_udp_port) }}
       {%- endif %}
       labels:
         sriov:

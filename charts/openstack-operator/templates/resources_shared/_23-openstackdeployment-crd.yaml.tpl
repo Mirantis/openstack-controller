@@ -641,6 +641,14 @@ spec:
                                   description: BGP sessions allowed from neighbors in this subnet
                                   items:
                                     type: string
+                        ipsec:
+                          type: object
+                          required:
+                            - enabled
+                          properties:
+                            enabled:
+                              type: boolean
+                              description: Enable IPsec authentication and encryption of tenant traffic
                     messaging:
                       type: object
                       properties:

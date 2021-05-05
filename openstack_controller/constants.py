@@ -39,6 +39,7 @@ CHART_GROUP_MAPPING = {
         "ceph-rgw",
         "frr",
         "iscsi",
+        "strongswan",
     ],
 }
 

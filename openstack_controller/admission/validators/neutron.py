@@ -52,4 +52,9 @@ class NeutronValidator(base.BaseValidator):
                 "not used, physnet needs to be specified in "
                 "features.neutron.floating_network section."
             )
+        ipsec = neutron_features.get("ipsec", {"enabled": False})
+        if neutron_backend == "tungstenfabric" and ipsec["enabled"]:
+            raise exception.OsDplValidationFailed(
+                "TungstenFabric with IPsec is not supported"
+            )
         self._check_bgpvpn(review_request)

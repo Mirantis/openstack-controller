@@ -89,6 +89,7 @@ class HorizonCredentials(OpenStackCredentials):
 @dataclass
 class NeutronCredentials(OpenStackCredentials):
     metadata_secret: str
+    ipsec_secret_key: str
 
     def __init__(
         self,
@@ -97,9 +98,11 @@ class NeutronCredentials(OpenStackCredentials):
         notifications=None,
         memcached="",
         metadata_secret="",
+        ipsec_secret_key="",
     ):
         super().__init__(database, messaging, notifications, memcached)
         self.metadata_secret = metadata_secret
+        self.ipsec_secret_key = ipsec_secret_key
 
 
 @dataclass
@@ -206,7 +209,7 @@ class Secret(abc.ABC):
         username = generate_name(prefix=prefix, length=username_length)
         return OSSytemCreds(username=username, password=password)
 
-    def _genereate_new_fields(self, *args):
+    def _generate_new_fields(self, *args):
         return {}
 
     @abc.abstractmethod
@@ -227,7 +230,7 @@ class Secret(abc.ABC):
             )
             all_fields = [f.name for f in fields(self.secret_class)]
             new_fields = set(all_fields) - set(params)
-            params.update(self._genereate_new_fields(*new_fields))
+            params.update(self._generate_new_fields(*new_fields))
             secret = self.secret_class(**params)
             self.save(secret)
             return secret
@@ -334,9 +337,41 @@ class HorizonSecret(OpenStackServiceSecret):
 class NeutronSecret(OpenStackServiceSecret):
     secret_class = NeutronCredentials
 
+    def _generate_ipsec_secret_key(self):
+        return generate_password(length=16)
+
+    def _generate_new_fields(self, *args):
+        creds = {}
+        for field in args:
+            if field == "ipsec_secret_key":
+                creds["ipsec_secret_key"] = self._generate_ipsec_secret_key()
+            else:
+                LOG.warning(
+                    f"Not supported field '{field}' requested for secret "
+                    f"'{self.secret_name}'."
+                )
+        return creds
+
+    def ensure(self):
+        try:
+            secret = self.get()
+            if not getattr(secret, "ipsec_secret_key"):
+                setattr(
+                    secret,
+                    "ipsec_secret_key",
+                    self._generate_ipsec_secret_key(),
+                )
+                self.save(secret)
+        except pykube.exceptions.ObjectDoesNotExist:
+            secret = self.create()
+            if secret:
+                self.save(secret)
+        return secret
+
     def create(self):
         os_creds = super().create()
         os_creds.metadata_secret = generate_password(length=32)
+        os_creds.ipsec_secret_key = self._generate_ipsec_secret_key()
         return os_creds
 
 
@@ -347,7 +382,7 @@ class GaleraSecret(Secret):
     def _generate_backup_creds(self):
         return self._generate_credentials("backup", 8)
 
-    def _genereate_new_fields(self, *args):
+    def _generate_new_fields(self, *args):
         creds = {}
         for field in args:
             if field == "backup":
