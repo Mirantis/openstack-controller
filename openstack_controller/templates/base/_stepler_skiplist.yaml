@@ -200,3 +200,9 @@
           9acd7607-d72f-4e8c-9b13-1a0728d56975:
             reason: PRODX-11366
             # stepler/horizon/tests/test_projects.py::TestAdminOnly::test_switch_projects
+          4016e9af-257b-4df2-8c63-5716f134e5bb:
+            reason: PRODX-12232
+            # stepler/horizon/tests/test_images.py::TestAnyOne::test_remove_protected_image
+          637b39da-5648-4d46-bf3f-d51ca858928f:
+            reason: PRODX-12232
+            # stepler/horizon/tests/test_images.py::TestAnyOne::test_remove_protected_image
