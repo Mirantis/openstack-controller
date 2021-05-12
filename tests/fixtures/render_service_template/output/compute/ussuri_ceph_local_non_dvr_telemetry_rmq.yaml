@@ -132,6 +132,8 @@ spec:
           keystone_authtoken:
             memcache_secret_key: JinzIdQzLdIslgxu
             memcache_security_strategy: ENCRYPT
+          notifications: 
+            notify_on_state_change: vm_and_task_state
           os_vif_ovs:
             isolate_vif: true 
           libvirt:
