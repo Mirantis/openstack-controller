@@ -151,7 +151,7 @@ services:
               block_device_allocate_retries_interval: 10
               report_interval: 30
               service_down_time: 180
-              rpc_response_timeout: 30
+              rpc_response_timeout: 60
             api_database:
               max_pool_size: 10
               max_retries: -1
