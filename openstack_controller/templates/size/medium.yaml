@@ -372,7 +372,7 @@ services:
               connection_recycle_time: 300
             controller_worker:
               amp_active_retries: 100
-              amp_active_wait_sec: 2
+              amp_active_wait_sec: 4
               workers: 8
             haproxy_amphora:
               connection_max_retries: 1500
