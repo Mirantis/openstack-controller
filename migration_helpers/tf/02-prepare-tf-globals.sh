@@ -8,11 +8,6 @@ TOP_DIR=$( cd $(dirname $RUN_DIR/../../) && pwd)
 . $TOP_DIR/globals
 . $TOP_DIR/functions-common
 
-function get_mcp2_tf_external_ip {
-    local service="$1"
-    echo "$(kubectl -n tf get services $service -o jsonpath='{.status.loadBalancer.ingress[0].ip}')"
-}
-
 function generate_contrail_globals {
     # Cassandra external addresses
     local mcp2_tf_cassandra_config_0_host=$(get_mcp2_tf_external_ip tf-cassandra-config-dc1-rack1-0-external)
