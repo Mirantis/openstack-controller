@@ -175,6 +175,11 @@ function get_mcp2_external_ip {
   echo "$(kubectl -n openstack get services $service -o jsonpath='{.status.loadBalancer.ingress[0].ip}')"
 }
 
+function get_mcp2_tf_external_ip {
+    local service="$1"
+    echo "$(kubectl -n tf get services $service -o jsonpath='{.status.loadBalancer.ingress[0].ip}')"
+}
+
 function expose_mcp2_memcached {
     local pod_names
     pod_names=$(kubectl -n openstack get pods -l application=memcached -o name | cut -d/ -f 2)

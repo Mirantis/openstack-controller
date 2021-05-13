@@ -6,7 +6,6 @@ TOP_DIR=$( cd $(dirname $RUN_DIR/../../) && pwd)
 
 . $TOP_DIR/globals
 . $TOP_DIR/functions-common
-. $TOP_DIR/database/functions
 
 SALTFORMULA_DIR=${SALTFORMULA_DIR:-"/srv/salt/env/prd/"}
 
@@ -31,9 +30,9 @@ map_alarm_gen=(["kafka_broker_list"]="tf-kafka-0-external:9092 tf-kafka-1-extern
                ["rabbitmq_vhost"]="\/"
                )
 
-echo "Map config for $CONFIG_FILENAME"
+info "Map config for $CONFIG_FILENAME"
 for i in "${!map_alarm_gen[@]}"; do
-  echo "Set $i to ${map_alarm_gen[$i]}"
+  info "Set $i to ${map_alarm_gen[$i]}"
   sed -i  "s/\($i *= *\).*/\1${map_alarm_gen[$i]}/" ${CONFIG_FILENAME};
 done
 
@@ -42,9 +41,9 @@ declare -A map_analytics_api
 map_analytics_api=(["cassandra_server_list"]="tf-cassandra-analytics-dc1-rack1-0-external:9042 tf-cassandra-analytics-dc1-rack1-1-external:9042 tf-cassandra-analytics-dc1-rack1-2-external:9042"
                    ["zk_list"]="tf-zookeeper-client-external:2181"
                    )
-echo "Map config for $CONFIG_FILENAME"
+info "Map config for $CONFIG_FILENAME"
 for i in "${!map_analytics_api[@]}"; do
-   echo "Set $i to ${map_analytics_api[$i]}"
+   info "Set $i to ${map_analytics_api[$i]}"
   sed -i  "s/\($i *= *\).*/\1${map_analytics_api[$i]}/" ${CONFIG_FILENAME};
 done
 
@@ -58,9 +57,9 @@ map_contrail_api=(["cassandra_server_list"]="tf-cassandra-config-dc1-rack1-0-ext
                   ["rabbit_password"]="guest"
                   ["rabbit_vhost"]="\/"
                   )
-echo "Map config for $CONFIG_FILENAME"
+info "Map config for $CONFIG_FILENAME"
 for i in "${!map_contrail_api[@]}"; do
-  echo "Set $i to ${map_contrail_api[$i]}"
+  info "Set $i to ${map_contrail_api[$i]}"
   sed -i  "s/\($i *= *\).*/\1${map_contrail_api[$i]}/" ${CONFIG_FILENAME};
 done
 
@@ -75,9 +74,9 @@ map_contrail_control=(["config_db_server_list"]="tf-cassandra-config-dc1-rack1-0
                        ["rabbitmq_password"]="guest"
                        ["rabbitmq_vhost"]="\/"
                       )
-echo "Map config for $CONFIG_FILENAME"
+info "Map config for $CONFIG_FILENAME"
 for i in "${!map_contrail_control[@]}"; do
-  echo "Set $i to ${map_contrail_control[$i]}"
+  info "Set $i to ${map_contrail_control[$i]}"
   sed -i  "s/\($i *= *\).*/\1${map_contrail_control[$i]}/" ${CONFIG_FILENAME};
 done
 
@@ -92,9 +91,9 @@ map_contrail_dev_man=(["zk_server_ip"]="tf-zookeeper-client-external:2181"
                       ["rabbit_password"]="guest"
                       ["rabbit_vhost"]="\/"
                       )
-echo "Map config for $CONFIG_FILENAME"
+info "Map config for $CONFIG_FILENAME"
 for i in "${!map_contrail_dev_man[@]}"; do
-  echo "Set $i to ${map_contrail_dev_man[$i]}"
+  info "Set $i to ${map_contrail_dev_man[$i]}"
   sed -i  "s/\($i *= *\).*/\1${map_contrail_dev_man[$i]}/" ${CONFIG_FILENAME};
 done
 
@@ -109,9 +108,9 @@ map_contrail_dns=(["zk_server_ip"]="tf-zookeeper-client-external:2181"
                   ["rabbitmq_password"]="guest"
                   ["rabbitmq_vhost"]="\/"
                  )
-echo "Map config for $CONFIG_FILENAME"
+info "Map config for $CONFIG_FILENAME"
 for i in "${!map_contrail_dns[@]}"; do
-  echo "Set $i to ${map_contrail_dns[$i]}"
+  info "Set $i to ${map_contrail_dns[$i]}"
   sed -i  "s/\($i *= *\).*/\1${map_contrail_dns[$i]}/" ${CONFIG_FILENAME};
 done
 
@@ -121,9 +120,9 @@ declare -A map_contrail_query
 map_contrail_query=(["cassandra_server_list"]="tf-cassandra-analytics-dc1-rack1-0-external:9042 tf-cassandra-analytics-dc1-rack1-1-external:9042 tf-cassandra-analytics-dc1-rack1-2-external:9042"
                    )
 
-echo "Map config for $CONFIG_FILENAME"
+info "Map config for $CONFIG_FILENAME"
 for i in "${!map_contrail_query[@]}"; do
-  echo "Set $i to ${map_contrail_query[$i]}"
+  info "Set $i to ${map_contrail_query[$i]}"
   sed -i  "s/\($i *= *\).*/\1${map_contrail_query[$i]}/" ${CONFIG_FILENAME};
 done
 
@@ -138,10 +137,10 @@ map_contrail_schema=(["zk_server_ip"]="tf-zookeeper-client-external:2181"
                      ["rabbit_password"]="guest"
                      ["rabbit_vhost"]="\/"
                     )
-echo "Map config for $CONFIG_FILENAME"
+info "Map config for $CONFIG_FILENAME"
 
 for i in "${!map_contrail_schema[@]}"; do
-  echo "Set $i to ${map_contrail_schema[$i]}"
+  info "Set $i to ${map_contrail_schema[$i]}"
   sed -i  "s/\($i *= *\).*/\1${map_contrail_schema[$i]}/" ${CONFIG_FILENAME};
 done
 
@@ -156,10 +155,10 @@ map_contrail_snmp_col=(["zookeeper"]="tf-zookeeper-client-external:2181"
                        ["rabbitmq_password"]="guest"
                        ["rabbitmq_vhost"]="\/"
                       )
-echo "Map config for $CONFIG_FILENAME"
+info "Map config for $CONFIG_FILENAME"
 
 for i in "${!map_contrail_snmp_col[@]}"; do
-  echo "Set $i to ${map_contrail_snmp_col[$i]}"
+  info "Set $i to ${map_contrail_snmp_col[$i]}"
   sed -i  "s/\($i *= *\).*/\1${map_contrail_snmp_col[$i]}/" ${CONFIG_FILENAME};
 done
 
@@ -174,9 +173,9 @@ map_contrail_svc_mon=(["zk_server_ip"]="tf-zookeeper-client-external:2181"
                       ["rabbit_password"]="guest"
                       ["rabbit_vhost"]="\/"
                       )
-echo "Map config for $CONFIG_FILENAME"
+info "Map config for $CONFIG_FILENAME"
 for i in "${!map_contrail_svc_mon[@]}"; do
-  echo "Set $i to ${map_contrail_svc_mon[$i]}"
+  info "Set $i to ${map_contrail_svc_mon[$i]}"
   sed -i  "s/\($i *= *\).*/\1${map_contrail_svc_mon[$i]}/" ${CONFIG_FILENAME};
 done
 
@@ -191,10 +190,10 @@ map_contrail_topology=(["zookeeper"]="tf-zookeeper-client-external:2181"
                        ["rabbitmq_password"]="guest"
                        ["rabbitmq_vhost"]="\/"
                        )
-echo "Map config for $CONFIG_FILENAME"
+info "Map config for $CONFIG_FILENAME"
 
 for i in "${!map_contrail_topology[@]}"; do
-  echo "Set $i to ${map_contrail_topology[$i]}"
+  info "Set $i to ${map_contrail_topology[$i]}"
   sed -i  "s/\($i *= *\).*/\1${map_contrail_topology[$i]}/" ${CONFIG_FILENAME};
 done
 
@@ -215,9 +214,9 @@ map_contrail_collector=(["kafka_broker_list"]="tf-kafka-0-external:9092 tf-kafka
                         ["rabbitmq_password"]="guest"
                         ["rabbitmq_vhost"]="\/"
                         )
-echo "Map config for $CONFIG_FILENAME"
+info "Map config for $CONFIG_FILENAME"
 for i in "${!map_contrail_collector[@]}"; do
-  echo "Set $i to ${map_contrail_collector[$i]}"
+  info "Set $i to ${map_contrail_collector[$i]}"
   sed -i  "s/\($i *= *\).*/\1${map_contrail_collector[$i]}/" ${CONFIG_FILENAME};
 done
 

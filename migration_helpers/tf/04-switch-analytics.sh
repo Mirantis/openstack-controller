@@ -7,20 +7,43 @@ TOP_DIR=$( cd $(dirname $RUN_DIR/../../) && pwd)
 
 . $TOP_DIR/globals
 . $TOP_DIR/functions-common
-. $TOP_DIR/database/functions
 
 SALTFORMULA_DIR=${SALTFORMULA_DIR:-"/srv/salt/env/prd/"}
 
-
-function get_analytics {
-  pod_names=$(kubectl -n tf get pod -l tungstenfabric=analytics  -o name | cut -d/ -f 2)
-  ips=""
-  for p in $pod_names; do
-    ips=${ips}"$(kubectl -n tf get pod $p --template={{.status.podIP}}):$1 ";
-  done
-  echo $ips
+function set_public_addresses {
+    cat << EOF | kubectl -n tf apply -f -
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: collector-external
+  namespace: tf
+spec:
+  type: LoadBalancer
+  ports:
+  - name: collector
+    port: 8086
+    protocol: TCP
+    targetPort: 8086
+  selector:
+    app: tf-analytics
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: analytics-api-external
+  namespace: tf
+spec:
+  type: LoadBalancer
+  ports:
+  - name: api
+    port: 8081
+    protocol: TCP
+    targetPort: 8081
+  selector:
+    app: tf-analytics
+EOF
 }
-
 
 function switch_analytics {
 
@@ -43,25 +66,27 @@ CONF_LIST_2=\
 ${SALTFORMULA_DIR}opencontrail/files/4.1/contrail-config-nodemgr.conf
 ${SALTFORMULA_DIR}opencontrail/files/4.1/contrail-control-nodemgr.conf"
 
-local COLLECTORS=$(get_analytics "8086")
+local COLLECTORS="$(get_mcp2_tf_external_ip "collector-external"):8086"
 VAR="collectors"
 for i in ${CONF_LIST_1}; do
-  echo "Updating collectors in $i"
+  info "Updating collectors in $i"
   sed -i  "s/\($VAR *= *\).*/\1${COLLECTORS}/" ${i};
 done
 
 VAR="server_list"
 for i in ${CONF_LIST_2}; do
-  echo "Updating collectors in $i"
+  info "Updating collectors in $i"
   sed -i  "s/\($VAR *= *\).*/\1${COLLECTORS}/" ${i};
 done
 
-local API=$(get_analytics "8081")
+local API="$(get_mcp2_tf_external_ip "analytics-api-external"):8081"
 
 VAR="analytics_server_list"
-echo "Update analytics API"
+info "Update analytics API"
 sed -i  "s/\($VAR *= *\).*/\1${API}/" "${SALTFORMULA_DIR}opencontrail/files/4.1/contrail-svc-monitor.conf";
 }
+
+set_public_addresses
 
 switch_analytics
 
