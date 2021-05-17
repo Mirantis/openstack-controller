@@ -628,10 +628,12 @@ class Keystone(OpenStackService):
                 "keystone-fernet-setup": {
                     "images": ["keystone_fernet_setup"],
                     "manifest": "job_fernet_setup",
+                    "hash_fields": ["conf.*"],
                 },
                 "keystone-credential-setup": {
                     "images": ["keystone_credential_setup"],
-                    "manifest": "job_credential_cleanup",
+                    "manifest": "job_credential_setup",
+                    "hash_fields": ["conf.ks_domains.*"],
                 },
                 "keystone-db-sync-expand": {
                     "images": ["keystone_db_sync_expand"],
