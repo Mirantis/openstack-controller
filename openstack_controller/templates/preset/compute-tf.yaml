@@ -327,7 +327,6 @@ services:
               build_timeout: 600
             #TODO(mshalamov): Will be removed during process of completing PRODX-1192
             compute-feature-enabled:
-              cold_migration: true
               resize: true
             image:
               build_timeout: 600

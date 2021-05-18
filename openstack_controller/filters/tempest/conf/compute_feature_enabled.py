@@ -82,6 +82,9 @@ class ComputeFeatureEnabled(base_section.BaseSection):
             "lvm",
         ]:
             return False
+        if self.is_service_enabled("ironic"):
+            return False
+        return True
 
     @property
     def config_drive(self):
