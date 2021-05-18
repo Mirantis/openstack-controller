@@ -18,8 +18,8 @@ spec:
           {{- $keystoneHost := tuple "identity" "public" . | include "helm-toolkit.endpoints.hostname_fqdn_endpoint_lookup" }}
           {{- $keystoneProtocol := tuple "identity" "public" "api" . | include "helm-toolkit.endpoints.keystone_endpoint_scheme_lookup" }}
           Listen 0.0.0.0:{{ $portInt }}
-          LogFormat "%h %l %u %t \"%r\" %>s %b \"%{Referer}i\" \"%{User-Agent}i\"" combined
-          LogFormat "%{X-Forwarded-For}i %l %u %t \"%r\" %>s %b \"%{Referer}i\" \"%{User-Agent}i\"" proxy
+          LogFormat "%h %l %u %t \"%r\" %>s %b %D \"%{Referer}i\" \"%{User-Agent}i\"" combined
+          LogFormat "%{X-Forwarded-For}i %l %u %t \"%r\" %>s %b %D \"%{Referer}i\" \"%{User-Agent}i\"" proxy
           SetEnvIf X-Forwarded-For "^.*\..*\..*\..*" forwarded
           CustomLog /dev/stdout combined env=!forwarded
           CustomLog /dev/stdout proxy env=forwarded
