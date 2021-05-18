@@ -307,7 +307,6 @@ services:
               suspend: false
               boot_from_volume: false
             {%- else %}
-              cold_migration: true
               resize: true
             {%- endif %}
             image:
