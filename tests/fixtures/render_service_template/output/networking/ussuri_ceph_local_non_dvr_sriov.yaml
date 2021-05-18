@@ -138,6 +138,13 @@ spec:
           \ router create r1\nopenstack router set --external-gateway public r1\n\
           openstack network set public --external  --default \n"
       conf:
+        ovs_bridges:
+          br-int:
+            nics:
+            - interface_options:
+                external-ids:iface-status: active
+                type: internal
+              name: o-hm0
         auto_bridge_add:
           br-ex: veth-phy
           br-sriov: ens7
