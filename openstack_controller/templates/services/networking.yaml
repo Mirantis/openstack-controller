@@ -641,6 +641,17 @@ spec:
           linuxbridge_agent:
             linux_bridge:
               bridge_mappings: {{ ','.join(bridge_mappings) }}
+{%- if 'load-balancer' in spec.get('features', {}).get('services') and not tungstenfabric_enabled %}
+        # NOTE(vsaienko): ensure o-hm0 device exists in bridge to let neutron
+        # bound port without races.
+        ovs_bridges:
+          br-int:
+            nics:
+            - name: o-hm0
+              interface_options:
+                type: internal
+                external-ids:iface-status: active
+{%- endif %}
         auto_bridge_add:
 {%- for network in spec.features.neutron.external_networks %}
           {{ network.bridge }}: {{ network.interface }}
