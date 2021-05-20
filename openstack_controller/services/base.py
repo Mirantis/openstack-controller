@@ -181,7 +181,7 @@ class Service:
     @property
     def child_objects(self):
         res = []
-
+        generic_objects = self._get_generic_child_objects()
         for chart_name, charts in self._child_objects.items():
             child = {}
             m_ext = {}
@@ -199,8 +199,18 @@ class Service:
                     )
                     child_obj.helmbundle_ext = m_ext_obj
                     child_obj.service = self
+
+                    # Remove objects that defined explicitly
+                    for obj in generic_objects:
+                        if (
+                            obj.helmbundle_ext.chart == chart_name
+                            and obj.kind == kind
+                            and obj.name == kind_name
+                        ):
+                            generic_objects.remove(obj)
                     res.append(child_obj)
-        return res + self._get_generic_child_objects()
+
+        return res + generic_objects
 
     def set_release_values(self, values):
         data = self.resource_def

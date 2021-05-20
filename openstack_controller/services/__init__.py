@@ -985,6 +985,14 @@ class Nova(OpenStackServiceWithCeph):
                 "images": ["nova_db_sync_online"],
                 "manifest": "job_db_sync_online",
             },
+            "nova-db-sync": {
+                "images": ["nova_db_sync"],
+                "manifest": "job_db_sync",
+                "hash_fields": [
+                    "endpoints.oslo_messaging.*",
+                    "endpoints.oslo_db.*",
+                ],
+            },
         }
         nova_deployments = {}
         nova_secrets = {}
