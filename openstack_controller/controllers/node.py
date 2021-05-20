@@ -27,7 +27,7 @@ LOG = utils.get_logger(__name__)
 @utils.collect_handler_metrics
 async def node_status_update_handler(name, body, old, new, event, **kwargs):
     LOG.debug(f"Handling node status {event} event.")
-    LOG.debug(f"The new state is {new}")
+    LOG.info(f"The node {name} changes are: {kwargs['diff']}")
 
     # NOTE(vsaienko) get conditions from the object to avoid fake reporing by
     # calico when kubelet is down on the node.
@@ -68,6 +68,7 @@ async def node_status_update_handler(name, body, old, new, event, **kwargs):
 async def node_change_handler(body, event, **kwargs):
     name = body["metadata"]["name"]
     LOG.info(f"Got event {event} for node {name}")
+    LOG.info(f"The node {name} changes are: {kwargs['diff']}")
     if not kube.NodeWorkloadLock.definition_exists():
         LOG.warning("No custom resource definition")
         return

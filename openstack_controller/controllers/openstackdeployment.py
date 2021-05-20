@@ -114,6 +114,7 @@ async def handle(body, meta, spec, logger, event, **kwargs):
     # actual **kwargs form is for forward-compat with kopf itself
     namespace = meta["namespace"]
     LOG.info(f"Got osdpl event {event}")
+    LOG.info(f"Changes are: {kwargs['diff']}")
 
     kwargs["patch"].setdefault("status", {})
     kwargs["patch"]["status"]["version"] = version.release_string

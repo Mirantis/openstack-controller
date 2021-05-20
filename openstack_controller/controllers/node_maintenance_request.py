@@ -80,6 +80,9 @@ async def node_maintenance_request_change_handler(body, retry, **kwargs):
     name = body["metadata"]["name"]
     node_name = body["spec"]["nodeName"]
     LOG.info(f"Got node maintenance request change event {name}")
+    LOG.info(
+        f"The node maintenance request {name} changes are: {kwargs['diff']}"
+    )
     node = kube.find(pykube.Node, node_name)
     if not kube.NodeWorkloadLock.required_for_node(node.obj):
         return

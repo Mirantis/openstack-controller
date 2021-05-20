@@ -74,7 +74,7 @@ async def test_maintenance_start(nova_registry_service):
 
     with mock.patch.object(kube, "find", return_value=nwl):
         await node_maintenance_request.node_maintenance_request_change_handler(
-            nmr, 0
+            nmr, 0, diff=()
         )
 
     assert values == ["prepare_inactive", "inactive"]
@@ -145,7 +145,7 @@ async def test_maintenance_preparation_failure(nova_registry_service):
     with pytest.raises(kopf.TemporaryError):
         with mock.patch.object(kube, "find", return_value=nwl):
             await node_maintenance_request.node_maintenance_request_change_handler(
-                nmr, 1000
+                nmr, 1000, diff=()
             )
 
     assert values == ["prepare_inactive", "active"]

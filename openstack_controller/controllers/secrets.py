@@ -86,6 +86,7 @@ async def handle_neutron_secret(
         return
 
     LOG.debug(f"Handling secret create/update {name}")
+    LOG.info(f"The secret {name} changes are: {diff}")
 
     secret_data = {}
     for key in AUTH_KEYS:
@@ -130,6 +131,7 @@ async def handle_neutron_configmap_secret(
     )
 
     LOG.debug(f"Handling secret create {name}")
+    LOG.info(f"The secret {name} changes are: {diff}")
     metadata = base64.b64decode(body["data"]["metadata_agent.ini"]).decode()
     config = configparser.ConfigParser()
     config.read_string(metadata)
@@ -167,6 +169,7 @@ async def handle_bgpvpnsecret(
 
     if name != settings.OSCTL_BGPVPN_NEIGHBOR_INFO_SECRET_NAME:
         return
+    LOG.info(f"The secret {name} changes are: {diff}")
 
     osdpl = health.get_osdpl(settings.OSCTL_OS_DEPLOYMENT_NAMESPACE)
 
@@ -242,6 +245,7 @@ async def handle_rabbitmq_secret(
         return
 
     LOG.debug(f"Handling secret create {name}")
+    LOG.info(f"The secret {name} changes are: {diff}")
 
     secret_data = json.loads(
         base64.b64decode(body["data"]["RABBITMQ_USERS"]).decode()
