@@ -273,6 +273,7 @@ spec:
           keystone_federations_create: keystone-federations-create:latest
           keystone_fernet_rotate: keystone-fernet-rotate:latest
           keystone_fernet_setup: keystone-fernet-setup:latest
+          keystone_init_secrets: keystone-init-secrets:latest
           ks_user: ks-user:latest
           rabbit_init: rabbit-init:latest
           test: test:latest

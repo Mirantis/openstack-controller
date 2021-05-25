@@ -96,6 +96,7 @@ images:
   keystone_credential_cleanup: keystone-credential-cleanup:latest
   keystone_credential_rotate: keystone-credential-rotate:latest
   keystone_credential_setup: keystone-credential-setup:latest
+  keystone_init_secrets: keystone-init-secrets:latest
   keystone_db_sync: keystone-db-sync:latest
   keystone_db_sync_contract: keystone-db-sync-contract:latest
   keystone_db_sync_expand: keystone-db-sync-expand:latest

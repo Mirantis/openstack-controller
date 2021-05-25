@@ -36,6 +36,7 @@ spec:
     "keystone_db_sync_migrate",
     "keystone_db_sync_contract",
     "keystone_client",
+    "keystone_init_secrets",
     "rabbit_init",
     "test",] %}
         {%- if image in images %}
