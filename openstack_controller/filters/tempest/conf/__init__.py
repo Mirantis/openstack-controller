@@ -16,6 +16,9 @@ from openstack_controller.filters.tempest.conf import heat_plugin
 from openstack_controller.filters.tempest.conf import identity
 from openstack_controller.filters.tempest.conf import identity_feature_enabled
 from openstack_controller.filters.tempest.conf import image
+from openstack_controller.filters.tempest.conf import (
+    image_signature_verification,
+)
 from openstack_controller.filters.tempest.conf import image_feature_enabled
 from openstack_controller.filters.tempest.conf import load_balancer
 from openstack_controller.filters.tempest.conf import (
@@ -58,6 +61,7 @@ SECTIONS = [
     identity_feature_enabled.IdentityFeatureEnabled,
     image.Image,
     image_feature_enabled.ImageFeatureEnabled,
+    image_signature_verification.ImageSignatureVerification,
     load_balancer.LoadBalancer,
     loadbalancer_feature_enabled.LoadBalancerFeatureEnabled,
     network.Network,
