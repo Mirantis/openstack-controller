@@ -58,6 +58,11 @@ spec:
               nginx.ingress.kubernetes.io/session-cookie-max-age: "1800"
               nginx.ingress.kubernetes.io/session-cookie-name: os-keycloak-sso
 {%- endif %}
+      objects:
+        secret_credentials_keys:
+          secret: {{ credentials_secret_name }}
+        secret_fernet_keys:
+          secret: {{ fernet_secret_name }}
       conf:
 {%- if keystone_keycloak.get('enabled', False) %}
         ks_federations:

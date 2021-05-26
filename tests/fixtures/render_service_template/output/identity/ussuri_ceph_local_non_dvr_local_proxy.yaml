@@ -3,6 +3,11 @@ spec:
   - chart: osh/keystone
     name: openstack-keystone
     values:
+      objects:
+        secret_credentials_keys:
+          secret: 'keystone-credential-data'
+        secret_fernet_keys:
+          secret: 'keystone-fernet-data'
       conf:
         keystone:
           cache:

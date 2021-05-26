@@ -670,20 +670,10 @@ class Keystone(OpenStackService):
         },
     }
 
-    def template_args(self):
-        t_args = super().template_args()
-        keycloak_enabled = (
-            self.mspec.get("features", {})
-            .get("keystone", {})
-            .get("keycloak", {})
-            .get("enabled", False)
-        )
-
-        if not keycloak_enabled:
-            return t_args
-
+    def _get_keycloak_args(self):
+        args = {}
         keycloak_salt = secrets.KeycloakSecret(self.namespace)
-        t_args["oidc_crypto_passphrase"] = keycloak_salt.ensure().passphrase
+        args["oidc_crypto_passphrase"] = keycloak_salt.ensure().passphrase
 
         # Create openstack IAM shared secret
         oidc_settings = (
@@ -718,13 +708,16 @@ class Keystone(OpenStackService):
                 self.namespace,
                 oidc_ca_secret,
             )
-            t_args["oidc_ca"] = base64.b64decode(
+            args["oidc_ca"] = base64.b64decode(
                 secrets.get_secret_data(
                     self.namespace,
                     oidc_ca_secret,
                 )["ca-cert.pem"]
             ).decode()
+        return args
 
+    def _get_object_storage_args(self):
+        args = {}
         # Get internal RGW secret
         kube.wait_for_secret(
             settings.OSCTL_CEPH_SHARED_NAMESPACE,
@@ -738,7 +731,71 @@ class Keystone(OpenStackService):
             rgw_internal_cacert = base64.b64decode(
                 rgw_internal_cacert
             ).decode()
-            t_args["rgw_internal_cacert"] = rgw_internal_cacert
+            args["rgw_internal_cacert"] = rgw_internal_cacert
+        return args
+
+    def _get_keystone_args(self):
+        args = {}
+        # Ensure the secrets with credentials/fernet keys exists
+        fernet_secret_name = "keystone-fernet-data"
+        credentials_secret_name = "keystone-credential-data"
+        args["fernet_secret_name"] = fernet_secret_name
+        args["credentials_secret_name"] = credentials_secret_name
+
+        for secret_names in [
+            ("keystone-fernet-keys", fernet_secret_name),
+            ("keystone-credential-keys", credentials_secret_name),
+        ]:
+            LOG.info(f"Handling secret {secret_names}")
+            old_secret, new_secret = secret_names
+
+            try:
+                kube.find(
+                    kube.Secret,
+                    name=new_secret,
+                    namespace=self.namespace,
+                    silent=False,
+                )
+            except pykube.exceptions.ObjectDoesNotExist:
+                LOG.debug(f"The {new_secret} does not exists")
+                data = {}
+                try:
+                    old_secret_obj = kube.find(
+                        kube.Secret,
+                        name=old_secret,
+                        namespace=self.namespace,
+                        silent=False,
+                    )
+                    data = old_secret_obj.obj["data"]
+                except pykube.exceptions.ObjectDoesNotExist:
+                    LOG.debug(f"The {old_secret} does not exists")
+
+                kube.save_secret_data(
+                    namespace=self.namespace, name=new_secret, data=data
+                )
+                LOG.debug(
+                    f"Secret {new_secret} has been created successfully."
+                )
+        return args
+
+    def template_args(self):
+        t_args = super().template_args()
+        t_args.update(self._get_keystone_args())
+
+        keycloak_enabled = (
+            self.mspec.get("features", {})
+            .get("keystone", {})
+            .get("keycloak", {})
+            .get("enabled", False)
+        )
+
+        if keycloak_enabled:
+            t_args.update(self._get_keycloak_args())
+
+        if "object-storage" in self.mspec.get("features", {}).get(
+            "services", []
+        ):
+            t_args.update(self._get_object_storage_args())
 
         return t_args
 

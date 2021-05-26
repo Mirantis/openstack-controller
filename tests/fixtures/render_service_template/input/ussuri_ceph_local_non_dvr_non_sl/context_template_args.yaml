@@ -167,6 +167,8 @@ identity:
     password: lIaVpAA3RiymRzerAWbNYFj5XfSitjcL
     username: testQALi
   oidc_crypto_passphrase: zQGr6LP7k9wgTBjGF6uJr8Bw0bwKbN1Z
+  credentials_secret_name: keystone-credential-data
+  fernet_secret_name: keystone-fernet-data
 image:
   ceph:
     glance:

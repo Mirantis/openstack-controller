@@ -166,6 +166,8 @@ identity:
   - account: test
     password: lIaVpAA3RiymRzerAWbNYFj5XfSitjcL
     username: testQALi
+  credentials_secret_name: keystone-credential-data
+  fernet_secret_name: keystone-fernet-data
 image:
   ceph:
     glance:
