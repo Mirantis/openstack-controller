@@ -13,11 +13,14 @@
 #    under the License.
 import os
 import time
+import logging.config
 
 import json
 import kopf
 from kopf.engines.posting import event_queue_var
 from prometheus_client import start_http_server, Gauge, Counter, Summary
+
+from openstack_controller.utils import merger
 
 
 HEARTBEAT = time.time()
@@ -245,6 +248,40 @@ OSCTL_PROXY_SECRET_NAMESPACE = os.environ.get(
 
 # The dict defining IAM data {"client": "os", "enabled": True, "oidcCASecret": "oidc-cert", url: "https://1.2.3.4"}
 OSDPL_IAM_DATA = json_from_env("OSDPL_IAM_DATA", {"enabled": False})
+
+LOGGING_CONFIG = {
+    "version": 1,
+    "disable_existing_loggers": True,
+    "formatters": {
+        "standard": {
+            "format": "%(asctime)s [%(levelname)s] %(name)s: %(message)s"
+        },
+    },
+    "handlers": {
+        "default": {
+            "level": "INFO",
+            "formatter": "standard",
+            "class": "logging.StreamHandler",
+            "stream": "ext://sys.stdout",  # Default is stderr
+        },
+    },
+    "loggers": {
+        "kopf.activities.prob": {
+            "handlers": ["default"],
+            "level": "WARNING",
+            "propagate": False,
+        },
+    },
+    "root": {
+        "handlers": ["default"],
+        "level": "INFO",
+    },
+}
+
+OSCTL_LOGGING_CONF = json_from_env("OSCTL_LOGGING_CONF", {})
+merger.merge(LOGGING_CONFIG, OSCTL_LOGGING_CONF)
+
+logging.config.dictConfig(LOGGING_CONFIG)
 
 
 @kopf.on.startup()

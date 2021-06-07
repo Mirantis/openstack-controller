@@ -14,11 +14,18 @@
 
 import asyncio
 import base64
+import copy
 import functools
 import logging
 import os
 import threading
 from typing import Dict, List
+
+import deepmerge
+import deepmerge.exception
+from deepmerge.strategy import dict as merge_dict
+from deepmerge.strategy import list as merge_list
+import deepmerge.strategy.type_conflict
 
 from openstack_controller import settings
 from kopf.engines.posting import event_queue_var
@@ -102,3 +109,67 @@ async def async_retry(function, *args, **kwargs):
         if result:
             return result
         await asyncio.sleep(10)
+
+
+class TypeConflictFail(
+    deepmerge.strategy.type_conflict.TypeConflictStrategies
+):
+    @staticmethod
+    def strategy_fail(config, path, base, nxt):
+        if (type(base), type(nxt)) == (float, int):
+            return nxt
+        raise deepmerge.exception.InvalidMerge(
+            f"Trying to merge different types of objects, {type(base)} and "
+            f"{type(nxt)} at path {':'.join(path)}",
+            base,
+            nxt,
+        )
+
+
+class CustomListStrategies(merge_list.ListStrategies):
+    """
+    Contains the strategies provided for lists.
+    """
+
+    @staticmethod
+    def strategy_merge(config, path, base, nxt):
+        """merge base with nxt, adds new elements from nxt."""
+        merged = copy.deepcopy(base)
+        for el in nxt:
+            if el not in merged:
+                merged.append(el)
+        return merged
+
+
+class CustomMerger(deepmerge.Merger):
+    PROVIDED_TYPE_STRATEGIES = {
+        list: CustomListStrategies,
+        dict: merge_dict.DictStrategies,
+    }
+
+    def __init__(
+        self, type_strategies, fallback_strategies, type_conflict_strategies
+    ):
+        super(CustomMerger, self).__init__(
+            type_strategies, fallback_strategies, []
+        )
+        self._type_conflict_strategy_with_fail = TypeConflictFail(
+            type_conflict_strategies
+        )
+
+    def type_conflict_strategy(self, *args):
+        return self._type_conflict_strategy_with_fail(self, *args)
+
+
+merger = CustomMerger(
+    # pass in a list of tuple, with the strategies you are looking to apply
+    # to each type.
+    # NOTE(pas-ha) We are handling results of yaml.safe_load and k8s api
+    # exclusively, thus only standard json-compatible collection data types
+    # will be present, so not botherting with collections.abc for now.
+    [(list, ["merge"]), (dict, ["merge"])],
+    # next, choose the fallback strategies, applied to all other types:
+    ["override"],
+    # finally, choose the strategies in the case where the types conflict:
+    ["fail"],
+)

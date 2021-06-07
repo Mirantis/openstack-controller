@@ -6,8 +6,6 @@ import hashlib
 
 import deepmerge
 import deepmerge.exception
-from deepmerge.strategy import dict as merge_dict
-from deepmerge.strategy import list as merge_list
 import deepmerge.strategy.type_conflict
 import jinja2
 import kopf
@@ -18,6 +16,7 @@ from openstack_controller import settings
 from openstack_controller.filters.tempest import generate_tempest_config
 from openstack_controller.filters.common_filters import update_url_hostname
 from openstack_controller import utils
+from openstack_controller.utils import merger
 
 LOG = utils.get_logger(__name__)
 
@@ -33,70 +32,6 @@ ENV.filters["update_url_hostname"] = update_url_hostname
 ENV.filters["b64encode"] = base64.b64encode
 ENV.filters["decode"] = lambda x: x.decode()
 ENV.filters["encode"] = lambda x: x.encode()
-
-
-class TypeConflictFail(
-    deepmerge.strategy.type_conflict.TypeConflictStrategies
-):
-    @staticmethod
-    def strategy_fail(config, path, base, nxt):
-        if (type(base), type(nxt)) == (float, int):
-            return nxt
-        raise deepmerge.exception.InvalidMerge(
-            f"Trying to merge different types of objects, {type(base)} and "
-            f"{type(nxt)} at path {':'.join(path)}",
-            base,
-            nxt,
-        )
-
-
-class CustomListStrategies(merge_list.ListStrategies):
-    """
-    Contains the strategies provided for lists.
-    """
-
-    @staticmethod
-    def strategy_merge(config, path, base, nxt):
-        """merge base with nxt, adds new elements from nxt."""
-        merged = copy.deepcopy(base)
-        for el in nxt:
-            if el not in merged:
-                merged.append(el)
-        return merged
-
-
-class CustomMerger(deepmerge.Merger):
-    PROVIDED_TYPE_STRATEGIES = {
-        list: CustomListStrategies,
-        dict: merge_dict.DictStrategies,
-    }
-
-    def __init__(
-        self, type_strategies, fallback_strategies, type_conflict_strategies
-    ):
-        super(CustomMerger, self).__init__(
-            type_strategies, fallback_strategies, []
-        )
-        self._type_conflict_strategy_with_fail = TypeConflictFail(
-            type_conflict_strategies
-        )
-
-    def type_conflict_strategy(self, *args):
-        return self._type_conflict_strategy_with_fail(self, *args)
-
-
-merger = CustomMerger(
-    # pass in a list of tuple, with the strategies you are looking to apply
-    # to each type.
-    # NOTE(pas-ha) We are handling results of yaml.safe_load and k8s api
-    # exclusively, thus only standard json-compatible collection data types
-    # will be present, so not botherting with collections.abc for now.
-    [(list, ["merge"]), (dict, ["merge"])],
-    # next, choose the fallback strategies, applied to all other types:
-    ["override"],
-    # finally, choose the strategies in the case where the types conflict:
-    ["fail"],
-)
 
 
 def kopf_exception(f):
