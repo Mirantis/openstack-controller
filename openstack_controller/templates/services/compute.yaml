@@ -468,6 +468,7 @@ spec:
         user_secret_name: {{ ceph.nova.secrets }}
 {%- endif %}
       conf:
+        policy: {{ service_policy }}
         ceph:
 {%- if ceph_enabled %}
           enabled: true
@@ -564,46 +565,6 @@ spec:
           {{ ssh_credentials.private|indent(10)|trim }}
         ssh_public: |
           {{ ssh_credentials.public }}
-{%- if spec.openstack_version not in ['queens', 'rocky', 'stein', 'train'] %}
-        policy:
-          os_compute_api:limits: "@"
-          os_compute_api:limits:other_project: rule:system_reader_api
-          os_compute_api:os-agents:create: rule:system_admin_api
-          os_compute_api:os-agents:delete: rule:system_admin_api
-          os_compute_api:os-agents:list: rule:system_reader_api
-          os_compute_api:os-agents:update: rule:system_admin_api
-          os_compute_api:os-attach-interfaces:create: rule:system_admin_or_owner
-          os_compute_api:os-attach-interfaces:delete: rule:system_admin_or_owner
-          os_compute_api:os-attach-interfaces:list: rule:system_or_project_reader
-          os_compute_api:os-attach-interfaces:show: rule:system_or_project_reader
-          os_compute_api:os-availability-zone:list: "@"
-          os_compute_api:os-deferred-delete:force: rule:system_admin_or_owner
-          os_compute_api:os-deferred-delete:restore: rule:system_admin_or_owner
-          os_compute_api:os-hypervisors:list: rule:system_reader_api
-          os_compute_api:os-hypervisors:list-detail: rule:system_reader_api
-          os_compute_api:os-hypervisors:search: rule:system_reader_api
-          os_compute_api:os-hypervisors:servers: rule:system_reader_api
-          os_compute_api:os-hypervisors:show: rule:system_reader_api
-          os_compute_api:os-hypervisors:statistics: rule:system_reader_api
-          os_compute_api:os-hypervisors:uptime: rule:system_reader_api
-          os_compute_api:os-instance-actions:list: rule:system_or_project_reader
-          os_compute_api:os-instance-actions:show: rule:system_or_project_reader
-          os_compute_api:os-instance-usage-audit-log:list: rule:system_reader_api
-          os_compute_api:os-instance-usage-audit-log:show: rule:system_reader_api
-          os_compute_api:os-security-groups:add: rule:system_admin_or_owner
-          os_compute_api:os-security-groups:list: rule:system_or_project_reader
-          os_compute_api:os-security-groups:remove: rule:system_admin_or_owner
-          os_compute_api:os-server-password:clear: rule:system_admin_or_owner
-          os_compute_api:os-server-password:show: rule:system_or_project_reader
-          os_compute_api:os-services:delete: rule:system_admin_api
-          os_compute_api:os-services:list: rule:system_reader_api
-          os_compute_api:os-services:update: rule:system_admin_api
-          os_compute_api:os-unrescue: rule:system_admin_or_owner
-{%- endif %}
-{%- if spec.openstack_version not in ['queens', 'rocky', 'stein', 'train', 'ussuri'] %}
-          os_compute_api:extensions: '@'
-          os_compute_api:os-floating-ip-pools: '@'
-{%- endif %}
       network:
         core_plugin: {{ neutron_backend }}
         {%- if neutron_backend == 'tungstenfabric' %}

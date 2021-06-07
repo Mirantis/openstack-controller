@@ -21,6 +21,7 @@ spec:
           aodh_alarms_cleaner: aodh-alarms-cleaner:latest
           image_repo_sync: image-repo-sync:latest
       conf:
+        policy: {}
         aodh:
           api:
             gnocchi_external_project_owner: service

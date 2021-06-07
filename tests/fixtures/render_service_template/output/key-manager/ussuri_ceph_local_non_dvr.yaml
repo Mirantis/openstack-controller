@@ -4,6 +4,7 @@ spec:
     name: openstack-barbican
     values:
       conf:
+        policy: {}
         barbican:
           DEFAULT:
             sql_idle_timeout: 3600
@@ -34,11 +35,6 @@ spec:
           logger_barbican:
             level: INFO
             propagate: 0
-        policy:
-          container_creator_user: user_id:%(target.container.creator_id)s
-          container_project_match: project_id:%(target.container.project_id)s
-          secret_creator_user: user_id:%(target.secret.creator_id)s
-          secret_project_match: project_id:%(target.secret.project_id)s
       dependencies:
         static:
           db_init:

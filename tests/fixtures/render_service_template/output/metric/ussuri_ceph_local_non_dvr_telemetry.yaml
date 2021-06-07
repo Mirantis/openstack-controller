@@ -20,6 +20,7 @@ spec:
           gnocchi_metricd: gnocchi-metricd:latest
           gnocchi_resources_cleaner: gnocchi-resources-cleaner:latest
       conf:
+        policy: {}
         apache: |
           {{- $portInt := tuple "metric" "internal" "api" $ | include "helm-toolkit.endpoints.endpoint_port_lookup" }}
           Listen 0.0.0.0:{{ $portInt }}

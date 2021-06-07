@@ -152,6 +152,41 @@ spec:
                     - neutron
                     - nova
                   properties:
+                    policies:
+                      type: object
+                      properties:
+                        aodh: &custom_policies
+                          type: object
+                          x-kubernetes-preserve-unknown-fields: true
+                          description: Values of policies to override.
+                        barbican:
+                          <<: *custom_policies
+                        cinder:
+                          <<: *custom_policies
+                        designate:
+                          <<: *custom_policies
+                        glance:
+                          <<: *custom_policies
+                        gnocchi:
+                          <<: *custom_policies
+                        heat:
+                          <<: *custom_policies
+                        ironic:
+                          <<: *custom_policies
+                        keystone:
+                          <<: *custom_policies
+                        masakari:
+                          <<: *custom_policies
+                        neutron:
+                          <<: *custom_policies
+                        nova:
+                          <<: *custom_policies
+                        octavia:
+                          <<: *custom_policies
+                        panko:
+                          <<: *custom_policies
+                        placement:
+                          <<: *custom_policies
                     database:
                       type: object
                       properties:

@@ -90,6 +90,12 @@ spec:
 {{ spec.features.ssl.public_endpoints.api_key | indent( width=18, first=True) }}
       conf:
         horizon:
+{%- if spec.features.get('policies', {}) %}
+          policy:
+  {%- for component, component_policy in spec.features.get('policies', {}).items() %}
+            {{ component }}: {{ component_policy }}
+  {%- endfor %}
+{%- endif %}
           {%- if keystone_keycloak_enabled %}
           openstack_clouds_yaml_custom_template:
             template: |

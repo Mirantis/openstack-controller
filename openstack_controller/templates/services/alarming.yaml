@@ -49,6 +49,7 @@ spec:
           logger_aodh:
             level: {{ spec.get('features', {}).get('logging', {}).get('aodh', {}).get('level', 'INFO') }}
             propagate: 0
+        policy: {{ service_policy }}
       dependencies:
         static:
           db_init:

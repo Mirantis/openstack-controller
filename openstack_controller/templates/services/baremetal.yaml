@@ -161,6 +161,7 @@ spec:
           device: {{ spec.get('features', {}).get('ironic', {}).get('provisioning_interface', 'ironic-pxe') }}
           convert_cleaning_network_name_to_uuid: false
       conf:
+        policy: {{ service_policy }}
         ironic:
           DEFAULT:
             enabled_hardware_types: ipmi,fake-hardware

@@ -138,6 +138,46 @@ services:
     nova:
       values:
         conf:
+          {%- if openstack_version not in ['queens', 'rocky', 'stein', 'train'] %}
+          policy:
+            os_compute_api:limits: "@"
+            os_compute_api:limits:other_project: rule:system_reader_api
+            os_compute_api:os-agents:create: rule:system_admin_api
+            os_compute_api:os-agents:delete: rule:system_admin_api
+            os_compute_api:os-agents:list: rule:system_reader_api
+            os_compute_api:os-agents:update: rule:system_admin_api
+            os_compute_api:os-attach-interfaces:create: rule:system_admin_or_owner
+            os_compute_api:os-attach-interfaces:delete: rule:system_admin_or_owner
+            os_compute_api:os-attach-interfaces:list: rule:system_or_project_reader
+            os_compute_api:os-attach-interfaces:show: rule:system_or_project_reader
+            os_compute_api:os-availability-zone:list: "@"
+            os_compute_api:os-deferred-delete:force: rule:system_admin_or_owner
+            os_compute_api:os-deferred-delete:restore: rule:system_admin_or_owner
+            os_compute_api:os-hypervisors:list: rule:system_reader_api
+            os_compute_api:os-hypervisors:list-detail: rule:system_reader_api
+            os_compute_api:os-hypervisors:search: rule:system_reader_api
+            os_compute_api:os-hypervisors:servers: rule:system_reader_api
+            os_compute_api:os-hypervisors:show: rule:system_reader_api
+            os_compute_api:os-hypervisors:statistics: rule:system_reader_api
+            os_compute_api:os-hypervisors:uptime: rule:system_reader_api
+            os_compute_api:os-instance-actions:list: rule:system_or_project_reader
+            os_compute_api:os-instance-actions:show: rule:system_or_project_reader
+            os_compute_api:os-instance-usage-audit-log:list: rule:system_reader_api
+            os_compute_api:os-instance-usage-audit-log:show: rule:system_reader_api
+            os_compute_api:os-security-groups:add: rule:system_admin_or_owner
+            os_compute_api:os-security-groups:list: rule:system_or_project_reader
+            os_compute_api:os-security-groups:remove: rule:system_admin_or_owner
+            os_compute_api:os-server-password:clear: rule:system_admin_or_owner
+            os_compute_api:os-server-password:show: rule:system_or_project_reader
+            os_compute_api:os-services:delete: rule:system_admin_api
+            os_compute_api:os-services:list: rule:system_reader_api
+            os_compute_api:os-services:update: rule:system_admin_api
+            os_compute_api:os-unrescue: rule:system_admin_or_owner
+            {%- if openstack_version not in ['ussuri'] %}
+            os_compute_api:extensions: '@'
+            os_compute_api:os-floating-ip-pools: '@'
+            {%- endif %}
+          {%- endif %}
           nova:
             filter_scheduler:
               enabled_filters:
@@ -373,3 +413,21 @@ services:
 
         manifests:
           job_bootstrap: true
+  key-manager:
+    barbican:
+      values:
+        conf:
+          policy:
+          {%- if openstack_version not in ['queens', 'rocky'] %}
+            # TODO(vsaienko): drop policy settings in upstream values.yaml to ensure in-code policy
+            # defaults are used.
+            secret_project_match: project_id:%(target.secret.project_id)s
+            secret_creator_user: user_id:%(target.secret.creator_id)s
+            container_project_match: project_id:%(target.container.project_id)s
+            container_creator_user: user_id:%(target.container.creator_id)s
+          {%- else %}
+            secret_project_match: project:%(target.secret.project_id)s
+            secret_creator_user: user:%(target.secret.creator_id)s
+            container_project_match: project:%(target.container.project_id)s
+            container_creator_user: user:%(target.container.creator_id)s
+          {%- endif %}

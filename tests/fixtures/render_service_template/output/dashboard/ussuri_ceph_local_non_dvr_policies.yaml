@@ -1,0 +1,127 @@
+spec:
+  releases:
+  - chart: osh/horizon
+    name: openstack-horizon
+    values:
+      network:
+        proxy:
+          enabled: true
+          env_vars:
+            HTTP_PROXY: http://127.0.0.1:3128
+            NO_PROXY: .svc.cluster.local
+      conf:
+        horizon:
+          policy:
+            aodh:
+              aodh_custom: value
+            barbican:
+              barbican_custom: value
+            cinder:
+              cinder_custom: value
+            designate:
+              designate_custom: value
+            glance:
+              glance_custom: value
+            gnocchi:
+              gnocchi_custom: value
+            heat:
+              heat_custom: value
+            keystone:
+              keystone_custom: value
+            masakari:
+              masakari_custom: value
+            neutron:
+              neutron_custom: value
+            nova:
+              nova_custom: value
+            octavia:
+              octavia_custom: value
+            panko:
+              panko_custom: value
+            placement:
+              placement_custom: value
+          local_settings:
+            config:
+              horizon_images_upload_mode: direct
+              horizon_secret_key: kQt7XsbPVNDABuHyngdJuppnzP5i82Mz
+              raw:
+                DEFAULT_THEME: default
+              secure_proxy_ssl_header: true
+              tungstenfabric:
+                enabled: false
+            custom_themes:
+              mirantis:
+                description: Mirantis
+                sha256summ: horizon-mirantis-theme-sha256summ
+                url: https://horizon-mirantis-theme-url/latest
+      dependencies:
+        static:
+          db_init:
+            jobs:
+            - openstack-mariadb-cluster-wait
+      endpoints:
+        cluster_domain_suffix: cluster.local
+        dashboard:
+          host_fqdn_override:
+            public:
+              host: horizon.it.just.works
+              tls:
+                ca: |
+                  TEST CA
+                  RGW CRT
+                crt: |
+                  TEST CRT
+                key: |
+                  TEST KEY
+          hosts:
+            default: horizon-int
+            public:
+              host: horizon
+              tls:
+                ca: |
+                  TEST CA
+                  RGW CRT
+                crt: |
+                  TEST CRT
+                key: |
+                  TEST KEY
+        identity:
+          auth:
+            admin:
+              default_domain_id: default
+              password: ZUqTyP2XwsgEGKZ7qNhhecYyq9NLkGE6
+              project_domain_name: default
+              project_name: admin
+              region_name: RegionOne
+              user_domain_name: default
+              username: admin
+            horizon:
+              password: MNysGxHJy8xYI8LmZjS3QrJC6N10XsFZ
+              username: horizonhGcF8rA
+            test:
+              password: 5Q52SdTD0ern0aJ6AMcraLqh0rbUbGJr
+              username: test5JeB
+        oslo_cache:
+          statefulset:
+            name: openstack-memcached-memcached
+            replicas: 3
+        oslo_db:
+          auth:
+            admin:
+              password: QACDSM6FBTH2LuXjTuRQ6DXhD8bSgPbn
+              username: root
+            horizon:
+              password: rBJDRdVaBH92I8zKHuBeKvtYSq8661ZE
+              username: horizonf2AZh0J
+      images:
+        tags:
+          db_drop: db-drop:latest
+          db_init: db-init:latest
+          dep_check: dep-check:latest
+          horizon: horizon:latest
+          horizon_db_sync: horizon-db-sync:latest
+          image_repo_sync: image-repo-sync:latest
+          test: test:latest
+      manifests:
+        network_policy: false
+        secret_ca_bundle: true

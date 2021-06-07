@@ -119,6 +119,7 @@ spec:
         job_rabbit_init: false
         secret_ca_bundle: true
       conf:
+        policy: {{ service_policy }}
         heat:
           keystone_authtoken:
             memcache_security_strategy: ENCRYPT

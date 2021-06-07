@@ -266,6 +266,7 @@ spec:
         proxy:
 {% include 'base/_proxy_vars.yaml' %}
       conf:
+        policy: {{ service_policy }}
         octavia:
           api_settings:
 # NOTE(vsaienko): amphorav2 is not production ready yet. For more info please see PRODX-13273

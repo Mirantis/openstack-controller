@@ -87,6 +87,7 @@ spec:
         {%- endif %}
 {%- endfor %}
       conf:
+        policy: {{ service_policy }}
         masakari:
           DEFAULT:
             os_privileged_user_name: {{ admin_creds.identity.username }}
