@@ -1,0 +1,160 @@
+"context_is_admin": "role:admin"
+
+"segregation": "rule:context_is_admin"
+
+"admin_or_owner": "rule:context_is_admin or project_id:%(project_id)s"
+
+"default": "rule:context_is_admin or project_id:%(project_id)s"
+
+# Get an alarm.
+# GET  /v2/alarms/{alarm_id}
+# Intended scope(s): system, project
+"telemetry:get_alarm": "(role:reader and system_scope:all) or (role:reader and project_id:%(project_id)s)"
+
+# DEPRECATED
+# "telemetry:get_alarm":"rule:context_is_admin or
+# project_id:%(project_id)s" has been deprecated since W in favor of
+# "telemetry:get_alarm":"(role:reader and system_scope:all) or
+# (role:reader and project_id:%(project_id)s)".
+# The alarm and quota APIs now support system-scope and default roles.
+
+# Get all alarms, based on the query provided.
+# GET  /v2/alarms
+# Intended scope(s): system, project
+"telemetry:get_alarms": "(role:reader and system_scope:all) or (role:reader and project_id:%(project_id)s)"
+
+# DEPRECATED
+# "telemetry:get_alarms":"rule:context_is_admin or
+# project_id:%(project_id)s" has been deprecated since W in favor of
+# "telemetry:get_alarms":"(role:reader and system_scope:all) or
+# (role:reader and project_id:%(project_id)s)".
+# The alarm and quota APIs now support system-scope and default roles.
+
+# Get alarms of all projects.
+# GET  /v2/alarms
+# Intended scope(s): system, project
+"telemetry:get_alarms:all_projects": "role:reader and system_scope:all"
+
+# DEPRECATED
+# "telemetry:get_alarms:all_projects":"rule:context_is_admin" has been
+# deprecated since W in favor of
+# "telemetry:get_alarms:all_projects":"role:reader and
+# system_scope:all".
+# The alarm and quota APIs now support system-scope and default roles.
+
+# Get all alarms, based on the query provided.
+# POST  /v2/query/alarms
+# Intended scope(s): system, project
+"telemetry:query_alarm": "(role:reader and system_scope:all) or (role:reader and project_id:%(project_id)s)"
+
+# DEPRECATED
+# "telemetry:query_alarm":"rule:context_is_admin or
+# project_id:%(project_id)s" has been deprecated since W in favor of
+# "telemetry:query_alarm":"(role:reader and system_scope:all) or
+# (role:reader and project_id:%(project_id)s)".
+# The alarm and quota APIs now support system-scope and default roles.
+
+# Create a new alarm.
+# POST  /v2/alarms
+# Intended scope(s): system, project
+"telemetry:create_alarm": "(role:admin and system_scope:all) or (role:member and project_id:%(project_id)s)"
+
+# DEPRECATED
+# "telemetry:create_alarm":"" has been deprecated since W in favor of
+# "telemetry:create_alarm":"(role:admin and system_scope:all) or
+# (role:member and project_id:%(project_id)s)".
+# The alarm and quota APIs now support system-scope and default roles.
+
+# Modify this alarm.
+# PUT  /v2/alarms/{alarm_id}
+# Intended scope(s): system, project
+"telemetry:change_alarm": "(role:admin and system_scope:all) or (role:member and project_id:%(project_id)s)"
+
+# DEPRECATED
+# "telemetry:change_alarm":"rule:context_is_admin or
+# project_id:%(project_id)s" has been deprecated since W in favor of
+# "telemetry:change_alarm":"(role:admin and system_scope:all) or
+# (role:member and project_id:%(project_id)s)".
+# The alarm and quota APIs now support system-scope and default roles.
+
+# Delete this alarm.
+# DELETE  /v2/alarms/{alarm_id}
+# Intended scope(s): system, project
+"telemetry:delete_alarm": "(role:admin and system_scope:all) or (role:member and project_id:%(project_id)s)"
+
+# DEPRECATED
+# "telemetry:delete_alarm":"rule:context_is_admin or
+# project_id:%(project_id)s" has been deprecated since W in favor of
+# "telemetry:delete_alarm":"(role:admin and system_scope:all) or
+# (role:member and project_id:%(project_id)s)".
+# The alarm and quota APIs now support system-scope and default roles.
+
+# Get the state of this alarm.
+# GET  /v2/alarms/{alarm_id}/state
+# Intended scope(s): system, project
+"telemetry:get_alarm_state": "(role:reader and system_scope:all) or (role:reader and project_id:%(project_id)s)"
+
+# DEPRECATED
+# "telemetry:get_alarm_state":"rule:context_is_admin or
+# project_id:%(project_id)s" has been deprecated since W in favor of
+# "telemetry:get_alarm_state":"(role:reader and system_scope:all) or
+# (role:reader and project_id:%(project_id)s)".
+# The alarm and quota APIs now support system-scope and default roles.
+
+# Set the state of this alarm.
+# PUT  /v2/alarms/{alarm_id}/state
+# Intended scope(s): system, project
+"telemetry:change_alarm_state": "(role:admin and system_scope:all) or (role:member and project_id:%(project_id)s)"
+
+# DEPRECATED
+# "telemetry:change_alarm_state":"rule:context_is_admin or
+# project_id:%(project_id)s" has been deprecated since W in favor of
+# "telemetry:change_alarm_state":"(role:admin and system_scope:all) or
+# (role:member and project_id:%(project_id)s)".
+# The alarm and quota APIs now support system-scope and default roles.
+
+# Assembles the alarm history requested.
+# GET  /v2/alarms/{alarm_id}/history
+# Intended scope(s): system, project
+"telemetry:alarm_history": "(role:reader and system_scope:all) or (role:reader and project_id:%(project_id)s)"
+
+# DEPRECATED
+# "telemetry:alarm_history":"rule:context_is_admin or
+# project_id:%(project_id)s" has been deprecated since W in favor of
+# "telemetry:alarm_history":"(role:reader and system_scope:all) or
+# (role:reader and project_id:%(project_id)s)".
+# The alarm and quota APIs now support system-scope and default roles.
+
+# Define query for retrieving AlarmChange data.
+# POST  /v2/query/alarms/history
+# Intended scope(s): system, project
+"telemetry:query_alarm_history": "(role:reader and system_scope:all) or (role:reader and project_id:%(project_id)s)"
+
+# DEPRECATED
+# "telemetry:query_alarm_history":"rule:context_is_admin or
+# project_id:%(project_id)s" has been deprecated since W in favor of
+# "telemetry:query_alarm_history":"(role:reader and system_scope:all)
+# or (role:reader and project_id:%(project_id)s)".
+# The alarm and quota APIs now support system-scope and default roles.
+
+# Update resources quotas for project.
+# POST  /v2/quotas
+# Intended scope(s): system
+"telemetry:update_quotas": "role:admin and system_scope:all"
+
+# DEPRECATED
+# "telemetry:update_quotas":"rule:context_is_admin" has been
+# deprecated since W in favor of "telemetry:update_quotas":"role:admin
+# and system_scope:all".
+# The alarm and quota APIs now support system-scope and default roles.
+
+# Delete resources quotas for project.
+# DELETE  /v2/quotas/{project_id}
+# Intended scope(s): system
+"telemetry:delete_quotas": "role:admin and system_scope:all"
+
+# DEPRECATED
+# "telemetry:delete_quotas":"rule:context_is_admin" has been
+# deprecated since W in favor of "telemetry:delete_quotas":"role:admin
+# and system_scope:all".
+# The alarm and quota APIs now support system-scope and default roles.

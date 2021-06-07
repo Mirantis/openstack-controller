@@ -1,0 +1,1333 @@
+# DEPRECATED
+# "admin_api" has been deprecated since W.
+# Pre-RBAC default rule. This rule does not support scoping system
+# scoping and as such is deprecated.
+# Legacy rule for cloud admin access
+"admin_api": "role:admin or role:administrator"
+
+# Internal flag for public API routes
+"public_api": "is_public_api:True"
+
+# Show or mask secrets within node driver information in API responses
+"show_password": "!"
+
+# Show or mask secrets within instance information in API responses
+"show_instance_secrets": "!"
+
+# DEPRECATED
+# "is_member" has been deprecated since W.
+# Pre-RBAC default rule. This rule does not support scoping system
+# scoping and as such is deprecated.
+# May be used to restrict access to specific projects
+"is_member": "(project_domain_id:default or project_domain_id:None) and (project_name:demo or project_name:baremetal)"
+
+# DEPRECATED
+# "is_observer" has been deprecated since W.
+# Pre-RBAC default rule. This rule does not support scoping system
+# scoping and as such is deprecated.
+# Read-only API access
+"is_observer": "rule:is_member and (role:observer or role:baremetal_observer)"
+
+# DEPRECATED
+# "is_admin" has been deprecated since W.
+# Pre-RBAC default rule. This rule does not support scoping system
+# scoping and as such is deprecated.
+# Full read/write API access
+"is_admin": "rule:admin_api or (rule:is_member and role:baremetal_admin)"
+
+# DEPRECATED
+# "is_node_owner" has been deprecated since W.
+# Pre-RBAC default rule. This rule does not support scoping system
+# scoping and as such is deprecated.
+# Owner of node
+"is_node_owner": "project_id:%(node.owner)s"
+
+# DEPRECATED
+# "is_node_lessee" has been deprecated since W.
+# Pre-RBAC default rule. This rule does not support scoping system
+# scoping and as such is deprecated.
+# Lessee of node
+"is_node_lessee": "project_id:%(node.lessee)s"
+
+# DEPRECATED
+# "is_allocation_owner" has been deprecated since W.
+# Pre-RBAC default rule. This rule does not support scoping system
+# scoping and as such is deprecated.
+# Owner of allocation
+"is_allocation_owner": "project_id:%(allocation.owner)s"
+
+# Create Node records
+# POST  /nodes
+# Intended scope(s): system
+"baremetal:node:create": "role:admin and system_scope:all"
+
+# DEPRECATED
+# "baremetal:node:create":"rule:is_admin" has been deprecated since W
+# in favor of "baremetal:node:create":"role:admin and
+# system_scope:all".
+# The baremetal node API is now aware of system scope and default
+# roles. Capability to fallback to legacy admin project policy
+# configuration will be removed in the Xena release of Ironic.
+
+# Retrieve multiple Node records, filtered by an explicit owner or the
+# client project_id
+# GET  /nodes
+# GET  /nodes/detail
+# Intended scope(s): system, project
+"baremetal:node:list": "role:reader"
+
+# DEPRECATED
+# "baremetal:node:list":"rule:baremetal:node:get" has been deprecated
+# since W in favor of "baremetal:node:list":"role:reader".
+# The baremetal node API is now aware of system scope and default
+# roles. Capability to fallback to legacy admin project policy
+# configuration will be removed in the Xena release of Ironic.
+
+# Retrieve multiple Node records
+# GET  /nodes
+# GET  /nodes/detail
+# Intended scope(s): system
+"baremetal:node:list_all": "role:reader and system_scope:all"
+
+# DEPRECATED
+# "baremetal:node:list_all":"rule:baremetal:node:get" has been
+# deprecated since W in favor of
+# "baremetal:node:list_all":"role:reader and system_scope:all".
+# The baremetal node API is now aware of system scope and default
+# roles. Capability to fallback to legacy admin project policy
+# configuration will be removed in the Xena release of Ironic.
+
+# Retrieve a single Node record
+# GET  /nodes/{node_ident}
+# Intended scope(s): system, project
+"baremetal:node:get": "(role:reader and system_scope:all) or (role:reader and (project_id:%(node.owner)s or project_id:%(node.lessee)s))"
+
+# DEPRECATED
+# "baremetal:node:get":"rule:is_admin or rule:is_observer" has been
+# deprecated since W in favor of "baremetal:node:get":"(role:reader
+# and system_scope:all) or (role:reader and (project_id:%(node.owner)s
+# or project_id:%(node.lessee)s))".
+# The baremetal node API is now aware of system scope and default
+# roles. Capability to fallback to legacy admin project policy
+# configuration will be removed in the Xena release of Ironic.
+
+# Filter to allow operators to govern the threshold where information
+# should be filtered. Non-authorized users will be subjected to
+# additional API policy checks for API content response bodies.
+# GET  /nodes/{node_ident}
+# Intended scope(s): system, project
+"baremetal:node:get:filter_threshold": "role:reader and system_scope:all"
+
+# DEPRECATED
+# "baremetal:node:get":"rule:is_admin or rule:is_observer" has been
+# deprecated since W in favor of
+# "baremetal:node:get:filter_threshold":"role:reader and
+# system_scope:all".
+# The baremetal node API is now aware of system scope and default
+# roles. Capability to fallback to legacy admin project policy
+# configuration will be removed in the Xena release of Ironic.
+"baremetal:node:get": "rule:baremetal:node:get:filter_threshold"
+
+# Governs if the node last_error field is masked from APIclients with
+# insufficent privileges.
+# GET  /nodes/{node_ident}
+# Intended scope(s): system, project
+"baremetal:node:get:last_error": "(role:reader and system_scope:all) or (role:reader and project_id:%(node.owner)s)"
+
+# DEPRECATED
+# "baremetal:node:get":"rule:is_admin or rule:is_observer" has been
+# deprecated since W in favor of
+# "baremetal:node:get:last_error":"(role:reader and system_scope:all)
+# or (role:reader and project_id:%(node.owner)s)".
+# The baremetal node API is now aware of system scope and default
+# roles. Capability to fallback to legacy admin project policy
+# configuration will be removed in the Xena release of Ironic.
+"baremetal:node:get": "rule:baremetal:node:get:last_error"
+
+# Governs if the node reservation field is masked from APIclients with
+# insufficent privileges.
+# GET  /nodes/{node_ident}
+# Intended scope(s): system, project
+"baremetal:node:get:reservation": "(role:reader and system_scope:all) or (role:reader and project_id:%(node.owner)s)"
+
+# DEPRECATED
+# "baremetal:node:get":"rule:is_admin or rule:is_observer" has been
+# deprecated since W in favor of
+# "baremetal:node:get:reservation":"(role:reader and system_scope:all)
+# or (role:reader and project_id:%(node.owner)s)".
+# The baremetal node API is now aware of system scope and default
+# roles. Capability to fallback to legacy admin project policy
+# configuration will be removed in the Xena release of Ironic.
+"baremetal:node:get": "rule:baremetal:node:get:reservation"
+
+# Governs if the node driver_internal_info field is masked from API
+# clients with insufficent privileges.
+# GET  /nodes/{node_ident}
+# Intended scope(s): system, project
+"baremetal:node:get:driver_internal_info": "(role:reader and system_scope:all) or (role:reader and project_id:%(node.owner)s)"
+
+# DEPRECATED
+# "baremetal:node:get":"rule:is_admin or rule:is_observer" has been
+# deprecated since W in favor of
+# "baremetal:node:get:driver_internal_info":"(role:reader and
+# system_scope:all) or (role:reader and project_id:%(node.owner)s)".
+# The baremetal node API is now aware of system scope and default
+# roles. Capability to fallback to legacy admin project policy
+# configuration will be removed in the Xena release of Ironic.
+"baremetal:node:get": "rule:baremetal:node:get:driver_internal_info"
+
+# Governs if the driver_info field is masked from APIclients with
+# insufficent privileges.
+# GET  /nodes/{node_ident}
+# Intended scope(s): system, project
+"baremetal:node:get:driver_info": "(role:reader and system_scope:all) or (role:reader and project_id:%(node.owner)s)"
+
+# DEPRECATED
+# "baremetal:node:get":"rule:is_admin or rule:is_observer" has been
+# deprecated since W in favor of
+# "baremetal:node:get:driver_info":"(role:reader and system_scope:all)
+# or (role:reader and project_id:%(node.owner)s)".
+# The baremetal node API is now aware of system scope and default
+# roles. Capability to fallback to legacy admin project policy
+# configuration will be removed in the Xena release of Ironic.
+"baremetal:node:get": "rule:baremetal:node:get:driver_info"
+
+# Governs if node driver_info field can be updated via the API
+# clients.
+# PATCH  /nodes/{node_ident}
+# Intended scope(s): system, project
+"baremetal:node:update:driver_info": "(role:member and system_scope:all) or (role:member and project_id:%(node.owner)s)"
+
+# DEPRECATED
+# "baremetal:node:update":"rule:is_admin" has been deprecated since W
+# in favor of "baremetal:node:update:driver_info":"(role:member and
+# system_scope:all) or (role:member and project_id:%(node.owner)s)".
+# The baremetal node API is now aware of system scope and default
+# roles. Capability to fallback to legacy admin project policy
+# configuration will be removed in the Xena release of Ironic.
+"baremetal:node:update": "rule:baremetal:node:update:driver_info"
+
+# Governs if node properties field can be updated via the API clients.
+# PATCH  /nodes/{node_ident}
+# Intended scope(s): system, project
+"baremetal:node:update:properties": "(role:member and system_scope:all) or (role:member and project_id:%(node.owner)s)"
+
+# DEPRECATED
+# "baremetal:node:update":"rule:is_admin" has been deprecated since W
+# in favor of "baremetal:node:update:properties":"(role:member and
+# system_scope:all) or (role:member and project_id:%(node.owner)s)".
+# The baremetal node API is now aware of system scope and default
+# roles. Capability to fallback to legacy admin project policy
+# configuration will be removed in the Xena release of Ironic.
+"baremetal:node:update": "rule:baremetal:node:update:properties"
+
+# Governs if node chassis_uuid field can be updated via the API
+# clients.
+# PATCH  /nodes/{node_ident}
+# Intended scope(s): system, project
+"baremetal:node:update:chassis_uuid": "role:admin and system_scope:all"
+
+# DEPRECATED
+# "baremetal:node:update":"rule:is_admin" has been deprecated since W
+# in favor of "baremetal:node:update:chassis_uuid":"role:admin and
+# system_scope:all".
+# The baremetal node API is now aware of system scope and default
+# roles. Capability to fallback to legacy admin project policy
+# configuration will be removed in the Xena release of Ironic.
+"baremetal:node:update": "rule:baremetal:node:update:chassis_uuid"
+
+# Governs if node instance_uuid field can be updated via the API
+# clients.
+# PATCH  /nodes/{node_ident}
+# Intended scope(s): system, project
+"baremetal:node:update:instance_uuid": "(role:member and system_scope:all) or (role:member and project_id:%(node.owner)s)"
+
+# DEPRECATED
+# "baremetal:node:update":"rule:is_admin" has been deprecated since W
+# in favor of "baremetal:node:update:instance_uuid":"(role:member and
+# system_scope:all) or (role:member and project_id:%(node.owner)s)".
+# The baremetal node API is now aware of system scope and default
+# roles. Capability to fallback to legacy admin project policy
+# configuration will be removed in the Xena release of Ironic.
+"baremetal:node:update": "rule:baremetal:node:update:instance_uuid"
+
+# Governs if node lessee field can be updated via the API clients.
+# PATCH  /nodes/{node_ident}
+# Intended scope(s): system, project
+"baremetal:node:update:lessee": "(role:member and system_scope:all) or (role:member and project_id:%(node.owner)s)"
+
+# DEPRECATED
+# "baremetal:node:update":"rule:is_admin" has been deprecated since W
+# in favor of "baremetal:node:update:lessee":"(role:member and
+# system_scope:all) or (role:member and project_id:%(node.owner)s)".
+# The baremetal node API is now aware of system scope and default
+# roles. Capability to fallback to legacy admin project policy
+# configuration will be removed in the Xena release of Ironic.
+"baremetal:node:update": "rule:baremetal:node:update:lessee"
+
+# Governs if node owner field can be updated via the API clients.
+# PATCH  /nodes/{node_ident}
+# Intended scope(s): system, project
+"baremetal:node:update:owner": "role:member and system_scope:all"
+
+# DEPRECATED
+# "baremetal:node:update":"rule:is_admin" has been deprecated since W
+# in favor of "baremetal:node:update:owner":"role:member and
+# system_scope:all".
+# The baremetal node API is now aware of system scope and default
+# roles. Capability to fallback to legacy admin project policy
+# configuration will be removed in the Xena release of Ironic.
+"baremetal:node:update": "rule:baremetal:node:update:owner"
+
+# Governs if node driver and driver interfaces field can be updated
+# via the API clients.
+# PATCH  /nodes/{node_ident}
+# Intended scope(s): system, project
+"baremetal:node:update:driver_interfaces": "(role:member and system_scope:all) or (role:admin and project_id:%(node.owner)s)"
+
+# DEPRECATED
+# "baremetal:node:update":"rule:is_admin" has been deprecated since W
+# in favor of "baremetal:node:update:driver_interfaces":"(role:member
+# and system_scope:all) or (role:admin and
+# project_id:%(node.owner)s)".
+# The baremetal node API is now aware of system scope and default
+# roles. Capability to fallback to legacy admin project policy
+# configuration will be removed in the Xena release of Ironic.
+"baremetal:node:update": "rule:baremetal:node:update:driver_interfaces"
+
+# Governs if node driver_info field can be updated via the API
+# clients.
+# PATCH  /nodes/{node_ident}
+# Intended scope(s): system, project
+"baremetal:node:update:network_data": "(role:member and system_scope:all) or (role:member and project_id:%(node.owner)s)"
+
+# DEPRECATED
+# "baremetal:node:update":"rule:is_admin" has been deprecated since W
+# in favor of "baremetal:node:update:network_data":"(role:member and
+# system_scope:all) or (role:member and project_id:%(node.owner)s)".
+# The baremetal node API is now aware of system scope and default
+# roles. Capability to fallback to legacy admin project policy
+# configuration will be removed in the Xena release of Ironic.
+"baremetal:node:update": "rule:baremetal:node:update:network_data"
+
+# Governs if node conductor_group field can be updated via the API
+# clients.
+# PATCH  /nodes/{node_ident}
+# Intended scope(s): system, project
+"baremetal:node:update:conductor_group": "role:member and system_scope:all"
+
+# DEPRECATED
+# "baremetal:node:update":"rule:is_admin" has been deprecated since W
+# in favor of "baremetal:node:update:conductor_group":"role:member and
+# system_scope:all".
+# The baremetal node API is now aware of system scope and default
+# roles. Capability to fallback to legacy admin project policy
+# configuration will be removed in the Xena release of Ironic.
+"baremetal:node:update": "rule:baremetal:node:update:conductor_group"
+
+# Governs if node name field can be updated via the API clients.
+# PATCH  /nodes/{node_ident}
+# Intended scope(s): system, project
+"baremetal:node:update:name": "(role:member and system_scope:all) or (role:member and project_id:%(node.owner)s)"
+
+# DEPRECATED
+# "baremetal:node:update":"rule:is_admin" has been deprecated since W
+# in favor of "baremetal:node:update:name":"(role:member and
+# system_scope:all) or (role:member and project_id:%(node.owner)s)".
+# The baremetal node API is now aware of system scope and default
+# roles. Capability to fallback to legacy admin project policy
+# configuration will be removed in the Xena release of Ironic.
+"baremetal:node:update": "rule:baremetal:node:update:name"
+
+# Governs if node retired and retired reason can be updated by API
+# clients.
+# PATCH  /nodes/{node_ident}
+# Intended scope(s): system, project
+"baremetal:node:update:retired": "(role:member and system_scope:all) or (role:member and project_id:%(node.owner)s)"
+
+# DEPRECATED
+# "baremetal:node:update":"rule:is_admin" has been deprecated since W
+# in favor of "baremetal:node:update:retired":"(role:member and
+# system_scope:all) or (role:member and project_id:%(node.owner)s)".
+# The baremetal node API is now aware of system scope and default
+# roles. Capability to fallback to legacy admin project policy
+# configuration will be removed in the Xena release of Ironic.
+"baremetal:node:update": "rule:baremetal:node:update:retired"
+
+# Generalized update of node records
+# PATCH  /nodes/{node_ident}
+# Intended scope(s): system, project
+"baremetal:node:update": "(role:member and system_scope:all) or (role:member and (project_id:%(node.owner)s or project_id:%(node.lessee)s))"
+
+# DEPRECATED
+# "baremetal:node:update":"rule:is_admin" has been deprecated since W
+# in favor of "baremetal:node:update":"(role:member and
+# system_scope:all) or (role:member and (project_id:%(node.owner)s or
+# project_id:%(node.lessee)s))".
+# The baremetal node API is now aware of system scope and default
+# roles. Capability to fallback to legacy admin project policy
+# configuration will be removed in the Xena release of Ironic.
+
+# Update Node extra field
+# PATCH  /nodes/{node_ident}
+# Intended scope(s): system, project
+"baremetal:node:update_extra": "(role:member and system_scope:all) or (role:member and (project_id:%(node.owner)s or project_id:%(node.lessee)s))"
+
+# DEPRECATED
+# "baremetal:node:update_extra":"rule:baremetal:node:update" has been
+# deprecated since W in favor of
+# "baremetal:node:update_extra":"(role:member and system_scope:all) or
+# (role:member and (project_id:%(node.owner)s or
+# project_id:%(node.lessee)s))".
+# The baremetal node API is now aware of system scope and default
+# roles. Capability to fallback to legacy admin project policy
+# configuration will be removed in the Xena release of Ironic.
+
+# Update Node instance_info field
+# PATCH  /nodes/{node_ident}
+# Intended scope(s): system, project
+"baremetal:node:update_instance_info": "(role:member and system_scope:all) or (role:member and project_id:%(node.owner)s) or (role:admin and project_id:%(node.lessee)s)"
+
+# DEPRECATED
+# "baremetal:node:update_instance_info":"rule:baremetal:node:update"
+# has been deprecated since W in favor of
+# "baremetal:node:update_instance_info":"(role:member and
+# system_scope:all) or (role:member and project_id:%(node.owner)s) or
+# (role:admin and project_id:%(node.lessee)s)".
+# The baremetal node API is now aware of system scope and default
+# roles. Capability to fallback to legacy admin project policy
+# configuration will be removed in the Xena release of Ironic.
+
+# Update Node owner even when Node is provisioned
+# PATCH  /nodes/{node_ident}
+# Intended scope(s): system
+"baremetal:node:update_owner_provisioned": "role:admin and system_scope:all"
+
+# DEPRECATED
+# "baremetal:node:update_owner_provisioned":"rule:is_admin" has been
+# deprecated since W in favor of
+# "baremetal:node:update_owner_provisioned":"role:admin and
+# system_scope:all".
+# The baremetal node API is now aware of system scope and default
+# roles. Capability to fallback to legacy admin project policy
+# configuration will be removed in the Xena release of Ironic.
+
+# Delete Node records
+# DELETE  /nodes/{node_ident}
+# Intended scope(s): system, project
+"baremetal:node:delete": "role:admin and system_scope:all"
+
+# DEPRECATED
+# "baremetal:node:delete":"rule:is_admin" has been deprecated since W
+# in favor of "baremetal:node:delete":"role:admin and
+# system_scope:all".
+# The baremetal node API is now aware of system scope and default
+# roles. Capability to fallback to legacy admin project policy
+# configuration will be removed in the Xena release of Ironic.
+
+# Request active validation of Nodes
+# GET  /nodes/{node_ident}/validate
+# Intended scope(s): system, project
+"baremetal:node:validate": "(role:member and system_scope:all) or (role:member and project_id:%(node.owner)s) or (role:admin and project_id:%(node.lessee)s)"
+
+# DEPRECATED
+# "baremetal:node:validate":"rule:is_admin" has been deprecated since
+# W in favor of "baremetal:node:validate":"(role:member and
+# system_scope:all) or (role:member and project_id:%(node.owner)s) or
+# (role:admin and project_id:%(node.lessee)s)".
+# The baremetal node API is now aware of system scope and default
+# roles. Capability to fallback to legacy admin project policy
+# configuration will be removed in the Xena release of Ironic.
+
+# Set maintenance flag, taking a Node out of service
+# PUT  /nodes/{node_ident}/maintenance
+# Intended scope(s): system, project
+"baremetal:node:set_maintenance": "(role:member and system_scope:all) or (role:member and project_id:%(node.owner)s) or (role:admin and project_id:%(node.lessee)s)"
+
+# DEPRECATED
+# "baremetal:node:set_maintenance":"rule:is_admin" has been deprecated
+# since W in favor of "baremetal:node:set_maintenance":"(role:member
+# and system_scope:all) or (role:member and project_id:%(node.owner)s)
+# or (role:admin and project_id:%(node.lessee)s)".
+# The baremetal node API is now aware of system scope and default
+# roles. Capability to fallback to legacy admin project policy
+# configuration will be removed in the Xena release of Ironic.
+
+# Clear maintenance flag, placing the Node into service again
+# DELETE  /nodes/{node_ident}/maintenance
+# Intended scope(s): system, project
+"baremetal:node:clear_maintenance": "(role:member and system_scope:all) or (role:member and project_id:%(node.owner)s) or (role:admin and project_id:%(node.lessee)s)"
+
+# DEPRECATED
+# "baremetal:node:clear_maintenance":"rule:is_admin" has been
+# deprecated since W in favor of
+# "baremetal:node:clear_maintenance":"(role:member and
+# system_scope:all) or (role:member and project_id:%(node.owner)s) or
+# (role:admin and project_id:%(node.lessee)s)".
+# The baremetal node API is now aware of system scope and default
+# roles. Capability to fallback to legacy admin project policy
+# configuration will be removed in the Xena release of Ironic.
+
+# Retrieve Node boot device metadata
+# GET  /nodes/{node_ident}/management/boot_device
+# GET  /nodes/{node_ident}/management/boot_device/supported
+# Intended scope(s): system, project
+"baremetal:node:get_boot_device": "(role:member and system_scope:all) or (role:admin and project_id:%(node.owner)s)"
+
+# DEPRECATED
+# "baremetal:node:get_boot_device":"rule:is_admin or rule:is_observer"
+# has been deprecated since W in favor of
+# "baremetal:node:get_boot_device":"(role:member and system_scope:all)
+# or (role:admin and project_id:%(node.owner)s)".
+# The baremetal node API is now aware of system scope and default
+# roles. Capability to fallback to legacy admin project policy
+# configuration will be removed in the Xena release of Ironic.
+
+# Change Node boot device
+# PUT  /nodes/{node_ident}/management/boot_device
+# Intended scope(s): system, project
+"baremetal:node:set_boot_device": "(role:member and system_scope:all) or (role:admin and project_id:%(node.owner)s)"
+
+# DEPRECATED
+# "baremetal:node:set_maintenance":"rule:is_admin" has been deprecated
+# since W in favor of "baremetal:node:set_boot_device":"(role:member
+# and system_scope:all) or (role:admin and
+# project_id:%(node.owner)s)".
+# The baremetal node API is now aware of system scope and default
+# roles. Capability to fallback to legacy admin project policy
+# configuration will be removed in the Xena release of Ironic.
+"baremetal:node:set_maintenance": "rule:baremetal:node:set_boot_device"
+
+# Retrieve Node indicators and their states
+# GET  /nodes/{node_ident}/management/indicators/{component}/{indicator}
+# GET  /nodes/{node_ident}/management/indicators
+# Intended scope(s): system, project
+"baremetal:node:get_indicator_state": "(role:reader and system_scope:all) or (role:reader and (project_id:%(node.owner)s or project_id:%(node.lessee)s))"
+
+# DEPRECATED
+# "baremetal:node:get_indicator_state":"rule:is_admin or
+# rule:is_observer" has been deprecated since W in favor of
+# "baremetal:node:get_indicator_state":"(role:reader and
+# system_scope:all) or (role:reader and (project_id:%(node.owner)s or
+# project_id:%(node.lessee)s))".
+# The baremetal node API is now aware of system scope and default
+# roles. Capability to fallback to legacy admin project policy
+# configuration will be removed in the Xena release of Ironic.
+
+# Change Node indicator state
+# PUT  /nodes/{node_ident}/management/indicators/{component}/{indicator}
+# Intended scope(s): system, project
+"baremetal:node:set_indicator_state": "(role:member and system_scope:all) or (role:member and project_id:%(node.owner)s)"
+
+# DEPRECATED
+# "baremetal:node:set_indicator_state":"rule:is_admin" has been
+# deprecated since W in favor of
+# "baremetal:node:set_indicator_state":"(role:member and
+# system_scope:all) or (role:member and project_id:%(node.owner)s)".
+# The baremetal node API is now aware of system scope and default
+# roles. Capability to fallback to legacy admin project policy
+# configuration will be removed in the Xena release of Ironic.
+
+# Inject NMI for a node
+# PUT  /nodes/{node_ident}/management/inject_nmi
+# Intended scope(s): system, project
+"baremetal:node:inject_nmi": "(role:member and system_scope:all) or (role:admin and project_id:%(node.owner)s)"
+
+# DEPRECATED
+# "baremetal:node:inject_nmi":"rule:is_admin" has been deprecated
+# since W in favor of "baremetal:node:inject_nmi":"(role:member and
+# system_scope:all) or (role:admin and project_id:%(node.owner)s)".
+# The baremetal node API is now aware of system scope and default
+# roles. Capability to fallback to legacy admin project policy
+# configuration will be removed in the Xena release of Ironic.
+
+# View Node power and provision state
+# GET  /nodes/{node_ident}/states
+# Intended scope(s): system, project
+"baremetal:node:get_states": "(role:reader and system_scope:all) or (role:reader and (project_id:%(node.owner)s or project_id:%(node.lessee)s))"
+
+# DEPRECATED
+# "baremetal:node:get_states":"rule:is_admin or rule:is_observer" has
+# been deprecated since W in favor of
+# "baremetal:node:get_states":"(role:reader and system_scope:all) or
+# (role:reader and (project_id:%(node.owner)s or
+# project_id:%(node.lessee)s))".
+# The baremetal node API is now aware of system scope and default
+# roles. Capability to fallback to legacy admin project policy
+# configuration will be removed in the Xena release of Ironic.
+
+# Change Node power status
+# PUT  /nodes/{node_ident}/states/power
+# Intended scope(s): system, project
+"baremetal:node:set_power_state": "(role:member and system_scope:all) or (role:member and (project_id:%(node.owner)s or project_id:%(node.lessee)s))"
+
+# DEPRECATED
+# "baremetal:node:set_power_state":"rule:is_admin" has been deprecated
+# since W in favor of "baremetal:node:set_power_state":"(role:member
+# and system_scope:all) or (role:member and (project_id:%(node.owner)s
+# or project_id:%(node.lessee)s))".
+# The baremetal node API is now aware of system scope and default
+# roles. Capability to fallback to legacy admin project policy
+# configuration will be removed in the Xena release of Ironic.
+
+# Change Node provision status
+# PUT  /nodes/{node_ident}/states/provision
+# Intended scope(s): system, project
+"baremetal:node:set_provision_state": "(role:member and system_scope:all) or (role:member and project_id:%(node.owner)s) or (role:admin and project_id:%(node.lessee)s)"
+
+# DEPRECATED
+# "baremetal:node:set_provision_state":"rule:is_admin" has been
+# deprecated since W in favor of
+# "baremetal:node:set_provision_state":"(role:member and
+# system_scope:all) or (role:member and project_id:%(node.owner)s) or
+# (role:admin and project_id:%(node.lessee)s)".
+# The baremetal node API is now aware of system scope and default
+# roles. Capability to fallback to legacy admin project policy
+# configuration will be removed in the Xena release of Ironic.
+
+# Change Node RAID status
+# PUT  /nodes/{node_ident}/states/raid
+# Intended scope(s): system, project
+"baremetal:node:set_raid_state": "(role:member and system_scope:all) or (role:member and project_id:%(node.owner)s)"
+
+# DEPRECATED
+# "baremetal:node:set_raid_state":"rule:is_admin" has been deprecated
+# since W in favor of "baremetal:node:set_raid_state":"(role:member
+# and system_scope:all) or (role:member and
+# project_id:%(node.owner)s)".
+# The baremetal node API is now aware of system scope and default
+# roles. Capability to fallback to legacy admin project policy
+# configuration will be removed in the Xena release of Ironic.
+
+# Get Node console connection information
+# GET  /nodes/{node_ident}/states/console
+# Intended scope(s): system, project
+"baremetal:node:get_console": "(role:member and system_scope:all) or (role:member and project_id:%(node.owner)s)"
+
+# DEPRECATED
+# "baremetal:node:get_console":"rule:is_admin" has been deprecated
+# since W in favor of "baremetal:node:get_console":"(role:member and
+# system_scope:all) or (role:member and project_id:%(node.owner)s)".
+# The baremetal node API is now aware of system scope and default
+# roles. Capability to fallback to legacy admin project policy
+# configuration will be removed in the Xena release of Ironic.
+
+# Change Node console status
+# PUT  /nodes/{node_ident}/states/console
+# Intended scope(s): system, project
+"baremetal:node:set_console_state": "(role:member and system_scope:all) or (role:member and project_id:%(node.owner)s)"
+
+# DEPRECATED
+# "baremetal:node:set_console_state":"rule:is_admin" has been
+# deprecated since W in favor of
+# "baremetal:node:set_console_state":"(role:member and
+# system_scope:all) or (role:member and project_id:%(node.owner)s)".
+# The baremetal node API is now aware of system scope and default
+# roles. Capability to fallback to legacy admin project policy
+# configuration will be removed in the Xena release of Ironic.
+
+# List VIFs attached to node
+# GET  /nodes/{node_ident}/vifs
+# Intended scope(s): system, project
+"baremetal:node:vif:list": "(role:reader and system_scope:all) or (role:reader and (project_id:%(node.owner)s or project_id:%(node.lessee)s))"
+
+# DEPRECATED
+# "baremetal:node:vif:list":"rule:is_admin" has been deprecated since
+# W in favor of "baremetal:node:vif:list":"(role:reader and
+# system_scope:all) or (role:reader and (project_id:%(node.owner)s or
+# project_id:%(node.lessee)s))".
+# The baremetal node API is now aware of system scope and default
+# roles. Capability to fallback to legacy admin project policy
+# configuration will be removed in the Xena release of Ironic.
+
+# Attach a VIF to a node
+# POST  /nodes/{node_ident}/vifs
+# Intended scope(s): system, project
+"baremetal:node:vif:attach": "(role:member and system_scope:all) or (role:member and project_id:%(node.owner)s) or (role:admin and project_id:%(node.lessee)s)"
+
+# DEPRECATED
+# "baremetal:node:vif:attach":"rule:is_admin" has been deprecated
+# since W in favor of "baremetal:node:vif:attach":"(role:member and
+# system_scope:all) or (role:member and project_id:%(node.owner)s) or
+# (role:admin and project_id:%(node.lessee)s)".
+# The baremetal node API is now aware of system scope and default
+# roles. Capability to fallback to legacy admin project policy
+# configuration will be removed in the Xena release of Ironic.
+
+# Detach a VIF from a node
+# DELETE  /nodes/{node_ident}/vifs/{node_vif_ident}
+# Intended scope(s): system, project
+"baremetal:node:vif:detach": "(role:member and system_scope:all) or (role:member and project_id:%(node.owner)s) or (role:admin and project_id:%(node.lessee)s)"
+
+# DEPRECATED
+# "baremetal:node:vif:detach":"rule:is_admin" has been deprecated
+# since W in favor of "baremetal:node:vif:detach":"(role:member and
+# system_scope:all) or (role:member and project_id:%(node.owner)s) or
+# (role:admin and project_id:%(node.lessee)s)".
+# The baremetal node API is now aware of system scope and default
+# roles. Capability to fallback to legacy admin project policy
+# configuration will be removed in the Xena release of Ironic.
+
+# List node traits
+# GET  /nodes/{node_ident}/traits
+# Intended scope(s): system, project
+"baremetal:node:traits:list": "(role:reader and system_scope:all) or (role:reader and (project_id:%(node.owner)s or project_id:%(node.lessee)s))"
+
+# DEPRECATED
+# "baremetal:node:traits:list":"rule:is_admin or rule:is_observer" has
+# been deprecated since W in favor of
+# "baremetal:node:traits:list":"(role:reader and system_scope:all) or
+# (role:reader and (project_id:%(node.owner)s or
+# project_id:%(node.lessee)s))".
+# The baremetal node API is now aware of system scope and default
+# roles. Capability to fallback to legacy admin project policy
+# configuration will be removed in the Xena release of Ironic.
+
+# Add a trait to, or replace all traits of, a node
+# PUT  /nodes/{node_ident}/traits
+# PUT  /nodes/{node_ident}/traits/{trait}
+# Intended scope(s): system, project
+"baremetal:node:traits:set": "(role:member and system_scope:all) or (role:admin and project_id:%(node.owner)s)"
+
+# DEPRECATED
+# "baremetal:node:traits:set":"rule:is_admin" has been deprecated
+# since W in favor of "baremetal:node:traits:set":"(role:member and
+# system_scope:all) or (role:admin and project_id:%(node.owner)s)".
+# The baremetal node API is now aware of system scope and default
+# roles. Capability to fallback to legacy admin project policy
+# configuration will be removed in the Xena release of Ironic.
+
+# Remove one or all traits from a node
+# DELETE  /nodes/{node_ident}/traits
+# DELETE  /nodes/{node_ident}/traits/{trait}
+# Intended scope(s): system, project
+"baremetal:node:traits:delete": "(role:member and system_scope:all) or (role:admin and project_id:%(node.owner)s)"
+
+# DEPRECATED
+# "baremetal:node:traits:delete":"rule:is_admin" has been deprecated
+# since W in favor of "baremetal:node:traits:delete":"(role:member and
+# system_scope:all) or (role:admin and project_id:%(node.owner)s)".
+# The baremetal node API is now aware of system scope and default
+# roles. Capability to fallback to legacy admin project policy
+# configuration will be removed in the Xena release of Ironic.
+
+# Retrieve Node BIOS information
+# GET  /nodes/{node_ident}/bios
+# GET  /nodes/{node_ident}/bios/{setting}
+# Intended scope(s): system, project
+"baremetal:node:bios:get": "(role:reader and system_scope:all) or (role:reader and (project_id:%(node.owner)s or project_id:%(node.lessee)s))"
+
+# DEPRECATED
+# "baremetal:node:bios:get":"rule:is_admin or rule:is_observer" has
+# been deprecated since W in favor of
+# "baremetal:node:bios:get":"(role:reader and system_scope:all) or
+# (role:reader and (project_id:%(node.owner)s or
+# project_id:%(node.lessee)s))".
+# The baremetal node API is now aware of system scope and default
+# roles. Capability to fallback to legacy admin project policy
+# configuration will be removed in the Xena release of Ironic.
+
+# Disable Node disk cleaning
+# PATCH  /nodes/{node_ident}
+# Intended scope(s): system
+"baremetal:node:disable_cleaning": "role:admin and system_scope:all"
+
+# DEPRECATED
+# "baremetal:node:disable_cleaning":"rule:baremetal:node:update" has
+# been deprecated since W in favor of
+# "baremetal:node:disable_cleaning":"role:admin and system_scope:all".
+# The baremetal node API is now aware of system scope and default
+# roles. Capability to fallback to legacy admin project policy
+# configuration will be removed in the Xena release of Ironic.
+
+# Retrieve Port records
+# GET  /ports/{port_id}
+# GET  /nodes/{node_ident}/ports
+# GET  /nodes/{node_ident}/ports/detail
+# GET  /portgroups/{portgroup_ident}/ports
+# GET  /portgroups/{portgroup_ident}/ports/detail
+# Intended scope(s): system, project
+"baremetal:port:get": "(role:reader and system_scope:all) or (role:reader and (project_id:%(node.owner)s or project_id:%(node.lessee)s))"
+
+# DEPRECATED
+# "baremetal:port:get":"rule:is_admin or rule:is_observer" has been
+# deprecated since W in favor of "baremetal:port:get":"(role:reader
+# and system_scope:all) or (role:reader and (project_id:%(node.owner)s
+# or project_id:%(node.lessee)s))".
+# The baremetal port API is now aware of system scope and default
+# roles.
+
+# Retrieve multiple Port records, filtered by owner
+# GET  /ports
+# GET  /ports/detail
+# Intended scope(s): system, project
+"baremetal:port:list": "role:reader"
+
+# DEPRECATED
+# "baremetal:port:list":"rule:baremetal:port:get" has been deprecated
+# since W in favor of "baremetal:port:list":"role:reader".
+# The baremetal port API is now aware of system scope and default
+# roles.
+
+# Retrieve multiple Port records
+# GET  /ports
+# GET  /ports/detail
+# Intended scope(s): system, project
+"baremetal:port:list_all": "role:reader and system_scope:all"
+
+# DEPRECATED
+# "baremetal:port:list_all":"rule:baremetal:port:get" has been
+# deprecated since W in favor of
+# "baremetal:port:list_all":"role:reader and system_scope:all".
+# The baremetal port API is now aware of system scope and default
+# roles.
+
+# Create Port records
+# POST  /ports
+# Intended scope(s): system, project
+"baremetal:port:create": "(role:admin and system_scope:all) or (role:admin and project_id:%(node.owner)s)"
+
+# DEPRECATED
+# "baremetal:port:create":"rule:is_admin" has been deprecated since W
+# in favor of "baremetal:port:create":"(role:admin and
+# system_scope:all) or (role:admin and project_id:%(node.owner)s)".
+# The baremetal port API is now aware of system scope and default
+# roles.
+
+# Delete Port records
+# DELETE  /ports/{port_id}
+# Intended scope(s): system, project
+"baremetal:port:delete": "(role:admin and system_scope:all) or (role:admin and project_id:%(node.owner)s)"
+
+# DEPRECATED
+# "baremetal:port:delete":"rule:is_admin" has been deprecated since W
+# in favor of "baremetal:port:delete":"(role:admin and
+# system_scope:all) or (role:admin and project_id:%(node.owner)s)".
+# The baremetal port API is now aware of system scope and default
+# roles.
+
+# Update Port records
+# PATCH  /ports/{port_id}
+# Intended scope(s): system, project
+"baremetal:port:update": "(role:member and system_scope:all) or (role:admin and project_id:%(node.owner)s)"
+
+# DEPRECATED
+# "baremetal:port:update":"rule:is_admin" has been deprecated since W
+# in favor of "baremetal:port:update":"(role:member and
+# system_scope:all) or (role:admin and project_id:%(node.owner)s)".
+# The baremetal port API is now aware of system scope and default
+# roles.
+
+# Retrieve Portgroup records
+# GET  /portgroups
+# GET  /portgroups/detail
+# GET  /portgroups/{portgroup_ident}
+# GET  /nodes/{node_ident}/portgroups
+# GET  /nodes/{node_ident}/portgroups/detail
+# Intended scope(s): system, project
+"baremetal:portgroup:get": "(role:reader and system_scope:all) or (role:reader and (project_id:%(node.owner)s or project_id:%(node.lessee)s))"
+
+# DEPRECATED
+# "baremetal:portgroup:get":"rule:is_admin or rule:is_observer" has
+# been deprecated since W in favor of
+# "baremetal:portgroup:get":"(role:reader and system_scope:all) or
+# (role:reader and (project_id:%(node.owner)s or
+# project_id:%(node.lessee)s))".
+# The baremetal port groups API is now aware of system scope and
+# default roles.
+
+# Create Portgroup records
+# POST  /portgroups
+# Intended scope(s): system, project
+"baremetal:portgroup:create": "(role:admin and system_scope:all) or (role:admin and project_id:%(node.owner)s)"
+
+# DEPRECATED
+# "baremetal:portgroup:create":"rule:is_admin" has been deprecated
+# since W in favor of "baremetal:portgroup:create":"(role:admin and
+# system_scope:all) or (role:admin and project_id:%(node.owner)s)".
+# The baremetal port groups API is now aware of system scope and
+# default roles.
+
+# Delete Portgroup records
+# DELETE  /portgroups/{portgroup_ident}
+# Intended scope(s): system, project
+"baremetal:portgroup:delete": "(role:admin and system_scope:all) or (role:admin and project_id:%(node.owner)s)"
+
+# DEPRECATED
+# "baremetal:portgroup:delete":"rule:is_admin" has been deprecated
+# since W in favor of "baremetal:portgroup:delete":"(role:admin and
+# system_scope:all) or (role:admin and project_id:%(node.owner)s)".
+# The baremetal port groups API is now aware of system scope and
+# default roles.
+
+# Update Portgroup records
+# PATCH  /portgroups/{portgroup_ident}
+# Intended scope(s): system, project
+"baremetal:portgroup:update": "(role:member and system_scope:all) or (role:admin and project_id:%(node.owner)s)"
+
+# DEPRECATED
+# "baremetal:portgroup:update":"rule:is_admin" has been deprecated
+# since W in favor of "baremetal:portgroup:update":"(role:member and
+# system_scope:all) or (role:admin and project_id:%(node.owner)s)".
+# The baremetal port groups API is now aware of system scope and
+# default roles.
+
+# Retrieve multiple Port records, filtered by owner
+# GET  /portgroups
+# GET  /portgroups/detail
+# Intended scope(s): system, project
+"baremetal:portgroup:list": "role:reader"
+
+# DEPRECATED
+# "baremetal:portgroup:get":"rule:is_admin or rule:is_observer" has
+# been deprecated since W in favor of
+# "baremetal:portgroup:list":"role:reader".
+# The baremetal port groups API is now aware of system scope and
+# default roles.
+"baremetal:portgroup:get": "rule:baremetal:portgroup:list"
+
+# Retrieve multiple Port records
+# GET  /portgroups
+# GET  /portgroups/detail
+# Intended scope(s): system, project
+"baremetal:portgroup:list_all": "role:reader and system_scope:all"
+
+# DEPRECATED
+# "baremetal:portgroup:get":"rule:is_admin or rule:is_observer" has
+# been deprecated since W in favor of
+# "baremetal:portgroup:list_all":"role:reader and system_scope:all".
+# The baremetal port groups API is now aware of system scope and
+# default roles.
+"baremetal:portgroup:get": "rule:baremetal:portgroup:list_all"
+
+# Retrieve Chassis records
+# GET  /chassis
+# GET  /chassis/detail
+# GET  /chassis/{chassis_id}
+# Intended scope(s): system
+"baremetal:chassis:get": "role:reader and system_scope:all"
+
+# DEPRECATED
+# "baremetal:chassis:get":"rule:is_admin or rule:is_observer" has been
+# deprecated since W in favor of "baremetal:chassis:get":"role:reader
+# and system_scope:all".
+# The baremetal chassis API is now aware of system scope and default
+# roles.
+
+# Create Chassis records
+# POST  /chassis
+# Intended scope(s): system
+"baremetal:chassis:create": "role:admin and system_scope:all"
+
+# DEPRECATED
+# "baremetal:chassis:create":"rule:is_admin" has been deprecated since
+# W in favor of "baremetal:chassis:create":"role:admin and
+# system_scope:all".
+# The baremetal chassis API is now aware of system scope and default
+# roles.
+
+# Delete Chassis records
+# DELETE  /chassis/{chassis_id}
+# Intended scope(s): system
+"baremetal:chassis:delete": "role:admin and system_scope:all"
+
+# DEPRECATED
+# "baremetal:chassis:delete":"rule:is_admin" has been deprecated since
+# W in favor of "baremetal:chassis:delete":"role:admin and
+# system_scope:all".
+# The baremetal chassis API is now aware of system scope and default
+# roles.
+
+# Update Chassis records
+# PATCH  /chassis/{chassis_id}
+# Intended scope(s): system
+"baremetal:chassis:update": "role:member and system_scope:all"
+
+# DEPRECATED
+# "baremetal:chassis:update":"rule:is_admin" has been deprecated since
+# W in favor of "baremetal:chassis:update":"role:member and
+# system_scope:all".
+# The baremetal chassis API is now aware of system scope and default
+# roles.
+
+# View list of available drivers
+# GET  /drivers
+# GET  /drivers/{driver_name}
+# Intended scope(s): system
+"baremetal:driver:get": "role:reader and system_scope:all"
+
+# DEPRECATED
+# "baremetal:driver:get":"rule:is_admin or rule:is_observer" has been
+# deprecated since W in favor of "baremetal:driver:get":"role:reader
+# and system_scope:all".
+# The baremetal driver API is now aware of system scope and default
+# roles.
+
+# View driver-specific properties
+# GET  /drivers/{driver_name}/properties
+# Intended scope(s): system
+"baremetal:driver:get_properties": "role:reader and system_scope:all"
+
+# DEPRECATED
+# "baremetal:driver:get_properties":"rule:is_admin or
+# rule:is_observer" has been deprecated since W in favor of
+# "baremetal:driver:get_properties":"role:reader and
+# system_scope:all".
+# The baremetal driver API is now aware of system scope and default
+# roles.
+
+# View driver-specific RAID metadata
+# GET  /drivers/{driver_name}/raid/logical_disk_properties
+# Intended scope(s): system
+"baremetal:driver:get_raid_logical_disk_properties": "role:reader and system_scope:all"
+
+# DEPRECATED
+# "baremetal:driver:get_raid_logical_disk_properties":"rule:is_admin
+# or rule:is_observer" has been deprecated since W in favor of
+# "baremetal:driver:get_raid_logical_disk_properties":"role:reader and
+# system_scope:all".
+# The baremetal driver API is now aware of system scope and default
+# roles.
+
+# Access vendor-specific Node functions
+# GET  nodes/{node_ident}/vendor_passthru/methods
+# GET  nodes/{node_ident}/vendor_passthru?method={method_name}
+# PUT  nodes/{node_ident}/vendor_passthru?method={method_name}
+# POST  nodes/{node_ident}/vendor_passthru?method={method_name}
+# PATCH  nodes/{node_ident}/vendor_passthru?method={method_name}
+# DELETE  nodes/{node_ident}/vendor_passthru?method={method_name}
+# Intended scope(s): system, project
+"baremetal:node:vendor_passthru": "role:admin and system_scope:all"
+
+# DEPRECATED
+# "baremetal:node:vendor_passthru":"rule:is_admin" has been deprecated
+# since W in favor of "baremetal:node:vendor_passthru":"role:admin and
+# system_scope:all".
+# The baremetal vendor passthru API is now aware of system scope and
+# default roles.
+
+# Access vendor-specific Driver functions
+# GET  drivers/{driver_name}/vendor_passthru/methods
+# GET  drivers/{driver_name}/vendor_passthru?method={method_name}
+# PUT  drivers/{driver_name}/vendor_passthru?method={method_name}
+# POST  drivers/{driver_name}/vendor_passthru?method={method_name}
+# PATCH  drivers/{driver_name}/vendor_passthru?method={method_name}
+# DELETE  drivers/{driver_name}/vendor_passthru?method={method_name}
+# Intended scope(s): system
+"baremetal:driver:vendor_passthru": "role:admin and system_scope:all"
+
+# DEPRECATED
+# "baremetal:driver:vendor_passthru":"rule:is_admin" has been
+# deprecated since W in favor of
+# "baremetal:driver:vendor_passthru":"role:admin and
+# system_scope:all".
+# The baremetal vendor passthru API is now aware of system scope and
+# default roles.
+
+# Receive heartbeats from IPA ramdisk
+# POST  /heartbeat/{node_ident}
+"baremetal:node:ipa_heartbeat": ""
+
+# DEPRECATED
+# "baremetal:node:ipa_heartbeat":"rule:public_api" has been deprecated
+# since W in favor of "baremetal:node:ipa_heartbeat":"".
+# The baremetal utility API is now aware of system scope and default
+# roles.
+
+# Access IPA ramdisk functions
+# GET  /lookup
+"baremetal:driver:ipa_lookup": ""
+
+# DEPRECATED
+# "baremetal:driver:ipa_lookup":"rule:public_api" has been deprecated
+# since W in favor of "baremetal:driver:ipa_lookup":"".
+# The baremetal utility API is now aware of system scope and default
+# roles.
+
+# Retrieve a list of all Volume connector and target records
+# GET  /volume/connectors
+# GET  /volume/targets
+# GET  /nodes/{node_ident}/volume/connectors
+# GET  /nodes/{node_ident}/volume/targets
+# Intended scope(s): system, project
+"baremetal:volume:list_all": "role:reader and system_scope:all"
+
+# DEPRECATED
+# "baremetal:volume:get":"rule:is_admin or rule:is_observer" has been
+# deprecated since W in favor of
+# "baremetal:volume:list_all":"role:reader and system_scope:all".
+# The baremetal volume API is now aware of system scope and default
+# roles.
+"baremetal:volume:get": "rule:baremetal:volume:list_all"
+
+# Retrieve a list of Volume connector and target records
+# GET  /volume/connectors
+# GET  /volume/targets
+# GET  /nodes/{node_ident}/volume/connectors
+# GET  /nodes/{node_ident}/volume/targets
+# Intended scope(s): system, project
+"baremetal:volume:list": "role:reader"
+
+# DEPRECATED
+# "baremetal:volume:get":"rule:is_admin or rule:is_observer" has been
+# deprecated since W in favor of
+# "baremetal:volume:list":"role:reader".
+# The baremetal volume API is now aware of system scope and default
+# roles.
+"baremetal:volume:get": "rule:baremetal:volume:list"
+
+# Retrieve Volume connector and target records
+# GET  /volume
+# GET  /volume/connectors
+# GET  /volume/connectors/{volume_connector_id}
+# GET  /volume/targets
+# GET  /volume/targets/{volume_target_id}
+# GET  /nodes/{node_ident}/volume
+# GET  /nodes/{node_ident}/volume/connectors
+# GET  /nodes/{node_ident}/volume/targets
+# Intended scope(s): system, project
+"baremetal:volume:get": "(role:reader and system_scope:all) or (role:reader and (project_id:%(node.owner)s or project_id:%(node.lessee)s))"
+
+# DEPRECATED
+# "baremetal:volume:get":"rule:is_admin or rule:is_observer" has been
+# deprecated since W in favor of "baremetal:volume:get":"(role:reader
+# and system_scope:all) or (role:reader and (project_id:%(node.owner)s
+# or project_id:%(node.lessee)s))".
+# The baremetal volume API is now aware of system scope and default
+# roles.
+
+# Create Volume connector and target records
+# POST  /volume/connectors
+# POST  /volume/targets
+# Intended scope(s): system, project
+"baremetal:volume:create": "(role:member and system_scope:all) or (role:admin and project_id:%(node.owner)s) or (role:admin and project_id:%(node.lessee)s)"
+
+# DEPRECATED
+# "baremetal:volume:create":"rule:is_admin" has been deprecated since
+# W in favor of "baremetal:volume:create":"(role:member and
+# system_scope:all) or (role:admin and project_id:%(node.owner)s) or
+# (role:admin and project_id:%(node.lessee)s)".
+# The baremetal volume API is now aware of system scope and default
+# roles.
+
+# Delete Volume connector and target records
+# DELETE  /volume/connectors/{volume_connector_id}
+# DELETE  /volume/targets/{volume_target_id}
+# Intended scope(s): system, project
+"baremetal:volume:delete": "(role:member and system_scope:all) or (role:admin and project_id:%(node.owner)s) or (role:admin and project_id:%(node.lessee)s)"
+
+# DEPRECATED
+# "baremetal:volume:delete":"rule:is_admin" has been deprecated since
+# W in favor of "baremetal:volume:delete":"(role:member and
+# system_scope:all) or (role:admin and project_id:%(node.owner)s) or
+# (role:admin and project_id:%(node.lessee)s)".
+# The baremetal volume API is now aware of system scope and default
+# roles.
+
+# Update Volume connector and target records
+# PATCH  /volume/connectors/{volume_connector_id}
+# PATCH  /volume/targets/{volume_target_id}
+# Intended scope(s): system, project
+"baremetal:volume:update": "(role:member and system_scope:all) or (role:member and project_id:%(node.owner)s) or (role:admin and project_id:%(node.lessee)s)"
+
+# DEPRECATED
+# "baremetal:volume:update":"rule:is_admin" has been deprecated since
+# W in favor of "baremetal:volume:update":"(role:member and
+# system_scope:all) or (role:member and project_id:%(node.owner)s) or
+# (role:admin and project_id:%(node.lessee)s)".
+# The baremetal volume API is now aware of system scope and default
+# roles.
+
+# Ability to view volume target properties
+# GET  /volume/connectors/{volume_connector_id}
+# GET  /volume/targets/{volume_target_id}
+# Intended scope(s): system, project
+"baremetal:volume:view_target_properties": "(role:reader and system_scope:all) or (role:admin)"
+
+# DEPRECATED
+# "baremetal:volume:update":"rule:is_admin" has been deprecated since
+# W in favor of
+# "baremetal:volume:view_target_properties":"(role:reader and
+# system_scope:all) or (role:admin)".
+# The baremetal volume API is now aware of system scope and default
+# roles.
+"baremetal:volume:update": "rule:baremetal:volume:view_target_properties"
+
+# Retrieve Conductor records
+# GET  /conductors
+# GET  /conductors/{hostname}
+# Intended scope(s): system
+"baremetal:conductor:get": "role:reader and system_scope:all"
+
+# DEPRECATED
+# "baremetal:conductor:get":"rule:is_admin or rule:is_observer" has
+# been deprecated since W in favor of
+# "baremetal:conductor:get":"role:reader and system_scope:all".
+# The baremetal conductor API is now aware of system scope and default
+# roles.
+
+# Retrieve Allocation records
+# GET  /allocations/{allocation_id}
+# GET  /nodes/{node_ident}/allocation
+# Intended scope(s): system, project
+"baremetal:allocation:get": "(role:reader and system_scope:all) or (role:reader and project_id:%(allocation.owner)s)"
+
+# DEPRECATED
+# "baremetal:allocation:get":"rule:is_admin or rule:is_observer" has
+# been deprecated since W in favor of
+# "baremetal:allocation:get":"(role:reader and system_scope:all) or
+# (role:reader and project_id:%(allocation.owner)s)".
+# The baremetal allocation API is now aware of system scope and
+# default roles.
+
+# Retrieve multiple Allocation records, filtered by owner
+# GET  /allocations
+# Intended scope(s): system, project
+"baremetal:allocation:list": "role:reader"
+
+# DEPRECATED
+# "baremetal:allocation:list":"rule:baremetal:allocation:get" has been
+# deprecated since W in favor of
+# "baremetal:allocation:list":"role:reader".
+# The baremetal allocation API is now aware of system scope and
+# default roles.
+
+# Retrieve multiple Allocation records
+# GET  /allocations
+# Intended scope(s): system, project
+"baremetal:allocation:list_all": "role:reader and system_scope:all"
+
+# DEPRECATED
+# "baremetal:allocation:list_all":"rule:baremetal:allocation:get and
+# is_admin_project:True" has been deprecated since W in favor of
+# "baremetal:allocation:list_all":"role:reader and system_scope:all".
+# The baremetal allocation API is now aware of system scope and
+# default roles.
+
+# Create Allocation records
+# POST  /allocations
+# Intended scope(s): system, project
+"baremetal:allocation:create": "(role:member and system_scope:all) or (role:member)"
+
+# DEPRECATED
+# "baremetal:allocation:create":"rule:is_admin and
+# is_admin_project:True" has been deprecated since W in favor of
+# "baremetal:allocation:create":"(role:member and system_scope:all) or
+# (role:member)".
+# The baremetal allocation API is now aware of system scope and
+# default roles.
+
+# Create Allocation records with a specific owner.
+# POST  /allocations
+# Intended scope(s): system, project
+"baremetal:allocation:create_restricted": "role:member and system_scope:all"
+
+# DEPRECATED
+# "baremetal:allocation:create_restricted":"rule:baremetal:allocation:
+# create" has been deprecated since W in favor of
+# "baremetal:allocation:create_restricted":"role:member and
+# system_scope:all".
+# The baremetal allocation API is now aware of system scope and
+# default roles.
+
+# Delete Allocation records
+# DELETE  /allocations/{allocation_id}
+# DELETE  /nodes/{node_ident}/allocation
+# Intended scope(s): system, project
+"baremetal:allocation:delete": "(role:member and system_scope:all) or (role:member and project_id:%(allocation.owner)s)"
+
+# DEPRECATED
+# "baremetal:allocation:delete":"rule:is_admin" has been deprecated
+# since W in favor of "baremetal:allocation:delete":"(role:member and
+# system_scope:all) or (role:member and
+# project_id:%(allocation.owner)s)".
+# The baremetal allocation API is now aware of system scope and
+# default roles.
+
+# Change name and extra fields of an allocation
+# PATCH  /allocations/{allocation_id}
+# Intended scope(s): system, project
+"baremetal:allocation:update": "(role:member and system_scope:all) or (role:member and project_id:%(allocation.owner)s)"
+
+# DEPRECATED
+# "baremetal:allocation:update":"rule:is_admin" has been deprecated
+# since W in favor of "baremetal:allocation:update":"(role:member and
+# system_scope:all) or (role:member and
+# project_id:%(allocation.owner)s)".
+# The baremetal allocation API is now aware of system scope and
+# default roles.
+
+# DEPRECATED
+# "baremetal:allocation:create_pre_rbac" has been deprecated since W.
+# The baremetal allocation API is now aware of system scope and
+# default roles.
+# Logical restrictor to prevent legacy allocation rule missuse -
+# Requires blank allocations to originate from the legacy
+# baremetal_admin.
+# PATCH  /allocations/{allocation_id}
+# Intended scope(s): project
+"baremetal:allocation:create_pre_rbac": "(rule:is_member and role:baremetal_admin) or (is_admin_project:True and role:admin)"
+
+# Post events
+# POST  /events
+# Intended scope(s): system
+"baremetal:events:post": "role:admin and system_scope:all"
+
+# DEPRECATED
+# "baremetal:events:post":"rule:is_admin" has been deprecated since W
+# in favor of "baremetal:events:post":"role:admin and
+# system_scope:all".
+# The baremetal event API is now aware of system scope and default
+# roles.
+
+# Retrieve Deploy Template records
+# GET  /deploy_templates
+# GET  /deploy_templates/{deploy_template_ident}
+# Intended scope(s): system
+"baremetal:deploy_template:get": "role:reader and system_scope:all"
+
+# DEPRECATED
+# "baremetal:deploy_template:get":"rule:is_admin or rule:is_observer"
+# has been deprecated since W in favor of
+# "baremetal:deploy_template:get":"role:reader and system_scope:all".
+# The baremetal deploy template API is now aware of system scope and
+# default roles.
+
+# Create Deploy Template records
+# POST  /deploy_templates
+# Intended scope(s): system
+"baremetal:deploy_template:create": "role:admin and system_scope:all"
+
+# DEPRECATED
+# "baremetal:deploy_template:create":"rule:is_admin" has been
+# deprecated since W in favor of
+# "baremetal:deploy_template:create":"role:admin and
+# system_scope:all".
+# The baremetal deploy template API is now aware of system scope and
+# default roles.
+
+# Delete Deploy Template records
+# DELETE  /deploy_templates/{deploy_template_ident}
+# Intended scope(s): system
+"baremetal:deploy_template:delete": "role:admin and system_scope:all"
+
+# DEPRECATED
+# "baremetal:deploy_template:delete":"rule:is_admin" has been
+# deprecated since W in favor of
+# "baremetal:deploy_template:delete":"role:admin and
+# system_scope:all".
+# The baremetal deploy template API is now aware of system scope and
+# default roles.
+
+# Update Deploy Template records
+# PATCH  /deploy_templates/{deploy_template_ident}
+# Intended scope(s): system
+"baremetal:deploy_template:update": "role:admin and system_scope:all"
+
+# DEPRECATED
+# "baremetal:deploy_template:update":"rule:is_admin" has been
+# deprecated since W in favor of
+# "baremetal:deploy_template:update":"role:admin and
+# system_scope:all".
+# The baremetal deploy template API is now aware of system scope and
+# default roles.
