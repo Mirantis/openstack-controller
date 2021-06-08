@@ -138,6 +138,7 @@ spec:
         configmap: rook-ceph-config
         user_secret_name: {{ ceph.cinder.secrets }}
       conf:
+        policy: {{ service_policy }}
         {%- if overrides.enabled %}
         standalone_backends:
           daemonset:

@@ -12,6 +12,7 @@ spec:
         configmap: rook-ceph-config
         user_secret_name: cinder-rbd-keyring
       conf:
+        policy: {}
         backends:
           volumes-hdd:
             rbd_ceph_conf: /etc/ceph/ceph.conf

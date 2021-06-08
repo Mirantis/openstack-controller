@@ -4,6 +4,7 @@ spec:
     name: openstack-placement
     values:
       conf:
+        policy: {}
         logging:
           logger_placement:
             level: INFO

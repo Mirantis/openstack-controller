@@ -96,6 +96,7 @@ spec:
             jobs:
               - openstack-mariadb-cluster-wait
       conf:
+        policy: {{ service_policy }}
         designate:
           keystone_authtoken:
             memcache_security_strategy: ENCRYPT

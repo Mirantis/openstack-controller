@@ -1,6 +1,7 @@
 import logging
 import os
 import yaml
+from unittest import mock
 
 from openstack_controller import constants
 from openstack_controller import layers
@@ -48,7 +49,8 @@ def get_render_kwargs(service, context, default_args):
     return spec, service_t_args
 
 
-def test_render_service_template(common_template_args):
+@mock.patch.object(layers, "_get_default_policy")
+def test_render_service_template(gdp_mock, common_template_args):
     # Remove excluded services once contexts with these services are added
     excluded_services = {
         "tempest",
@@ -74,6 +76,7 @@ def test_render_service_template(common_template_args):
         if not contexts:
             raise RuntimeError(f"No contexts provided for service {service}")
         for context in contexts:
+            gdp_mock.return_value = {}
             logger.debug(f"Rendering service {service} for context {context}")
             spec, kwargs = get_render_kwargs(
                 service, context, common_template_args

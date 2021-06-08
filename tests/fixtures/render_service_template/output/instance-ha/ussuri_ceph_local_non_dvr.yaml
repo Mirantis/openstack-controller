@@ -4,6 +4,7 @@ spec:
     name: openstack-masakari
     values:
       conf:
+        policy: {}
         masakari:
           DEFAULT:
             os_privileged_user_name: admin

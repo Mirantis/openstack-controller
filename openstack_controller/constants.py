@@ -65,6 +65,24 @@ OS_SERVICES_MAP = {
     "instance-ha": "masakari",
 }
 
+OS_POLICY_SERVICES = {
+    "block-storage": "cinder",
+    "compute": "nova",
+    "dns": "designate",
+    "identity": "keystone",
+    "image": "glance",
+    "networking": "neutron",
+    "orchestration": "heat",
+    "load-balancer": "octavia",
+    "key-manager": "barbican",
+    "placement": "placement",
+    "baremetal": "ironic",
+    "alarming": "aodh",
+    "event": "panko",
+    "metric": "gnocchi",
+    "instance-ha": "masakari",
+}
+
 OPENSTACK_SERVICES_UPGRADE_ORDER = [
     "identity",
     "placement",

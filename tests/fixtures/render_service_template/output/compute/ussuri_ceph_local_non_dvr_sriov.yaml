@@ -44,6 +44,7 @@ spec:
         configmap: rook-ceph-config
         user_secret_name: nova-rbd-keyring
       conf:
+        policy: {}
         ceph:
           cinder:
             keyring: AQDNZLJf8S+fORAA6hg50Jo+vBq07kxtBXB9PQ==
@@ -86,40 +87,6 @@ spec:
             topics: notifications,stacklight_notifications
           service_user:
             send_service_user_token: true
-        policy:
-          os_compute_api:limits: '@'
-          os_compute_api:limits:other_project: rule:system_reader_api
-          os_compute_api:os-agents:create: rule:system_admin_api
-          os_compute_api:os-agents:delete: rule:system_admin_api
-          os_compute_api:os-agents:list: rule:system_reader_api
-          os_compute_api:os-agents:update: rule:system_admin_api
-          os_compute_api:os-attach-interfaces:create: rule:system_admin_or_owner
-          os_compute_api:os-attach-interfaces:delete: rule:system_admin_or_owner
-          os_compute_api:os-attach-interfaces:list: rule:system_or_project_reader
-          os_compute_api:os-attach-interfaces:show: rule:system_or_project_reader
-          os_compute_api:os-availability-zone:list: '@'
-          os_compute_api:os-deferred-delete:force: rule:system_admin_or_owner
-          os_compute_api:os-deferred-delete:restore: rule:system_admin_or_owner
-          os_compute_api:os-hypervisors:list: rule:system_reader_api
-          os_compute_api:os-hypervisors:list-detail: rule:system_reader_api
-          os_compute_api:os-hypervisors:search: rule:system_reader_api
-          os_compute_api:os-hypervisors:servers: rule:system_reader_api
-          os_compute_api:os-hypervisors:show: rule:system_reader_api
-          os_compute_api:os-hypervisors:statistics: rule:system_reader_api
-          os_compute_api:os-hypervisors:uptime: rule:system_reader_api
-          os_compute_api:os-instance-actions:list: rule:system_or_project_reader
-          os_compute_api:os-instance-actions:show: rule:system_or_project_reader
-          os_compute_api:os-instance-usage-audit-log:list: rule:system_reader_api
-          os_compute_api:os-instance-usage-audit-log:show: rule:system_reader_api
-          os_compute_api:os-security-groups:add: rule:system_admin_or_owner
-          os_compute_api:os-security-groups:list: rule:system_or_project_reader
-          os_compute_api:os-security-groups:remove: rule:system_admin_or_owner
-          os_compute_api:os-server-password:clear: rule:system_admin_or_owner
-          os_compute_api:os-server-password:show: rule:system_or_project_reader
-          os_compute_api:os-services:delete: rule:system_admin_api
-          os_compute_api:os-services:list: rule:system_reader_api
-          os_compute_api:os-services:update: rule:system_admin_api
-          os_compute_api:os-unrescue: rule:system_admin_or_owner
         ssh_private: 'COMPUTE TEST SSH PRIVATE KEY
 
           '

@@ -1,0 +1,325 @@
+spec:
+  releases:
+  - chart: osh/octavia
+    name: openstack-octavia
+    values:
+      network:
+        proxy:
+          enabled: true
+          env_vars:
+            HTTP_PROXY: http://127.0.0.1:3128
+            NO_PROXY: .svc.cluster.local
+      conf:
+        policy:
+          octavia_custom: value
+        logging:
+          logger_octavia:
+            level: INFO
+            propagate: 0
+        octavia:
+          api_settings:
+            default_provider_driver: amphora
+            enabled_provider_drivers: amphora:The Octavia Amphora driver.,octavia:Deprecated
+              alias of the Octavia Amphora driver.,amphorav2:Extented Octavia Amphora
+              driver with jobboard support.
+          certificates:
+            endpoint_type: internalURL
+          glance:
+            endpoint_type: internalURL
+          haproxy_amphora:
+            connection_max_retries: 500
+          keystone_authtoken:
+            memcache_secret_key: cAZLeChP79lxHJ1Z
+            memcache_security_strategy: ENCRYPT
+          neutron:
+            endpoint_type: internalURL
+          nova:
+            endpoint_type: internalURL
+          oslo_messaging_notifications:
+            topics: notifications,stacklight_notifications
+          service_auth:
+            memcache_secret_key: cAZLeChP79lxHJ1Z
+            memcache_security_strategy: ENCRYPT
+          task_flow:
+            jobboard_enabled: true
+            jobboard_backend_hosts: rfs-openstack-redis.openstack-redis
+            jobboard_backend_password: cfLDYSsNbuCywa6VmBvZ8h2sJXuZnvqW
+            jobboard_backend_port: 26379
+            jobboard_expiration_time: 90
+            jobboard_redis_sentinel: mymaster
+      dependencies:
+        static:
+          db_init:
+            jobs:
+            - openstack-mariadb-cluster-wait
+      endpoints:
+        cluster_domain_suffix: cluster.local
+        identity:
+          auth:
+            admin:
+              default_domain_id: default
+              password: ZUqTyP2XwsgEGKZ7qNhhecYyq9NLkGE6
+              project_domain_name: default
+              project_name: admin
+              region_name: RegionOne
+              user_domain_name: default
+              username: admin
+            octavia:
+              password: VdeaqYEJb5UWW3TCxCMBNWIlzkcy94W7
+              username: octaviafgirF49
+            test:
+              password: Y6tYdn0ShRF69ZrXKeaa3sNYT8Y7AlP8
+              username: testcnVC
+        load_balancer:
+          host_fqdn_override:
+            public:
+              host: octavia.it.just.works
+              tls:
+                ca: |
+                  TEST CA
+                crt: |
+                  TEST CRT
+                key: |
+                  TEST KEY
+          hosts:
+            admin:
+              host: octavia-api
+            default: octavia
+            internal: octavia-api
+            public:
+              host: octavia
+              tls:
+                ca: |
+                  TEST CA
+                crt: |
+                  TEST CRT
+                key: |
+                  TEST KEY
+          port:
+            api:
+              admin: 9876
+              default: 80
+              internal: 9876
+              public: 443
+          scheme:
+            default: http
+            public: https
+        oslo_cache:
+          statefulset:
+            name: openstack-memcached-memcached
+            replicas: 3
+        oslo_db:
+          auth:
+            admin:
+              password: QACDSM6FBTH2LuXjTuRQ6DXhD8bSgPbn
+              username: root
+            octavia:
+              password: jBxCDfusABmmmeBcY7ZUb6pVtTX2ip9s
+              username: octaviaFEzC0Qa
+        oslo_db_persistence:
+          auth:
+            admin:
+              password: QACDSM6FBTH2LuXjTuRQ6DXhD8bSgPbn
+              username: root
+            octavia:
+              password: jBxCDfusABmmmeBcY7ZUb6pVtTX2ip9s
+              username: octaviaFEzC0Qa
+        oslo_messaging:
+          auth:
+            admin:
+              password: 2tnAuP0j9MsgaVHErehZkC5HCK3ZxYLr
+              username: rabbitmq
+            octavia:
+              password: P4tAIFt2fRzEddPyPmfCmBcInbNdCI9S
+              username: octaviaGrHbrrp
+            user:
+              password: 2tnAuP0j9MsgaVHErehZkC5HCK3ZxYLr
+              username: rabbitmq
+          hosts:
+            default: rabbitmq
+          path: /octavia
+          statefulset:
+            name: openstack-rabbitmq-rabbitmq
+            replicas: 1
+        oslo_messaging_notifications:
+          auth:
+            octavia:
+              password: xcKEJVAYZflpAmEWcyzTKpvNlJycCLvc
+              username: octaviadRDTSj1
+          host_fqdn_override: {}
+          hosts:
+            default: rabbitmq
+          path: /openstack
+          port:
+            amqp:
+              default: 5672
+            http:
+              default: 15672
+          scheme: rabbit
+          statefulset:
+            name: openstack-rabbitmq-rabbitmq
+            replicas: 1
+      images:
+        tags:
+          bootstrap: bootstrap:latest
+          create_resources: create-resources:latest
+          db_drop: db-drop:latest
+          db_init: db-init:latest
+          dep_check: dep-check:latest
+          image_repo_sync: image-repo-sync:latest
+          ks_endpoints: ks-endpoints:latest
+          ks_service: ks-service:latest
+          ks_user: ks-user:latest
+          octavia_api: octavia-api:latest
+          octavia_db_sync: octavia-db-sync:latest
+          octavia_db_sync_persistence: octavia-db-sync-persistence:latest
+          octavia_driver_agent: octavia-driver-agent:latest
+          octavia_health_manager: octavia-health-manager:latest
+          octavia_health_manager_init: octavia-health-manager-init:latest
+          octavia_housekeeping: octavia-housekeeping:latest
+          octavia_worker: octavia-worker:latest
+          openvswitch_vswitchd: openvswitch-vswitchd:latest
+          rabbit_init: rabbit-init:latest
+          test: test:latest
+      jobs:
+        create_resources:
+          restartPolicy: Never
+        ks_endpoints:
+          restartPolicy: Never
+        ks_service:
+          restartPolicy: Never
+        ks_user:
+          restartPolicy: Never
+      labels:
+        health_manager:
+          node_selector_key: openstack-gateway
+          node_selector_value: enabled
+        housekeeping:
+          node_selector_key: openstack-gateway
+          node_selector_value: enabled
+        worker:
+          node_selector_key: openstack-gateway
+          node_selector_value: enabled
+      manifests:
+        job_db_sync_persistence: true
+        job_rabbit_init: false
+        network_policy: false
+        secret_amphora_ssh_key: true
+        secret_ca_bundle: true
+        secret_octavia_certs: false
+      octavia:
+        settings:
+          amphora_image_checksum: null
+          amphora_image_url: https://amphora-image-url/latest
+          enable_amphorav2: true
+          lbmgmt_subnets:
+            - pool_end: 192.168.0.254
+              pool_start: 192.168.0.1
+              range: 192.168.0.0/24
+      pod:
+        mounts:
+          octavia_api:
+            octavia_api:
+              volumeMounts:
+              - mountPath: /etc/octavia/certs/private/cakey.pem
+                name: octavia-certs
+                subPath: key
+              - mountPath: /etc/octavia/certs/ca_01.pem
+                name: octavia-certs
+                subPath: cert
+              - mountPath: /etc/octavia/certs/client.pem
+                name: octavia-certs
+                subPath: cert_all
+              volumes:
+              - name: octavia-certs
+                secret:
+                  defaultMode: 420
+                  secretName: octavia-certs
+            octavia_driver_agent:
+              volumeMounts:
+              - mountPath: /etc/octavia/certs/private/cakey.pem
+                name: octavia-certs
+                subPath: key
+              - mountPath: /etc/octavia/certs/ca_01.pem
+                name: octavia-certs
+                subPath: cert
+              - mountPath: /etc/octavia/certs/client.pem
+                name: octavia-certs
+                subPath: cert_all
+              volumes:
+              - name: octavia-certs
+                secret:
+                  defaultMode: 420
+                  secretName: octavia-certs
+          octavia_health_manager:
+            octavia_health_manager:
+              volumeMounts:
+              - mountPath: /etc/octavia/certs/private/cakey.pem
+                name: octavia-certs
+                subPath: key
+              - mountPath: /etc/octavia/certs/ca_01.pem
+                name: octavia-certs
+                subPath: cert
+              - mountPath: /etc/octavia/certs/client.pem
+                name: octavia-certs
+                subPath: cert_all
+              volumes:
+              - name: octavia-certs
+                secret:
+                  defaultMode: 420
+                  secretName: octavia-certs
+          octavia_housekeeping:
+            octavia_housekeeping:
+              volumeMounts:
+              - mountPath: /etc/octavia/certs/private/cakey.pem
+                name: octavia-certs
+                subPath: key
+              - mountPath: /etc/octavia/certs/ca_01.pem
+                name: octavia-certs
+                subPath: cert
+              - mountPath: /etc/octavia/certs/client.pem
+                name: octavia-certs
+                subPath: cert_all
+              volumes:
+              - name: octavia-certs
+                secret:
+                  defaultMode: 420
+                  secretName: octavia-certs
+          octavia_worker:
+            octavia_worker:
+              volumeMounts:
+              - mountPath: /etc/octavia/certs/private/cakey.pem
+                name: octavia-certs
+                subPath: key
+              - mountPath: /etc/octavia/certs/ca_01.pem
+                name: octavia-certs
+                subPath: cert
+              - mountPath: /etc/octavia/certs/client.pem
+                name: octavia-certs
+                subPath: cert_all
+              volumes:
+              - name: octavia-certs
+                secret:
+                  defaultMode: 420
+                  secretName: octavia-certs
+        replicas:
+          health_manager: 3
+          housekeeping: 3
+          worker: 3
+        probes:
+          octavia_api:
+            octavia_api:
+              liveness:
+                enabled: true
+                params:
+                  initialDelaySeconds: 15
+                  timeoutSeconds: 5
+              readiness:
+                enabled: true
+                params:
+                  initialDelaySeconds: 15
+                  timeoutSeconds: 5
+      secrets:
+        amphora_ssh_key:
+          private: TE9BRCBCQUxBTkNFUiBURVNUIFNTSCBQUklWQVRFIEtFWQ==
+          public: TE9BRCBCQUxBTkNFUiBURVNUIFNTSCBQVUJMSUMgS0VZ

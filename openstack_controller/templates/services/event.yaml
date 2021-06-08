@@ -33,6 +33,7 @@ spec:
         {%- endif %}
 {%- endfor %}
       conf:
+        policy: {{ service_policy }}
         paste:
           composite:panko+keystone:
             use: egg:Paste#urlmap

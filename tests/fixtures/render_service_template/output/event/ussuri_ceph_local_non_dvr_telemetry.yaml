@@ -18,6 +18,7 @@ spec:
           panko_events_cleaner: panko-events-cleaner:latest
           image_repo_sync: image-repo-sync:latest
       conf:
+        policy: {}
         paste:
           composite:panko+keystone:
             use: egg:Paste#urlmap

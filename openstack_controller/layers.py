@@ -162,6 +162,15 @@ def services(spec, logger, **kwargs):
     return to_apply, to_delete
 
 
+def _get_default_policy(spec, chart):
+    openstack_version = spec["openstack_version"]
+    return yaml.safe_load(
+        ENV.get_template(f"{openstack_version}/policies/{chart}.yaml").render(
+            spec=spec,
+        )
+    )
+
+
 @kopf_exception
 def render_service_template(
     service, body, meta, spec, logger, **template_args
@@ -171,12 +180,22 @@ def render_service_template(
 
     # get supported openstack versions
     openstack_versions = [v for v in constants.OpenStackVersion.__members__]
+    service_policy = {}
+    # Add default policies
+    if service in constants.OS_POLICY_SERVICES:
+        chart = constants.OS_POLICY_SERVICES[service]
+        service_policy = _get_default_policy(spec, chart)
+        merger.merge(
+            service_policy,
+            spec.get("features", {}).get("policies", {}).get(chart, {}),
+        )
 
     text = tpl.render(
         body=body,
         meta=meta,
         spec=spec,
         openstack_versions=openstack_versions,
+        service_policy=service_policy,
         **template_args,
     )
     data = yaml.safe_load(text)

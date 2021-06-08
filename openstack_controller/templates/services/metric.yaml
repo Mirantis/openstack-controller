@@ -36,6 +36,7 @@ spec:
         {%- endif %}
 {%- endfor %}
       conf:
+        policy: {{ service_policy }}
         apache: |
           {%- raw %}
           {{- $portInt := tuple "metric" "internal" "api" $ | include "helm-toolkit.endpoints.endpoint_port_lookup" }}
