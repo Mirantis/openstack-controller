@@ -1,22 +1,7 @@
-"context_is_admin": "role:admin"
-
-# Return the user and project the requestshould be limited to
-# GET  /v2/events
-# GET  /v2/events/{message_id}
-# Intended scope(s): system
-"segregation": "role:admin and system_scope:all"
-
-# DEPRECATED
-# "segregation":"rule:context_is_admin" has been deprecated since W in
-# favor of "segregation":"role:admin and system_scope:all".
-# The events API now supports system scope and default roles.
-
-# Return all events matching the query filters.
-# GET  /v2/events
-# Intended scope(s): system, project
-"telemetry:events:index": ""
-
-# Return a single event with the given message id.
-# GET  /v2/events/{message_id}
-# Intended scope(s): system, project
-"telemetry:events:show": ""
+# Policy copied from openstack-helm
+# Use static policy unless bootstrap procedure
+# is fixed to work with system scope tokens PRODX-15152
+context_is_admin: role:admin
+segregation: rule:context_is_admin
+telemetry:events:index: ''
+telemetry:events:show: ''

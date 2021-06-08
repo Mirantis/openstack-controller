@@ -1,343 +1,55 @@
-# Defines the default rule used for policies that historically had an
-# empty policy in the supplied policy.json file.
-"default": ""
-
-# DEPRECATED
-# "default":"role:admin" has been deprecated since Ussuri in favor of
-# "default":"".
-# In order to allow operators to accept the default policies from code
-# by not defining them in the policy file, while still working with
-# old policy files that rely on the ``default`` rule for policies that
-# are not specified in the policy file, the ``default`` rule must now
-# be explicitly set to ``"role:admin"`` when that is the desired
-# default for unspecified rules.
-
-# Defines the rule for the is_admin:True check.
-"context_is_admin": "role:admin"
-
-# Create new image
-# POST  /v2/images
-# Intended scope(s): system, project
-"add_image": "role:admin or (role:member and project_id:%(project_id)s)"
-
-# DEPRECATED
-# "add_image":"rule:default" has been deprecated since W in favor of
-# "add_image":"role:admin or (role:member and
-# project_id:%(project_id)s)".
-# The image API now supports and default roles.
-
-# Deletes the image
-# DELETE  /v2/images/{image_id}
-# Intended scope(s): system, project
-"delete_image": "role:admin or (role:member and project_id:%(project_id)s)"
-
-# DEPRECATED
-# "delete_image":"rule:default" has been deprecated since W in favor
-# of "delete_image":"role:admin or (role:member and
-# project_id:%(project_id)s)".
-# The image API now supports and default roles.
-
-# Get specified image
-# GET  /v2/images/{image_id}
-# Intended scope(s): system, project
-"get_image": "role:admin or (role:reader and (project_id:%(project_id)s or project_id:%(member_id)s or "community":%(visibility)s or "public":%(visibility)s))"
-
-# DEPRECATED
-# "get_image":"rule:default" has been deprecated since W in favor of
-# "get_image":"role:admin or (role:reader and
-# (project_id:%(project_id)s or project_id:%(member_id)s or
-# "community":%(visibility)s or "public":%(visibility)s))".
-# The image API now supports and default roles.
-
-# Get all available images
-# GET  /v2/images
-# Intended scope(s): system, project
-"get_images": "role:admin or (role:reader and project_id:%(project_id)s)"
-
-# DEPRECATED
-# "get_images":"rule:default" has been deprecated since W in favor of
-# "get_images":"role:admin or (role:reader and
-# project_id:%(project_id)s)".
-# The image API now supports and default roles.
-
-# Updates given image
-# PATCH  /v2/images/{image_id}
-# Intended scope(s): system, project
-"modify_image": "role:admin or (role:member and project_id:%(project_id)s)"
-
-# DEPRECATED
-# "modify_image":"rule:default" has been deprecated since W in favor
-# of "modify_image":"role:admin or (role:member and
-# project_id:%(project_id)s)".
-# The image API now supports and default roles.
-
-# Publicize given image
-# PATCH  /v2/images/{image_id}
-# Intended scope(s): system, project
-"publicize_image": "role:admin"
-
-# Communitize given image
-# PATCH  /v2/images/{image_id}
-# Intended scope(s): system, project
-"communitize_image": "role:admin or (role:member and project_id:%(project_id)s)"
-
-# DEPRECATED
-# "communitize_image":"rule:default" has been deprecated since W in
-# favor of "communitize_image":"role:admin or (role:member and
-# project_id:%(project_id)s)".
-# The image API now supports and default roles.
-
-# Downloads given image
-# GET  /v2/images/{image_id}/file
-# Intended scope(s): system, project
-"download_image": "role:admin or (role:member and (project_id:%(project_id)s or project_id:%(member_id)s or "community":%(visibility)s or "public":%(visibility)s))"
-
-# DEPRECATED
-# "download_image":"rule:default" has been deprecated since W in favor
-# of "download_image":"role:admin or (role:member and
-# (project_id:%(project_id)s or project_id:%(member_id)s or
-# "community":%(visibility)s or "public":%(visibility)s))".
-# The image API now supports and default roles.
-
-# Uploads data to specified image
-# PUT  /v2/images/{image_id}/file
-# Intended scope(s): system, project
-"upload_image": "role:admin or (role:member and project_id:%(project_id)s)"
-
-# DEPRECATED
-# "upload_image":"rule:default" has been deprecated since W in favor
-# of "upload_image":"role:admin or (role:member and
-# project_id:%(project_id)s)".
-# The image API now supports and default roles.
-
-# Deletes the location of given image
-# PATCH  /v2/images/{image_id}
-# Intended scope(s): system, project
-"delete_image_location": "role:admin"
-
-# DEPRECATED
-# "delete_image_location":"rule:default" has been deprecated since W
-# in favor of "delete_image_location":"role:admin".
-# The image API now supports and default roles.
-
-# Reads the location of the image
-# GET  /v2/images/{image_id}
-# Intended scope(s): system, project
-"get_image_location": "role:admin or (role:reader and project_id:%(project_id)s)"
-
-# DEPRECATED
-# "get_image_location":"rule:default" has been deprecated since W in
-# favor of "get_image_location":"role:admin or (role:reader and
-# project_id:%(project_id)s)".
-# The image API now supports and default roles.
-
-# Sets location URI to given image
-# PATCH  /v2/images/{image_id}
-# Intended scope(s): system, project
-"set_image_location": "role:admin or (role:member and project_id:%(project_id)s)"
-
-# DEPRECATED
-# "set_image_location":"rule:default" has been deprecated since W in
-# favor of "set_image_location":"role:admin or (role:member and
-# project_id:%(project_id)s)".
-# The image API now supports and default roles.
-
-# Create image member
-# POST  /v2/images/{image_id}/members
-# Intended scope(s): system, project
-"add_member": "role:admin or (role:member and project_id:%(project_id)s)"
-
-# DEPRECATED
-# "add_member":"rule:default" has been deprecated since W in favor of
-# "add_member":"role:admin or (role:member and
-# project_id:%(project_id)s)".
-# The image API now supports and default roles.
-
-# Delete image member
-# DELETE  /v2/images/{image_id}/members/{member_id}
-# Intended scope(s): system, project
-"delete_member": "role:admin or (role:member and project_id:%(project_id)s)"
-
-# DEPRECATED
-# "delete_member":"rule:default" has been deprecated since W in favor
-# of "delete_member":"role:admin or (role:member and
-# project_id:%(project_id)s)".
-# The image API now supports and default roles.
-
-# Show image member details
-# GET  /v2/images/{image_id}/members/{member_id}
-# Intended scope(s): system, project
-"get_member": "role:admin or (role:reader and project_id:%(project_id)s)"
-
-# DEPRECATED
-# "get_member":"rule:default" has been deprecated since W in favor of
-# "get_member":"role:admin or (role:reader and
-# project_id:%(project_id)s)".
-# The image API now supports and default roles.
-
-# List image members
-# GET  /v2/images/{image_id}/members
-# Intended scope(s): system, project
-"get_members": "role:admin or (role:reader and project_id:%(project_id)s)"
-
-# DEPRECATED
-# "get_members":"rule:default" has been deprecated since W in favor of
-# "get_members":"role:admin or (role:reader and
-# project_id:%(project_id)s)".
-# The image API now supports and default roles.
-
-# Update image member
-# PUT  /v2/images/{image_id}/members/{member_id}
-# Intended scope(s): system, project
-"modify_member": "role:admin or (role:member and project_id:%(project_id)s)"
-
-# DEPRECATED
-# "modify_member":"rule:default" has been deprecated since W in favor
-# of "modify_member":"role:admin or (role:member and
-# project_id:%(project_id)s)".
-# The image API now supports and default roles.
-
-# Manage image cache
-# Intended scope(s): system, project
-"manage_image_cache": "role:admin"
-
-# Deactivate image
-# POST  /v2/images/{image_id}/actions/deactivate
-# Intended scope(s): system, project
-"deactivate": "role:admin or (role:member and project_id:%(project_id)s)"
-
-# DEPRECATED
-# "deactivate":"rule:default" has been deprecated since W in favor of
-# "deactivate":"role:admin or (role:member and
-# project_id:%(project_id)s)".
-# The image API now supports and default roles.
-
-# Reactivate image
-# POST  /v2/images/{image_id}/actions/reactivate
-# Intended scope(s): system, project
-"reactivate": "role:admin or (role:member and project_id:%(project_id)s)"
-
-# DEPRECATED
-# "reactivate":"rule:default" has been deprecated since W in favor of
-# "reactivate":"role:admin or (role:member and
-# project_id:%(project_id)s)".
-# The image API now supports and default roles.
-
-# Copy existing image to other stores
-# POST  /v2/images/{image_id}/import
-# Intended scope(s): system, project
-"copy_image": "role:admin"
-
-# Get an image task.
-#
-# This granular policy controls access to tasks, both from the tasks
-# API as well as internal locations in Glance that use tasks (like
-# import). Practically this cannot be more restrictive than the policy
-# that controls import or things will break, and changing it from the
-# default is almost certainly not what you want. Access to the
-# external tasks API should be restricted as desired by the
-# tasks_api_access policy. This may change in the future.
-# GET  /v2/tasks/{task_id}
-# Intended scope(s): system, project
-"get_task": "rule:default"
-
-# List tasks for all images.
-#
-# This granular policy controls access to tasks, both from the tasks
-# API as well as internal locations in Glance that use tasks (like
-# import). Practically this cannot be more restrictive than the policy
-# that controls import or things will break, and changing it from the
-# default is almost certainly not what you want. Access to the
-# external tasks API should be restricted as desired by the
-# tasks_api_access policy. This may change in the future.
-# GET  /v2/tasks
-# Intended scope(s): system, project
-"get_tasks": "rule:default"
-
-# List tasks for all images.
-#
-# This granular policy controls access to tasks, both from the tasks
-# API as well as internal locations in Glance that use tasks (like
-# import). Practically this cannot be more restrictive than the policy
-# that controls import or things will break, and changing it from the
-# default is almost certainly not what you want. Access to the
-# external tasks API should be restricted as desired by the
-# tasks_api_access policy. This may change in the future.
-# POST  /v2/tasks
-# Intended scope(s): system, project
-"add_task": "rule:default"
-
-# DEPRECATED
-# "modify_task" has been deprecated since W.
-# This policy check has never been honored by the API. It will be
-# removed in a future release.
-# This policy is not used.
-# DELETE  /v2/tasks/{task_id}
-# Intended scope(s): system, project
-"modify_task": "rule:default"
-
-# This is a generic blanket policy for protecting all task APIs. It is
-# not granular and will not allow you to separate writable and
-# readable task operations into different roles.
-# GET  /v2/tasks/{task_id}
-# GET  /v2/tasks
-# POST  /v2/tasks
-# DELETE  /v2/tasks/{task_id}
-# Intended scope(s): system, project
-"tasks_api_access": "role:admin"
-
-"metadef_default": ""
-
-"metadef_admin": "role:admin"
-
-"get_metadef_namespace": "rule:metadef_default"
-
-"get_metadef_namespaces": "rule:metadef_default"
-
-"modify_metadef_namespace": "rule:metadef_admin"
-
-"add_metadef_namespace": "rule:metadef_admin"
-
-"delete_metadef_namespace": "rule:metadef_admin"
-
-"get_metadef_object": "rule:metadef_default"
-
-"get_metadef_objects": "rule:metadef_default"
-
-"modify_metadef_object": "rule:metadef_admin"
-
-"add_metadef_object": "rule:metadef_admin"
-
-"delete_metadef_object": "rule:metadef_admin"
-
-"list_metadef_resource_types": "rule:metadef_default"
-
-"get_metadef_resource_type": "rule:metadef_default"
-
-"add_metadef_resource_type_association": "rule:metadef_admin"
-
-"remove_metadef_resource_type_association": "rule:metadef_admin"
-
-"get_metadef_property": "rule:metadef_default"
-
-"get_metadef_properties": "rule:metadef_default"
-
-"modify_metadef_property": "rule:metadef_admin"
-
-"add_metadef_property": "rule:metadef_admin"
-
-"remove_metadef_property": "rule:metadef_admin"
-
-"get_metadef_tag": "rule:metadef_default"
-
-"get_metadef_tags": "rule:metadef_default"
-
-"modify_metadef_tag": "rule:metadef_admin"
-
-"add_metadef_tag": "rule:metadef_admin"
-
-"add_metadef_tags": "rule:metadef_admin"
-
-"delete_metadef_tag": "rule:metadef_admin"
-
-"delete_metadef_tags": "rule:metadef_admin"
+# Policy copied from openstack-helm
+# Use static policy unless bootstrap procedure
+# is fixed to work with system scope tokens PRODX-15152
+context_is_admin: role:admin
+default: role:admin
+add_image: ''
+delete_image: ''
+get_image: ''
+get_images: ''
+modify_image: ''
+publicize_image: role:admin
+copy_from: ''
+download_image: ''
+upload_image: ''
+delete_image_location: ''
+get_image_location: ''
+set_image_location: ''
+add_member: ''
+delete_member: ''
+get_member: ''
+get_members: ''
+modify_member: ''
+manage_image_cache: role:admin
+get_task: role:admin
+get_tasks: role:admin
+add_task: role:admin
+modify_task: role:admin
+deactivate: ''
+reactivate: ''
+get_metadef_namespace: ''
+get_metadef_namespaces: ''
+modify_metadef_namespace: ''
+add_metadef_namespace: ''
+delete_metadef_namespace: ''
+delete_metadef_object: ''
+get_metadef_object: ''
+get_metadef_objects: ''
+modify_metadef_object: ''
+add_metadef_object: ''
+list_metadef_resource_types: ''
+get_metadef_resource_type: ''
+add_metadef_resource_type_association: ''
+remove_metadef_resource_type_association: ''
+get_metadef_property: ''
+get_metadef_properties: ''
+modify_metadef_property: ''
+add_metadef_property: ''
+remove_metadef_property: ''
+get_metadef_tag: ''
+get_metadef_tags: ''
+modify_metadef_tag: ''
+add_metadef_tag: ''
+delete_metadef_tag: ''
+add_metadef_tags: ''
+delete_metadef_tags: ''
