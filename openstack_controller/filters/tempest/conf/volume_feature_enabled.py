@@ -16,6 +16,7 @@ class VolumeFeatureEnabled(base_section.BaseSection):
         "manage_volume",
         "multi_backend",
         "snapshot",
+        "instance_locality_enabled",
     ]
 
     @property
@@ -61,3 +62,10 @@ class VolumeFeatureEnabled(base_section.BaseSection):
     @property
     def snapshot(self):
         pass
+
+    @property
+    def instance_locality_enabled(self):
+        if self.get_values_item("nova", "conf.nova.libvirt.images_type") in [
+            "lvm",
+        ]:
+            return True
