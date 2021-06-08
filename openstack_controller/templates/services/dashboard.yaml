@@ -36,6 +36,10 @@ spec:
       network:
         proxy:
 {% include 'base/_proxy_vars.yaml' %}
+        dashboard:
+          ingress:
+            annotations:
+              nginx.ingress.kubernetes.io/proxy-body-size: "0"
       endpoints:
         cluster_domain_suffix: {{ spec.internal_domain_name }}
 {% include 'base/_admin_identity.yaml' %}
