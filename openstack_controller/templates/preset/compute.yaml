@@ -353,6 +353,7 @@ services:
               build_timeout: 600
             load_balancer:
               lb_build_timeout: 1500
+              build_timeout: 600
             validation:
               image_ssh_password: gocubsgo
               image_ssh_user: cirros
