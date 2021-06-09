@@ -9,6 +9,10 @@ spec:
           env_vars:
             HTTP_PROXY: http://127.0.0.1:3128
             NO_PROXY: .svc.cluster.local
+        dashboard:
+          ingress:
+            annotations:
+              nginx.ingress.kubernetes.io/proxy-body-size: "0"
       conf:
         horizon:
           policy:
