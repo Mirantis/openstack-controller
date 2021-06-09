@@ -343,6 +343,8 @@ services:
             - (?:patrole_tempest_plugin)
             # The test below is skipped while upstream bug (https://bugs.launchpad.net/tempest/+bug/1317133) is not fixed.
             - (?:tempest.api.object_storage.test_container_sync_middleware.ContainerSyncMiddlewareTest.test_container_synchronization)
+            # Do not run test that plays plugs real computes to agregates on the fly, dengerous for production PRODX-14770
+            - (?:tempest.scenario.test_aggregates_basic_ops.TestAggregatesBasicOps.test_aggregate_basic_ops)
           script: |
             tempest run --config-file /etc/tempest/tempest.conf -w 4 --smoke --blacklist-file  /etc/tempest/test-blacklist
           tempest:
