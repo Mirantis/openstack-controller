@@ -54,6 +54,11 @@ features:
     user:
       username: stacklight
 services:
+  image:
+    glance:
+      values:
+        conf:
+          enable_iscsi: true
   ingress:
     ingress:
       values:
