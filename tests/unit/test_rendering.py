@@ -54,7 +54,6 @@ def test_render_service_template(gdp_mock, common_template_args):
     # Remove excluded services once contexts with these services are added
     excluded_services = {
         "tempest",
-        "baremetal",
         "object-storage",
     }
     infra_services = {

@@ -1,0 +1,5 @@
+---
+fixes:
+  - |
+    Adjust default list of ironic management interfaces for queens.
+    More details - `PRODX-15179 <https://mirantis.jira.com/browse/PRODX-15179>`__

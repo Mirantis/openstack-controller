@@ -364,6 +364,35 @@ instance-ha:
   - account: test
     password: KI40mJVQ9fZP3MBZLpgrFSf2nqZIbbqg
     username: testC7BY
+baremetal:
+  credentials: &credentials_baremetal
+    database:
+      user:
+        password: knwFGHdZ6KCqcKqBidXXEqiEpZhBD7h4
+        username: ironicdrGjrFm
+    memcached: 4zDhycwch09UPx4j
+    messaging:
+      user:
+        password: TRRhbnUMsepnqSzyJngJtgZD9gRu0Fwy
+        username: ironicx7uHpit
+    metadata_secret: mN0aLDTcg1AVqyLWNDjCd2Jz6DA61cZJ
+    notifications:
+      user:
+        password: hL3STFyPBLCdR2qUCdaGEUeRB5jRIFPf
+        username: ironictvAcFA3
+  service_creds:
+  - account: ironic
+    password: 9d4CIP5ismqTa7l5N5FdD8MAuFMXx9EV
+    username: ironicAhFsr
+  - account: test
+    password: q38BqVBqRH8mwfvI3uZeTmwe7JhKm3q1
+    username: testLJtA
+  - account: nova
+    password: BLFKrb8JhAMBb1v9BnRGDckMaYY7XUbq
+    username: novaZzHG
+  - account: neutron
+    password: KBecvsPZsWBFzDqYnevHWArm7tFycZKr
+    username: neutronLeRjiDsyT
 messaging:
   credentials:
     block-storage: *credentials_block-storage
@@ -378,6 +407,7 @@ messaging:
     orchestration: *credentials_orchestration
     placement: *credentials_placement
     instance-ha: *credentials_instance-ha
+    barmetal: *credentials_baremetal
   services:
     block-storage: null
     compute: null
