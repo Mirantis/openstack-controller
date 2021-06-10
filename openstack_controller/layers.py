@@ -164,10 +164,15 @@ def services(spec, logger, **kwargs):
 
 def _get_default_policy(spec, chart):
     openstack_version = spec["openstack_version"]
-    return yaml.safe_load(
-        ENV.get_template(f"{openstack_version}/policies/{chart}.yaml").render(
-            spec=spec,
+    return (
+        yaml.safe_load(
+            ENV.get_template(
+                f"{openstack_version}/policies/{chart}.yaml"
+            ).render(
+                spec=spec,
+            )
         )
+        or {}
     )
 
 
