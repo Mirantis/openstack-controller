@@ -23,15 +23,9 @@
           50dcf89e-370a-47d2-a0eb-c56dd77c968e:
             reason: PRODX-12232
             # stepler/horizon/tests/test_images.py::TestAnyOne::test_edit_image
-          619298ae-f9f5-4afa-a50b-c3f5faa38c81:
-            reason: Locators update is needed
-            # stepler/horizon/tests/test_images.py::TestAnyOne::test_create_volume_from_image
           3167e844-1d13-44d5-aa1e-85c58c086240:
             reason: Locators update is needed
             # stepler/horizon/tests/test_images.py::TestAnyOne::test_set_image_disk_and_ram_size
-          3c98d922-df89-4701-a4b1-c5258fda5d7b:
-            reason: Locators update is needed
-            # stepler/horizon/tests/test_images.py::TestAnyOne::test_launch_instance_from_image
           c42d793b-efa9-46c4-b031-9f7bf7a49cd1:
             reason: Locators update is needed
             # stepler/horizon/tests/test_images.py::TestAnyOne::test_edit_image_disk_and_ram
@@ -104,12 +98,6 @@
           8c85f869-993b-4447-98e4-fc1e4ebacb4e:
             reason: PRODX-12232
             # stepler/horizon/tests/test_images.py::TestAnyOne::test_edit_image
-          f2bb54d2-f926-4c7c-85ce-2737e109000d:
-            reason: Locators update is needed
-            # stepler/horizon/tests/test_images.py::TestAnyOne::test_create_volume_from_image
-          782940f1-f958-4275-b716-232a56fea743:
-            reason: Locators update is needed
-            # stepler/horizon/tests/test_images.py::TestAnyOne::test_launch_instance_from_image
           796fcdf5-c258-4acc-8d93-786641615c48:
             reason: Locators update is needed
             # stepler/horizon/tests/test_images.py::TestAnyOne::test_edit_image_disk_and_ram
