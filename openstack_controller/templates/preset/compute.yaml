@@ -297,6 +297,11 @@ services:
             - (?:tempest.api.object_storage.test_container_sync_middleware.ContainerSyncMiddlewareTest.test_container_synchronization)
             # Do not run test that plays plugs real computes to agregates on the fly, dengerous for production PRODX-14770
             - (?:tempest.scenario.test_aggregates_basic_ops.TestAggregatesBasicOps.test_aggregate_basic_ops)
+            # Skip bgpvpn tempest tests until PRODX-14720 will be resolved
+            - (?:neutron_tempest_plugin.bgpvpn.scenario.test_bgpvpn_basic.TestBGPVPNBasic.test_bgpvpn_negative_delete_bgpvpn)
+            - (?:neutron_tempest_plugin.bgpvpn.scenario.test_bgpvpn_basic.TestBGPVPNBasic.test_bgpvpn_negative_delete_net_association)
+            - (?:neutron_tempest_plugin.bgpvpn.scenario.test_bgpvpn_basic.TestBGPVPNBasic.test_bgpvpn_negative_delete_router_association)
+            - (?:neutron_tempest_plugin.bgpvpn.scenario.test_bgpvpn_basic.TestBGPVPNBasic.test_bgpvpn_port_association_local_pref)
           script: |
             tempest run --config-file /etc/tempest/tempest.conf -w 4 --smoke --blacklist-file  /etc/tempest/test-blacklist
           tempest:
