@@ -468,7 +468,9 @@ spec:
         user_secret_name: {{ ceph.nova.secrets }}
 {%- endif %}
       conf:
-        policy: {{ service_policy }}
+        policy.d:
+          01-controller-default.yaml: {{ service_policy }}
+          02-custom.yaml: {{ spec.get("features", {}).get("policies", {}).get("nova", {}) }}
         ceph:
 {%- if ceph_enabled %}
           enabled: true

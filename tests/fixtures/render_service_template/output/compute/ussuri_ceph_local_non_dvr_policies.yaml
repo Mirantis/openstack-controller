@@ -31,8 +31,10 @@ spec:
         configmap: rook-ceph-config
         user_secret_name: nova-rbd-keyring
       conf:
-        policy:
-          nova_custom: value
+        policy.d:
+          01-controller-default.yaml: {}
+          02-custom.yaml:
+            nova_custom: value
         ceph:
           cinder:
             keyring: AQDNZLJf8S+fORAA6hg50Jo+vBq07kxtBXB9PQ==

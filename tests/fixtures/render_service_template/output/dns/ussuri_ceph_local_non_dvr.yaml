@@ -4,7 +4,9 @@ spec:
     name: openstack-designate
     values:
       conf:
-        policy: {}
+        policy.d:
+          01-controller-default.yaml: {}
+          02-custom.yaml: {}
         designate:
           keystone_authtoken:
             memcache_secret_key: zdLlg6VAsGH6E7tX

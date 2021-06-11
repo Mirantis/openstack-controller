@@ -4,8 +4,10 @@ spec:
     name: openstack-placement
     values:
       conf:
-        policy:
-          placement_custom: value
+        policy.d:
+          01-controller-default.yaml: {}
+          02-custom.yaml:
+            placement_custom: value
         logging:
           logger_placement:
             level: INFO

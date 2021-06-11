@@ -4,8 +4,10 @@ spec:
     name: openstack-masakari
     values:
       conf:
-        policy:
-          masakari_custom: value
+        policy.d:
+          01-controller-default.yaml: {}
+          02-custom.yaml:
+            masakari_custom: value
         masakari:
           DEFAULT:
             os_privileged_user_name: admin

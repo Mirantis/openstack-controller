@@ -4,7 +4,9 @@ spec:
     name: openstack-heat
     values:
       conf:
-        policy: {}
+        policy.d:
+          01-controller-default.yaml: {}
+          02-custom.yaml: {}
         heat:
           keystone_authtoken:
             memcache_secret_key: 7JNLzlMydG5nxe80

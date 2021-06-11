@@ -4,7 +4,9 @@ spec:
     name: openstack-barbican
     values:
       conf:
-        policy: {}
+        policy.d:
+          01-controller-default.yaml: {}
+          02-custom.yaml: {}
         barbican:
           DEFAULT:
             sql_idle_timeout: 3600

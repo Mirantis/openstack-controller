@@ -500,7 +500,9 @@ spec:
           openstack network set {{ floating_network.get('name', 'public') }} --external {% if not tungstenfabric_enabled %} --default {% endif %}
       {%- endif %}
       conf:
-        policy: {{ service_policy }}
+        policy.d:
+          01-controller-default.yaml: {{ service_policy }}
+          02-custom.yaml: {{ spec.get("features", {}).get("policies", {}).get("neutron", {}) }}
         paste:
           app:neutronversions:
             paste.app_factory: neutron.pecan_wsgi.app:versions_factory

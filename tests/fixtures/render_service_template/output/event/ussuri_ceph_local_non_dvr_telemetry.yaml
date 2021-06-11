@@ -18,7 +18,9 @@ spec:
           panko_events_cleaner: panko-events-cleaner:latest
           image_repo_sync: image-repo-sync:latest
       conf:
-        policy: {}
+        policy.d:
+          01-controller-default.yaml: {}
+          02-custom.yaml: {}
         paste:
           composite:panko+keystone:
             use: egg:Paste#urlmap

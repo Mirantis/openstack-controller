@@ -10,7 +10,9 @@ spec:
             HTTP_PROXY: http://127.0.0.1:3128
             NO_PROXY: .svc.cluster.local
       conf:
-        policy: {}
+        policy.d:
+          01-controller-default.yaml: {}
+          02-custom.yaml: {}
         logging:
           logger_octavia:
             level: INFO

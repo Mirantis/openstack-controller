@@ -49,7 +49,9 @@ spec:
           logger_aodh:
             level: {{ spec.get('features', {}).get('logging', {}).get('aodh', {}).get('level', 'INFO') }}
             propagate: 0
-        policy: {{ service_policy }}
+        policy.d:
+          01-controller-default.yaml: {{ service_policy }}
+          02-custom.yaml: {{ spec.get("features", {}).get("policies", {}).get("aodh", {}) }}
       dependencies:
         static:
           db_init:

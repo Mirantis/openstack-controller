@@ -9,7 +9,9 @@ spec:
         secret_fernet_keys:
           secret: 'keystone-fernet-data'
       conf:
-        policy: {}
+        policy.d:
+          01-controller-default.yaml: {}
+          02-custom.yaml: {}
         keystone:
           cache:
             backend: oslo_cache.memcache_pool

@@ -48,7 +48,9 @@ spec:
         configmap: rook-ceph-config
         user_secret_name: cinder-rbd-keyring
       conf:
-        policy: {}
+        policy.d:
+          01-controller-default.yaml: {}
+          02-custom.yaml: {}
         standalone_backends:
           daemonset:
             conf:

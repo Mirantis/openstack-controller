@@ -64,7 +64,9 @@ spec:
         secret_fernet_keys:
           secret: {{ fernet_secret_name }}
       conf:
-        policy: {{ service_policy }}
+        policy.d:
+          01-controller-default.yaml: {{ service_policy }}
+          02-custom.yaml: {{ spec.get("features", {}).get("policies", {}).get("keystone", {}) }}
 {%- if keystone_keycloak.get('enabled', False) %}
         ks_federations:
           oidc:

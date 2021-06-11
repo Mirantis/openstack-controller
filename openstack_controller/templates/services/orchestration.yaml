@@ -119,7 +119,9 @@ spec:
         job_rabbit_init: false
         secret_ca_bundle: true
       conf:
-        policy: {{ service_policy }}
+        policy.d:
+          01-controller-default.yaml: {{ service_policy }}
+          02-custom.yaml: {{ spec.get("features", {}).get("policies", {}).get("heat", {}) }}
         heat:
           keystone_authtoken:
             memcache_security_strategy: ENCRYPT

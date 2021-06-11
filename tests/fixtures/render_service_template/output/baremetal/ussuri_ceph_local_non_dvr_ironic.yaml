@@ -51,7 +51,9 @@ spec:
           logger_ironic:
             level: INFO
             propagate: 0
-        policy: {}
+        policy.d:
+          01-controller-default.yaml: {}
+          02-custom.yaml: {}
       dependencies:
         static:
           db_init:

@@ -141,7 +141,9 @@ spec:
                 os_distro: ubuntu
               source_url: {{ default_binary_base_url }}/openstack/bin/ubuntu/18.04/
       conf:
-        policy: {{ service_policy }}
+        policy.d:
+          01-controller-default.yaml: {{ service_policy }}
+          02-custom.yaml: {{ spec.get("features", {}).get("policies", {}).get("glance", {}) }}
         glance:
           cors:
             allow_headers: Content-Type,Cache-Control,Content-Language,Expires,Last-Modified,Pragma,X-Custom-Header,X-Auth-Token

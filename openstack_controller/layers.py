@@ -125,10 +125,6 @@ def render_service_template(
     if service in constants.OS_POLICY_SERVICES:
         chart = constants.OS_POLICY_SERVICES[service]
         service_policy = _get_default_policy(spec, chart)
-        merger.merge(
-            service_policy,
-            spec.get("features", {}).get("policies", {}).get(chart, {}),
-        )
 
     text = tpl.render(
         body=body,

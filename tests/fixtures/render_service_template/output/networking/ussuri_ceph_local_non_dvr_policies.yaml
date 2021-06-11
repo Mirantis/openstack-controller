@@ -135,8 +135,10 @@ spec:
           \ router create r1\nopenstack router set --external-gateway public r1\n\
           openstack network set public --external  --default \n"
       conf:
-        policy:
-          neutron_custom: value
+        policy.d:
+          01-controller-default.yaml: {}
+          02-custom.yaml:
+            neutron_custom: value
         auto_bridge_add:
           br-ex: veth-phy
         ironic:

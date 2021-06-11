@@ -91,7 +91,9 @@ spec:
             jobs:
               - openstack-mariadb-cluster-wait
       conf:
-        policy: {{ service_policy }}
+        policy.d:
+          01-controller-default.yaml: {{ service_policy }}
+          02-custom.yaml: {{ spec.get("features", {}).get("policies", {}).get("barbican", {}) }}
         barbican:
           keystone_authtoken:
             memcache_security_strategy: ENCRYPT
