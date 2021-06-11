@@ -478,12 +478,17 @@ class Heat(OpenStackService):
                 "heat-domain-ks-user": {
                     "images": ["ks_user"],
                     "manifest": "job_ks_user_domain",
+                    "hash_fields": ["conf.*"],
                 },
                 "heat-trustee-ks-user": {
                     "images": ["ks_user"],
                     "manifest": "job_ks_user_trustee",
                 },
-                "heat-trusts": {"images": ["ks_trusts"], "manifest": ""},
+                "heat-trusts": {
+                    "images": ["ks_trusts"],
+                    "manifest": "",
+                    "hash_fields": ["conf.*"],
+                },
                 "heat-db-sync": {
                     "images": ["heat_db_sync"],
                     "manifest": "job_db_sync",
@@ -623,7 +628,7 @@ class Keystone(OpenStackService):
                 "keystone-domain-manage": {
                     "images": ["keystone_domain_manage"],
                     "manifest": "job_domain_manage",
-                    "hash_fields": ["conf.ks_domains.*"],
+                    "hash_fields": ["conf.*"],
                 },
                 "keystone-fernet-setup": {
                     "images": ["keystone_fernet_setup"],
@@ -633,7 +638,7 @@ class Keystone(OpenStackService):
                 "keystone-credential-setup": {
                     "images": ["keystone_credential_setup"],
                     "manifest": "job_credential_setup",
-                    "hash_fields": ["conf.ks_domains.*"],
+                    "hash_fields": ["conf.*"],
                 },
                 "keystone-db-sync-expand": {
                     "images": ["keystone_db_sync_expand"],
