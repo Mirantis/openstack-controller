@@ -7,7 +7,11 @@ from openstack_controller.controllers import health
 
 @pytest.mark.asyncio
 async def test_hook_called():
-    meta = {"name": "nova-compute-default"}
+    meta = {
+        "name": "nova-compute-default",
+        "labels": {"application": "nova", "component": "compute"},
+    }
+    compute_ds_name = meta["name"]
     status = {
         "currentNumberScheduled": 1,
         "desiredNumberScheduled": 1,
@@ -20,9 +24,7 @@ async def test_hook_called():
     osdpl = {
         "name": "fake-name",
         "status": {
-            "nova-compute-default": {
-                "nova-compute-default": {"status": constants.PROGRESS}
-            }
+            "health": {"nova": {"compute-default": {"status": constants.BAD}}}
         },
         "spec": {
             "openstack_version": "master",
@@ -44,8 +46,8 @@ async def test_hook_called():
         },
     }
 
-    def fake_hook(osdpl, namespace, meta, status):
-        assert osdpl.obj["name"] == "fake-name"
+    def fake_hook(osdpl, namespace, meta, status, **kwargs):
+        raise ValueError("fake-hook-test")
 
     # failed to patch as function decorator probably due to asynio decorator
     # so let's patch with the context manager
@@ -56,24 +58,17 @@ async def test_hook_called():
     ) as find:
         find.return_value.obj = cronjob
         o.return_value.obj = osdpl
-        await health.daemonsets(
-            meta["name"],
-            "openstack",
-            meta,
-            status,
-            "",
-            body={"status": status},
-        )
-        health.DAEMONSET_HOOKS = {
-            (constants.PROGRESS, constants.OK): {
-                "nova-compute-default": fake_hook
-            },
-        }
-        await health.daemonsets(
-            meta["name"],
-            "openstack",
-            meta,
-            status,
-            "",
-            body={"status": status},
-        )
+        ds_hooks = health.DAEMONSET_HOOKS[(constants.BAD, constants.OK)]
+        # make sure mapping is correct
+        assert compute_ds_name in ds_hooks
+        ds_hooks[compute_ds_name] = fake_hook
+        with pytest.raises(ValueError, match="^fake-hook-test$"):
+            await health.daemonsets(
+                compute_ds_name,
+                "openstack",
+                meta,
+                status,
+                "",
+                body={"status": status},
+                new={"desiredNumberScheduled": 2},
+            )
