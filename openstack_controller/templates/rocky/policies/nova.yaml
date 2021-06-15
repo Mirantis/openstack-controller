@@ -33,7 +33,8 @@ os_compute_api:os-baremetal-nodes:discoverable: "@"
 os_compute_api:os-baremetal-nodes: rule:admin_api
 context_is_admin: role:admin
 admin_or_owner: is_admin:True or project_id:%(project_id)s
-admin_api: is_admin:True
+# NOTE(vsaienko): is_admin conflicts with placement code
+admin_api: role:admin
 network:attach_external_network: is_admin:True
 os_compute_api:os-block-device-mapping:discoverable: "@"
 os_compute_api:os-block-device-mapping-v1:discoverable: "@"
