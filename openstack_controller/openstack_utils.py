@@ -14,7 +14,9 @@
 
 import asyncio
 import base64
+from datetime import datetime
 
+from keystoneauth1 import exceptions as ksa_exceptions
 import kopf
 import openstack
 import pykube
@@ -140,3 +142,21 @@ async def migrate_servers(
             raise kopf.PermanentError(
                 "Can not move instances off of deleted host"
             )
+
+
+async def notify_masakari_host_down(node):
+    try:
+        cloud = await get_openstack_connection()
+        notification = cloud.instance_ha.create_notification(
+            type="COMPUTE_HOST",
+            hostname=node.name,
+            generated_time=datetime.utcnow().isoformat(timespec="seconds"),
+            payload={"event": "STOPPED", "host_status": "NORMAL"},
+        )
+        LOG.info(f"Sent notification {notification} to Masakari API")
+    except ksa_exceptions.EndpointNotFound:
+        LOG.info("Instance-HA service is not deployed, ignore notifying")
+        return
+    except Exception as e:
+        LOG.warning(f"Failed to notify Masakari - {e}")
+        raise kopf.TemporaryError(f"{e}") from e

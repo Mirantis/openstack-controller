@@ -17,6 +17,7 @@ import datetime
 import kopf
 
 from openstack_controller import kube
+from openstack_controller import openstack_utils as ostutils
 from openstack_controller import settings
 from openstack_controller import utils
 
@@ -52,10 +53,22 @@ async def node_status_update_handler(name, body, old, new, event, **kwargs):
         raise kopf.TemporaryError(
             f"The node is not ready for {not_ready_for.seconds}s",
         )
-    LOG.info(
-        f"The node: {name} is not ready for {not_ready_for.seconds}s. "
-        f"Removing pods..."
-    )
+    LOG.info(f"The node {name} is not ready for {not_ready_for.seconds}s.")
+
+    # NOTE(pas-ha): guard against node being in maintenance
+    # when node is already being drained
+    # we assume that at this stage the workflow with NodeWorkloadLocks
+    # and auto-migration of workloads is happening instead of using Masakari
+    if (
+        node.labels.get("openstack-compute-node") == "enabled"
+        and not node.unschedulable
+    ):
+        LOG.info(
+            f"Notifying HA service that OpenStack compute host {name} is down."
+        )
+        await ostutils.notify_masakari_host_down(node)
+
+    LOG.info(f"Removing pods from node {name}")
     node.remove_pods(settings.OSCTL_OS_DEPLOYMENT_NAMESPACE)
 
 
@@ -87,3 +100,6 @@ async def node_delete_handler(body, **kwargs):
     nwl = kube.NodeWorkloadLock.get(name)
     if nwl:
         await nwl.purge()
+    node = kube.Node(kube.api, body)
+    if node.labels.get("openstack-compute-node") == "enabled":
+        await ostutils.notify_masakari_host_down(node)
