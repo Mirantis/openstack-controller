@@ -5,7 +5,7 @@
 {%- set components_with_dedicated_messaging = spec.get('features', {}).get('messaging', {}).get('components_with_dedicated_messaging', []) %}
 {%- set stacklight_enabled = spec.get('features', {}).get('stacklight', {}).get('enabled', False) %}
 {%- set notification_topics = ['notifications'] %}
-{%- set telemetry_mode = spec.get('features', {}).get('telemetry', {}).get('mode') %}
+{%- set telemetry_mode = spec.get('features', {}).get('telemetry', {}).get('mode', 'autoscaling') %}
 
 spec:
   releases:
