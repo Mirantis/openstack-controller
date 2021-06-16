@@ -375,6 +375,10 @@ spec:
         secret_ca_bundle: true
         daemonset_sriov_agent: true
       network:
+        server:
+          ingress:
+            annotations:
+              nginx.ingress.kubernetes.io/proxy-read-timeout: "120"
         core_plugin: ml2
         interface:
           tunnel: ens3

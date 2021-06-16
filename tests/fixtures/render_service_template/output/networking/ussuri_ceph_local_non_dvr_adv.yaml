@@ -403,6 +403,10 @@ spec:
         job_rabbit_init: false
         secret_ca_bundle: true
       network:
+        server:
+          ingress:
+            annotations:
+              nginx.ingress.kubernetes.io/proxy-read-timeout: "120"
         core_plugin: ml2
         interface:
           tunnel: ens3
