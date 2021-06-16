@@ -114,11 +114,11 @@ class ValidationResource(object):
                     except exception.OsDplValidationFailed as e:
                         response.set_error(e.code, e.message)
                         break
-        resp.body = json.dumps(response.to_json())
+        resp.text = json.dumps(response.to_json())
 
 
 def create_api():
-    app = falcon.API()
+    app = falcon.App()
     health_checker = RootResource()
     validator = ValidationResource()
     app.add_route("/", health_checker)
