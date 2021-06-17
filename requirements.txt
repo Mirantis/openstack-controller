@@ -6,7 +6,7 @@ jsonpath-ng
 deepmerge>0.2
 pykube-ng>=19.9.0
 cryptography
-falcon
+falcon>=3.0.0
 jsonschema
 uwsgi
 prometheus_client
