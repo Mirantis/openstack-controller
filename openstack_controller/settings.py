@@ -266,7 +266,7 @@ LOGGING_CONFIG = {
         },
     },
     "loggers": {
-        "kopf.activities.prob": {
+        "kopf.activities.probe": {
             "handlers": ["default"],
             "level": "WARNING",
             "propagate": False,
