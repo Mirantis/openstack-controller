@@ -96,7 +96,7 @@ services:
                 pod_replacement_strategy: RollingUpdate
                 rolling_update:
                   max_unavailable: 10%
-                  max_surge: 10%
+                  max_surge: 0
         conf:
           glance:
             DEFAULT:
@@ -139,7 +139,7 @@ services:
                 pod_replacement_strategy: RollingUpdate
                 rolling_update:
                   max_unavailable: 10%
-                  max_surge: 10%
+                  max_surge: 0
         conf:
           nova:
             DEFAULT:
@@ -349,7 +349,7 @@ services:
                 pod_replacement_strategy: RollingUpdate
                 rolling_update:
                   max_unavailable: 10%
-                  max_surge: 10%
+                  max_surge: 0
               daemonsets:
                 pod_replacement_strategy: RollingUpdate
                 health_manager:
