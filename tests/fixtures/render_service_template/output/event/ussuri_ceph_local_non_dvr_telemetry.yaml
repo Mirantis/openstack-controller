@@ -19,7 +19,7 @@ spec:
           image_repo_sync: image-repo-sync:latest
       conf:
         policy.d:
-          01-controller-default.yaml: {}
+          01-controller-default.yaml: {'event_rule1': 'event_value1'}
           02-custom.yaml: {}
         paste:
           composite:panko+keystone:

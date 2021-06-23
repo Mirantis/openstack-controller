@@ -11,7 +11,7 @@ spec:
             NO_PROXY: .svc.cluster.local
       conf:
         policy.d:
-          01-controller-default.yaml: {}
+          01-controller-default.yaml: {'load-balancer_rule1': 'load-balancer_value1'}
           02-custom.yaml:
             octavia_custom: value
         logging:

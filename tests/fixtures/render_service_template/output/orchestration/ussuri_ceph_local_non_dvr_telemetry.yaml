@@ -5,8 +5,7 @@ spec:
     values:
       conf:
         policy.d:
-          01-controller-default.yaml: {}
-          02-custom.yaml: {}
+          01-controller-default.yaml: {'orchestration_rule1': 'orchestration_value1'}
           02-custom.yaml: {}
         heat:
           keystone_authtoken:

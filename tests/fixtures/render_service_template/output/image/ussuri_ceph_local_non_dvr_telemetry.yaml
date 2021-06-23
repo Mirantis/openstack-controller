@@ -49,8 +49,7 @@ spec:
             NO_PROXY: .svc.cluster.local
       conf:
         policy.d:
-          01-controller-default.yaml: {}
-          02-custom.yaml: {}
+          01-controller-default.yaml: {'image_rule1': 'image_value1'}
           02-custom.yaml: {}
         glance:
           DEFAULT:

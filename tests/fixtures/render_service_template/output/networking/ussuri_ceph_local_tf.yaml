@@ -90,7 +90,7 @@ spec:
           openstack network set public --external \n"
       conf:
         policy.d:
-          01-controller-default.yaml: {}
+          01-controller-default.yaml: {'networking_rule1': 'networking_value1'}
           02-custom.yaml: {}
         auto_bridge_add: ~
         ironic:

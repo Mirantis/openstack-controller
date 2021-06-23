@@ -5,7 +5,7 @@ spec:
     values:
       conf:
         policy.d:
-          01-controller-default.yaml: {}
+          01-controller-default.yaml: {'instance-ha_rule1': 'instance-ha_value1'}
           02-custom.yaml: {}
         masakari:
           DEFAULT:

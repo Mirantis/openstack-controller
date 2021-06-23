@@ -13,7 +13,7 @@ spec:
         user_secret_name: cinder-rbd-keyring
       conf:
         policy.d:
-          01-controller-default.yaml: {}
+          01-controller-default.yaml: {'block-storage_rule1': 'block-storage_value1'}
           02-custom.yaml: {}
           02-custom.yaml: {}
         backends:

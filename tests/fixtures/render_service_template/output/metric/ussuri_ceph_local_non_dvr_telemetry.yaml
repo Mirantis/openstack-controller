@@ -21,7 +21,7 @@ spec:
           gnocchi_resources_cleaner: gnocchi-resources-cleaner:latest
       conf:
         policy.d:
-          01-controller-default.yaml: {}
+          01-controller-default.yaml: {'metric_rule1': 'metric_value1'}
           02-custom.yaml: {}
         apache: |
           {{- $portInt := tuple "metric" "internal" "api" $ | include "helm-toolkit.endpoints.endpoint_port_lookup" }}

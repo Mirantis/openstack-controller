@@ -52,7 +52,7 @@ spec:
             level: INFO
             propagate: 0
         policy.d:
-          01-controller-default.yaml: {}
+          01-controller-default.yaml: {'baremetal_rule1': 'baremetal_value1'}
           02-custom.yaml: {}
       dependencies:
         static:

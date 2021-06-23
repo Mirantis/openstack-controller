@@ -32,7 +32,7 @@ spec:
         user_secret_name: nova-rbd-keyring
       conf:
         policy.d:
-          01-controller-default.yaml: {}
+          01-controller-default.yaml: {'compute_rule1': 'compute_value1'}
           02-custom.yaml: {}
           02-custom.yaml: {}
         ceph:

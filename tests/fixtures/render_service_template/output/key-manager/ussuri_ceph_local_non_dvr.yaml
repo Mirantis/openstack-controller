@@ -5,7 +5,7 @@ spec:
     values:
       conf:
         policy.d:
-          01-controller-default.yaml: {}
+          01-controller-default.yaml: {'key-manager_rule1': 'key-manager_value1'}
           02-custom.yaml: {}
         barbican:
           DEFAULT:

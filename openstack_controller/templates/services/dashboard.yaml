@@ -5,6 +5,10 @@
 {%- set keystone_keycloak_enabled = keystone_keycloak.get('enabled', False) %}
 {%- set horizon_features = spec.get('features', {}).get('horizon', {}) %}
 {%- set neutron_backend = spec.features.neutron.get('backend', 'ml2') %}
+{%- set custom_policies = {} %}
+{%- for service, policy in spec.get("features", {}).get("policies", {}).items() %}
+{%- do custom_policies.update({service: {"01-custom.yaml": policy }}) %}
+{%- endfor %}
 
 spec:
   releases:
@@ -93,13 +97,12 @@ spec:
                 key: |
 {{ spec.features.ssl.public_endpoints.api_key | indent( width=18, first=True) }}
       conf:
+        policy.d: {{ custom_policies }}
         horizon:
-{%- if spec.features.get('policies', {}) %}
           policy:
-  {%- for component, component_policy in spec.features.get('policies', {}).items() %}
+  {%- for component, component_policy in service_policy.items() %}
             {{ component }}: {{ component_policy }}
   {%- endfor %}
-{%- endif %}
           {%- if keystone_keycloak_enabled %}
           openstack_clouds_yaml_custom_template:
             template: |

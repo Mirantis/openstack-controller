@@ -111,6 +111,10 @@ def _get_default_policy(spec, chart):
     )
 
 
+def _get_dashboard_default_policy(spec, charts):
+    return dict((chart, _get_default_policy(spec, chart)) for chart in charts)
+
+
 @kopf_exception
 def render_service_template(
     service, body, meta, spec, logger, **template_args
@@ -125,6 +129,9 @@ def render_service_template(
     if service in constants.OS_POLICY_SERVICES:
         chart = constants.OS_POLICY_SERVICES[service]
         service_policy = _get_default_policy(spec, chart)
+    elif service == "dashboard":
+        charts = constants.OS_POLICY_SERVICES.values()
+        service_policy = _get_dashboard_default_policy(spec, charts)
 
     text = tpl.render(
         body=body,

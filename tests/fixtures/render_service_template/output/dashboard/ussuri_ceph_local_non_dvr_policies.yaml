@@ -14,36 +14,52 @@ spec:
             annotations:
               nginx.ingress.kubernetes.io/proxy-body-size: "0"
       conf:
+        policy.d:
+          aodh:
+            01-custom.yaml: {'aodh_custom': 'value'}
+          barbican:
+            01-custom.yaml: {'barbican_custom': 'value'}
+          cinder:
+            01-custom.yaml: {'cinder_custom': 'value'}
+          designate:
+            01-custom.yaml: {'designate_custom': 'value'}
+          glance:
+            01-custom.yaml: {'glance_custom': 'value'}
+          gnocchi:
+            01-custom.yaml: {'gnocchi_custom': 'value'}
+          heat:
+            01-custom.yaml: {'heat_custom': 'value'}
+          keystone:
+            01-custom.yaml: {'keystone_custom': 'value'}
+          masakari:
+            01-custom.yaml: {'masakari_custom': 'value'}
+          neutron:
+            01-custom.yaml: {'neutron_custom': 'value'}
+          nova:
+            01-custom.yaml: {'nova_custom': 'value'}
+          octavia:
+            01-custom.yaml: {'octavia_custom': 'value'}
+          panko:
+            01-custom.yaml: {'panko_custom': 'value'}
+          placement:
+            01-custom.yaml: {'placement_custom': 'value'}
         horizon:
           policy:
-            aodh:
-              aodh_custom: value
-            barbican:
-              barbican_custom: value
-            cinder:
-              cinder_custom: value
-            designate:
-              designate_custom: value
-            glance:
-              glance_custom: value
-            gnocchi:
-              gnocchi_custom: value
-            heat:
-              heat_custom: value
-            keystone:
-              keystone_custom: value
-            masakari:
-              masakari_custom: value
-            neutron:
-              neutron_custom: value
-            nova:
-              nova_custom: value
-            octavia:
-              octavia_custom: value
-            panko:
-              panko_custom: value
-            placement:
-              placement_custom: value
+            aodh: {'alarming_rule1': 'alarming_value1'}
+            barbican: {'key-manager_rule1': 'key-manager_value1'}
+            cinder: {'block-storage_rule1': 'block-storage_value1'}
+            designate: {'dns_rule1': 'dns_value1'}
+            glance: {'image_rule1': 'image_value1'}
+            gnocchi: {'metric_rule1': 'metric_value1'}
+            heat: {'orchestration_rule1': 'orchestration_value1'}
+            ironic: {'baremetal_rule1': 'baremetal_value1'}
+            keystone: {'identity_rule1': 'identity_value1'}
+            masakari: {'instance-ha_rule1': 'instance-ha_value1'}
+            neutron: {'networking_rule1': 'networking_value1'}
+            nova:  {'compute_rule1': 'compute_value1'}
+            octavia: {'load-balancer_rule1': 'load-balancer_value1'}
+            panko: {'event_rule1': 'event_value1'}
+            placement: {'placement_rule1': 'placement_value1'}
           local_settings:
             config:
               horizon_images_upload_mode: direct

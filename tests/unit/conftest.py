@@ -30,6 +30,11 @@ class AsyncMock(mock.Mock):
 
 
 @pytest.fixture
+def dashboard_policy_default():
+    yield yaml.safe_load(open("tests/fixtures/dashboard_policy_default.yaml"))
+
+
+@pytest.fixture
 def openstackdeployment():
     yield yaml.safe_load(open("tests/fixtures/openstackdeployment.yaml"))
 

@@ -5,7 +5,7 @@ spec:
     values:
       conf:
         policy.d:
-          01-controller-default.yaml: {}
+          01-controller-default.yaml: {'dns_rule1': 'dns_value1'}
           02-custom.yaml:
             designate_custom: value
         designate:

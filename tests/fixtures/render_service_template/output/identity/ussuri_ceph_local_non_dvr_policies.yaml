@@ -10,7 +10,7 @@ spec:
           secret: 'keystone-fernet-data'
       conf:
         policy.d:
-          01-controller-default.yaml: {}
+          01-controller-default.yaml: {'identity_rule1': 'identity_value1'}
           02-custom.yaml:
             keystone_custom: value
         keystone:
