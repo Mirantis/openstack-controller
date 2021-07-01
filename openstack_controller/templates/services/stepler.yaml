@@ -30,6 +30,16 @@ spec:
           host_fqdn_override:
             public:
               host: keystone.{{ spec.public_domain_name }}
+              tls:
+                ca: |
+{{ spec.features.ssl.public_endpoints.ca_cert | indent( width=18, first=True) }}
+{%- if rgw_internal_cacert is defined %}
+{{ rgw_internal_cacert | indent( width=18, first=True) }}
+{%- endif %}
+                crt: |
+{{ spec.features.ssl.public_endpoints.api_cert | indent( width=18, first=True) }}
+                key: |
+{{ spec.features.ssl.public_endpoints.api_key | indent( width=18, first=True) }}
           hosts:
             admin:
               host: keystone-api
@@ -37,6 +47,16 @@ spec:
             internal: keystone-api
             public:
               host: keystone
+              tls:
+                ca: |
+{{ spec.features.ssl.public_endpoints.ca_cert | indent( width=18, first=True) }}
+{%- if rgw_internal_cacert is defined %}
+{{ rgw_internal_cacert | indent( width=18, first=True) }}
+{%- endif %}
+                crt: |
+{{ spec.features.ssl.public_endpoints.api_cert | indent( width=18, first=True) }}
+                key: |
+{{ spec.features.ssl.public_endpoints.api_key | indent( width=18, first=True) }}
           port:
             api:
               admin: 5000

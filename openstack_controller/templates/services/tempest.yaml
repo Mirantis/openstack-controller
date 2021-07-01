@@ -32,6 +32,45 @@ spec:
       endpoints:
         cluster_domain_suffix: {{ spec.internal_domain_name }}
 {% include 'base/_admin_identity.yaml' %}
+          host_fqdn_override:
+            public:
+              host: keystone.{{ spec.public_domain_name }}
+              tls:
+                ca: |
+{{ spec.features.ssl.public_endpoints.ca_cert | indent( width=18, first=True) }}
+{%- if rgw_internal_cacert is defined %}
+{{ rgw_internal_cacert | indent( width=18, first=True) }}
+{%- endif %}
+                crt: |
+{{ spec.features.ssl.public_endpoints.api_cert | indent( width=18, first=True) }}
+                key: |
+{{ spec.features.ssl.public_endpoints.api_key | indent( width=18, first=True) }}
+          hosts:
+            admin:
+              host: keystone-api
+            default: keystone
+            internal: keystone-api
+            public:
+              host: keystone
+              tls:
+                ca: |
+{{ spec.features.ssl.public_endpoints.ca_cert | indent( width=18, first=True) }}
+{%- if rgw_internal_cacert is defined %}
+{{ rgw_internal_cacert | indent( width=18, first=True) }}
+{%- endif %}
+                crt: |
+{{ spec.features.ssl.public_endpoints.api_cert | indent( width=18, first=True) }}
+                key: |
+{{ spec.features.ssl.public_endpoints.api_key | indent( width=18, first=True) }}
+          port:
+            api:
+              admin: 5000
+              default: 80
+              internal: 5000
+              public: 443
+          scheme:
+            default: http
+            public: https
         dashboard:
           host_fqdn_override:
             default: horizon.{{ spec.public_domain_name }}
