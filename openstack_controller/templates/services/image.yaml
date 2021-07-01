@@ -10,6 +10,8 @@
 {%- if local_proxy %}
   {%- set default_binary_base_url = default_binary_base_url | update_url_hostname("${NODE_IP}") %}
 {%- endif %}
+{%- set multi_backends = spec.get('features', {}).get('glance', {}).get('backends', {}) %}
+{%- set default_backend = namespace(name='') %}
 
 spec:
   releases:
@@ -150,6 +152,22 @@ spec:
           keystone_authtoken:
             memcache_security_strategy: ENCRYPT
             memcache_secret_key: {{ credentials.memcached }}
+      {%- if multi_backends %}
+      {%- set enabled_backends = [] %}
+      {%- for type, backend in multi_backends.items() %}
+        {%- for store_ident, ident_opts in backend.items() %}
+        {%- do enabled_backends.append(store_ident ~ ':' ~ type) %}
+        {%- if ident_opts.pop('default', False) %}
+          {%- set default_backend.name = store_ident %}
+        {%- endif %}
+          {{store_ident}}:
+          {%- for key,val in ident_opts.items() %}
+            {{ key }}: {{ val }}
+          {%- endfor %}
+{% include 'base/_' + type + '_store_opts.yaml' %}
+        {%- endfor %}
+      {%- endfor %}
+      {%- endif %}
           DEFAULT:
             enable_v1_api: True
             enable_v2_registry: True
@@ -157,10 +175,16 @@ spec:
             # Ceph as backend. The parameter exposes additional information about the images
             # but this information doesn't exist any sensitive data there are UUIDs and pool name.
             show_multiple_locations: True
+          {%- if multi_backends %}
+            enabled_backends: {{ ','.join(enabled_backends) }}
+          {%- endif %}
           glance_store:
-{%- for pools, pools_config in ceph.glance.pools.items() %}
-            rbd_store_pool: {{ pools_config.name }}
-{%- endfor %}
+          {%- if multi_backends %}
+            default_backend: {{ default_backend.name }}
+          {%- endif %}
+{%- if not multi_backends %}
+{% include 'base/_rbd_store_opts.yaml' %}
+{%- endif %}
           oslo_messaging_notifications:
             topics: {{ notification_topics|join(',') }}
           import_filtering_opts:

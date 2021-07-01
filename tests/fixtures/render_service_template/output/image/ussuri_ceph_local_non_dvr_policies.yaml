@@ -60,7 +60,12 @@ spec:
           cors:
             allow_headers: Content-Type,Cache-Control,Content-Language,Expires,Last-Modified,Pragma,X-Custom-Header,X-Auth-Token
           glance_store:
+            rbd_store_ceph_conf: /etc/ceph/ceph.conf
+            rbd_store_chunk_size: 8
+            rbd_store_crush_rule: replicated_rule
             rbd_store_pool: images-hdd
+            rbd_store_replication: 3
+            rbd_store_user: glance
           keystone_authtoken:
             memcache_secret_key: yXjj5J8Ad1hHdCCh
             memcache_security_strategy: ENCRYPT

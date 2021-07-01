@@ -187,6 +187,24 @@ spec:
                           <<: *custom_policies
                         placement:
                           <<: *custom_policies
+                    glance:
+                      properties:
+                        backends:
+                          description: |
+                            Set of backeds are going to be used by glance as multi backends.
+                          type: object
+                          properties:
+                            cinder:
+                              type: object
+                              x-kubernetes-preserve-unknown-fields: true
+                              description: |
+                                Section to configure cinder backends
+                            rbd:
+                              type: object
+                              x-kubernetes-preserve-unknown-fields: true
+                              description: |
+                                Section to configure rbd (Ceph) backends
+                      type: object
                     database:
                       type: object
                       properties:
