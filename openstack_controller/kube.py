@@ -57,6 +57,12 @@ def get_kubernetes_objects():
 KUBE_OBJECTS = get_kubernetes_objects()
 
 
+def get_object_by_kind(kind):
+    for item, kube_class in get_kubernetes_objects().items():
+        if kind == item[1]:
+            return kube_class
+
+
 def object_factory(api, api_version, kind):
     """Dynamically builds kubernetes objects python class.
 
@@ -74,6 +80,13 @@ class OpenStackDeployment(pykube.objects.NamespacedAPIObject):
     version = "lcm.mirantis.com/v1alpha1"
     kind = "OpenStackDeployment"
     endpoint = "openstackdeployments"
+    kopf_on_args = *version.split("/"), endpoint
+
+
+class HelmBundle(pykube.objects.NamespacedAPIObject):
+    version = "lcm.mirantis.com/v1alpha1"
+    kind = "HelmBundle"
+    endpoint = "helmbundles"
     kopf_on_args = *version.split("/"), endpoint
 
 
@@ -126,7 +139,9 @@ class HelmBundleMixin:
 
         i = 1
         while True:
-            self.service.set_release_values(diff)
+            await self.service.set_release_values(
+                self.helmbundle_ext.chart, diff
+            )
             if not wait_completion:
                 return
             if self.exists():
@@ -177,7 +192,9 @@ class HelmBundleMixin:
         diff["manifests"][self.helmbundle_ext.manifest] = False
         i = 1
         while True:
-            self.service.set_release_values(diff)
+            await self.service.set_release_values(
+                self.helmbundle_ext.chart, diff
+            )
             if not wait_completion:
                 return
             if not self.exists():

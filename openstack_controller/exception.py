@@ -11,3 +11,9 @@ class OsDplValidationFailed(OpenStackControllerException):
         super().__init__()
         self.message = message
         self.code = code
+
+
+class HelmImmutableFieldChange(OpenStackControllerException):
+    def __init__(self, message="Trying to change immutable object."):
+        super().__init__()
+        self.message = message

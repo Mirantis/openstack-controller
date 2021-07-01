@@ -14,12 +14,6 @@ apiVersion: zalando.org/v1
 kind: KopfPeering
 metadata:
   namespace: "{{ .Values.osdpl.namespace }}"
-  name: openstack-controller.helmbundle
----
-apiVersion: zalando.org/v1
-kind: KopfPeering
-metadata:
-  namespace: "{{ .Values.osdpl.namespace }}"
   name: openstack-controller.secrets
 ---
 apiVersion: zalando.org/v1

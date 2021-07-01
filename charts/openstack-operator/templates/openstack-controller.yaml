@@ -241,6 +241,19 @@ spec:
         sysctls:
         - name: net.ipv4.ip_local_port_range
           value: 32800 60999
+      initContainers:
+        - name: 2to3
+          command:
+          - osctl-2to3
+          env:
+            {{- range $optionName, $optionValue := .Values.osdpl.settings.helm2to3.raw }}
+            - name: {{ $optionName }}
+              value: "{{ $optionValue }}"
+            {{- end }}
+            - name: HELMBUNDLE_NAMESPACE
+              value: {{ .Values.osdpl.namespace }}
+          image: {{ tuple . .Values.image | include "getImageUrl" }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
       containers:
         - name: osdpl
           image: {{ tuple . .Values.image | include "getImageUrl" }}
@@ -277,39 +290,6 @@ spec:
               path: /healthz
               port: 32768
             {{- toYaml .Values.osdpl.pod.controller.secrets.liveness.params | nindent 12}}
-          resources:
-            {{- toYaml .Values.resources | nindent 12 }}
-        - name: helmbundle
-          image: {{ tuple . .Values.image | include "getImageUrl" }}
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
-          command:
-            - kopf
-            - run
-            - '-n'
-            - {{ .Values.osdpl.namespace }}
-            - '-P'
-            - openstack-controller.helmbundle
-            - '-m'
-            - openstack_controller.controllers.helmbundle
-            - '-m'
-            - openstack_controller.controllers.probe
-            - '-L'
-            - 'http://0.0.0.0:32769/healthz'
-          env:
-            {{- range $optionName, $optionValue := .Values.osdpl.settings.raw }}
-            - name: {{ $optionName }}
-              value: "{{ $optionValue }}"
-            {{- end }}
-            {{- range $optionName, $optionValue := .Values.osdpl.settings.helmbundle.raw }}
-            - name: {{ $optionName }}
-              value: "{{ $optionValue }}"
-            {{- end }}
-{{ tuple . | include "openstack-controller.common_env" | indent 12 }}
-          livenessProbe:
-            httpGet:
-              path: /healthz
-              port: 32769
-            {{- toYaml .Values.osdpl.pod.controller.health.liveness.params | nindent 12}}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
         - name: secrets

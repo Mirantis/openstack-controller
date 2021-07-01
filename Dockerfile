@@ -1,4 +1,5 @@
 ARG FROM=docker-remote.docker.mirantis.net/ubuntu:bionic
+
 FROM $FROM as builder
 # NOTE(pas-ha) need Git for pbr to install from source checkout w/o sdist
 ADD https://bootstrap.pypa.io/get-pip.py /tmp/get-pip.py
@@ -15,6 +16,9 @@ ADD . /opt/operator
 RUN pip wheel --wheel-dir /opt/wheels --find-links /opt/wheels /opt/operator
 
 FROM $FROM
+ARG KUBECTL_BINARY="http://binary.mirantis.com/openstack/bin/utils/kubectl/kubectl-1.18.8-linux"
+ARG HELM_BINARY="https://binary.mirantis.com/openstack/bin/utils/helm/helm-v3.6.2-linux-amd64"
+
 COPY --from=builder /tmp/get-pip.py /tmp/get-pip.py
 COPY --from=builder /opt/wheels /opt/wheels
 COPY --from=builder /opt/operator/uwsgi.ini /opt/operator/uwsgi.ini
@@ -32,7 +36,9 @@ RUN set -ex; \
         gdb \
         patch \
         strace \
-        ca-certificates; \
+        ca-certificates \
+        wget \
+        git; \
     apt-get download python3-distutils; \
     dpkg-deb -x python3-distutils*.deb /; \
     rm -vf python3-distutils*.deb; \
@@ -41,6 +47,12 @@ RUN set -ex; \
     cd /usr/local/lib/python3.7/dist-packages; \
     patch -p1 < /tmp/kopf-session-timeout.path; \
     cd -
+RUN wget -q -O /usr/local/bin/helm3 ${HELM_BINARY}; \
+    chmod +x /usr/local/bin/helm3
+RUN helm3 plugin install https://github.com/helm/helm-2to3
+RUN wget -q ${KUBECTL_BINARY} -O /usr/local/bin/kubectl; \
+    chmod +x /usr/local/bin/kubectl
+
 RUN rm -rvf /tmp/kopf-session-timeout.path
 RUN rm -rvf /opt/wheels; \
     apt-get -q clean; \

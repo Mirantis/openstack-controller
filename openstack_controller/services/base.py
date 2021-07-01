@@ -18,6 +18,7 @@ from openstack_controller import secrets
 from openstack_controller import settings
 from openstack_controller import version
 from openstack_controller import utils
+from openstack_controller import helm
 
 
 LOG = utils.get_logger(__name__)
@@ -125,11 +126,7 @@ class Service:
         self.logger = logger
         self.openstack_version = self.body["spec"]["openstack_version"]
         self.mspec = layers.merge_spec(self.body["spec"], self.logger)
-
-    def _get_helmbundle(self):
-        data = self.resource_def
-        kopf.adopt(data, self.osdpl.obj)
-        return kube.resource(data)
+        self.helm_manager = helm.HelmManager(namespace=self.namespace)
 
     def _get_osdpl(self):
         osdpl = kube.OpenStackDeployment(kube.api, self.body)
@@ -147,24 +144,12 @@ class Service:
     @property
     def resource_def(self):
         """Minimal representation of the resource"""
-        fingerprint = layers.spec_hash(self.body["spec"])
-        annotations = {
-            f"{self.group}/openstack-controller-fingerprint": json.dumps(
-                {
-                    "osdpl_generation": self._get_osdpl().metadata[
-                        "generation"
-                    ],
-                    "version": version.release_string,
-                    "fingerprint": fingerprint,
-                }
-            )
-        }
+
         res = {
             "apiVersion": f"{self.group}/{self.version}",
             "kind": self.kind,
             "metadata": {
                 "name": self.resource_name,
-                "annotations": annotations,
             },
         }
         return res
@@ -212,17 +197,40 @@ class Service:
 
         return res + generic_objects
 
-    def set_release_values(self, values):
-        data = self.resource_def
-        kopf.adopt(data, self.osdpl.obj)
-        obj = kube.resource(data)
-        obj.reload()
-        data = obj.obj
+    async def set_release_values(self, chart, values):
+        release_name = f"openstack-{chart}"
+        current_values = await self.helm_manager.get_release_values(
+            release_name
+        )
+        helm_metadata = (
+            current_values.get(f"{self.group}/{self.version}", {})
+            .get("openstack-controller", {})
+            .get("helm", {})
+            .get(chart, {})
+        )
+        repo_url = helm_metadata.get("repo_url")
+        version = helm_metadata.get("version")
 
-        for release in data["spec"]["releases"]:
-            layers.merger.merge(release["values"], values)
-        obj.update()
+        if repo_url is None or version is None:
+            kopf.TemporaryError(
+                f"Not enough information to set release value. repo_url: {repo_url}, version: {version}"
+            )
+
+        await self.helm_manager.set_release_values(
+            f"openstack-{chart}", values, repo_url, chart, version
+        )
         LOG.info(f"Update {self.service} with {values}")
+
+    def _genenrate_helm_metadata(self, data):
+        res = {}
+        repos = {r["name"]: r["url"] for r in data["spec"]["repositories"]}
+        for release in data["spec"]["releases"]:
+            repo, chart_name = release["chart"].split("/")
+            res[chart_name] = {
+                "repo_url": repos[repo],
+                "version": release["version"],
+            }
+        return res
 
     def get_child_object(self, kind, name):
         return [
@@ -231,41 +239,48 @@ class Service:
             if child.kind == kind and child.name == name
         ][0]
 
-    def generate_child_object_hash(self, child_object, data):
+    def get_child_object_current_hash(self, child_object, values):
+        """Get currently defined child object hash stored
+        in HelmBundle release annotations.
+
+        :param child_object: Child object
+        :param values: Values of helm release
+        :returns: String with hash or None
+        """
+        child_obj_metadata = (
+            values.get(f"{self.group}/{self.version}", {})
+            .get("openstack-controller", {})
+            .get("child-objects", {})
+        )
+        return (
+            child_obj_metadata.get(child_object.helmbundle_ext.chart, {})
+            .get(child_object.kind, {})
+            .get(child_object.name, {})
+            .get("hash", None)
+        )
+
+    def generate_child_object_hash(self, child_object, values):
         """Generate stable hash of child object
 
         The has takes into account hash_fileds and create stable hash
         by taking values from release.
 
         :param child_object: The child object
-        :param: data: The whole helmbundle object data.
+        :param: values: The values for release object data.
         :return: string with hash
         """
 
-        def _get_release_values(data, chart_name):
-            for release in data["spec"]["releases"]:
-                if release["chart"].split("/")[1] == chart_name:
-                    return release["values"]
+        if not child_object.helmbundle_ext.hash_fields:
+            return None
 
-        def _generate_child_object_hash(child_object, release_values):
-            if not child_object.helmbundle_ext.hash_fields:
-                return None
-
-            hasher = hashlib.sha256()
-            resource_hash_data = {}
-            for field in child_object.helmbundle_ext.hash_fields:
-                resource_hash_data[field] = [
-                    match.value for match in parse(field).find(release_values)
-                ]
-            hasher.update(
-                json.dumps(resource_hash_data, sort_keys=True).encode()
-            )
-            return hasher.hexdigest()
-
-        release_values = _get_release_values(
-            data, child_object.helmbundle_ext.chart
-        )
-        return _generate_child_object_hash(child_object, release_values)
+        hasher = hashlib.sha256()
+        resource_hash_data = {}
+        for field in child_object.helmbundle_ext.hash_fields:
+            resource_hash_data[field] = [
+                match.value for match in parse(field).find(values)
+            ]
+        hasher.update(json.dumps(resource_hash_data, sort_keys=True).encode())
+        return hasher.hexdigest()
 
     def generate_child_object_hashes(self, data):
         """Generate stable hash of child objects
@@ -283,9 +298,20 @@ class Service:
             }
         """
         res = {}
+        release_mapping = {}
+        for release in data["spec"]["releases"]:
+            chart_name = release["chart"].split("/")[1]
+
+            release_mapping[chart_name] = {
+                "new_values": release["values"],
+            }
+
         for child_object in self.child_objects:
             child_object_hash = self.generate_child_object_hash(
-                child_object, data
+                child_object,
+                release_mapping.get(child_object.helmbundle_ext.chart, {}).get(
+                    "new_values", {}
+                ),
             )
             child_hash = {
                 child_object.helmbundle_ext.chart: {
@@ -297,45 +323,25 @@ class Service:
             layers.merger.merge(res, child_hash)
         return res
 
-    def get_child_object_current_hash(self, child_object):
-        """Get currently defined child object hash stored
-        in HelmBundle release annotations.
-
-        :param child_object: Child object
-        :returns: String with hash or None
-        """
-        hb = self._get_helmbundle()
-        hb.reload()
-        child_obj_metadata = json.loads(
-            hb.annotations.get(
-                f"{self.group}/openstack-controller-child-objects", "{}"
-            )
-        )
-        return (
-            child_obj_metadata.get(child_object.helmbundle_ext.chart, {})
-            .get(child_object.kind, {})
-            .get(child_object.name, {})
-            .get("hash", None)
-        )
-
-    def is_child_object_hash_changed(self, child_object, data):
+    async def is_child_object_hash_changed(
+        self, child_object, old_values, new_values
+    ):
         """Check if object hash was changed
 
         :param child_object: Child object
         :param data: The whole helmbundle object data
         :returns: True when current hash not equal to hash in annotation
         """
-        current_hash = self.get_child_object_current_hash(child_object)
-        new_hash = self.generate_child_object_hash(child_object, data)
-
+        current_hash = self.get_child_object_current_hash(
+            child_object, old_values
+        )
+        new_hash = self.generate_child_object_hash(child_object, new_values)
         return new_hash != current_hash
 
     def update_status(self, patch):
         self.osdpl.patch({"status": patch})
 
-    async def cleanup_immutable_resources(
-        self, new_obj, rendered_spec, force=False
-    ):
+    async def cleanup_immutable_resources(self, new_obj, force=False):
         """
         Remove immmutable resources for helmbundle object when:
             1. The hash for release values fields used in child object
@@ -347,115 +353,112 @@ class Service:
         :param rendered_spec: the current representation of helmbundle
         :param force: the flag to force remove all immutable objects that we know about.
         """
-        old_obj = kube.resource(rendered_spec)
-        old_obj.reload()
-
         to_cleanup = set()
 
-        def _is_immutable_changed(image, chart):
-            for old_release in old_obj.obj["spec"]["releases"]:
-                if old_release["chart"].endswith(f"/{chart}"):
-                    for new_release in new_obj.obj["spec"]["releases"]:
-                        if new_release["chart"].endswith(f"/{chart}"):
-                            old_version = old_release["version"]
-                            new_version = new_release["version"]
-                            old_image = old_release["values"]["images"][
-                                "tags"
-                            ].get(image)
-                            new_image = new_release["values"]["images"][
-                                "tags"
-                            ][image]
-                            if old_version != new_version:
-                                return True
-                            # When image name is changed it will not present in helmbundle object
-                            # on deployed environmet. At the same time in current version of code
-                            # we will use new name of image.
-                            if old_image is None:
-                                return True
-                            if old_image != new_image:
-                                return True
+        release_mapping = {}
+        for release in new_obj["spec"]["releases"]:
+            chart_name = release["chart"].split("/")[1]
+            old_values = await self.helm_manager.get_release_values(
+                release["name"]
+            )
+            release_mapping[chart_name] = {
+                "new_values": release["values"],
+                "old_values": old_values,
+            }
+
+        async def _is_immutable_changed(image, chart_name):
+            old_values = release_mapping.get(chart_name, {}).get(
+                "old_values", {}
+            )
+            new_values = release_mapping.get(chart_name, {}).get(
+                "new_values", {}
+            )
+            # For case when inf ochild object doesn't exist in values.
+            if not old_values and not new_values:
+                return False
+            #                            old_version = old_values["version"]
+            #                            new_version = new_release["version"]
+            old_image = old_values["images"]["tags"].get(image)
+            new_image = new_values["images"]["tags"][image]
+            #                            if old_version != new_version:
+            #                                return True
+            # When image name is changed it will not present in helmbundle object
+            # on deployed environmet. At the same time in current version of code
+            # we will use new name of image.
+            if old_image is None or old_image != new_image:
+                return True
 
         for resource in self.child_objects:
             # NOTE(vsaienko): even the object is not immutable, it may have immutable fields.
-            if self.is_child_object_hash_changed(resource, new_obj.obj):
+            chart_name = resource.helmbundle_ext.chart
+            old_values = release_mapping.get(chart_name, {}).get(
+                "old_values", {}
+            )
+            new_values = release_mapping.get(chart_name, {}).get(
+                "new_values", {}
+            )
+            # For case when inf ochild object doesn't exist in values.
+            if not old_values and not new_values:
+                continue
+            if await self.is_child_object_hash_changed(
+                resource, old_values, new_values
+            ):
                 to_cleanup.add(resource)
             if resource.immutable:
                 for image in resource.helmbundle_ext.images:
-                    if force or _is_immutable_changed(
+                    if force or await _is_immutable_changed(
                         image, resource.helmbundle_ext.chart
                     ):
                         to_cleanup.add(resource)
                         # Break on first image match.
                         break
-
         LOG.info(f"Removing the following jobs: {to_cleanup}")
         tasks = set()
         for child_object in to_cleanup:
             tasks.add(child_object.purge())
-
         await asyncio.gather(*tasks)
 
     async def delete(self, *, body, meta, spec, logger, **kwargs):
         LOG.info(f"Deleting config for {self.service}")
+        self.set_children_status("Deleting")
         # TODO(e0ne): remove credentials of the deleted services
-        data = self.resource_def
-        kopf.adopt(data, self.osdpl.obj)
-        obj = kube.resource(data)
-        # delete the object, already non-existing are auto-handled
-        obj.delete(propagation_policy="Foreground")
-        LOG.info(f"{obj.kind} {obj.namespace}/{obj.name} deleted")
+        data = self.render()
+        await self.helm_manager.delete_bundle(data)
+        msg = f"Deleted helm release {self.resource_name} for service {self.service}"
+        LOG.info(msg)
+
         # remove child reference from status
-        self.update_status({"children": {obj.name: None}})
+        self.set_children_status(None)
         kopf.info(
             body,
             reason="Delete",
-            message=f"deleted {obj.kind} for {self.service}",
+            message=msg,
         )
 
+    def set_children_status(self, status):
+        status_patch = {"children": {self.resource_name: status}}
+        self.update_status(status_patch)
+
     async def apply(self, event, **kwargs):
-        # ensure child ref exists in the current status of osdpl object
-        if self.resource_name not in self._get_osdpl().obj.get(
-            "status", {}
-        ).get("children", {}):
-            status_patch = {"children": {self.resource_name: "Unknown"}}
-            self.update_status(status_patch)
+        self.set_children_status("Applying")
         LOG.info(f"Applying config for {self.service}")
         data = self.render()
+
+        for release in data["spec"]["releases"]:
+            if await self.helm_manager.exist(release["name"]):
+                await self.cleanup_immutable_resources(data)
+        try:
+            await self.helm_manager.install_bundle(data)
+        except:
+            raise
+
         LOG.info(f"Config applied for {self.service}")
-
-        # NOTE(pas-ha) this sets the parent refs in child
-        # to point to our resource so that cascading delete
-        # is handled by K8s itself
-        kopf.adopt(data, self.osdpl.obj)
-        helmbundle_obj = kube.resource(data)
-
-        # apply state of the object
-        if helmbundle_obj.exists():
-            # Drop immutable resources (jobs) before changing theirs values.
-            await self.cleanup_immutable_resources(helmbundle_obj, data)
-            # TODO(pas-ha) delete jobs if image was changed
-            helmbundle_obj.reload()
-            helmbundle_obj.set_obj(data)
-            helmbundle_obj.update()
-            LOG.debug(
-                f"{helmbundle_obj.kind} child is updated: %s",
-                helmbundle_obj.obj,
-            )
-        else:
-            if kwargs.get("helmobj_overrides", {}):
-                self._helm_obj_override(
-                    helmbundle_obj, kwargs["helmobj_overrides"]
-                )
-            helmbundle_obj.create()
-            LOG.debug(
-                f"{helmbundle_obj.kind} child is created: %s",
-                helmbundle_obj.obj,
-            )
         kopf.info(
             self.osdpl.obj,
             reason=event.capitalize(),
-            message=f"{event}d {helmbundle_obj.kind} for {self.service}",
+            message=f"{event}d for {self.service}",
         )
+        self.set_children_status(True)
 
     def _helm_obj_override(self, obj, overrides):
         for release in obj.obj["spec"]["releases"]:
@@ -488,6 +491,7 @@ class Service:
         pass
 
     async def upgrade(self, event, **kwargs):
+        self.set_children_status("Upgrading")
         try:
             await self.wait_service_healthy()
             LOG.info(f"Upgrading {self.service} started.")
@@ -506,6 +510,7 @@ class Service:
             # controller.
             LOG.exception(f"Got {e} when upgrading service {self.service}.")
             raise kopf.TemporaryError(f"Retrying to upgrade {self.service}")
+        self.set_children_status(True)
         LOG.info(f"Upgrading {self.service} done")
 
     def template_args(self):
@@ -559,18 +564,31 @@ class Service:
         )
 
         data.update(self.resource_def)
+        kopf.adopt(data, self.osdpl.obj)
 
+        # Add internal data to helm release
+
+        fingerprint = layers.spec_hash(self.body["spec"])
+        helm_data = self._genenrate_helm_metadata(data)
         child_hashes = self.generate_child_object_hashes(data)
-        child_hashes_data = {
-            "metadata": {
-                "annotations": {
-                    f"{self.group}/openstack-controller-child-objects": json.dumps(
-                        child_hashes
-                    )
+        internal_data = {
+            f"{self.group}/{self.version}": {
+                "openstack-controller": {
+                    "osdpl_generation": self._get_osdpl().metadata[
+                        "generation"
+                    ],
+                    "version": version.release_string,
+                    "fingerprint": fingerprint,
+                    "child-objects": child_hashes,
+                    "ownerReferences": data["metadata"]["ownerReferences"],
+                    "helm": helm_data,
+                    "helmbundle": {"name": self.resource_name},
                 }
             }
         }
-        layers.merger.merge(data, child_hashes_data)
+
+        for release in data["spec"]["releases"]:
+            layers.merger.merge(release["values"], internal_data)
         return data
 
     def get_chart_value_or_none(

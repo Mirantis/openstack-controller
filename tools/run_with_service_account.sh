@@ -10,7 +10,6 @@ export KUBECONFIG=$KUBECFG_FILE_NAME
 available_controllers=(
     "-m openstack_controller.controllers.node"
     "-m openstack_controller.controllers.openstackdeployment"
-    "-m openstack_controller.controllers.helmbundle"
     "-m openstack_controller.controllers.secrets"
     "-m openstack_controller.controllers.health"
     "-m openstack_controller.controllers.probe"
