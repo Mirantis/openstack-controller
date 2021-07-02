@@ -128,3 +128,10 @@ class OpenStackVersion(enum.IntEnum):
     ussuri = 5
     victoria = 6
     master = sys.maxsize
+
+
+# Enum for supported OpenStack-related node roles
+class NodeRole(enum.Enum):
+    compute = "compute"
+    gateway = "gateway"
+    controller = "controller"

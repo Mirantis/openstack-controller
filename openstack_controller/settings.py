@@ -20,6 +20,7 @@ import kopf
 from kopf.engines.posting import event_queue_var
 from prometheus_client import start_http_server, Gauge, Counter, Summary
 
+from openstack_controller import constants as const
 from openstack_controller.utils import merger
 
 
@@ -229,18 +230,34 @@ OSCTL_MIGRATE_CONCURRENCY = int(os.environ.get("OSCTL_MIGRATE_CONCURRENCY", 5))
 # Whether to perform evacuation if compute node is down, or just error out
 OSCTL_ALLOW_EVACUATION = bool_from_env("OSCTL_ALLOW_EVACUATION", False)
 
-# A dict of OpenStack node labels in json format.
-# For example `OSCTL_OPENSTACK_NODE_LABELS={"openstack-compute-node":"enabled","openstack-control-plane":"enabled"}`
-# If a node has one of specified labels with the matching value an appropriate NodeWorkloadLock object will be created.
-OSCTL_OPENSTACK_NODE_LABELS = json_from_env(
-    "OSCTL_OPENSTACK_NODE_LABELS", {"openstack-compute-node": "enabled"}
-)
+# A dict of OpenStack node labels per role in json format.
+# See the structure below
+# If a node has one of specified labels with the matching value,
+# an appropriate NodeWorkloadLock object will be created.
+def _parse_node_roles_from_env():
+    roles = json_from_env(
+        "OSCTL_OPENSTACK_NODE_LABELS",
+        {
+            "controller": {"openstack-control-plane": "enabled"},
+            "compute": {"openstack-compute-node": "enabled"},
+            "gateway": {"openstack-gateway": "enabled"},
+        },
+    )
+
+    parsed_roles = {const.NodeRole[k]: v for k, v in roles.items()}
+    for d in parsed_roles.values():
+        for x, y in d.items():
+            pass  # simple test on structure
+    return parsed_roles
+
+
 try:
-    for x, y in OSCTL_OPENSTACK_NODE_LABELS.items():
-        pass
-except Exception:
+    OSCTL_OPENSTACK_NODE_LABELS = _parse_node_roles_from_env()
+except Exception as exc:
+    # may raise KeyError from Enum, AttributeError from non-dict items()
+    # and whatever from json.load
     raise kopf.PermanentError(
-        f"OSCTL_OPENSTACK_NODE_LABELS invalid format, should be a dict with node labels and values"
+        f"OSCTL_OPENSTACK_NODE_LABELS invalid format - {exc}"
     )
 
 # The dict defining proxy settings

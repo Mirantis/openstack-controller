@@ -16,6 +16,7 @@ import datetime
 
 import kopf
 
+from openstack_controller import constants as const
 from openstack_controller import kube
 from openstack_controller import openstack_utils as ostutils
 from openstack_controller import settings
@@ -59,12 +60,9 @@ async def node_status_update_handler(name, body, old, new, event, **kwargs):
     # when node is already being drained
     # we assume that at this stage the workflow with NodeWorkloadLocks
     # and auto-migration of workloads is happening instead of using Masakari
-    if (
-        node.labels.get("openstack-compute-node") == "enabled"
-        and not node.unschedulable
-    ):
+    if node.has_role(const.NodeRole.compute) and not node.unschedulable:
         LOG.info(
-            f"Notifying HA service that OpenStack compute host {name} is down."
+            f"Notifying HA service on OpenStack compute host {name} down."
         )
         await ostutils.notify_masakari_host_down(node)
 
@@ -85,7 +83,8 @@ async def node_change_handler(body, event, **kwargs):
     if not kube.NodeWorkloadLock.definition_exists():
         LOG.warning("No custom resource definition")
         return
-    if kube.NodeWorkloadLock.required_for_node(body):
+    node = kube.Node(kube.api, body)
+    if kube.NodeWorkloadLock.required_for_node(node):
         kube.NodeWorkloadLock.ensure(name)
     else:
         nwl = kube.NodeWorkloadLock.get(name)
@@ -101,5 +100,8 @@ async def node_delete_handler(body, **kwargs):
     if nwl:
         await nwl.purge()
     node = kube.Node(kube.api, body)
-    if node.labels.get("openstack-compute-node") == "enabled":
+    if node.has_role(const.NodeRole.compute):
+        LOG.info(
+            f"Notifying HA service on OpenStack compute host {node.name} down."
+        )
         await ostutils.notify_masakari_host_down(node)

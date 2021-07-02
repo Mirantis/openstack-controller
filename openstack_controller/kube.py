@@ -11,6 +11,7 @@ import kopf
 import pykube
 from typing import Dict
 
+from . import constants as const
 from . import settings
 from . import utils
 
@@ -379,6 +380,15 @@ class Node(pykube.Node):
                     propagation_policy="Background", grace_period_seconds=0
                 )
 
+    def has_role(self, role: const.NodeRole) -> bool:
+        if role not in const.NodeRole:
+            LOG.warning(f"Unknown node role {role.value}, ignoring...")
+            return False
+        for k, v in settings.OSCTL_OPENSTACK_NODE_LABELS[role].items():
+            if self.labels.get(k) == v:
+                return True
+        return False
+
 
 class NodeWorkloadLock(pykube.objects.APIObject, HelmBundleMixin):
     version = "lcm.mirantis.com/v1alpha1"
@@ -427,9 +437,9 @@ class NodeWorkloadLock(pykube.objects.APIObject, HelmBundleMixin):
         return find(cls, name, silent=True)
 
     @staticmethod
-    def required_for_node(node_body):
-        for k, v in settings.OSCTL_OPENSTACK_NODE_LABELS.items():
-            if node_body["metadata"]["labels"].get(k) == v:
+    def required_for_node(node: Node) -> bool:
+        for role in (const.NodeRole.compute, const.NodeRole.gateway):
+            if node.has_role(role):
                 return True
         return False
 
