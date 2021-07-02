@@ -356,7 +356,12 @@ class Service:
         to_cleanup = set()
 
         release_mapping = {}
+        installed_releases = [
+            release["name"] for release in await self.helm_manager.list()
+        ]
         for release in new_obj["spec"]["releases"]:
+            if not release["name"] in installed_releases:
+                break
             chart_name = release["chart"].split("/")[1]
             old_values = await self.helm_manager.get_release_values(
                 release["name"]
@@ -445,8 +450,7 @@ class Service:
         data = self.render()
 
         for release in data["spec"]["releases"]:
-            if await self.helm_manager.exist(release["name"]):
-                await self.cleanup_immutable_resources(data)
+            await self.cleanup_immutable_resources(data)
         try:
             await self.helm_manager.install_bundle(data)
         except:
