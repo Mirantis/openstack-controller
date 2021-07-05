@@ -65,6 +65,16 @@ async def test_maintenance_start(nova_registry_service):
         },
     )
 
+    node = kube.Node(
+        kube.api,
+        {
+            "metadata": {
+                "name": "fake-node",
+                "labels": {"openstack-compute-node": "enabled"},
+            },
+        },
+    )
+
     values = []
 
     def set_state(value):
@@ -72,7 +82,7 @@ async def test_maintenance_start(nova_registry_service):
 
     nwl.set_state = set_state
 
-    with mock.patch.object(kube, "find", return_value=nwl):
+    with mock.patch.object(kube, "find", side_effect=(node, nwl)):
         await node_maintenance_request.node_maintenance_request_change_handler(
             nmr, 0, diff=()
         )
@@ -98,6 +108,16 @@ async def test_maintenance_stop(nova_registry_service):
         },
     )
 
+    node = kube.Node(
+        kube.api,
+        {
+            "metadata": {
+                "name": "fake-node",
+                "labels": {"openstack-compute-node": "enabled"},
+            },
+        },
+    )
+
     values = []
 
     def set_state(value):
@@ -105,7 +125,7 @@ async def test_maintenance_stop(nova_registry_service):
 
     nwl.set_state = set_state
 
-    with mock.patch.object(kube, "find", return_value=nwl):
+    with mock.patch.object(kube, "find", side_effect=(node, nwl)):
         await node_maintenance_request.node_maintenance_request_delete_handler(
             nmr, 0
         )
@@ -135,6 +155,16 @@ async def test_maintenance_preparation_failure(nova_registry_service):
         },
     )
 
+    node = kube.Node(
+        kube.api,
+        {
+            "metadata": {
+                "name": "fake-node",
+                "labels": {"openstack-compute-node": "enabled"},
+            },
+        },
+    )
+
     values = []
 
     def set_state(value):
@@ -143,7 +173,7 @@ async def test_maintenance_preparation_failure(nova_registry_service):
     nwl.set_state = set_state
 
     with pytest.raises(kopf.TemporaryError):
-        with mock.patch.object(kube, "find", return_value=nwl):
+        with mock.patch.object(kube, "find", side_effect=(node, nwl)):
             await node_maintenance_request.node_maintenance_request_change_handler(
                 nmr, 1000, diff=()
             )
