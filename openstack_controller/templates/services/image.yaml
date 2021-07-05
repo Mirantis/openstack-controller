@@ -102,6 +102,18 @@ spec:
           db_init:
             jobs:
               - openstack-mariadb-cluster-wait
+{%- if multi_backends %}
+          api:
+            services:
+              - endpoint: internal
+                service: oslo_db
+              - endpoint: internal
+                service: identity
+              - endpoint: internal
+                service: oslo_messaging
+              - endpoint: internal
+                service: volumev3
+{%- endif %}
       pod:
         replicas:
           api: 1
