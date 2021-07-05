@@ -40,6 +40,10 @@ class HelmManager:
             }
         )
 
+    def _substitute_local_proxy(self, repo):
+        node_ip = os.environ["NODE_IP"]
+        return utils.update_url_hostname(repo, node_ip)
+
     async def _guess_and_delete(self, stderr):
         immutable_pattern = (
             r'Error: .*: cannot patch "(.*)" with kind ([a-zA-Z]+): '
@@ -142,6 +146,7 @@ class HelmManager:
         self, name, values, repo, chart, version, args=None
     ):
         args = args or []
+        repo = self._substitute_local_proxy(repo)
         with tempfile.NamedTemporaryFile(
             mode="w", prefix=name, delete=True
         ) as tmp:
@@ -167,6 +172,7 @@ class HelmManager:
 
     async def install(self, name, values, repo, chart, version, args=None):
         args = args or []
+        repo = self._substitute_local_proxy(repo)
         with tempfile.NamedTemporaryFile(
             mode="w", prefix=name, delete=True
         ) as tmp:
@@ -194,6 +200,7 @@ class HelmManager:
         repos = {r["name"]: r["url"] for r in data["spec"]["repositories"]}
         for release in data["spec"]["releases"]:
             repo, chart = release["chart"].split("/")
+            repo = self._substitute_local_proxy(repo)
             await self.install(
                 release["name"],
                 release["values"],

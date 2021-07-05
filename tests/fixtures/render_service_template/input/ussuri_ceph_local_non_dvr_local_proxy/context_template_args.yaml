@@ -69,7 +69,7 @@ images:
   horizon_clean_cache: horizon-clean-cache:latest
   horizon_db_sync: horizon-db-sync:latest
   horizon_mirantis_theme_sha256summ: horizon-mirantis-theme-sha256summ
-  horizon_mirantis_theme_url: http://localhost:8282/bin/latest
+  horizon_mirantis_theme_url: http://127.0.0.1:8282/bin/latest
   image_repo_sync: image-repo-sync:latest
   ingress: ingress:latest
   ingress_module_init: ingress-module-init:latest
@@ -140,7 +140,7 @@ images:
   nova_service_cleaner: nova-service-cleaner:latest
   nova_spiceproxy: nova-spiceproxy:latest
   nova_spiceproxy_assets: nova-spiceproxy-assets:latest
-  octavia_amphora:  http://localhost:8282/bin/latest
+  octavia_amphora:  http://127.0.0.1:8282/bin/latest
   octavia_api: octavia-api:latest
   octavia_db_sync: octavia-db-sync:latest
   octavia_db_sync_persistence: octavia-db-sync-persistence:latest
