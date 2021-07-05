@@ -176,7 +176,8 @@ merger = CustomMerger(
 )
 
 
-def update_url_hostname(url, hostname):
+def substitute_local_proxy_hostname(url, hostname):
+    """Point artifact to use nodeIP instead of 127.0.0.1"""
     parsed = urlsplit(url)
     if not parsed.hostname == "127.0.0.1":
         return url

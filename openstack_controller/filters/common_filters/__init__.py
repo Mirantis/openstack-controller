@@ -1,5 +1,5 @@
 from openstack_controller import utils
 
 
-def update_url_hostname(url, hostname):
-    return utils.update_url_hostname(url, hostname)
+def substitute_local_proxy_hostname(url, hostname):
+    return utils.substitute_local_proxy_hostname(url, hostname)

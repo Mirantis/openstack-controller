@@ -91,11 +91,9 @@ spec:
               pool_end: {{ subnet.pool_end }}
   {%- endfor %}
   {%- set octavia_amphora_url = images["octavia_amphora"] %}
-  {%- if local_proxy %}
     # amphora_image_url is env var inside octavia create resources job
     # that's why () brakets are used
-    {%- set octavia_amphora_url = octavia_amphora_url | update_url_hostname("$(NODE_IP)") %}
-  {%- endif %}
+    {%- set octavia_amphora_url = octavia_amphora_url | substitute_local_proxy_hostname("$(NODE_IP)") %}
           amphora_image_url: {{ octavia_amphora_url }}
           amphora_image_checksum: {{ images["octavia_amphora_checksum"] }}
 {%- endif %}

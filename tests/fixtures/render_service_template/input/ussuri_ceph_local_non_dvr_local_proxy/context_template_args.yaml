@@ -1,4 +1,3 @@
-local_proxy: true
 images:
   aodh_alarms_cleaner: aodh-alarms-cleaner:latest
   aodh_api: aodh-api:latest
