@@ -449,6 +449,9 @@ class Service:
         LOG.info(f"Applying config for {self.service}")
         data = self.render()
 
+        if kwargs.get("helmobj_overrides", {}):
+            self._merge_helm_override(data, kwargs["helmobj_overrides"])
+
         for release in data["spec"]["releases"]:
             await self.cleanup_immutable_resources(data)
         try:
@@ -464,8 +467,8 @@ class Service:
         )
         self.set_children_status(True)
 
-    def _helm_obj_override(self, obj, overrides):
-        for release in obj.obj["spec"]["releases"]:
+    def _merge_helm_override(self, data, overrides):
+        for release in data["spec"]["releases"]:
             name = release["name"]
             if name in overrides:
                 LOG.info(
