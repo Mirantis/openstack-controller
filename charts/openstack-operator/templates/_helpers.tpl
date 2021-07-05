@@ -67,6 +67,10 @@ Generate environment variables for osdpl containers
   value: {{ $context.Values.global.dockerBaseUrl }}
 - name: OSCTL_BINARY_BASE_URL
   value: {{ $context.Values.global.helmBaseUrl }}
+- name: NODE_IP
+  valueFrom:
+    fieldRef:
+      fieldPath: status.hostIP
 {{- end }}
 
 {{/*

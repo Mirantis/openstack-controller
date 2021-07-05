@@ -26,6 +26,7 @@ import deepmerge.exception
 from deepmerge.strategy import dict as merge_dict
 from deepmerge.strategy import list as merge_list
 import deepmerge.strategy.type_conflict
+from urllib.parse import urlsplit
 
 from openstack_controller import settings
 from kopf.engines.posting import event_queue_var
@@ -173,3 +174,19 @@ merger = CustomMerger(
     # finally, choose the strategies in the case where the types conflict:
     ["fail"],
 )
+
+
+def update_url_hostname(url, hostname):
+    parsed = urlsplit(url)
+    if not parsed.hostname == "127.0.0.1":
+        return url
+    new_netloc = hostname
+    auth = parsed.username
+    new_netloc = hostname
+    if auth:
+        if parsed.password:
+            auth = f"{auth}:{parsed.password}"
+        new_netloc = f"{auth}@{new_netloc}"
+    if parsed.port:
+        new_netloc = f"{new_netloc}:{parsed.port}"
+    return parsed._replace(netloc=new_netloc).geturl()
