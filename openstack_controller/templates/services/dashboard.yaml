@@ -236,10 +236,7 @@ spec:
                              }) %}
 {%- endif %}
 {%- for theme in horizon_themes %}
-  {%- set theme_url = theme.url %}
-  {%- if local_proxy %}
-    {%- set theme_url = theme_url | update_url_hostname("${NODE_IP}") %}
-  {%- endif %}
+  {%- set theme_url = theme.url | substitute_local_proxy_hostname("${NODE_IP}") %}
               {{ theme.name }}:
                 url: {{ theme_url }}
                 sha256summ: {{ theme.sha256summ }}

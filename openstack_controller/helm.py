@@ -42,7 +42,7 @@ class HelmManager:
 
     def _substitute_local_proxy(self, repo):
         node_ip = os.environ["NODE_IP"]
-        return utils.update_url_hostname(repo, node_ip)
+        return utils.substitute_local_proxy_hostname(repo, node_ip)
 
     async def _guess_and_delete(self, stderr):
         immutable_pattern = (
