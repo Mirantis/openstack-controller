@@ -144,7 +144,12 @@ class ComputeFeatureEnabled(base_section.BaseSection):
 
     @property
     def resize(self):
-        pass
+        if self.get_values_item("nova", "conf.nova.libvirt.images_type") in [
+            "lvm",
+        ]:
+            return False
+        else:
+            return True
 
     @property
     def scheduler_available_filters(self):
