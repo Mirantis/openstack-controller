@@ -8,7 +8,6 @@ from urllib.parse import urlsplit
 
 from openstack_controller import ceph_api
 from openstack_controller import constants
-from openstack_controller import health
 from openstack_controller import kube
 from openstack_controller import secrets
 from openstack_controller import settings  # noqa
@@ -171,7 +170,7 @@ async def handle_bgpvpnsecret(
         return
     LOG.info(f"The secret {name} changes are: {diff}")
 
-    osdpl = health.get_osdpl(settings.OSCTL_OS_DEPLOYMENT_NAMESPACE)
+    osdpl = kube.get_osdpl(settings.OSCTL_OS_DEPLOYMENT_NAMESPACE)
 
     hasher = hashlib.sha256()
     hasher.update(json.dumps(body["data"], sort_keys=True).encode())

@@ -51,7 +51,7 @@ async def test_hook_called():
 
     # failed to patch as function decorator probably due to asynio decorator
     # so let's patch with the context manager
-    with mock.patch("openstack_controller.health.get_osdpl") as o, mock.patch(
+    with mock.patch("openstack_controller.kube.get_osdpl") as o, mock.patch(
         "kopf.adopt"
     ), mock.patch("openstack_controller.kube.resource"), mock.patch(
         "openstack_controller.kube.find"

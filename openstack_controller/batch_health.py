@@ -36,7 +36,7 @@ def calculate_statuses(k8s_objects):
 
 
 def update_health_statuses():
-    osdpl = health.get_osdpl(settings.OSCTL_OS_DEPLOYMENT_NAMESPACE)
+    osdpl = kube.get_osdpl(settings.OSCTL_OS_DEPLOYMENT_NAMESPACE)
     statuses = calculate_statuses(get_k8s_objects(osdpl.namespace))
     health_all = collections.defaultdict(dict)
     for ident, status in statuses.items():

@@ -160,20 +160,6 @@ async def wait_application_ready(
     )
 
 
-def get_osdpl(namespace):
-    LOG.debug("Getting osdpl object")
-    osdpl = list(
-        kube.OpenStackDeployment.objects(kube.api).filter(namespace=namespace)
-    )
-    if len(osdpl) != 1:
-        LOG.warning(
-            f"Could not find unique OpenStackDeployment resource "
-            f"in namespace {namespace}, skipping health report processing."
-        )
-        return
-    return osdpl[0]
-
-
 def daemonset_health_status(obj):
     st = DaemonSetStatus(**obj["status"])
     res_health = constants.UNKNOWN

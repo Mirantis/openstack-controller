@@ -558,4 +558,16 @@ async def wait_for_deleted(
     return False
 
 
+def get_osdpl(namespace):
+    LOG.debug("Getting osdpl object")
+    osdpl = list(OpenStackDeployment.objects(api).filter(namespace=namespace))
+    if len(osdpl) != 1:
+        LOG.warning(
+            f"Could not find unique OpenStackDeployment resource "
+            f"in namespace {namespace}, skipping health report processing."
+        )
+        return
+    return osdpl[0]
+
+
 find_osdpl = functools.partial(find, OpenStackDeployment)

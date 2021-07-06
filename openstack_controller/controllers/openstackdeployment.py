@@ -101,7 +101,6 @@ def discover_images(mspec, logger):
 
 
 # on.field to force storing that field to be reacting on its changes
-@kopf.on.field(*kube.OpenStackDeployment.kopf_on_args, field="status.children")
 @kopf.on.field(*kube.OpenStackDeployment.kopf_on_args, field="status.watched")
 @kopf.on.resume(*kube.OpenStackDeployment.kopf_on_args)
 @kopf.on.update(*kube.OpenStackDeployment.kopf_on_args)
@@ -120,14 +119,6 @@ async def handle(body, meta, spec, logger, event, **kwargs):
     kwargs["patch"].setdefault("status", {})
     kwargs["patch"]["status"]["version"] = version.release_string
     kwargs["patch"]["status"]["fingerprint"] = layers.spec_hash(body["spec"])
-
-    # update overall deployed status based on children satuses
-    children = kwargs["status"].get("children", {})
-    kwargs["patch"]["status"]["deployed"] = (
-        all([c is True for c in children.values()]) if children else False
-    )
-
-    LOG.debug(f"Updated status for osdpl {kwargs['name']}")
 
     if spec.get("draft"):
         LOG.info("OpenStack deployment is in draft mode, skipping handling...")
@@ -204,6 +195,9 @@ async def handle(body, meta, spec, logger, event, **kwargs):
         ] = (service_instance.delete, event, body, meta, spec, logger, kwargs)
 
     await run_task(task_def)
+
+    # If we got here, we installed all releases successfully.
+    kwargs["patch"]["status"]["deployed"] = True
 
     return {"lastStatus": f"{event}d"}
 
