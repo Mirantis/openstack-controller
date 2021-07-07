@@ -48,7 +48,9 @@ class HelmManager:
         immutable_pattern = (
             r'Error: .*: cannot patch "(.*)" with kind ([a-zA-Z]+): '
         )
-        m = re.match(immutable_pattern, stderr)
+        # Use search to find pattern in multiline string.
+        # TODO(vsaienko): Add unittests for regex
+        m = re.search(immutable_pattern, stderr)
         if m:
             try:
                 name, kind = m.group(1, 2)
