@@ -269,12 +269,10 @@ spec:
           02-custom.yaml: {{ spec.get("features", {}).get("policies", {}).get("octavia", {}) }}
         octavia:
           api_settings:
-# NOTE(vsaienko): amphorav2 is not production ready yet. For more info please see PRODX-13273
-# and PRODX-12922
-{% set _default_provider_driver = 'amphora' %}
+{% set _default_provider_driver = 'amphorav2' %}
 {%- if spec.openstack_version in ['queens'] %}
   {% set _default_provider_driver = 'octavia' %}
-{%- elif spec.openstack_version in ['rocky', 'stein', 'train'] %}
+{%- elif spec.openstack_version in ['rocky', 'stein', 'train', 'ussuri'] %}
   {% set _default_provider_driver = 'amphora' %}
 {%- endif %}
 {%- if tungstenfabric_enabled %}
