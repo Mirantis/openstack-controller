@@ -30,6 +30,47 @@ def get_os_services_for_upgrade(enabled_services):
     ]
 
 
+def check_handling_allowed(old, new, event):
+    LOG.info(f"Checking whether handling is allowed")
+
+    new_values = (
+        new.get("spec", {})
+        .get("services", {})
+        .get("database", {})
+        .get("mariadb", {})
+        .get("values", {})
+    )
+    new_enabled = new_values.get("manifests", {}).get(
+        "job_mariadb_phy_restore", False
+    )
+
+    if new_enabled:
+        if event == "create":
+            raise kopf.PermanentError(
+                f"Mariadb restore cannot be enabled during Openstack deployment create"
+            )
+        elif event == "resume":
+            raise kopf.PermanentError(
+                f"Resume is blocked due to Mariadb restore job enabled"
+            )
+        else:
+            old_values = (
+                old.get("spec", {})
+                .get("services", {})
+                .get("database", {})
+                .get("mariadb", {})
+                .get("values", {})
+            )
+            old_enabled = old_values.get("manifests", {}).get(
+                "job_mariadb_phy_restore", False
+            )
+            if old_enabled:
+                raise kopf.PermanentError(
+                    f"Mariadb restore job should be disabled before doing other changes, handling is not allowed"
+                )
+    LOG.info("Handling is allowed")
+
+
 async def run_task(task_def):
     """Run OpenStack controller tasks
 
@@ -123,6 +164,8 @@ async def handle(body, meta, spec, logger, event, **kwargs):
     if spec.get("draft"):
         LOG.info("OpenStack deployment is in draft mode, skipping handling...")
         return {"lastStatus": f"{event} drafted"}
+
+    check_handling_allowed(kwargs["old"], kwargs["new"], event)
 
     secrets.OpenStackAdminSecret(namespace).ensure()
 
