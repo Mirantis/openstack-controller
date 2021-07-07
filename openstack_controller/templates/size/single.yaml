@@ -294,7 +294,7 @@ services:
               rest_request_read_timeout: 120
             task_flow:
               engine: parallel
-              max_workers: 64
+              max_workers: 4
             house_keeping:
               amphora_expiry_age: 3600
               load_balancer_expiry_age: 3600
