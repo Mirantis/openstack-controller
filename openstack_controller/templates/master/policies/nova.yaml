@@ -76,7 +76,7 @@ os_compute_api:os-extended-status: rule:admin_or_owner
 os_compute_api:os-extended-volumes: rule:admin_or_owner
 os_compute_api:os-extended-volumes:discoverable: "@"
 os_compute_api:extension_info:discoverable: "@"
-os_compute_api:extensions: rule:admin_or_owner
+os_compute_api:extensions: "@"
 os_compute_api:extensions:discoverable: "@"
 os_compute_api:os-fixed-ips:discoverable: "@"
 os_compute_api:os-fixed-ips: rule:admin_api
@@ -101,7 +101,7 @@ os_compute_api:os-floating-ip-dns:domain:update: rule:admin_api
 os_compute_api:os-floating-ip-dns:discoverable: "@"
 os_compute_api:os-floating-ip-dns:domain:delete: rule:admin_api
 os_compute_api:os-floating-ip-pools:discoverable: "@"
-os_compute_api:os-floating-ip-pools: rule:admin_or_owner
+os_compute_api:os-floating-ip-pools: "@"
 os_compute_api:os-floating-ips: rule:admin_or_owner
 os_compute_api:os-floating-ips:discoverable: "@"
 os_compute_api:os-floating-ips-bulk:discoverable: "@"
