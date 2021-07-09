@@ -18,16 +18,7 @@ from openstack_controller import exception
 class NeutronValidator(base.BaseValidator):
     service = "networking"
 
-    def _check_bgpvpn(self, review_request):
-        bgpvpn = (
-            review_request.get("object", {})
-            .get("spec", {})
-            .get("features", {})
-            .get("neutron", {})
-            .get("bgpvpn", {})
-        )
-        if bgpvpn.get("enabled") is None:
-            return
+    def _check_bgpvpn(self, bgpvpn):
         if not bgpvpn.get("route_reflector", {}).get("enabled"):
             if not bgpvpn.get("peers"):
                 raise exception.OsDplValidationFailed(
@@ -36,25 +27,30 @@ class NeutronValidator(base.BaseValidator):
                 )
 
     def validate(self, review_request):
-        neutron_features = (
-            review_request.get("object", {})
-            .get("spec", {})
-            .get("features", {})
-            .get("neutron", {})
-        )
-        neutron_backend = neutron_features.get("backend")
+        spec = review_request.get("object", {}).get("spec", {})
+        neutron_features = spec.get("features", {}).get("neutron", {})
         floating_network = neutron_features.get("floating_network", {})
-        if neutron_backend != "tungstenfabric" and not floating_network.get(
-            "physnet"
-        ):
-            raise exception.OsDplValidationFailed(
-                "Malformed OpenStackDeployment spec, if TungstenFabric is "
-                "not used, physnet needs to be specified in "
-                "features.neutron.floating_network section."
-            )
         ipsec = neutron_features.get("ipsec", {"enabled": False})
-        if neutron_backend == "tungstenfabric" and ipsec["enabled"]:
-            raise exception.OsDplValidationFailed(
-                "TungstenFabric with IPsec is not supported"
-            )
-        self._check_bgpvpn(review_request)
+        bgpvpn = neutron_features.get("bgpvpn", {"enabled": False})
+        tungstenfabric_enabled = spec["preset"] == "compute-tf"
+
+        if not tungstenfabric_enabled:
+            if floating_network.get("enabled") and not floating_network.get(
+                "physnet"
+            ):
+                raise exception.OsDplValidationFailed(
+                    "Malformed OpenStackDeployment spec, if TungstenFabric is "
+                    "not used, physnet needs to be specified in "
+                    "features.neutron.floating_network section."
+                )
+            if bgpvpn["enabled"]:
+                self._check_bgpvpn(bgpvpn)
+        else:
+            if ipsec["enabled"]:
+                raise exception.OsDplValidationFailed(
+                    "TungstenFabric with IPsec is not supported"
+                )
+            if bgpvpn["enabled"]:
+                raise exception.OsDplValidationFailed(
+                    "TungstenFabric with BGPVPN is not supported"
+                )
