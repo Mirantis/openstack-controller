@@ -340,27 +340,6 @@ services:
               fixed_network_name: ironic-provisioning
             {%- endif %}
               build_timeout: 600
-            #TODO(mshalamov): Will be removed during process of completing PRODX-1192
-            compute-feature-enabled:
-            {%- if ironic_enabled %}
-              attach_encrypted_volume: false
-              block_migration_for_live_migration: false
-              change_password: false
-              console_output: false
-              interface_attach: false
-              live_migrate_back_and_forth: false
-              live_migration: false
-              pause: false
-              personality: false
-              rescue: false
-              resize: false
-              shelve: false
-              snapshot: false
-              suspend: false
-              boot_from_volume: false
-            {%- else %}
-              resize: true
-            {%- endif %}
             image:
               build_timeout: 600
             load_balancer:

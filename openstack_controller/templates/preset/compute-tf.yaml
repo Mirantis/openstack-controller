@@ -373,8 +373,6 @@ services:
               fixed_network_name: tempest-fixed-net
               build_timeout: 600
             #TODO(mshalamov): Will be removed during process of completing PRODX-1192
-            compute-feature-enabled:
-              resize: true
             image:
               build_timeout: 600
             load_balancer:

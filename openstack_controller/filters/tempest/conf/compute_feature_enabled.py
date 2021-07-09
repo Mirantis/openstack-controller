@@ -60,6 +60,11 @@ class ComputeFeatureEnabled(base_section.BaseSection):
         )
 
     @property
+    def boot_from_volume(self):
+        if self.is_service_enabled("ironic"):
+            return False
+
+    @property
     def block_migrate_cinder_iscsi(self):
         pass
 
@@ -74,7 +79,8 @@ class ComputeFeatureEnabled(base_section.BaseSection):
 
     @property
     def change_password(self):
-        pass
+        if self.is_service_enabled("ironic"):
+            return False
 
     @property
     def cold_migration(self):
@@ -105,17 +111,21 @@ class ComputeFeatureEnabled(base_section.BaseSection):
 
     @property
     def interface_attach(self):
-        pass
+        if self.is_service_enabled("ironic"):
+            return False
 
     @property
     def live_migrate_back_and_forth(self):
-        pass
+        if self.is_service_enabled("ironic"):
+            return False
 
     @property
     def live_migration(self):
         if self.get_values_item("nova", "conf.nova.libvirt.images_type") in [
             "lvm",
         ]:
+            return False
+        if self.is_service_enabled("ironic"):
             return False
 
     @property
@@ -128,11 +138,13 @@ class ComputeFeatureEnabled(base_section.BaseSection):
 
     @property
     def pause(self):
-        pass
+        if self.is_service_enabled("ironic"):
+            return False
 
     @property
     def personality(self):
-        pass
+        if self.is_service_enabled("ironic"):
+            return False
 
     @property
     def rdp_console(self):
@@ -140,7 +152,8 @@ class ComputeFeatureEnabled(base_section.BaseSection):
 
     @property
     def rescue(self):
-        pass
+        if self.is_service_enabled("ironic"):
+            return False
 
     @property
     def resize(self):
@@ -148,8 +161,9 @@ class ComputeFeatureEnabled(base_section.BaseSection):
             "lvm",
         ]:
             return False
-        else:
-            return True
+        if self.is_service_enabled("ironic"):
+            return False
+        return True
 
     @property
     def scheduler_available_filters(self):
@@ -175,11 +189,13 @@ class ComputeFeatureEnabled(base_section.BaseSection):
 
     @property
     def shelve(self):
-        pass
+        if self.is_service_enabled("ironic"):
+            return False
 
     @property
     def snapshot(self):
-        pass
+        if self.is_service_enabled("ironic"):
+            return False
 
     @property
     def spice_console(self):
@@ -187,7 +203,8 @@ class ComputeFeatureEnabled(base_section.BaseSection):
 
     @property
     def suspend(self):
-        pass
+        if self.is_service_enabled("ironic"):
+            return False
 
     @property
     def swap_volume(self):
