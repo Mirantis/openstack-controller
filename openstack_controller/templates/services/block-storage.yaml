@@ -264,12 +264,15 @@ spec:
                          volumes_dir: /var/lib/cinder/volumes
                          volume_driver: cinder.volume.drivers.lvm.LVMVolumeDriver
                          volume_backend_name: {{ backend_name }}
+                         image_upload_use_cinder_backend: True
+                         image_upload_use_internal_tenant: True
                          {%- for key,val in backend_opts.lvm.items() %}
                          {{ key }}: {{ val }}
                          {%- endfor %}
                          {%- endif %}
                        DEFAULT:
                          enabled_backends: {{ ','.join(enabled_backends) }}
+                         allowed_direct_url_schemes: cinder
                        {%- endfor %}
         {%- endfor %}
       {%- endif %}

@@ -28,13 +28,18 @@ spec:
                           volume_backend_name: lvm_fast
                           volume_group: fast-vol
                           volumes_dir: /var/lib/cinder/volumes
+                          image_upload_use_cinder_backend: True
+                          image_upload_use_internal_tenant: True
                         lvm_slow:
                           volume_group: slow-vol
                           volume_driver: cinder.volume.drivers.lvm.LVMVolumeDriver
                           volume_backend_name: lvm_slow
                           volumes_dir: /var/lib/cinder/volumes
+                          image_upload_use_cinder_backend: True
+                          image_upload_use_internal_tenant: True
                         DEFAULT:
                           enabled_backends: lvm_fast,lvm_slow
+                          allowed_direct_url_schemes: cinder
       bootstrap:
         bootstrap_conf_backends: false
         volume_types:
