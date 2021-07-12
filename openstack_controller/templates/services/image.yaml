@@ -100,9 +100,6 @@ spec:
             jobs:
               - openstack-mariadb-cluster-wait
 {%- if multi_backends %}
-          bootstrap:
-            jobs:
-              - cinder-bootstrap
           api:
             services:
               - endpoint: internal
@@ -113,6 +110,8 @@ spec:
                 service: oslo_messaging
               - endpoint: internal
                 service: volumev3
+            jobs:
+              - cinder-bootstrap
 {%- endif %}
       pod:
         replicas:
