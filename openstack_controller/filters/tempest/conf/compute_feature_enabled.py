@@ -8,6 +8,7 @@ class ComputeFeatureEnabled(base_section.BaseSection):
         "api_extensions",
         "attach_encrypted_volume",
         "barbican_integration_enabled",
+        "boot_from_volume",
         "block_migrate_cinder_iscsi",
         "block_migration_for_live_migration",
         "change_password",
