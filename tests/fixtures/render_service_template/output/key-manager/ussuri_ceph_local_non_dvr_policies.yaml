@@ -37,7 +37,6 @@ spec:
         logging:
           logger_barbican:
             level: INFO
-            propagate: 0
       dependencies:
         static:
           db_init:

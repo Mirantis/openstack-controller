@@ -46,7 +46,6 @@ spec:
         logging:
           logger_nova:
             level: INFO
-            propagate: 0
         nova:
           DEFAULT:
             allow_resize_to_same_host: true

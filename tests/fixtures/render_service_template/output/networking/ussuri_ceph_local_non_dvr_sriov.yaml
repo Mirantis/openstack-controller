@@ -152,7 +152,6 @@ spec:
         logging:
           logger_neutron:
             level: INFO
-            propagate: 0
         metadata_agent:
           DEFAULT:
             metadata_proxy_shared_secret: mN0aLDTcg1AVqyLWNDjCd2Jz6DA61cZJ

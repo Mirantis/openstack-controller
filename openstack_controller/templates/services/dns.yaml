@@ -110,7 +110,6 @@ spec:
         logging:
           logger_designate:
             level: {{ spec.get('features', {}).get('logging', {}).get('designate', {}).get('level', 'INFO') }}
-            propagate: 0
       manifests:
         network_policy: false
         job_rabbit_init: false

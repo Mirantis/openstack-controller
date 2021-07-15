@@ -60,7 +60,6 @@ spec:
         logging:
           logger_cinder:
             level: INFO
-            propagate: 0
       dependencies:
         static:
           db_init:

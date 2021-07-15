@@ -82,7 +82,6 @@ spec:
         logging:
           logger_gnocchi:
             level: INFO
-            propagate: 0
       dependencies:
         static:
           db_init:

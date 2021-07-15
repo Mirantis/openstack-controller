@@ -705,7 +705,6 @@ spec:
         logging:
           logger_ceilometer:
             level: INFO
-            propagate: 0
       dependencies:
         static:
           compute:

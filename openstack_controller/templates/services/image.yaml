@@ -209,7 +209,6 @@ spec:
         logging:
           logger_glance:
             level: {{ spec.get('features', {}).get('logging', {}).get('glance', {}).get('level', 'INFO') }}
-            propagate: 0
       volume:
         class_name: rook-ceph-block
         size: 2Gi

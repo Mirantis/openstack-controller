@@ -16,7 +16,6 @@ spec:
         logging:
           logger_octavia:
             level: INFO
-            propagate: 0
         octavia:
           api_settings:
             default_provider_driver: amphora

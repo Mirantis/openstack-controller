@@ -43,7 +43,6 @@ spec:
         logging:
           logger_panko:
             level: INFO
-            propagate: 0
       dependencies:
         static:
           db_init:

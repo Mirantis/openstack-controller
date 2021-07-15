@@ -18,7 +18,6 @@ spec:
         logging:
           logger_designate:
             level: INFO
-            propagate: 0
       dependencies:
         static:
           db_init:

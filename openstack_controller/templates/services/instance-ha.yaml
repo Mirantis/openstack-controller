@@ -100,10 +100,8 @@ spec:
         logging:
           logger_masakari:
             level: {{ spec.get('features', {}).get('logging', {}).get('masakari', {}).get('level', 'INFO') }}
-            propagate: 0
           logger_masakarimonitors:
             level: {{ spec.get('features', {}).get('logging', {}).get('masakari', {}).get('level', 'INFO') }}
-            propagate: 0
       dependencies:
         static:
           db_init:

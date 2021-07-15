@@ -16,7 +16,6 @@ spec:
         logging:
           logger_heat:
             level: INFO
-            propagate: 0
       dependencies:
         static:
           db_init:

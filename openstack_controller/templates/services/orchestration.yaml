@@ -131,7 +131,6 @@ spec:
         logging:
           logger_heat:
             level: {{ spec.get('features', {}).get('logging', {}).get('heat', {}).get('level', 'INFO') }}
-            propagate: 0
 {%- if spec.features.neutron.get('bgpvpn', {}).get('enabled') %}
         plugins:
           - networking_bgpvpn_heat

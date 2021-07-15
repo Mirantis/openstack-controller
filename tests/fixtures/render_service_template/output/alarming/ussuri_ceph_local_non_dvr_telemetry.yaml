@@ -36,7 +36,6 @@ spec:
         logging:
           logger_aodh:
             level: INFO
-            propagate: 0
       dependencies:
         static:
           db_init:
