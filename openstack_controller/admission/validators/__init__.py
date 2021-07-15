@@ -1,3 +1,4 @@
+from openstack_controller.admission.validators import glance
 from openstack_controller.admission.validators import keystone
 from openstack_controller.admission.validators import neutron
 from openstack_controller.admission.validators import nova
@@ -10,4 +11,5 @@ __all__ = [
     nova.NovaValidator,
     openstack.OpenStackValidator,
     nodes.NodeSpecificValidator,
+    glance.GlanceValidator,
 ]

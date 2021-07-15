@@ -1,55 +1,16 @@
 spec:
   releases:
-  - chart: osh-infra/iscsi
-    name: openstack-iscsi
-    values:
-      images:
-        tags:
-          iscsi_iscsi: cinder-volume:latest
-          iscsi_tgt: cinder-volume:latest
-          dep_check: dep-check:latest
-      manifests:
-        daemonset_iscsi: false
-        daemonset_tgt: true
   - chart: osh/cinder
     name: openstack-cinder
     values:
-      overrides:
-        cinder_volume_ds:
-          labels:
-            lvm::node:
-              values:
-                conf:
-                  standalone_backends:
-                    daemonset:
-                      conf:
-                        lvm_fast:
-                          image_upload_use_cinder_backend: True
-                          image_upload_use_internal_tenant: True
-                          volume_driver: cinder.volume.drivers.lvm.LVMVolumeDriver
-                          volume_backend_name: lvm_fast
-                          volume_group: fast-vol
-                          volumes_dir: /var/lib/cinder/volumes
-                        lvm_slow:
-                          volume_group: slow-vol
-                          volume_driver: cinder.volume.drivers.lvm.LVMVolumeDriver
-                          volume_backend_name: lvm_slow
-                          volumes_dir: /var/lib/cinder/volumes
-                        DEFAULT:
-                          allowed_direct_url_schemes: cinder
-                          enabled_backends: lvm_fast,lvm_slow
       bootstrap:
         bootstrap_conf_backends: false
         volume_types:
           volumes-hdd:
             volume_backend_name: volumes-hdd
-          lvm_fast:
-            volume_backend_name: lvm_fast
-          lvm_fast_multiattach:
-            multiattach: '"<is> True"'
-            volume_backend_name: lvm_fast
-          lvm_slow:
-            volume_backend_name: lvm_slow
+          volumes-hdd_multiattach:
+            multiattach: "\"<is> True\""
+            volume_backend_name: volumes-hdd
       ceph_client:
         configmap: rook-ceph-config
         user_secret_name: cinder-rbd-keyring
@@ -57,13 +18,10 @@ spec:
         policy.d:
           01-controller-default.yaml: {'block-storage_rule1': 'block-storage_value1'}
           02-custom.yaml: {}
-        standalone_backends:
-          daemonset:
-            conf:
-              DEFAULT:
-                cluster: ""
         backends:
           volumes-hdd:
+            image_upload_use_cinder_backend: True
+            image_upload_use_internal_tenant: True
             rbd_ceph_conf: /etc/ceph/ceph.conf
             rbd_pool: volumes-hdd
             rbd_user: cinder

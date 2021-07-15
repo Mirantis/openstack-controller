@@ -16,7 +16,8 @@
     {%- do node_specific.update({label: node_features.features}) %}
   {%- endif %}
 {%- endfor %}
-
+{%- set glance_cinder_backends = spec.get('features', {}).get('glance', {}).get('backends', {}).get('cinder', {}) %}
+{%- set glance_cinder_multi = {} %}
 
 spec:
   releases:
@@ -154,6 +155,15 @@ spec:
   {%- if backend_config.role == 'volumes' %}
     {%- do enabled_backends.append(backend) %}
           {{ backend }}:
+    {%- for g_backend_name, g_backend_opts in glance_cinder_backends.items() %}
+      {%- if g_backend_opts.get('backend_name') %}
+        {%- set glance_cinder_volume_type, glance_cinder_backend_name =  g_backend_opts['backend_name'].split(':') %}
+      {%- endif %}
+      {%- if glance_cinder_volume_type == 'rbd' and glance_cinder_backend_name == backend %}
+            image_upload_use_cinder_backend: True
+            image_upload_use_internal_tenant: True
+      {%- endif %}
+    {%- endfor %}
             volume_driver: cinder.volume.drivers.rbd.RBDDriver
             volume_backend_name: {{ backend }}
             rbd_pool: {{ backend_config.name }}
@@ -217,6 +227,14 @@ spec:
       bootstrap:
         bootstrap_conf_backends: false
         volume_types:
+    {%- for g_backend_name, g_backend_opts in glance_cinder_backends.items() %}
+      {%- if g_backend_opts.get('backend_name') %}
+        {%- set glance_cinder_volume_type, glance_cinder_backend_name =  g_backend_opts['backend_name'].split(':') %}
+          {{ glance_cinder_backend_name }}_multiattach:
+            volume_backend_name: {{ glance_cinder_backend_name }}
+            multiattach: "\"<is> True\""
+      {%- endif %}
+    {%- endfor %}
 {%- for backend in enabled_backends %}
           {{ backend }}:
             volume_backend_name: {{ backend }}
@@ -256,23 +274,37 @@ spec:
                  standalone_backends:
                    daemonset:
                      conf:
-                       {%- set enabled_backends = [] %}
+                       {%- set overriden_enabled_backends = [] %}
                        {%- for backend_name,backend_opts in cinder_override.get("volume", {}).get("backends", {}).items() %}
-                       {%- do enabled_backends.append(backend_name) %}
+                       {%- do overriden_enabled_backends.append(backend_name) %}
                        {{ backend_name }}:
                          {%- if "lvm" in backend_opts %}
                          volumes_dir: /var/lib/cinder/volumes
                          volume_driver: cinder.volume.drivers.lvm.LVMVolumeDriver
                          volume_backend_name: {{ backend_name }}
+                     {%- for g_backend_name, g_backend_opts in glance_cinder_backends.items() %}
+                       {%- if g_backend_opts.get('backend_name') %}
+                         {%- set glance_cinder_volume_type, glance_cinder_backend_name =  g_backend_opts['backend_name'].split(':') %}
+                       {%- endif %}
+                       {%- if glance_cinder_volume_type == 'lvm' and glance_cinder_backend_name == backend_name %}
                          image_upload_use_cinder_backend: True
                          image_upload_use_internal_tenant: True
+                       {%- endif %}
+                     {%- endfor %}
                          {%- for key,val in backend_opts.lvm.items() %}
                          {{ key }}: {{ val }}
                          {%- endfor %}
                          {%- endif %}
                        DEFAULT:
-                         enabled_backends: {{ ','.join(enabled_backends) }}
+                         enabled_backends: {{ ','.join(overriden_enabled_backends) }}
+                       {%- for g_backend_name, g_backend_opts in glance_cinder_backends.items() %}
+                       {%- if g_backend_opts.get('backend_name') %}
+                         {%- set glance_cinder_volume_type, glance_cinder_backend_name =  g_backend_opts['backend_name'].split(':') %}
+                       {%- endif %}
+                         {%- if glance_cinder_backend_name in overriden_enabled_backends %}
                          allowed_direct_url_schemes: cinder
+                         {%- endif %}
+                       {%- endfor %}
                        {%- endfor %}
         {%- endfor %}
       {%- endif %}

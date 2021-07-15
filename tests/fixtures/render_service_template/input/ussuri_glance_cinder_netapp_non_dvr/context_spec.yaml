@@ -1,16 +1,4 @@
 openstack_version: ussuri
-nodes:
-  lvm::node:
-    features:
-      cinder:
-        volume:
-          backends:
-            lvm_fast:
-              lvm:
-                volume_group: "fast-vol"
-            lvm_slow:
-              lvm:
-                volume_group: "slow-vol"
 features:
   barbican:
     backends:
@@ -32,9 +20,9 @@ features:
     backend: ceph
     backends:
       cinder:
-        blockstore:
+        netappstore:
           default: true
-          backend_name: lvm:lvm_fast
+          volume_type: netapp_volume_type
   messaging:
     components_with_dedicated_messaging:
     - networking
@@ -59,18 +47,16 @@ features:
         pool_start: 10.11.12.100
         range: 10.11.12.0/24
     tunnel_interface: ens3
-  nova:
-    images:
-      backend: lvm
-      lvm:
-        volume_group: "custom-group"
-    live_migration_interface: ens3
   octavia:
     lb_network:
       subnets:
-      - pool_end: 10.255.255.254
-        pool_start: 10.255.1.0
-        range: 10.255.0.0/16
+      - range: '192.168.0.0/24'
+        pool_start: '192.168.0.1'
+        pool_end: '192.168.0.254'
+  nova:
+    images:
+      backend: local
+    live_migration_interface: ens3
   services:
   - block-storage
   - compute
@@ -101,6 +87,27 @@ features:
     user:
       password: stacklight
       username: stacklight
+services:
+  object-storage:
+    cinder:
+      values:
+        conf:
+          standalone_backends:
+            statefulsets:
+              netapp:
+                conf:
+                  netapp:
+                    netapp_login: vsadmin
+                    netapp_password: password
+                    netapp_server_hostname: 192.168.0.1
+                    netapp_server_port: 80
+                    netapp_storage_family: ontap_cluster
+                    netapp_storage_protocol: iscsi
+                    netapp_vserver: cinder
+                    volume_backend_name: netapp
+                    volume_driver: cinder.volume.drivers.netapp.common.NetAppDriver
+                  DEFAULT:
+                    enabled_backends: netapp
 artifacts:
   binary_base_url: https://artifactory.mcp.mirantis.net/binary-dev-kaas-local
   images_base_url: docker-dev-kaas-local.docker.mirantis.net

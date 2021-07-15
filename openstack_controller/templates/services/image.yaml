@@ -173,7 +173,11 @@ spec:
         {%- endif %}
           {{store_ident}}:
           {%- for key,val in ident_opts.items() %}
+            {%- if type == 'cinder' and key == 'backend_name' %}
+            cinder_volume_type: {{ val.split(':')[0] ~ '_multiattach' }}
+            {%- else %}
             {{ key }}: {{ val }}
+            {%- endif %}
           {%- endfor %}
 {% include 'base/_' + type + '_store_opts.yaml' %}
         {%- endfor %}

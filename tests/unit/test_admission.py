@@ -825,3 +825,112 @@ def test_nodes_features_cinder_keys(client):
         },
         True,
     )
+
+
+def test_glance_features_cinder_keys(client):
+    req = copy.deepcopy(ADMISSION_REQ)
+    req["request"]["object"]["spec"]["features"]["glance"] = {
+        "backends": {
+            "cinder": {
+                "backend1": {"default": True, "backend_name": "lvm:fast"}
+            }
+        }
+    }
+    response = client.simulate_post("/validate", json=req)
+    assert response.status == falcon.HTTP_OK
+    assert response.json["response"]["allowed"] is True
+
+    req["request"]["object"]["spec"]["features"]["glance"] = {
+        "backends": {
+            "cinder": {
+                "backend1": {"default": True, "cinder_volume_type": "fast"}
+            }
+        }
+    }
+    response = client.simulate_post("/validate", json=req)
+    assert response.status == falcon.HTTP_OK
+    assert response.json["response"]["allowed"] is True
+
+
+def test_glance_features_multiple_backends_ok(client):
+    req = copy.deepcopy(ADMISSION_REQ)
+    req["request"]["object"]["spec"]["features"]["glance"] = {
+        "backends": {
+            "cinder": {
+                "backend1": {"default": True, "backend_name": "lvm:fast"},
+                "backend2": {"backend_name": "lvm:fast"},
+            }
+        }
+    }
+    response = client.simulate_post("/validate", json=req)
+    assert response.status == falcon.HTTP_OK
+    assert response.json["response"]["allowed"] is True
+
+
+def test_glance_features_multiple_defaults(client):
+    req = copy.deepcopy(ADMISSION_REQ)
+    req["request"]["object"]["spec"]["features"]["glance"] = {
+        "backends": {
+            "cinder": {
+                "backend1": {"default": True, "backend_name": "lvm:fast"},
+                "backend2": {"default": True, "backend_name": "lvm:fast"},
+            }
+        }
+    }
+    response = client.simulate_post("/validate", json=req)
+    assert response.status == falcon.HTTP_OK
+    assert response.json["response"]["allowed"] is False
+    assert response.json["response"]["status"]["code"] == 400
+
+
+def test_glance_features_cinder_missing_mandatory(client):
+    req = copy.deepcopy(ADMISSION_REQ)
+    req["request"]["object"]["spec"]["features"]["glance"] = {
+        "backends": {"cinder": {"backend1": {"backend_name": "lvm:fast"}}}
+    }
+    response = client.simulate_post("/validate", json=req)
+    assert response.status == falcon.HTTP_OK
+    assert response.json["response"]["status"]["code"] == 400
+    assert response.json["response"]["allowed"] is False
+
+    req["request"]["object"]["spec"]["features"]["glance"] = {
+        "backends": {"cinder": {"backend1": {"default": True}}}
+    }
+    response = client.simulate_post("/validate", json=req)
+    assert response.status == falcon.HTTP_OK
+    assert response.json["response"]["status"]["code"] == 400
+    assert response.json["response"]["allowed"] is False
+
+    req["request"]["object"]["spec"]["features"]["glance"] = {
+        "backends": {"cinder": {"backend1": {"default": True}}}
+    }
+    response = client.simulate_post("/validate", json=req)
+    assert response.status == falcon.HTTP_OK
+    assert response.json["response"]["status"]["code"] == 400
+    assert response.json["response"]["allowed"] is False
+
+
+def test_glance_features_cinder_invalid_backend_name(client):
+    req = copy.deepcopy(ADMISSION_REQ)
+    req["request"]["object"]["spec"]["features"]["glance"] = {
+        "backends": {
+            "cinder": {
+                "backend1": {"default": True, "backend_name": "lvmfast"}
+            }
+        }
+    }
+    response = client.simulate_post("/validate", json=req)
+    assert response.status == falcon.HTTP_OK
+    assert response.json["response"]["status"]["code"] == 400
+    assert response.json["response"]["allowed"] is False
+
+
+def test_glance_features_cinder_missing_default(client):
+    req = copy.deepcopy(ADMISSION_REQ)
+    req["request"]["object"]["spec"]["features"]["glance"] = {
+        "backends": {"cinder": {"backend1": {"backend_name": "lvm:fast"}}}
+    }
+    response = client.simulate_post("/validate", json=req)
+    assert response.status == falcon.HTTP_OK
+    assert response.json["response"]["status"]["code"] == 400
+    assert response.json["response"]["allowed"] is False
