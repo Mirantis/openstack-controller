@@ -1432,9 +1432,9 @@ class Placement(OpenStackService):
                 # for db sync job, during apply it will be removed
                 LOG.info(f"Cleaning up database migration jobs")
                 await self.get_child_object("Job", "placement-db-sync").purge()
-                await self.get_child_object(
-                    "Job", "placement-db-nova-migrate-placement"
-                ).disable(wait_completion=True)
+                # Recreate placement-db-sync without nova_migrate_placement dependency
+                kwargs.pop("helmobj_overrides")
+                await self.apply(event, **kwargs)
             except Exception as e:
                 # NOTE(mkarpin): in case something went wrong during placement migration
                 # we need to cleanup all child objects related to placement
