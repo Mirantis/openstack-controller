@@ -198,7 +198,7 @@ spec:
                               type: object
                               x-kubernetes-preserve-unknown-fields: true
                               description: |
-                                Section to configure cinder backends
+                                Section to configure cinder backends.
                             rbd:
                               type: object
                               x-kubernetes-preserve-unknown-fields: true

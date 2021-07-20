@@ -1,55 +1,13 @@
 spec:
   releases:
-  - chart: osh-infra/iscsi
-    name: openstack-iscsi
-    values:
-      images:
-        tags:
-          iscsi_iscsi: cinder-volume:latest
-          iscsi_tgt: cinder-volume:latest
-          dep_check: dep-check:latest
-      manifests:
-        daemonset_iscsi: false
-        daemonset_tgt: true
   - chart: osh/cinder
     name: openstack-cinder
     values:
-      overrides:
-        cinder_volume_ds:
-          labels:
-            lvm::node:
-              values:
-                conf:
-                  standalone_backends:
-                    daemonset:
-                      conf:
-                        lvm_fast:
-                          image_upload_use_cinder_backend: True
-                          image_upload_use_internal_tenant: True
-                          volume_driver: cinder.volume.drivers.lvm.LVMVolumeDriver
-                          volume_backend_name: lvm_fast
-                          volume_group: fast-vol
-                          volumes_dir: /var/lib/cinder/volumes
-                        lvm_slow:
-                          volume_group: slow-vol
-                          volume_driver: cinder.volume.drivers.lvm.LVMVolumeDriver
-                          volume_backend_name: lvm_slow
-                          volumes_dir: /var/lib/cinder/volumes
-                        DEFAULT:
-                          allowed_direct_url_schemes: cinder
-                          enabled_backends: lvm_fast,lvm_slow
       bootstrap:
         bootstrap_conf_backends: false
         volume_types:
           volumes-hdd:
             volume_backend_name: volumes-hdd
-          lvm_fast:
-            volume_backend_name: lvm_fast
-          lvm_fast_multiattach:
-            multiattach: '"<is> True"'
-            volume_backend_name: lvm_fast
-          lvm_slow:
-            volume_backend_name: lvm_slow
       ceph_client:
         configmap: rook-ceph-config
         user_secret_name: cinder-rbd-keyring
@@ -57,11 +15,6 @@ spec:
         policy.d:
           01-controller-default.yaml: {'block-storage_rule1': 'block-storage_value1'}
           02-custom.yaml: {}
-        standalone_backends:
-          daemonset:
-            conf:
-              DEFAULT:
-                cluster: ""
         backends:
           volumes-hdd:
             rbd_ceph_conf: /etc/ceph/ceph.conf
@@ -69,6 +22,28 @@ spec:
             rbd_user: cinder
             volume_backend_name: volumes-hdd
             volume_driver: cinder.volume.drivers.rbd.RBDDriver
+# NOTE:the section below is commented due to the fact that spec:service
+#      section is not passed from input fixtures and not merged.
+#         standalone_backends:
+#           daemonset:
+#             conf:
+#               DEFAULT:
+#                 cluster: ""
+#               statefulsets:
+#                 netapp:
+#                   conf:
+#                     netapp:
+#                       netapp_login: vsadmin
+#                       netapp_password: password
+#                       netapp_server_hostname: 192.168.0.1
+#                       netapp_server_port: 80
+#                       netapp_storage_family: ontap_cluster
+#                       netapp_storage_protocol: iscsi
+#                       netapp_vserver: cinder
+#                       volume_backend_name: netapp
+#                       volume_driver: cinder.volume.drivers.netapp.common.NetAppDriver
+#                     DEFAULT:
+#                       enabled_backends: netapp
         ceph:
           pools:
             backup:
@@ -106,6 +81,7 @@ spec:
         logging:
           logger_cinder:
             level: INFO
+            propagate: 0
       dependencies:
         static:
           db_init:
