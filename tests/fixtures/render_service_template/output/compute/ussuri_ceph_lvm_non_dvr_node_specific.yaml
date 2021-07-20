@@ -152,6 +152,35 @@ spec:
           scheme:
             default: http
             public: https
+        compute_metadata:
+          host_fqdn_override:
+            public:
+              host: 'metadata.it.just.works'
+              tls:
+                ca: |
+                  TEST CA
+                crt: |
+                  TEST CRT
+                key: |
+                  TEST KEY
+          hosts:
+            default: 'nova-metadata'
+            public:
+              host: metadata
+              tls:
+                ca: |
+                  TEST CA
+                crt: |
+                  TEST CRT
+                key: |
+                  TEST KEY
+          port:
+            metadata:
+              default: 8775
+              public: 443
+          scheme:
+            default: http
+            public: https
         identity:
           auth:
             admin:
@@ -340,7 +369,7 @@ spec:
         sshd:
           enabled: true
       overrides:
-        nova_compute: 
+        nova_compute:
           labels:
             compute::migration_interface:
               conf:
@@ -362,10 +391,10 @@ spec:
                 nova:
                   libvirt:
                     images_type: 'qcow2'
-            compute::local: 
-              conf: 
-                nova: 
-                  libvirt: 
+            compute::local:
+              conf:
+                nova:
+                  libvirt:
                     images_type: 'qcow2'
             compute::lvm_custom:
               conf:

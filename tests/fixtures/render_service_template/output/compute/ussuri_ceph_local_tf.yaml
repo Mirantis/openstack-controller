@@ -157,6 +157,35 @@ spec:
           scheme:
             default: http
             public: https
+        compute_metadata:
+          host_fqdn_override:
+            public:
+              host: 'metadata.it.just.works'
+              tls:
+                ca: |
+                  TEST CA
+                crt: |
+                  TEST CRT
+                key: |
+                  TEST KEY
+          hosts:
+            default: 'nova-metadata'
+            public:
+              host: metadata
+              tls:
+                ca: |
+                  TEST CA
+                crt: |
+                  TEST CRT
+                key: |
+                  TEST KEY
+          port:
+            metadata:
+              default: 8775
+              public: 443
+          scheme:
+            default: http
+            public: https
         identity:
           auth:
             admin:
