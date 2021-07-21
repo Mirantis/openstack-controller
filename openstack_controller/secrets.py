@@ -442,6 +442,33 @@ class RedisSecret(Secret):
         kube.save_secret_data(self.namespace, self.secret_name, data)
 
 
+class StackLightPasswordSecret(Secret):
+    secret_name = "generated-stacklight-password"
+    secret_class = OSSytemCreds
+
+    def create(self) -> OSSytemCreds:
+        return OSSytemCreds(
+            password=generate_password(length=32),
+            username=generate_name(prefix="stacklight", length=16),
+        )
+
+    def decode(self, data):
+        params = {}
+        for kind, creds in data.items():
+            decoded = base64.b64decode(creds)
+            params[kind] = decoded
+
+        return self.secret_class(**params)
+
+    def save(self, secret) -> None:
+        data = asdict(secret)
+
+        for key in data.keys():
+            data[key] = base64.b64encode(data[key].encode("ascii")).decode()
+
+        kube.save_secret_data(self.namespace, self.secret_name, data)
+
+
 class PowerDNSSecret(Secret):
     secret_name = "generated-powerdns-passwords"
     secret_class = PowerDnsCredentials

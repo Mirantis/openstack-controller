@@ -167,8 +167,8 @@ spec:
           stacklight_service_notifications:
             auth:
               stacklight:
-                username: {{ spec.features.stacklight.user.username }}
-                password: {{ spec.features.stacklight.user.password }}
+                username: {{ credentials['stacklight'].username }}
+                password: {{ credentials['stacklight'].password }}
             path: /openstack
           {%- endif %}
           {%- if 'baremetal' in services %}

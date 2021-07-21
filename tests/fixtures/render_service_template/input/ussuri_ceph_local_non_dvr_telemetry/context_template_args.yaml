@@ -472,6 +472,9 @@ messaging:
     orchestration: *credentials_orchestration
     placement: *credentials_placement
     instance-ha: *credentials_instance-ha
+    stacklight:
+      username: stacklight123456
+      password: ptehSf4lZxF0TAs16INhV9XmuVXHbL6R
   services:
     alarming: null
     block-storage: null

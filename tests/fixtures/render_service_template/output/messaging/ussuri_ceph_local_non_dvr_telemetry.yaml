@@ -414,8 +414,8 @@ spec:
           stacklight_service_notifications:
             auth:
               stacklight:
-                password: stacklight
-                username: stacklight
+                password: ptehSf4lZxF0TAs16INhV9XmuVXHbL6R
+                username: stacklight123456
             path: /openstack
           alarming_service:
             auth:
