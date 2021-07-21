@@ -78,7 +78,6 @@ spec:
         logging:
           logger_glance:
             level: INFO
-            propagate: 0
       dependencies:
         static:
           api:
