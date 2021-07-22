@@ -271,7 +271,7 @@ OSDPL_IAM_DATA = json_from_env("OSDPL_IAM_DATA", {"enabled": False})
 
 LOGGING_CONFIG = {
     "version": 1,
-    "disable_existing_loggers": True,
+    "disable_existing_loggers": False,
     "formatters": {
         "standard": {
             "format": "%(asctime)s [%(levelname)s] %(name)s: %(message)s"
@@ -279,7 +279,6 @@ LOGGING_CONFIG = {
     },
     "handlers": {
         "default": {
-            "level": "INFO",
             "formatter": "standard",
             "class": "logging.StreamHandler",
             "stream": "ext://sys.stdout",  # Default is stderr
@@ -287,9 +286,13 @@ LOGGING_CONFIG = {
     },
     "loggers": {
         "kopf.activities.probe": {
-            "handlers": ["default"],
             "level": "WARNING",
-            "propagate": False,
+        },
+        "kopf": {
+            "level": "INFO",
+        },
+        "aiohttp": {
+            "level": "WARNING",
         },
     },
     "root": {
