@@ -408,6 +408,9 @@ messaging:
     placement: *credentials_placement
     instance-ha: *credentials_instance-ha
     barmetal: *credentials_baremetal
+    stacklight:
+      username: stacklight123456
+      password: ptehSf4lZxF0TAs16INhV9XmuVXHbL6R
   services:
     block-storage: null
     compute: null

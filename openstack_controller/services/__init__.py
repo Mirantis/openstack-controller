@@ -201,6 +201,10 @@ class RabbitMQ(Service):
             secret = Service.registry[s]._secret_class(self.namespace, s)
             credentials[s] = secret.ensure()
 
+        credentials["stacklight"] = secrets.StackLightPasswordSecret(
+            self.namespace
+        ).ensure()
+
         return {
             "services": services,
             "credentials": credentials,
