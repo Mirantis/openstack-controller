@@ -2,6 +2,7 @@
 # appended during merging
 {%- set ironic_enabled = 'baremetal' in services %}
 {%- set nginx_ingress_namespace_class = "openstack-ingress-nginx" %}
+internal_domain_name: cluster.local
 common:
   charts:
     releases:

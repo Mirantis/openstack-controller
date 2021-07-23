@@ -1,6 +1,7 @@
 # IMPORTANT: list items specified here is not possible to override as they
 # appended during merging
 {%- set nginx_ingress_namespace_class = "openstack-ingress-nginx" %}
+internal_domain_name: cluster.local
 common:
   charts:
     releases:

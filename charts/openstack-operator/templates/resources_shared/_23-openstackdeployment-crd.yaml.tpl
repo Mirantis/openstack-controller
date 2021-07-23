@@ -915,7 +915,6 @@ spec:
                 - preset
                 - size
                 - public_domain_name
-                - internal_domain_name
             status:
               x-kubernetes-preserve-unknown-fields: true
               type: object
