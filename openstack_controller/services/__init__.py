@@ -555,6 +555,33 @@ class Heat(OpenStackService):
                 await child_obj.purge()
             await child_obj.enable(self.openstack_version, True, extra_values)
 
+    def template_args(self):
+        t_args = super().template_args()
+
+        # Get Tungsten Fabric API endpoint
+        if (
+            utils.get_in(self.mspec["features"], ["neutron", "backend"])
+            == "tungstenfabric"
+        ):
+            kube.wait_for_secret(
+                constants.OPENSTACK_TF_SHARED_NAMESPACE,
+                constants.TF_OPENSTACK_SECRET,
+            )
+            tf_secret = secrets.get_secret_data(
+                constants.OPENSTACK_TF_SHARED_NAMESPACE,
+                constants.TF_OPENSTACK_SECRET,
+            )
+            tf_api_keys = ["tf_api_service", "tf_api_port"]
+            if all([k in tf_secret for k in tf_api_keys]):
+                t_args.update(
+                    {
+                        key: base64.b64decode(tf_secret[key]).decode()
+                        for key in tf_api_keys
+                    }
+                )
+
+        return t_args
+
 
 class Horizon(OpenStackService):
     service = "dashboard"

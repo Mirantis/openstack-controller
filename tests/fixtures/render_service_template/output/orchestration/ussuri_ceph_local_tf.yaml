@@ -6,8 +6,7 @@ spec:
       conf:
         policy.d:
           01-controller-default.yaml: {'orchestration_rule1': 'orchestration_value1'}
-          02-custom.yaml:
-            heat_custom: value
+          02-custom.yaml: {}
         heat:
           keystone_authtoken:
             memcache_secret_key: 7JNLzlMydG5nxe80
@@ -17,6 +16,8 @@ spec:
         logging:
           logger_heat:
             level: INFO
+        plugins:
+        - vnc_api/gen/heat
       dependencies:
         static:
           db_init:
@@ -161,6 +162,35 @@ spec:
           statefulset:
             name: openstack-rabbitmq-rabbitmq
             replicas: 1
+        tungstenfabric:
+          host_fqdn_override:
+            public:
+              host: tungstenfabric-api.it.just.works
+              tls:
+                ca: |
+                  TEST CA
+                crt: |
+                  TEST CRT
+                key: |
+                  TEST KEY
+          hosts:
+            default: tungstenfabric-api
+            public:
+              host: tungstenfabric-api
+              tls:
+                ca: |
+                  TEST CA
+                crt: |
+                  TEST CRT
+                key: |
+                  TEST KEY
+          port:
+            api:
+              default: 8082
+              public: 443
+          scheme:
+            default: http
+            public: https
       images:
         tags:
           bootstrap: bootstrap:latest
@@ -193,4 +223,4 @@ spec:
         network_policy: false
         secret_ca_bundle: true
       network:
-        core_plugin: ml2
+        core_plugin: tungstenfabric
