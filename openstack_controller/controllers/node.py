@@ -84,10 +84,16 @@ async def node_change_handler(body, event, **kwargs):
         LOG.warning("No custom resource definition")
         return
     node = kube.Node(kube.api, body)
-    if kube.NodeWorkloadLock.required_for_node(node):
-        kube.NodeWorkloadLock.ensure(name)
+    nwl = kube.NodeWorkloadLock.get(name)
+    if settings.OSCTL_NODE_MAINTENANCE_ENABLED:
+        if kube.NodeWorkloadLock.required_for_node(node):
+            kube.NodeWorkloadLock.ensure(name)
+        else:
+            if nwl:
+                await nwl.purge()
+    # NOTE(vsaienko) purge lock if exists but controller is not enabled
+    # for more details see https://mirantis.jira.com/browse/PRODX-16884
     else:
-        nwl = kube.NodeWorkloadLock.get(name)
         if nwl:
             await nwl.purge()
 

@@ -230,6 +230,11 @@ OSCTL_MIGRATE_CONCURRENCY = int(os.environ.get("OSCTL_MIGRATE_CONCURRENCY", 5))
 # Whether to perform evacuation if compute node is down, or just error out
 OSCTL_ALLOW_EVACUATION = bool_from_env("OSCTL_ALLOW_EVACUATION", False)
 
+# Whether node maintenance controller is enabled or not
+OSCTL_NODE_MAINTENANCE_ENABLED = bool_from_env(
+    "OSCTL_NODE_MAINTENANCE_ENABLED", False
+)
+
 # A dict of OpenStack node labels per role in json format.
 # See the structure below
 # If a node has one of specified labels with the matching value,
