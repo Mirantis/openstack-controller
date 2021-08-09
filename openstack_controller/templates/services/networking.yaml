@@ -522,6 +522,7 @@ spec:
             memcache_security_strategy: ENCRYPT
             memcache_secret_key: {{ credentials.memcached }}
           DEFAULT:
+            router_processes_greentlet_max: 10
             api_workers: 4
             # Combined DVR + L3 HA is not recommended until load tested (had issues in the past)
             {%- if spec.get('features', {}).get('neutron', {}).get('dvr', {}).get('enabled', False) %}

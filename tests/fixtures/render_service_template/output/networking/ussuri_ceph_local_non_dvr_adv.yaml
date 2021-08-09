@@ -200,6 +200,7 @@ spec:
         neutron:
           DEFAULT:
             api_workers: 4
+            router_processes_greentlet_max: 10
             dhcp_agents_per_network: 2
             dns_domain: openstack.internal.
             dnsmasq_dns_servers: 10.172.1.100
