@@ -72,6 +72,15 @@ spec:
       pod:
         replicas:
           server: 1
+        probes:
+          server:
+            rabbitmq:
+              readiness:
+                periodSeconds: 60
+                timeoutSeconds: 30
+              liveness:
+                periodSeconds: 60
+                timeoutSeconds: 30
       volume:
         enabled: false
   - chart: osh-infra/openvswitch

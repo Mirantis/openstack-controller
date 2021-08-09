@@ -84,7 +84,7 @@ def test_render_service_template(
                 gdp_mock.return_value = {
                     f"{service}_rule1": f"{service}_value1"
                 }
-            logger.debug(f"Rendering service {service} for context {context}")
+            logger.info(f"Rendering service {service} for context {context}")
             spec, kwargs = get_render_kwargs(
                 service, context, common_template_args
             )
