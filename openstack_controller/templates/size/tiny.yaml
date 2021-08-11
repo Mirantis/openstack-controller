@@ -233,6 +233,10 @@ services:
               rabbit_qos_prefetch_count: 64
             ovs:
               ovsdb_timeout: 30
+          plugins:
+            ml2_conf:
+              ml2_type_vxlan:
+                vni_ranges: 1:1000
     openvswitch:
       values:
         pod:
