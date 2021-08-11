@@ -288,6 +288,7 @@ def test_baremetal_tf(client):
     req["request"]["object"]["spec"]["features"]["services"].append(
         "baremetal"
     )
+    req["request"]["object"]["spec"]["features"]["ironic"] = {"test": "test"}
     response = client.simulate_post("/validate", json=req)
     assert response.status == falcon.HTTP_OK
     assert response.json["response"]["status"]["code"] == 400
@@ -300,6 +301,31 @@ def test_baremetal_ovs(client):
     req["request"]["object"]["spec"]["features"]["services"].append(
         "baremetal"
     )
+    req["request"]["object"]["spec"]["features"]["ironic"] = {"test": "test"}
+    response = client.simulate_post("/validate", json=req)
+    assert response.status == falcon.HTTP_OK
+    assert response.json["response"]["allowed"] is True
+
+
+def test_baremetal_empty_config(client):
+    req = copy.deepcopy(ADMISSION_REQ)
+    req["request"]["object"]["spec"]["preset"] = "compute"
+    req["request"]["object"]["spec"]["features"]["services"].append(
+        "baremetal"
+    )
+    response = client.simulate_post("/validate", json=req)
+    assert response.status == falcon.HTTP_OK
+    assert response.json["response"]["status"]["code"] == 400
+    assert response.json["response"]["allowed"] is False
+
+
+def test_baremetal_non_empty_config(client):
+    req = copy.deepcopy(ADMISSION_REQ)
+    req["request"]["object"]["spec"]["preset"] = "compute"
+    req["request"]["object"]["spec"]["features"]["services"].append(
+        "baremetal"
+    )
+    req["request"]["object"]["spec"]["features"]["ironic"] = {"test": "test"}
     response = client.simulate_post("/validate", json=req)
     assert response.status == falcon.HTTP_OK
     assert response.json["response"]["allowed"] is True
