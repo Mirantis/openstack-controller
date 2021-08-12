@@ -4,6 +4,8 @@
 {%- set service = 'heat' %}
 {%- set components_with_dedicated_messaging = spec.get('features', {}).get('messaging', {}).get('components_with_dedicated_messaging', []) %}
 {%- set latest_openstack_versions = openstack_versions[openstack_versions.index(spec.openstack_version):] %}
+{%- set tungstenfabric_enabled = spec.features.neutron.get('backend', 'ml2') == 'tungstenfabric' %}
+{%- set tungstenfabric_custom_api_opts = tf_api_service is defined and tf_api_port is defined %}
 {%- set stacklight_enabled = spec.get('features', {}).get('stacklight', {}).get('enabled', False) %}
 {%- set notification_topics = ['notifications'] %}
 {%- do notification_topics.append('stacklight_notifications') if stacklight_enabled %}
@@ -131,10 +133,20 @@ spec:
         logging:
           logger_heat:
             level: {{ spec.get('features', {}).get('logging', {}).get('heat', {}).get('level', 'INFO') }}
-{%- if spec.features.neutron.get('bgpvpn', {}).get('enabled') %}
-        plugins:
-          - networking_bgpvpn_heat
+{%- set enabled_plugins = [] %}
+{%- if tungstenfabric_enabled %}
+  {%- if openstack_version not in ['queens', 'rocky', 'stein', 'train'] %}
+    {%- do enabled_plugins.append('vnc_api/gen/heat') %}
+  {%- endif %}
 {%- endif %}
+{%- if spec.features.neutron.get('bgpvpn', {}).get('enabled') %}
+  {%- do enabled_plugins.append('networking_bgpvpn_heat') %}
+{%- endif %}
+{%- if enabled_plugins %}
+        plugins: {{ enabled_plugins }}
+{%- endif %}
+      network:
+        core_plugin: {{ spec.features.neutron.get('backend', 'ml2') }}
       endpoints:
         cluster_domain_suffix: {{ spec.internal_domain_name }}
 {% include 'base/_admin_identity.yaml' %}
@@ -221,6 +233,37 @@ spec:
           scheme:
             default: http
             public: https
+      {%- if tungstenfabric_enabled and tungstenfabric_custom_api_opts %}
+        tungstenfabric:
+          host_fqdn_override:
+            public:
+              host: {{ tf_api_service }}.{{ spec.public_domain_name }}
+              tls:
+                ca: |
+{{ spec.features.ssl.public_endpoints.ca_cert | indent( width=18, first=True) }}
+                crt: |
+{{ spec.features.ssl.public_endpoints.api_cert | indent( width=18, first=True) }}
+                key: |
+{{ spec.features.ssl.public_endpoints.api_key | indent( width=18, first=True) }}
+          hosts:
+            default: {{ tf_api_service }}
+            public:
+              host: {{ tf_api_service }}
+              tls:
+                ca: |
+{{ spec.features.ssl.public_endpoints.ca_cert | indent( width=18, first=True) }}
+                crt: |
+{{ spec.features.ssl.public_endpoints.api_cert | indent( width=18, first=True) }}
+                key: |
+{{ spec.features.ssl.public_endpoints.api_key | indent( width=18, first=True) }}
+          port:
+            api:
+              default: {{ tf_api_port }}
+              public: 443
+          scheme:
+            default: http
+            public: https
+      {%- endif %}
       jobs:
 {% include 'base/_ks_jobs.yaml' %}
 {%- endif %}

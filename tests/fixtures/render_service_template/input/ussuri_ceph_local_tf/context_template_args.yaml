@@ -315,6 +315,8 @@ orchestration:
   - account: test
     password: nDsJytWemY6VcFv0jxqsg7QHBRgetQF7
     username: testyRGH
+  tf_api_service: tungstenfabric-api
+  tf_api_port: 8082
 placement:
   credentials: &credentials_placement
     database:
