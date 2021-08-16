@@ -93,9 +93,15 @@ async def _main():
             release_name = release["name"]
             try:
                 LOG.info(f"Converting release {release_name}")
-                await helm_manager.convert_2to3(release_name)
+                stdout, stderr = await helm_manager.convert_2to3(release_name)
+                LOG.info(
+                    f"Converted release {release_name}. stdout: {stdout}, stderr: {stderr}"
+                )
                 LOG.info(f"Removing release {release_name}")
-                await helm_manager.cleanup_2to3(release_name)
+                stdout, stderr = await helm_manager.cleanup_2to3(release_name)
+                LOG.info(
+                    f"Removed release {release_name}. stdout: {stdout}, stderr: {stderr}"
+                )
                 LOG.info(f"The release {release_name} removed successfully.")
             except Exception:
                 failed_releases.append(release_name)
