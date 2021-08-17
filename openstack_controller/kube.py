@@ -336,6 +336,15 @@ class Deployment(pykube.Deployment, HelmBundleMixin):
             and self.obj["status"].get("readyReplicas") == self.replicas
         )
 
+    async def wait_for_replicas(self, count, times=60, seconds=10):
+        for i in range(times):
+            self.reload()
+            # NOTE(vsaienko): the key doesn't exist when have 0 replicas
+            if self.obj["status"].get("readyReplicas", 0) == count:
+                return True
+            await asyncio.sleep(seconds)
+        return False
+
 
 class Pod(pykube.Pod):
 
