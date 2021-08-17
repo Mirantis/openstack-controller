@@ -15,6 +15,9 @@ RELEASE_VERSION_MAX = int(os.environ.get("RELEASE_VERSION_MAX", 3))
 HELMBUNDLE_NAMESPACE = os.environ.get(
     "HELMBUNDLE_NAMESPACE", settings.OSCTL_OS_DEPLOYMENT_NAMESPACE
 )
+HELM2_CONTROLLER_DEPLOYMENT_NAME = os.environ.get(
+    "HELM2_CONTROLLER_DEPLOYMENT_NAME", "stacklight-helm-controller"
+)
 
 LOG = utils.get_logger("osctl-2to3")
 
@@ -73,6 +76,43 @@ async def _main():
         f"openstack-{x}" for x in services.registry.keys() if x is not None
     ]
 
+    helm2_deployment = None
+    helm2_need_to_scale = False
+
+    for hb_name in osdpl_helmbundles:
+        hb = kube.find(
+            kube.HelmBundle,
+            name=hb_name,
+            namespace=HELMBUNDLE_NAMESPACE,
+            silent=True,
+        )
+        if hb and hb.exists():
+            LOG.info(
+                "Found at least one helmbundle. Need to scale helm2 controller."
+            )
+            helm2_need_to_scale = True
+            break
+
+    if helm2_need_to_scale:
+        LOG.info(
+            "Looking for SL controller deployment {HELM2_CONTROLLER_DEPLOYMENT_NAME}"
+        )
+        helm2_deployment = kube.find(
+            kube.Deployment,
+            HELM2_CONTROLLER_DEPLOYMENT_NAME,
+            namespace=TILLER_NAMESPACE,
+            silent=True,
+            cluster=False,
+        )
+        if helm2_deployment:
+            LOG.info("Scaling helm2 controller deployment to 0")
+            helm2_deployment.scale(replicas=0)
+            await helm2_deployment.wait_for_replicas(0)
+        else:
+            LOG.warning(
+                "SL helm controller deployment not found. Skipping scale."
+            )
+
     for hb_name in osdpl_helmbundles:
         hb = kube.find(
             kube.HelmBundle,
@@ -116,6 +156,9 @@ async def _main():
         else:
             LOG.info(f"Removing release {release_name}")
             hb.delete(propagation_policy="Foreground")
+            # NOTE(vsaienko): allow helmbundle to be removed immidiately.
+            hb.patch({"metadata": {"finalizers": []}})
+            await kube.wait_for_deleted(hb, times=60, seconds=10)
             LOG.info(f"The helmbundle {hb.name} removed successfully.")
 
     if has_errors:
@@ -123,6 +166,11 @@ async def _main():
             "Got errors while trying to convert releases. Please inspect logs above."
         )
         sys.exit(1)
+
+    if helm2_deployment:
+        LOG.info("Scaling helm2 controller deployment to 3")
+        helm2_deployment.reload()
+        helm2_deployment.scale(replicas=3)
 
 
 def main():
