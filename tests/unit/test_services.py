@@ -41,7 +41,8 @@ class MockOsdpl:
 
 @mock.patch.object(kube.OpenStackDeployment, "reload")
 def test_get_osdpl(mock_reload, openstackdeployment, kubeapi, kube_resource):
-    service = services.Nova(openstackdeployment, logging)
+    osdplstmock = mock.MagicMock()
+    service = services.Nova(openstackdeployment, logging, osdplstmock)
     service._get_osdpl()
     mock_reload.assert_called_once()
 
@@ -49,7 +50,8 @@ def test_get_osdpl(mock_reload, openstackdeployment, kubeapi, kube_resource):
 @mock.patch("openstack_controller.secrets.generate_password")
 @mock.patch.object(secrets, "get_secret_data")
 def test_get_admin_creds(mock_data, mock_password, openstackdeployment):
-    service = services.Nova(openstackdeployment, logging)
+    osdplstmock = mock.MagicMock()
+    service = services.Nova(openstackdeployment, logging, osdplstmock)
 
     mock_password.return_value = "password"
     mock_data.return_value = {
@@ -76,6 +78,7 @@ def test_service_keystone_render(
     mock_osdpl, mock_template_args, openstackdeployment, kubeapi
 ):
 
+    osdplstmock = mock.MagicMock()
     creds = secrets.OSSytemCreds("test", "test")
     admin_creds = secrets.OpenStackAdminCredentials(creds, creds, creds)
     creds_dict = {"user": creds, "admin": creds}
@@ -97,7 +100,7 @@ def test_service_keystone_render(
         "values": {"pod": {"replicas": {"api": 333}}}
     }
     openstackdeployment_old = copy.deepcopy(openstackdeployment)
-    service = services.Keystone(openstackdeployment, logging)
+    service = services.Keystone(openstackdeployment, logging, osdplstmock)
     identity_helmbundle = service.render()
     # check no modification in-place for openstackdeployment
     assert openstackdeployment_old == openstackdeployment
@@ -139,6 +142,7 @@ def test_service_nova_with_ceph_render(
 
     mock_ssh.return_value = secrets.SshKey("public", "private")
     mock_osdpl.return_value = MockOsdpl()
+    osdplstmock = mock.MagicMock()
     mock_template_args.return_value = {
         "credentials": credentials,
         "admin_creds": admin_creds,
@@ -157,7 +161,7 @@ def test_service_nova_with_ceph_render(
     }
 
     openstackdeployment_old = copy.deepcopy(openstackdeployment)
-    service = services.Nova(openstackdeployment, logging)
+    service = services.Nova(openstackdeployment, logging, osdplstmock)
     compute_helmbundle = service.render()
     # check no modification in-place for openstackdeployment
     assert openstackdeployment_old == openstackdeployment
@@ -179,7 +183,8 @@ def test_service_nova_with_ceph_render(
 async def test_service_apply(
     mocker, openstackdeployment, compute_helmbundle_all
 ):
-    service = services.Nova(openstackdeployment, logging)
+    osdplstmock = mock.MagicMock()
+    service = services.Nova(openstackdeployment, logging, osdplstmock)
 
     mock_render = mocker.patch.object(services.base.Service, "render")
     mock_render.return_value = compute_helmbundle_all
@@ -202,13 +207,15 @@ async def test_service_apply(
 
 
 def test_default_service_account_list(openstackdeployment):
-    service = services.Nova(openstackdeployment, logging)
+    osdplstmock = mock.MagicMock()
+    service = services.Nova(openstackdeployment, logging, osdplstmock)
     accounts = [constants.OS_SERVICES_MAP[service.service], "test"]
     assert accounts == service.service_accounts
 
 
 def test_heat_service_account_list(openstackdeployment):
-    service = services.Heat(openstackdeployment, logging)
+    osdplstmock = mock.MagicMock()
+    service = services.Heat(openstackdeployment, logging, osdplstmock)
     accounts = ["heat_trustee", "heat_stack_user", "heat", "test"]
     assert accounts == service.service_accounts
 

@@ -1,0 +1,5 @@
+---
+features:
+  - |
+    The new ``openstackdeploymentstatus`` with shortcut ``osdplst`` object is created,
+    which reflects detailed status of ``openstackdeployment``.

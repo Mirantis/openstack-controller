@@ -18,6 +18,7 @@ from openstack_controller import settings
 from openstack_controller import version
 from openstack_controller import utils
 from openstack_controller import helm
+from openstack_controller.osdplstatus import APPLYING, APPLIED, DELETING
 
 
 LOG = utils.get_logger(__name__)
@@ -114,7 +115,7 @@ class Service:
         super().__init_subclass__(*args, **kwargs)
         cls.registry[cls.service] = cls
 
-    def __init__(self, body, logger):
+    def __init__(self, body, logger, osdplst):
         # TODO(e0ne): we need to omit this object usage in the future to
         # not face side-effects with mutable PyKube OSDPL object.
         # We have to use self._get_osdpl() method instead of it.
@@ -126,6 +127,7 @@ class Service:
         self.openstack_version = self.body["spec"]["openstack_version"]
         self.mspec = layers.merge_spec(self.body["spec"], self.logger)
         self.helm_manager = helm.HelmManager(namespace=self.namespace)
+        self.osdplst = osdplst
 
     def _get_osdpl(self):
         osdpl = kube.OpenStackDeployment(kube.api, self.body)
@@ -440,8 +442,23 @@ class Service:
         )
 
     def set_children_status(self, status):
+        apply_statuses = ("Applying", "Upgrading")
+        applied_status = (True,)
+        delete_status = ("Deleting",)
+        deleted_status = (None,)
+
+        # TODO(vsaienok): remove legacy status
         status_patch = {"children": {self.resource_name: status}}
         self.update_status(status_patch)
+
+        if status in apply_statuses:
+            self.osdplst.set_service_status(self.service, APPLYING)
+        elif status in applied_status:
+            self.osdplst.set_service_status(self.service, APPLIED)
+        elif status in delete_status:
+            self.osdplst.set_service_status(self.service, DELETING)
+        elif status in deleted_status:
+            self.osdplst.remove_service_status(self.service)
 
     async def apply(self, event, **kwargs):
         self.set_children_status("Applying")

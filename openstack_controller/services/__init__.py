@@ -1433,7 +1433,7 @@ class Placement(OpenStackService):
                 ("Ingress", "placement"),
             ]
             compute_service_instance = Service.registry["compute"](
-                self.body, self.logger
+                self.body, self.logger, self.osdplst
             )
             try:
                 LOG.info(
@@ -1678,7 +1678,7 @@ class Tempest(Service):
             "redis",
         }:
             service_template_args = Service.registry[s](
-                self.body, self.logger
+                self.body, self.logger, self.osdplst
             ).template_args()
             try:
                 helmbundles_body[s] = layers.merge_all_layers(

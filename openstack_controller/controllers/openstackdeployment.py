@@ -11,6 +11,7 @@ from openstack_controller import services
 from openstack_controller import settings  # noqa
 from openstack_controller import version
 from openstack_controller import utils
+from openstack_controller import osdplstatus
 
 
 LOG = utils.get_logger(__name__)
@@ -154,12 +155,19 @@ async def handle(body, meta, spec, logger, event, **kwargs):
     # pass further only those that are really needed
     # actual **kwargs form is for forward-compat with kopf itself
     namespace = meta["namespace"]
+    name = meta["name"]
     LOG.info(f"Got osdpl event {event}")
     LOG.info(f"Changes are: {kwargs['diff']}")
 
+    # TODO(vsaienko): remove legacy status
     kwargs["patch"].setdefault("status", {})
     kwargs["patch"]["status"]["version"] = version.release_string
     kwargs["patch"]["status"]["fingerprint"] = layers.spec_hash(body["spec"])
+    osdplst = osdplstatus.OpenStackDeploymentStatus(
+        name, namespace, osdpl={"body": body, "kwargs": kwargs}
+    )
+    osdplst.present()
+    osdplst.set_osdpl_status(osdplstatus.APPLYING)
 
     if spec.get("draft"):
         LOG.info("OpenStack deployment is in draft mode, skipping handling...")
@@ -184,7 +192,9 @@ async def handle(body, meta, spec, logger, event, **kwargs):
         )
         for service in services_to_upgrade:
             task_def = {}
-            service_instance = services.registry[service](body, logger)
+            service_instance = services.registry[service](
+                body, logger, osdplst
+            )
             task_def[
                 asyncio.create_task(
                     service_instance.upgrade(
@@ -211,7 +221,7 @@ async def handle(body, meta, spec, logger, event, **kwargs):
     # and environment after upgrade/update are identical.
     task_def = {}
     for service in update:
-        service_instance = services.registry[service](body, logger)
+        service_instance = services.registry[service](body, logger, osdplst)
         task_def[
             asyncio.create_task(
                 service_instance.apply(
@@ -228,7 +238,7 @@ async def handle(body, meta, spec, logger, event, **kwargs):
     if delete:
         LOG.info(f"deleting children {' '.join(delete)}")
     for service in delete:
-        service_instance = services.registry[service](body, logger)
+        service_instance = services.registry[service](body, logger, osdplst)
         task_def[
             asyncio.create_task(
                 service_instance.delete(
@@ -240,7 +250,9 @@ async def handle(body, meta, spec, logger, event, **kwargs):
     await run_task(task_def)
 
     # If we got here, we installed all releases successfully.
+    # TODO(vsaienko): remove legacy status
     kwargs["patch"]["status"]["deployed"] = True
+    osdplst.set_osdpl_status(osdplstatus.APPLIED)
 
     return {"lastStatus": f"{event}d"}
 

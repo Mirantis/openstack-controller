@@ -32,6 +32,8 @@ osdpl:
       OSCTL_REDIS_NAMESPACE: "openstack-redis"
     osdpl:
       raw: {}
+    osdplstatus:
+      raw: {}
     node:
       raw: {}
     secrets:
@@ -50,6 +52,12 @@ osdpl:
   pod:
     controller:
       osdpl:
+       liveness:
+         params:
+           initialDelaySeconds: 120
+           periodSeconds: 60
+           timeoutSeconds: 5
+      osdplstatus:
        liveness:
          params:
            initialDelaySeconds: 120
