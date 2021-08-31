@@ -5,8 +5,8 @@ import logging
 import pykube
 
 from openstack_controller import constants
-from openstack_controller import kube
 from openstack_controller import settings
+from openstack_controller import osdplstatus
 
 LOG = logging.getLogger(__name__)
 
@@ -80,38 +80,22 @@ def ident(meta):
     return application, component
 
 
-def set_application_health(
-    osdpl,
-    application,
-    component,
-    health,
-    observed_generation,
-    custom_data={},
-):
-    LOG.debug(f"Set application health for {application}-{component}")
-    patch = {
-        application: {
-            component: {
-                "status": health,
-                "generation": observed_generation,
-            }
-        }
-    }
-    if patch[application][component]:
-        patch[application][component].update(custom_data)
-    osdpl.patch({"status": {"health": patch}})
-
-
-def set_multi_application_health(osdpl, patch):
+def set_multi_application_health(osdpl, patch, osdplst):
     LOG.debug(f"Set multi application health")
+    # TODO(vsaienko): remove after deprecation period
     osdpl.patch({"status": {"health": patch}})
+    osdplst.set_osdpl_health(patch)
 
 
 def is_application_ready(application, osdpl):
-    osdpl = kube.OpenStackDeployment(kube.api, osdpl.obj)
-    osdpl.reload()
+    osdplst = osdplstatus.OpenStackDeploymentStatus(
+        osdpl.name, osdpl.namespace
+    )
+    osdplst.reload()
 
-    app_status = osdpl.obj.get("status", {}).get("health", {}).get(application)
+    app_status = (
+        osdplst.obj.get("status", {}).get("health", {}).get(application)
+    )
     if not app_status:
         LOG.info(
             f"Application: {application} is not present in .status.health."

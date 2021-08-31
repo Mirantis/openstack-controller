@@ -6,6 +6,7 @@ from openstack_controller import health
 from openstack_controller import kube
 from openstack_controller import settings
 from openstack_controller import utils
+from openstack_controller import osdplstatus
 
 
 LOG = utils.get_logger(__name__)
@@ -37,6 +38,9 @@ def calculate_statuses(k8s_objects):
 
 def update_health_statuses():
     osdpl = kube.get_osdpl(settings.OSCTL_OS_DEPLOYMENT_NAMESPACE)
+    osdplst = osdplstatus.OpenStackDeploymentStatus(
+        osdpl.name, osdpl.namespace
+    )
     statuses = calculate_statuses(get_k8s_objects(osdpl.namespace))
     health_all = collections.defaultdict(dict)
     for ident, status in statuses.items():
@@ -45,5 +49,5 @@ def update_health_statuses():
             "status": status[0],
             "generation": status[1],
         }
-    health.set_multi_application_health(osdpl, health_all)
+    health.set_multi_application_health(osdpl, health_all, osdplst)
     LOG.info("Health statuses updated %d", len(statuses))

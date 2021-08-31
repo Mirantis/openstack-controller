@@ -163,11 +163,11 @@ async def handle(body, meta, spec, logger, event, **kwargs):
     kwargs["patch"].setdefault("status", {})
     kwargs["patch"]["status"]["version"] = version.release_string
     kwargs["patch"]["status"]["fingerprint"] = layers.spec_hash(body["spec"])
-    osdplst = osdplstatus.OpenStackDeploymentStatus(
-        name, namespace, osdpl={"body": body, "kwargs": kwargs}
-    )
+    osdplst = osdplstatus.OpenStackDeploymentStatus(name, namespace)
     osdplst.present()
-    osdplst.set_osdpl_status(osdplstatus.APPLYING)
+    osdplst.set_osdpl_status(
+        osdplstatus.APPLYING, body["spec"], kwargs["diff"], event
+    )
 
     if spec.get("draft"):
         LOG.info("OpenStack deployment is in draft mode, skipping handling...")
@@ -190,6 +190,8 @@ async def handle(body, meta, spec, logger, event, **kwargs):
         LOG.info(
             f"Starting upgrade for the following services: {services_to_upgrade}"
         )
+        for service in set(list(services_to_upgrade) + list(update)):
+            osdplst.set_service_state(service, osdplstatus.WAITING)
         for service in services_to_upgrade:
             task_def = {}
             service_instance = services.registry[service](
@@ -252,7 +254,9 @@ async def handle(body, meta, spec, logger, event, **kwargs):
     # If we got here, we installed all releases successfully.
     # TODO(vsaienko): remove legacy status
     kwargs["patch"]["status"]["deployed"] = True
-    osdplst.set_osdpl_status(osdplstatus.APPLIED)
+    osdplst.set_osdpl_status(
+        osdplstatus.APPLIED, body["spec"], kwargs["diff"], event
+    )
 
     return {"lastStatus": f"{event}d"}
 

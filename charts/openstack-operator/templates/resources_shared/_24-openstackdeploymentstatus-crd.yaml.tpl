@@ -39,7 +39,7 @@ spec:
                         state:
                           type: string
                           description: >
-                            The current state of LCM operation one of APPLYING or APPLIED.
+                            The current state of LCM operation one of WAITING, APPLYING or APPLIED.
                         openstack_version:
                           type: string
                           description: >
@@ -133,6 +133,9 @@ spec:
                         type: string
                         description: >
                           The timestamp of latest state change operation.
+                health:
+                  type: object
+                  x-kubernetes-preserve-unknown-fields: true
       additionalPrinterColumns:
       - name: OpenStack Version
         type: string

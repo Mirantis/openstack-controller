@@ -451,12 +451,13 @@ class Service:
         status_patch = {"children": {self.resource_name: status}}
         self.update_status(status_patch)
 
+        osdpl_spec = self.osdpl.obj["spec"]
         if status in apply_statuses:
-            self.osdplst.set_service_status(self.service, APPLYING)
+            self.osdplst.set_service_status(self.service, APPLYING, osdpl_spec)
         elif status in applied_status:
-            self.osdplst.set_service_status(self.service, APPLIED)
+            self.osdplst.set_service_status(self.service, APPLIED, osdpl_spec)
         elif status in delete_status:
-            self.osdplst.set_service_status(self.service, DELETING)
+            self.osdplst.set_service_status(self.service, DELETING, osdpl_spec)
         elif status in deleted_status:
             self.osdplst.remove_service_status(self.service)
 
