@@ -23,6 +23,10 @@ MAINTENANCE = "maintenance"
 OPERATIONAL = "operational"
 
 
+def maintenance_node_name(body):
+    return body["spec"]["nodeName"].split(".")[0]
+
+
 async def _run_service_methods(services, methods, node_metadata):
     for service, service_class in services:
         for method_name in methods:
@@ -39,7 +43,6 @@ async def _make_state_transition(operation, nwl, node, retry):
         ]
         states = {
             "prepare": "prepare_inactive",
-            "temporary_failure": "active",
             "final": "inactive",
         }
     elif operation == OPERATIONAL:
@@ -50,24 +53,24 @@ async def _make_state_transition(operation, nwl, node, retry):
         ]
         states = {
             "prepare": "prepare_active",
-            "temporary_failure": "inactive",
             "final": "active",
         }
     else:
         raise kopf.PermanentError("Got unknown operation")
 
     LOG.info(f"Preparing node {name} for {operation} state")
-    nwl.set_state(states["prepare"])
+    nwl.set_inner_state(states["prepare"])
     try:
         await _run_service_methods(*args)
     except Exception:
-        nwl.set_state(states["temporary_failure"])
         LOG.exception(
             f"Failed to get node {name} to {operation} state, attempt number {retry}"
         )
         raise kopf.TemporaryError(
             "Maintenance request processing temporarily failed"
         )
+    finally:
+        nwl.set_inner_state(None)
     nwl.set_state(states["final"])
     LOG.info(f"{operation} state is applied for node {name}")
 
@@ -77,7 +80,7 @@ async def _make_state_transition(operation, nwl, node, retry):
 @kopf.on.resume(*kube.NodeMaintenanceRequest.kopf_on_args)
 async def node_maintenance_request_change_handler(body, retry, **kwargs):
     name = body["metadata"]["name"]
-    node_name = body["spec"]["nodeName"]
+    node_name = maintenance_node_name(body)
     LOG.info(f"Got node maintenance request change event {name}")
     LOG.info(
         f"The node maintenance request {name} changes are: {kwargs['diff']}"
@@ -95,7 +98,7 @@ async def node_maintenance_request_change_handler(body, retry, **kwargs):
 @kopf.on.delete(*kube.NodeMaintenanceRequest.kopf_on_args)
 async def node_maintenance_request_delete_handler(body, retry, **kwargs):
     name = body["metadata"]["name"]
-    node_name = body["spec"]["nodeName"]
+    node_name = maintenance_node_name(body)
     LOG.info(f"Got node maintenance request delete event {name}")
     node = kube.find(kube.Node, node_name)
     if not kube.NodeWorkloadLock.required_for_node(node):

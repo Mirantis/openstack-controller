@@ -80,14 +80,21 @@ async def test_maintenance_start(nova_registry_service):
     def set_state(value):
         values.append(value)
 
+    inner_states = []
+
+    def set_inner_state(value):
+        inner_states.append(value)
+
     nwl.set_state = set_state
+    nwl.set_inner_state = set_inner_state
 
     with mock.patch.object(kube, "find", side_effect=(node, nwl)):
         await node_maintenance_request.node_maintenance_request_change_handler(
             nmr, 0, diff=()
         )
 
-    assert values == ["prepare_inactive", "inactive"]
+    assert inner_states == ["prepare_inactive", None]
+    assert values == ["inactive"]
 
 
 @pytest.mark.asyncio
@@ -123,14 +130,21 @@ async def test_maintenance_stop(nova_registry_service):
     def set_state(value):
         values.append(value)
 
+    inner_states = []
+
+    def set_inner_state(value):
+        inner_states.append(value)
+
     nwl.set_state = set_state
+    nwl.set_inner_state = set_inner_state
 
     with mock.patch.object(kube, "find", side_effect=(node, nwl)):
         await node_maintenance_request.node_maintenance_request_delete_handler(
             nmr, 0
         )
 
-    assert values == ["prepare_active", "active"]
+    assert inner_states == ["prepare_active", None]
+    assert values == ["active"]
 
 
 @pytest.mark.asyncio
@@ -170,7 +184,13 @@ async def test_maintenance_preparation_failure(nova_registry_service):
     def set_state(value):
         values.append(value)
 
+    inner_states = []
+
+    def set_inner_state(value):
+        inner_states.append(value)
+
     nwl.set_state = set_state
+    nwl.set_inner_state = set_inner_state
 
     with pytest.raises(kopf.TemporaryError):
         with mock.patch.object(kube, "find", side_effect=(node, nwl)):
@@ -178,4 +198,5 @@ async def test_maintenance_preparation_failure(nova_registry_service):
                 nmr, 1000, diff=()
             )
 
-    assert values == ["prepare_inactive", "active"]
+    assert inner_states == ["prepare_inactive", None]
+    assert values == []

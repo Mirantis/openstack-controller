@@ -453,13 +453,23 @@ class NodeWorkloadLock(pykube.objects.APIObject, HelmBundleMixin):
         return False
 
     def is_active(self):
+        if self.get_inner_state():
+            return False
         return self.obj["status"]["state"] == "active"
 
     def is_maintenance(self):
+        if self.get_inner_state():
+            return False
         return self.obj["status"]["state"] == "inactive"
 
     def set_state(self, state):
         self.patch({"status": {"state": state}}, subresource="status")
+
+    def set_inner_state(self, state):
+        self.patch({"metadata": {"annotations": {"inner_state": state}}})
+
+    def get_inner_state(self):
+        return self.obj["metadata"].get("annotations", {}).get("inner_state")
 
 
 class NodeMaintenanceRequest(pykube.objects.APIObject, HelmBundleMixin):
