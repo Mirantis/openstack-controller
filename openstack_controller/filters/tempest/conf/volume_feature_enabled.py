@@ -65,7 +65,5 @@ class VolumeFeatureEnabled(base_section.BaseSection):
 
     @property
     def instance_locality_enabled(self):
-        if self.get_values_item("nova", "conf.nova.libvirt.images_type") in [
-            "lvm",
-        ]:
-            return True
+        # This option should be explicitly specified in osdpl by the user
+        return False
