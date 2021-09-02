@@ -152,9 +152,6 @@
           beb14ed4-cd96-42f0-ba08-32a3123b7d66:
             reason: Locators update is needed
             # stepler/horizon/tests/test_users.py::TestAdminOnly::test_sort_users
-          0374870e-5d84-4574-a114-cf78db640c26:
-            reason: Locators update is needed
-            # stepler/horizon/tests/test_volumes.py::TestAdminOnly::test_launch_volume_as_instance
           e585242-9443-4e78-a7fe-3ee6097459bb:
             reason: The test will be removed as depricated
             # stepler/horizon/tests/test_volumes.py::TestAdminOnly::test_migrate_volume
