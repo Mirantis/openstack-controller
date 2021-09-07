@@ -81,6 +81,7 @@ def spec_hash(spec):
     return hasher.hexdigest()
 
 
+# TODO(avolkov): remove  logger arg
 def services(spec, logger, **kwargs):
     base = merge_spec(spec, logger)
 

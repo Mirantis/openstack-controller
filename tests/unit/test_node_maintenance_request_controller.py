@@ -12,6 +12,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import asyncio
 from unittest import mock
 
 import kopf
@@ -138,7 +139,15 @@ async def test_maintenance_stop(nova_registry_service):
     nwl.set_state = set_state
     nwl.set_inner_state = set_inner_state
 
-    with mock.patch.object(kube, "find", side_effect=(node, nwl)):
+    check_services_healthy = asyncio.Future()
+    check_services_healthy.set_result(True)
+    with mock.patch.object(
+        kube, "find", side_effect=(node, nwl)
+    ), mock.patch.object(
+        node_maintenance_request,
+        "check_services_healthy",
+        return_value=check_services_healthy,
+    ):
         await node_maintenance_request.node_maintenance_request_delete_handler(
             nmr, 0
         )
@@ -200,3 +209,25 @@ async def test_maintenance_preparation_failure(nova_registry_service):
 
     assert inner_states == ["prepare_inactive", None]
     assert values == []
+
+
+@pytest.mark.asyncio
+async def test_check_services_not_healthy(fake_osdpl):
+    with pytest.raises(kopf.TemporaryError):
+        with mock.patch.object(kube, "get_osdpl", return_value=fake_osdpl):
+            await node_maintenance_request.check_services_healthy()
+
+
+@pytest.mark.asyncio
+async def test_check_services_healthy(fake_osdpl, load_fixture):
+    statuses = load_fixture("check-service-health.yaml")
+    with mock.patch.object(
+        kube, "get_osdpl", return_value=fake_osdpl
+    ), mock.patch(
+        "openstack_controller.controllers.node_maintenance_request.get_health_statuses",
+        return_value=statuses,
+    ), mock.patch(
+        "openstack_controller.layers.services",
+        return_value=[["compute", "load-balancer"], []],
+    ):
+        assert await node_maintenance_request.check_services_healthy()

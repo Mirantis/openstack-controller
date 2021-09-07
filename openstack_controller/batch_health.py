@@ -36,18 +36,25 @@ def calculate_statuses(k8s_objects):
     return {k: v for k, v in (calculate_status(i) for i in k8s_objects)}
 
 
+def get_health_statuses(osdpl):
+    if osdpl is None:
+        osdpl = kube.get_osdpl(settings.OSCTL_OS_DEPLOYMENT_NAMESPACE)
+    statuses = calculate_statuses(get_k8s_objects(osdpl.namespace))
+    health_all = collections.defaultdict(dict)
+    for ident, status in statuses.items():
+        LOG.debug(f"Got status {status} for {ident}")
+        health_all[ident[0]][ident[1]] = {
+            "status": status[0],
+            "generation": status[1],
+        }
+    return health_all
+
+
 def update_health_statuses():
     osdpl = kube.get_osdpl(settings.OSCTL_OS_DEPLOYMENT_NAMESPACE)
     osdplst = osdplstatus.OpenStackDeploymentStatus(
         osdpl.name, osdpl.namespace
     )
-    statuses = calculate_statuses(get_k8s_objects(osdpl.namespace))
-    health_all = collections.defaultdict(dict)
-    for ident, status in statuses.items():
-        LOG.debug(f"Update status for {ident} to {status}")
-        health_all[ident[0]][ident[1]] = {
-            "status": status[0],
-            "generation": status[1],
-        }
-    health.set_multi_application_health(osdpl, health_all, osdplst)
+    statuses = get_health_statuses(osdpl)
+    health.set_multi_application_health(osdpl, statuses, osdplst)
     LOG.info("Health statuses updated %d", len(statuses))

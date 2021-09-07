@@ -3,6 +3,9 @@ import kopf
 from openstack_controller import kube
 from openstack_controller.services import base
 from openstack_controller import utils
+from openstack_controller import layers
+from openstack_controller.batch_health import get_health_statuses
+
 
 LOG = utils.get_logger(__name__)
 
@@ -33,9 +36,25 @@ async def _run_service_methods(services, methods, node_metadata):
             await getattr(service_class, method_name)(node_metadata)
 
 
-async def _make_state_transition(operation, nwl, node, retry):
+async def check_services_healthy():
+    osdpl = kube.get_osdpl()
+    statuses = get_health_statuses(osdpl)
+    services = [
+        base.Service.registry[i](osdpl.obj, LOG, {})
+        for i in layers.services(osdpl.obj["spec"], LOG)[0]
+    ]
+    if not all(service.healthy(statuses) for service in services):
+        LOG.info(
+            "Some services are not healthy: %s",
+            [i.service for i in services if not i.healthy(statuses)],
+        )
+        raise kopf.TemporaryError("Services are not healthy")
+    return True
+
+
+async def _make_state_transition(new_state, nwl, node, retry):
     name = node.obj["metadata"]["name"]
-    if operation == MAINTENANCE:
+    if new_state == MAINTENANCE:
         args = [
             ORDERED_SERVICES,
             ["remove_node_from_scheduling", "prepare_for_node_reboot"],
@@ -45,7 +64,7 @@ async def _make_state_transition(operation, nwl, node, retry):
             "prepare": "prepare_inactive",
             "final": "inactive",
         }
-    elif operation == OPERATIONAL:
+    elif new_state == OPERATIONAL:
         args = [
             list(reversed(ORDERED_SERVICES)),
             ["prepare_node_after_reboot", "add_node_to_scheduling"],
@@ -56,23 +75,26 @@ async def _make_state_transition(operation, nwl, node, retry):
             "final": "active",
         }
     else:
-        raise kopf.PermanentError("Got unknown operation")
+        raise kopf.PermanentError("Got unknown new_state")
 
-    LOG.info(f"Preparing node {name} for {operation} state")
+    LOG.info(f"Preparing node {name} for {new_state} state")
     nwl.set_inner_state(states["prepare"])
     try:
+        if new_state == OPERATIONAL:
+            await check_services_healthy()
         await _run_service_methods(*args)
     except Exception:
         LOG.exception(
-            f"Failed to get node {name} to {operation} state, attempt number {retry}"
+            f"Failed to get node {name} to {new_state} state, attempt number {retry}"
         )
         raise kopf.TemporaryError(
             "Maintenance request processing temporarily failed"
         )
     finally:
         nwl.set_inner_state(None)
+
     nwl.set_state(states["final"])
-    LOG.info(f"{operation} state is applied for node {name}")
+    LOG.info(f"{new_state} state is applied for node {name}")
 
 
 @kopf.on.create(*kube.NodeMaintenanceRequest.kopf_on_args)

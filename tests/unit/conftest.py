@@ -15,6 +15,7 @@
 import asyncio
 import logging
 from unittest import mock
+from openstack_controller import kube
 
 import pytest
 import yaml
@@ -149,3 +150,17 @@ def override_setting(request, mocker):
     )
     yield setting_mock
     mocker.stopall()
+
+
+@pytest.fixture
+def fake_osdpl(openstackdeployment):
+    osdpl = kube.OpenStackDeployment(kube.api, openstackdeployment)
+    yield osdpl
+
+
+@pytest.fixture
+def load_fixture():
+    def loader(name):
+        return yaml.safe_load(open("tests/fixtures/" + name))
+
+    yield loader

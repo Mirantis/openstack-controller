@@ -650,6 +650,26 @@ class Service:
     async def add_node_to_scheduling(cls, node_metadata):
         pass
 
+    def healthy(self, statuses):
+        if not hasattr(self, "health_groups"):
+            LOG.info("Service %s has no health groups", self)
+            return True
+        for health_group in self.health_groups:
+            LOG.info(
+                "Checking health group %s for service %s", health_group, self
+            )
+            if health_group not in statuses:
+                LOG.info("Health group %s not found", health_group)
+                return False
+            try:
+                for component, values in statuses[health_group].items():
+                    if values["status"].lower() != "ready":
+                        LOG.info("Component is not ready %s", component)
+                        return False
+            except KeyError:
+                return False
+        return True
+
 
 class OpenStackService(Service):
     openstack_chart = None
