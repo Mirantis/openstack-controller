@@ -249,7 +249,7 @@ class Gnocchi(OpenStackService):
             settings.OSCTL_REDIS_NAMESPACE, redis_secret.secret_name
         )
         redis_creds = redis_secret.get()
-        t_args["redis_secret"] = redis_creds.password.decode()
+        t_args["redis_secret"] = redis_creds.password
 
         return t_args
 
@@ -1536,7 +1536,7 @@ class Octavia(OpenStackService):
                 settings.OSCTL_REDIS_NAMESPACE, redis_secret.secret_name
             )
             redis_creds = redis_secret.get()
-            t_args["redis_secret"] = redis_creds.password.decode()
+            t_args["redis_secret"] = redis_creds.password
         return t_args
 
 

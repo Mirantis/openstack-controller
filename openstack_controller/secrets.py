@@ -428,7 +428,7 @@ class RedisSecret(Secret):
     def decode(self, data):
         params = {}
         for kind, creds in data.items():
-            decoded = base64.b64decode(creds)
+            decoded = base64.b64decode(creds).decode()
             params[kind] = decoded
 
         return self.secret_class(**params)
@@ -437,14 +437,32 @@ class RedisSecret(Secret):
         data = asdict(secret)
 
         for key in data.keys():
-            data[key] = base64.b64encode(data[key].encode("ascii")).decode()
+            data[key] = base64.b64encode(data[key].encode()).decode()
 
         kube.save_secret_data(self.namespace, self.secret_name, data)
+
+    def ensure(self):
+        try:
+            secret = self.get()
+        except pykube.exceptions.ObjectDoesNotExist:
+            secret = self.create()
+            if secret:
+                self.save(secret)
+                secret = self.get()
+        return secret
 
 
 class StackLightPasswordSecret(Secret):
     secret_name = "generated-stacklight-password"
     secret_class = OSSytemCreds
+
+    def decode(self, data):
+        params = {}
+        for kind, creds in data.items():
+            decoded = base64.b64decode(creds).decode()
+            params[kind] = decoded
+
+        return self.secret_class(**params)
 
     def create(self) -> OSSytemCreds:
         return OSSytemCreds(
@@ -452,19 +470,21 @@ class StackLightPasswordSecret(Secret):
             username=generate_name(prefix="stacklight", length=16),
         )
 
-    def decode(self, data):
-        params = {}
-        for kind, creds in data.items():
-            decoded = base64.b64decode(creds)
-            params[kind] = decoded
-
-        return self.secret_class(**params)
+    def ensure(self):
+        try:
+            secret = self.get()
+        except pykube.exceptions.ObjectDoesNotExist:
+            secret = self.create()
+            if secret:
+                self.save(secret)
+                secret = self.get()
+        return secret
 
     def save(self, secret) -> None:
         data = asdict(secret)
 
         for key in data.keys():
-            data[key] = base64.b64encode(data[key].encode("ascii")).decode()
+            data[key] = base64.b64encode(data[key].encode()).decode()
 
         kube.save_secret_data(self.namespace, self.secret_name, data)
 

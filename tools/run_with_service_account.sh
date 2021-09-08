@@ -7,7 +7,7 @@ python3 tools/set-cluster-insecure.py $KUBECFG_FILE_NAME
 echo using kube config file $KUBECFG_FILE_NAME
 export KUBECONFIG=$KUBECFG_FILE_NAME
 
-NODE_IP=${NODE_IP:$(ip route get 4.2.2.1 | awk '{print $7}' | head -1)}
+export NODE_IP=${NODE_IP:$(ip route get 4.2.2.1 | awk '{print $7}' | head -1)}
 
 available_controllers=(
     "-m openstack_controller.controllers.node"
