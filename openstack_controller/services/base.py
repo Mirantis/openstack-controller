@@ -447,7 +447,7 @@ class Service:
         delete_status = ("Deleting",)
         deleted_status = (None,)
 
-        # TODO(vsaienok): remove legacy status
+        # TODO(vsaienko): remove legacy status
         status_patch = {"children": {self.resource_name: status}}
         self.update_status(status_patch)
 
