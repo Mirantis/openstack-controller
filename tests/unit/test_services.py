@@ -12,6 +12,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import asyncio
 import copy
 import logging
 from unittest import mock
@@ -175,10 +176,9 @@ def test_service_nova_with_ceph_render(
     mock_ceph_template_args.assert_called_once()
 
 
-# NOTE (e0ne): @mock.path decorator doesn't work with coroutines
+# NOTE (e0ne): @mock.patch decorator doesn't work with coroutines
 
 
-@pytest.mark.skip(reason="temporary skip")
 @pytest.mark.asyncio
 async def test_service_apply(
     mocker, openstackdeployment, compute_helmbundle_all
@@ -190,20 +190,37 @@ async def test_service_apply(
     mock_render.return_value = compute_helmbundle_all
 
     mock_update_status = mocker.patch.object(services.Nova, "update_status")
-    mocck_ceeph_secrets = mocker.patch.object(
+    mock_ceph_secrets = mocker.patch.object(
         services.Nova, "ensure_ceph_secrets"
     )
     mock_info = mocker.patch.object(kopf, "info")
     mocker.patch("subprocess.check_call")
 
+    helm_run_cmd = mocker.patch(
+        "openstack_controller.helm.HelmManager.run_cmd",
+        return_value=asyncio.Future(),
+    )
+    helm_run_cmd.return_value.set_result(["fake_stdout", "fake_stderr"])
+
+    helm_list = mocker.patch(
+        "openstack_controller.helm.HelmManager.list",
+        return_value=asyncio.Future(),
+    )
+    helm_list.return_value.set_result([])
+    mocker.patch.dict("os.environ", {"NODE_IP": "fake_ip"})
+
     await service.apply("test_event")
 
     mock_render.assert_called_once()
-    mock_update_status.assert_called_once_with(
-        {"children": {service.resource_name: "Unknown"}}
+    mock_update_status.has_calls(
+        [
+            mock.call({"children": {service.resource_name: "Applying"}}),
+            mock.call({"children": {service.resource_name: True}}),
+        ]
     )
-    mocck_ceeph_secrets.assert_called_once()
+    mock_ceph_secrets.assert_called_once()
     mock_info.assert_called_once()
+    helm_run_cmd.assert_called()
 
 
 def test_default_service_account_list(openstackdeployment):
