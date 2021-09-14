@@ -365,6 +365,8 @@ spec:
               readiness:
                 params:
                   initialDelaySeconds: 30
+                  periodSeconds: 30
+                  timeoutSeconds: 30
           rpc_retries: 2
           rpc_timeout: 30
         use_fqdn:

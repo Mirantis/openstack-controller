@@ -311,6 +311,8 @@ spec:
               readiness:
                 params:
                   initialDelaySeconds: 30
+                  periodSeconds: 30
+                  timeoutSeconds: 30
           metadata_agent:
             metadata_agent:
               liveness:
