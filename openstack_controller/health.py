@@ -107,7 +107,7 @@ def is_application_ready(application, osdpl):
             for component_health in app_status.values()
         ]
     ):
-        LOG.info(f"All components for application: {application} are healty.")
+        LOG.info(f"All components for application: {application} are healthy.")
         return True
 
     not_ready = [
