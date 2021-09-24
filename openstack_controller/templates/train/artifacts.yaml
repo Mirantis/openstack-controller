@@ -125,7 +125,7 @@ entrypoint: '{{ images_base_url }}/openstack/extra/kubernetes-entrypoint:v1.0.0-
 purge_test: '{{ images_base_url }}/openstack/heat:train-bionic-20210903100101'
 prometheus_mysql_exporter: '{{ images_base_url }}/stacklight/mysqld-exporter:v0.11.0'
 prometheus_rabbitmq_exporter: '{{ images_base_url }}/stacklight/rabbitmq-exporter:v1.0.0-RC8'
-prometheus_memcached_exporter: '{{ images_base_url }}/stacklight/memcached-exporter:v0.5.0'
+prometheus_memcached_exporter: '{{ images_base_url }}/stacklight/memcached-exporter:0.9.0'
 cinder_backup_storage_init: '{{ images_base_url }}/openstack/extra/ceph-config-helper:nautilus-bionic-20210804080905'
 cinder_storage_init: '{{ images_base_url }}/openstack/extra/ceph-config-helper:nautilus-bionic-20210804080905'
 glance_storage_init: '{{ images_base_url }}/openstack/extra/ceph-config-helper:nautilus-bionic-20210804080905'
