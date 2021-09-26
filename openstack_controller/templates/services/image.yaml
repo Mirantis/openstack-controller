@@ -76,6 +76,7 @@ spec:
     "db_drop",
     "image_repo_sync",
     "bootstrap",
+    "glance_bootstrap",
     "glance_db_sync",
     "glance_db_expand",
     "glance_db_migrate",
