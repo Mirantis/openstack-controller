@@ -235,6 +235,8 @@ spec:
                 key: |
 {{ spec.features.ssl.public_endpoints.api_key | indent(width=18, first=True) }}
           hosts:
+            admin:
+              host: ironic-api
             default: ironic
             internal: ironic-api
             public:
@@ -248,6 +250,7 @@ spec:
 {{ spec.features.ssl.public_endpoints.api_key | indent(width=18, first=True) }}
           port:
             api:
+              admin: 6385
               default: 80
               internal: 6385
               public: 443
