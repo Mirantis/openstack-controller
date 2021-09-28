@@ -17,6 +17,7 @@ services:
     - OSCTL_HELMBUNDLE_APPLY_DELAY=10
       #Redis namespace, should be different from osdpl namespace to avoid conflicts.
     - OSCTL_REDIS_NAMESPACE=openstack-redis
+    - NODE_IP
     volumes:
     - ${KUBECFG_FILE_NAME}:/opt/kube.conf:ro
     command: kopf run --dev -n openstack --liveness=http://0.0.0.0:8090/healthz -m openstack_controller.controllers.probe -m openstack_controller.controllers.openstackdeployment -P openstack-controller.osdpl
@@ -39,6 +40,6 @@ services:
   probe:
     <<: *osctl
     container_name: probe
-    command: /usr/bin/python3.7 /opt/healthz 10 osdpl node-maintenance node secrets health helmbundle
+    command: /usr/bin/python3.8 /opt/healthz 10 osdpl node-maintenance node secrets health helmbundle
     volumes:
     - ./healthz:/opt/healthz
