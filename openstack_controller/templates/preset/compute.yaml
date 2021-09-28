@@ -303,6 +303,10 @@ services:
             - (?:neutron_tempest_plugin.bgpvpn.scenario.test_bgpvpn_basic.TestBGPVPNBasic.test_bgpvpn_negative_delete_net_association)
             - (?:neutron_tempest_plugin.bgpvpn.scenario.test_bgpvpn_basic.TestBGPVPNBasic.test_bgpvpn_negative_delete_router_association)
             - (?:neutron_tempest_plugin.bgpvpn.scenario.test_bgpvpn_basic.TestBGPVPNBasic.test_bgpvpn_port_association_local_pref)
+          {%- if openstack_version not in [ 'victoria' ] %}
+            # Skip because of PRODX-9184 has won't fix resolution. Should be executed only for victoria environments.
+            - (?:octavia_tempest_plugin.tests.scenario.v2.test_traffic_ops.TrafficOperationsScenarioTest.test_basic_traffic)
+          {%- endif %}
           script: |
             tempest run --config-file /etc/tempest/tempest.conf -w 4 --smoke --blacklist-file  /etc/tempest/test-blacklist
           tempest:
