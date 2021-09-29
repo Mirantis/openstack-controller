@@ -6,7 +6,6 @@
 {%- set stacklight_enabled = spec.get('features', {}).get('stacklight', {}).get('enabled', False) %}
 {%- set notification_topics = ['notifications'] %}
 {%- do notification_topics.append('stacklight_notifications') if stacklight_enabled %}
-{%- set default_binary_base_url = spec.artifacts.binary_base_url | substitute_local_proxy_hostname("${NODE_IP}") %}
 {%- set multi_backends = spec.get('features', {}).get('glance', {}).get('backends', {}) %}
 {%- set default_backend = namespace(name='') %}
 
@@ -133,7 +132,7 @@ spec:
               private: false
               properties:
                 os_distro: cirros
-              source_url: {{ default_binary_base_url }}/openstack/bin/cirros/0.5.1/
+              source_url: {{ spec.artifacts.binary_base_url }}/openstack/bin/cirros/0.5.1/
             fedora:
               container_format: bare
               image_file: Fedora-Cloud-Base-27-1.6.x86_64.qcow2
@@ -143,7 +142,7 @@ spec:
               private: false
               properties:
                 os_distro: fedora
-              source_url: {{ default_binary_base_url }}/openstack/bin/Fedora/27/
+              source_url: {{ spec.artifacts.binary_base_url }}/openstack/bin/Fedora/27/
             ubuntu:
               container_format: bare
               image_file: bionic-server-cloudimg-amd64.img
@@ -153,7 +152,17 @@ spec:
               private: false
               properties:
                 os_distro: ubuntu
-              source_url: {{ default_binary_base_url }}/openstack/bin/ubuntu/18.04/
+              source_url: {{ spec.artifacts.binary_base_url }}/openstack/bin/ubuntu/18.04/
+            amphora-x64-haproxy:
+              container_format: bare
+              image_type: qcow2
+              name: amphora-x64-haproxy
+              private: true
+              properties:
+                os_distro: ubuntu
+              tags: ['amphora']
+              source_url: {{ images["octavia_amphora"] }}
+              checksum: {{ images["octavia_amphora_checksum"] }}
       conf:
         policy.d:
           01-controller-default.yaml: {{ service_policy }}

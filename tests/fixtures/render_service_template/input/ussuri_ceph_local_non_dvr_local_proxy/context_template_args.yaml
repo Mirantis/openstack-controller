@@ -140,6 +140,7 @@ images:
   nova_spiceproxy: nova-spiceproxy:latest
   nova_spiceproxy_assets: nova-spiceproxy-assets:latest
   octavia_amphora:  http://127.0.0.1:8282/bin/latest
+  octavia_amphora_checksum: md5summ
   octavia_api: octavia-api:latest
   octavia_db_sync: octavia-db-sync:latest
   octavia_db_sync_persistence: octavia-db-sync-persistence:latest

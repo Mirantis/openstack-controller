@@ -149,7 +149,8 @@ images:
   nova_service_cleaner: nova-service-cleaner:latest
   nova_spiceproxy: nova-spiceproxy:latest
   nova_spiceproxy_assets: nova-spiceproxy-assets:latest
-  octavia_amphora:  https://amphora-image-url/latest
+  octavia_amphora: https://amphora-image-url/latest
+  octavia_amphora_checksum: md5summ
   octavia_api: octavia-api:latest
   octavia_db_sync: octavia-db-sync:latest
   octavia_db_sync_persistence: octavia-db-sync-persistence:latest
