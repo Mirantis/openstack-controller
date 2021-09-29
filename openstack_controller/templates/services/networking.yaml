@@ -9,7 +9,15 @@
 {%- set bgpvpn = spec.features.neutron.get('bgpvpn', {'enabled': False}) %}
 {%- set ipsec = spec.features.neutron.get('ipsec', {'enabled': False}) %}
 {%- set notification_topics = ['notifications'] %}
-{%- set service_plugins = ['<None>'] if tungstenfabric_enabled else ['router', 'metering', 'qos'] %}
+{%- if tungstenfabric_enabled %}
+  {%- if 'victoria' in spec.openstack_version %}
+    {%- set service_plugins = ['neutron_plugin_contrail.plugins.opencontrail.services.tag.tag_plugin.TagPlugin,neutron_plugin_contrail.plugins.opencontrail.services.timestamp.timestamp_plugin.TimeStampPlugin,neutron_plugin_contrail.plugins.opencontrail.services.trunk.plugin.TrunkPlugin'] %}
+  {%- else %}
+    {%- set service_plugins = ['<None>'] %}
+  {%- endif %}
+{%- else %}
+  {%- set service_plugins = ['router', 'metering', 'qos'] %}
+{%- endif %}
 {%- do service_plugins.append('bgpvpn') if bgpvpn.enabled %}
 {%- do notification_topics.append('stacklight_notifications') if stacklight_enabled %}
 {%- set floating_network = spec.features.neutron.get('floating_network', {}) %}
