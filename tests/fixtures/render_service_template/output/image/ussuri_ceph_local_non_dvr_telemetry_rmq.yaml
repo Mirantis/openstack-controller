@@ -112,6 +112,17 @@ spec:
               properties:
                 os_distro: ubuntu
               source_url: https://artifactory.mcp.mirantis.net/binary-dev-kaas-local/openstack/bin/ubuntu/18.04/
+            amphora-x64-haproxy:
+              checksum: md5summ
+              container_format: bare
+              image_type: qcow2
+              name: amphora-x64-haproxy
+              private: true
+              properties:
+                os_distro: ubuntu
+              source_url: 'https://amphora-image-url/latest'
+              tags:
+                - amphora
       ceph_client:
         configmap: rook-ceph-config
         user_secret_name: glance-rbd-keyring
