@@ -76,6 +76,8 @@ spec:
 
                   '
           hosts:
+            admin:
+              host: ironic-api
             default: ironic
             internal: ironic-api
             public:
@@ -92,6 +94,7 @@ spec:
                   '
           port:
             api:
+              admin: 6385
               default: 80
               internal: 6385
               public: 443
