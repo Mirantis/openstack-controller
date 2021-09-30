@@ -120,7 +120,7 @@ spec:
       storage: rbd
       bootstrap:
         enabled: true
-        ks_user: admin
+        ks_user: glance
         structured:
           images:
             cirros:
