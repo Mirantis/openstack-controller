@@ -17,7 +17,7 @@ import logging.config
 
 import json
 import kopf
-from kopf.engines.posting import event_queue_var
+from kopf._core.engines.posting import event_queue_var
 from prometheus_client import start_http_server, Gauge, Counter, Summary
 
 from openstack_controller import constants as const

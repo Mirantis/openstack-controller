@@ -16,12 +16,10 @@ LOG = utils.get_logger(__name__)
 @kopf.on.update(*osdplstatus.OpenStackDeploymentStatus.kopf_on_args)
 @kopf.on.create(*osdplstatus.OpenStackDeploymentStatus.kopf_on_args)
 @utils.collect_handler_metrics
-async def handle(body, meta, spec, logger, event, **kwargs):
-    # TODO(pas-ha) "cause" is deprecated, replace with "reason"
-    event = kwargs["cause"].event
+async def handle(body, meta, spec, logger, reason, **kwargs):
     # TODO(pas-ha) remove all this kwargs[*] nonsense, accept explicit args,
     # pass further only those that are really needed
     # actual **kwargs form is for forward-compat with kopf itself
-    LOG.info(f"Got osdplstatus event {event}")
+    LOG.info(f"Got osdplstatus event {reason}")
     LOG.info(f"Changes are: {kwargs['diff']}")
-    return {"lastStatus": f"{event}"}
+    return {"lastStatus": f"{reason}"}

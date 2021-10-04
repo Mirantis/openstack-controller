@@ -196,7 +196,7 @@ class HelmManager:
                 "--install",
                 *args,
             ]
-            stdout, stderr = await self.run_cmd(cmd)
+            await self.run_cmd(cmd)
 
     async def install_bundle(self, data):
         repos = {r["name"]: r["url"] for r in data["spec"]["repositories"]}

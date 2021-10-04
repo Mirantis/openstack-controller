@@ -37,7 +37,7 @@ def _delete(osdpl, kind, meta, application, component):
 
 @kopf.on.delete("apps", "v1", "deployments")
 @utils.collect_handler_metrics
-async def deployments(name, namespace, meta, status, new, event, **kwargs):
+async def deployments(name, namespace, meta, status, new, reason, **kwargs):
     LOG.debug(f"Deployment {name} status.conditions is {status}")
     osdpl = kube.get_osdpl(namespace)
     if not osdpl:
@@ -48,7 +48,7 @@ async def deployments(name, namespace, meta, status, new, event, **kwargs):
 
 @kopf.on.delete("apps", "v1", "statefulsets")
 @utils.collect_handler_metrics
-async def statefulsets(name, namespace, meta, status, event, **kwargs):
+async def statefulsets(name, namespace, meta, status, reason, **kwargs):
     LOG.debug(f"StatefulSet {name} status is {status}")
     osdpl = kube.get_osdpl(namespace)
     if not osdpl:
@@ -60,13 +60,13 @@ async def statefulsets(name, namespace, meta, status, event, **kwargs):
 @kopf.on.field("apps", "v1", "daemonsets", field="status")
 @kopf.on.delete("apps", "v1", "daemonsets")
 @utils.collect_handler_metrics
-async def daemonsets(name, namespace, meta, status, event, **kwargs):
+async def daemonsets(name, namespace, meta, status, reason, **kwargs):
     LOG.debug(f"DaemonSet {name} status is {status}")
     osdpl = kube.get_osdpl(namespace)
     if not osdpl:
         return
     application, component = health.ident(meta)
-    if event == "delete":
+    if reason == "delete":
         _delete(osdpl, "DaemonSet", meta, application, component)
         return
     res_health = health.daemonset_health_status(kwargs["body"])

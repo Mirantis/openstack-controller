@@ -148,15 +148,13 @@ def discover_images(mspec, logger):
 @kopf.on.update(*kube.OpenStackDeployment.kopf_on_args)
 @kopf.on.create(*kube.OpenStackDeployment.kopf_on_args)
 @utils.collect_handler_metrics
-async def handle(body, meta, spec, logger, event, **kwargs):
-    # TODO(pas-ha) "cause" is deprecated, replace with "reason"
-    event = kwargs["cause"].event
+async def handle(body, meta, spec, logger, reason, **kwargs):
     # TODO(pas-ha) remove all this kwargs[*] nonsense, accept explicit args,
     # pass further only those that are really needed
     # actual **kwargs form is for forward-compat with kopf itself
     namespace = meta["namespace"]
     name = meta["name"]
-    LOG.info(f"Got osdpl event {event}")
+    LOG.info(f"Got osdpl event {reason}")
     LOG.info(f"Changes are: {kwargs['diff']}")
 
     # TODO(vsaienko): remove legacy status
@@ -166,14 +164,14 @@ async def handle(body, meta, spec, logger, event, **kwargs):
     osdplst = osdplstatus.OpenStackDeploymentStatus(name, namespace)
     osdplst.present()
     osdplst.set_osdpl_status(
-        osdplstatus.APPLYING, body["spec"], kwargs["diff"], event
+        osdplstatus.APPLYING, body["spec"], kwargs["diff"], reason
     )
 
     if spec.get("draft"):
         LOG.info("OpenStack deployment is in draft mode, skipping handling...")
-        return {"lastStatus": f"{event} drafted"}
+        return {"lastStatus": f"{reason} drafted"}
 
-    check_handling_allowed(kwargs["old"], kwargs["new"], event)
+    check_handling_allowed(kwargs["old"], kwargs["new"], reason)
 
     secrets.OpenStackAdminSecret(namespace).ensure()
 
@@ -200,7 +198,7 @@ async def handle(body, meta, spec, logger, event, **kwargs):
             task_def[
                 asyncio.create_task(
                     service_instance.upgrade(
-                        event=event,
+                        event=reason,
                         body=body,
                         meta=meta,
                         spec=spec,
@@ -210,7 +208,7 @@ async def handle(body, meta, spec, logger, event, **kwargs):
                 )
             ] = (
                 service_instance.upgrade,
-                event,
+                reason,
                 body,
                 meta,
                 spec,
@@ -227,7 +225,7 @@ async def handle(body, meta, spec, logger, event, **kwargs):
         task_def[
             asyncio.create_task(
                 service_instance.apply(
-                    event=event,
+                    event=reason,
                     body=body,
                     meta=meta,
                     spec=spec,
@@ -235,7 +233,7 @@ async def handle(body, meta, spec, logger, event, **kwargs):
                     **kwargs,
                 )
             )
-        ] = (service_instance.apply, event, body, meta, spec, logger, kwargs)
+        ] = (service_instance.apply, reason, body, meta, spec, logger, kwargs)
 
     if delete:
         LOG.info(f"deleting children {' '.join(delete)}")
@@ -247,7 +245,7 @@ async def handle(body, meta, spec, logger, event, **kwargs):
                     body=body, meta=meta, spec=spec, logger=logger, **kwargs
                 )
             )
-        ] = (service_instance.delete, event, body, meta, spec, logger, kwargs)
+        ] = (service_instance.delete, reason, body, meta, spec, logger, kwargs)
 
     await run_task(task_def)
 
@@ -255,10 +253,10 @@ async def handle(body, meta, spec, logger, event, **kwargs):
     # TODO(vsaienko): remove legacy status
     kwargs["patch"]["status"]["deployed"] = True
     osdplst.set_osdpl_status(
-        osdplstatus.APPLIED, body["spec"], kwargs["diff"], event
+        osdplstatus.APPLIED, body["spec"], kwargs["diff"], reason
     )
 
-    return {"lastStatus": f"{event}d"}
+    return {"lastStatus": f"{reason}d"}
 
 
 @kopf.on.delete(*kube.OpenStackDeployment.kopf_on_args)

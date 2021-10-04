@@ -27,8 +27,8 @@ LOG = utils.get_logger(__name__)
 
 @kopf.on.field("", "v1", "nodes", field="status.conditions")
 @utils.collect_handler_metrics
-async def node_status_update_handler(name, body, old, new, event, **kwargs):
-    LOG.debug(f"Handling node status {event} event.")
+async def node_status_update_handler(name, body, old, new, reason, **kwargs):
+    LOG.debug(f"Handling node status {reason} event.")
     LOG.info(f"The node {name} changes are: {kwargs['diff']}")
 
     # NOTE(vsaienko) get conditions from the object to avoid fake reporing by
@@ -76,9 +76,9 @@ async def node_status_update_handler(name, body, old, new, event, **kwargs):
 @kopf.on.create("", "v1", "nodes")
 @kopf.on.update("", "v1", "nodes")
 @kopf.on.resume("", "v1", "nodes")
-async def node_change_handler(body, event, **kwargs):
+async def node_change_handler(body, reason, **kwargs):
     name = body["metadata"]["name"]
-    LOG.info(f"Got event {event} for node {name}")
+    LOG.info(f"Got event {reason} for node {name}")
     LOG.info(f"The node {name} changes are: {kwargs['diff']}")
     if not kube.NodeWorkloadLock.definition_exists():
         LOG.warning("No custom resource definition")

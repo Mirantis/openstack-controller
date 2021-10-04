@@ -29,7 +29,7 @@ import deepmerge.strategy.type_conflict
 from urllib.parse import urlsplit
 
 from openstack_controller import settings
-from kopf.engines.posting import event_queue_var
+from kopf._core.engines.posting import event_queue_var
 
 
 def get_in(d: Dict, keys: List, default=None):
