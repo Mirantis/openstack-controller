@@ -80,6 +80,7 @@ spec:
     "glance_db_expand",
     "glance_db_migrate",
     "glance_db_contract",
+    "glance_db_purge",
     "glance_storage_init",
     "ks_endpoints",
     "rabbit_init",

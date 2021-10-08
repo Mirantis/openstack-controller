@@ -173,7 +173,7 @@ spec:
           heat_db_sync: heat-db-sync:latest
           heat_engine: heat-engine:latest
           heat_engine_cleaner: heat-engine-cleaner:latest
-          heat_purge_deleted: heat-purge-deleted:latest
+          heat_db_purge: heat-purge-deleted:latest
           image_repo_sync: image-repo-sync:latest
           ks_endpoints: ks-endpoints:latest
           ks_trusts: ks-trusts:latest

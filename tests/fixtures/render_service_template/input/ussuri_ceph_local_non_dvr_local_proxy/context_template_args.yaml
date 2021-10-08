@@ -63,7 +63,7 @@ images:
   heat_db_sync: heat-db-sync:latest
   heat_engine: heat-engine:latest
   heat_engine_cleaner: heat-engine-cleaner:latest
-  heat_purge_deleted: heat-purge-deleted:latest
+  heat_db_purge: heat-purge-deleted:latest
   horizon: horizon:latest
   horizon_clean_cache: horizon-clean-cache:latest
   horizon_db_sync: horizon-db-sync:latest

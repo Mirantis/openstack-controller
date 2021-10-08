@@ -99,7 +99,7 @@ spec:
     "heat_engine_cleaner",
     "ks_service",
     "ks_trusts",
-    "heat_purge_deleted",
+    "heat_db_purge",
     "heat_db_sync",
     "bootstrap",
     "rabbit_init",
