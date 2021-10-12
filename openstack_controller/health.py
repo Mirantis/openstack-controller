@@ -101,6 +101,9 @@ def is_application_ready(application, osdpl):
             f"Application: {application} is not present in .status.health."
         )
         return False
+    # TODO(avolkov): this func may return false positive if not all components
+    #   of an app exists in k8s, it needs to be combined with
+    #   openstack_controller.services.base.Service.healthy
     elif all(
         [
             component_health["status"] == constants.OK

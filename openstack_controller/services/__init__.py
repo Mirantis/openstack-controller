@@ -135,7 +135,7 @@ class MariaDB(Service):
 
     @property
     def health_groups(self):
-        return ["mysql"]
+        return ["mariadb"]
 
     _child_objects = {
         "mariadb": {

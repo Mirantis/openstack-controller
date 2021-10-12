@@ -577,7 +577,7 @@ async def wait_for_deleted(
     return False
 
 
-def get_osdpl(namespace):
+def get_osdpl(namespace=settings.OSCTL_OS_DEPLOYMENT_NAMESPACE):
     LOG.debug("Getting osdpl object")
     osdpl = list(OpenStackDeployment.objects(api).filter(namespace=namespace))
     if len(osdpl) != 1:
