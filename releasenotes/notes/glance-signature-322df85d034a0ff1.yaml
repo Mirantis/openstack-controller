@@ -1,0 +1,4 @@
+---
+features:
+  - Allows to enforce glance signature when booting VM or
+    creating volume.

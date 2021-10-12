@@ -188,6 +188,7 @@ spec:
                         placement:
                           <<: *custom_policies
                     glance:
+                      type: object
                       properties:
                         backends:
                           description: |
@@ -204,7 +205,18 @@ spec:
                               x-kubernetes-preserve-unknown-fields: true
                               description: |
                                 Section to configure rbd (Ceph) backends
-                      type: object
+                        signature:
+                          type: object
+                          properties:
+                            enabled:
+                              type: boolean
+                              description: |
+                                Enforce signature validation for images on upload. Upload of images without signature
+                                metadata is rejected. When image signature is not valid compute service will not allow
+                                to start instance and block storage service will not allow to create volumes.
+                            certificate_validation:
+                              type: boolean
+                              description: Enable certificate validation when verifying signatures.
                     database:
                       type: object
                       properties:
