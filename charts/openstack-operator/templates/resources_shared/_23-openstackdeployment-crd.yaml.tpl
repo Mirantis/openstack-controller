@@ -303,6 +303,16 @@ spec:
                                   description: >
                                     URL of the Vault server
                                   type: string
+                                namespace:
+                                  description: >
+                                    Vault Namespace to use for all requests to Vault.
+                                    This is available only in Vault Enterprise and
+                                    is supported only since OpenStack Victoria release.
+                                  type: string
+                                kv_mountpoint:
+                                  description: >
+                                    Mountpoint of KV store in Vault to use.
+                                  type: string
                                 use_ssl:
                                   description: >
                                     Specifies whether to use SSL
