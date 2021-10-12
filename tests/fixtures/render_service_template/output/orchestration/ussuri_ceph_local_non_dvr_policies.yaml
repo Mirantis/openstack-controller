@@ -12,6 +12,8 @@ spec:
           keystone_authtoken:
             memcache_secret_key: 7JNLzlMydG5nxe80
             memcache_security_strategy: ENCRYPT
+          clients_swift:
+            endpoint_type: public
           oslo_messaging_notifications:
             topics: notifications,stacklight_notifications
         logging:
