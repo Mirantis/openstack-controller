@@ -7,11 +7,11 @@ RUN apt-get update; \
     apt-get install -y \
         python3-distutils \
         build-essential \
-        python3.7-dev \
+        python3.8-dev \
         libffi-dev \
         libssl-dev \
         git; \
-    python3.7 /tmp/get-pip.py
+    python3.8 /tmp/get-pip.py
 ADD . /opt/operator
 RUN pip wheel --wheel-dir /opt/wheels --find-links /opt/wheels /opt/operator
 
@@ -29,9 +29,9 @@ ADD kopf-session-timeout.path /tmp/kopf-session-timeout.path
 RUN set -ex; \
     apt-get -q update; \
     apt-get install -q -y --no-install-recommends --no-upgrade \
-        python3.7 \
-        python3.7-dbg \
-        libpython3.7 \
+        python3.8 \
+        python3.8-dbg \
+        libpython3.8 \
         net-tools \
         gdb \
         patch \
@@ -42,9 +42,9 @@ RUN set -ex; \
     apt-get download python3-distutils; \
     dpkg-deb -x python3-distutils*.deb /; \
     rm -vf python3-distutils*.deb; \
-    python3.7 /tmp/get-pip.py; \
+    python3.8 /tmp/get-pip.py; \
     pip install --no-index --no-cache --find-links /opt/wheels openstack-controller; \
-    cd /usr/local/lib/python3.7/dist-packages; \
+    cd /usr/local/lib/python3.8/dist-packages; \
     patch -p1 < /tmp/kopf-session-timeout.path; \
     cd -
 RUN wget -q -O /usr/local/bin/helm3 ${HELM_BINARY}; \
