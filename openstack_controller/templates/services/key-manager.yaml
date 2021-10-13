@@ -124,6 +124,13 @@ spec:
     {%- if spec.features.barbican.backends.vault.ssl_ca_crt_file is defined %}
             ssl_ca_crt_file: {{ spec.features.barbican.backends.vault.ssl_ca_crt_file }}
     {%- endif %}
+    {%- if spec.features.barbican.backends.vault.kv_mountpoint is defined %}
+            kv_mountpoint: {{ spec.features.barbican.backends.vault.kv_mountpoint }}
+    {%- endif %}
+    {%- if spec.features.barbican.backends.vault.namespace is defined %}
+            namespace: {{ spec.features.barbican.backends.vault.namespace }}
+    {%- endif %}
+
 {%- else %}
           secretstore:
             enabled_secretstore_plugins: store_crypto
