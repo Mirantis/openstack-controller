@@ -202,6 +202,7 @@ spec:
               </VirtualHost>
       manifests:
         network_policy: false
+        job_credential_cleanup: false
 {%- if keystone_keycloak.get('enabled', False) %}
         job_federations_create: true
 {%- endif %}

@@ -175,6 +175,7 @@ spec:
           rabbit_init: rabbit-init:latest
           test: test:latest
       manifests:
+        job_credential_cleanup: false
         job_rabbit_init: false
         network_policy: false
         secret_ca_bundle: true

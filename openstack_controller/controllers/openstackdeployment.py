@@ -261,16 +261,23 @@ async def handle(body, meta, spec, logger, reason, **kwargs):
 
 @kopf.on.delete(*kube.OpenStackDeployment.kopf_on_args)
 @utils.collect_handler_metrics
-async def delete(name, logger, **kwargs):
+async def delete(name, meta, body, spec, logger, reason, **kwargs):
     # TODO(pas-ha) wait for children to be deleted
     # TODO(pas-ha) remove secrets and so on?
-    LOG.info(f"deleting {name}")
-
-    redis_failover = kube.find(
-        kube.RedisFailover,
-        "openstack-redis",
-        settings.OSCTL_REDIS_NAMESPACE,
-        silent=True,
-    )
-    if redis_failover:
-        redis_failover.delete()
+    LOG.info(f"Deleting {name}")
+    namespace = meta["namespace"]
+    osdplst = osdplstatus.OpenStackDeploymentStatus(name, namespace)
+    delete_services = layers.services(spec, logger, **kwargs)[0]
+    for service in delete_services:
+        LOG.info(f"Deleting {service} service")
+        task_def = {}
+        service_instance = services.registry[service](body, logger, osdplst)
+        task_def[
+            asyncio.create_task(
+                service_instance.delete(
+                    body=body, meta=meta, spec=spec, logger=logger, **kwargs
+                )
+            )
+        ] = (service_instance.delete, reason, body, meta, spec, logger, kwargs)
+        await run_task(task_def)
+    # TODO(dbiletskiy) delete osdpl status
