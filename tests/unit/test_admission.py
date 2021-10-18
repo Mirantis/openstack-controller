@@ -853,6 +853,33 @@ def test_nodes_features_cinder_keys(client):
     )
 
 
+def test_glance_signature(client):
+    req = copy.deepcopy(ADMISSION_REQ)
+    req["request"]["object"]["spec"]["features"]["glance"] = {
+        "signature": {"enabled": True}
+    }
+    response = client.simulate_post("/validate", json=req)
+    assert response.status == falcon.HTTP_OK
+    assert response.json["response"]["allowed"] is True
+
+    req["request"]["object"]["spec"]["features"]["glance"] = {
+        "signature": {"enabled": True, "certificate_validation": True}
+    }
+
+    response = client.simulate_post("/validate", json=req)
+    assert response.status == falcon.HTTP_OK
+    assert response.json["response"]["allowed"] is True
+
+    req["request"]["object"]["spec"]["features"]["glance"] = {
+        "signature": {"enabled": False, "certificate_validation": True}
+    }
+
+    response = client.simulate_post("/validate", json=req)
+    assert response.status == falcon.HTTP_OK
+    assert response.json["response"]["allowed"] is False
+    assert response.json["response"]["status"]["code"] == 400
+
+
 def test_glance_features_cinder_keys(client):
     req = copy.deepcopy(ADMISSION_REQ)
     req["request"]["object"]["spec"]["features"]["glance"] = {

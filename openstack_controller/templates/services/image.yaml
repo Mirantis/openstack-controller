@@ -9,6 +9,8 @@
 {%- set multi_backends = spec.get('features', {}).get('glance', {}).get('backends', {}) %}
 {%- set default_backend = namespace(name='') %}
 
+{%- set signature = spec.get('features', {}).get('glance', {}).get("signature", {"enabled": false}) %}
+
 spec:
   releases:
 {%- if 'image' in components_with_dedicated_messaging %}
@@ -89,6 +91,7 @@ spec:
     "test",
     "glance_registry",
     "glance_metadefs_load",
+    "glance_barbican_cert_init",
     "ks_user",] %}
         {%- if image in images %}
           {{ image }}: {{ images[image] }}
@@ -133,6 +136,11 @@ spec:
               properties:
                 os_distro: cirros
               source_url: {{ spec.artifacts.binary_base_url }}/openstack/bin/cirros/0.5.1/
+{%- if signature.enabled %}
+              signature:
+                enabled: true
+                hash_method: SHA-256
+{%- endif %}
             fedora:
               container_format: bare
               image_file: Fedora-Cloud-Base-27-1.6.x86_64.qcow2
@@ -143,6 +151,11 @@ spec:
               properties:
                 os_distro: fedora
               source_url: {{ spec.artifacts.binary_base_url }}/openstack/bin/Fedora/27/
+{%- if signature.enabled %}
+              signature:
+                enabled: true
+                hash_method: SHA-256
+{%- endif %}
             ubuntu:
               container_format: bare
               image_file: bionic-server-cloudimg-amd64.img
@@ -153,6 +166,11 @@ spec:
               properties:
                 os_distro: ubuntu
               source_url: {{ spec.artifacts.binary_base_url }}/openstack/bin/ubuntu/18.04/
+{%- if signature.enabled %}
+              signature:
+                enabled: true
+                hash_method: SHA-256
+{%- endif %}
             amphora-x64-haproxy:
               container_format: bare
               image_type: qcow2
@@ -163,6 +181,11 @@ spec:
               tags: ['amphora']
               source_url: {{ images["octavia_amphora"] }}
               checksum: {{ images["octavia_amphora_checksum"] }}
+{%- if signature.enabled %}
+              signature:
+                enabled: true
+                hash_method: SHA-256
+{%- endif %}
       conf:
         policy.d:
           01-controller-default.yaml: {{ service_policy }}
@@ -236,6 +259,9 @@ spec:
         job_rabbit_init: false
         job_storage_init: false
         secret_ca_bundle: true
+{%- if signature.enabled %}
+        job_barbican_cert_init: true
+{%- endif %}
       network:
         proxy:
 {% include 'base/_proxy_vars.yaml' %}

@@ -49,3 +49,14 @@ class GlanceValidator(base.BaseValidator):
             raise exception.OsDplValidationFailed(
                 "Glance cinder backend should have at least one default backend."
             )
+
+        if (
+            glance_features.get("signature", {}).get(
+                "certificate_validation", False
+            )
+            and glance_features.get("signature", {}).get("enabled", False)
+            == False
+        ):
+            raise exception.OsDplValidationFailed(
+                "The certificate validation might be enabled only with signature validation."
+            )

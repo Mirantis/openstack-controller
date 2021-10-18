@@ -22,6 +22,8 @@
   {%- endif %}
 {%- endfor %}
 
+{%- set signature = spec.get('features', {}).get('glance', {}).get("signature", {"enabled": false}) %}
+
 {%- set ceph_enabled = spec.get('features', {}).get('nova', {}).get('images', {}).get('backend') == 'ceph' or spec.get('features', {}).get('cinder', {}).get('volume', {}).get('backend') == 'ceph' %}
 {%- set ephemeral_encryption = spec.get('features', {}).get('nova', {}).get('images', {}).get("encryption", {}) %}
 
@@ -525,6 +527,11 @@ spec:
             # deployed as well.
             default_schedule_zone: nova
             allow_resize_to_same_host: true
+{%- if signature.enabled %}
+          glance:
+            verify_glance_signatures: true
+            enable_certificate_validation: {{ signature.get("certificate_validation", false) }}
+{%- endif %}
           cache:
             backend: oslo_cache.memcache_pool
           keystone_authtoken:
