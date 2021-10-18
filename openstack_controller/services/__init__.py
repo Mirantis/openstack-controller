@@ -129,6 +129,18 @@ class Redis(Service):
         )
         self.set_children_status(True)
 
+    async def delete(self, **kwargs):
+        name = "openstack-{0}".format(self.service)
+        namespace = settings.OSCTL_REDIS_NAMESPACE
+        redis_failover = kube.find(
+            kube.RedisFailover,
+            name,
+            namespace,
+            silent=True,
+        )
+        if redis_failover:
+            redis_failover.delete()
+
 
 class MariaDB(Service):
     service = "database"
