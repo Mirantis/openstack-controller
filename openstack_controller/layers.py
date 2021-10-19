@@ -271,6 +271,10 @@ def merge_spec(spec, logger):
             openstack_version=os_release,
             openstack_namespace=settings.OSCTL_OS_DEPLOYMENT_NAMESPACE,
             services=spec.get("features", {}).get("services", []),
+            signature_enabled=spec.get("features", {})
+            .get("glance", {})
+            .get("signature", {})
+            .get("enabled", False),
             ironic_mt_enabled=spec.get("features", {})
             .get("ironic", {})
             .get("networks", {})
