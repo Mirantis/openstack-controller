@@ -24,7 +24,7 @@ spec:
           mapped:
             remote_id_attribute: HTTP_OIDC_ISS
           auth:
-            methods: password,token,mapped
+            methods: password,token,mapped,application_credential
           identity:
             driver: sql
             default_domain_id: default
