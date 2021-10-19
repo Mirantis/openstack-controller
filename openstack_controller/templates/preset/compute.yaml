@@ -307,6 +307,33 @@ services:
             # Skip because of PRODX-9184 has won't fix resolution. Should be executed only for victoria environments.
             - (?:octavia_tempest_plugin.tests.scenario.v2.test_traffic_ops.TrafficOperationsScenarioTest.test_basic_traffic)
           {%- endif %}
+          {%- if signature_enabled %}
+            # Skip TEST failed, that doesn't work with static accounts correctly
+            # TODO(vsaienko): remove when PRODX-18761 is fixed
+            - (?:tempest.api.compute.servers.test_server_actions.ServerActionsTestJSON.test_shelve_unshelve_server)
+            - (?:tempest.api.compute.servers.test_servers_negative.ServersNegativeTestJSON.test_shelve_shelved_server)
+            # TODO(vsaienko): remove when PRODX-18762 is fixed
+            - (?:tempest.api.compute.servers.test_servers_negative.ServersNegativeTestMultiTenantJSON.test_delete_a_server_of_another_tenant)
+            - (?:tempest.api.compute.servers.test_servers_negative.ServersNegativeTestMultiTenantJSON.test_update_server_of_another_tenant)
+            - (?:tempest.api.image.v2.test_images_member.ImagesMemberTest.test_image_share_accept)
+            - (?:tempest.api.image.v2.test_images_member.ImagesMemberTest.test_image_share_reject)
+            - (?:tempest.api.image.v2.test_images_member.ImagesMemberTest.test_remove_image_member)
+            - (?:tempest.api.image.v2.test_images_member_negative.ImagesMemberNegativeTest.test_image_share_owner_cannot_accept)
+            - (?:tempest.api.network.admin.test_floating_ips_admin_actions.FloatingIPAdminTestJSON.test_list_floating_ips_from_admin_and_nonadmin)
+            - (?:designate_tempest_plugin.tests.api.v2.test_recordset.RecordsetOwnershipTest.test_no_create_recordset_via_alt_domain)
+            - (?:designate_tempest_plugin.tests.api.v2.test_recordset.RecordsetOwnershipTest.test_no_create_super_recordsets)
+            - (?:designate_tempest_plugin.tests.api.v2.test_zones.ZoneOwnershipTest.test_no_create_subdomain_by_alt_user)
+            - (?:designate_tempest_plugin.tests.api.v2.test_zones.ZoneOwnershipTest.test_no_create_superdomain_by_alt_user)
+            - (?:designate_tempest_plugin.tests.scenario.v2.test_zones_transfer.ZonesTransferTest.test_zone_transfer)
+            # TODO(vsaienko): remove when PRODX-18763 is fixed
+            - (?:neutron_tempest_plugin.api.admin.test_networks.NetworksTestAdmin.test_create_network_with_project)
+            - (?:neutron_tempest_plugin.api.admin.test_networks.NetworksTestAdmin.test_create_network_with_project_and_tenant)
+            - (?:neutron_tempest_plugin.api.test_security_groups.SecGroupQuotaTest.test_create_sg_when_quota_disabled)
+            - (?:neutron_tempest_plugin.api.test_security_groups.SecGroupRulesQuotaTest.test_create_sg_rules_when_quota_disabled)
+            - (?:neutron_tempest_plugin.api.test_security_groups.SecGroupTest.test_list_security_group_rules_contains_all_rules)
+            - (?:neutron_tempest_plugin.api.test_security_groups_negative.NegativeSecGroupQuotaTest.test_create_excess_sg)
+            - (?:neutron_tempest_plugin.api.test_security_groups_negative.NegativeSecGroupRulesQuotaTest.test_sg_creation_with_insufficient_sg_rules_quota)
+          {%- endif %}
           script: |
             tempest run --config-file /etc/tempest/tempest.conf -w 4 --smoke --blacklist-file  /etc/tempest/test-blacklist
           tempest:
