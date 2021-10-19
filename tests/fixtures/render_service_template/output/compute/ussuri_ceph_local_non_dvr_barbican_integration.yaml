@@ -78,6 +78,16 @@ spec:
           glance:
             verify_glance_signatures: true
             enable_certificate_validation: true
+        nova_ironic:
+          DEFAULT:
+            compute_driver: ironic.IronicDriver
+            reserved_host_cpu: 0
+            reserved_host_disk_mb: 0
+            reserved_host_memory_mb: 0
+          filter_scheduler:
+            track_instance_changes: false
+          scheduler:
+            discover_hosts_in_cells_interval: 120
         ssh_private: 'COMPUTE TEST SSH PRIVATE KEY
 
           '
@@ -354,6 +364,7 @@ spec:
       manifests:
         deployment_consoleauth: false
         deployment_placement: false
+        statefulset_compute_ironic: true
         ingress_placement: false
         job_db_init_placement: false
         job_ks_placement_endpoints: false

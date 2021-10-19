@@ -5,12 +5,7 @@ spec:
     values:
       bootstrap:
         image:
-          source_base: https://binary.mirantis.com/openstack/bin/ironic/tinyipa
-          structured:
-            ironic-agent.initramfs:
-              source: tinyipa-stable-ussuri-20201008064914.gz
-            ironic-agent.kernel:
-              source: tinyipa-stable-ussuri-20201008064914.vmlinuz
+          enabled: false
         object_store:
           enabled: false
       conf:

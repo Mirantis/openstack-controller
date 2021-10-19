@@ -122,13 +122,8 @@ spec:
         object_store:
           enabled: false
         image:
-          {%- set agent_images = spec.features.ironic.get('agent_images', {}) %}
-          source_base: {{ agent_images.get('base_url', default_binary_base_url ~ '/openstack/bin/ironic/tinyipa') }}
-          structured:
-            ironic-agent.initramfs:
-              source: {{ agent_images.get('initramfs', 'tinyipa-stable-' ~ spec.openstack_version ~ '.gz') }}
-            ironic-agent.kernel:
-              source: {{ agent_images.get('kernel', 'tinyipa-stable-' ~ spec.openstack_version ~ '.vmlinuz') }}
+          # NOTE(vsaienko): image creation is moved to glance to support singed image upload.
+          enabled: false
       network:
         proxy:
 {% include 'base/_proxy_vars.yaml' %}
