@@ -2,6 +2,7 @@
 #kind: HelmBundle
 
 {%- set service = 'tempest' %}
+{%- set signature = spec.get('features', {}).get('glance', {}).get("signature", {"enabled": false}) %}
 
 spec:
   releases:
@@ -16,6 +17,7 @@ spec:
     "dep_check",
     "image_repo_sync",
     "bootstrap",
+    "tempest_static_accounts",
     "tempest-uuids-init",] %}
         {%- if image in images %}
           {{ image }}: {{ images[image] }}
@@ -24,6 +26,9 @@ spec:
       manifests:
         network_policy: false
         secret_ca_bundle: true
+{%- if signature.enabled %}
+        job_static_accounts: true
+{%- endif %}
       pod:
         replicas:
           server: 1
