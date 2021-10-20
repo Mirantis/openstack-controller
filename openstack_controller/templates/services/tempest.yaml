@@ -140,4 +140,11 @@ spec:
             --network tempest-fixed-net
 {%- endif %}
       conf:
+        convert_to_uuid:
+          identity:
+{%- if signature.enabled %}
+            default_domain_id: tempest
+{%- else %}
+            default_domain_id: Default
+{%- endif %}
         tempest: {{ spec | generate_tempest_config(helmbundles_body) }}

@@ -357,6 +357,7 @@ services:
             - (?:tempest.api.compute.servers.test_server_actions.ServerActionsTestJSON.test_shelve_unshelve_server)
             - (?:tempest.api.compute.servers.test_servers_negative.ServersNegativeTestJSON.test_shelve_shelved_server)
             # TODO(vsaienko): remove when PRODX-18762 is fixed
+            - (?:tempest.api.identity.v3.test_projects.IdentityV3ProjectsTest.test_list_projects_returns_only_authorized_projects)
             - (?:tempest.api.compute.servers.test_servers_negative.ServersNegativeTestMultiTenantJSON.test_delete_a_server_of_another_tenant)
             - (?:tempest.api.compute.servers.test_servers_negative.ServersNegativeTestMultiTenantJSON.test_update_server_of_another_tenant)
             - (?:tempest.api.image.v2.test_images_member.ImagesMemberTest.test_image_share_accept)
