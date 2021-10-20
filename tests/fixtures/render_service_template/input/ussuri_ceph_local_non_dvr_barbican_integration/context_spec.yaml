@@ -24,6 +24,11 @@ features:
   messaging:
     components_with_dedicated_messaging:
     - networking
+  ironic:
+    agent_images:
+      base_url: https://binary.mirantis.com/openstack/bin/ironic/tinyipa
+      initramfs: tinyipa-stable-ussuri-20201008064914.gz
+      kernel: tinyipa-stable-ussuri-20201008064914.vmlinuz
   neutron:
     backend: ml2
     dns_servers:
@@ -74,6 +79,7 @@ features:
   - key-manager
   - redis
   - instance-ha
+  - baremetal
   ssl:
     public_endpoints:
       api_cert: "TEST CRT"

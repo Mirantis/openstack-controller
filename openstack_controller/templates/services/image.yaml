@@ -186,6 +186,32 @@ spec:
                 enabled: true
                 hash_method: SHA-256
 {%- endif %}
+{%- if "baremetal" in spec.features.services %}
+  {%- set ironic_agent_images = spec.features.ironic.get('agent_images', {}) %}
+  {%- set ironic_images_base_url = ironic_agent_images.get('base_url', spec.artifacts.binary_base_url ~ '/openstack/bin/ironic/tinyipa') %}
+            ironic-agent.kernel:
+              container_format: aki
+              image_type: aki
+              name: ironic-agent.kernel
+              private: true
+              source_url: {{ironic_images_base_url}}/{{ ironic_agent_images.get('kernel', 'tinyipa-stable-' ~ spec.openstack_version ~ '.vmlinuz') }}
+  {%- if signature.enabled %}
+              signature:
+                enabled: true
+                hash_method: SHA-256
+  {%- endif %}
+            ironic-agent.initramfs:
+              container_format: ari
+              image_type: ari
+              name: ironic-agent.initramfs
+              private: true
+              source_url: {{ironic_images_base_url}}/{{ ironic_agent_images.get('initramfs', 'tinyipa-stable-' ~ spec.openstack_version ~ '.gz') }}
+  {%- if signature.enabled %}
+              signature:
+                enabled: true
+                hash_method: SHA-256
+  {%- endif %}
+{%- endif %}
       conf:
         policy.d:
           01-controller-default.yaml: {{ service_policy }}
