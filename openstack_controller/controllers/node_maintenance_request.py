@@ -58,7 +58,7 @@ async def _make_state_transition(new_state, nwl, node, retry):
         args = [
             ORDERED_SERVICES,
             ["remove_node_from_scheduling", "prepare_for_node_reboot"],
-            node.obj["metadata"],
+            node,
         ]
         states = {
             "prepare": "prepare_inactive",
@@ -68,7 +68,7 @@ async def _make_state_transition(new_state, nwl, node, retry):
         args = [
             list(reversed(ORDERED_SERVICES)),
             ["prepare_node_after_reboot", "add_node_to_scheduling"],
-            node.obj["metadata"],
+            node,
         ]
         states = {
             "prepare": "prepare_active",
