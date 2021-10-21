@@ -1,88 +1,5 @@
 spec:
   releases:
-  - chart: osh-infra/rabbitmq
-    name: openstack-nova-rabbitmq
-    values:
-      conf:
-        aux_conf:
-          policies:
-          - definition:
-              message-ttl: 120000
-            name: default-policy
-            pattern: ^(?!amq\.).*
-            vhost: nova
-          - definition:
-              expires: 3600000
-            name: results_expire
-            pattern: ^results\.
-            priority: 1
-            vhost: nova
-          - definition:
-              expires: 3600000
-            name: tasks_expire
-            pattern: ^tasks\.
-            priority: 1
-            vhost: nova
-        prometheus_exporter:
-          rabbit_exporters: overview,exchange,node
-        users:
-          nova:
-            auth:
-              service_user:
-                password: tuzgvismPceyDLXGeq1cpQcDIQDwIyhr
-                username: nova27zb
-            path: /nova
-      endpoints:
-        cluster_domain_suffix: cluster.local
-        oslo_messaging:
-          auth:
-            admin:
-              password: 2tnAuP0j9MsgaVHErehZkC5HCK3ZxYLr
-              username: rabbitmq
-            nova:
-              password: tuzgvismPceyDLXGeq1cpQcDIQDwIyhr
-              username: nova27zb
-            user:
-              password: 2tnAuP0j9MsgaVHErehZkC5HCK3ZxYLr
-              username: rabbitmq
-          hosts:
-            default: rabbitmq-nova
-          path: /nova
-          statefulset:
-            name: openstack-nova-rabbitmq-rabbitmq
-            replicas: 1
-        prometheus_rabbitmq_exporter:
-          hosts:
-            default: rabbitmq-exporter-nova
-      images:
-        tags:
-          dep_check: dep-check:latest
-          image_repo_sync: image-repo-sync:latest
-          prometheus_rabbitmq_exporter: prometheus-rabbitmq-exporter:latest
-          prometheus_rabbitmq_exporter_helm_tests: prometheus-rabbitmq-exporter-helm-tests:latest
-          rabbitmq: rabbitmq:latest
-          rabbitmq_init: rabbitmq-init:latest
-          rabbitmq_scripted_test: rabbitmq-scripted-test:latest
-      manifests:
-        job_users_create: true
-        network_policy: false
-      monitoring:
-        prometheus:
-          enabled: true
-      pod:
-        replicas:
-          server: 1
-        probes:
-          server:
-            rabbitmq:
-              readiness:
-                periodSeconds: 60
-                timeoutSeconds: 30
-              liveness:
-                periodSeconds: 60
-                timeoutSeconds: 30
-      volume:
-        enabled: false
   - chart: osh-infra/libvirt
     name: openstack-libvirt
     values:
@@ -143,8 +60,6 @@ spec:
           keystone_authtoken:
             memcache_secret_key: JinzIdQzLdIslgxu
             memcache_security_strategy: ENCRYPT
-          notifications:
-            notify_on_state_change: vm_and_task_state
           os_vif_ovs:
             isolate_vif: true
           libvirt:
@@ -327,14 +242,11 @@ spec:
               password: 2tnAuP0j9MsgaVHErehZkC5HCK3ZxYLr
               username: rabbitmq
           hosts:
-            default: rabbitmq-nova
+            default: rabbitmq
           path: /nova
           statefulset:
-            name: openstack-nova-rabbitmq-rabbitmq
+            name: openstack-rabbitmq-rabbitmq
             replicas: 1
-        prometheus_rabbitmq_exporter:
-          hosts:
-            default: rabbitmq-exporter-nova
         oslo_messaging_notifications:
           auth:
             nova:
@@ -433,18 +345,17 @@ spec:
           restartPolicy: Never
         db_purge:
           enabled: true
-          cron: "1 0 * * 1"
+          cron: "1 2 3 4 5"
           script:
             config:
-              age: 30
-              max_rows: 1000
+              age: 1
+              max_rows: 2
       labels:
         agent:
           compute_ironic:
             node_selector_key: openstack-control-plane
             node_selector_value: enabled
       manifests:
-        cron_job_db_purge: true
         deployment_consoleauth: false
         deployment_placement: false
         ingress_placement: false
@@ -459,6 +370,7 @@ spec:
         secret_keystone_placement: false
         service_ingress_placement: false
         service_placement: false
+        cron_job_db_purge: true
       network:
         core_plugin: ml2
         sshd:

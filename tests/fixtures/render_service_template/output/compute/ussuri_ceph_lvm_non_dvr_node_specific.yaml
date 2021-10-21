@@ -344,12 +344,20 @@ spec:
           restartPolicy: Never
         ks_user:
           restartPolicy: Never
+        db_purge:
+          enabled: true
+          cron: "1 0 * * 1"
+          script:
+            config:
+              age: 30
+              max_rows: 1000
       labels:
         agent:
           compute_ironic:
             node_selector_key: openstack-control-plane
             node_selector_value: enabled
       manifests:
+        cron_job_db_purge: true
         deployment_consoleauth: false
         deployment_placement: false
         ingress_placement: false

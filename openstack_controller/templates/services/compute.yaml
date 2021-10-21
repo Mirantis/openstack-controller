@@ -26,6 +26,7 @@
 
 {%- set ceph_enabled = spec.get('features', {}).get('nova', {}).get('images', {}).get('backend') == 'ceph' or spec.get('features', {}).get('cinder', {}).get('volume', {}).get('backend') == 'ceph' %}
 {%- set ephemeral_encryption = spec.get('features', {}).get('nova', {}).get('images', {}).get("encryption", {}) %}
+{%- set nova_db_cleanup = spec.get('features', {}).get('database', {}).get('cleanup', {}).get('nova', {'enabled': true}) %}
 
 spec:
   releases:
@@ -322,6 +323,7 @@ spec:
             jobs:
               - openstack-mariadb-cluster-wait
       manifests:
+        cron_job_db_purge: {{ nova_db_cleanup.enabled }}
         network_policy: false
         job_rabbit_init: false
 {%- if spec.openstack_version not in ['queens', 'rocky'] %}
@@ -620,4 +622,13 @@ spec:
           enabled: true
       jobs:
 {% include 'base/_ks_jobs.yaml' %}
+{%- if nova_db_cleanup.enabled %}
+        db_purge:
+          enabled: {{ nova_db_cleanup.enabled }}
+          cron: {{ nova_db_cleanup.get("schedule", "1 0 * * 1") }}
+          script:
+            config:
+              age: {{ nova_db_cleanup.get("age", 30) }}
+              max_rows: {{ nova_db_cleanup.get("max_rows", 1000) }}
+{%- endif %}
 {%- endif %}
