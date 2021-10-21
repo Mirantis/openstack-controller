@@ -445,6 +445,14 @@ class NodeWorkloadLock(pykube.objects.APIObject, HelmBundleMixin):
         name = cls._lock_name(node)
         return find(cls, name, silent=True)
 
+    @classmethod
+    def get_all(cls):
+        return (
+            o
+            for o in cls.objects(api)
+            if o.obj["spec"]["controllerName"] == cls.workload
+        )
+
     @staticmethod
     def required_for_node(node: Node) -> bool:
         for role in (const.NodeRole.compute, const.NodeRole.gateway):

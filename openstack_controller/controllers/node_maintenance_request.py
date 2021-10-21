@@ -113,6 +113,11 @@ async def node_maintenance_request_change_handler(body, retry, **kwargs):
 
     nwl = kube.NodeWorkloadLock.ensure(node_name)
 
+    if any(not nwl.is_active() for nwl in kube.NodeWorkloadLock.get_all()):
+        raise kopf.TemporaryError(
+            f"Inactive NodeWorkloadLocks for openstack detected, "
+            f"deferring processing for node {node.name}"
+        )
     if nwl.is_active():
         await _make_state_transition(MAINTENANCE, nwl, node, retry)
 
