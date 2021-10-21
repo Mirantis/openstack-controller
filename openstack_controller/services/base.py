@@ -635,19 +635,19 @@ class Service:
         )
 
     @classmethod
-    async def remove_node_from_scheduling(cls, node_metadata):
+    async def remove_node_from_scheduling(cls, node):
         pass
 
     @classmethod
-    async def prepare_for_node_reboot(cls, node_metadata):
+    async def prepare_for_node_reboot(cls, node):
         pass
 
     @classmethod
-    async def prepare_node_after_reboot(cls, node_metadata):
+    async def prepare_node_after_reboot(cls, node):
         pass
 
     @classmethod
-    async def add_node_to_scheduling(cls, node_metadata):
+    async def add_node_to_scheduling(cls, node):
         pass
 
     def healthy(self, statuses):

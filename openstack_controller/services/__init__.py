@@ -1230,21 +1230,22 @@ class Nova(OpenStackServiceWithCeph):
             await child_obj.enable(self.openstack_version, True)
 
     @classmethod
-    async def remove_node_from_scheduling(cls, node_metadata):
-        node_name = node_metadata["name"]
+    async def remove_node_from_scheduling(cls, node):
+        if not node.has_role(constants.NodeRole.compute):
+            return
         openstack_connection = await openstack_utils.get_openstack_connection()
         try:
             target_service = openstack_utils.get_single_service(
-                openstack_connection, host=node_name
+                openstack_connection, host=node.name
             )
             if target_service and target_service["state"] == "up":
                 openstack_connection.compute.disable_service(
-                    target_service["id"], node_name, "nova-compute"
+                    target_service["id"], node.name, "nova-compute"
                 )
 
                 def wait_for_service_disabled():
                     service = openstack_utils.get_single_service(
-                        openstack_connection, host=node_name
+                        openstack_connection, host=node.name
                     )
                     if service and service["status"] == "disabled":
                         return service
@@ -1266,12 +1267,13 @@ class Nova(OpenStackServiceWithCeph):
             )
 
     @classmethod
-    async def prepare_for_node_reboot(cls, node_metadata):
-        node_name = node_metadata["name"]
+    async def prepare_for_node_reboot(cls, node):
+        if not node.has_role(constants.NodeRole.compute):
+            return
         openstack_connection = await openstack_utils.get_openstack_connection()
         try:
             target_service = openstack_utils.get_single_service(
-                openstack_connection, host=node_name
+                openstack_connection, host=node.name
             )
             if target_service and target_service["state"] == "up":
                 migrate_func = openstack_connection.compute.live_migrate_server
@@ -1284,14 +1286,14 @@ class Nova(OpenStackServiceWithCeph):
                 migrate_func = openstack_connection.compute.evacuate_server
             servers_to_migrate = list(
                 openstack_connection.compute.servers(
-                    details=False, all_projects=True, host=node_name
+                    details=False, all_projects=True, host=node.name
                 )
             )
             await openstack_utils.migrate_servers(
                 openstack_connection=openstack_connection,
                 migrate_func=migrate_func,
                 servers=servers_to_migrate,
-                migrating_off=node_name,
+                migrating_off=node.name,
                 concurrency=settings.OSCTL_MIGRATE_CONCURRENCY,
             )
         except exceptions.SDKException as e:
@@ -1301,14 +1303,16 @@ class Nova(OpenStackServiceWithCeph):
             )
 
     @classmethod
-    async def prepare_node_after_reboot(cls, node_metadata):
-        node_name = node_metadata["name"]
+    async def prepare_node_after_reboot(cls, node):
+        if not node.has_role(constants.NodeRole.compute):
+            return
+
         openstack_connection = await openstack_utils.get_openstack_connection()
         try:
 
             def wait_for_service_found():
                 return openstack_utils.get_single_service(
-                    openstack_connection, host=node_name
+                    openstack_connection, host=node.name
                 )
 
             try:
@@ -1339,7 +1343,7 @@ class Nova(OpenStackServiceWithCeph):
                 "added compute host"
             )
         job = await openstack_utils.find_nova_cell_setup_cron_job(
-            node_uid=node_metadata["uid"]
+            node_uid=node.metadata["uid"]
         )
         kopf.adopt(job, osdpl.obj)
         kube_job = kube.Job(kube.api, job)
@@ -1366,22 +1370,23 @@ class Nova(OpenStackServiceWithCeph):
             )
 
     @classmethod
-    async def add_node_to_scheduling(cls, node_metadata):
-        node_name = node_metadata["name"]
+    async def add_node_to_scheduling(cls, node):
+        if not node.has_role(constants.NodeRole.compute):
+            return
         openstack_connection = await openstack_utils.get_openstack_connection()
         try:
             service = openstack_utils.get_single_service(
-                openstack_connection, host=node_name
+                openstack_connection, host=node.name
             )
             # Enable service, in case this is a compute that was previously
             # removed and now is being added back
             openstack_connection.compute.enable_service(
-                service["id"], node_name, "nova-compute"
+                service["id"], node.name, "nova-compute"
             )
 
             def wait_for_service_enabled():
                 service = openstack_utils.get_single_service(
-                    openstack_connection, host=node_name
+                    openstack_connection, host=node.name
                 )
                 if service and service["status"] == "enabled":
                     return service
