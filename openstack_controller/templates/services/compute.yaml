@@ -154,6 +154,7 @@ spec:
     "nova_db_sync_online",
     "nova_db_sync_db",
     "nova_db_sync_api",
+    "nova_db_purge",
     "db_drop",
     "bootstrap",
     "image_repo_sync",

@@ -58,7 +58,7 @@ spec:
           heat_db_sync: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/heat:stein-bionic-20190827193015
           heat_engine: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/heat:stein-bionic-20190827193015
           heat_engine_cleaner: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/heat:stein-bionic-20190827193015
-          heat_purge_deleted: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/heat:stein-bionic-20190827193015
+          heat_db_purge: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/heat:stein-bionic-20190827193015
           horizon: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/horizon:stein-bionic-20190827193015
           horizon_db_sync: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/horizon:stein-bionic-20190827193015
           image_repo_sync: docker.io/docker:17.07.0
@@ -171,7 +171,7 @@ spec:
           heat_db_sync: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/heat:stein-bionic-20190827193015
           heat_engine: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/heat:stein-bionic-20190827193015
           heat_engine_cleaner: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/heat:stein-bionic-20190827193015
-          heat_purge_deleted: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/heat:stein-bionic-20190827193015
+          heat_db_purge: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/heat:stein-bionic-20190827193015
           horizon: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/horizon:stein-bionic-20190827193015
           horizon_db_sync: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/horizon:stein-bionic-20190827193015
           image_repo_sync: docker.io/docker:17.07.0
