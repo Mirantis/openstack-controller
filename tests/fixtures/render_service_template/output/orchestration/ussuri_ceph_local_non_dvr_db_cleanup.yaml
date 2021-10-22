@@ -6,8 +6,7 @@ spec:
       conf:
         policy.d:
           01-controller-default.yaml: {'orchestration_rule1': 'orchestration_value1'}
-          02-custom.yaml:
-            heat_custom: value
+          02-custom.yaml: {}
         heat:
           keystone_authtoken:
             memcache_secret_key: 7JNLzlMydG5nxe80
@@ -192,16 +191,16 @@ spec:
           restartPolicy: Never
         db_purge:
           enabled: true
-          cron: "1 4 * * 1"
+          cron: "1 2 3 4 5"
           script:
             config:
-              age: 30
+              age: 1
               granularity: days
-              batch_size: 10
+              batch_size: 2
       manifests:
-        cron_job_db_purge: true
         job_rabbit_init: false
         network_policy: false
         secret_ca_bundle: true
+        cron_job_db_purge: true
       network:
         core_plugin: ml2

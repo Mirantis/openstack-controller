@@ -26,6 +26,17 @@ features:
         enabled: true
         age: 1
         schedule: "1 2 3 4 5"
+      glance:
+        enabled: true
+        age: 1
+        schedule: "1 2 3 4 5"
+        max_rows: 2
+      heat:
+        enabled: true
+        age: 1
+        schedule: "1 2 3 4 5"
+        granularity: days
+        batch_size: 2
   glance:
     backend: ceph
   messaging:
