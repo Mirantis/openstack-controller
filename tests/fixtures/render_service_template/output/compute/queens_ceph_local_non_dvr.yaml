@@ -348,6 +348,13 @@ spec:
           restartPolicy: Never
         ks_user:
           restartPolicy: Never
+        db_purge:
+          enabled: true
+          cron: "1 0 * * 1"
+          script:
+            config:
+              age: 30
+              max_rows: 1000
       labels:
         agent:
           compute_ironic:
@@ -357,6 +364,7 @@ spec:
         job_rabbit_init: false
         network_policy: false
         secret_ca_bundle: true
+        cron_job_db_purge: true
       network:
         core_plugin: ml2
         sshd:

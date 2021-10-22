@@ -1,0 +1,5 @@
+---
+features:
+  - Add support of periodic cleanup of openstack databases for
+    the following services
+    * nova
