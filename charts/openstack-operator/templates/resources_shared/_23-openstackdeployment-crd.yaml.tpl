@@ -242,6 +242,22 @@ spec:
                                 max_rows:
                                   type: integer
                                   description: The batch size for each iteration.
+                            cinder:
+                              type: object
+                              required:
+                                - enabled
+                              properties:
+                                enabled:
+                                  type: boolean
+                                  description: Enable periodic cleanup of database for Nova.
+                                schedule:
+                                  type: string
+                                  description: Cron schedule for periodic cleanup.
+                                age:
+                                  type: integer
+                                  description: |
+                                    Number of days to keep deleted entries. When set to 0 all entries from shadow tables
+                                    are deleted.
                         backup:
                           type: object
                           required:
