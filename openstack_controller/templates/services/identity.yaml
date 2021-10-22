@@ -161,7 +161,7 @@ spec:
 {%- if keystone_keycloak.get('enabled', False) %}
               OIDCClaimPrefix "OIDC-"
               OIDCResponseType "id_token"
-              OIDCScope "openid email profile"
+              OIDCScope "{{ keystone_keycloak.get('oidc',{}).get('OIDCScope', 'openid email profile') }}"
               OIDCProviderMetadataURL {{ keystone_keycloak.get('oidc', {}).get('OIDCProviderMetadataURL', keystone_keycloak.url + "/auth/realms/iam/.well-known/openid-configuration")}}
               OIDCOAuthVerifyJwksUri {{ keystone_keycloak.get('oidc', {}).get('OIDCProviderMetadataURL', keystone_keycloak.url + "/auth/realms/iam/protocol/openid-connect/certs")}}
               OIDCClientID {{ keystone_keycloak.get('oidc', {}).get('OIDCClientID', "os") }}

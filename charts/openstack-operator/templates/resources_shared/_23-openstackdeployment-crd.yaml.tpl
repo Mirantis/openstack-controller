@@ -494,6 +494,9 @@ spec:
                                   description: >
                                     Define one or more regular expressions that specify URLs (or domains) allowed for post logout and
                                     other redirects such as the "return_to" value on refresh token requests
+                                OIDCScope:
+                                   type: string
+                                   description: Used to request specific scopes
                         domain_specific_configuration:
                           type: object
                           properties:
