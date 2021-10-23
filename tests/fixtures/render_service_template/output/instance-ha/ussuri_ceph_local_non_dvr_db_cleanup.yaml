@@ -145,11 +145,11 @@ spec:
           restartPolicy: Never
         db_purge:
           enabled: true
-          cron: "1 3 * * 1"
+          cron: "1 2 3 4 5"
           script:
             config:
-              age: 30
-              max_rows: 1000
+              age: 1
+              max_rows: 2
       manifests:
         cron_job_db_purge: true
         job_rabbit_init: false

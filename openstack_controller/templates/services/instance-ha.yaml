@@ -7,6 +7,7 @@
 {%- set notification_topics = ['notifications'] %}
 {%- do notification_topics.append('stacklight_notifications') if stacklight_enabled %}
 {%- set components_with_dedicated_messaging = spec.get('features', {}).get('messaging', {}).get('components_with_dedicated_messaging', []) %}
+{%- set masakari_db_cleanup = spec.get('features', {}).get('database', {}).get('cleanup', {}).get('masakari', {'enabled': true}) %}
 
 spec:
   releases:
@@ -108,6 +109,7 @@ spec:
             jobs:
               - openstack-mariadb-cluster-wait
       manifests:
+        cron_job_db_purge: {{ masakari_db_cleanup.enabled }}
         network_policy: false
         job_rabbit_init: false
         secret_ca_bundle: true
@@ -165,3 +167,12 @@ spec:
             public: https
       jobs:
 {% include 'base/_ks_jobs.yaml' %}
+{%- if masakari_db_cleanup.enabled %}
+        db_purge:
+          enabled: {{ masakari_db_cleanup.enabled }}
+          cron: {{ masakari_db_cleanup.get("schedule", "1 3 * * 1") }}
+          script:
+            config:
+              age: {{ masakari_db_cleanup.get("age", 30) }}
+              max_rows: {{ masakari_db_cleanup.get("batch", 1000) }}
+{%- endif %}

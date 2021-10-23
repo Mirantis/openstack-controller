@@ -6,6 +6,7 @@
 {%- set stacklight_enabled = spec.get('features', {}).get('stacklight', {}).get('enabled', False) %}
 {%- set notification_topics = ['notifications'] %}
 {%- do notification_topics.append('stacklight_notifications') if stacklight_enabled %}
+{%- set barbican_db_cleanup = spec.get('features', {}).get('database', {}).get('cleanup', {}).get('barbican', {'enabled': true}) %}
 
 spec:
   releases:
@@ -143,6 +144,7 @@ spec:
           logger_barbican:
             level: {{ spec.get('features', {}).get('logging', {}).get('barbican', {}).get('level', 'INFO') }}
       manifests:
+        cron_job_db_purge: {{ barbican_db_cleanup.enabled }}
         network_policy: false
         job_rabbit_init: false
         secret_ca_bundle: true
@@ -200,4 +202,12 @@ spec:
             public: https
       jobs:
 {% include 'base/_ks_jobs.yaml' %}
+{%- if barbican_db_cleanup.enabled %}
+        db_purge:
+          enabled: {{ barbican_db_cleanup.enabled }}
+          cron: {{ barbican_db_cleanup.get("schedule", "1 4 * * 1") }}
+          script:
+            config:
+              age: {{ barbican_db_cleanup.get("age", 30) }}
+{%- endif %}
 {%- endif %}

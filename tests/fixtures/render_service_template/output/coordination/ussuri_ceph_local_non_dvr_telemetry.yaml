@@ -1,1 +1,20 @@
-./ussuri_ceph_local_non_dvr.yaml
+spec:
+  releases:
+  - chart: osh-infra/etcd
+    name: etcd
+    values:
+      endpoints:
+        cluster_domain_suffix: cluster.local
+      images:
+        tags:
+          dep_check: dep-check:latest
+          etcd: etcd:latest
+          etcd_db_compact: etcd-db-compact:latest
+          image_repo_sync: image-repo-sync:latest
+      manifests:
+        cron_job_db_compact: true
+      pod:
+        replicas:
+          etcd: 3
+      volume:
+        class_name: lvp-fake-root

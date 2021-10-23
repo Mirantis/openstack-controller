@@ -1,23 +1,40 @@
 spec:
   releases:
-  - chart: osh/masakari
-    name: openstack-masakari
+  - chart: osh/barbican
+    name: openstack-barbican
     values:
       conf:
         policy.d:
-          01-controller-default.yaml: {'instance-ha_rule1': 'instance-ha_value1'}
+          01-controller-default.yaml: {'key-manager_rule1': 'key-manager_value1'}
           02-custom.yaml: {}
-        masakari:
+        barbican:
           DEFAULT:
-            os_privileged_user_name: admin
-            os_privileged_user_password: ZUqTyP2XwsgEGKZ7qNhhecYyq9NLkGE6
+            sql_idle_timeout: 3600
+            sql_max_retries: -1
+            sql_retry_interval: 1
           keystone_authtoken:
             memcache_secret_key: 3vySYJq0rDZ32KGG
             memcache_security_strategy: ENCRYPT
+          oslo_messaging_notifications:
+            topics: notifications,stacklight_notifications
+          secretstore:
+            enable_multiple_secret_stores: true
+            stores_lookup_suffix: software, vault
+          secretstore:software:
+            crypto_plugin: simple_crypto
+            secret_store_plugin: store_crypto
+          secretstore:vault:
+            global_default: true
+            secret_store_plugin: vault_plugin
+          simple_crypto_plugin:
+            kek: SDJTR0lEQVFXeFhkMjdyS05WVGxnR3MxbHkxWlNIaWg=
+          vault_plugin:
+            approle_role_id: e5e97952-cf82-e7fd-da71-c568f18cea5e
+            approle_secret_id: e33841c6-f175-1ea1-87ba-2dd49df6f776
+            use_ssl: false
+            vault_url: http://vault.openstack-vault.svc:8200
         logging:
-          logger_masakari:
-            level: INFO
-          logger_masakarimonitors:
+          logger_barbican:
             level: INFO
       dependencies:
         static:
@@ -36,16 +53,16 @@ spec:
               region_name: RegionOne
               user_domain_name: default
               username: admin
-            masakari:
+            barbican:
               password: fUPlF2xntwICHH8KDYEjuc4Seb1TNQ8d
-              username: masakari8Xfl6MhP
+              username: barbican8Xfl6MhP
             test:
               password: KI40mJVQ9fZP3MBZLpgrFSf2nqZIbbqg
               username: testC7BY
-        instance_ha:
+        key_manager:
           host_fqdn_override:
             public:
-              host: masakari.it.just.works
+              host: barbican.it.just.works
               tls:
                 ca: |
                   TEST CA
@@ -55,11 +72,11 @@ spec:
                   TEST KEY
           hosts:
             admin:
-              host: masakari-api
-            default: masakari
-            internal: masakari-api
+              host: barbican-api
+            default: barbican
+            internal: barbican-api
             public:
-              host: masakari
+              host: barbican
               tls:
                 ca: |
                   TEST CA
@@ -69,9 +86,9 @@ spec:
                   TEST KEY
           port:
             api:
-              admin: 15868
+              admin: 9311
               default: 80
-              internal: 15868
+              internal: 9311
               public: 443
           scheme:
             default: http
@@ -85,31 +102,31 @@ spec:
             admin:
               password: QACDSM6FBTH2LuXjTuRQ6DXhD8bSgPbn
               username: root
-            masakari:
+            barbican:
               password: R441HIJxfNF8iAfAfwxASnndFXqSBfVn
-              username: masakariteW3kGBC
+              username: barbicanteW3kGBC
         oslo_messaging:
           auth:
             admin:
               password: 2tnAuP0j9MsgaVHErehZkC5HCK3ZxYLr
               username: rabbitmq
-            masakari:
+            barbican:
               password: iHMN1WsAMxAi8G4d0r64iggSdedSRR1p
-              username: masakariVuqCvFid
+              username: barbicanVuqCvFid
             user:
               password: 2tnAuP0j9MsgaVHErehZkC5HCK3ZxYLr
               username: rabbitmq
           hosts:
             default: rabbitmq
-          path: /masakari
+          path: /barbican
           statefulset:
             name: openstack-rabbitmq-rabbitmq
             replicas: 1
         oslo_messaging_notifications:
           auth:
-            masakari:
+            barbican:
               password: acH2p6deh90bDJWlRDzFE7wptqgQgVc7
-              username: masakariyfHtXhiq
+              username: barbicanyfHtXhiq
           host_fqdn_override: {}
           hosts:
             default: rabbitmq
@@ -125,8 +142,8 @@ spec:
             replicas: 1
       images:
         tags:
-          masakari_api: masakari-api:latest
-          masakari_db_sync: masakari-db-sync:latest
+          barbican_api: barbican-api:latest
+          barbican_db_sync: barbican-db-sync:latest
           bootstrap: bootstrap:latest
           db_drop: db-drop:latest
           db_init: db-init:latest
@@ -135,7 +152,8 @@ spec:
           ks_endpoints: ks-endpoints:latest
           ks_service: ks-service:latest
           ks_user: ks-user:latest
-          test: test:latest
+          rabbit_init: rabbit-init:latest
+          scripted_test: scripted-test:latest
       jobs:
         ks_endpoints:
           restartPolicy: Never
@@ -145,11 +163,10 @@ spec:
           restartPolicy: Never
         db_purge:
           enabled: true
-          cron: "1 3 * * 1"
+          cron: "1 2 3 4 5"
           script:
             config:
-              age: 30
-              max_rows: 1000
+              age: 1
       manifests:
         cron_job_db_purge: true
         job_rabbit_init: false
