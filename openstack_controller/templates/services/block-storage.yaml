@@ -407,7 +407,7 @@ spec:
 {%- if cinder_db_cleanup.enabled %}
         db_purge:
           enabled: {{ cinder_db_cleanup.enabled }}
-          cron: {{ cinder_db_cleanup.get("schedule", "1 11 * * 1") }}
+          cron: {{ cinder_db_cleanup.get("schedule", "1 0 * * 1") }}
           script:
             config:
               age: {{ cinder_db_cleanup.get("age", 30) }}

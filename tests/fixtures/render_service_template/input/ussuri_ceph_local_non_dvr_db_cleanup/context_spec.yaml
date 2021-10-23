@@ -17,11 +17,20 @@ features:
     local_volumes:
       enabled: true
     cleanup:
+      barbican:
+        enabled: true
+        age: 1
+        schedule: "1 2 3 4 5"
+      masakari:
+        enabled: true
+        age: 1
+        schedule: "1 2 3 4 5"
+        batch: 2
       nova:
         enabled: true
         age: 1
         schedule: "1 2 3 4 5"
-        max_rows: 2
+        batch: 2
       cinder:
         enabled: true
         age: 1
@@ -30,13 +39,12 @@ features:
         enabled: true
         age: 1
         schedule: "1 2 3 4 5"
-        max_rows: 2
+        batch: 2
       heat:
         enabled: true
         age: 1
         schedule: "1 2 3 4 5"
-        granularity: days
-        batch_size: 2
+        batch: 2
   glance:
     backend: ceph
   messaging:

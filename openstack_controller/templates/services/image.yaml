@@ -374,10 +374,10 @@ spec:
 {%- if glance_db_cleanup.enabled %}
         db_purge:
           enabled: {{ glance_db_cleanup.enabled }}
-          cron: {{ glance_db_cleanup.get("schedule", "1 7 * * 1") }}
+          cron: {{ glance_db_cleanup.get("schedule", "1 2 * * 1") }}
           script:
             config:
               age: {{ glance_db_cleanup.get("age", 30) }}
-              max_rows: {{ glance_db_cleanup.get("max_rows", 1000) }}
+              max_rows: {{ glance_db_cleanup.get("batch", 1000) }}
 {%- endif %}
 {%- endif %}

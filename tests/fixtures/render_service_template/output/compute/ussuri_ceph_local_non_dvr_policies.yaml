@@ -346,7 +346,7 @@ spec:
           restartPolicy: Never
         db_purge:
           enabled: true
-          cron: "1 0 * * 1"
+          cron: "1 1 * * 1"
           script:
             config:
               age: 30

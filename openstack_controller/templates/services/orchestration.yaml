@@ -273,11 +273,10 @@ spec:
 {%- if heat_db_cleanup.enabled %}
         db_purge:
           enabled: {{ heat_db_cleanup.enabled }}
-          cron: {{ heat_db_cleanup.get("schedule", "1 4 * * 1") }}
+          cron: {{ heat_db_cleanup.get("schedule", "1 5 * * 1") }}
           script:
             config:
               age: {{ heat_db_cleanup.get("age", 30) }}
-              granularity: {{ heat_db_cleanup.get("granularity", "days") }}
-              batch_size: {{ heat_db_cleanup.get("batch_size", 10) }}
+              batch_size: {{ heat_db_cleanup.get("batch", 10) }}
 {%- endif %}
 {%- endif %}

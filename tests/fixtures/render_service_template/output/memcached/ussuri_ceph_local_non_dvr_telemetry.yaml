@@ -1,1 +1,39 @@
-./ussuri_ceph_local_non_dvr.yaml
+spec:
+  releases:
+  - chart: osh-infra/memcached
+    name: openstack-memcached
+    values:
+      endpoints:
+        cluster_domain_suffix: cluster.local
+      images:
+        tags:
+          dep_check: dep-check:latest
+          image_repo_sync: image-repo-sync:latest
+          memcached: memcached:latest
+          prometheus_memcached_exporter: prometheus-memcached-exporter:latest
+      manifests:
+        deployment: false
+        network_policy: false
+        statefulset: true
+      monitoring:
+        prometheus:
+          enabled: true
+      pod:
+        replicas:
+          server: 3
+      scripts:
+        prometheus_memcached_exporter: |
+          #!/bin/bash
+          set -ex
+          COMMAND="${@:-start}"
+
+          function start () {
+            memcached_exporter --memcached.address "$MEMCACHED_HOST:$MEMCACHED_PORT"
+          }
+
+          function stop () {
+            kill -TERM 1
+          }
+
+          $COMMAND
+

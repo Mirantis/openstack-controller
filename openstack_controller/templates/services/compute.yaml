@@ -626,10 +626,10 @@ spec:
 {%- if nova_db_cleanup.enabled %}
         db_purge:
           enabled: {{ nova_db_cleanup.enabled }}
-          cron: {{ nova_db_cleanup.get("schedule", "1 0 * * 1") }}
+          cron: {{ nova_db_cleanup.get("schedule", "1 1 * * 1") }}
           script:
             config:
               age: {{ nova_db_cleanup.get("age", 30) }}
-              max_rows: {{ nova_db_cleanup.get("max_rows", 1000) }}
+              max_rows: {{ nova_db_cleanup.get("batch", 1000) }}
 {%- endif %}
 {%- endif %}
