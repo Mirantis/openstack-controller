@@ -196,3 +196,4 @@ tempest_static_accounts: '{{ images_base_url }}/openstack/heat:ussuri-bionic-202
 nova_db_purge: '{{ images_base_url }}/openstack/nova:ussuri-bionic-20211022120442'
 glance_db_purge: '{{ images_base_url }}/openstack/glance:ussuri-bionic-20211022120442'
 heat_db_purge: '{{ images_base_url }}/openstack/heat:ussuri-bionic-20211022120442'
+barbican_db_purge: '{{ images_base_url }}/openstack/barbican:ussuri-bionic-20211022120442'
