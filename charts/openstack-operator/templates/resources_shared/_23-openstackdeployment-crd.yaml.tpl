@@ -258,6 +258,47 @@ spec:
                                   description: |
                                     Number of days to keep deleted entries. When set to 0 all entries from shadow tables
                                     are deleted.
+                            glance:
+                              type: object
+                              required:
+                                - enabled
+                              properties:
+                                enabled:
+                                  type: boolean
+                                  description: Enable periodic cleanup of database for Nova.
+                                schedule:
+                                  type: string
+                                  description: Cron schedule for periodic cleanup.
+                                age:
+                                  type: integer
+                                  description: |
+                                    Number of days to keep deleted entries. When set to 0 all entries from shadow tables
+                                    are deleted.
+                                max_rows:
+                                  type: integer
+                                  description: The batch size for each iteration.
+                            heat:
+                              type: object
+                              required:
+                                - enabled
+                              properties:
+                                enabled:
+                                  type: boolean
+                                  description: Enable periodic cleanup of database for Nova.
+                                schedule:
+                                  type: string
+                                  description: Cron schedule for periodic cleanup.
+                                age:
+                                  type: integer
+                                  description: |
+                                    Number of days to keep deleted entries. When set to 0 all entries from shadow tables
+                                    are deleted.
+                                granularity:
+                                  type: string
+                                  description: Granularity to use for age argument.(days,hours,minutes,seconds)
+                                batch_size:
+                                  type: integer
+                                  description: Number of stacks to delete at a time (per transaction).
                         backup:
                           type: object
                           required:

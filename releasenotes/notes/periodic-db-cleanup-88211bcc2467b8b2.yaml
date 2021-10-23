@@ -4,3 +4,5 @@ features:
     the following services
     * nova
     * cinder
+    * glance
+    * heat

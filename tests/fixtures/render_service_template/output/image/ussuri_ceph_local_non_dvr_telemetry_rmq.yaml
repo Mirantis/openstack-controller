@@ -320,7 +320,15 @@ spec:
           restartPolicy: Never
         ks_user:
           restartPolicy: Never
+        db_purge:
+          enabled: true
+          cron: "1 7 * * 1"
+          script:
+            config:
+              age: 30
+              max_rows: 1000
       manifests:
+        cron_job_db_purge: true
         job_rabbit_init: false
         job_storage_init: false
         network_policy: false
