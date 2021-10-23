@@ -22,6 +22,10 @@ features:
         age: 1
         schedule: "1 2 3 4 5"
         max_rows: 2
+      cinder:
+        enabled: true
+        age: 1
+        schedule: "1 2 3 4 5"
   glance:
     backend: ceph
   messaging:

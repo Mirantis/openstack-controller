@@ -18,6 +18,7 @@
 {%- endfor %}
 {%- set glance_cinder_backends = spec.get('features', {}).get('glance', {}).get('backends', {}).get('cinder', {}) %}
 {%- set glance_cinder_multi = {} %}
+{%- set cinder_db_cleanup = spec.get('features', {}).get('database', {}).get('cleanup', {}).get('cinder', {'enabled': true}) %}
 
 spec:
   releases:
@@ -256,6 +257,7 @@ spec:
           volume: {{ ceph.cinder.secrets }}
           backup: {{ ceph.cinder.secrets }}
       manifests:
+        cron_job_db_purge: {{ cinder_db_cleanup.enabled }}
         network_policy: false
         job_rabbit_init: false
         job_storage_init: false
@@ -402,4 +404,12 @@ spec:
             public: https
       jobs:
 {% include 'base/_ks_jobs.yaml' %}
+{%- if cinder_db_cleanup.enabled %}
+        db_purge:
+          enabled: {{ cinder_db_cleanup.enabled }}
+          cron: {{ cinder_db_cleanup.get("schedule", "1 11 * * 1") }}
+          script:
+            config:
+              age: {{ cinder_db_cleanup.get("age", 30) }}
+{%- endif %}
 {%- endif %}

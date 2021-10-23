@@ -8,9 +8,6 @@ spec:
         volume_types:
           volumes-hdd:
             volume_backend_name: volumes-hdd
-          volumes-hdd_multiattach:
-            multiattach: "\"<is> True\""
-            volume_backend_name: volumes-hdd
       ceph_client:
         configmap: rook-ceph-config
         user_secret_name: cinder-rbd-keyring
@@ -20,8 +17,6 @@ spec:
           02-custom.yaml: {}
         backends:
           volumes-hdd:
-            image_upload_use_cinder_backend: True
-            image_upload_use_internal_tenant: True
             rbd_ceph_conf: /etc/ceph/ceph.conf
             rbd_pool: volumes-hdd
             rbd_user: cinder
@@ -236,18 +231,18 @@ spec:
           restartPolicy: Never
         db_purge:
           enabled: true
-          cron: "1 11 * * 1"
+          cron: "1 2 3 4 5"
           script:
             config:
-              age: 30
+              age: 1
       manifests:
-        cron_job_db_purge: true
         job_backup_storage_init: false
         job_rabbit_init: false
         job_storage_init: false
         network_policy: false
         secret_ca_bundle: true
         cron_service_cleaner: true
+        cron_job_db_purge: true
       pod:
         replicas:
           api: 1
