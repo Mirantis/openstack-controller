@@ -74,6 +74,7 @@ spec:
     "bootstrap",
     "db_drop",
     "barbican_db_sync",
+    "barbican_db_purge",
     "image_repo_sync",
     "ks_endpoints",
     "rabbit_init",

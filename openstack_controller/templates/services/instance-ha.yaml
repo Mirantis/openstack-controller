@@ -76,6 +76,7 @@ spec:
     "db_drop",
     "bootstrap",
     "masakari_db_sync",
+    "masakari_db_purge",
     "ks_user",
     "ks_service",
     "ks_endpoints",
