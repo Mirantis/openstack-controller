@@ -12,6 +12,7 @@
 # limitations under the License.
 
 from openstack_controller.admission.validators import base
+from openstack_controller import constants
 from openstack_controller import exception
 
 
@@ -19,12 +20,19 @@ class NovaValidator(base.BaseValidator):
     service = "compute"
 
     def validate(self, review_request):
+        os_num_version = constants.OpenStackVersion[
+            review_request["object"]["spec"]["openstack_version"]
+        ].value
         nova_section = (
             review_request.get("object", {})
             .get("spec", {})
             .get("features", {})
             .get("nova", {})
         )
+        self._check_ephemeral_encryption(nova_section)
+        self._check_vcpu_type(nova_section, os_num_version)
+
+    def _check_ephemeral_encryption(self, nova_section):
         if (
             nova_section.get("images", {})
             .get("encryption", {})
@@ -34,3 +42,18 @@ class NovaValidator(base.BaseValidator):
             raise exception.OsDplValidationFailed(
                 "Ephemeral encryption is supported only with LVM backend."
             )
+
+    def _check_vcpu_type(self, nova_section, os_version):
+        vcpu_types = nova_section.get("vcpu_type", "").split(",")
+
+        if len(vcpu_types) > 1:
+            if "host-model" in vcpu_types or "host-passthrough" in vcpu_types:
+                raise exception.OsDplValidationFailed(
+                    "Vcpu type 'host-model' or 'host-passthrough' "
+                    "can not be used together with other values."
+                )
+            if os_version < constants.OpenStackVersion["train"].value:
+                raise exception.OsDplValidationFailed(
+                    "Multiple vcpu types are supported "
+                    "since OpenStack Train release."
+                )

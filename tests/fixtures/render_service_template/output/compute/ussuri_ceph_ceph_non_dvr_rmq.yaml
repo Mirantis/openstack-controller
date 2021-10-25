@@ -144,8 +144,7 @@ spec:
             memcache_secret_key: JinzIdQzLdIslgxu
             memcache_security_strategy: ENCRYPT
           libvirt:
-            cpu_mode: custom
-            cpu_model: kvm64
+            cpu_mode: host-model
             images_rbd_pool: vms-hdd
             images_type: rbd
             rbd_user: nova

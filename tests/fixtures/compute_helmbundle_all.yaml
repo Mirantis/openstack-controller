@@ -259,7 +259,7 @@ spec:
         nova:
           libvirt:
             cpu_mode: custom
-            cpu_model: kvm64
+            cpu_models: host-model
             virt_type: kvm
       dependencies:
         static:

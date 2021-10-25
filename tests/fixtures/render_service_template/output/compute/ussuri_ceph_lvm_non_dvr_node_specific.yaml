@@ -63,8 +63,7 @@ spec:
           os_vif_ovs:
             isolate_vif: true
           libvirt:
-            cpu_mode: custom
-            cpu_model: kvm64
+            cpu_mode: host-model
             images_rbd_pool: vms-hdd
             images_type: lvm
             images_volume_group: 'custom-group'

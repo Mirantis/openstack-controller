@@ -581,6 +581,13 @@ def test_nodes_features_nova_keys(client):
         True,
     )
 
+    # cpu mode
+    _node_specific_request(
+        client,
+        {"good::label": {"features": {"nova": {"vcpu_type": "kvm64"}}}},
+        True,
+    )
+
 
 def test_nodes_features_neutron_keys(client):
     neutron_required = {"dpdk": {"enabled": True, "driver": "igb_uio"}}
@@ -999,3 +1006,38 @@ def test_barbican_features_namespace_before_victoria(client):
     assert response.status == falcon.HTTP_OK
     assert response.json["response"]["status"]["code"] == 400
     assert response.json["response"]["allowed"] is False
+
+
+def test_nova_features_vcpu_type(client):
+    req = copy.deepcopy(ADMISSION_REQ)
+    req["request"]["object"]["spec"]["features"]["nova"] = {
+        "vcpu_type": "spam,ham"
+    }
+    response = client.simulate_post("/validate", json=req)
+    assert response.status == falcon.HTTP_OK
+    assert response.json["response"]["allowed"] is True
+
+
+def test_nova_features_vcpu_type_host_mode_not_alone(client):
+    req = copy.deepcopy(ADMISSION_REQ)
+    for t in ("host-model", "host-passthrough"):
+        req["request"]["object"]["spec"]["features"]["nova"] = {
+            "vcpu_type": f"spam,ham,{t}"
+        }
+        response = client.simulate_post("/validate", json=req)
+        assert response.status == falcon.HTTP_OK
+        assert response.json["response"]["allowed"] is False, t
+        assert response.json["response"]["status"]["code"] == 400
+
+
+def test_nova_features_vcpu_type_multiple_stein_or_older(client):
+    req = copy.deepcopy(ADMISSION_REQ)
+    req["request"]["object"]["spec"]["features"]["nova"] = {
+        "vcpu_type": "spam,ham"
+    }
+    for ver in ("queens", "rocky", "stein"):
+        req["request"]["object"]["spec"]["openstack_version"] = ver
+        response = client.simulate_post("/validate", json=req)
+        assert response.status == falcon.HTTP_OK
+        assert response.json["response"]["allowed"] is False, ver
+        assert response.json["response"]["status"]["code"] == 400

@@ -206,11 +206,20 @@ spec:
                   interface:
                     sriov: {{ neutron_override.sriov.nics }}
           {%- endif %}
-          {%- if nova_override.get("images", {}).get("backend") or nova_override.get('live_migration_interface') %}
+          {%- if nova_override.get("images", {}).get("backend") or nova_override.get('live_migration_interface') or nova_override.get("vcpu_type") %}
                 conf:
-            {%- if nova_override.get("images", {}).get("backend") %}
+            {%- if nova_override.get("images", {}).get("backend") or nova_override.get("vcpu_type") %}
                   nova:
                     libvirt:
+                {%- if nova_override.get("vcpu_type") in ("host-model", "host-passthrough") %}
+                      cpu_mode: {{ nova_override.vcpu_type }}
+                {%- elif nova_override.get("vcpu_type") and spec.openstack_version in ("queens", "rocky", "stein") %}
+                      cpu_mode: custom
+                      cpu_model: {{ vcpu_type }}
+                {%- elif nova_override.get("vcpu_type") %}
+                      cpu_mode: custom
+                      cpu_models: {{ vcpu_type }}
+                {%- endif %}
               {%- if nova_override.images.backend == 'ceph' %}
                       images_type: rbd
               {%- elif nova_override.images.backend == 'local' %}
@@ -570,8 +579,16 @@ spec:
             isolate_vif: true
 {%- endif %}
           libvirt:
+{%- set vcpu_type = spec.get("features", {}).get("nova", {}).get("vcpu_type", "host-model") %}  # INTERNAL DEFAULT
+{%- if vcpu_type in ("host-model", "host-passthrough") %}
+            cpu_mode: {{ vcpu_type }}
+{%- elif spec.openstack_version in ("queens", "rocky", "stein") %}
             cpu_mode: custom
-            cpu_model: kvm64
+            cpu_model: {{ vcpu_type }}
+{%- else %}
+            cpu_mode: custom
+            cpu_models: {{ vcpu_type }}
+{%- endif %}
             virt_type: kvm
             rbd_user: {{ ceph.nova.username }}
 {%- if spec.get('features', {}).get('nova', {}).get('images', {}).get('backend') == 'ceph' %}

@@ -529,6 +529,14 @@ spec:
                                   type: string
                                   description: >
                                     Volume group used when images backend is lvm. Default to nova-vol
+                            vcpu_type:
+                              type: string
+                              description: >
+                                Types of cpu to create instances with. Can be host-model, host-passthrough
+                                or a coma-separated list of qemu cpu types.
+                                For OpenStack Stein and older, only single value can be provided.
+                                Default is "host-model" for a optimal compromise between performance
+                                and live-migration support.
                     horizon:
                       type: object
                       properties:
