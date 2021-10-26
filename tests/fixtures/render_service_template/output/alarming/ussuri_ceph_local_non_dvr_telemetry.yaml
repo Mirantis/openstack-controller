@@ -18,7 +18,7 @@ spec:
           aodh_evaluator: aodh-evaluator:latest
           aodh_listener: aodh-listener:latest
           aodh_notifier: aodh-notifier:latest
-          aodh_alarms_cleaner: aodh-alarms-cleaner:latest
+          aodh_db_purge: aodh-db-purge:latest
           image_repo_sync: image-repo-sync:latest
       conf:
         policy.d:
@@ -30,6 +30,8 @@ spec:
             gnocchi_external_domain_name: service
           coordination:
             backend_url: etcd3://etcd:2379
+          database:
+            alarm_history_time_to_live: 86400
           keystone_authtoken:
             memcache_security_strategy: ENCRYPT
             memcache_secret_key: vaT1fSWMgCwFlXem
@@ -45,6 +47,7 @@ spec:
         network_policy: false
         job_rabbit_init: false
         secret_ca_bundle: true
+        cron_job_db_purge: true
       endpoints:
         cluster_domain_suffix: cluster.local
         identity:
@@ -145,6 +148,8 @@ spec:
             default: http
             public: https
       jobs:
+        db_purge:
+          cron: '1 6 * * 1'
         ks_service:
           restartPolicy: Never
         ks_endpoints:
