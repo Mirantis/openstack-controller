@@ -482,6 +482,10 @@ spec:
         daemonset_bagpipe_bgp: true
       {%- endif %}
       network:
+        server:
+          ingress:
+            annotations:
+              nginx.ingress.kubernetes.io/proxy-read-timeout: "120"
         core_plugin: {{ spec.features.neutron.get('backend', 'ml2') }}
       {%- if spec.get('features', {}).get('neutron', {}).get('tunnel_interface') %}
         interface:

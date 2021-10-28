@@ -200,7 +200,7 @@ spec:
               flat_networks: physnet1
             ml2_type_vlan:
               network_vlan_ranges: ironic:1000:1099,ironic:2000:2099
-            genericswitch:br-host: 
+            genericswitch:br-host:
               device_type: netmiko_ovs_linux
               ip: 10.10.0.64
               key_file: '/etc/neutron/ngs/br-host.key'
@@ -378,6 +378,10 @@ spec:
         deployment_ironic_agent: true
         secret_ca_bundle: true
       network:
+        server:
+          ingress:
+            annotations:
+              nginx.ingress.kubernetes.io/proxy-read-timeout: "120"
         core_plugin: ml2
         interface:
           tunnel: ens3

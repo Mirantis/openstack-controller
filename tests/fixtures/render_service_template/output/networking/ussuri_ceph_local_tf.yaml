@@ -371,6 +371,10 @@ spec:
         daemonset_sriov_agent: false
         pod_rally_test: false
       network:
+        server:
+          ingress:
+            annotations:
+              nginx.ingress.kubernetes.io/proxy-read-timeout: "120"
         core_plugin: tungstenfabric
         interface:
           tunnel: ens3

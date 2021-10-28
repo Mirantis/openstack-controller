@@ -139,8 +139,8 @@ spec:
         bgp:
           as_number: 64512
           update_source_interface: 'ens3'
-      images: 
-        tags: 
+      images:
+        tags:
           dep_check: 'dep-check:latest'
           image_repo_sync: 'image-repo-sync:latest'
   - chart: osh/neutron
@@ -164,14 +164,14 @@ spec:
         auto_bridge_add:
           br-ex: veth-phy
           br-mpls: 'null'
-        bagpipe_bgp: 
+        bagpipe_bgp:
           api:
             host: 'localhost'
             port: 8082
           bgp:
             local_address: 'ens3'
             my_as: 64512
-          common: 
+          common:
             root_helper: 'sudo /var/lib/openstack/bin/neutron-rootwrap /etc/neutron/rootwrap.conf'
           dataplane_driver_evpn:
             dataplane_driver: 'ovs'
@@ -406,6 +406,10 @@ spec:
         secret_ca_bundle: true
         daemonset_bagpipe_bgp: true
       network:
+        server:
+          ingress:
+            annotations:
+              nginx.ingress.kubernetes.io/proxy-read-timeout: "120"
         core_plugin: ml2
         interface:
           tunnel: ens3
