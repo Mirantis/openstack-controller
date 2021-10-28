@@ -331,6 +331,21 @@ spec:
                                 batch:
                                   type: integer
                                   description: Number of stacks to delete at a time (per transaction).
+                            aodh:
+                              type: object
+                              required:
+                                - enabled
+                              properties:
+                                enabled:
+                                  type: boolean
+                                  description: Enable periodic cleanup of expired alarm history data for Aodh
+                                schedule:
+                                  type: string
+                                  description: Cron schedule for periodic cleanup
+                                age:
+                                  type: integer
+                                  description: |
+                                    Number of days that alarm histories are kept in the database for (<= 0 means forever)
                         backup:
                           type: object
                           required:

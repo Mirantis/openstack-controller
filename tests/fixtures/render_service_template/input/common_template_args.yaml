@@ -9,7 +9,7 @@ admin_creds:
     password: 2tnAuP0j9MsgaVHErehZkC5HCK3ZxYLr
     username: rabbitmq
 images:
-  aodh_alarms_cleaner: aodh-alarms-cleaner:latest
+  aodh_db_purge: aodh-db-purge:latest
   aodh_api: aodh-api:latest
   aodh_db_sync: aodh-db-sync:latest
   aodh_evaluator: aodh-evaluator:latest
