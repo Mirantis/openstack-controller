@@ -5,8 +5,6 @@ Jinja2>2.10
 jsonpath-ng
 deepmerge>0.2
 pykube-ng>=19.9.0
-# Unless https://mirantis.jira.com/browse/PRODX-18688 is fixed
-PyYAML<6.0
 cryptography
 falcon>=3.0.0
 jsonschema

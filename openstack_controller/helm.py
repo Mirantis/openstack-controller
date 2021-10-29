@@ -112,7 +112,7 @@ class HelmManager:
             *args,
         ]
         stdout, stderr = await self.run_cmd(cmd)
-        for release in yaml.load(stdout):
+        for release in yaml.safe_load(stdout):
             if release["name"] == name:
                 return True
 
@@ -127,7 +127,7 @@ class HelmManager:
             *args,
         ]
         stdout, stderr = await self.run_cmd(cmd)
-        return yaml.load(stdout)
+        return yaml.safe_load(stdout)
 
     async def get_release_values(self, name, args=None):
         args = args or []
@@ -142,7 +142,7 @@ class HelmManager:
             *args,
         ]
         stdout, stderr = await self.run_cmd(cmd)
-        return yaml.load(stdout)
+        return yaml.safe_load(stdout)
 
     async def set_release_values(
         self, name, values, repo, chart, version, args=None

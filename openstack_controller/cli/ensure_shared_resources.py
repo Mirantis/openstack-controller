@@ -24,7 +24,7 @@ def _wait_for_obj(obj):
 def main():
     for resource_file in sorted(glob.glob(f"{CONFIG_DIRECTORY}/*.yaml")):
         with open(resource_file, "r") as f:
-            for document in yaml.load_all(f):
+            for document in yaml.safe_load_all(f):
                 LOG.debug(
                     f"Handling resorce document {document} from file: {resource_file}"
                 )
