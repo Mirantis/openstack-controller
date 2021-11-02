@@ -164,3 +164,19 @@ def load_fixture():
         return yaml.safe_load(open("tests/fixtures/" + name))
 
     yield loader
+
+
+@pytest.fixture
+def helm_error_1_item():
+    fixture_file = "tests/fixtures/test_helm/1_item.txt"
+    with open(fixture_file, "rb") as f:
+        error = f.read()
+    yield error
+
+
+@pytest.fixture
+def helm_error_5_item():
+    fixture_file = "tests/fixtures/test_helm/5_item.txt"
+    with open(fixture_file, "rb") as f:
+        error = f.read()
+    yield error
