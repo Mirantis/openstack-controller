@@ -21,6 +21,19 @@ import pytest
 from openstack_controller import openstack_utils
 
 
+NODE_OBJ = {
+    "apiVersion": "v1",
+    "kind": "Node",
+    "metadata": {
+        "name": "host1",
+        "uid": "42",
+        "labels": {
+            "openstack-compute-node": "enabled",
+        },
+    },
+}
+
+
 @pytest.mark.asyncio
 async def test_get_keystone_admin_creds(kube_resource_list):
     kube_resource_list.return_value.get_or_none.return_value = mock.Mock(
@@ -34,15 +47,34 @@ async def test_get_keystone_admin_creds(kube_resource_list):
     assert {
         "ff": "foo",
         "bar": "bar",
-    } == await openstack_utils.get_keystone_admin_creds()
+    } == openstack_utils.get_keystone_admin_creds()
 
 
 @pytest.mark.asyncio
-async def test_get_keystone_admin_creds_timeout(
-    kube_resource_list, asyncio_wait_for_timeout
-):
+async def test_get_keystone_admin_creds_timeout(kube_resource_list):
+    get_or_none_mock = mock.Mock()
+    get_or_none_mock.return_value = None
+    openstack_utils.ADMIN_CREDS = None
+
+    kube_resource_list.return_value.get_or_none.return_value = None
+
     with pytest.raises(kopf.TemporaryError):
-        await openstack_utils.get_keystone_admin_creds()
+        openstack_utils.get_keystone_admin_creds()
+
+
+@pytest.mark.asyncio
+async def test_get_keystone_admin_creds_multiple_times(kube_resource_list):
+    kube_resource_list.return_value.get_or_none.return_value = mock.Mock(
+        obj={
+            "data": {
+                "OS_FF": base64.b64encode("foo".encode("utf-8")),
+                "BAR": base64.b64encode("bar".encode("utf-8")),
+            }
+        }
+    )
+    openstack_utils.get_keystone_admin_creds()
+    openstack_utils.get_keystone_admin_creds()
+    kube_resource_list.assert_called_once()
 
 
 @pytest.mark.asyncio
@@ -82,59 +114,24 @@ async def test_find_nova_cell_setup_cron_job_timeout(
         await openstack_utils.find_nova_cell_setup_cron_job(node_uid="ff")
 
 
-class _Server:
-    hypervisor_hostname = None
-    status = "None"
+@pytest.mark.asyncio
+async def test_openstack_client_no_creds(mocker, openstack_connect):
+    get_keystone_creds_mock = mocker.patch.object(
+        openstack_utils, "get_keystone_admin_creds"
+    )
+    get_keystone_creds_mock.return_value = {"ff": "foo", "bar": "bar"}
+
+    openstack_utils.OpenStackClientManager()
+    get_keystone_creds_mock.assert_called_once()
+    openstack_connect.assert_called_once_with(ff="foo", bar="bar")
 
 
 @pytest.mark.asyncio
-async def test_migrate_servers():
-    conn_mock = mock.Mock(
-        compute=mock.Mock(
-            get_server=mock.Mock(
-                return_value=mock.Mock(
-                    status="ACTIVE",
-                    hypervisor_hostname="buzz",
-                    spec_set=_Server,
-                )
-            )
-        )
+async def test_openstack_client_creds(mocker, openstack_connect):
+    get_keystone_creds_mock = mocker.patch.object(
+        openstack_utils, "get_keystone_admin_creds"
     )
-    migrate_mock = mock.Mock(return_value=None)
-    servers = ["a", "b", "c"]
-    await openstack_utils.migrate_servers(
-        openstack_connection=conn_mock,
-        migrate_func=migrate_mock,
-        servers=servers,
-        migrating_off="bar",
-    )
-    migrate_mock.assert_has_calls([mock.call(s) for s in servers])
-    conn_mock.compute.get_server.assert_has_calls(
-        [mock.call(s) for s in servers]
-    )
-
-
-@pytest.mark.asyncio
-async def test_migrate_servers_timeout(asyncio_wait_for_timeout):
-    conn_mock = mock.Mock(
-        compute=mock.Mock(
-            get_server=mock.Mock(
-                return_value=mock.Mock(
-                    status="MIGRATING",
-                    hypervisor_hostname="bar",
-                    spec_set=_Server,
-                )
-            )
-        )
-    )
-    migrate_mock = mock.Mock(return_value=None)
-    servers = ["a", "b", "c"]
-
-    with pytest.raises(kopf.PermanentError):
-        await openstack_utils.migrate_servers(
-            openstack_connection=conn_mock,
-            migrate_func=migrate_mock,
-            servers=servers,
-            migrating_off="bar",
-        )
-    migrate_mock.assert_has_calls([mock.call(s) for s in servers])
+    creds = {"ff": "foo", "bar": "bar"}
+    openstack_utils.OpenStackClientManager(creds)
+    get_keystone_creds_mock.assert_not_called()
+    openstack_connect.assert_called_once_with(**creds)

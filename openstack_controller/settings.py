@@ -27,9 +27,6 @@ from openstack_controller.utils import merger
 HEARTBEAT = time.time()
 CURRENT_NUMBER_OF_TASKS = -1
 
-TRUE_STRINGS = {"1", "t", "true", "on", "y", "yes"}
-FALSE_STRINGS = {"0", "f", "false", "off", "n", "no"}
-
 
 def bool_from_env(env_name, default):
     """Convert env variable into boolean
@@ -47,9 +44,9 @@ def bool_from_env(env_name, default):
 
     lowered = data.strip().lower()
 
-    if lowered in TRUE_STRINGS:
+    if lowered in const.TRUE_STRINGS:
         return True
-    elif lowered in FALSE_STRINGS:
+    elif lowered in const.FALSE_STRINGS:
         return False
 
     raise kopf.PermanentError(f"Failed to convert {data} into boolean.")
@@ -225,10 +222,7 @@ if OSCTL_HEARTBEAT_INTERVAL:
 OSCTL_HEALTH_INTERVAL = int(os.environ.get("OSCTL_HEALTH_INTERVAL", 60))
 
 # Number of instances to migrate off node concurrently
-OSCTL_MIGRATE_CONCURRENCY = int(os.environ.get("OSCTL_MIGRATE_CONCURRENCY", 5))
-
-# Whether to perform evacuation if compute node is down, or just error out
-OSCTL_ALLOW_EVACUATION = bool_from_env("OSCTL_ALLOW_EVACUATION", False)
+OSCTL_MIGRATE_CONCURRENCY = int(os.environ.get("OSCTL_MIGRATE_CONCURRENCY", 1))
 
 # Whether node maintenance controller is enabled or not
 OSCTL_NODE_MAINTENANCE_ENABLED = bool_from_env(

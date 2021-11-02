@@ -2,6 +2,9 @@ import enum
 import sys
 
 
+TRUE_STRINGS = {"1", "t", "true", "on", "y", "yes"}
+FALSE_STRINGS = {"0", "f", "false", "off", "n", "no"}
+
 ADMIN_SECRET_NAME = "openstack-admin-users"
 
 CACHE_NAME = "image-precaching"

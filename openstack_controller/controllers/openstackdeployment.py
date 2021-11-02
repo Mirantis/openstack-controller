@@ -6,6 +6,7 @@ from openstack_controller import cache
 from openstack_controller import constants
 from openstack_controller import kube
 from openstack_controller import layers
+from openstack_controller import maintenance
 from openstack_controller import secrets
 from openstack_controller import services
 from openstack_controller import settings  # noqa
@@ -163,6 +164,13 @@ async def handle(body, meta, spec, logger, reason, **kwargs):
     kwargs["patch"]["status"]["fingerprint"] = layers.spec_hash(body["spec"])
     osdplst = osdplstatus.OpenStackDeploymentStatus(name, namespace)
     osdplst.present()
+
+    # Always create clusterworkloadlock, but set to inactive when we are not interested
+    cwl = maintenance.ClusterWorkloadLock.get_resource(name)
+    cwl.present()
+
+    if not settings.OSCTL_NODE_MAINTENANCE_ENABLED:
+        cwl.set_state_inactive()
     osdplst.set_osdpl_status(
         osdplstatus.APPLYING, body["spec"], kwargs["diff"], reason
     )
@@ -281,3 +289,4 @@ async def delete(name, meta, body, spec, logger, reason, **kwargs):
         ] = (service_instance.delete, reason, body, meta, spec, logger, kwargs)
         await run_task(task_def)
     # TODO(dbiletskiy) delete osdpl status
+    kube.ClusterWorkloadLock.get_resource(name).absent()
