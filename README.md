@@ -109,7 +109,7 @@ openstack server create --image cirros-0.5.1-x86_64-disk --flavor m1.tiny --nic 
 
 ```
 # Download helm client with your version:
-wget https://get.helm.sh/helm-v3.7.1-linux-arm64.tar.gz
+wget https://get.helm.sh/helm-v3.7.1-linux-amd64.tar.gz
 tar -xf helm-v3.7.1-linux-arm64.tar.gz
 mv linux-amd64/helm /usr/local/bin/helm
 
