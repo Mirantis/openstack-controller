@@ -104,6 +104,10 @@ admission:
   cluster_domain_suffix: cluster.local
 
 node_maintenance:
+  create_crd: false
+
+  # when not enabled, we will not handle instance migration but will still process
+  # maintanance API objects.
   enabled: false
 
   # webhook needs to run with TLS. By default certificates are generated automatically,

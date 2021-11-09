@@ -18,6 +18,7 @@ import kopf
 
 from openstack_controller import constants as const
 from openstack_controller import kube
+from openstack_controller import maintenance
 from openstack_controller import openstack_utils as ostutils
 from openstack_controller import settings
 from openstack_controller import utils
@@ -80,34 +81,23 @@ async def node_change_handler(body, reason, **kwargs):
     name = body["metadata"]["name"]
     LOG.info(f"Got event {reason} for node {name}")
     LOG.info(f"The node {name} changes are: {kwargs['diff']}")
-    if not kube.NodeWorkloadLock.definition_exists():
-        LOG.warning("No custom resource definition")
+    if not settings.OSCTL_NODE_MAINTENANCE_ENABLED:
+        LOG.warning("The maintenance API is not enabled.")
         return
     node = kube.Node(kube.api, body)
-    nwl = kube.NodeWorkloadLock.get(name)
-    if settings.OSCTL_NODE_MAINTENANCE_ENABLED:
-        if kube.NodeWorkloadLock.required_for_node(node):
-            kube.NodeWorkloadLock.ensure(name)
-        else:
-            if nwl:
-                await nwl.purge()
-    # NOTE(vsaienko) purge lock if exists but controller is not enabled
-    # for more details see https://mirantis.jira.com/browse/PRODX-16884
+    nwl = maintenance.NodeWorkloadLock.get_resource(name)
+    if nwl.required_for_node(node):
+        nwl.present()
     else:
-        if nwl:
-            await nwl.purge()
+        LOG.info(
+            f"We do not have OS workloads on node {name} anymore. Remove NodeWorkloadLock."
+        )
+        nwl.absent()
 
 
 @kopf.on.delete("", "v1", "nodes")
 async def node_delete_handler(body, **kwargs):
     name = body["metadata"]["name"]
     LOG.info(f"Got delete event for node {name}")
-    nwl = kube.NodeWorkloadLock.get(name)
-    if nwl:
-        await nwl.purge()
-    node = kube.Node(kube.api, body)
-    if node.has_role(const.NodeRole.compute):
-        LOG.info(
-            f"Notifying HA service on OpenStack compute host {node.name} down."
-        )
-        await ostutils.notify_masakari_host_down(node)
+    nwl = maintenance.NodeWorkloadLock.get_resource(name)
+    nwl.absent()

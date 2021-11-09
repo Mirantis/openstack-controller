@@ -1,6 +1,5 @@
 import asyncio
 from dataclasses import dataclass
-from hashlib import sha256
 import inspect
 import json
 import sys
@@ -397,94 +396,6 @@ class Node(pykube.Node):
             if self.labels.get(k) == v:
                 return True
         return False
-
-
-class NodeWorkloadLock(pykube.objects.APIObject, HelmBundleMixin):
-    version = "lcm.mirantis.com/v1alpha1"
-    endpoint = "nodeworkloadlocks"
-    kind = "NodeWorkloadLock"
-    workload = "openstack"
-
-    @classmethod
-    def definition_exists(cls):
-        name = cls.endpoint + "." + cls.version.split("/")[0]
-        return find(
-            pykube.CustomResourceDefinition, name, silent=True, cluster=True
-        )
-
-    @classmethod
-    def _lock_name(cls, node):
-        hash = sha256(node.encode()).hexdigest()[:8]
-        return f"{cls.workload}-{hash}"
-
-    @classmethod
-    def ensure(cls, node):
-        name = cls._lock_name(node)
-        obj = find(cls, name, silent=True)
-        if not obj:
-            LOG.info(f"Node workload lock not found {name}")
-            data = {
-                "apiVersion": cls.version,
-                "kind": cls.kind,
-                "metadata": {
-                    "name": name,
-                },
-                "spec": {
-                    "nodeName": node,
-                    "controllerName": cls.workload,
-                },
-            }
-            obj = cls(api, data)
-            obj.create()
-            obj.set_state("active")
-            LOG.info(f"Node workload created {name} {data}")
-        return obj
-
-    @classmethod
-    def get(cls, node):
-        name = cls._lock_name(node)
-        return find(cls, name, silent=True)
-
-    @classmethod
-    def get_all(cls):
-        return (
-            o
-            for o in cls.objects(api)
-            if o.obj["spec"]["controllerName"] == cls.workload
-        )
-
-    @staticmethod
-    def required_for_node(node: Node) -> bool:
-        for role in (const.NodeRole.compute, const.NodeRole.gateway):
-            if node.has_role(role):
-                return True
-        return False
-
-    def is_active(self):
-        if self.get_inner_state():
-            return False
-        return self.obj["status"]["state"] == "active"
-
-    def is_maintenance(self):
-        if self.get_inner_state():
-            return False
-        return self.obj["status"]["state"] == "inactive"
-
-    def set_state(self, state):
-        self.patch({"status": {"state": state}}, subresource="status")
-
-    def set_inner_state(self, state):
-        self.patch({"metadata": {"annotations": {"inner_state": state}}})
-
-    def get_inner_state(self):
-        return self.obj["metadata"].get("annotations", {}).get("inner_state")
-
-
-class NodeMaintenanceRequest(pykube.objects.APIObject, HelmBundleMixin):
-    version = "lcm.mirantis.com/v1alpha1"
-    endpoint = "nodemaintenancerequests"
-    kind = "NodeMaintenanceRequest"
-    kopf_on_args = *version.split("/"), endpoint
 
 
 class RedisFailover(pykube.objects.NamespacedAPIObject):

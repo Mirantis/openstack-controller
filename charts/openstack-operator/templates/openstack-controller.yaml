@@ -411,7 +411,7 @@ spec:
             - '-P'
             - openstack-controller.nodemaintenancerequest
             - '-m'
-            - openstack_controller.controllers.node_maintenance_request
+            - openstack_controller.controllers.maintenance
             - '-m'
             - openstack_controller.controllers.probe
             - '-L'

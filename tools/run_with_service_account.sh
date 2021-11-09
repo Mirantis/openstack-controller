@@ -15,7 +15,7 @@ available_controllers=(
     "-m openstack_controller.controllers.secrets"
     "-m openstack_controller.controllers.health"
     "-m openstack_controller.controllers.probe"
-    "-m openstack_controller.controllers.node_maintenance_request"
+    "-m openstack_controller.controllers.maintenance"
     "-m openstack_controller.controllers.openstackdeploymentstatus"
 )
 

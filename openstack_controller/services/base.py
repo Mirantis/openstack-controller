@@ -1,3 +1,4 @@
+from abc import abstractmethod
 import asyncio
 import base64
 import json
@@ -99,6 +100,10 @@ class Service:
     _service_accounts = []
     _required_accounts = {}
     _secret_class = secrets.OpenStackServiceSecret
+
+    @property
+    def maintenance_api(self):
+        return isinstance(self, MaintenanceApiMixin)
 
     @property
     def service_accounts(self) -> List[str]:
@@ -634,22 +639,6 @@ class Service:
             openstack_version=openstack_version,
         )
 
-    @classmethod
-    async def remove_node_from_scheduling(cls, node):
-        pass
-
-    @classmethod
-    async def prepare_for_node_reboot(cls, node):
-        pass
-
-    @classmethod
-    async def prepare_node_after_reboot(cls, node):
-        pass
-
-    @classmethod
-    async def add_node_to_scheduling(cls, node):
-        pass
-
     def healthy(self, statuses):
         if not hasattr(self, "health_groups"):
             LOG.info("Service %s has no health groups", self)
@@ -669,6 +658,40 @@ class Service:
             except KeyError:
                 return False
         return True
+
+
+class MaintenanceApiMixin:
+    @classmethod
+    @abstractmethod
+    async def remove_node_from_scheduling(cls, node):
+        pass
+
+    @classmethod
+    @abstractmethod
+    async def prepare_node_for_reboot(cls, node):
+        pass
+
+    @classmethod
+    @abstractmethod
+    async def prepare_node_after_reboot(cls, node):
+        pass
+
+    @classmethod
+    @abstractmethod
+    async def add_node_to_scheduling(cls, node):
+        pass
+
+    @classmethod
+    async def process_nmr(cls, node, nmr):
+        await cls.remove_node_from_scheduling(node)
+        if nmr.is_reboot_possible():
+            LOG.info(f"The reboot is possible, migrating workloads")
+            await cls.prepare_node_for_reboot(node)
+
+    @classmethod
+    async def delete_nmr(cls, node, nmr):
+        await cls.prepare_node_after_reboot(node)
+        await cls.add_node_to_scheduling(node)
 
 
 class OpenStackService(Service):

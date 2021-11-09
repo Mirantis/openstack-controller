@@ -28,31 +28,32 @@ from openstack_controller import utils
 
 LOG = utils.get_logger(__name__)
 
+ADMIN_CREDS = None
 
-async def get_keystone_admin_creds():
-    def get_keystone_admin_secret():
-        return kube.resource_list(
-            pykube.Secret,
-            None,
-            settings.OSCTL_OS_DEPLOYMENT_NAMESPACE,
-        ).get_or_none(name=constants.COMPUTE_NODE_CONTROLLER_SECRET_NAME)
 
-    try:
-        keystone_secret = await asyncio.wait_for(
-            utils.async_retry(get_keystone_admin_secret),
-            timeout=300,
-        )
-    except asyncio.TimeoutError:
+def get_keystone_admin_creds():
+
+    global ADMIN_CREDS
+    if ADMIN_CREDS:
+        return ADMIN_CREDS
+
+    keystone_secret = kube.resource_list(
+        pykube.Secret,
+        None,
+        settings.OSCTL_OS_DEPLOYMENT_NAMESPACE,
+    ).get_or_none(name=constants.COMPUTE_NODE_CONTROLLER_SECRET_NAME)
+
+    if keystone_secret is None:
         raise kopf.TemporaryError(
-            "keystone admin secret not found, can not discover the newly "
-            "added compute host"
+            "Keystone admin secret not found, can not get keystone admin creds."
         )
-    creds = {}
+    ADMIN_CREDS = {}
     for k, v in keystone_secret.obj["data"].items():
-        creds[
+        ADMIN_CREDS[
             (k[3:] if k.startswith("OS_") else k).lower()
         ] = base64.b64decode(v).decode("utf-8")
-    return creds
+
+    return ADMIN_CREDS
 
 
 async def find_nova_cell_setup_cron_job(node_uid):
@@ -85,69 +86,62 @@ async def find_nova_cell_setup_cron_job(node_uid):
     return job
 
 
-async def get_openstack_connection():
-    creds = await get_keystone_admin_creds()
-    return openstack.connect(**creds)
+class OpenStackClientManager:
+    def __init__(self, creds=None):
+        if not creds:
+            creds = get_keystone_admin_creds()
+        self.oc = openstack.connect(**creds)
 
+    def compute_get_services(self, host=None, binary="nova-compute"):
+        return list(self.oc.compute.services(host=host, binary=binary))
 
-def get_single_service(os_connection, host=None, binary="nova-compute"):
-    services = list(os_connection.compute.services(host=host, binary=binary))
-    if len(services) == 1:
-        return services[0]
+    def compute_ensure_service_enabled(self, service):
+        if service["status"].lower() != "enabled":
+            self.oc.compute.enable_service(service)
 
+    def compute_ensure_service_disabled(self, service, disabled_reason=None):
+        if service["status"].lower() != "disabled":
+            self.oc.compute.disable_service(service, disabled_reason)
 
-async def migrate_servers(
-    *,
-    openstack_connection,
-    migrate_func,
-    servers,
-    migrating_off,
-    concurrency=None,
-):
-    if concurrency is None:
-        concurrency = len(servers)
-    groups = utils.divide_into_groups_of(concurrency, servers)
-    for group in groups:
-        for server in group:
-            migrate_func(server)
-            # TODO(vdrok): if, at this point, the controller gets restarted,
-            # but it already started the migration, the retry of the handler
-            # will fail as servers already started migrating, and they can not
-            # accept another live migrate task anymore. Handle this by looking
-            # at the error message, it should contain something like
-            # "Cannot 'os-migrateLive' instance ...  while it is in
-            # task_state migrating"
+    def compute_get_all_servers(self, host=None, status=None):
+        filters = {}
+        if host:
+            filters["host"] = host
+        if status:
+            filters["status"] = status
+        return self.oc.list_servers(
+            detailed=False, all_projects=True, filters=filters
+        )
 
-        def wait_all_servers_have_migrated():
-            current_servers = [
-                openstack_connection.compute.get_server(s) for s in group
-            ]
-            LOG.info(
-                f"Migrating servers, they currently are in state: "
-                f"{[(s.hypervisor_hostname, s.status) for s in current_servers]}"
+    def compute_get_servers_valid_for_live_migration(self, host=None):
+        servers = []
+        for status in ["ACTIVE", "PAUSED"]:
+            servers.extend(
+                list(self.compute_get_all_servers(host=host, status=status))
             )
-            # TODO(vdrok): if any of the servers fall into error state,
-            #              stop immediately and don't retry
-            return all(
-                s.hypervisor_hostname != migrating_off and s.status == "ACTIVE"
-                for s in current_servers
-            )
+        servers = [s for s in servers if s.task_state != "migrating"]
+        return servers
 
-        try:
-            await asyncio.wait_for(
-                utils.async_retry(wait_all_servers_have_migrated),
-                timeout=300,
-            )
-        except asyncio.TimeoutError:
-            raise kopf.PermanentError(
-                "Can not move instances off of deleted host"
-            )
+    def compute_get_servers_in_migrating_state(self, host=None):
+        return self.compute_get_all_servers(host=host, status="MIGRATING")
+
+    def instance_ha_create_notification(
+        self, type, hostname, payload, generated_time=None
+    ):
+        if not generated_time:
+            generated_time = datetime.utcnow().isoformat(timespec="seconds")
+        return self.oc.instance_ha.create_notification(
+            type=type,
+            hostname=hostname,
+            generated_time=generated_time,
+            payload=payload,
+        )
 
 
 async def notify_masakari_host_down(node):
     try:
-        cloud = await get_openstack_connection()
-        notification = cloud.instance_ha.create_notification(
+        os_client = OpenStackClientManager()
+        notification = os_client.instance_ha_create_notification(
             type="COMPUTE_HOST",
             hostname=node.name,
             generated_time=datetime.utcnow().isoformat(timespec="seconds"),

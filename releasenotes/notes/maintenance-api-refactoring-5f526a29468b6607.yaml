@@ -1,0 +1,6 @@
+---
+features:
+  - |
+    Refactor node mainteance API code to fully suport all required object
+    ``ClusterWorkloadLock``, ``ClusterMaintenanceRequest``, ``NodeWorkloadLock``
+    and ``NodeMaintenanceRequest``.
