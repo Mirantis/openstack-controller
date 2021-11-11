@@ -565,7 +565,6 @@ class Service:
             proxy_secret = secrets.ProxySecret()
             proxy_secret.wait()
             domain_names = [
-                self.mspec["public_domain_name"],
                 self.mspec["internal_domain_name"],
             ]
             proxy_vars = proxy_secret.get_proxy_vars(no_proxy=domain_names)
