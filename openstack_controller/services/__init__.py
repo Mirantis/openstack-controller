@@ -1280,10 +1280,10 @@ class Nova(OpenStackServiceWithCeph, MaintenanceApiMixin):
                     srv = servers_to_migrate.pop()
                     LOG.info(f"Starting migration for {srv.id}")
                     try:
-                        os_client.oc.compute.live_migrate_server(srv)
                         servers_migrating_count[srv.id] = (
                             servers_migrating_count.get(srv.id, 1) + 1
                         )
+                        os_client.oc.compute.live_migrate_server(srv)
                         # NOTE(vsaienko): do not call API extensively, give some time for API
                         # to set correct status for instance.
                         await asyncio.sleep(5)
