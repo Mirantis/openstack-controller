@@ -144,7 +144,7 @@ services:
             neutron:
               timeout: 300
             filter_scheduler:
-              host_subset_size: 30
+              host_subset_size: 3
             oslo_messaging_rabbit:
               rabbit_qos_prefetch_count: 64
   networking:
