@@ -575,6 +575,11 @@ spec:
           service_providers:
             service_provider: BGPVPN:BaGPipe:networking_bgpvpn.neutron.services.service_drivers.bagpipe.bagpipe_v2.BaGPipeBGPVPNDriver:default
           {%- endif %}
+          # TODO: option will be removed in Yoga, it will be default behavior.
+          {%- if spec.openstack_version not in ['queens', 'rocky', 'stein', 'train', 'ussuri'] %}
+          nova:
+            live_migration_events: true
+          {%- endif %}
         logging:
           logger_neutron:
             level: {{ spec.get('features', {}).get('logging', {}).get('neutron', {}).get('level', 'INFO') }}
