@@ -379,46 +379,52 @@ spec:
         nova_compute:
           labels:
             compute::migration_interface:
-              conf:
-                libvirt:
-                  live_migration_interface: 'live01'
-                hypervisor:
-                  host_interface: 'live01'
+              values:
+                conf:
+                  libvirt:
+                    live_migration_interface: 'live01'
+                  hypervisor:
+                    host_interface: 'live01'
             compute::local_migration_interface:
-              conf:
-                nova:
+              values:
+                conf:
+                  nova:
+                    libvirt:
+                      images_type: 'qcow2'
                   libvirt:
-                    images_type: 'qcow2'
-                libvirt:
-                  live_migration_interface: 'live01'
-                hypervisor:
-                  host_interface: 'live01'
+                    live_migration_interface: 'live01'
+                  hypervisor:
+                    host_interface: 'live01'
             compute::local_sriov_disabled:
-              conf:
-                nova:
-                  libvirt:
-                    images_type: 'qcow2'
+              values:
+                conf:
+                  nova:
+                    libvirt:
+                      images_type: 'qcow2'
             compute::local:
-              conf:
-                nova:
-                  libvirt:
-                    images_type: 'qcow2'
+              values:
+                conf:
+                  nova:
+                    libvirt:
+                      images_type: 'qcow2'
             compute::lvm_custom:
-              conf:
-                nova:
-                  libvirt:
-                    images_type: 'lvm'
-                    images_volume_group: 'override-group'
+              values:
+                conf:
+                  nova:
+                    libvirt:
+                      images_type: 'lvm'
+                      images_volume_group: 'override-group'
             compute::lvm_custom_encryption:
-              conf:
-                nova:
-                  libvirt:
-                    images_type: 'lvm'
-                    images_volume_group: 'override-group'
-                  ephemeral_storage_encryption:
-                    enabled: true
-                    cipher: "foo"
-                    key_size: 123
+              values:
+                conf:
+                  nova:
+                    libvirt:
+                      images_type: 'lvm'
+                      images_volume_group: 'override-group'
+                    ephemeral_storage_encryption:
+                      enabled: true
+                      cipher: "foo"
+                      key_size: 123
       pod:
         probes:
           compute:

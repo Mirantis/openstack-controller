@@ -197,9 +197,8 @@ spec:
           {%- set nova_override = override.get("nova", {}) %}
           {%- if neutron_override.get("sriov", {}).get("enabled", False) or nova_override %}
             {{ label }}:
-          {%- endif %}
-          {%- if neutron_override.get("sriov", {}).get("enabled", False) %}
               values:
+          {%- if neutron_override.get("sriov", {}).get("enabled", False) %}
                 network:
                   backend:
                     - sriovnicswitch
@@ -241,6 +240,7 @@ spec:
                   hypervisor:
                     host_interface: {{ nova_override.live_migration_interface }}
             {%- endif %}
+          {%- endif %}
           {%- endif %}
 
         {%- endfor %}
