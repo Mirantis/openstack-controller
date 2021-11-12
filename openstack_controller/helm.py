@@ -33,12 +33,15 @@ class HelmManager:
         self.binary = binary
         self.namespace = namespace
         self.max_history = str(history_max)
-        self.env = dict(os.environ).update(
+        os_env = os.environ
+        os_env.update(
             {
                 "HELM_NAMESPACE": namespace,
                 "HELM_MAX_HISTORY": str(history_max),
             }
         )
+
+        self.env = os_env
 
     def _substitute_local_proxy(self, repo):
         node_ip = os.environ["NODE_IP"]
