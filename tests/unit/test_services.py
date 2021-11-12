@@ -268,22 +268,11 @@ def node_maintenance_config(mocker):
     mocker.stopall()
 
 
-@pytest.fixture
-def find_nova_cell_setup_cron_job(mocker):
-    mock_get_creds = mocker.patch(
-        "openstack_controller.openstack_utils.find_nova_cell_setup_cron_job",
-        AsyncMock(return_value={"metadata": {"name": "buzz"}}),
-    )
-    yield mock_get_creds
-    mocker.stopall()
-
-
 @pytest.mark.asyncio
 async def test_nova_prepare_node_after_reboot(
     mocker,
     openstack_client,
     kube_resource_list,
-    find_nova_cell_setup_cron_job,
     kopf_adopt,
 ):
     mocker.patch("openstack_controller.kube.get_osdpl", mock.MagicMock())
@@ -303,7 +292,6 @@ async def test_nova_prepare_node_after_reboot_not_compute(
     get_keystone_admin_creds,
     openstack_client,
     kube_resource_list,
-    find_nova_cell_setup_cron_job,
     kopf_adopt,
 ):
     node_obj = copy.deepcopy(NODE_OBJ)

@@ -12,7 +12,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import asyncio
 import base64
 from datetime import datetime
 
@@ -54,36 +53,6 @@ def get_keystone_admin_creds():
         ] = base64.b64decode(v).decode("utf-8")
 
     return ADMIN_CREDS
-
-
-async def find_nova_cell_setup_cron_job(node_uid):
-    def get_nova_cell_setup_job():
-        return kube.resource_list(
-            pykube.CronJob, None, settings.OSCTL_OS_DEPLOYMENT_NAMESPACE
-        ).get_or_none(name="nova-cell-setup")
-
-    try:
-        cronjob = await asyncio.wait_for(
-            utils.async_retry(get_nova_cell_setup_job), timeout=300
-        )
-    except asyncio.TimeoutError:
-        raise kopf.TemporaryError(
-            "nova-cell-setup cron job not found, can not discover the "
-            "newly added compute host"
-        )
-    job = {
-        "metadata": {
-            "name": f"nova-cell-setup-online-{node_uid}",
-            "namespace": settings.OSCTL_OS_DEPLOYMENT_NAMESPACE,
-            "annotations": cronjob.obj["metadata"]["annotations"],
-            "labels": cronjob.obj["spec"]["jobTemplate"]["metadata"]["labels"],
-        },
-        "spec": cronjob.obj["spec"]["jobTemplate"]["spec"],
-    }
-    job["spec"]["backoffLimit"] = 10
-    job["spec"]["ttlSecondsAfterFinished"] = 60
-    job["spec"]["template"]["spec"]["restartPolicy"] = "OnFailure"
-    return job
 
 
 class OpenStackClientManager:

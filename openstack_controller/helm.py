@@ -40,7 +40,6 @@ class HelmManager:
                 "HELM_MAX_HISTORY": str(history_max),
             }
         )
-
         self.env = os_env
 
     def _substitute_local_proxy(self, repo):

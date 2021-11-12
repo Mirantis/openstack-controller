@@ -78,43 +78,6 @@ async def test_get_keystone_admin_creds_multiple_times(kube_resource_list):
 
 
 @pytest.mark.asyncio
-async def test_find_nova_cell_setup_cron_job(kube_resource_list):
-    kube_resource_list.return_value.get_or_none.return_value = mock.Mock(
-        obj={
-            "metadata": {"annotations": ["foo"]},
-            "spec": {
-                "jobTemplate": {
-                    "spec": {"template": {"spec": {}}},
-                    "metadata": {"labels": ["buzz"]},
-                }
-            },
-        }
-    )
-    res = await openstack_utils.find_nova_cell_setup_cron_job(node_uid="bar")
-    assert {
-        "metadata": {
-            "name": "nova-cell-setup-online-bar",
-            "namespace": "openstack",
-            "annotations": ["foo"],
-            "labels": ["buzz"],
-        },
-        "spec": {
-            "backoffLimit": 10,
-            "ttlSecondsAfterFinished": 60,
-            "template": {"spec": {"restartPolicy": "OnFailure"}},
-        },
-    } == res
-
-
-@pytest.mark.asyncio
-async def test_find_nova_cell_setup_cron_job_timeout(
-    kube_resource_list, asyncio_wait_for_timeout
-):
-    with pytest.raises(kopf.TemporaryError):
-        await openstack_utils.find_nova_cell_setup_cron_job(node_uid="ff")
-
-
-@pytest.mark.asyncio
 async def test_openstack_client_no_creds(mocker, openstack_connect):
     get_keystone_creds_mock = mocker.patch.object(
         openstack_utils, "get_keystone_admin_creds"
