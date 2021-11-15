@@ -160,6 +160,10 @@ class Service:
         }
         return res
 
+    @property
+    def health_groups(self):
+        return []
+
     def _get_generic_child_objects(self):
         res = []
         for chart, items in self._child_generic_objects.items():
@@ -633,26 +637,6 @@ class Service:
             ["images", "tags", name],
             openstack_version=openstack_version,
         )
-
-    def healthy(self, statuses):
-        if not hasattr(self, "health_groups"):
-            LOG.info("Service %s has no health groups", self)
-            return True
-        for health_group in self.health_groups:
-            LOG.info(
-                "Checking health group %s for service %s", health_group, self
-            )
-            if health_group not in statuses:
-                LOG.info("Health group %s not found", health_group)
-                return False
-            try:
-                for component, values in statuses[health_group].items():
-                    if values["status"].lower() != "ready":
-                        LOG.info("Component is not ready %s", component)
-                        return False
-            except KeyError:
-                return False
-        return True
 
 
 class MaintenanceApiMixin:
