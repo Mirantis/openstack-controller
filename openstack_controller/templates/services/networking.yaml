@@ -264,6 +264,7 @@ spec:
     "neutron_l3",
     "neutron_sriov_agent_init",
     "bootstrap",
+    "neutron_bootstrap",
     "neutron_ironic_agent",
     "neutron_sriov_agent",
     "rabbit_init",
@@ -521,6 +522,7 @@ spec:
           openstack router show {{ floating_network.get('router', {}).get('name', 'r1') }} || openstack router create {{ floating_network.get('router', {}).get('name', 'r1') }}
           openstack router set --external-gateway {{ floating_network.get('name', 'public') }} {{ floating_network.get('router', {}).get('name', 'r1') }}
           openstack network set {{ floating_network.get('name', 'public') }} --external {% if not tungstenfabric_enabled %} --default {% endif %}
+        floating_network: {{ floating_network }}
       {%- endif %}
       conf:
         policy.d:

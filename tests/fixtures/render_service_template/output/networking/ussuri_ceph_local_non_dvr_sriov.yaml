@@ -146,6 +146,14 @@ spec:
           \ 10.11.12.39 \\\n  --network public\nopenstack router show r1 || openstack\
           \ router create r1\nopenstack router set --external-gateway public r1\n\
           openstack network set public --external  --default \n"
+        floating_network:
+          enabled: true
+          physnet: physnet1
+          subnet:
+            gateway: 10.11.12.39
+            pool_end: 10.11.12.200
+            pool_start: 10.11.12.100
+            range: 10.11.12.0/24
       conf:
         policy.d:
           01-controller-default.yaml: {'networking_rule1': 'networking_value1'}
