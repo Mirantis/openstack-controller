@@ -29,6 +29,7 @@ spec:
                 draft:
                   type: boolean
                   description: trigger to process osdpl resource
+                  default: false
                 artifacts:
                   type: object
                   properties:
@@ -1115,9 +1116,6 @@ spec:
       - name: Draft
         type: boolean
         jsonPath: .spec.draft
-      - name: Deployed
-        type: boolean
-        jsonPath: .status.deployed
   # either Namespaced or Cluster
   scope: Namespaced
   names:

@@ -56,5 +56,5 @@ def update_health_statuses():
         osdpl.name, osdpl.namespace
     )
     statuses = get_health_statuses(osdpl)
-    health.set_multi_application_health(osdpl, statuses, osdplst)
+    health.set_multi_application_health(osdplst, statuses)
     LOG.info("Health statuses updated %d", len(statuses))

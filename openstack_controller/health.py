@@ -80,10 +80,8 @@ def ident(meta):
     return application, component
 
 
-def set_multi_application_health(osdpl, patch, osdplst):
+def set_multi_application_health(osdplst, patch):
     LOG.debug(f"Set multi application health")
-    # TODO(vsaienko): remove after deprecation period
-    osdpl.patch({"status": {"health": patch}})
     osdplst.set_osdpl_health(patch)
 
 

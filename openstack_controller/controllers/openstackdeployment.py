@@ -257,9 +257,11 @@ async def handle(body, meta, spec, logger, reason, **kwargs):
 
     await run_task(task_def)
 
-    # If we got here, we installed all releases successfully.
-    # TODO(vsaienko): remove legacy status
-    kwargs["patch"]["status"]["deployed"] = True
+    # TODO(vsaienko): remove when release boundary passed. Cleanup status from osdpl
+    # object.
+    kwargs["patch"]["status"]["health"] = None
+    kwargs["patch"]["status"]["children"] = None
+    kwargs["patch"]["status"]["deployed"] = None
     osdplst.set_osdpl_status(
         osdplstatus.APPLIED, body["spec"], kwargs["diff"], reason
     )
