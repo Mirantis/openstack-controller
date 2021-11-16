@@ -452,10 +452,6 @@ class Service:
         delete_status = ("Deleting",)
         deleted_status = (None,)
 
-        # TODO(vsaienko): remove legacy status
-        status_patch = {"children": {self.resource_name: status}}
-        self.update_status(status_patch)
-
         osdpl_spec = self.osdpl.obj["spec"]
         if status in apply_statuses:
             self.osdplst.set_service_status(self.service, APPLYING, osdpl_spec)

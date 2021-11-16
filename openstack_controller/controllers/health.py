@@ -7,6 +7,7 @@ from openstack_controller import hooks
 from openstack_controller import kube
 from openstack_controller import settings  # noqa
 from openstack_controller import utils
+from openstack_controller import osdplstatus
 
 
 LOG = utils.get_logger(__name__)
@@ -28,13 +29,6 @@ DAEMONSET_HOOKS = {
 }
 
 
-def _delete(osdpl, kind, meta, application, component):
-    LOG.info(f"Handling delete event for {kind}")
-    name = meta["name"]
-    LOG.debug(f"Cleaning health for {kind} {name}")
-    osdpl.patch({"status": {"health": {application: {component: None}}}})
-
-
 @kopf.on.delete("apps", "v1", "deployments")
 @utils.collect_handler_metrics
 async def deployments(name, namespace, meta, status, new, reason, **kwargs):
@@ -42,8 +36,11 @@ async def deployments(name, namespace, meta, status, new, reason, **kwargs):
     osdpl = kube.get_osdpl(namespace)
     if not osdpl:
         return
+    osdplst = osdplstatus.OpenStackDeploymentStatus(
+        osdpl.name, osdpl.namespace
+    )
     application, component = health.ident(meta)
-    _delete(osdpl, "Deployment", meta, application, component)
+    osdplst.remove_osdpl_service_health(application, component)
 
 
 @kopf.on.delete("apps", "v1", "statefulsets")
@@ -53,8 +50,11 @@ async def statefulsets(name, namespace, meta, status, reason, **kwargs):
     osdpl = kube.get_osdpl(namespace)
     if not osdpl:
         return
+    osdplst = osdplstatus.OpenStackDeploymentStatus(
+        osdpl.name, osdpl.namespace
+    )
     application, component = health.ident(meta)
-    _delete(osdpl, "StatefulSet", meta, application, component)
+    osdplst.remove_osdpl_service_health(application, component)
 
 
 @kopf.on.field("apps", "v1", "daemonsets", field="status")
@@ -67,7 +67,10 @@ async def daemonsets(name, namespace, meta, status, reason, **kwargs):
         return
     application, component = health.ident(meta)
     if reason == "delete":
-        _delete(osdpl, "DaemonSet", meta, application, component)
+        osdplst = osdplstatus.OpenStackDeploymentStatus(
+            osdpl.name, osdpl.namespace
+        )
+        osdplst.remove_osdpl_service_health(application, component)
         return
     res_health = health.daemonset_health_status(kwargs["body"])
     prev_res_health = utils.get_in(
