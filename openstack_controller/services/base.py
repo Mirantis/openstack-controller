@@ -669,6 +669,29 @@ class MaintenanceApiMixin:
 
     @classmethod
     async def delete_nmr(cls, node, nmr):
+        LOG.info(f"Waiting for {node.name} is ready.")
+        while True:
+            if not node.ready:
+                LOG.info(f"The node {node.name} is not ready yet.")
+                await asyncio.sleep(10)
+                continue
+            LOG.info(f"The node {node.name} is ready.")
+            break
+
+        LOG.info(f"Waiting for pods ready on node {node.name}.")
+        while True:
+            LOG.info(f"Waiting for pods ready on node {node.name}.")
+            node_pods = node.get_pods(
+                namespace=settings.OSCTL_OS_DEPLOYMENT_NAMESPACE
+            )
+            not_ready_pods = [pod.name for pod in node_pods if not pod.ready]
+            if not_ready_pods:
+                LOG.info(f"The pods {not_ready_pods} are not ready.")
+                await asyncio.sleep(10)
+                continue
+            LOG.info(f"All pods are ready on node {node.name}.")
+            break
+
         await cls.prepare_node_after_reboot(node)
         await cls.add_node_to_scheduling(node)
 

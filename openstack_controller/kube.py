@@ -378,15 +378,18 @@ class Node(pykube.Node):
                 return True
         return False
 
-    def remove_pods(self, namespace=None):
+    def get_pods(self, namespace=None):
         pods = Pod.objects(api).filter(namespace=namespace)
+        pods = [
+            pod for pod in pods if pod.obj["spec"].get("nodeName") == self.name
+        ]
+        return pods
 
+    def remove_pods(self, namespace=None):
+        pods = self.get_pods(namespace=namespace)
         for pod in pods:
-            if pod.obj["spec"].get("nodeName") == self.name:
-                LOG.debug(f"Removing pod: {pod.name} from node: {self.name}")
-                pod.delete(
-                    propagation_policy="Background", grace_period_seconds=0
-                )
+            LOG.debug(f"Removing pod: {pod.name} from node: {self.name}")
+            pod.delete(propagation_policy="Background", grace_period_seconds=0)
 
     def has_role(self, role: const.NodeRole) -> bool:
         if role not in const.NodeRole:
