@@ -2,10 +2,13 @@ import asyncio
 from dataclasses import dataclass
 import logging
 
+import kopf
 import pykube
 
+from openstack_controller.services import base
 from openstack_controller import constants
 from openstack_controller import settings
+from openstack_controller import layers
 from openstack_controller import osdplstatus
 
 LOG = logging.getLogger(__name__)
@@ -99,9 +102,6 @@ def is_application_ready(application, osdpl):
             f"Application: {application} is not present in .status.health."
         )
         return False
-    # TODO(avolkov): this func may return false positive if not all components
-    #   of an app exists in k8s, it needs to be combined with
-    #   openstack_controller.services.base.Service.healthy
     elif all(
         [
             component_health["status"] == constants.OK
@@ -143,6 +143,24 @@ async def wait_application_ready(
         _wait_application_ready(application, osdpl, delay=delay),
         timeout=timeout,
     )
+
+
+async def wait_services_healthy(osdpl):
+    """Wait all openstack related services are healthy."""
+
+    services = [
+        base.Service.registry[i](osdpl.obj, LOG, {})
+        for i in layers.services(osdpl.obj["spec"], LOG)[0]
+    ]
+    for service in services:
+        try:
+            await service.wait_service_healthy()
+        except Exception as e:
+            LOG.info(
+                f"Time out waiting health for service {service.service}. Error: {e}",
+            )
+            raise kopf.TemporaryError("Services are not healthy")
+    return True
 
 
 def daemonset_health_status(obj):

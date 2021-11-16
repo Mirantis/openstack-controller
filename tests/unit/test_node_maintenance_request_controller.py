@@ -299,25 +299,3 @@ async def test_nmr_delete_nwl_in_maintenance(mocker, nova_registry_service):
     nwl.is_maintenance.assert_called()
     nwl.set_inner_state_inactive.assert_called_once()
     nwl.set_state_active.assert_called_once()
-
-
-@pytest.mark.asyncio
-async def test_check_services_not_healthy(fake_osdpl):
-    with pytest.raises(kopf.TemporaryError):
-        with mock.patch.object(kube, "get_osdpl", return_value=fake_osdpl):
-            await maintenance_controller.check_services_healthy()
-
-
-@pytest.mark.asyncio
-async def test_check_services_healthy(fake_osdpl, load_fixture):
-    statuses = load_fixture("check-service-health.yaml")
-    with mock.patch.object(
-        kube, "get_osdpl", return_value=fake_osdpl
-    ), mock.patch(
-        "openstack_controller.controllers.maintenance.get_health_statuses",
-        return_value=statuses,
-    ), mock.patch(
-        "openstack_controller.layers.services",
-        return_value=[["compute", "load-balancer"], []],
-    ):
-        assert await maintenance_controller.check_services_healthy()

@@ -2,12 +2,11 @@ import kopf
 
 from openstack_controller import kube
 from openstack_controller.services import base
+from openstack_controller import health
 from openstack_controller import settings
 from openstack_controller import utils
-from openstack_controller import layers
 from openstack_controller import maintenance
 from openstack_controller import osdplstatus
-from openstack_controller.batch_health import get_health_statuses
 
 
 LOG = utils.get_logger(__name__)
@@ -28,22 +27,6 @@ ORDERED_SERVICES = list(
 
 def maintenance_node_name(body):
     return body["spec"]["nodeName"].split(".")[0]
-
-
-async def check_services_healthy():
-    osdpl = kube.get_osdpl()
-    statuses = get_health_statuses(osdpl)
-    services = [
-        base.Service.registry[i](osdpl.obj, LOG, {})
-        for i in layers.services(osdpl.obj["spec"], LOG)[0]
-    ]
-    if not all(service.healthy(statuses) for service in services):
-        LOG.info(
-            "Some services are not healthy: %s",
-            [i.service for i in services if not i.healthy(statuses)],
-        )
-        raise kopf.TemporaryError("Services are not healthy")
-    return True
 
 
 @kopf.on.create(*maintenance.NodeMaintenanceRequest.kopf_on_args)
@@ -141,8 +124,8 @@ async def cluster_maintenance_request_change_handler(body, **kwargs):
         )
 
     cwl = maintenance.ClusterWorkloadLock.get_resource(osdpl_name)
-    if not await check_services_healthy():
-        kopf.TemporaryError("Waiting services to become healthy.")
+
+    await health.wait_services_healthy(osdpl)
 
     LOG.info(f"Releasing {name} ClusterWorkloadLock")
     cwl.set_state_inactive()
