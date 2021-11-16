@@ -640,60 +640,31 @@ class Service:
 
 
 class MaintenanceApiMixin:
-    @classmethod
     @abstractmethod
-    async def remove_node_from_scheduling(cls, node):
+    async def remove_node_from_scheduling(self, node):
         pass
 
-    @classmethod
     @abstractmethod
-    async def prepare_node_for_reboot(cls, node):
+    async def prepare_node_for_reboot(self, node):
         pass
 
-    @classmethod
     @abstractmethod
-    async def prepare_node_after_reboot(cls, node):
+    async def prepare_node_after_reboot(self, node):
         pass
 
-    @classmethod
     @abstractmethod
-    async def add_node_to_scheduling(cls, node):
+    async def add_node_to_scheduling(self, node):
         pass
 
-    @classmethod
-    async def process_nmr(cls, node, nmr):
-        await cls.remove_node_from_scheduling(node)
+    async def process_nmr(self, node, nmr):
+        await self.remove_node_from_scheduling(node)
         if nmr.is_reboot_possible():
             LOG.info(f"The reboot is possible, migrating workloads")
-            await cls.prepare_node_for_reboot(node)
+            await self.prepare_node_for_reboot(node)
 
-    @classmethod
-    async def delete_nmr(cls, node, nmr):
-        LOG.info(f"Waiting for {node.name} is ready.")
-        while True:
-            if not node.ready:
-                LOG.info(f"The node {node.name} is not ready yet.")
-                await asyncio.sleep(10)
-                continue
-            LOG.info(f"The node {node.name} is ready.")
-            break
-
-        LOG.info(f"Waiting for pods ready on node {node.name}.")
-        while True:
-            LOG.info(f"Waiting for pods ready on node {node.name}.")
-            node_pods = node.get_pods(
-                namespace=settings.OSCTL_OS_DEPLOYMENT_NAMESPACE
-            )
-            not_ready_pods = [pod.name for pod in node_pods if not pod.ready]
-            if not_ready_pods:
-                LOG.info(f"The pods {not_ready_pods} are not ready.")
-                await asyncio.sleep(10)
-                continue
-            LOG.info(f"All pods are ready on node {node.name}.")
-            break
-
-        await cls.prepare_node_after_reboot(node)
-        await cls.add_node_to_scheduling(node)
+    async def delete_nmr(self, node, nmr):
+        await self.prepare_node_after_reboot(node)
+        await self.add_node_to_scheduling(node)
 
 
 class OpenStackService(Service):

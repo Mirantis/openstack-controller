@@ -867,7 +867,7 @@ class Keystone(OpenStackService):
             await child_obj.enable(self.openstack_version, True)
 
 
-class Neutron(OpenStackService):
+class Neutron(OpenStackService, MaintenanceApiMixin):
     service = "networking"
     openstack_chart = "neutron"
     _secret_class = secrets.NeutronSecret
@@ -1049,6 +1049,58 @@ class Neutron(OpenStackService):
             tfs.save(secret_data)
 
         await super().apply(event, **kwargs)
+
+    async def remove_node_from_scheduling(self, node):
+        pass
+
+    async def prepare_node_for_reboot(self, node):
+        pass
+
+    async def prepare_node_after_reboot(self, node):
+        if (
+            utils.get_in(self.mspec["features"], ["neutron", "backend"])
+            == "tungstenfabric"
+        ):
+            return
+        neutron_roles = [
+            constants.NodeRole.compute,
+            constants.NodeRole.gateway,
+        ]
+        all_neutron_roles = []
+        for role in neutron_roles:
+            all_neutron_roles.append(node.has_role(constants.NodeRole.compute))
+        if not any(all_neutron_roles):
+            return
+
+        try:
+            os_client = openstack_utils.OpenStackClientManager()
+
+            def wait_for_agents_up():
+                network_agents = os_client.network_get_agents(
+                    host=node.name, is_alive=False
+                )
+                network_agents = [a.id for a in network_agents]
+                if network_agents:
+                    return False
+                return True
+
+            try:
+                await asyncio.wait_for(
+                    utils.async_retry(wait_for_agents_up),
+                    timeout=300,
+                )
+            except asyncio.TimeoutError:
+                raise kopf.TemporaryError(
+                    f"Timeout waiting for network agents on the host {node.name}."
+                )
+        except openstack.exceptions.SDKException as e:
+            LOG.error(f"Cannot execute openstack commands, error: {e}")
+            raise kopf.TemporaryError(
+                "Got error while waiting for network agents."
+            )
+
+    async def add_node_to_scheduling(self, node):
+        pass
 
 
 class Nova(OpenStackServiceWithCeph, MaintenanceApiMixin):
@@ -1232,8 +1284,7 @@ class Nova(OpenStackServiceWithCeph, MaintenanceApiMixin):
             await child_obj.purge()
             await child_obj.enable(self.openstack_version, True)
 
-    @classmethod
-    async def remove_node_from_scheduling(cls, node):
+    async def remove_node_from_scheduling(self, node):
         if not node.has_role(constants.NodeRole.compute):
             return
         try:
@@ -1248,8 +1299,7 @@ class Nova(OpenStackServiceWithCeph, MaintenanceApiMixin):
                 "Can not disable compute service on a host to be deleted"
             )
 
-    @classmethod
-    async def _migrate_servers(cls, os_client, host, cfg, concurrency=1):
+    async def _migrate_servers(self, os_client, host, cfg, concurrency=1):
         async def _check_migration_completed():
             all_servers = os_client.compute_get_all_servers(host=host)
             if all_servers:
@@ -1321,15 +1371,14 @@ class Nova(OpenStackServiceWithCeph, MaintenanceApiMixin):
 
         await _check_migration_completed()
 
-    @classmethod
-    async def prepare_node_for_reboot(cls, node):
+    async def prepare_node_for_reboot(self, node):
         if not node.has_role(constants.NodeRole.compute):
             return
         maintenance_cfg = maintenance.NodeMaintenanceConfig(node)
 
         try:
             os_client = openstack_utils.OpenStackClientManager()
-            await cls._migrate_servers(
+            await self._migrate_servers(
                 os_client=os_client,
                 host=node.name,
                 cfg=maintenance_cfg,
@@ -1339,8 +1388,7 @@ class Nova(OpenStackServiceWithCeph, MaintenanceApiMixin):
             LOG.error(f"Cannot execute openstack commands, error: {e}")
             raise kopf.TemporaryError("Retrying migrate instances from host.")
 
-    @classmethod
-    async def prepare_node_after_reboot(cls, node):
+    async def prepare_node_after_reboot(self, node):
         if not node.has_role(constants.NodeRole.compute):
             return
         try:
@@ -1369,10 +1417,8 @@ class Nova(OpenStackServiceWithCeph, MaintenanceApiMixin):
             raise kopf.TemporaryError(
                 "can not discover the newly added compute host"
             )
-        # TODO(vsaienko): implement run create-cell job only when new node is added PRODX-19310
 
-    @classmethod
-    async def add_node_to_scheduling(cls, node):
+    async def add_node_to_scheduling(self, node):
         if not node.has_role(constants.NodeRole.compute):
             return
         try:
