@@ -7,6 +7,8 @@
           sources:
             - events:
                 - '*'
+                - '!audit.http.request'
+                - '!audit.http.response'
               name: event_source
               sinks:
                 - event_sink
