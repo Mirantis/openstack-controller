@@ -1,3 +1,5 @@
+import asyncio
+
 import kopf
 
 from openstack_controller import kube
@@ -13,7 +15,7 @@ LOG = utils.get_logger(__name__)
 
 # Higher value means that component's prepare-usage handlers will be called
 # later and prepare-shutdown handlers - sooner
-SERVICE_ORDER = {"compute": 100}
+SERVICE_ORDER = {"compute": 100, "networking": 120}
 ORDERED_SERVICES = list(
     sorted(
         filter(
@@ -54,14 +56,21 @@ async def node_maintenance_request_change_handler(body, **kwargs):
             f"Inactive NodeWorkloadLocks for openstack detected, "
             f"deferring processing for node {node.name}"
         )
+
+    osdpl = kube.get_osdpl()
+    if not osdpl or not osdpl.exists():
+        LOG.info("Can't find OpenStackDeployment object")
+        return
+
     if nwl.is_active():
         nwl.set_inner_state_active()
         for service, service_class in ORDERED_SERVICES:
-            if service_class.maintenance_api:
+            service = service_class(osdpl.obj, LOG, {})
+            if service.maintenance_api:
                 LOG.info(
                     f"Got moving node {node_name} into maintenance for {service_class.service}"
                 )
-                await service_class.process_nmr(node, nmr)
+                await service.process_nmr(node, nmr)
                 LOG.info(
                     f"The node {node_name} is ready for maintenance for {service_class.service}"
                 )
@@ -81,13 +90,39 @@ async def node_maintenance_request_delete_handler(body, **kwargs):
         nwl.absent()
         return
 
+    osdpl = kube.get_osdpl()
+    if not osdpl or not osdpl.exists():
+        LOG.info("Can't find OpenStackDeployment object")
+        return
+
     if nwl.is_maintenance():
-        for service, service_class in ORDERED_SERVICES:
-            if service_class.maintenance_api:
+        LOG.info(f"Waiting for {node.name} is ready.")
+        while True:
+            if not node.ready:
+                LOG.info(f"The node {node.name} is not ready yet.")
+                await asyncio.sleep(10)
+                continue
+            LOG.info(f"The node {node.name} is ready.")
+            break
+
+        while True:
+            LOG.info(f"Waiting for pods ready on node {node.name}.")
+            node_pods = node.get_pods(namespace=osdpl.namespace)
+            not_ready_pods = [pod.name for pod in node_pods if not pod.ready]
+            if not_ready_pods:
+                LOG.info(f"The pods {not_ready_pods} are not ready.")
+                await asyncio.sleep(10)
+                continue
+            LOG.info(f"All pods are ready on node {node.name}.")
+            break
+
+        for service, service_class in reversed(ORDERED_SERVICES):
+            service = service_class(osdpl.obj, LOG, {})
+            if service.maintenance_api:
                 LOG.info(
                     f"Moving node {node_name} to operational state for {service_class.service}"
                 )
-                await service_class.delete_nmr(node, nmr)
+                await service.delete_nmr(node, nmr)
                 LOG.info(
                     f"The node {node_name} is ready for operations for {service_class.service}"
                 )
@@ -116,7 +151,6 @@ async def cluster_maintenance_request_change_handler(body, **kwargs):
     osdplst = osdplstatus.OpenStackDeploymentStatus(
         osdpl_name, osdpl_namespace
     )
-    osdplst.reload()
     osdplst_status = osdplst.get_osdpl_status()
     if osdplst_status != osdplstatus.APPLIED:
         raise kopf.TemporaryError(

@@ -65,6 +65,7 @@ class OpenStackDeploymentStatus(pykube.objects.NamespacedAPIObject):
         self.patch({"status": {"osdpl": patch}})
 
     def get_osdpl_status(self):
+        self.reload()
         return self.obj["status"]["osdpl"]["state"]
 
     def set_service_status(self, service_name, state, osdpl_spec):

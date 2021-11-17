@@ -106,6 +106,18 @@ class OpenStackClientManager:
             payload=payload,
         )
 
+    def network_get_agents(
+        self, host=None, is_alive=None, is_admin_state_up=None
+    ):
+        kwargs = {}
+        if host is not None:
+            kwargs["host"] = host
+        if is_alive is not None:
+            kwargs["is_alive"] = is_alive
+        if is_admin_state_up is not None:
+            kwargs["is_admin_state_up"] = is_admin_state_up
+        return list(self.oc.network.agents(**kwargs))
+
 
 async def notify_masakari_host_down(node):
     try:

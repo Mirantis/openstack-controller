@@ -274,6 +274,7 @@ async def test_nova_prepare_node_after_reboot(
     openstack_client,
     kube_resource_list,
     kopf_adopt,
+    openstackdeployment,
 ):
     mocker.patch("openstack_controller.kube.get_osdpl", mock.MagicMock())
     node = kube.Node(mock.Mock, copy.deepcopy(NODE_OBJ))
@@ -283,8 +284,11 @@ async def test_nova_prepare_node_after_reboot(
     openstack_client.return_value.compute_get_services.return_value = [
         compute_service
     ]
+    osdplstmock = mock.Mock()
     with mock.patch.object(kube.Job, "create"):
-        await services.Nova.prepare_node_after_reboot(node)
+        await services.Nova(
+            openstackdeployment, logging, osdplstmock
+        ).prepare_node_after_reboot(node)
 
 
 @pytest.mark.asyncio
@@ -293,43 +297,56 @@ async def test_nova_prepare_node_after_reboot_not_compute(
     openstack_client,
     kube_resource_list,
     kopf_adopt,
+    openstackdeployment,
 ):
     node_obj = copy.deepcopy(NODE_OBJ)
     node_obj["metadata"]["labels"] = {}
     node = kube.Node(mock.Mock, node_obj)
     kube_resource_list.return_value.get.return_value = mock.Mock(obj=None)
+    osdplstmock = mock.Mock()
+
     with mock.patch.object(kube.Job, "create"):
-        await services.Nova.prepare_node_after_reboot(node)
+        await services.Nova(
+            openstackdeployment, logging, osdplstmock
+        ).prepare_node_after_reboot(node)
         kube_resource_list.return_value.get.assert_not_called()
 
 
 @pytest.mark.asyncio
 async def test_nova_prepare_node_after_reboot_timeout(
-    asyncio_wait_for_timeout,
-    openstack_client,
+    asyncio_wait_for_timeout, openstack_client, openstackdeployment
 ):
+    osdplstmock = mock.Mock()
     node = kube.Node(mock.Mock, copy.deepcopy(NODE_OBJ))
     with pytest.raises(kopf.TemporaryError):
-        await services.Nova.prepare_node_after_reboot(node)
+        await services.Nova(
+            openstackdeployment, logging, osdplstmock
+        ).prepare_node_after_reboot(node)
 
 
 @pytest.mark.asyncio
 async def test_nova_prepare_node_after_reboot_openstacksdk_exception(
-    asyncio_wait_for_timeout, openstack_client
+    asyncio_wait_for_timeout, openstack_client, openstackdeployment
 ):
 
     openstack_client.side_effect = openstack.exceptions.SDKException("foo")
     node = kube.Node(mock.Mock, copy.deepcopy(NODE_OBJ))
+    osdplstmock = mock.Mock()
     with pytest.raises(kopf.TemporaryError):
-        await services.Nova.prepare_node_after_reboot(node)
+        await services.Nova(
+            openstackdeployment, logging, osdplstmock
+        ).prepare_node_after_reboot(node)
 
 
 @pytest.mark.asyncio
 async def test_nova_add_node_to_scheduling(
-    get_keystone_admin_creds, openstack_client
+    get_keystone_admin_creds, openstack_client, openstackdeployment
 ):
     node = kube.Node(mock.Mock, copy.deepcopy(NODE_OBJ))
-    await services.Nova.add_node_to_scheduling(node)
+    osdplstmock = mock.Mock()
+    await services.Nova(
+        openstackdeployment, logging, osdplstmock
+    ).add_node_to_scheduling(node)
     openstack_client.return_value.compute_get_services.assert_called_once_with(
         host="host1"
     )
@@ -337,103 +354,134 @@ async def test_nova_add_node_to_scheduling(
 
 
 @pytest.mark.asyncio
-async def test_nova_add_node_to_scheduling_not_compute(openstack_client):
+async def test_nova_add_node_to_scheduling_not_compute(
+    openstack_client, openstackdeployment
+):
     node_obj = copy.deepcopy(NODE_OBJ)
     node_obj["metadata"]["labels"] = {}
     node = kube.Node(mock.Mock, node_obj)
-    await services.Nova.add_node_to_scheduling(node)
+    osdplstmock = mock.Mock()
+    await services.Nova(
+        openstackdeployment, logging, osdplstmock
+    ).add_node_to_scheduling(node)
     openstack_client.return_value.compute_get_services.assert_not_called()
 
 
 @pytest.mark.asyncio
 async def test_nova_add_node_to_scheduling_cannot_enable_service(
-    openstack_client,
+    openstack_client, openstackdeployment
 ):
     openstack_client.side_effect = openstack.exceptions.SDKException("foo")
     node = kube.Node(mock.Mock, copy.deepcopy(NODE_OBJ))
+    osdplstmock = mock.Mock()
     with pytest.raises(kopf.TemporaryError):
-        await services.Nova.add_node_to_scheduling(node)
+        await services.Nova(
+            openstackdeployment, logging, osdplstmock
+        ).add_node_to_scheduling(node)
 
 
 @pytest.mark.asyncio
-async def test_nova_remove_node_from_scheduling(openstack_client):
+async def test_nova_remove_node_from_scheduling(
+    openstack_client, openstackdeployment
+):
     node = kube.Node(mock.Mock, copy.deepcopy(NODE_OBJ))
-    await services.Nova.remove_node_from_scheduling(node)
+    osdplstmock = mock.Mock()
+    await services.Nova(
+        openstackdeployment, logging, osdplstmock
+    ).remove_node_from_scheduling(node)
     openstack_client.return_value.compute_get_services.assert_called_once()
     openstack_client.return_value.compute_ensure_service_disabled.assert_called_once()
 
 
 @pytest.mark.asyncio
-async def test_nova_remove_node_from_scheduling_not_compute(openstack_client):
+async def test_nova_remove_node_from_scheduling_not_compute(
+    openstack_client, openstackdeployment
+):
     node_obj = copy.deepcopy(NODE_OBJ)
     node_obj["metadata"]["labels"] = {}
     node = kube.Node(mock.Mock, node_obj)
-    await services.Nova.remove_node_from_scheduling(node)
+    osdplstmock = mock.Mock()
+    await services.Nova(
+        openstackdeployment, logging, osdplstmock
+    ).remove_node_from_scheduling(node)
     openstack_client.return_value.compute_get_services.assert_not_called()
 
 
 @pytest.mark.asyncio
 async def test_nova_remove_node_from_scheduling_cannot_disable_service(
-    openstack_client,
+    openstack_client, openstackdeployment
 ):
     node = kube.Node(mock.Mock, copy.deepcopy(NODE_OBJ))
+    osdplstmock = mock.Mock()
     openstack_client.return_value.compute_ensure_service_disabled.side_effect = openstack.exceptions.SDKException(
         "foo"
     )
     with pytest.raises(kopf.TemporaryError):
-        await services.Nova.remove_node_from_scheduling(node)
+        await services.Nova(
+            openstackdeployment, logging, osdplstmock
+        ).remove_node_from_scheduling(node)
 
 
 @pytest.mark.asyncio
 async def test_nova_prepare_node_for_reboot(
-    mocker, openstack_client, node_maintenance_config
+    mocker, openstack_client, node_maintenance_config, openstackdeployment
 ):
     node = kube.Node(mock.Mock, copy.deepcopy(NODE_OBJ))
+    osdplstmock = mock.Mock()
 
     with mock.patch.object(
         services.Nova, "_migrate_servers", AsyncMock()
     ) as mock_migrate:
-        await services.Nova.prepare_node_for_reboot(node)
+        await services.Nova(
+            openstackdeployment, logging, osdplstmock
+        ).prepare_node_for_reboot(node)
         mock_migrate.assert_called_once()
 
 
 @pytest.mark.asyncio
 async def test_nova_prepare_node_for_reboot_not_compute(
-    openstack_client, node_maintenance_config
+    openstack_client, node_maintenance_config, openstackdeployment
 ):
     node_obj = copy.deepcopy(NODE_OBJ)
     node_obj["metadata"]["labels"] = {}
     node = kube.Node(mock.Mock, node_obj)
+    osdplstmock = mock.Mock()
     with mock.patch.object(
         services.Nova, "_migrate_servers", AsyncMock()
     ) as mock_migrate:
-        await services.Nova.prepare_node_for_reboot(node)
+        await services.Nova(
+            openstackdeployment, logging, osdplstmock
+        ).prepare_node_for_reboot(node)
         mock_migrate.assert_not_called()
 
 
 @pytest.mark.asyncio
 async def test_nova_prepare_node_for_reboot_sdk_exception(
-    openstack_client, node_maintenance_config
+    openstack_client, node_maintenance_config, openstackdeployment
 ):
     openstack_client.side_effect = openstack.exceptions.SDKException("foo")
     node = kube.Node(mock.Mock, copy.deepcopy(NODE_OBJ))
+    osdplstmock = mock.Mock()
     with pytest.raises(kopf.TemporaryError):
-        await services.Nova.prepare_node_for_reboot(node)
+        await services.Nova(
+            openstackdeployment, logging, osdplstmock
+        ).prepare_node_for_reboot(node)
 
 
 @pytest.mark.asyncio
 async def test_nova_migrate_servers_no_instances(
-    openstack_client, node_maintenance_config
+    openstack_client, node_maintenance_config, openstackdeployment
 ):
+    osdplstmock = mock.Mock()
     openstack_client.compute_get_servers_valid_for_live_migration.return_value = (
         []
     )
     openstack_client.compute_get_all_servers.return_value = []
 
     node_maintenance_config.instance_migration_mode = "live"
-    await services.Nova._migrate_servers(
-        openstack_client, "host1", node_maintenance_config, 1
-    )
+    await services.Nova(
+        openstackdeployment, logging, osdplstmock
+    )._migrate_servers(openstack_client, "host1", node_maintenance_config, 1)
     openstack_client.compute_get_all_servers.assert_called_once()
     openstack_client.compute_get_servers_valid_for_live_migration.assert_called_once()
     openstack_client.compute_get_servers_in_migrating_state.assert_not_called()
@@ -441,12 +489,13 @@ async def test_nova_migrate_servers_no_instances(
 
 @pytest.mark.asyncio
 async def test_nova_migrate_servers_skip(
-    openstack_client, node_maintenance_config
+    openstack_client, node_maintenance_config, openstackdeployment
 ):
+    osdplstmock = mock.Mock()
     node_maintenance_config.instance_migration_mode = "skip"
-    await services.Nova._migrate_servers(
-        openstack_client, "host1", node_maintenance_config, 1
-    )
+    await services.Nova(
+        openstackdeployment, logging, osdplstmock
+    )._migrate_servers(openstack_client, "host1", node_maintenance_config, 1)
     openstack_client.compute_get_all_servers.assert_not_called()
     openstack_client.compute_get_servers_valid_for_live_migration.assert_not_called()
     openstack_client.compute_get_servers_in_migrating_state.assert_not_called()
@@ -463,9 +512,10 @@ def _get_server_obj(obj=None):
 
 @pytest.mark.asyncio
 async def test_nova_migrate_servers_manual_one_server(
-    openstack_client, node_maintenance_config
+    openstack_client, node_maintenance_config, openstackdeployment
 ):
 
+    osdplstmock = mock.Mock()
     openstack_client.compute_get_servers_valid_for_live_migration.return_value = (
         []
     )
@@ -473,7 +523,9 @@ async def test_nova_migrate_servers_manual_one_server(
 
     node_maintenance_config.instance_migration_mode = "manual"
     with pytest.raises(kopf.TemporaryError):
-        await services.Nova._migrate_servers(
+        await services.Nova(
+            openstackdeployment, logging, osdplstmock
+        )._migrate_servers(
             openstack_client, "host1", node_maintenance_config, 1
         )
     openstack_client.compute_get_all_servers.assert_called_once()
@@ -482,9 +534,10 @@ async def test_nova_migrate_servers_manual_one_server(
 
 @pytest.mark.asyncio
 async def test_nova_migrate_servers_live_one_error_server(
-    openstack_client, node_maintenance_config
+    openstack_client, node_maintenance_config, openstackdeployment
 ):
 
+    osdplstmock = mock.Mock()
     openstack_client.compute_get_servers_valid_for_live_migration.return_value = (
         []
     )
@@ -495,7 +548,9 @@ async def test_nova_migrate_servers_live_one_error_server(
 
     node_maintenance_config.instance_migration_mode = "live"
     with pytest.raises(kopf.TemporaryError):
-        await services.Nova._migrate_servers(
+        await services.Nova(
+            openstackdeployment, logging, osdplstmock
+        )._migrate_servers(
             openstack_client, "host1", node_maintenance_config, 1
         )
     openstack_client.compute_get_all_servers.assert_called_once()
