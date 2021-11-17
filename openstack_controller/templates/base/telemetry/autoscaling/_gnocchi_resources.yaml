@@ -1,4 +1,4 @@
-        gnocchi_resources:
+        gnocchi_resources: |
           archive_policy_default: ceilometer-low
           archive_policies:
             - name: ceilometer-low

@@ -1,4 +1,4 @@
-        meters:
+        meters: |
           metric:
             - name: "image.size"
               event_type:

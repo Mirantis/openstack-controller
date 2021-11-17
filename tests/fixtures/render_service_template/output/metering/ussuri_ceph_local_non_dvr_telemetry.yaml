@@ -23,7 +23,7 @@ spec:
           ceilometer_notification: ceilometer-notification:latest
           image_repo_sync: image-repo-sync:latest
       conf:
-        event_pipeline:
+        event_pipeline: |
           sinks:
             - name: event_sink
               publishers:
@@ -35,7 +35,7 @@ spec:
               name: event_source
               sinks:
                 - event_sink
-        gnocchi_resources:
+        gnocchi_resources: |
           archive_policy_default: ceilometer-low
           archive_policies:
             - name: ceilometer-low
@@ -329,7 +329,7 @@ spec:
                 - hardware.network.outgoing.bytes
                 - hardware.network.outgoing.errors
               resource_type: host_network_interface
-        meters:
+        meters: |
           metric:
             - name: "image.size"
               event_type:
@@ -634,7 +634,7 @@ spec:
                 service_id: $.payload.service_id
                 instance_type: $.payload.instance_type
                 instance_type_id: $.payload.instance_type_id
-        pipeline:
+        pipeline: |
           sources:
             - name: meter_source
               meters:
@@ -655,7 +655,7 @@ spec:
               transformers:
               publishers:
                 - gnocchi://
-        polling:
+        polling: |
           sources:
             - name: ascale_pollsters
               interval: 60
