@@ -61,10 +61,15 @@ async def node_status_update_handler(name, body, old, new, reason, **kwargs):
     # when node is already being drained
     # we assume that at this stage the workflow with NodeWorkloadLocks
     # and auto-migration of workloads is happening instead of using Masakari
-    if node.has_role(const.NodeRole.compute) and not node.unschedulable:
-        LOG.info(
-            f"Notifying HA service on OpenStack compute host {name} down."
-        )
+    if node.has_role(const.NodeRole.compute):
+        # NOTE(vsaienko): when maintenance is over and node added back to scheduling
+        # there is time frame when nova-compute is still startin. Do not notify
+        # Masakary when node is under maintenance.
+        nwl = maintenance.NodeWorkloadLock.get_resource(name)
+        if not node.unschedulable or nwl.is_maintenance():
+            LOG.info(
+                f"Notifying HA service on OpenStack compute host {name} down."
+            )
         await ostutils.notify_masakari_host_down(node)
 
     LOG.info(f"Removing pods from node {name}")
