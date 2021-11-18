@@ -1,4 +1,4 @@
-        polling:
+        polling: |
           sources:
             - name: ascale_pollsters
               interval: 60

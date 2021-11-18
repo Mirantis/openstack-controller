@@ -1,4 +1,4 @@
-        event_pipeline:
+        event_pipeline: |
           sinks:
             - name: event_sink
               publishers:
