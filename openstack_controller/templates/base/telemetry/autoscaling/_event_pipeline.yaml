@@ -3,6 +3,7 @@
             - name: event_sink
               publishers:
                 - panko://
+                - notifier://?topic=alarm.all
               transformers: null
           sources:
             - events:
