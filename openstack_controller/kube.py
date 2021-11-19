@@ -365,6 +365,13 @@ class Pod(pykube.Pod):
         if r.status_code != 404:
             self.api.raise_for_status(r)
 
+    @property
+    def job_child(self):
+        for owner in self.metadata["ownerReferences"]:
+            if owner["kind"] == "Job":
+                return True
+        return False
+
 
 class Node(pykube.Node):
     @property
