@@ -75,6 +75,7 @@ async def node_maintenance_request_change_handler(body, **kwargs):
                     f"The node {node_name} is ready for maintenance for {service_class.service}"
                 )
     nwl.set_state_inactive()
+    LOG.info(f"Released NodeWorkloadLock for node {node_name}")
 
 
 @kopf.on.delete(*maintenance.NodeMaintenanceRequest.kopf_on_args)
@@ -108,7 +109,11 @@ async def node_maintenance_request_delete_handler(body, **kwargs):
         while True:
             LOG.info(f"Waiting for pods ready on node {node.name}.")
             node_pods = node.get_pods(namespace=osdpl.namespace)
-            not_ready_pods = [pod.name for pod in node_pods if not pod.ready]
+            not_ready_pods = [
+                pod.name
+                for pod in node_pods
+                if not pod.job_child and not pod.ready
+            ]
             if not_ready_pods:
                 LOG.info(f"The pods {not_ready_pods} are not ready.")
                 await asyncio.sleep(10)
@@ -128,6 +133,7 @@ async def node_maintenance_request_delete_handler(body, **kwargs):
                 )
     nwl.set_inner_state_inactive()
     nwl.set_state_active()
+    LOG.info(f"Acquired NodeWorkloadLock for node {node_name}")
 
 
 @kopf.on.create(*maintenance.ClusterMaintenanceRequest.kopf_on_args)
@@ -158,11 +164,15 @@ async def cluster_maintenance_request_change_handler(body, **kwargs):
         )
 
     cwl = maintenance.ClusterWorkloadLock.get_resource(osdpl_name)
+    if not cwl.is_active():
+        # NOTE(vsaienko): we are in maintenance, but controller is restarted, do
+        # not wait for health
+        return
 
     await health.wait_services_healthy(osdpl)
 
-    LOG.info(f"Releasing {name} ClusterWorkloadLock")
     cwl.set_state_inactive()
+    LOG.info(f"Released {name} ClusterWorkloadLock")
 
 
 @kopf.on.delete(*maintenance.ClusterMaintenanceRequest.kopf_on_args)
@@ -180,3 +190,4 @@ async def cluster_maintenance_request_delete_handler(body, **kwargs):
     name = osdpl.metadata["name"]
     cwl = maintenance.ClusterWorkloadLock.get_resource(name)
     cwl.set_state_active()
+    LOG.info(f"Acquired ClusterWorkloadLock {name}")
