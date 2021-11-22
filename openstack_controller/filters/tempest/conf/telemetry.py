@@ -1,3 +1,5 @@
+import yaml
+
 from openstack_controller.filters.tempest import base_section
 
 
@@ -17,9 +19,12 @@ class Telemetry(base_section.BaseSection):
                 "ceilometer-high-static-rate": 3600,
             }
 
-            resources = self.get_values_item(
-                "ceilometer", "conf.gnocchi_resources.resources", []
+            # NOTE(pas-ha) we pass ceilo YAML config files as text
+            gnocchi_resources_text = self.get_values_item(
+                "ceilometer", "conf.gnocchi_resources", "{}"
             )
+            gnocchi_resources = yaml.safe_load(gnocchi_resources_text)
+            resources = gnocchi_resources.get("resources", [])
             for res in resources:
                 # check all resources and find the first with type instance and
                 # return granularity related to policy name in archive_policy_values
