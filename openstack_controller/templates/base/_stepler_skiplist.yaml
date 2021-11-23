@@ -1,163 +1,46 @@
           #Horizon
-          e2804b4e-743e-4632-9c63-34066491a418:
-            reason: Locators update is needed
-            # stepler/horizon/tests/test_containers.py::TestAnyOne::test_create_public_container
-          fde52ec8-1e68-4c9d-86d3-6dbc5d915c85:
-            reason: Locators update is needed
-            # stepler/horizon/tests/test_containers.py::TestAnyOne::test_available_public_container_url
           27f9647e-a7be-454b-95c5-fe1aa84d665d:
-            reason: Locators update is needed
+            reason: PRODX-18513
             # stepler/horizon/tests/test_containers.py::TestAnyOne::test_upload_file_to_container
-          762249c5-ae19-4480-9295-b51501c0c817:
-            reason: Locators update is needed
-            # stepler/horizon/tests/test_containers.py::TestAnyOne::test_upload_file_to_folder
+          b18a6dbe-f98c-41fa-ace7-dede0df0c8ef:
+            reason: PRODX-11068
+            # stepler/horizon/tests/test_credentials.py::TestAnyOne::test_download_rc_v2
           9f0a85c2-8194-11e7-bbb2-bbb93bcf2e77:
             reason: Test case id depricated
             # stepler/horizon/tests/test_credentials.py::TestAnyOne::test_download_rc_v2_via_menu
-          a6ed9d2a-ae40-45ca-92c9-0034cbb425b1:
-            reason: Locators update is needed
-            # stepler/horizon/tests/test_credentials.py::TestAnyOne::test_download_ec2
           50dcf89e-370a-47d2-a0eb-c56dd77c968e:
             reason: PRODX-12232
             # stepler/horizon/tests/test_images.py::TestAnyOne::test_edit_image
           3167e844-1d13-44d5-aa1e-85c58c086240:
-            reason: Locators update is needed
+            reason: PRODX-19402
             # stepler/horizon/tests/test_images.py::TestAnyOne::test_set_image_disk_and_ram_size
-          c42d793b-efa9-46c4-b031-9f7bf7a49cd1:
-            reason: Locators update is needed
-            # stepler/horizon/tests/test_images.py::TestAnyOne::test_edit_image_disk_and_ram
-          4262e99a-10c5-4ce5-b48a-160568611bb0:
-            reason: Locators update is needed
-            # stepler/horizon/tests/test_images.py::TestAnyOne::test_open_image_info_in_new_tab
-          bd1840c3-ac0c-4a36-ac63-d0182edfb6ec:
-            reason: Locators update is needed
-            # stepler/horizon/tests/test_security_groups.py::TestAnyOne::test_create_delete_security_group
-          f624afef-8cdd-4aea-bdc3-066234212f00:
-            reason: Locators update is needed
-            # stepler/horizon/tests/test_stacks.py::TestAnyOne::test_stack_delete
-          f624afef-8cdd-4aea-bdc3-066234212f00:
-            reason: Locators update is needed
-            # stepler/horizon/tests/test_stacks.py::TestAnyOne::test_stack_delete
-          3a24328e-bd82-4d3b-8cab-9fbbb221d408:
-            reason: Locators update is needed
-            # stepler/horizon/tests/test_stacks.py::TestAnyOne::test_stacks_delete
-          3a24328e-bd82-4d3b-8cab-9fbbb221d408:
-            reason: Locators update is needed
-            # stepler/horizon/tests/test_stacks.py::TestAnyOne::test_stacks_delete
           7f43197f-ba2c-4962-a07a-43cbf77a779b:
             reason: PRODX-11370
             # stepler/horizon/tests/test_volume_backups.py::TestAnyOne::test_volume_backups_pagination[admin]
           f49eef31-b26a-496c-8f0f-2465a97d04cf:
             reason: PRODX-11370
             # stepler/horizon/tests/test_volume_backups.py::TestAnyOne::test_volume_backups_pagination[user]
-          dd3abd5c-0900-40a0-be3d-b284eeb6b5da:
-            reason: Locators update is needed
-            # stepler/horizon/tests/test_volume_backups.py::TestAnyOne::test_create_volume_backup
-          9cc2b22d-6234-4fb3-aad8-abe7d39cc870:
-            reason: Locators update is needed
-            # stepler/horizon/tests/test_volume_backups.py::TestAnyOne::test_create_volume_backup
-          95a60e66-8e12-48ea-a7b2-c9b49ca35e45:
-            reason: Locators update is needed
-            # stepler/horizon/tests/test_volume_backups.py::TestAnyOne::test_delete_volume_backups
-          acf12ae6-7b00-4bad-aef4-25ca3e3c3dc0:
-            reason: Locators update is needed
-            # stepler/horizon/tests/test_volume_backups.py::TestAnyOne::test_volume_backup_form_max_name_length
-          42020f62-06d5-49f5-8b78-08d40b518b17:
-            reason: Locators update is needed
-            # stepler/horizon/tests/test_volume_backups.py::TestAnyOne::test_create_volume_backup_with_description
-          36a02ea4-ce4d-4f45-b461-954ded1ea171:
-            reason: Locators update is needed
-            # stepler/horizon/tests/test_volume_backups.py::TestAnyOne::test_create_volume_backup_with_max_length_description
-          65272c3b-c2ea-42e6-91ac-f1daa43fdbfc:
-            reason: Locators update is needed
-            # stepler/horizon/tests/test_volumes.py::TestAnyOne::test_upload_volume_to_image
-          31502fae-2fbb-4d69-9699-22ddb6983503:
-            reason: Locators update is needed
-            # stepler/horizon/tests/test_containers.py::TestAnyOne::test_create_public_container
-          99c09de0-a6c6-4dad-b216-f758841b0598:
-            reason: Locators update is needed
-            # stepler/horizon/tests/test_containers.py::TestAnyOne::test_available_public_container_url
           8c627f7b-c2c9-4421-91e9-d90bc47346c3:
-            reason: Locators update is needed
+            reason: PRODX-18513
             # stepler/horizon/tests/test_containers.py::TestAnyOne::test_upload_file_to_container
-          6031f347-8a36-4939-b2b8-f01957511d3c:
-            reason: Locators update is needed
-            # stepler/horizon/tests/test_containers.py::TestAnyOne::test_upload_file_to_folder
-          3b793f66-6e89-4ac7-b359-ad8c9787593f:
-            reason: Locators update is needed
-            # stepler/horizon/tests/test_credentials.py::TestAnyOne::test_download_rc_v2
           9f83be74-8194-11e7-ba35-7700980b0d3f:
             reason: Test case id depricated
             # stepler/horizon/tests/test_credentials.py::TestAnyOne::test_download_rc_v2_via_menu
-          596710b9-1f77-4db9-9a77-f5733a5708ff:
-            reason: Locators update is needed
-            # stepler/horizon/tests/test_credentials.py::TestAnyOne::test_download_ec2
           8c85f869-993b-4447-98e4-fc1e4ebacb4e:
             reason: PRODX-12232
             # stepler/horizon/tests/test_images.py::TestAnyOne::test_edit_image
-          796fcdf5-c258-4acc-8d93-786641615c48:
-            reason: Locators update is needed
-            # stepler/horizon/tests/test_images.py::TestAnyOne::test_edit_image_disk_and_ram
-          dc5e9a46-cd20-47f7-bd84-739563864af2:
-            reason: Locators update is needed
-            # stepler/horizon/tests/test_images.py::TestAnyOne::test_open_image_info_in_new_tab
-          e41796c3-0f14-467c-80b0-98012d13bc1c:
-            reason: Locators update is needed
-            # stepler/horizon/tests/test_security_groups.py::TestAnyOne::test_create_delete_security_group
-          9f0a660e-2ed7-4b4b-8f72-7ea7733c22c5:
-            reason: Locators update is needed
-            # stepler/horizon/tests/test_stacks.py::TestAnyOne::test_stack_delete
-          9f0a660e-2ed7-4b4b-8f72-7ea7733c22c5:
-            reason: Locators update is needed
-            # stepler/horizon/tests/test_stacks.py::TestAnyOne::test_stack_delete
-          76fa1807-ab4e-4d48-83e8-de4a478419f3:
-            reason: Locators update is needed
-            # stepler/horizon/tests/test_stacks.py::TestAnyOne::test_stacks_delete
-          76fa1807-ab4e-4d48-83e8-de4a478419f3:
-            reason: Locators update is needed
-            # stepler/horizon/tests/test_stacks.py::TestAnyOne::test_stacks_delete
-          7ab4eb5a-e00a-427e-9128-fff277a38e85:
-            reason: Locators update is needed
-            # stepler/horizon/tests/test_volume_backups.py::TestAnyOne::test_delete_volume_backups
-          bcdb65f1-49a5-4623-9bca-dd08d31a30bb:
-            reason: Locators update is needed
-            # stepler/horizon/tests/test_volume_backups.py::TestAnyOne::test_volume_backup_form_max_name_length
-          6018b01d-0b3b-41fb-a7ca-46b78c2cc7a3:
-            reason: Locators update is needed
-            # stepler/horizon/tests/test_volume_backups.py::TestAnyOne::test_create_volume_backup_with_description
-          abb97b8e-6539-413a-b3b0-7e770eeb83e2:
-            reason: Locators update is needed
-            # stepler/horizon/tests/test_volume_backups.py::TestAnyOne::test_create_volume_backup_with_max_length_description
-          a4ab8682-eed6-4d00-8975-4289e2aac4d3:
-            reason: Locators update is needed
-            # stepler/horizon/tests/test_volumes.py::TestAnyOne::test_upload_volume_to_image
-          5d3a55ec-5100-11e7-83e0-b33e26fe0aed:
-            reason: Locators update is needed
-            # stepler/horizon/tests/test_credentials.py::TestAdminOnly::test_download_rc_v2_non_ascii_project_name
           e654d077-c645-4eb7-9a7b-763a1cee3a81:
             reason: Test case is depricated - will be removed from repo
             # stepler/horizon/tests/test_flavors.py::TestAdminOnly::test_update_flavor
           b846cf53-d3fa-4cca-8b10-fbaf50749f7c:
-            reason: Locators update is needed
+            reason: PRODX-19402
             # stepler/horizon/tests/test_images.py::TestUserOnly::test_big_image_create_delete
-          b5116a31-404d-4391-b1d6-e35670dbadb3:
-            reason: Locators update is needed
-            # stepler/horizon/tests/test_users.py::TestAdminOnly::test_change_user_password
-          beb14ed4-cd96-42f0-ba08-32a3123b7d66:
-            reason: Locators update is needed
-            # stepler/horizon/tests/test_users.py::TestAdminOnly::test_sort_users
+          8381d3ff-9f94-465f-a127-c84d328e14a4:
+            reason: PRODX-14410
+            # stepler/horizon/tests/test_stacks.py::TestAdminOnly::test_create_stack
           e585242-9443-4e78-a7fe-3ee6097459bb:
             reason: The test will be removed as depricated
             # stepler/horizon/tests/test_volumes.py::TestAdminOnly::test_migrate_volume
-          f9632117-d130-4171-8b61-2ada6c9e2f55:
-            reason: Locators update is needed
-            # stepler/horizon/tests/test_volumes.py::TestAdminOnly::test_volume_present_in_admin_volumes
-          d923893c-5fe0-11e7-bfb3-5404a69126b9:
-            reason: Locators update is needed
-            # stepler/horizon/tests/test_volumes.py::TestAdminOnly::test_container_name_volume_backup
-          b3db692c-a132-4450-ba3b-6ab6c66c3846:
-            reason: Locators update is needed
-            # stepler/horizon/tests/test_volumes.py::TestAdminOnly::test_change_volume_type
           9acd7607-d72f-4e8c-9b13-1a0728d56975:
             reason: PRODX-11366
             # stepler/horizon/tests/test_projects.py::TestAdminOnly::test_switch_projects
