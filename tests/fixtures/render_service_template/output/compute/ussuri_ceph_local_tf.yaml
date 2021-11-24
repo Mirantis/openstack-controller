@@ -16,6 +16,18 @@ spec:
           listen_addr: 0.0.0.0
         qemu:
           security_driver: apparmor
+      pod:
+        probes:
+          libvirt:
+            libvirt:
+              readiness:
+                initialDelaySeconds: 30
+                periodSeconds: 10
+                timeoutSeconds: 5
+              liveness:
+                initialDelaySeconds: 30
+                periodSeconds: 10
+                timeoutSeconds: 5
       images:
         tags:
           ceph_config_helper: ceph-config-helper:latest

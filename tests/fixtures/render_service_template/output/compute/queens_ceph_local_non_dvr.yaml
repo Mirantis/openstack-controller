@@ -19,6 +19,15 @@ spec:
       pod:
         probes:
           libvirt:
+            libvirt:
+              readiness:
+                initialDelaySeconds: 30
+                periodSeconds: 10
+                timeoutSeconds: 5
+              liveness:
+                initialDelaySeconds: 30
+                periodSeconds: 10
+                timeoutSeconds: 5
             virtlogd:
               readiness:
                 enabled: false
