@@ -140,6 +140,8 @@ spec:
             --network tempest-fixed-net
 {%- endif %}
       conf:
+        static_accounts:
+          project_count: 30
         convert_to_uuid:
           identity:
 {%- if signature.enabled %}
