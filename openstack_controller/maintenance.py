@@ -5,6 +5,7 @@ import pykube
 
 from openstack_controller import constants as const
 from openstack_controller import kube
+from openstack_controller import settings
 
 LOG = logging.getLogger(__name__)
 
@@ -96,6 +97,8 @@ class LockBase(pykube.objects.APIObject):
             self.create()
             # Explicitly set state to active to do not rely on default.
             self.set_state(LockState.active.value)
+        if settings.OSCTL_CLUSTER_RELEASE:
+            self.set_release(settings.OSCTL_CLUSTER_RELEASE)
 
     def absent(self):
         if self.exists():
@@ -114,6 +117,9 @@ class LockBase(pykube.objects.APIObject):
 
     def set_state_active(self):
         self.set_state(LockState.active.value)
+
+    def set_release(self, release):
+        self.patch({"status": {"release": release}}, subresource="status")
 
     def set_state_inactive(self):
         self.set_state(LockState.inactive.value)
