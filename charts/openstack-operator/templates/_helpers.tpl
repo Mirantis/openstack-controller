@@ -73,6 +73,10 @@ Generate environment variables for osdpl containers
       fieldPath: status.hostIP
 - name: OSCTL_NODE_MAINTENANCE_ENABLED
   value: {{ $context.Values.node_maintenance.enabled | quote }}
+  {{- if index $context.Values.global "clusterRelease"  }}
+- name: OSCTL_CLUSTER_RELEASE
+  value: {{ $context.Values.global.clusterRelease }}
+  {{- end }}
 {{- end }}
 
 {{/*
