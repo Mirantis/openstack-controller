@@ -135,13 +135,15 @@ spec:
           libvirt:
             libvirt:
               readiness:
-                initialDelaySeconds: 30
-                periodSeconds: 10
-                timeoutSeconds: 5
+                params:
+                  initialDelaySeconds: 30
+                  periodSeconds: 10
+                  timeoutSeconds: 5
               liveness:
-                initialDelaySeconds: 30
-                periodSeconds: 10
-                timeoutSeconds: 5
+                params:
+                  initialDelaySeconds: 30
+                  periodSeconds: 10
+                  timeoutSeconds: 5
 {%- if spec.openstack_version in ['queens', 'rocky', 'stein', 'train'] %}
       # in libvirt 4.0.0 there is no support of admin protocol to check virtlogd health
             virtlogd:
