@@ -25,6 +25,7 @@ from openstack_controller import constants
 from openstack_controller import kube
 from openstack_controller import secrets
 from openstack_controller import services
+from openstack_controller import maintenance
 
 
 # TODO(vdrok): Remove with switch to python3.8 as mock itself will be able
@@ -512,7 +513,7 @@ def _get_server_obj(obj=None):
 
 @pytest.mark.asyncio
 async def test_nova_migrate_servers_manual_one_server(
-    openstack_client, node_maintenance_config, openstackdeployment
+    mocker, openstack_client, node_maintenance_config, openstackdeployment
 ):
 
     osdplstmock = mock.Mock()
@@ -522,19 +523,24 @@ async def test_nova_migrate_servers_manual_one_server(
     openstack_client.compute_get_all_servers.return_value = [_get_server_obj()]
 
     node_maintenance_config.instance_migration_mode = "manual"
+    nwl = mock.Mock()
+    mocker.patch.object(
+        maintenance.NodeWorkloadLock, "get_resource", return_value=nwl
+    )
     with pytest.raises(kopf.TemporaryError):
         await services.Nova(
             openstackdeployment, logging, osdplstmock
         )._migrate_servers(
-            openstack_client, "host1", node_maintenance_config, 1
+            openstack_client, "host1", node_maintenance_config, nwl, 1
         )
+    nwl.set_error_message.assert_called_once()
     openstack_client.compute_get_all_servers.assert_called_once()
     openstack_client.compute_get_servers_valid_for_live_migration.assert_not_called()
 
 
 @pytest.mark.asyncio
 async def test_nova_migrate_servers_live_one_error_server(
-    openstack_client, node_maintenance_config, openstackdeployment
+    mocker, openstack_client, node_maintenance_config, openstackdeployment
 ):
 
     osdplstmock = mock.Mock()
@@ -547,12 +553,17 @@ async def test_nova_migrate_servers_live_one_error_server(
     ]
 
     node_maintenance_config.instance_migration_mode = "live"
+    nwl = mock.Mock()
+    mocker.patch.object(
+        maintenance.NodeWorkloadLock, "get_resource", return_value=nwl
+    )
     with pytest.raises(kopf.TemporaryError):
         await services.Nova(
             openstackdeployment, logging, osdplstmock
         )._migrate_servers(
-            openstack_client, "host1", node_maintenance_config, 1
+            openstack_client, "host1", node_maintenance_config, nwl, 1
         )
+    nwl.set_error_message.assert_called_once()
     openstack_client.compute_get_all_servers.assert_called_once()
     openstack_client.compute_get_servers_valid_for_live_migration.assert_called_once()
 

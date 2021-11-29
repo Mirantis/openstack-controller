@@ -1072,6 +1072,7 @@ class Neutron(OpenStackService, MaintenanceApiMixin):
         if not any(all_neutron_roles):
             return
 
+        nwl = maintenance.NodeWorkloadLock.get_resource(node.name)
         try:
             os_client = openstack_utils.OpenStackClientManager()
 
@@ -1090,14 +1091,13 @@ class Neutron(OpenStackService, MaintenanceApiMixin):
                     timeout=300,
                 )
             except asyncio.TimeoutError:
-                raise kopf.TemporaryError(
-                    f"Timeout waiting for network agents on the host {node.name}."
-                )
+                msg = f"Timeout waiting for network agents on the host {node.name}."
+                nwl.set_error_message(msg)
+                raise kopf.TemporaryError(msg)
         except openstack.exceptions.SDKException as e:
-            LOG.error(f"Cannot execute openstack commands, error: {e}")
-            raise kopf.TemporaryError(
-                "Got error while waiting for network agents."
-            )
+            msg = f"Got error while waiting for network agents. Cannot execute openstack commands, error: {e}."
+            nwl.set_error_message(msg)
+            raise kopf.TemporaryError(msg)
 
     async def add_node_to_scheduling(self, node):
         pass
@@ -1285,6 +1285,7 @@ class Nova(OpenStackServiceWithCeph, MaintenanceApiMixin):
             await child_obj.enable(self.openstack_version, True)
 
     async def remove_node_from_scheduling(self, node):
+        nwl = maintenance.NodeWorkloadLock.get_resource(node.name)
         if not node.has_role(constants.NodeRole.compute):
             return
         try:
@@ -1295,21 +1296,18 @@ class Nova(OpenStackServiceWithCeph, MaintenanceApiMixin):
             )
         except exceptions.SDKException as e:
             LOG.error(f"Cannot execute openstack commands, error: {e}")
-            raise kopf.TemporaryError(
-                "Can not disable compute service on a host to be deleted"
-            )
+            msg = "Can not disable compute service on a host to be deleted"
+            nwl.set_error_message(msg)
+            raise kopf.TemporaryError(msg)
 
-    async def _migrate_servers(self, os_client, host, cfg, concurrency=1):
+    async def _migrate_servers(self, os_client, host, cfg, nwl, concurrency=1):
         async def _check_migration_completed():
             all_servers = os_client.compute_get_all_servers(host=host)
             if all_servers:
                 servers_out = {s.id: s.status for s in all_servers}
-                LOG.info(
-                    f"Some servers {servers_out} are still present on host {host}"
-                )
-                raise kopf.TemporaryError(
-                    f"Waiting unless all of them are migrated manually or instance_migration_mode is set to 'skip'"
-                )
+                msg = f"Some servers {servers_out} are still present on host {host}. Waiting unless all of them are migrated manually or instance_migration_mode is set to 'skip'"
+                nwl.set_error_message(msg)
+                raise kopf.TemporaryError(msg)
 
         async def _do_servers_migration():
             servers_to_migrate = (
@@ -1342,9 +1340,9 @@ class Nova(OpenStackServiceWithCeph, MaintenanceApiMixin):
                             f"Got error while trying to migrate server {srv.id}: {e}"
                         )
                 else:
-                    LOG.info(
-                        f"Waiting servers migration is completed: {[s.id for s in servers_in_migrating_state]}"
-                    )
+                    msg = f"Waiting servers migration is completed: {[s.id for s in servers_in_migrating_state]}"
+                    LOG.info(msg)
+                    nwl.set_error_message(msg)
                     await asyncio.sleep(30)
                 await asyncio.sleep(5)
                 servers_migrating_skip = [
@@ -1372,6 +1370,7 @@ class Nova(OpenStackServiceWithCeph, MaintenanceApiMixin):
         await _check_migration_completed()
 
     async def prepare_node_for_reboot(self, node):
+        nwl = maintenance.NodeWorkloadLock.get_resource(node.name)
         if not node.has_role(constants.NodeRole.compute):
             return
         maintenance_cfg = maintenance.NodeMaintenanceConfig(node)
@@ -1382,13 +1381,16 @@ class Nova(OpenStackServiceWithCeph, MaintenanceApiMixin):
                 os_client=os_client,
                 host=node.name,
                 cfg=maintenance_cfg,
+                nwl=nwl,
                 concurrency=settings.OSCTL_MIGRATE_CONCURRENCY,
             )
         except exceptions.SDKException as e:
-            LOG.error(f"Cannot execute openstack commands, error: {e}")
-            raise kopf.TemporaryError("Retrying migrate instances from host.")
+            msg = f"Retrying migrate instances from host. Cannot execute openstack commands, error: {e}"
+            nwl.set_error_message(msg)
+            raise kopf.TemporaryError(msg)
 
     async def prepare_node_after_reboot(self, node):
+        nwl = maintenance.NodeWorkloadLock.get_resource(node.name)
         if not node.has_role(constants.NodeRole.compute):
             return
         try:
@@ -1409,16 +1411,16 @@ class Nova(OpenStackServiceWithCeph, MaintenanceApiMixin):
                     timeout=300,
                 )
             except asyncio.TimeoutError:
-                raise kopf.TemporaryError(
-                    "Timeout waiting for compute services up on the host."
-                )
+                msg = "Timeout waiting for compute services up on the host."
+                nwl.set_error_message(msg)
+                raise kopf.TemporaryError(msg)
         except openstack.exceptions.SDKException as e:
-            LOG.error(f"Cannot execute openstack commands, error: {e}")
-            raise kopf.TemporaryError(
-                "can not discover the newly added compute host"
-            )
+            msg = f"Got error while waiting services to be UP on the host. Cannot execute openstack commands, error: {e}"
+            nwl.set_error_message(msg)
+            raise kopf.TemporaryError(msg)
 
     async def add_node_to_scheduling(self, node):
+        nwl = maintenance.NodeWorkloadLock.get_resource(node.name)
         if not node.has_role(constants.NodeRole.compute):
             return
         try:
@@ -1428,8 +1430,9 @@ class Nova(OpenStackServiceWithCeph, MaintenanceApiMixin):
             # removed and now is being added back
             os_client.compute_ensure_service_enabled(service)
         except openstack.exceptions.SDKException as e:
-            LOG.error(f"Cannot execute openstack commands, error: {e}")
-            raise kopf.TemporaryError("Can not bring node back to scheduling.")
+            msg = f"Can not bring node back to scheduling. Cannot execute openstack commands, error: {e}"
+            nwl.set_error_message(msg)
+            raise kopf.TemporaryError(msg)
 
 
 class Placement(OpenStackService):

@@ -1,3 +1,4 @@
+import datetime
 import logging
 
 import enum
@@ -135,6 +136,14 @@ class LockBase(pykube.objects.APIObject):
 
     def get_inner_state(self):
         return self.obj["metadata"].get("annotations", {}).get("inner_state")
+
+    def set_error_message(self, msg):
+        timestamp = datetime.datetime.utcnow()
+        msg = f"{timestamp} {msg}"
+        self.patch({"status": {"errorMessage": msg}}, subresource="status")
+
+    def unset_error_message(self):
+        self.patch({"status": {"errorMessage": None}}, subresource="status")
 
 
 class ClusterWorkloadLock(LockBase):

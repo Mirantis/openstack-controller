@@ -52,10 +52,12 @@ async def node_maintenance_request_change_handler(body, **kwargs):
     # NOTE(vsaienko): check if current node is in maintenance to let
     # retry on Exception here.
     if not nwl.is_maintenance() and len(nwl.maintenance_locks()) >= 1:
-        raise kopf.TemporaryError(
+        msg = (
             f"Inactive NodeWorkloadLocks for openstack detected, "
             f"deferring processing for node {node.name}"
         )
+        nwl.set_error_message(msg)
+        raise kopf.TemporaryError(msg)
 
     osdpl = kube.get_osdpl()
     if not osdpl or not osdpl.exists():
@@ -158,20 +160,23 @@ async def cluster_maintenance_request_change_handler(body, **kwargs):
         osdpl_name, osdpl_namespace
     )
     osdplst_status = osdplst.get_osdpl_status()
+    cwl = maintenance.ClusterWorkloadLock.get_resource(osdpl_name)
     if osdplst_status != osdplstatus.APPLIED:
-        raise kopf.TemporaryError(
+        msg = (
             f"Waiting osdpl status APPLIED, current state is {osdplst_status}"
         )
+        cwl.set_error_message(msg)
+        raise kopf.TemporaryError(msg)
 
-    cwl = maintenance.ClusterWorkloadLock.get_resource(osdpl_name)
     if not cwl.is_active():
         # NOTE(vsaienko): we are in maintenance, but controller is restarted, do
         # not wait for health
         return
-
+    cwl.set_error_message("Waiting for all OpenStack services are healthy.")
     await health.wait_services_healthy(osdpl)
 
     cwl.set_state_inactive()
+    cwl.unset_error_message()
     LOG.info(f"Released {name} ClusterWorkloadLock")
 
 
