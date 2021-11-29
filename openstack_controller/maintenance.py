@@ -25,7 +25,7 @@ MAINTENANCE_DEFAULT_NODE_CONFIG = {
 
 
 class NodeMaintenanceConfig:
-    opts_prefix = "maintenance.lcm.mirantis.com"
+    opts_prefix = "openstack.lcm.mirantis.com"
 
     def __init__(self, node):
         self.node = node
