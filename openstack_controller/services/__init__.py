@@ -1326,7 +1326,9 @@ class Nova(OpenStackServiceWithCeph, MaintenanceApiMixin):
                 if len(servers_in_migrating_state) < concurrency:
                     random.shuffle(servers_to_migrate)
                     srv = servers_to_migrate.pop()
-                    LOG.info(f"Starting migration for {srv.id}")
+                    msg = f"Starting migration for {srv.id}"
+                    LOG.info(msg)
+                    nwl.set_error_message(msg)
                     try:
                         servers_migrating_count[srv.id] = (
                             servers_migrating_count.get(srv.id, 1) + 1
@@ -1336,9 +1338,9 @@ class Nova(OpenStackServiceWithCeph, MaintenanceApiMixin):
                         # to set correct status for instance.
                         await asyncio.sleep(5)
                     except Exception as e:
-                        LOG.warning(
-                            f"Got error while trying to migrate server {srv.id}: {e}"
-                        )
+                        msg = f"Got error while trying to migrate server {srv.id}: {e}"
+                        LOG.warning(msg)
+                        nwl.set_error_message(msg)
                 else:
                     msg = f"Waiting servers migration is completed: {[s.id for s in servers_in_migrating_state]}"
                     LOG.info(msg)
