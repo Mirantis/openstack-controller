@@ -141,7 +141,8 @@ spec:
 {%- endif %}
       conf:
         static_accounts:
-          project_count: 30
+          project_count: 20
+          user_count: 5
         convert_to_uuid:
           identity:
 {%- if signature.enabled %}
