@@ -191,6 +191,9 @@ spec:
             shred_final_overwrite_with_zeros: false
             default_boot_option: local
             fast_track: false
+          keystone_authtoken:
+            memcache_security_strategy: ENCRYPT
+            memcache_secret_key: {{ credentials.memcached }}
           neutron:
             port_setup_delay: 30
             cleaning_network: {{ network.get('name', 'baremetal') }}
