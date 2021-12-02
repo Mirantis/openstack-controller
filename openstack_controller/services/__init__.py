@@ -315,6 +315,10 @@ class Cinder(OpenStackServiceWithCeph):
                     "images": ["cinder_db_sync"],
                     "manifest": "job_db_sync",
                 },
+                "cinder-drop-default-volume-type": {
+                    "images": ["cinder_drop_default_volume_type"],
+                    "manifest": "job_drop_default_volume_type",
+                },
             },
             "Deployment": {
                 "cinder-api": {

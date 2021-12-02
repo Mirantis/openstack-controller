@@ -244,6 +244,7 @@ spec:
         network_policy: false
         secret_ca_bundle: true
         cron_service_cleaner: true
+        job_drop_default_volume_type: true
       pod:
         replicas:
           api: 1
