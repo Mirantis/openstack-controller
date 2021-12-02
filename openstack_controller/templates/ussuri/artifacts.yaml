@@ -199,5 +199,5 @@ heat_db_purge: '{{ images_base_url }}/openstack/heat:ussuri-bionic-2021112912473
 barbican_db_purge: '{{ images_base_url }}/openstack/barbican:ussuri-bionic-20211129124739'
 masakari_db_purge: '{{ images_base_url }}/openstack/masakari:ussuri-bionic-20211129124739'
 neutron_bootstrap: '{{ images_base_url }}/openstack/openstack-tools:ussuri-bionic-20211129124739'
-cinder_drop_default_volume_type: '{{ images_base_url }}/openstack/openstack-tools:ussuri-bionic-20211115060025'
-cinder_create_internal_tenant: '{{ images_base_url }}/openstack/openstack-tools:ussuri-bionic-20211115060025'
+cinder_drop_default_volume_type: '{{ images_base_url }}/openstack/openstack-tools:ussuri-bionic-20211129124739'
+cinder_create_internal_tenant: '{{ images_base_url }}/openstack/openstack-tools:ussuri-bionic-20211129124739'
