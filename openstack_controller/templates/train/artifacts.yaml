@@ -193,3 +193,5 @@ glance_db_purge: '{{ images_base_url }}/openstack/glance:train-bionic-2021090310
 nova_db_purge: '{{ images_base_url }}/openstack/nova:train-bionic-20210903100101'
 barbican_db_purge: '{{ images_base_url }}/openstack/barbican:train-bionic-20210903100101'
 neutron_bootstrap: '{{ images_base_url }}/openstack/openstack-tools:ussuri-bionic-20211115060025'
+cinder_drop_default_volume_type: '{{ images_base_url }}/openstack/openstack-tools:ussuri-bionic-20211115060025'
+cinder_create_internal_tenant: '{{ images_base_url }}/openstack/openstack-tools:ussuri-bionic-20211115060025'

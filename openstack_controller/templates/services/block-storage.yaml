@@ -121,6 +121,8 @@ spec:
     "cinder_service_cleaner",
     "cinder_volume",
     "cinder_volume_daemonset",
+    "cinder_drop_default_volume_type",
+    "cinder_create_internal_tenant",
     "test",] %}
         {%- if image in images %}
           {{ image }}: {{ images[image] }}
