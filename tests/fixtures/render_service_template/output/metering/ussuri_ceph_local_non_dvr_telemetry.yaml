@@ -657,7 +657,7 @@ spec:
             - name: meter_sink
               transformers:
               publishers:
-                - gnocchi://
+                - gnocchi://?filter_project=service&filter_domain=service
         polling: |
           sources:
             - name: ascale_pollsters
