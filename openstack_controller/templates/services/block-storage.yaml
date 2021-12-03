@@ -263,6 +263,7 @@ spec:
           backup: {{ ceph.cinder.secrets }}
       manifests:
         cron_job_db_purge: {{ cinder_db_cleanup.enabled }}
+        job_drop_default_volume_type: true
         network_policy: false
         job_rabbit_init: false
         job_storage_init: false

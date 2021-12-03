@@ -237,6 +237,7 @@ spec:
               age: 1
       manifests:
         job_backup_storage_init: false
+        job_drop_default_volume_type: true
         job_rabbit_init: false
         job_storage_init: false
         network_policy: false
