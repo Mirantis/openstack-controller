@@ -10,12 +10,16 @@
 {%- set baremetal_enabled = 'baremetal' in spec.features.services %}
 {%- set node_specific = {} %}
 {%- set overrides = namespace(enabled=false) %}
+{%- set dpdk = namespace(enabled=false) %}
 {%- for label, node_features in spec.get("nodes", {}).items() %}
   {%- if "nova" in node_features.get("features", {}).keys() %}
     {% set overrides.enabled = true %}
   {%- endif  %}
   {%- if node_features.get("features", {}).get("neutron", {}).get("sriov", {}).get("enabled", false) %}
     {% set overrides.enabled = true %}
+  {%- endif  %}
+  {%- if node_features.get("features", {}).get("neutron", {}).get("dpdk", {}).get("enabled", false) %}
+    {% set dpdk.enabled = true %}
   {%- endif  %}
   {%- if node_features.get("features", {}) %}
     {%- do node_specific.update({label: node_features.features}) %}
@@ -128,6 +132,27 @@ spec:
           listen_addr: 0.0.0.0
         qemu:
           security_driver: apparmor
+      {%- if dpdk.enabled %}
+        apparmor:
+          templates:
+            TEMPLATE.qemu: |
+              # Managed by Kubernetes
+              # This profile is for the domain whose UUID matches this file.
+              #
+              #include <tunables/global>
+              profile LIBVIRT_TEMPLATE flags=(attach_disconnected) {
+                  #include <abstractions/libvirt-qemu>
+
+                  # allow mknod and rw in vhostuser dir, remove this workaround
+                  # when libvirt is upgraded to 7.10
+                  capability mknod,
+                  {%- if neutron_backend == 'tungstenfabric' %}
+                  /run/vrouter/* rw,
+                  {%- else %}
+                  /run/openvswitch/vhostuser/* rw,
+                  {%- endif %}
+              }
+      {%- endif %}
       {%- if neutron_backend == 'tungstenfabric' %}
       network:
         backend: []
