@@ -13,6 +13,7 @@
 
 import copy
 import json
+from unittest import mock
 
 import falcon
 from falcon import testing
@@ -76,6 +77,16 @@ def client():
     return testing.TestClient(controller.create_api())
 
 
+@pytest.fixture
+def osdplst(mocker):
+    osdplst = mocker.patch(
+        "openstack_controller.osdplstatus.OpenStackDeploymentStatus"
+    )
+    osdplst.return_value = mock.AsyncMock()
+    yield osdplst
+    mocker.stopall()
+
+
 def test_root(client):
     response = client.simulate_get("/")
     assert response.status == falcon.HTTP_OK
@@ -126,14 +137,39 @@ def test_openstack_create_master_fail(client):
     )
 
 
-def test_openstack_upgrade_ok(client):
+def test_openstack_upgrade_ok(client, osdplst):
     req = copy.deepcopy(ADMISSION_REQ)
+    osdplst.return_value.obj = {
+        "status": {"openstack_version": "train", "osdpl": {"state": "APPLIED"}}
+    }
+    get_osdpl_status_mock = mock.Mock()
+    get_osdpl_status_mock.return_value = "APPLIED"
+    osdplst.return_value.get_osdpl_status = get_osdpl_status_mock
+
     req["request"]["operation"] = "UPDATE"
     req["request"]["oldObject"] = copy.deepcopy(req["request"]["object"])
     req["request"]["oldObject"]["spec"]["openstack_version"] = "train"
     response = client.simulate_post("/validate", json=req)
     assert response.status == falcon.HTTP_OK
     assert response.json["response"]["allowed"] is True
+
+
+def test_openstack_upgrade_another_upgrade(client, osdplst):
+    req = copy.deepcopy(ADMISSION_REQ)
+    osdplst.return_value.obj = {
+        "status": {"openstack_version": "train", "osdpl": {"state": "APPYING"}}
+    }
+    get_osdpl_status_mock = mock.Mock()
+    get_osdpl_status_mock.return_value = "APPYING"
+    osdplst.return_value.get_osdpl_status = get_osdpl_status_mock
+
+    req["request"]["operation"] = "UPDATE"
+    req["request"]["oldObject"] = copy.deepcopy(req["request"]["object"])
+    req["request"]["oldObject"]["spec"]["openstack_version"] = "train"
+    response = client.simulate_post("/validate", json=req)
+    assert response.status == falcon.HTTP_OK
+    assert response.json["response"]["allowed"] is False
+    assert response.json["response"]["status"]["code"] == 400
 
 
 def test_openstack_upgrade_to_master_fail(client):

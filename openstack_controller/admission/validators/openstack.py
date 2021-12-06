@@ -16,6 +16,7 @@ import copy
 from openstack_controller.admission.validators import base
 from openstack_controller import constants
 from openstack_controller import exception
+from openstack_controller import osdplstatus
 
 
 class OpenStackValidator(base.BaseValidator):
@@ -27,9 +28,12 @@ class OpenStackValidator(base.BaseValidator):
         old_obj = review_request.get("oldObject", {})
         new_obj = review_request.get("object", {})
         self._deny_master(new_obj)
-        if review_request["operation"] == "UPDATE":
+        if review_request[
+            "operation"
+        ] == "UPDATE" and self._openstack_version_changed(old_obj, new_obj):
             # on update we deffinitely have both old and new as not empty
             self._validate_openstack_upgrade(old_obj, new_obj)
+            self._validate_for_another_upgrade(review_request)
         self._check_masakari_allowed(new_obj)
         self._check_baremetal_allowed(new_obj)
 
@@ -68,6 +72,25 @@ class OpenStackValidator(base.BaseValidator):
             raise exception.OsDplValidationFailed(
                 "This OpenStack Baremetal services is not supported"
                 "with TungstenFabric networking."
+            )
+
+    def _openstack_version_changed(self, old_obj, new_obj):
+        old_version = constants.OpenStackVersion[
+            old_obj["spec"]["openstack_version"]
+        ]
+        new_version = constants.OpenStackVersion[
+            new_obj["spec"]["openstack_version"]
+        ]
+        return new_version != old_version
+
+    def _validate_for_another_upgrade(self, review_request):
+        osdplst = osdplstatus.OpenStackDeploymentStatus(
+            review_request["name"], review_request["namespace"]
+        )
+        osdplst_status = osdplst.get_osdpl_status()
+        if osdplst_status != osdplstatus.APPLIED:
+            raise exception.OsDplValidationFailed(
+                "OpenStack version upgrade is not possible while another upgrade is in progress."
             )
 
     def _validate_openstack_upgrade(self, old_obj, new_obj):
