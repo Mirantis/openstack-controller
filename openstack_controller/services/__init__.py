@@ -506,8 +506,8 @@ class Heat(OpenStackService):
                 },
                 "heat-trusts": {
                     "images": ["ks_trusts"],
-                    "manifest": "",
                     "hash_fields": ["conf.*"],
+                    "manifest": "job_heat_trusts",
                 },
                 "heat-db-sync": {
                     "images": ["heat_db_sync"],

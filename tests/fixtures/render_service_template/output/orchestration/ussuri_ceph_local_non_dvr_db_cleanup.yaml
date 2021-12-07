@@ -201,5 +201,6 @@ spec:
         network_policy: false
         secret_ca_bundle: true
         cron_job_db_purge: true
+        job_heat_trusts: false
       network:
         core_plugin: ml2

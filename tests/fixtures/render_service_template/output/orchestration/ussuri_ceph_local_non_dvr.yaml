@@ -201,5 +201,6 @@ spec:
         job_rabbit_init: false
         network_policy: false
         secret_ca_bundle: true
+        job_heat_trusts: false
       network:
         core_plugin: ml2
