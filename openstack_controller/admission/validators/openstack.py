@@ -101,9 +101,6 @@ class OpenStackValidator(base.BaseValidator):
         new_version = constants.OpenStackVersion[
             new_obj["spec"]["openstack_version"]
         ]
-        # not an upgrade
-        if new_version == old_version:
-            return
         if old_version > new_version:
             raise exception.OsDplValidationFailed(
                 "OpenStack version downgrade is not permitted"
