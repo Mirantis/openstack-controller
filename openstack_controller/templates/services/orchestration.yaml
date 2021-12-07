@@ -122,6 +122,7 @@ spec:
         network_policy: false
         job_rabbit_init: false
         secret_ca_bundle: true
+        job_heat_trusts: false
       conf:
         policy.d:
           01-controller-default.yaml: {{ service_policy }}
