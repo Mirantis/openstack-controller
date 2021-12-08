@@ -10,7 +10,7 @@
 {%- set ipsec = spec.features.neutron.get('ipsec', {'enabled': False}) %}
 {%- set notification_topics = ['notifications'] %}
 {%- if tungstenfabric_enabled %}
-  {%- if 'victoria' in spec.openstack_version %}
+  {%- if spec.openstack_version not in ['queens', 'rocky', 'stein', 'train', 'ussuri'] %}
     {%- set service_plugins = ['neutron_plugin_contrail.plugins.opencontrail.services.tag.tag_plugin.TagPlugin,neutron_plugin_contrail.plugins.opencontrail.services.timestamp.timestamp_plugin.TimeStampPlugin,neutron_plugin_contrail.plugins.opencontrail.services.trunk.plugin.TrunkPlugin'] %}
   {%- else %}
     {%- set service_plugins = ['<None>'] %}

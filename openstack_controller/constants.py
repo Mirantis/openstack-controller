@@ -130,6 +130,8 @@ class OpenStackVersion(enum.IntEnum):
     train = 4
     ussuri = 5
     victoria = 6
+    wallaby = 7
+    xena = 8
     master = sys.maxsize
 
 

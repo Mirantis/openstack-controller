@@ -1,7 +1,7 @@
 #apiVersion: lcm.mirantis.com/v1alpha1
 #kind: HelmBundle
 
-{%- set latest_openstack_versions = openstack_versions[openstack_versions.index(spec.openstack_version):] %}
+{%- set latest_openstack_versions = openstack_versions[openstack_versions.index(spec.openstack_version):openstack_versions.index(spec.openstack_version)+2] %}
 {%- set stacklight_enabled = spec.get('features', {}).get('stacklight', {}).get('enabled', False) %}
 {%- set enabled_vhosts = ['openstack'] %}
 
