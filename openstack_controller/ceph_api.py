@@ -114,6 +114,7 @@ class OSRGWCreds:
     public_domain: str
     tls_crt: str
     tls_key: str
+    barbican_url: str
 
 
 def get_os_user_keyring_name(user: OSUser) -> str:

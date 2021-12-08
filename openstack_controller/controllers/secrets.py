@@ -6,7 +6,6 @@ import pykube
 import hashlib
 from urllib.parse import urlsplit
 
-from openstack_controller import ceph_api
 from openstack_controller import constants
 from openstack_controller import kube
 from openstack_controller import secrets
@@ -26,31 +25,6 @@ AUTH_KEYS = [
     "OS_USER_DOMAIN_NAME",
     "OS_USERNAME",
 ]
-
-
-@kopf.on.create(
-    "", "v1", "secrets", labels={"application": "ceph", "component": "rgw"}
-)
-@utils.collect_handler_metrics
-async def handle_rgw_secret(
-    body,
-    meta,
-    name,
-    status,
-    logger,
-    diff,
-    **kwargs,
-):
-    # TODO: unhardcode secret name
-    LOG.debug(f"Handling secret create {name}")
-    if name != constants.RGW_KEYSTONE_SECRET:
-        return
-    data = body["data"]
-    args = {}
-    for key in AUTH_KEYS:
-        args[key[3:].lower()] = data[key]
-    os_rgw_creds = ceph_api.OSRGWCreds(**args)
-    ceph_api.set_os_rgw_creds(os_rgw_creds, kube.save_secret_data)
 
 
 @kopf.on.resume(

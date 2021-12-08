@@ -1634,18 +1634,20 @@ class RadosGateWay(Service):
             if service_cred.account == "ceph-rgw":
                 rgw_creds = {
                     "auth_url": auth_url,
-                    "default_domain": "default",
+                    "default_domain": "service",
                     "interface": "public",
                     "password": service_cred.password,
                     "project_domain_name": "service",
                     "project_name": "service",
                     "region_name": "RegionOne",
-                    "user_domain_name": "default",
+                    "user_domain_name": "service",
                     "username": service_cred.username,
                     "public_domain": self.mspec["public_domain_name"],
                     "ca_cert": ssl_public_endpoints["ca_cert"],
                     "tls_crt": ssl_public_endpoints["api_cert"],
                     "tls_key": ssl_public_endpoints["api_key"],
+                    "barbican_url": "https://barbican."
+                    + self.mspec["public_domain_name"],
                 }
 
                 # encode values from rgw_creds
