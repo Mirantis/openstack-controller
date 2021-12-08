@@ -365,6 +365,10 @@ services:
             - (?:neutron_tempest_plugin.api.test_security_groups.SecGroupTest.test_list_security_group_rules_contains_all_rules)
             - (?:neutron_tempest_plugin.api.test_security_groups_negative.NegativeSecGroupQuotaTest.test_create_excess_sg)
             - (?:neutron_tempest_plugin.api.test_security_groups_negative.NegativeSecGroupRulesQuotaTest.test_sg_creation_with_insufficient_sg_rules_quota)
+            # Skip TESTs failed, that don't work with signature verification enabled
+            - (?:tempest.scenario.test_minimum_basic.TestMinimumBasicScenario.test_minimum_basic_scenario)
+            - (?:tempest.scenario.test_snapshot_pattern.TestSnapshotPattern.test_snapshot_pattern)
+            - (?:tempest.scenario.test_stamp_pattern.TestStampPattern.test_stamp_pattern)
           {%- endif %}
           script: |
             tempest run --config-file /etc/tempest/tempest.conf -w 4 --smoke --blacklist-file  /etc/tempest/test-blacklist
