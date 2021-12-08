@@ -65,35 +65,6 @@ spec:
             pattern: ^(?!amq\.).*
             vhost: heat_victoria
           - definition:
-              expires: 3600000
-            name: heat_engine_rpc_expire
-            pattern: ^heat-engine-listener\.
-            priority: 1
-            vhost: heat_master
-          - definition:
-              expires: 3600000
-            name: heat_worker_rpc_expire
-            pattern: ^engine_worker\.
-            priority: 1
-            vhost: heat_master
-          - definition:
-              expires: 3600000
-            name: results_expire
-            pattern: ^results\.
-            priority: 1
-            vhost: heat_master
-          - definition:
-              expires: 3600000
-            name: tasks_expire
-            pattern: ^tasks\.
-            priority: 1
-            vhost: heat_master
-          - definition:
-              message-ttl: 120000
-            name: default-policy
-            pattern: ^(?!amq\.).*
-            vhost: heat_master
-          - definition:
               message-ttl: 120000
             name: default-policy-openstack
             pattern: ^(?!amq\.).*
@@ -322,7 +293,6 @@ spec:
             path:
             - /heat_ussuri
             - /heat_victoria
-            - /heat_master
           heat_service_notifications:
             auth:
               heat:
