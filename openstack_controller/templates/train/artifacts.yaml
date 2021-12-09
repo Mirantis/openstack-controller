@@ -32,7 +32,6 @@ heat_cloudwatch: '{{ images_base_url }}/openstack/heat:train-bionic-202109031001
 heat_db_sync: '{{ images_base_url }}/openstack/heat:train-bionic-20210903100101'
 heat_engine: '{{ images_base_url }}/openstack/heat:train-bionic-20210903100101'
 heat_engine_cleaner: '{{ images_base_url }}/openstack/heat:train-bionic-20210903100101'
-heat_purge_deleted: '{{ images_base_url }}/openstack/heat:train-bionic-20210903100101'
 horizon: '{{ images_base_url }}/openstack/horizon:train-bionic-20210903100101'
 horizon_db_sync: '{{ images_base_url }}/openstack/horizon:train-bionic-20210903100101'
 image_repo_sync: '{{ images_base_url }}/openstack/extra/docker:17.07.0'

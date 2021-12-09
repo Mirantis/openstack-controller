@@ -32,7 +32,6 @@ heat_cloudwatch: '{{ images_base_url }}/openstack/heat:ussuri-bionic-20211206091
 heat_db_sync: '{{ images_base_url }}/openstack/heat:ussuri-bionic-20211206091341'
 heat_engine: '{{ images_base_url }}/openstack/heat:ussuri-bionic-20211206091341'
 heat_engine_cleaner: '{{ images_base_url }}/openstack/heat:ussuri-bionic-20211206091341'
-heat_purge_deleted: '{{ images_base_url }}/openstack/heat:ussuri-bionic-20211018060027'
 horizon: '{{ images_base_url }}/openstack/horizon:ussuri-bionic-20211206091341'
 horizon_db_sync: '{{ images_base_url }}/openstack/horizon:ussuri-bionic-20211206091341'
 image_repo_sync: '{{ images_base_url }}/openstack/extra/docker:17.07.0'

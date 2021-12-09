@@ -32,7 +32,6 @@ heat_cloudwatch: '{{ images_base_url }}/openstack/heat:wallaby-bionic-2021120813
 heat_db_sync: '{{ images_base_url }}/openstack/heat:wallaby-bionic-20211208132348'
 heat_engine: '{{ images_base_url }}/openstack/heat:wallaby-bionic-20211208132348'
 heat_engine_cleaner: '{{ images_base_url }}/openstack/heat:wallaby-bionic-20211208132348'
-heat_purge_deleted: '{{ images_base_url }}/openstack/heat:victoria-bionic-20211018060027'
 horizon: '{{ images_base_url }}/openstack/horizon:wallaby-bionic-20211208132348'
 horizon_db_sync: '{{ images_base_url }}/openstack/horizon:wallaby-bionic-20211208132348'
 image_repo_sync: '{{ images_base_url }}/openstack/extra/docker:17.07.0'
