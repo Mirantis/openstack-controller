@@ -47,15 +47,10 @@ class HelmManager:
         return utils.substitute_local_proxy_hostname(repo, node_ip)
 
     async def _guess_and_delete(self, stderr):
-        immutable_pattern = (
-            r'Error: .*: cannot patch "(.*)" with kind ([a-zA-Z]+): '
-        )
-        # Use search to find pattern in multiline string.
-        # TODO(vsaienko): Add unittests for regex
-        m = re.search(immutable_pattern, stderr)
-        if m:
+        immutable_pattern = r'cannot patch "(.*?)" with kind ([a-zA-Z]+):'
+        for match in re.findall(immutable_pattern, stderr):
             try:
-                name, kind = m.group(1, 2)
+                name, kind = match
             except:
                 kopf.TemporaryError("Failed to guess name and kind.")
             LOG.info(f"Trying to remove kind: {kind} with name: {name}")
@@ -65,8 +60,8 @@ class HelmManager:
                     "Failed to find pykube class for kind: {kind}"
                 )
 
-            obj = kube.find(kube_class, name, self.namespace)
-            if obj.exists():
+            obj = kube.find(kube_class, name, self.namespace, silent=True)
+            if obj and obj.exists():
                 obj.delete()
                 await kube.wait_for_deleted(obj)
             LOG.info(f"Successfully removed kind: {kind} with name {name}")
