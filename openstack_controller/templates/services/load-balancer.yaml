@@ -143,12 +143,12 @@ spec:
               readiness:
                 enabled: true
                 params:
-                  initialDelaySeconds: 15
+                  initialDelaySeconds: 5
                   timeoutSeconds: 5
               liveness:
                 enabled: true
                 params:
-                  initialDelaySeconds: 15
+                  initialDelaySeconds: 30
                   timeoutSeconds: 5
         mounts:
           octavia_api:

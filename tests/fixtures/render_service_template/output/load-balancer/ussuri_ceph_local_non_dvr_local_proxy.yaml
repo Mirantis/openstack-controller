@@ -312,12 +312,12 @@ spec:
               liveness:
                 enabled: true
                 params:
-                  initialDelaySeconds: 15
+                  initialDelaySeconds: 30
                   timeoutSeconds: 5
               readiness:
                 enabled: true
                 params:
-                  initialDelaySeconds: 15
+                  initialDelaySeconds: 5
                   timeoutSeconds: 5
       secrets:
         amphora_ssh_key:
