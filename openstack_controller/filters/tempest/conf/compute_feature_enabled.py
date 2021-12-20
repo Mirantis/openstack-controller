@@ -1,6 +1,23 @@
 from openstack_controller.filters.tempest import base_section
 
 
+MULTIATTACH_CEPH_RELEASE_MAPPING = {
+    "xena": True,
+    "wallaby": True,
+    "victoria": True,
+    "ussuri": False,
+    "train": False,
+    "stein": False,
+    "rocky": False,
+    "queens": False,
+    "pike": False,
+    "ocata": False,
+    "newton": False,
+    "mitaka": False,
+    "kilo": False,
+}
+
+
 class ComputeFeatureEnabled(base_section.BaseSection):
 
     name = "compute-feature-enabled"
@@ -36,6 +53,7 @@ class ComputeFeatureEnabled(base_section.BaseSection):
         "swap_volume",
         "vnc_console",
         "vnc_server_header",
+        "volume_multiattach",
     ]
 
     @property
@@ -218,3 +236,17 @@ class ComputeFeatureEnabled(base_section.BaseSection):
     @property
     def vnc_server_header(self):
         pass
+
+    @property
+    def volume_multiattach(self):
+        """
+            This option depends on the used Cinder backend driver:
+
+        - Ceph driver supports volume_multiattach from Stein
+        - LVM driver supports volume_multiattach from Queens
+
+        but we've decided not to test it on the Openstack versions older than
+        Victoria.
+        """
+        version = self.spec["openstack_version"]
+        return MULTIATTACH_CEPH_RELEASE_MAPPING.get(version)
