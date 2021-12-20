@@ -35,6 +35,7 @@ features:
     - coordination
     - key-manager
     - redis
+    - descheduler
   glance:
     backend: ceph
   cinder:

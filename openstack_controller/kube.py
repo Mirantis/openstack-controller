@@ -325,6 +325,42 @@ class Job(pykube.Job, HelmBundleMixin):
         LOG.info("New job created: %s", self.name)
 
 
+class CronJob(pykube.CronJob, HelmBundleMixin):
+    async def _suspend(
+        self,
+        wait_completion=False,
+        delay=settings.OSCTL_HELMBUNLE_MANIFEST_DISABLE_DELAY,
+    ):
+        diff = {"conf": {"cronjob": {"suspend": True}}}
+        i = 1
+        while True:
+            self.reload()
+            await self.service.set_release_values(
+                self.helmbundle_ext.chart, diff
+            )
+            if not wait_completion:
+                return
+            check_apply = self.obj["spec"].get("suspend", None)
+            if check_apply:
+                return
+            LOG.info(
+                f"The object {self.kind} {self.name} still not suspended, retrying {i}"
+            )
+            await asyncio.sleep(delay)
+            i += 1
+
+    async def suspend(
+        self,
+        wait_completion=False,
+        timeout=settings.OSCTL_HELMBUNLE_MANIFEST_DISABLE_TIMEOUT,
+        delay=settings.OSCTL_HELMBUNLE_MANIFEST_DISABLE_DELAY,
+    ):
+        await asyncio.wait_for(
+            self._suspend(wait_completion=wait_completion, delay=delay),
+            timeout=timeout,
+        )
+
+
 class Deployment(pykube.Deployment, HelmBundleMixin):
     @property
     def ready(self):

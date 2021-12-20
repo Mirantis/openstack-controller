@@ -227,6 +227,30 @@ class RabbitMQ(Service):
         }
 
 
+class Descheduler(Service):
+    service = "descheduler"
+
+    def template_args(self):
+        t_args = super().template_args()
+        t_args["openstack_namespace"] = self.namespace
+        return t_args
+
+    @property
+    def health_groups(self):
+        return []
+
+    _child_objects = {
+        "descheduler": {
+            "CronJob": {
+                "descheduler": {
+                    "images": ["descheduler"],
+                    "manifest": "cronjob",
+                }
+            }
+        }
+    }
+
+
 class Aodh(OpenStackService):
     service = "alarming"
     openstack_chart = "aodh"
