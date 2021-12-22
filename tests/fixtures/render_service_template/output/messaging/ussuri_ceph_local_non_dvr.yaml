@@ -396,5 +396,16 @@ spec:
       pod:
         replicas:
           server: 1
+        probes:
+          server:
+            rabbitmq:
+              readiness:
+                params:
+                  periodSeconds: 60
+                  timeoutSeconds: 30
+              liveness:
+                params:
+                  periodSeconds: 60
+                  timeoutSeconds: 30
       volume:
         enabled: false

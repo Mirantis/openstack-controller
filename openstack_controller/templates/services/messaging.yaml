@@ -19,6 +19,17 @@ spec:
       pod:
         replicas:
           server: 1
+        probes:
+          server:
+            rabbitmq:
+              readiness:
+                params:
+                  periodSeconds: 60
+                  timeoutSeconds: 30
+              liveness:
+                params:
+                  periodSeconds: 60
+                  timeoutSeconds: 30
       manifests:
         network_policy: false
         job_users_create: true

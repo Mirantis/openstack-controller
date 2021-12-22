@@ -59,11 +59,13 @@ spec:
           server:
             rabbitmq:
               readiness:
-                periodSeconds: 60
-                timeoutSeconds: 30
+                params:
+                  periodSeconds: 60
+                  timeoutSeconds: 30
               liveness:
-                periodSeconds: 60
-                timeoutSeconds: 30
+                params:
+                  periodSeconds: 60
+                  timeoutSeconds: 30
       manifests:
         network_policy: false
         job_users_create: true
