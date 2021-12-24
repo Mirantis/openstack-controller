@@ -192,6 +192,15 @@ async def handle(body, meta, spec, logger, reason, **kwargs):
     update, delete = layers.services(spec, logger, **kwargs)
 
     if is_openstack_version_changed(kwargs["diff"]):
+        # Suspend descheduler cronjob during the upgrade services
+        service_instance_descheduler = services.registry["descheduler"](
+            body, logger, osdplst
+        )
+        child_obj_descheduler = service_instance_descheduler.get_child_object(
+            "CronJob", "descheduler"
+        )
+        await child_obj_descheduler.suspend(wait_completion=True)
+
         services_to_upgrade = get_os_services_for_upgrade(update)
         LOG.info(
             f"Starting upgrade for the following services: {services_to_upgrade}"

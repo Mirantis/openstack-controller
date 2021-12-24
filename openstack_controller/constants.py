@@ -38,6 +38,7 @@ CHART_GROUP_MAPPING = {
         "libvirt",
         "ingress",
         "etcd",
+        "descheduler",
         "gnocchi",
         "ceph-rgw",
         "frr",

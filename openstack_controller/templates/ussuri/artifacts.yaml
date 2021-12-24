@@ -200,3 +200,4 @@ masakari_db_purge: '{{ images_base_url }}/openstack/masakari:ussuri-bionic-20211
 neutron_bootstrap: '{{ images_base_url }}/openstack/openstack-tools:ussuri-bionic-20211213060015'
 cinder_drop_default_volume_type: '{{ images_base_url }}/openstack/openstack-tools:ussuri-bionic-20211213060015'
 cinder_create_internal_tenant: '{{ images_base_url }}/openstack/openstack-tools:ussuri-bionic-20211213060015'
+descheduler: '{{ images_base_url }}/openstack/extra/descheduler:v0.21.0'
