@@ -163,7 +163,7 @@ async def handle(body, meta, spec, logger, reason, **kwargs):
     kwargs["patch"]["status"]["version"] = version.release_string
     kwargs["patch"]["status"]["fingerprint"] = layers.spec_hash(body["spec"])
     osdplst = osdplstatus.OpenStackDeploymentStatus(name, namespace)
-    osdplst.present()
+    osdplst.present(osdpl_obj=body)
 
     # Always create clusterworkloadlock, but set to inactive when we are not interested
     cwl = maintenance.ClusterWorkloadLock.get_resource(name)
@@ -300,4 +300,4 @@ async def delete(name, meta, body, spec, logger, reason, **kwargs):
         ] = (service_instance.delete, reason, body, meta, spec, logger, kwargs)
         await run_task(task_def)
     # TODO(dbiletskiy) delete osdpl status
-    kube.ClusterWorkloadLock.get_resource(name).absent()
+    maintenance.ClusterWorkloadLock.get_resource(name).absent()

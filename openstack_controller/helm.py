@@ -214,7 +214,7 @@ class HelmManager:
 
         stdout, stderr = await self.run_cmd(cmd, raise_on_error=False)
         if stderr and "Release not loaded" not in stderr:
-            raise kopf.TemporaryError("Helm command failed")
+            raise kopf.TemporaryError(f"Helm command failed: {stderr}")
 
     async def delete_bundle(self, data):
         for release in data["spec"]["releases"]:

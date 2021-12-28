@@ -2,6 +2,7 @@ import logging
 
 import pykube
 import datetime
+import kopf
 
 from openstack_controller import version
 from openstack_controller import layers
@@ -36,9 +37,11 @@ class OpenStackDeploymentStatus(pykube.objects.NamespacedAPIObject):
         }
         return super().__init__(kube.api, self.dummy)
 
-    def present(self):
+    def present(self, osdpl_obj):
         if not self.exists():
             self.create()
+        kopf.adopt(self.obj, osdpl_obj)
+        self.update()
 
     def absent(self):
         if self.exists():
