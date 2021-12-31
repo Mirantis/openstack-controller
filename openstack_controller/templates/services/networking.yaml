@@ -110,6 +110,12 @@ spec:
   - name: openstack-openvswitch
     chart: {{spec.common.infra.repo}}/openvswitch
     values:
+      {%- if spec.openstack_version in ["wallaby", "xena", "master"] %}
+      conf:
+        neutron:
+          DEFAULT:
+            support_sync_ovs_info: false
+      {%- endif %}
       pod:
         probes:
           ovs_db:
@@ -541,6 +547,7 @@ spec:
             memcache_secret_key: {{ credentials.memcached }}
           DEFAULT:
             {%- if spec.openstack_version in ["wallaby", "xena", "master"] %}
+            support_sync_ovs_info: False
             support_sync_ha_routers_info: False
             {%- endif %}
             router_processes_greentlet_max: 10
