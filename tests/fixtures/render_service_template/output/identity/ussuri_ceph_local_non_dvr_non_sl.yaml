@@ -19,7 +19,10 @@ spec:
             topics: notifications
           federation:
             # TODO: move this logic to keystone helm chart
-            trusted_dashboard: "https://horizon.it.just.works/auth/websso/"
+            trusted_dashboard:
+              type: multistring
+              values:
+                - "https://horizon.it.just.works/auth/websso/"
             remote_id_attribute: HTTP_OIDC_ISS
           mapped:
             remote_id_attribute: HTTP_OIDC_ISS
