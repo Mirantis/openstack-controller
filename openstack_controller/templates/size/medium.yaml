@@ -453,7 +453,7 @@ services:
                 min_available: 2
           replicas:
             api: 5
-            conductor: 5
+            conductor: 3
         conf:
           ironic:
             database:
