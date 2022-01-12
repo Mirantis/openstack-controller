@@ -137,6 +137,9 @@ patternProperties:
                   driver:
                     type: string
                     description: The dpdk driver to use for NICs
+                  socket_memory:
+                    type: string
+                    description: "Memory to allocate for numa node, default: 1024 MB to first numa node"
                   bridges:
                     type: array
                     items:

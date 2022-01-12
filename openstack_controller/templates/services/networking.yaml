@@ -175,6 +175,7 @@ spec:
       {%- if override.get("dpdk", {}).get("enabled", False) %}
       {%- set hp_size = override.get("dpdk", {}).get("hugepages", {}).get("size", "2Mi") %}
       {%- set hp_amount = override.get("dpdk", {}).get("hugepages", {}).get("amount", "1Gi") %}
+      {%- set socket_memory = override.get("dpdk", {}).get("socket_memory", "1024") %}
             {{ label }}:
               values:
                 pod:
@@ -189,7 +190,7 @@ spec:
                   ovs_dpdk:
                     enabled: true
                     hugepages_mountpath: /dev/hugepages
-                    socket_memory: 1024
+                    socket_memory: {{ socket_memory }}
                     vhostuser_socket_dir: vhostuser
       {%- endif %}
     {%- endfor %}

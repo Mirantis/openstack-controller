@@ -85,6 +85,7 @@ nodes:
             name: br-phy
           driver: igb_uio
           enabled: true
+          socket_memory: 512,512
           nics:
           - bridge: br-phy
             name: ens8

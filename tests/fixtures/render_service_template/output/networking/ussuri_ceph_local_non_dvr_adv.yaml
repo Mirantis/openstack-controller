@@ -148,7 +148,7 @@ spec:
                    ovs_dpdk:
                      enabled: true
                      hugepages_mountpath: /dev/hugepages
-                     socket_memory: 1024
+                     socket_memory: 512,512
                      vhostuser_socket_dir: vhostuser
              openstack-compute-node-dpdk-2::enabled:
                values:
