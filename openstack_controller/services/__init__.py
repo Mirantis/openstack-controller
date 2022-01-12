@@ -267,10 +267,13 @@ class Ceilometer(OpenStackService):
 
     def template_args(self):
         t_args = super().template_args()
-        panko_secret = secrets.OpenStackServiceSecret(self.namespace, "event")
-        kube.wait_for_secret(self.namespace, panko_secret.secret_name)
-        panko_creds = panko_secret.get()
-        t_args["event_credentials"] = panko_creds
+        if "event" in self.mspec["features"].get("services", []):
+            panko_secret = secrets.OpenStackServiceSecret(
+                self.namespace, "event"
+            )
+            kube.wait_for_secret(self.namespace, panko_secret.secret_name)
+            panko_creds = panko_secret.get()
+            t_args["event_credentials"] = panko_creds
         return t_args
 
 
