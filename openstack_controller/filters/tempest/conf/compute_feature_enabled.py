@@ -210,6 +210,10 @@ class ComputeFeatureEnabled(base_section.BaseSection):
     def shelve(self):
         if self.is_service_enabled("ironic"):
             return False
+        if self.get_values_item(
+            "nova", "conf.nova.glance.verify_glance_signatures", False
+        ):
+            return False
 
     @property
     def snapshot(self):
