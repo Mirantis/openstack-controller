@@ -1110,6 +1110,8 @@ spec:
                           <<: *logging_level
                         masakari:
                           <<: *logging_level
+                        barbican:
+                          <<: *logging_level
                 migration:
                   x-kubernetes-preserve-unknown-fields: true
                   type: object
