@@ -531,6 +531,12 @@ spec:
           openstack router show {{ floating_network.get('router', {}).get('name', 'r1') }} || openstack router create {{ floating_network.get('router', {}).get('name', 'r1') }}
           openstack router set --external-gateway {{ floating_network.get('name', 'public') }} {{ floating_network.get('router', {}).get('name', 'r1') }}
           openstack network set {{ floating_network.get('name', 'public') }} --external {% if not tungstenfabric_enabled %} --default {% endif %}
+        {%- if not tungstenfabric_enabled %}
+          {%- do floating_network.update({ 'default': True, 'type': 'flat' }) %}
+        {%- endif %}
+        {%- do floating_network.update({ 'external': True }) %}
+        {%- do floating_network.subnet.update({ 'dhcp': False }) %}
+        {%- do floating_network.setdefault('router', {'name': 'r1'}) %}
         floating_network: {{ floating_network }}
       {%- endif %}
       conf:

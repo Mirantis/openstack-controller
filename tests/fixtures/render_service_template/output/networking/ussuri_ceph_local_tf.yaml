@@ -101,11 +101,15 @@ spec:
           openstack network set public --external \n"
         floating_network:
           enabled: true
+          external: true
           subnet:
             gateway: 10.11.12.39
             pool_end: 10.11.12.200
             pool_start: 10.11.12.100
             range: 10.11.12.0/24
+            dhcp: false
+          router:
+            name: r1
       conf:
         policy.d:
           01-controller-default.yaml: {'networking_rule1': 'networking_value1'}
