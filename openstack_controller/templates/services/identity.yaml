@@ -126,7 +126,10 @@ spec:
 {%- if keystone_keycloak.get('enabled', False) %}
           federation:
             # TODO: move this logic to keystone helm chart
-            trusted_dashboard: "https://horizon.{{ spec.public_domain_name }}/auth/websso/"
+            trusted_dashboard:
+              type: multistring
+              values:
+                - "https://horizon.{{ spec.public_domain_name }}/auth/websso/"
             remote_id_attribute: HTTP_OIDC_ISS
           mapped:
             remote_id_attribute: HTTP_OIDC_ISS
