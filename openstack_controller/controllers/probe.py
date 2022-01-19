@@ -6,6 +6,7 @@ import time
 
 from openstack_controller import settings
 from openstack_controller import utils
+from openstack_controller import kube
 
 
 LOG = utils.get_logger(__name__)
@@ -25,6 +26,12 @@ def check_recv_queue(**kwargs):
     cmd = ["netstat", "-plan", "--tcp"]
     cmd_res = subprocess.run(cmd, stdout=subprocess.PIPE, text=True)
     pid = os.getpid()
+    # the urllib3 connection might time out and closed from server/client side
+    # since neither pykube or urllib3 has periodic tasks to close socket
+    # after TCP connection closed, socket will be in CLOSE_WAIT unless we close
+    # connection explicitly from application. Run get() here to refresh connection
+    # and let urllib3 to close timed out connections. Related issue https://github.com/urllib3/urllib3/issues/2100
+    kube.api.get()
     LOG.debug(f"Checking Rec-Q for pid: {pid}")
     global RECV_QUEUE
     recv_q_max = 0
