@@ -97,7 +97,7 @@ prometheus_rabbitmq_exporter_helm_tests: '{{ images_base_url }}/openstack/heat:x
 rabbitmq_init: '{{ images_base_url }}/openstack/heat:xena-bionic-20220117110643'
 rabbitmq: '{{ images_base_url }}/general/rabbitmq:3.9.8'
 rabbitmq_scripted_test: '{{ images_base_url }}/general/rabbitmq:3.9.8-management'
-tempest_run_tests: '{{ images_base_url }}/openstack/tempest:victoria-bionic-20220114091907'
+tempest_run_tests: '{{ images_base_url }}/openstack/tempest:victoria-bionic-20220119123458'
 tempest-uuids-init: '{{ images_base_url }}/openstack/heat:xena-bionic-20220117110643'
 glance_metadefs_load: '{{ images_base_url }}/openstack/glance:xena-bionic-20220117110643'
 memcached: '{{ images_base_url }}/general/memcached:1.6.6-alpine'
