@@ -604,7 +604,7 @@ class SignedCertificateSecret(Secret):
             .serial_number(x509.random_serial_number())
             .not_valid_before(datetime.datetime.utcnow())
             .not_valid_after(
-                datetime.datetime.utcnow() + datetime.timedelta(days=365)
+                datetime.datetime.utcnow() + datetime.timedelta(days=10 * 365)
             )
             .public_key(key.public_key())
             .add_extension(
