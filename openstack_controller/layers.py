@@ -135,7 +135,10 @@ def render_service_template(
         chart = constants.OS_POLICY_SERVICES[service]
         service_policy = _get_default_policy(spec, chart)
     elif service == "dashboard":
-        charts = constants.OS_POLICY_SERVICES.values()
+        os_services = set(spec.get("features", {}).get("services", []))
+        charts = set(constants.OS_POLICY_SERVICES.values()).intersection(
+            os_services
+        )
         service_policy = _get_dashboard_default_policy(spec, charts)
 
     text = tpl.render(

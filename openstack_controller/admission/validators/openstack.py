@@ -36,6 +36,7 @@ class OpenStackValidator(base.BaseValidator):
             self._validate_for_another_upgrade(review_request)
         self._check_masakari_allowed(new_obj)
         self._check_baremetal_allowed(new_obj)
+        self._check_panko_allowed(new_obj)
 
     def _deny_master(self, new_obj):
         new_version = new_obj.get("spec", {}).get("openstack_version")
@@ -72,6 +73,23 @@ class OpenStackValidator(base.BaseValidator):
             raise exception.OsDplValidationFailed(
                 "This OpenStack Baremetal services is not supported"
                 "with TungstenFabric networking."
+            )
+
+    def _check_panko_allowed(self, new_obj):
+        # Do not call heavy render logic, assume default values in preset is ok
+        openstack_services = (
+            new_obj.get("spec", {}).get("features", {}).get("services", [])
+        )
+        os_num_version = constants.OpenStackVersion[
+            new_obj["spec"]["openstack_version"]
+        ].value
+        if (
+            "event" in openstack_services
+            and os_num_version >= constants.OpenStackVersion["xena"].value
+        ):
+            raise exception.OsDplValidationFailed(
+                "Event service (Panko) was retired and "
+                "is not available since OpenStack Xena release."
             )
 
     def _openstack_version_changed(self, old_obj, new_obj):

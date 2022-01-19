@@ -106,11 +106,13 @@ spec:
             ceilometer:
               username: {{ credentials.database.user.username }}
               password: {{ credentials.database.user.password }}
+  {%- if 'event' in spec.features.services %}
         oslo_db_panko:
           auth:
             panko:
               username:   {{ event_credentials.database.user.username }}
               password:   {{ event_credentials.database.user.password }}
+  {%- endif %}
 {%- if 'metering' in components_with_dedicated_messaging %}
 {% include 'base/_messaging_dedicated.yaml' %}
 {%- else %}

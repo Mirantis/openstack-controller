@@ -1077,3 +1077,38 @@ def test_nova_features_vcpu_type_multiple_stein_or_older(client):
         assert response.status == falcon.HTTP_OK
         assert response.json["response"]["allowed"] is False, ver
         assert response.json["response"]["status"]["code"] == 400
+
+
+def test_panko_install_ok(client):
+    allow_in = [
+        "queens",
+        "rocky",
+        "stein",
+        "train",
+        "ussuri",
+        "victoria",
+        "wallaby",
+    ]
+    req = copy.deepcopy(ADMISSION_REQ)
+    req["request"]["object"]["spec"]["features"]["services"].append("event")
+    for os_version in allow_in:
+        req["request"]["object"]["spec"]["openstack_version"] = os_version
+        response = client.simulate_post("/validate", json=req)
+        assert response.status == falcon.HTTP_OK
+        assert (
+            response.json["response"]["allowed"] is True
+        ), "Event service (Panko) was retired and is not available since OpenStack Xena release."
+
+
+def test_panko_install_fail(client):
+    deny_in = ["xena", "master"]
+    req = copy.deepcopy(ADMISSION_REQ)
+    req["request"]["object"]["spec"]["features"]["services"].append("event")
+    for os_version in deny_in:
+        req["request"]["object"]["spec"]["openstack_version"] = os_version
+        response = client.simulate_post("/validate", json=req)
+        assert response.status == falcon.HTTP_OK
+        assert (
+            response.json["response"]["allowed"] is False
+        ), "Event service (Panko) was retired and is not available since OpenStack Xena release."
+        assert response.json["response"]["status"]["code"] == 400
