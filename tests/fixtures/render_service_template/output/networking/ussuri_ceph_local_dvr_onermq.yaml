@@ -57,22 +57,15 @@ spec:
     values:
       bootstrap:
         enabled: true
-        script: "openstack network show public || openstack network create \\\n  --provider-network-type\
-          \ flat \\\n  --provider-physical-network physnet1 \\\n  --external \\\n\
-          \  public\n# set default gateway via any non-master/worker node to get into\
-          \ ingress controller\nopenstack subnet show public-subnet || openstack subnet\
-          \ create  public-subnet \\\n  --no-dhcp --subnet-range  10.11.12.0/24 \\\
-          \n  --allocation-pool start=10.11.12.100,end=10.11.12.200 \\\n  --gateway\
-          \ 10.11.12.39 \\\n  --network public\nopenstack router show r1 || openstack\
-          \ router create r1\nopenstack router set --external-gateway public r1\n\
-          openstack network set public --external  --default \n"
         floating_network:
           enabled: true
           default: true
           external: true
+          name: public
           network_type: flat
           physnet: physnet1
           subnet:
+            name: public-subnet
             gateway: 10.11.12.39
             pool_end: 10.11.12.200
             pool_start: 10.11.12.100

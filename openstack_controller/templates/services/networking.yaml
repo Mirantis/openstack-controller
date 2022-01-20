@@ -520,29 +520,14 @@ spec:
       {%- if floating_network.get('enabled', False) %}
       bootstrap:
         enabled: true
-        script: |
-          openstack network show {{ floating_network.get('name', 'public') }} || openstack network create \
-            {%- if not tungstenfabric_enabled %}
-            --provider-network-type flat \
-            --provider-physical-network {{ floating_network.get('physnet', 'physnet1') }} \
-            {%- endif %}
-            --external \
-            {{ floating_network.get('name', 'public') }}
-          # set default gateway via any non-master/worker node to get into ingress controller
-          openstack subnet show {{ floating_network.subnet.get('name', 'public-subnet') }} || openstack subnet create  {{ floating_network.subnet.get('name', 'public-subnet') }} \
-            --no-dhcp --subnet-range  {{ floating_network.subnet.range }} \
-            --allocation-pool start={{ floating_network.subnet.pool_start }},end={{ floating_network.subnet.pool_end }} \
-            --gateway {{ floating_network.subnet.gateway }} \
-            --network {{ floating_network.get('name', 'public') }}
-          openstack router show {{ floating_network.get('router', {}).get('name', 'r1') }} || openstack router create {{ floating_network.get('router', {}).get('name', 'r1') }}
-          openstack router set --external-gateway {{ floating_network.get('name', 'public') }} {{ floating_network.get('router', {}).get('name', 'r1') }}
-          openstack network set {{ floating_network.get('name', 'public') }} --external {% if not tungstenfabric_enabled %} --default {% endif %}
         {%- if not tungstenfabric_enabled %}
           {%- do floating_network.update({ 'default': True }) %}
           {%- do floating_network.setdefault('network_type', 'flat') %}
         {%- endif %}
         {%- do floating_network.update({ 'external': True }) %}
+        {%- do floating_network.setdefault('name', 'public') %}
         {%- do floating_network.subnet.update({ 'dhcp': False }) %}
+        {%- do floating_network.subnet.setdefault('name', 'public-subnet') %}
         {%- do floating_network.setdefault('router', {'name': 'r1'}) %}
         floating_network: {{ floating_network }}
       {%- endif %}
