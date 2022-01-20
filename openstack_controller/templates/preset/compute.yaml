@@ -371,6 +371,7 @@ services:
             load_balancer:
               lb_build_timeout: 1500
               build_timeout: 600
+              listener_conn_limit: 50000
             validation:
               image_ssh_password: gocubsgo
               image_ssh_user: cirros
