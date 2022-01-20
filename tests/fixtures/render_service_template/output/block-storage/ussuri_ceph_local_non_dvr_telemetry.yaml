@@ -245,6 +245,7 @@ spec:
         secret_ca_bundle: true
         cron_service_cleaner: true
         job_drop_default_volume_type: true
+        cron_volume_usage_audit: false
       pod:
         replicas:
           api: 1
