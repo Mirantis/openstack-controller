@@ -322,5 +322,9 @@ def configure(settings: kopf.OperatorSettings, **_):
     )
     # Defines total timeout for aiohttp watching session.
     settings.watching.client_timeout = 1 * 600
+    # setting unique finalizer name for each controller
+    settings.persistence.finalizer = (
+        f"lcm.mirantis.com/{settings.peering.name}-finalizer"
+    )
     if OSCTL_METRICS_PORT > 0:
         start_http_server(OSCTL_METRICS_PORT)
