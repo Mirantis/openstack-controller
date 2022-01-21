@@ -270,6 +270,7 @@ spec:
         job_backup_storage_init: false
         secret_ca_bundle: true
         cron_service_cleaner: true
+        cron_volume_usage_audit: false
       # NODE SPECIFIC START
       {%- if overrides.enabled %}
       overrides:
