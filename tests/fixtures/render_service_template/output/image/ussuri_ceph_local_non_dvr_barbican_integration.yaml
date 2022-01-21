@@ -83,6 +83,10 @@ spec:
         configmap: rook-ceph-config
         user_secret_name: glance-rbd-keyring
       network:
+        api:
+          ingress:
+            annotations:
+              nginx.ingress.kubernetes.io/proxy-request-buffering: "off"
         proxy:
           enabled: true
           env_vars:

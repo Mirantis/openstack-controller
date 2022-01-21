@@ -294,6 +294,10 @@ spec:
       network:
         proxy:
 {% include 'base/_proxy_vars.yaml' %}
+        api:
+          ingress:
+            annotations:
+              nginx.ingress.kubernetes.io/proxy-request-buffering: "off"
       endpoints:
         cluster_domain_suffix: {{ spec.internal_domain_name }}
 {% include 'base/_admin_identity.yaml' %}
