@@ -304,6 +304,7 @@ spec:
             endpoint_type: internalURL
           neutron:
             endpoint_type: internalURL
+            connect_retries: 10
           nova:
             endpoint_type: internalURL
           oslo_messaging_notifications:
