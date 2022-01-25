@@ -360,12 +360,15 @@ services:
             baremetal_feature_enabled:
               adoption: true
             {%- endif %}
-            #TODO(mshalamov): Will be removed during process of completing PRODX-1192
+            # TODO (mshalamov): Will be removed during process of completing PRODX-1192
             compute:
             {%- if ironic_enabled and not ironic_mt_enabled %}
               fixed_network_name: ironic-provisioning
             {%- endif %}
               build_timeout: 600
+            # NOTE(vsaienko): let nova scheduler pick destination host
+            compute_feature_enabled:
+              can_migrate_between_any_hosts: false
             image:
               build_timeout: 600
             load_balancer:
