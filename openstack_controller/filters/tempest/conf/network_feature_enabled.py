@@ -77,11 +77,9 @@ class NetworkFeatureEnabled(base_section.BaseSection):
                 >= constants.OpenStackVersion["ussuri"]
             ):
                 api_extensions_default.append("rbac-address-scope")
-            if (
-                self.get_spec_item("features.neutron.backend")
-                == "tungstenfabric"
-            ):
-                api_extensions_default.extend(["standard-attr-tag", "trunk"])
+
+        if self.get_spec_item("features.neutron.backend") == "tungstenfabric":
+            api_extensions_default.extend(["standard-attr-tag", "trunk"])
 
         if self.get_spec_item("features.neutron.bgpvpn.enabled"):
             api_extensions_default.extend(
