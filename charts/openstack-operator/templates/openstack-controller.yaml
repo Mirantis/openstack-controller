@@ -262,6 +262,13 @@ spec:
               value: {{ .Values.osdpl.namespace }}
           image: {{ tuple . .Values.image | include "getImageUrl" }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+        - name: remove-default-finalizer
+          command:
+          - osctl-remove-default-finalizer
+          env:
+{{ tuple . | include "openstack-controller.common_env" | indent 12 }}
+          image: {{ tuple . .Values.image | include "getImageUrl" }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
       containers:
         - name: osdpl
           image: {{ tuple . .Values.image | include "getImageUrl" }}
