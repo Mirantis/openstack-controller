@@ -232,6 +232,9 @@ metadata:
     app.kubernetes.io/managed-by: {{ .Release.Service }}
 spec:
   replicas: {{ .Values.replicaCount }}
+  strategy:
+    rollingUpdate:
+      maxUnavailable: 100%
   selector:
     matchLabels:
       app.kubernetes.io/name: {{ include "openstack-controller.name" . }}
