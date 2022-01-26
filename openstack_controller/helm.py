@@ -219,3 +219,15 @@ class HelmManager:
     async def delete_bundle(self, data):
         for release in data["spec"]["releases"]:
             await self.delete(release["name"])
+
+    async def delete_not_active_releases(self, data):
+        """Remove releases which a dynamic and enabled by feature flag."""
+
+        if not "available_releases" in data["spec"]:
+            return
+        current_releases = [r["name"] for r in data["spec"]["releases"]]
+        available_releases = data["spec"]["available_releases"]
+        to_remove = set(available_releases) - set(current_releases)
+
+        for release in to_remove:
+            await self.delete(release)

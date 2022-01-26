@@ -10,6 +10,9 @@
 {%- set masakari_db_cleanup = spec.get('features', {}).get('database', {}).get('cleanup', {}).get('masakari', {'enabled': true}) %}
 
 spec:
+  available_releases:
+    - "openstack-masakari-rabbitmq"
+    - "openstack-masakari"
   releases:
 {%- if 'instance-ha' in components_with_dedicated_messaging %}
   - name: openstack-masakari-rabbitmq

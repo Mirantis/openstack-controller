@@ -481,6 +481,8 @@ class Service:
         except:
             raise
 
+        await self.helm_manager.delete_not_active_releases(data)
+
         LOG.info(f"Config applied for {self.service}")
         kopf.info(
             self.osdpl.obj,

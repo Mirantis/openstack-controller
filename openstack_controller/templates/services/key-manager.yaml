@@ -9,6 +9,9 @@
 {%- set barbican_db_cleanup = spec.get('features', {}).get('database', {}).get('cleanup', {}).get('barbican', {'enabled': true}) %}
 
 spec:
+  available_releases:
+    - "openstack-barbican-rabbitmq"
+    - "openstack-barbican"
   releases:
 {%- if 'key-manager' in components_with_dedicated_messaging %}
   - name: openstack-barbican-rabbitmq

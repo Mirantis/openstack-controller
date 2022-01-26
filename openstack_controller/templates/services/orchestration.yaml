@@ -12,6 +12,9 @@
 {%- set heat_db_cleanup = spec.get('features', {}).get('database', {}).get('cleanup', {}).get('heat', {'enabled': true}) %}
 
 spec:
+  available_releases:
+    - "openstack-heat-rabbitmq"
+    - "openstack-heat"
   releases:
 {%- if 'orchestration' in components_with_dedicated_messaging %}
   - name: openstack-heat-rabbitmq

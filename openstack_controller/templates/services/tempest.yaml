@@ -5,6 +5,8 @@
 {%- set signature = spec.get('features', {}).get('glance', {}).get("signature", {"enabled": false}) %}
 
 spec:
+  available_releases:
+    - "openstack-tempest"
   releases:
   - name: openstack-tempest
     chart: {{spec.common.openstack.repo}}/tempest

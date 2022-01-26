@@ -13,6 +13,9 @@
 {%- set glance_db_cleanup = spec.get('features', {}).get('database', {}).get('cleanup', {}).get('glance', {'enabled': true}) %}
 
 spec:
+  available_releases:
+    - "openstack-glance-rabbitmq"
+    - "openstack-glance"
   releases:
 {%- if 'image' in components_with_dedicated_messaging %}
   - name: openstack-glance-rabbitmq

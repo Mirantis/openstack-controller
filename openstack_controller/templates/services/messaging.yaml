@@ -6,6 +6,8 @@
 {%- set enabled_vhosts = ['openstack'] %}
 
 spec:
+  available_releases:
+    - "openstack-rabbitmq"
   releases:
   - name: openstack-rabbitmq
     chart: {{spec.common.infra.get('repo', spec.common.charts.repo)}}/rabbitmq

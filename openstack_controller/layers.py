@@ -150,6 +150,9 @@ def render_service_template(
         **template_args,
     )
     data = yaml.safe_load(text)
+    # NOTE(vsaienko): for case when deploy_main_service is set to false
+    if "releases" in data["spec"] and not data["spec"]["releases"]:
+        data["spec"]["releases"] = []
     return data
 
 

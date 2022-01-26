@@ -41,6 +41,12 @@
 {%- set vxlan_udp_port = 4790 %}
 
 spec:
+  available_releases:
+    - "openstack-neutron-rabbitmq"
+    - "openstack-openvswitch"
+    - "openstack-neutron-frrouting"
+    - "openstack-ipsec"
+    - "openstack-neutron"
   releases:
 {%- if 'networking' in components_with_dedicated_messaging %}
   - name: openstack-neutron-rabbitmq

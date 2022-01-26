@@ -26,6 +26,9 @@
 {%- endif %}
 
 spec:
+  available_releases:
+    - "openstack-ironic-rabbitmq"
+    - "openstack-ironic"
   releases:
 {%- if 'baremetal' in components_with_dedicated_messaging %}
   - name: openstack-ironic-rabbitmq

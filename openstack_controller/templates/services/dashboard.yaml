@@ -11,6 +11,8 @@
 {%- endfor %}
 
 spec:
+  available_releases:
+    - "openstack-horizon"
   releases:
   - name: openstack-horizon
     chart: {{spec.common.openstack.repo}}/horizon

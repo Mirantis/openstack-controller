@@ -1,4 +1,6 @@
 spec:
+  available_releases:
+    - "openstack-aodh"
   releases:
   - name: openstack-aodh
     chart: osh/aodh

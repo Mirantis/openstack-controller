@@ -1,4 +1,7 @@
 spec:
+  available_releases:
+    - "openstack-ironic-rabbitmq"
+    - "openstack-ironic"
   releases:
   - chart: osh/ironic
     name: openstack-ironic

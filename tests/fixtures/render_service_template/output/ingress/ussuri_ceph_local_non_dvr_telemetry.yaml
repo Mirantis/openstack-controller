@@ -1,4 +1,6 @@
 spec:
+  available_releases:
+    - "ingress-openstack"
   releases:
   - chart: osh-infra/ingress
     name: ingress-openstack

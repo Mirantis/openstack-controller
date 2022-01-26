@@ -8,6 +8,8 @@
 {%- do notification_topics.append('stacklight_notifications') if stacklight_enabled %}
 
 spec:
+  available_releases:
+    - "openstack-panko"
   releases:
 {%- if spec.get('migration', {}).get('telemetry', {}).get('deploy_main_service', True) %}
   - name: openstack-panko

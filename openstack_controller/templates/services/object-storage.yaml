@@ -4,6 +4,8 @@
 {%- set service = 'ceph-rgw' %}
 
 spec:
+  available_releases:
+    - "openstack-ceph-rgw"
   releases:
   - name: openstack-ceph-rgw
     chart: {{spec.common.infra.repo}}/ceph-rgw

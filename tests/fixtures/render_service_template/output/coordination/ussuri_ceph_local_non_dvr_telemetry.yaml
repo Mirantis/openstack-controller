@@ -1,4 +1,6 @@
 spec:
+  available_releases:
+    - "etcd"
   releases:
   - chart: osh-infra/etcd
     name: etcd

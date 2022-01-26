@@ -2,6 +2,8 @@
 #kind: HelmBundle
 
 spec:
+  available_releases:
+    - "etcd"
   releases:
   - name: etcd
     chart: {{spec.common.infra.repo}}/etcd

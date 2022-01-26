@@ -21,6 +21,10 @@
 {%- set cinder_db_cleanup = spec.get('features', {}).get('database', {}).get('cleanup', {}).get('cinder', {'enabled': true}) %}
 
 spec:
+  available_releases:
+    - "openstack-cinder-rabbitmq"
+    - "openstack-iscsi"
+    - "openstack-cinder"
   releases:
 {%- if 'block-storage' in components_with_dedicated_messaging %}
   - name: openstack-cinder-rabbitmq

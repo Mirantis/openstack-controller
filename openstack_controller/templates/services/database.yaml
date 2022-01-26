@@ -5,6 +5,8 @@
 {%- set backup_params = spec.get('features', {}).get('database', {}).get('backup', {}) %}
 
 spec:
+  available_releases:
+    - "openstack-mariadb"
   releases:
   - name: openstack-mariadb
     chart: {{spec.common.infra.repo}}/mariadb

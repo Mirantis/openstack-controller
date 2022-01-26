@@ -15,6 +15,9 @@
 {%- do notification_topics.append('stacklight_notifications') if stacklight_enabled %}
 
 spec:
+  available_releases:
+    - "openstack-octavia-rabbitmq"
+    - "openstack-octavia"
   releases:
 {%- if 'load-balancer' in components_with_dedicated_messaging %}
   - name: openstack-octavia-rabbitmq

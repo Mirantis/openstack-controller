@@ -8,6 +8,8 @@
 {%- set telemetry_mode = spec.get('features', {}).get('telemetry', {}).get('mode', 'autoscaling') %}
 
 spec:
+  available_releases:
+    - "openstack-ceilometer"
   releases:
 {%- if spec.get('migration', {}).get('telemetry', {}).get('deploy_main_service', True) %}
   - name: openstack-ceilometer

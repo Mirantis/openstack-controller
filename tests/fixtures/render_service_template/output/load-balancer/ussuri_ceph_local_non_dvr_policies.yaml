@@ -1,4 +1,7 @@
 spec:
+  available_releases:
+    - "openstack-octavia-rabbitmq"
+    - "openstack-octavia"
   releases:
   - chart: osh/octavia
     name: openstack-octavia

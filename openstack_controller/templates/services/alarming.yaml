@@ -9,6 +9,8 @@
 {%- set aodh_db_cleanup = spec.get('features', {}).get('database', {}).get('cleanup', {}).get('aodh', {'enabled': true}) %}
 
 spec:
+  available_releases:
+    - "openstack-aodh"
   releases:
 {%- if spec.get('migration', {}).get('telemetry', {}).get('deploy_main_service', True) %}
   - name: openstack-aodh

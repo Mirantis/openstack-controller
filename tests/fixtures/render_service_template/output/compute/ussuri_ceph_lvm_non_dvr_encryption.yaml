@@ -1,4 +1,8 @@
 spec:
+  available_releases:
+    - "openstack-nova-rabbitmq"
+    - "openstack-libvirt"
+    - "openstack-nova"
   releases:
   - chart: osh-infra/libvirt
     name: openstack-libvirt

@@ -1,4 +1,6 @@
 spec:
+  available_releases:
+    - "openstack-mariadb"
   releases:
   - chart: osh-infra/mariadb
     name: openstack-mariadb

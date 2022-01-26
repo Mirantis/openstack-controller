@@ -1,2 +1,5 @@
 spec:
-  releases:
+  available_releases:
+    - "openstack-glance-rabbitmq"
+    - "openstack-glance"
+  releases: []
