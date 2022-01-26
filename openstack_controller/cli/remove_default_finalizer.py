@@ -11,10 +11,18 @@ from openstack_controller import utils
 LOG = utils.get_logger("remove-old-finalizer")
 
 DEFAULT_KOPF_FINALIZER = "kopf.zalando.org/KopfFinalizerMarker"
+WATCHED_KINDS = [
+    "DaemonSet",
+    "StatefulSet",
+    "Deployment",
+    "Node",
+    "OpenStackDeployment",
+]
 
 
 async def _main():
-    for kclass in kube.KUBE_OBJECTS.values():
+    for kkind in WATCHED_KINDS:
+        kclass = kube.get_object_by_kind(kkind)
         namespace = settings.OSCTL_OS_DEPLOYMENT_NAMESPACE
         if not issubclass(kclass, pykube.objects.NamespacedAPIObject):
             namespace = None
