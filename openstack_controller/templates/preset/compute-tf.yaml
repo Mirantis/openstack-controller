@@ -371,7 +371,7 @@ services:
             - (?:tempest.scenario.test_snapshot_pattern.TestSnapshotPattern.test_snapshot_pattern)
             - (?:tempest.scenario.test_stamp_pattern.TestStampPattern.test_stamp_pattern)
             # Skip smoke test failed due to PRODX-5281
-            - (?:heat_tempest_plugin.tests.scenario.test_server_signal.ServerSignalIntegrationTest.test_server_signal_userdata_format_raw[id-8da0f6cc-60e6-4298-9e54-e1f905c5552a,smoke])
+            - (?:heat_tempest_plugin.tests.scenario.test_server_signal.ServerSignalIntegrationTest.test_server_signal_userdata_format_raw)
           {%- endif %}
           script: |
             tempest run --config-file /etc/tempest/tempest.conf -w 4 --smoke --blacklist-file  /etc/tempest/test-blacklist
