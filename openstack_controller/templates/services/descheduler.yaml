@@ -16,19 +16,19 @@ spec:
           logOptions:
             v: 3
           suspend: false
-      policy:
-        #Allows eviction of pods with host mounts
-        evictLocalStoragePods: true
-        strategies:
-          RemoveDuplicates:
-            enabled: true
-            params:
-              namespaces:
-                include:
-                - {{ openstack_namespace }}
-              removeDuplicates:
-                excludeOwnerKinds:
-                - "StatefulSet"
+        policy:
+          #Allows eviction of pods with host mounts
+          evictLocalStoragePods: true
+          strategies:
+            RemoveDuplicates:
+              enabled: true
+              params:
+                namespaces:
+                  include:
+                  - {{ openstack_namespace }}
+                removeDuplicates:
+                  excludeOwnerKinds:
+                  - "StatefulSet"
       manifests:
         rbac: true
         configmap_bin: true
