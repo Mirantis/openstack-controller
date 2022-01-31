@@ -66,7 +66,26 @@ class HelmManager:
                 await kube.wait_for_deleted(obj)
             LOG.info(f"Successfully removed kind: {kind} with name {name}")
 
-    async def run_cmd(self, cmd, raise_on_error=True):
+    async def _rollback(self, name, args=None):
+        args = args or []
+        LOG.info(f"Rolling back release {name}")
+        cmd = [
+            "rollback",
+            name,
+            "--namespace",
+            self.namespace,
+            *args,
+        ]
+        cmd = " ".join([self.binary, *cmd])
+        process = await asyncio.create_subprocess_shell(
+            cmd, env=self.env, stdin=PIPE, stdout=PIPE, stderr=PIPE
+        )
+        stdout, stderr = await process.communicate()
+        stdout = stdout.decode() or None
+        stderr = stderr.decode() or None
+        return (stdout, stderr)
+
+    async def run_cmd(self, cmd, raise_on_error=True, release_name=None):
         cmd = " ".join([self.binary, *cmd])
         LOG.info(
             "Running helm command started: '%s'",
@@ -95,6 +114,16 @@ class HelmManager:
                     LOG.warning("Trying to modify immutable object")
                     await self._guess_and_delete(stderr)
                     raise exception.HelmImmutableFieldChange()
+                if (
+                    "another operation (install/upgrade/rollback) is in progress"
+                    in stderr
+                    and release_name
+                ):
+                    LOG.warning(
+                        f"The release {release_name} stuck in install/upgrade/rollback. Rollback it."
+                    )
+                    await self._rollback(release_name)
+                    raise exception.HelmRollback()
                 raise kopf.TemporaryError("Helm command failed")
             return (stdout, stderr)
 
@@ -167,7 +196,7 @@ class HelmManager:
                 "--reuse-values",
                 *args,
             ]
-            await self.run_cmd(cmd)
+            return await self.run_cmd(cmd, release_name=name)
 
     async def install(self, name, values, repo, chart, version, args=None):
         args = args or []
@@ -193,7 +222,7 @@ class HelmManager:
                 "--install",
                 *args,
             ]
-            await self.run_cmd(cmd)
+            return await self.run_cmd(cmd, release_name=name)
 
     async def install_bundle(self, data):
         repos = {r["name"]: r["url"] for r in data["spec"]["repositories"]}

@@ -180,3 +180,11 @@ def helm_error_5_item():
     with open(fixture_file, "rb") as f:
         error = f.read()
     yield error
+
+
+@pytest.fixture
+def helm_error_rollout_restart():
+    fixture_file = "tests/fixtures/test_helm/rollout_restart.txt"
+    with open(fixture_file, "rb") as f:
+        error = f.read()
+    yield error

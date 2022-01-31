@@ -253,3 +253,31 @@ async def test_install_remove_immutable_5_item(
     ]
     kube_find.assert_has_calls(expected_kube_find, any_order=True)
     assert 5 == kube_find.return_value.delete.call_count
+
+
+@pytest.mark.asyncio
+async def test_install_rollback(subprocess_shell, helm_error_rollout_restart):
+
+    hc = helm.HelmManager()
+    subprocess_shell.return_value.returncode = 1
+    subprocess_shell.return_value.communicate.return_value = (
+        b"",
+        helm_error_rollout_restart,
+    )
+
+    with pytest.raises(exception.HelmRollback):
+        await hc.run_cmd(
+            "helm3 upgrade --install test-release", release_name="test-release"
+        )
+    subprocess_shell.assert_has_calls(
+        [
+            mock.call(
+                "helm3 rollback test-release --namespace openstack",
+                env=mock.ANY,
+                stdin=mock.ANY,
+                stdout=mock.ANY,
+                stderr=mock.ANY,
+            )
+        ],
+        any_order=True,
+    )

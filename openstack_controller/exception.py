@@ -17,3 +17,9 @@ class HelmImmutableFieldChange(OpenStackControllerException):
     def __init__(self, message="Trying to change immutable object."):
         super().__init__()
         self.message = message
+
+
+class HelmRollback(OpenStackControllerException):
+    def __init__(self, message="Trying to rollback stuck release."):
+        super().__init__()
+        self.message = message
