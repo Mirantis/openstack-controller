@@ -12,6 +12,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 import os
+import random
 import time
 import logging.config
 
@@ -309,6 +310,12 @@ merger.merge(LOGGING_CONFIG, OSCTL_LOGGING_CONF)
 logging.config.dictConfig(LOGGING_CONFIG)
 
 
+class InfiniteBackoffsWithJitter:
+    def __iter__(self):
+        while True:
+            yield 10 + random.randint(-5, +5)
+
+
 @kopf.on.startup()
 def configure(settings: kopf.OperatorSettings, **_):
     settings.watching.connect_timeout = 1 * 60
@@ -328,3 +335,5 @@ def configure(settings: kopf.OperatorSettings, **_):
     )
     if OSCTL_METRICS_PORT > 0:
         start_http_server(OSCTL_METRICS_PORT)
+
+    settings.networking.error_backoffs = InfiniteBackoffsWithJitter()

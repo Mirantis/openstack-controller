@@ -11,5 +11,4 @@ jsonschema
 uwsgi
 prometheus_client
 openstacksdk>=0.53
-click==7.1.2
 keystoneauth1
