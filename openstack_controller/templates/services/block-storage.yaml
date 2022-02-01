@@ -141,6 +141,10 @@ spec:
         replicas:
           api: 1
           registry: 1
+        affinity:
+          anti:
+            type:
+              backup: "requiredDuringSchedulingIgnoredDuringExecution"
       storage: ceph
       ceph_client:
         configmap: rook-ceph-config

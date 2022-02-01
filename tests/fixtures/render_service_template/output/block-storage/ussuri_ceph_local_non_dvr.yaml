@@ -250,6 +250,10 @@ spec:
         job_drop_default_volume_type: true
         cron_volume_usage_audit: false
       pod:
+        affinity:
+          anti:
+            type:
+              backup: "requiredDuringSchedulingIgnoredDuringExecution"
         replicas:
           api: 1
           registry: 1
