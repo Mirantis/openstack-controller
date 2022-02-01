@@ -15,7 +15,7 @@ spec:
       network:
         service:
           type: LoadBalancer
-          externalTrafficPolicy: Cluster
+          externalTrafficPolicy: Local
       images:
         tags:
 {%- for image in [

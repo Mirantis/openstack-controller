@@ -27,7 +27,7 @@ spec:
         network_policy: false
       network:
         service:
-          externalTrafficPolicy: Cluster
+          externalTrafficPolicy: Local
           type: LoadBalancer
       pod:
         probes:
