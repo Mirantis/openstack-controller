@@ -5,6 +5,8 @@ spec:
   - chart: osh-infra/ingress
     name: ingress-openstack
     values:
+      deployment:
+        type: DaemonSet
       conf:
         ingress:
           nginx-status-ipv4-whitelist: 0.0.0.0/0
@@ -21,8 +23,8 @@ spec:
           ingress_routed_vip: ingress-routed-vip:latest
       labels:
         server:
-          node_selector_key: openstack-control-plane
-          node_selector_value: enabled
+          node_selector_key: kubernetes.io/os
+          node_selector_value: linux
       manifests:
         network_policy: false
       network:
