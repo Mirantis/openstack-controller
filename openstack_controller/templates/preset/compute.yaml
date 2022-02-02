@@ -375,6 +375,9 @@ services:
               lb_build_timeout: 1500
               build_timeout: 600
               listener_conn_limit: 50000
+            {%- if ironic_enabled and not ironic_mt_enabled %}
+              test_with_ipv6: false
+            {%- endif %}
             validation:
               image_ssh_password: gocubsgo
               image_ssh_user: cirros
