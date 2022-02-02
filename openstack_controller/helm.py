@@ -91,10 +91,10 @@ class HelmManager:
             "Running helm command started: '%s'",
             cmd,
         )
-        process = await asyncio.create_subprocess_shell(
-            cmd, env=self.env, stdin=PIPE, stdout=PIPE, stderr=PIPE
-        )
         async with helm_lock(HELM_LOCK):
+            process = await asyncio.create_subprocess_shell(
+                cmd, env=self.env, stdin=PIPE, stdout=PIPE, stderr=PIPE
+            )
             stdout, stderr = await process.communicate()
             stdout = stdout.decode() or None
             stderr = stderr.decode() or None
