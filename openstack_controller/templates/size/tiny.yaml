@@ -378,6 +378,9 @@ services:
             task_flow:
               engine: parallel
               max_workers: 4
+            health_manager:
+              health_update_threads: 4
+              stats_update_threads: 4
             house_keeping:
               amphora_expiry_age: 3600
               load_balancer_expiry_age: 3600
