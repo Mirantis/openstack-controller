@@ -802,7 +802,15 @@ spec:
                               type: string
                               description: >
                                 name of physical network to associate
-                              default: "physnet1"
+                            network_type:
+                              type: string
+                              enum:
+                                - flat
+                                - vlan
+                              description: network physical mechanism
+                            segmentation_id:
+                              type: integer
+                              description: vlan id for vlan networks
                             subnet:
                               type: object
                               required:

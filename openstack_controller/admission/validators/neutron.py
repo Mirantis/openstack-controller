@@ -54,3 +54,14 @@ class NeutronValidator(base.BaseValidator):
                 raise exception.OsDplValidationFailed(
                     "TungstenFabric with BGPVPN is not supported"
                 )
+            if floating_network.get("enabled"):
+                network_options = [
+                    floating_network.get(k)
+                    for k in ["network_type", "physnet", "segmentation_id"]
+                ]
+                if any(network_options) and not all(network_options):
+                    raise exception.OsDplValidationFailed(
+                        "TungstenFabric as network backend and setting of "
+                        "floating network physnet name without network type "
+                        "and segmentation id are not compatible."
+                    )

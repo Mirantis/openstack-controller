@@ -296,9 +296,30 @@ def test_insance_ha_deny_in_services(client):
         assert response.json["response"]["status"]["code"] == 400
 
 
-def test_physnet_optional_tf(client):
+def test_physnet_required_other_options_tf(client):
     req = copy.deepcopy(ADMISSION_REQ)
     req["request"]["object"]["spec"]["preset"] = "compute-tf"
+    response = client.simulate_post("/validate", json=req)
+    assert response.status == falcon.HTTP_OK
+    assert response.json["response"]["allowed"] is False
+    assert response.json["response"]["status"]["code"] == 400
+
+
+def test_physnet_with_all_options_tf(client):
+    req = copy.deepcopy(ADMISSION_REQ)
+    req["request"]["object"]["spec"].update(
+        {
+            "preset": "compute-tf",
+            "features": {
+                "neutron": {
+                    "floating_network": {
+                        "network_type": "vlan",
+                        "segmentation_id": 4094,
+                    }
+                }
+            },
+        }
+    )
     response = client.simulate_post("/validate", json=req)
     assert response.status == falcon.HTTP_OK
     assert response.json["response"]["allowed"] is True
