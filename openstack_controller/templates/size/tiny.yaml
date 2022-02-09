@@ -64,6 +64,11 @@ services:
   key-manager:
     barbican:
       values:
+        conf:
+          software:
+            apache2:
+              processes:
+                api: 2
         pod:
           replicas:
             api: 3
@@ -140,6 +145,11 @@ services:
                   max_unavailable: 10%
                   max_surge: 0
         conf:
+          software:
+            apache2:
+              processes:
+                api: 2
+                metadata: 2
           nova:
             DEFAULT:
               cpu_allocation_ratio: 8.0
@@ -216,8 +226,8 @@ services:
           neutron:
             DEFAULT:
               dhcp_lease_duration: 86400
-              rpc_workers: 4
-              api_workers: 4
+              rpc_workers: 2
+              api_workers: 2
               rpc_state_report_workers: 2
               agent_down_time: 95
               max_l3_agents_per_router: 2
@@ -268,11 +278,14 @@ services:
                   max_unavailable: 10%
                   max_surge: 10%
         conf:
+          software:
+            apache2:
+              processes: 2
           cinder:
             DEFAULT:
               rpc_response_timeout: 3600
               osapi_volume_workers: 1
-              backup_workers: 4
+              backup_workers: 2
             database:
               max_pool_size: 10
               max_retries: -1
@@ -326,6 +339,10 @@ services:
   placement:
     placement:
       values:
+        conf:
+          software:
+            apache2:
+              processes: 2
         pod:
           replicas:
             api: 3
@@ -360,6 +377,9 @@ services:
                 health_manager:
                   max_unavailable: 10%
         conf:
+          software:
+            apache2:
+              processes: 2
           octavia:
             database:
               max_pool_size: 10
@@ -379,8 +399,8 @@ services:
               engine: parallel
               max_workers: 4
             health_manager:
-              health_update_threads: 4
-              stats_update_threads: 4
+              health_update_threads: 2
+              stats_update_threads: 2
             house_keeping:
               amphora_expiry_age: 3600
               load_balancer_expiry_age: 3600
