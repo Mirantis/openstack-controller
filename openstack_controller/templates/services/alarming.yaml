@@ -44,6 +44,8 @@ spec:
             gnocchi_external_project_owner: service
             gnocchi_external_domain_name: service
           coordination:
+            #There are some problems with etcd3+http driver so we shouldn't use it
+            #BUG: https://mirantis.jira.com/browse/PRODX-21784
             backend_url: etcd3://etcd:2379
           keystone_authtoken:
             memcache_security_strategy: ENCRYPT

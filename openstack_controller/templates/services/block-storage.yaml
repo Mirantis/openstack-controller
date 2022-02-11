@@ -220,6 +220,8 @@ spec:
           oslo_messaging_notifications:
             topics: {{ notification_topics|join(',') }}
           coordination:
+            #There are some problems with etcd3 driver so we shouldn't use it
+            #BUG: https://mirantis.jira.com/browse/PRODX-21783
             backend_url: "etcd3+http://etcd:2379"
           service_user:
             send_service_user_token: true

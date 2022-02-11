@@ -57,6 +57,8 @@ spec:
               values:
                 - gnocchi
           coordination:
+            #There are some problems with etcd3+http driver so we shouldn't use it
+            #BUG: https://mirantis.jira.com/browse/PRODX-21785
             backend_url: etcd3://etcd:2379
           api:
             aodh_is_enabled: "True"

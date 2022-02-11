@@ -90,6 +90,8 @@ spec:
         gnocchi:
           DEFAULT:
             debug: false
+            #There are some problems with etcd3+http driver so we shouldn't use it
+            #BUG: https://mirantis.jira.com/browse/PRODX-21786
             coordination_url: etcd3://etcd:2379
           storage:
             driver: redis
