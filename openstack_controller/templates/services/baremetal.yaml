@@ -97,6 +97,7 @@ spec:
         tags:
 {%- for image in [
     "ironic_manage_networks",
+    "ironic_update_nodes_metadata",
     "ironic_retrieve_networks",
     "ironic_retrieve_swift_config",
     "bootstrap",
@@ -127,6 +128,7 @@ spec:
         network_policy: false
         job_rabbit_init: false
         secret_ca_bundle: true
+        job_update_nodes_metadata: true
       bootstrap:
         object_store:
           enabled: false
@@ -227,6 +229,9 @@ spec:
         logging:
           logger_ironic:
             level: {{ spec.get('features', {}).get('logging', {}).get('ironic', {}).get('level', 'INFO') }}
+        nodes:
+          deploy_kernel_image: {{ images["ironic_agent_kernel"].split('/')[-1] }}
+          deploy_ramdisk_image: {{ images["ironic_agent_initramfs"].split('/')[-1] }}
       endpoints:
         cluster_domain_suffix: {{ spec.internal_domain_name }}
 {% include 'base/_admin_identity.yaml' %}

@@ -94,6 +94,7 @@ images:
   ironic_conductor: ironic-conductor:latest
   ironic_db_sync: ironic-db-sync:latest
   ironic_manage_networks: ironic-manage-networks:latest
+  ironic_update_nodes_metadata: ironic-update-nodes-metadata:latest
   ironic_pxe: ironic-pxe:latest
   ironic_pxe_init: ironic-pxe-init:latest
   ironic_retrieve_networks: ironic-retrieve-networks:latest
