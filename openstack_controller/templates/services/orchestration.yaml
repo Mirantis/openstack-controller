@@ -143,7 +143,7 @@ spec:
             level: {{ spec.get('features', {}).get('logging', {}).get('heat', {}).get('level', 'INFO') }}
 {%- set enabled_plugins = [] %}
 {%- if tungstenfabric_enabled %}
-  {%- if openstack_version not in ['queens', 'rocky', 'stein', 'train'] %}
+  {%- if spec.openstack_version not in ['queens', 'rocky', 'stein', 'train'] %}
     {%- do enabled_plugins.append('vnc_api/gen/heat') %}
   {%- endif %}
 {%- endif %}
