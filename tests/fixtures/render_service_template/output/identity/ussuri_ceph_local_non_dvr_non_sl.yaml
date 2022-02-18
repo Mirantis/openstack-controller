@@ -10,11 +10,19 @@ spec:
           secret: 'keystone-credential-data'
         secret_fernet_keys:
           secret: 'keystone-fernet-data'
+      jobs:
+        fernet_rotate:
+          cron: "0 */12 * * *"  # once per 12h
       conf:
         policy.d:
           01-controller-default.yaml: {'identity_rule1': 'identity_value1'}
           02-custom.yaml: {}
         keystone:
+          fernet_tokens:
+            max_active_keys: 7
+          token:
+            expiration: 43200
+            allow_expired_window: 172800
           cache:
             backend: oslo_cache.memcache_pool
           oslo_messaging_notifications:

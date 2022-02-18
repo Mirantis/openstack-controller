@@ -65,6 +65,9 @@ spec:
           secret: {{ credentials_secret_name }}
         secret_fernet_keys:
           secret: {{ fernet_secret_name }}
+      jobs:
+        fernet_rotate:
+          cron: "0 */12 * * *"  # once per 12h
       conf:
         policy.d:
           01-controller-default.yaml: {{ service_policy }}
@@ -114,6 +117,18 @@ spec:
           logger_keystone:
             level: {{ spec.get('features', {}).get('logging', {}).get('keystone', {}).get('level', 'INFO') }}
         keystone:
+          token:
+            expiration: 43200  # 12h
+            allow_expired_window: 172800 # 48h - default in Keystone, but set it explicitly here
+          fernet_tokens:
+            # NOTE(pas-ha) defaults set set above are:
+            # - token expiry 12h
+            # - allow expired window 48h
+            # - rotation once in 12h (jobs:fernet_rotate:cron)
+            # since we do enable service auth (in e.g. Cinder and Nova) by default,
+            # we need to account for allow expired window for max_active_keys
+            # max_active_keys = 2 + (token_expiration + allow_expired_window) / rotation_frequency
+            max_active_keys: 7
           cache:
             backend: oslo_cache.memcache_pool
           oslo_messaging_notifications:
