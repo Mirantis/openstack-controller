@@ -427,6 +427,8 @@ spec:
             - '-L'
             - 'http://0.0.0.0:32773/healthz'
           env:
+            - name: OSCTL_LOGGING_CONF
+              value: '{{ toJson .Values.osdpl.settings.node_maintenance_request.OSCTL_LOGGING_CONF }}'
             {{- range $optionName, $optionValue := .Values.osdpl.settings.raw }}
             - name: {{ $optionName }}
               value: "{{ $optionValue }}"

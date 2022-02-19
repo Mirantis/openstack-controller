@@ -45,6 +45,7 @@ osdpl:
         PYTHONASYNCIODEBUG: 1
         KOPF_RUN_DEBUG: 1
     node_maintenance_request:
+      OSCTL_LOGGING_CONF: {}
       raw: {}
     helm2to3:
       raw:
