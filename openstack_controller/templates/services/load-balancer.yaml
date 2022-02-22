@@ -76,9 +76,9 @@ spec:
   - name: openstack-octavia
     chart: {{spec.common.openstack.get('repo', spec.common.charts.repo)}}/octavia
     values:
+  {%- if not tungstenfabric_enabled %}
       octavia:
         settings:
-{%- if not tungstenfabric_enabled %}
           lbmgmt_subnets:
   {%- set lb_subnets = [] %}
   {%- if spec.features.get('octavia', {}).get('lb_network', {}).get('subnets', []) %}
@@ -99,9 +99,9 @@ spec:
     {%- set octavia_amphora_url = octavia_amphora_url | substitute_local_proxy_hostname("$(NODE_IP)") %}
           amphora_image_url: {{ octavia_amphora_url }}
           amphora_image_checksum: {{ images["octavia_amphora_checksum"] }}
-{%- endif %}
 {%- if 'amphorav2' in provider_map.keys() %}
           enable_amphorav2: true
+{%- endif %}
 {%- endif %}
       images:
         tags:
