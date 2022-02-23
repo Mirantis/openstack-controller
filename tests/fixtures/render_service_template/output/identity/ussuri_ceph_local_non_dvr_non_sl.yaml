@@ -166,6 +166,7 @@ spec:
           ingress:
             annotations:
               nginx.ingress.kubernetes.io/affinity: cookie
+              nginx.ingress.kubernetes.io/proxy-body-size: "114688"
               nginx.ingress.kubernetes.io/session-cookie-expires: "1800"
               nginx.ingress.kubernetes.io/session-cookie-max-age: "1800"
               nginx.ingress.kubernetes.io/session-cookie-name: os-keycloak-sso
