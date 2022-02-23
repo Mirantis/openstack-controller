@@ -1,4 +1,5 @@
 import asyncio
+import os
 
 import kopf
 
@@ -143,6 +144,13 @@ def discover_images(mspec, logger):
     }
 
 
+def cleanup_helm_cache():
+    LOG.info(f"Cleaning helm cache in {settings.HELM_REPOSITORY_CACHE}")
+    for root, dirs, files in os.walk(settings.HELM_REPOSITORY_CACHE):
+        for file in files:
+            os.remove(os.path.join(root, file))
+
+
 # on.field to force storing that field to be reacting on its changes
 @kopf.on.field(*kube.OpenStackDeployment.kopf_on_args, field="status.watched")
 @kopf.on.resume(*kube.OpenStackDeployment.kopf_on_args)
@@ -274,6 +282,8 @@ async def handle(body, meta, spec, logger, reason, **kwargs):
     osdplst.set_osdpl_status(
         osdplstatus.APPLIED, body["spec"], kwargs["diff"], reason
     )
+
+    cleanup_helm_cache()
 
     return {"lastStatus": f"{reason}d"}
 

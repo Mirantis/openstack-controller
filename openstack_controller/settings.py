@@ -20,6 +20,7 @@ import json
 import kopf
 from kopf._core.engines.posting import event_queue_var
 from prometheus_client import start_http_server, Gauge, Counter, Summary
+from pathlib import Path
 
 from openstack_controller import constants as const
 from openstack_controller.utils import merger
@@ -337,3 +338,11 @@ def configure(settings: kopf.OperatorSettings, **_):
         start_http_server(OSCTL_METRICS_PORT)
 
     settings.networking.error_backoffs = InfiniteBackoffsWithJitter()
+
+
+# HELM SETTINGS
+HOME = str(Path.home())
+HELM_REPOSITORY_CACHE = os.environ.get(
+    "HELM_REPOSITORY_CACHE", os.path.join(HOME, ".cache/helm/repository")
+)
+# END HELM SETTINGS
