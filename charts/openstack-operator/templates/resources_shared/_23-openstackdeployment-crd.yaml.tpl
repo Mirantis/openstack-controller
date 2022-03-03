@@ -429,6 +429,35 @@ spec:
                             - autoscaling
                           description: >
                             Which telemetry mode is going to be used for telemetry.
+                    designate:
+                      type: object
+                      required:
+                        - backend
+                      properties:
+                        backend:
+                          type: object
+                          required:
+                            - type
+                            - protocol
+                          properties:
+                            type:
+                              default: powerdns
+                              type: string
+                              description: >
+                                Type of the backend for Designate. For example: powerdns.
+                            protocol:
+                              type: string
+                              default: udp
+                              description: >
+                                Protocol for Designate backend in Kubernetes Service. Could be udp|tcp|tcp+udp.
+                              enum:
+                                - udp
+                                - tcp
+                                - tcp+udp
+                            external_ip:
+                              description: >
+                                Optional field to define IP address for LoadBalancer service.
+                              type: string
                     ssl:
                       type: object
                       required:

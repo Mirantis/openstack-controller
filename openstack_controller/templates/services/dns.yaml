@@ -6,6 +6,12 @@
 {%- set stacklight_enabled = spec.get('features', {}).get('stacklight', {}).get('enabled', False) %}
 {%- set notification_topics = ['notifications'] %}
 {%- do notification_topics.append('stacklight_notifications') if stacklight_enabled %}
+{%- set designate_backend = spec.get('features', {}).get('designate', {}).get('backend', {}).get('type', 'powerdns') %}
+{%- if designate_backend == 'powerdns' %}
+  {%- set powerdns_protocol = spec.get('features', {}).get('designate', {}).get('backend', {}).get('protocol', 'udp') %}
+  {%- set powerdns_external_ip = spec.get('features', {}).get('designate', {}).get('backend', {}).get('external_ip') %}
+{%- endif %}
+
 
 spec:
   available_releases:
@@ -116,7 +122,12 @@ spec:
       manifests:
         network_policy: false
         job_rabbit_init: false
+      {%- if powerdns_protocol == 'udp' or powerdns_protocol == 'tcp+udp' %}
         service_powerdns_external: true
+      {%- endif %}
+      {%- if powerdns_protocol == 'tcp' or powerdns_protocol == 'tcp+udp' %}
+        service_powerdns_external_tcp: true
+      {%- endif %}
         secret_powerdns_db: true
         service_powerdns_api: true
         designate_powerdns: true
@@ -129,6 +140,12 @@ spec:
         mdns:
           node_port:
             enabled: false
+      {%- if powerdns_external_ip %}
+        powerdns:
+          external:
+            service:
+              loadBalancerIP: {{ powerdns_external_ip }}
+      {%- endif %}
       endpoints:
         cluster_domain_suffix: {{ spec.internal_domain_name }}
 {% include 'base/_admin_identity.yaml' %}
