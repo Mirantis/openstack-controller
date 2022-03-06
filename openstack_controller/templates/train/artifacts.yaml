@@ -128,7 +128,7 @@ prometheus_memcached_exporter: '{{ images_base_url }}/stacklight/memcached-expor
 cinder_backup_storage_init: '{{ images_base_url }}/openstack/extra/ceph-config-helper:nautilus-bionic-20211025114106'
 cinder_storage_init: '{{ images_base_url }}/openstack/extra/ceph-config-helper:nautilus-bionic-20211025114106'
 glance_storage_init: '{{ images_base_url }}/openstack/extra/ceph-config-helper:nautilus-bionic-20211025114106'
-test: '{{ images_base_url }}/openstack/extra/xrally-openstack:2.1.0-20211116035447'
+test: '{{ images_base_url }}/openstack/extra/xrally-openstack:2.2.0-20220217210744'
 keystone_client: '{{ images_base_url }}/openstack/heat:train-bionic-20220112142640'
 pause: '{{ images_base_url }}/general/external/pause:3.1'
 neutron_rpc_server: '{{ images_base_url }}/openstack/neutron:train-bionic-20220112142640'
@@ -195,3 +195,7 @@ neutron_bootstrap: '{{ images_base_url }}/openstack/openstack-tools:ussuri-bioni
 cinder_drop_default_volume_type: '{{ images_base_url }}/openstack/openstack-tools:ussuri-bionic-20220113100346'
 cinder_create_internal_tenant: '{{ images_base_url }}/openstack/openstack-tools:ussuri-bionic-20220113100346'
 descheduler: '{{ images_base_url }}/openstack/extra/descheduler:v0.21.0'
+ironic_agent_kernel: '{{ binary_base_url }}/openstack/bin/ironic/tinyipa/tinyipa-stable-train-20201007063015.vmlinuz'
+ironic_agent_initramfs: '{{ binary_base_url }}/openstack/bin/ironic/tinyipa/tinyipa-stable-train-20201007063015.gz'
+ironic_agent_kernel_checksum: ea33716e90b71837785e860e07e8c059
+ironic_agent_initramfs_checksum: d352c4ae01e95a730106324a8f7ee1e4
