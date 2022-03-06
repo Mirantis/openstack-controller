@@ -9,7 +9,7 @@ cinder_scheduler: '{{ images_base_url }}/openstack/cinder:ussuri-bionic-20220113
 cinder_volume: '{{ images_base_url }}/openstack/cinder:ussuri-bionic-20220113100346'
 cinder_volume_daemonset: '{{ images_base_url }}/openstack/cinder:ussuri-bionic-20220113100346'
 cinder_volume_usage_audit: '{{ images_base_url }}/openstack/cinder:ussuri-bionic-20220113100346'
-stepler_run_tests: '{{ images_base_url }}/openstack/stepler:ussuri-bionic-20220113094819'
+stepler_run_tests: '{{ images_base_url }}/openstack/stepler:ussuri-bionic-20220303172419'
 db_drop: '{{ images_base_url }}/openstack/heat:ussuri-bionic-20220113100346'
 db_init: '{{ images_base_url }}/openstack/heat:ussuri-bionic-20220113100346'
 dep_check: '{{ images_base_url }}/openstack/extra/kubernetes-entrypoint:v1.0.0-20200311160233'
@@ -128,7 +128,7 @@ prometheus_memcached_exporter: '{{ images_base_url }}/stacklight/memcached-expor
 cinder_backup_storage_init: '{{ images_base_url }}/openstack/extra/ceph-config-helper:nautilus-bionic-20211025114106'
 cinder_storage_init: '{{ images_base_url }}/openstack/extra/ceph-config-helper:nautilus-bionic-20211025114106'
 glance_storage_init: '{{ images_base_url }}/openstack/extra/ceph-config-helper:nautilus-bionic-20211025114106'
-test: '{{ images_base_url }}/openstack/extra/xrally-openstack:2.1.0-20211116035447'
+test: '{{ images_base_url }}/openstack/extra/xrally-openstack:2.2.0-20220217210744'
 keystone_client: '{{ images_base_url }}/openstack/heat:ussuri-bionic-20220113100346'
 pause: '{{ images_base_url }}/general/external/pause:3.1'
 neutron_rpc_server: '{{ images_base_url }}/openstack/neutron:ussuri-bionic-20220113100346'
@@ -137,7 +137,7 @@ placement_db_sync: '{{ images_base_url }}/openstack/placement:ussuri-bionic-2022
 keystone_db_sync_expand: '{{ images_base_url }}/openstack/keystone:ussuri-bionic-20220113100346'
 keystone_db_sync_migrate: '{{ images_base_url }}/openstack/keystone:ussuri-bionic-20220113100346'
 keystone_db_sync_contract: '{{ images_base_url }}/openstack/keystone:ussuri-bionic-20220113100346'
-octavia_amphora: '{{ binary_base_url }}/openstack/bin/octavia/amphora-x64-haproxy-ussuri-20220113104335.qcow2'
+octavia_amphora: '{{ binary_base_url }}/openstack/bin/octavia/amphora-x64-haproxy-ussuri-20220224010017.qcow2'
 etcd: '{{ images_base_url }}/openstack/extra/etcd:3.2.26'
 etcd_db_compact: '{{ images_base_url }}/openstack/extra/etcd:3.2.26'
 cinder_db_sync_online: '{{ images_base_url }}/openstack/cinder:ussuri-bionic-20220113100346'
@@ -174,7 +174,7 @@ mariadb_controller: '{{ images_base_url }}/general/mariadb:10.6.7-bionic-2022030
 horizon_mirantis_theme_sha256summ: b1bab205a68770fc18cf4d1648a1b0a2c397af245d8988517fa4ad1a03ccea3c
 horizon_mirantis_theme_url: '{{ binary_base_url }}/openstack/bin/horizon/mirantis-ussuri-48f346e-20210119132403.tar.gz'
 ceph_config_helper: '{{ images_base_url }}/openstack/extra/ceph-config-helper:nautilus-bionic-20211025114106'
-octavia_amphora_checksum: 1eecf6e7d4f12a5c59dffcc54745186d
+octavia_amphora_checksum: df950b4350b31a1b4604d76a01c6bbd2
 masakari_db_sync: '{{ images_base_url }}/openstack/masakari:ussuri-bionic-20220113100346'
 masakari_api: '{{ images_base_url }}/openstack/masakari:ussuri-bionic-20220113100346'
 masakari_engine: '{{ images_base_url }}/openstack/masakari:ussuri-bionic-20220113100346'
@@ -201,3 +201,7 @@ neutron_bootstrap: '{{ images_base_url }}/openstack/openstack-tools:ussuri-bioni
 cinder_drop_default_volume_type: '{{ images_base_url }}/openstack/openstack-tools:ussuri-bionic-20220113100346'
 cinder_create_internal_tenant: '{{ images_base_url }}/openstack/openstack-tools:ussuri-bionic-20220113100346'
 descheduler: '{{ images_base_url }}/openstack/extra/descheduler:v0.21.0'
+ironic_agent_kernel: '{{ binary_base_url }}/openstack/bin/ironic/tinyipa/tinyipa-stable-ussuri-20210802130534.vmlinuz'
+ironic_agent_initramfs: '{{ binary_base_url }}/openstack/bin/ironic/tinyipa/tinyipa-stable-ussuri-20210802130534.gz'
+ironic_agent_kernel_checksum: ea33716e90b71837785e860e07e8c059
+ironic_agent_initramfs_checksum: 1f59c95bbc87ba13fd53d3a8d6660b54
