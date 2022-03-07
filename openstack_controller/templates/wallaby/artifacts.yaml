@@ -97,7 +97,7 @@ prometheus_rabbitmq_exporter_helm_tests: '{{ images_base_url }}/openstack/heat:w
 rabbitmq_init: '{{ images_base_url }}/openstack/heat:wallaby-bionic-20220117110643'
 rabbitmq: '{{ images_base_url }}/general/rabbitmq:3.9.8'
 rabbitmq_scripted_test: '{{ images_base_url }}/general/rabbitmq:3.9.8-management'
-tempest_run_tests: '{{ images_base_url }}/openstack/tempest:victoria-bionic-20220119123458'
+tempest_run_tests: '{{ images_base_url }}/openstack/tempest:victoria-bionic-20220221060020'
 tempest-uuids-init: '{{ images_base_url }}/openstack/heat:wallaby-bionic-20220117110643'
 glance_metadefs_load: '{{ images_base_url }}/openstack/glance:wallaby-bionic-20220117110643'
 memcached: '{{ images_base_url }}/general/memcached:1.6.6-alpine'
@@ -128,7 +128,7 @@ prometheus_memcached_exporter: '{{ images_base_url }}/stacklight/memcached-expor
 cinder_backup_storage_init: '{{ images_base_url }}/openstack/extra/ceph-config-helper:nautilus-bionic-20211025114106'
 cinder_storage_init: '{{ images_base_url }}/openstack/extra/ceph-config-helper:nautilus-bionic-20211025114106'
 glance_storage_init: '{{ images_base_url }}/openstack/extra/ceph-config-helper:nautilus-bionic-20211025114106'
-test: '{{ images_base_url }}/openstack/extra/xrally-openstack:2.1.0-20211116035447'
+test: '{{ images_base_url }}/openstack/extra/xrally-openstack:2.2.0-20220217210744'
 keystone_client: '{{ images_base_url }}/openstack/heat:wallaby-bionic-20220117110643'
 pause: '{{ images_base_url }}/general/external/pause:3.1'
 neutron_rpc_server: '{{ images_base_url }}/openstack/neutron:wallaby-bionic-20220117110643'
@@ -137,7 +137,7 @@ placement_db_sync: '{{ images_base_url }}/openstack/placement:wallaby-bionic-202
 keystone_db_sync_expand: '{{ images_base_url }}/openstack/keystone:wallaby-bionic-20220117110643'
 keystone_db_sync_migrate: '{{ images_base_url }}/openstack/keystone:wallaby-bionic-20220117110643'
 keystone_db_sync_contract: '{{ images_base_url }}/openstack/keystone:wallaby-bionic-20220117110643'
-octavia_amphora: '{{ binary_base_url }}/openstack/bin/octavia/amphora-x64-haproxy-wallaby-20220117161743.qcow2'
+octavia_amphora: '{{ binary_base_url }}/openstack/bin/octavia/amphora-x64-haproxy-wallaby-20220225065619.qcow2'
 etcd: '{{ images_base_url }}/openstack/extra/etcd:3.2.26'
 etcd_db_compact: '{{ images_base_url }}/openstack/extra/etcd:3.2.26'
 cinder_db_sync_online: '{{ images_base_url }}/openstack/cinder:wallaby-bionic-20220117110643'
@@ -174,7 +174,7 @@ mariadb_controller: '{{ images_base_url }}/general/mariadb:10.6.7-bionic-2022030
 horizon_mirantis_theme_sha256summ: 482e5f23356499ce53ecff63060af797bf910af3fd3bd0062fc45de64ea2b96a
 horizon_mirantis_theme_url: '{{ binary_base_url }}/openstack/bin/horizon/mirantis-wallaby-08bd92e-20220110111451.tar.gz'
 ceph_config_helper: '{{ images_base_url }}/openstack/extra/ceph-config-helper:nautilus-bionic-20211025114106'
-octavia_amphora_checksum: ae11bdd38e95e0b5c521335eb562072d
+octavia_amphora_checksum: 5714b3fc73fe91e34ae4e34f57cb4c76
 masakari_db_sync: '{{ images_base_url }}/openstack/masakari:wallaby-bionic-20220117110643'
 masakari_api: '{{ images_base_url }}/openstack/masakari:wallaby-bionic-20220117110643'
 masakari_engine: '{{ images_base_url }}/openstack/masakari:wallaby-bionic-20220117110643'
@@ -201,3 +201,7 @@ neutron_bootstrap: '{{ images_base_url }}/openstack/openstack-tools:ussuri-bioni
 cinder_drop_default_volume_type: '{{ images_base_url }}/openstack/openstack-tools:ussuri-bionic-20220113100346'
 cinder_create_internal_tenant: '{{ images_base_url }}/openstack/openstack-tools:ussuri-bionic-20220113100346'
 descheduler: '{{ images_base_url }}/openstack/extra/descheduler:v0.21.0'
+ironic_agent_kernel: '{{ binary_base_url }}/openstack/bin/ironic/tinyipa/tinyipa-stable-wallaby-20220211071223.vmlinuz'
+ironic_agent_initramfs: '{{ binary_base_url }}/openstack/bin/ironic/tinyipa/tinyipa-stable-wallaby-20220211071223.gz'
+ironic_agent_kernel_checksum: ab3a8196df5a84889f16494fde188799
+ironic_agent_initramfs_checksum: f667d6197ce951effc6fd7c24491ad19
