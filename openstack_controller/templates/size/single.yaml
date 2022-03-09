@@ -322,6 +322,10 @@ services:
             sink: 1
             worker: 1
         conf:
+          software:
+            apache2:
+              processes:
+                api: 2
           designate:
             service:api:
               workers: 2
