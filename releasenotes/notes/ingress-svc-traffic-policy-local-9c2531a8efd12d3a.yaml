@@ -1,0 +1,9 @@
+---
+features:
+  - |
+    In order to enable visibility of client source ips in
+    openstack logs, ingress service external traffic policy
+    was switched from Cluster to Local. Along with this it is
+    required now to run ingress on every node in cluster. For
+    example this is needed for connection from openstack vm
+    to openstack services public endpoints.

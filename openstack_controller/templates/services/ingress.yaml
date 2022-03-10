@@ -8,10 +8,12 @@ spec:
   - name: ingress-openstack
     chart: {{spec.common.infra.repo}}/ingress
     values:
+      deployment:
+        type: DaemonSet
       labels:
         server:
-          node_selector_key: openstack-control-plane
-          node_selector_value: enabled
+          node_selector_key: kubernetes.io/os
+          node_selector_value: linux
       network:
         service:
           type: LoadBalancer
