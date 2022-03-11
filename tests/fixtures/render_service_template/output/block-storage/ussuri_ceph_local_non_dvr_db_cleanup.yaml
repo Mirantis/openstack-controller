@@ -53,6 +53,8 @@ spec:
             memcache_security_strategy: ENCRYPT
           oslo_messaging_notifications:
             topics: notifications,stacklight_notifications
+          oslo_middleware:
+            max_request_body_size: 114688
           service_user:
             send_service_user_token: true
           backend_defaults:
@@ -68,6 +70,11 @@ spec:
           db_init:
             jobs:
             - openstack-mariadb-cluster-wait
+      network:
+        api:
+          ingress:
+            annotations:
+              nginx.ingress.kubernetes.io/proxy-body-size: "114688"
       endpoints:
         cluster_domain_suffix: cluster.local
         identity:

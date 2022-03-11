@@ -219,6 +219,8 @@ spec:
             scheduler_default_filters: AvailabilityZoneFilter,CapacityFilter,CapabilitiesFilter,InstanceLocalityFilter
           oslo_messaging_notifications:
             topics: {{ notification_topics|join(',') }}
+          oslo_middleware:
+            max_request_body_size: 114688
           coordination:
             #There are some problems with etcd3 driver so we shouldn't use it
             #BUG: https://mirantis.jira.com/browse/PRODX-21783
@@ -281,6 +283,11 @@ spec:
         secret_ca_bundle: true
         cron_service_cleaner: true
         cron_volume_usage_audit: false
+      network:
+        api:
+          ingress:
+            annotations:
+              nginx.ingress.kubernetes.io/proxy-body-size: "114688"
       # NODE SPECIFIC START
       {%- if overrides.enabled %}
       overrides:
