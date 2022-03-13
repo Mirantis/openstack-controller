@@ -200,3 +200,4 @@ ironic_agent_kernel: '{{ binary_base_url }}/openstack/bin/ironic/tinyipa/tinyipa
 ironic_agent_initramfs: '{{ binary_base_url }}/openstack/bin/ironic/tinyipa/tinyipa-stable-stein.gz'
 ironic_agent_kernel_checksum: 6b0e1446467f7a685ee0379d5486f067
 ironic_agent_initramfs_checksum: 6ea460c7b5e71f682819134c716bd55e
+ironic_update_nodes_metadata: '{{ images_base_url }}/openstack/openstack-tools:ussuri-bionic-20220113100346'
