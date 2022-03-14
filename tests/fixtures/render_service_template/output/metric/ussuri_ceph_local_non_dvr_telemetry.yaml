@@ -28,12 +28,14 @@ spec:
         apache: |
           {{- $portInt := tuple "metric" "internal" "api" $ | include "helm-toolkit.endpoints.endpoint_port_lookup" }}
           Listen 0.0.0.0:{{ $portInt }}
+          LogFormat "%h %l %u %t \"%r\" %>s %b %D \"%{Referer}i\" \"%{User-Agent}i\"" combined
+          LogFormat "%{X-Forwarded-For}i %l %u %t \"%r\" %>s %b %D \"%{Referer}i\" \"%{User-Agent}i\"" proxy
           SetEnvIf X-Forwarded-For "^.*\..*\..*\..*" forwarded
           CustomLog /dev/stdout combined env=!forwarded
           CustomLog /dev/stdout proxy env=forwarded
 
           <VirtualHost *:{{ $portInt }}>
-              WSGIDaemonProcess gnocchi processes=8 threads=1 user=gnocchi group=gnocchi display-name=%{GROUP}
+              WSGIDaemonProcess gnocchi processes={{ .Values.conf.software.apache2.processes }} threads=1 user=gnocchi group=gnocchi display-name=%{GROUP}
               WSGIProcessGroup gnocchi
               WSGIScriptAlias / "/var/lib/openstack/lib/python3.6/site-packages/gnocchi/rest/wsgi.py"
               WSGIApplicationGroup %{GLOBAL}
