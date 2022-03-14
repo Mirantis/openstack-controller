@@ -381,6 +381,9 @@ services:
               connection_recycle_time: 300
               max_overflow: 30
               max_pool_size: 10
+          software:
+            apache2:
+              processes: 4
   event:
     panko:
       values:
