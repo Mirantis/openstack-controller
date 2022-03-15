@@ -28,17 +28,22 @@ spec:
               properties:
                 draft:
                   type: boolean
-                  description: trigger to process osdpl resource
-                  default: false
+                  description: |
+                    trigger to process osdpl resource
+                    default: false
                 artifacts:
                   type: object
                   properties:
                     images_base_url:
                       type: string
-                      description: "base URL for docker images"
+                      description: |
+                        "base URL for docker images"
+                        default: "mirantis.azurecr.io"
                     binary_base_url:
                       type: string
-                      description: "base URL for repo with helm charts & other binaries"
+                      description: |
+                        "base URL for repo with helm charts & other binaries"
+                        default: "https://binary.mirantis.com"
                 openstack_version:
                   description: version of OpenStack to deploy
                   type: string
@@ -68,18 +73,23 @@ spec:
                     - medium
                 public_domain_name:
                   type: string
-                  description: domain name used for public endpoints
+                  description: |
+                    domain name used for public endpoints
+                    default: "it.just.works"
                 internal_domain_name:
                   type: string
-                  description: internal k8s domain name
+                  description: |
+                    internal k8s domain name
+                    default: "cluster.local"
                 local_volume_storage_class:
                   type: string
-                  description: >
+                  description: |
                     Default storage class with local volumes, used by services with built in clustering
                     mechanism like mariadb, etcd, redis.
+                    default: "openstack-operator-bind-mounts"
                 persistent_volume_storage_class:
                   type: string
-                  description: >
+                  description: |
                     Default storage class with persistence, for example ceph. Used by services that require
                     persistence on filesystem level like backups for mariadb.
                 common:
@@ -219,7 +229,9 @@ spec:
                                 to start instance and block storage service will not allow to create volumes.
                             certificate_validation:
                               type: boolean
-                              description: Enable certificate validation when verifying signatures.
+                              description: |
+                                Enable certificate validation when verifying signatures.
+                                default: false
                     database:
                       type: object
                       properties:
@@ -233,15 +245,20 @@ spec:
                               properties:
                                 enabled:
                                   type: boolean
-                                  description: Enable periodic cleanup of database for Barbican.
+                                  description: |
+                                    Enable periodic cleanup of database for Barbican.
+                                    default: true
                                 schedule:
                                   type: string
-                                  description: Cron schedule for periodic cleanup.
+                                  description: |
+                                    Cron schedule for periodic cleanup.
+                                    default: "1 4 * * 1"
                                 age:
                                   type: integer
                                   description: |
                                     Number of days to keep deleted entries. When set to 0 all entries from shadow tables
                                     are deleted.
+                                    default: 30
                             masakari:
                               type: object
                               required:
@@ -249,18 +266,25 @@ spec:
                               properties:
                                 enabled:
                                   type: boolean
-                                  description: Enable periodic cleanup of database for Masakari.
+                                  description: |
+                                    Enable periodic cleanup of database for Masakari.
+                                    default: true
                                 schedule:
                                   type: string
-                                  description: Cron schedule for periodic cleanup.
+                                  description: |
+                                    Cron schedule for periodic cleanup.
+                                    default: "1 3 * * 1"
                                 age:
                                   type: integer
                                   description: |
                                     Number of days to keep deleted entries. When set to 0 all entries from shadow tables
                                     are deleted.
+                                    default: 30
                                 batch:
                                   type: integer
-                                  description: The batch size for each iteration.
+                                  description: |
+                                    The batch size for each iteration.
+                                    default: 1000
                             nova:
                               type: object
                               required:
@@ -268,18 +292,25 @@ spec:
                               properties:
                                 enabled:
                                   type: boolean
-                                  description: Enable periodic cleanup of database for Nova.
+                                  description: |
+                                    Enable periodic cleanup of database for Nova.
+                                    default: true
                                 schedule:
                                   type: string
-                                  description: Cron schedule for periodic cleanup.
+                                  description: |
+                                    Cron schedule for periodic cleanup.
+                                    default: "1 1 * * 1"
                                 age:
                                   type: integer
                                   description: |
                                     Number of days to keep deleted entries. When set to 0 all entries from shadow tables
                                     are deleted.
+                                    default: 30
                                 batch:
                                   type: integer
-                                  description: The batch size for each iteration.
+                                  description: |
+                                    The batch size for each iteration.
+                                    default: 1000
                             cinder:
                               type: object
                               required:
@@ -287,15 +318,20 @@ spec:
                               properties:
                                 enabled:
                                   type: boolean
-                                  description: Enable periodic cleanup of database for Cinder.
+                                  description: |
+                                    Enable periodic cleanup of database for Cinder.
+                                    default: true
                                 schedule:
                                   type: string
-                                  description: Cron schedule for periodic cleanup.
+                                  description: |
+                                    Cron schedule for periodic cleanup.
+                                    default: "1 0 * * 1"
                                 age:
                                   type: integer
                                   description: |
                                     Number of days to keep deleted entries. When set to 0 all entries from shadow tables
                                     are deleted.
+                                    default: 30
                             glance:
                               type: object
                               required:
@@ -303,18 +339,25 @@ spec:
                               properties:
                                 enabled:
                                   type: boolean
-                                  description: Enable periodic cleanup of database for Glance.
+                                  description: |
+                                    Enable periodic cleanup of database for Glance.
+                                    default: true
                                 schedule:
                                   type: string
-                                  description: Cron schedule for periodic cleanup.
+                                  description: |
+                                    Cron schedule for periodic cleanup.
+                                    default: "1 2 * * 1"
                                 age:
                                   type: integer
                                   description: |
                                     Number of days to keep deleted entries. When set to 0 all entries from shadow tables
                                     are deleted.
+                                    default: 30
                                 batch:
                                   type: integer
-                                  description: The batch size for each iteration.
+                                  description: |
+                                    The batch size for each iteration.
+                                    default: 1000
                             heat:
                               type: object
                               required:
@@ -322,18 +365,25 @@ spec:
                               properties:
                                 enabled:
                                   type: boolean
-                                  description: Enable periodic cleanup of database for Heat.
+                                  description: |
+                                    Enable periodic cleanup of database for Heat.
+                                    default: true
                                 schedule:
                                   type: string
-                                  description: Cron schedule for periodic cleanup.
+                                  description: |
+                                    Cron schedule for periodic cleanup.
+                                    default: "1 5 * * 1"
                                 age:
                                   type: integer
                                   description: |
                                     Number of days to keep deleted entries. When set to 0 all entries from shadow tables
                                     are deleted.
+                                    default: 30
                                 batch:
                                   type: integer
-                                  description: Number of stacks to delete at a time (per transaction).
+                                  description: |
+                                    Number of stacks to delete at a time (per transaction).
+                                    default: 10
                             aodh:
                               type: object
                               required:
@@ -341,10 +391,14 @@ spec:
                               properties:
                                 enabled:
                                   type: boolean
-                                  description: Enable periodic cleanup of expired alarm history data for Aodh
+                                  description: |
+                                    Enable periodic cleanup of expired alarm history data for Aodh
+                                    default: true
                                 schedule:
                                   type: string
-                                  description: Cron schedule for periodic cleanup
+                                  description: |
+                                    Cron schedule for periodic cleanup
+                                    default: "1 6 * * 1"
                                 age:
                                   type: integer
                                   description: |
@@ -355,28 +409,29 @@ spec:
                             - enabled
                           properties:
                             enabled:
-                              description: >
+                              description: |
                                 Indicates whether cron job will launch backup jobs. When set to true suspend
                                 flag in cron job will be switched to false.
+                                default: false
                               type: boolean
                             schedule_time:
-                              description: >
+                              description: |
                                 Unix style cron expression indicates how often to run backup
                                 cron job. Default is '0 1 * * *' - every day at 01:00.
                               type: string
                             backup_type:
-                              description: >
+                              description: |
                                 Type of backup. Possible values: incremental or full.
                                 incremental: If newest full backup is older then full_backup_cycle seconds,
                                 perform full backup, else perform incremental backup to the newest full.
                                 full: perform always only full backup. Default is incremental.
                               type: string
                             backups_to_keep:
-                              description: >
+                              description: |
                                 How many full backups to keep.
                               type: integer
                             full_backup_cycle:
-                              description: >
+                              description: |
                                 Number of seconds that defines a period between 2 full backups.
                                 During this period incremental backups will be performed. The parameter
                                 is taken into account only if backup_type is set to 'incremental', otherwise
@@ -393,7 +448,7 @@ spec:
                           type: string
                           enum:
                             - autoscaling
-                          description: >
+                          description: |
                             Which telemetry mode is going to be used for telemetry.
                     designate:
                       type: object
@@ -407,21 +462,21 @@ spec:
                             - protocol
                           properties:
                             type:
-                              default: powerdns
                               type: string
-                              description: >
+                              description: |
                                 Type of the backend for Designate. For example: powerdns.
+                                default: powerdns
                             protocol:
                               type: string
-                              default: udp
-                              description: >
+                              description: |
                                 Protocol for Designate backend in Kubernetes Service. Could be udp|tcp|tcp+udp.
+                                default: udp
                               enum:
                                 - udp
                                 - tcp
                                 - tcp+udp
                             external_ip:
-                              description: >
+                              description: |
                                 Optional field to define IP address for LoadBalancer service.
                               type: string
                     ssl:
@@ -437,15 +492,15 @@ spec:
                             - api_key
                           properties:
                             ca_cert:
-                              description: >
+                              description: |
                                 CA certificate
                               type: string
                             api_cert:
-                              description: >
+                              description: |
                                 API server certificate
                               type: string
                             api_key:
-                              description: >
+                              description: |
                                 API server private key
                               type: string
                     barbican:
@@ -458,37 +513,38 @@ spec:
                               type: object
                               properties:
                                 enabled:
-                                  description: >
+                                  description: |
                                     Indicates if simple_crypto backend is enabled
+                                    default: false
                                   type: boolean
                                 approle_role_id:
-                                  description: >
+                                  description: |
                                     Specifies the app role ID
                                   type: string
                                 approle_secret_id:
-                                  description: >
+                                  description: |
                                      Specifies the secret ID created for the app role
                                   type: string
                                 vault_url:
-                                  description: >
+                                  description: |
                                     URL of the Vault server
                                   type: string
                                 namespace:
-                                  description: >
+                                  description: |
                                     Vault Namespace to use for all requests to Vault.
                                     This is available only in Vault Enterprise and
                                     is supported only since OpenStack Victoria release.
                                   type: string
                                 kv_mountpoint:
-                                  description: >
+                                  description: |
                                     Mountpoint of KV store in Vault to use.
                                   type: string
                                 use_ssl:
-                                  description: >
+                                  description: |
                                     Specifies whether to use SSL
                                   type: boolean
                                 ssl_ca_crt_file:
-                                  description: >
+                                  description: |
                                     The path to CA cert file
                                   type: string
                     services:
@@ -533,8 +589,7 @@ spec:
                           description: "Physical interface used for live migration."
                         vcpu_type:
                           type: string
-                          default: "host-model"
-                          description: >
+                          description: |
                             Types of cpu to create instances with. Can be host-model, host-passthrough
                             or a coma-separated list of qemu cpu types.
                             For OpenStack Stein and older, only single value can be provided.
@@ -544,7 +599,7 @@ spec:
                           type: object
                           properties:
                             backend:
-                              description: >
+                              description: |
                                 Backend for nova images can be ceph or local
                               type: string
                               enum:
@@ -556,26 +611,34 @@ spec:
                               properties:
                                 enabled:
                                   type: boolean
-                                  description: Enable ephemeral disk encryption, only available with lvm backend.
+                                  description: |
+                                    Enable ephemeral disk encryption, only available with lvm backend.
+                                    default: false
                                 cipher:
                                   type: string
-                                  description: Cipher-mode string to be used.
+                                  description: |
+                                    Cipher-mode string to be used.
+                                    default: "aes-xts-plain64"
                                 key_size:
                                   type: integer
-                                  description: Encryption key length in bits.
+                                  description: |
+                                    Encryption key length in bits.
+                                    default: 256
                             lvm:
                               type: object
                               properties:
                                 volume_group:
                                   type: string
-                                  description: >
+                                  description: |
                                     Volume group used when images backend is lvm. Default to nova-vol
                     horizon:
                       type: object
                       properties:
                         default_theme:
                           type: string
-                          description: The default theme name.
+                          description: |
+                            The default theme name.
+                            default: "default"
                         themes:
                           type: array
                           items:
@@ -608,30 +671,37 @@ spec:
                               type: object
                               properties:
                                 region_name:
-                                  description: >
+                                  description: |
                                     OpenStack region name
+                                    default: "RegionOne"
                                   type: string
                                 project_name:
-                                  description: >
+                                  description: |
                                     Project name for admin of OpenStack deployment
+                                    default: "admin"
                                   type: string
                                 user_domain_name:
-                                  description: >
+                                  description: |
                                     Domain name for admin of OpenStack deployment
+                                    default: "default"
                                   type: string
                                 project_domain_name:
-                                  description: >
+                                  description: |
                                     Project domain name for admin of OpenStack deployment
+                                    default: "default"
                                   type: string
                                 default_domain_id:
-                                  description: >
+                                  description: |
                                     Domain ID for admin of OpenStack deployment
+                                    default: "default"
                                   type: string
                         keycloak:
                           type: object
                           properties:
                             enabled:
-                              description: Trigger to enable keycloak integration
+                              description: |
+                                Trigger to enable keycloak integration
+                                default: false
                               type: boolean
                             url:
                               type: string
@@ -641,7 +711,9 @@ spec:
                               properties:
                                 OIDCClientID:
                                   type: string
-                                  description: Client identifier used in calls to the statically configured OpenID Connect Provider
+                                  description: |
+                                    Client identifier used in calls to the statically configured OpenID Connect Provider
+                                    default: "os"
                                 OIDCProviderMetadataURL:
                                   type: string
                                   description: Override for URL where OpenID Connect Provider metadata can be found
@@ -658,12 +730,14 @@ spec:
                                   description: Require a valid SSL server certificate when communicating with the Authorization Server
                                 OIDCRedirectURLsAllowed:
                                   type: string
-                                  description: >
+                                  description: |
                                     Define one or more regular expressions that specify URLs (or domains) allowed for post logout and
                                     other redirects such as the "return_to" value on refresh token requests
                                 OIDCScope:
                                    type: string
-                                   description: Used to request specific scopes
+                                   description: |
+                                     Used to request specific scopes
+                                     default: "openid email profile"
                         domain_specific_configuration:
                           type: object
                           properties:
@@ -672,7 +746,7 @@ spec:
                               description: Enable domain specific keystone configuration
                             domains:
                               type: array
-                              description: >
+                              description: |
                                 The list of domain specific configuration options.
                               items:
                                 type: object
@@ -701,13 +775,15 @@ spec:
                           description: "Physical interface used for tunnel traffic"
                         dns_servers:
                           type: array
-                          description: >
+                          description: |
                             The list with the IP addresses of DNS servers reachable from Virtual Networks
                           items:
                             type: string
                         backend:
                           type: string
-                          description: Neutron backend
+                          description: |
+                            Neutron backend
+                            default: "ml2"
                           enum:
                             - ml2
                             - tungstenfabric
@@ -718,7 +794,9 @@ spec:
                           properties:
                             enabled:
                               type: boolean
-                              description: Enable distributed routers
+                              description: |
+                                Enable distributed routers
+                                default: false
                         tenant_network_types:
                           type: array
                           description: Ordered list of network_types to allocate as tenant networks
@@ -739,7 +817,9 @@ spec:
                             properties:
                               physnet:
                                 type: string
-                                description: Neutron physnet name
+                                description: |
+                                  Neutron physnet name
+                                  default: "physnet1"
                               interface:
                                 type: string
                                 description: Physical interface mapped with physnet
@@ -769,14 +849,17 @@ spec:
                           properties:
                             enabled:
                               type: boolean
-                              description: >
+                              description: |
                                 enable floating network creation
+                                default: false
                             name:
                               type: string
-                              description: The name of floating network
+                              description: |
+                                The name of floating network
+                                default: "public"
                             physnet:
                               type: string
-                              description: >
+                              description: |
                                 name of physical network to associate
                             network_type:
                               type: string
@@ -797,7 +880,9 @@ spec:
                               properties:
                                 name:
                                   type: string
-                                  description: "The name of floating subnet"
+                                  description: |
+                                    "The name of floating subnet"
+                                    default: "public-subnet"
                                 range:
                                   type: string
                                   description: "IP address range ie: 1.2.3.0/24"
@@ -815,7 +900,9 @@ spec:
                               properties:
                                 name:
                                   type: string
-                                  description: "The name of public router"
+                                  description: |
+                                    "The name of public router"
+                                    default: "r1"
                         baremetal:
                           type: object
                           properties:
@@ -865,7 +952,9 @@ spec:
                           properties:
                             enabled:
                               type: boolean
-                              description: Enable BGPVPN plugin/service
+                              description: |
+                                Enable BGPVPN plugin/service
+                                default: false
                             control_interface:
                               type: string
                               description: IP address or interface used for BGP peerings
@@ -902,7 +991,9 @@ spec:
                           properties:
                             enabled:
                               type: boolean
-                              description: Enable IPsec authentication and encryption of tenant traffic
+                              description: |
+                                Enable IPsec authentication and encryption of tenant traffic
+                                default: false
                     messaging:
                       type: object
                       properties:
@@ -929,7 +1020,9 @@ spec:
                       properties:
                         provisioning_interface:
                           type: string
-                          description: name of physical interface to bind PXE services
+                          description: |
+                            name of physical interface to bind PXE services
+                            default: "ironic-pxe"
                         baremetal_network_name:
                           type: string
                           description: name of baremetal provisioning/cleaning network
@@ -941,16 +1034,22 @@ spec:
                               properties:
                                 name:
                                   type: string
-                                  description: name of baremetal network
+                                  description: |
+                                    name of baremetal network
+                                    default: "baremetal"
                                 physnet:
                                   type: string
-                                  description: name of physical network to associate
+                                  description: |
+                                    name of physical network to associate
+                                    default: "ironic"
                                 network_type:
                                   type: string
                                   enum:
                                     - flat
                                     - vlan
-                                  description: type of provisioning/cleaning baremetal network
+                                  description: |
+                                    type of provisioning/cleaning baremetal network
+                                    default: "vlan"
                                 segmentation_id:
                                   type: integer
                                   description: the vlan number of cleaning network in case of VLAN segmentation is used
@@ -959,8 +1058,12 @@ spec:
                                   description: the MTU for cleaning network
                                 external:
                                   type: boolean
+                                  description: |
+                                    default: true
                                 shared:
                                   type: boolean
+                                  description: |
+                                    default: true
                                 subnets:
                                   type: array
                                   items:
@@ -991,7 +1094,9 @@ spec:
                           type: object
                           properties:
                             base_url:
-                              description: base URL for ironic agent images
+                              description: |
+                                base URL for ironic agent images
+                                default: "https://binary.mirantis.com/openstack/bin/ironic/tinyipa"
                               type: string
                             initramfs:
                               type: string
@@ -1027,7 +1132,7 @@ spec:
                       type: object
                       properties:
                         enabled:
-                          description: >
+                          description: |
                             enable StackLight operations support system
                           type: boolean
                         user:
@@ -1035,11 +1140,11 @@ spec:
                           properties:
                             username:
                               type: string
-                              description: >
+                              description: |
                                 The option is no longer handled, the username is autogenerated.
                             password:
                               type: string
-                              description: >
+                              description: |
                                 The option is no longer handled, the password is autogenerated.
                     logging:
                       type: object
@@ -1049,7 +1154,9 @@ spec:
                           properties:
                             level:
                               type: string
-                              description: Service logging level
+                              description: |
+                                Service logging level
+                                default: "INFO"
                               enum:
                                 - DEBUG
                                 - INFO
@@ -1103,10 +1210,14 @@ spec:
                           properties:
                             timeout:
                               type: integer
-                              description: Number of seconds to wait for application becomes ready.
+                              description: |
+                                Number of seconds to wait for application becomes ready.
+                                default: 1200
                             delay:
                               type: integer
-                              description: Number of seconds between readiness attempts.
+                              description: |
+                                Number of seconds between readiness attempts.
+                                default: 10
                         neutron:
                           <<: *application_readiness
               required:
@@ -1121,7 +1232,7 @@ spec:
               properties:
                 watched:
                   type: object
-                  description: >
+                  description: |
                     The object that contains information of objects that openstack-controller
                     is watching for. Changin fields of this object will trigger update of
                     all children.
@@ -1134,7 +1245,7 @@ spec:
                           properties:
                             hash:
                               type: string
-                              description: >
+                              description: |
                                 The hash value for secret, is a trigger to reload ceph
                                 metadata
                     neutron:
