@@ -51,6 +51,15 @@ spec:
           service_catalog:
             valid_interfaces: public,internal
         logging:
+          loggers:
+             keys:
+               - root
+               - ironic
+               - eventletwsgi
+          logger_eventletwsgi:
+            level: INFO
+            handlers: ""
+            qualname: eventlet.wsgi.server
           logger_ironic:
             level: INFO
         policy.d:

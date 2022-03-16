@@ -204,6 +204,17 @@ spec:
           service_catalog:
             valid_interfaces: public,internal
         logging:
+          # NOTE(mkarpin): remove loggers and logger_eventletwsgi sections when ironic api
+          # is switched to wsgi.
+          loggers:
+            keys:
+              - root
+              - ironic
+              - eventletwsgi
+          logger_eventletwsgi:
+            level: INFO
+            handlers: ""
+            qualname: eventlet.wsgi.server
           logger_ironic:
             level: {{ spec.get('features', {}).get('logging', {}).get('ironic', {}).get('level', 'INFO') }}
       endpoints:
