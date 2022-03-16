@@ -176,6 +176,10 @@ spec:
         logging:
           logger_neutron:
             level: INFO
+          logger_neutron_lib:
+             handlers: ""
+             level: INFO
+             qualname: neutron_lib
         metadata_agent:
           DEFAULT:
             metadata_proxy_shared_secret: mN0aLDTcg1AVqyLWNDjCd2Jz6DA61cZJ
