@@ -201,8 +201,8 @@ neutron_bootstrap: '{{ images_base_url }}/openstack/openstack-tools:ussuri-bioni
 cinder_drop_default_volume_type: '{{ images_base_url }}/openstack/openstack-tools:ussuri-bionic-20220113100346'
 cinder_create_internal_tenant: '{{ images_base_url }}/openstack/openstack-tools:ussuri-bionic-20220113100346'
 descheduler: '{{ images_base_url }}/openstack/extra/descheduler:v0.21.0'
-ironic_agent_kernel: '{{ binary_base_url }}/openstack/bin/ironic/tinyipa/tinyipa-stable-xena-20220313005506.vmlinuz'
-ironic_agent_initramfs: '{{ binary_base_url }}/openstack/bin/ironic/tinyipa/tinyipa-stable-xena-20220313005506.gz'
+ironic_agent_kernel: '{{ binary_base_url }}/openstack/bin/ironic/tinyipa/tinyipa-stable-xena-20220318005512.vmlinuz'
+ironic_agent_initramfs: '{{ binary_base_url }}/openstack/bin/ironic/tinyipa/tinyipa-stable-xena-20220318005512.gz'
 ironic_agent_kernel_checksum: ab3a8196df5a84889f16494fde188799
-ironic_agent_initramfs_checksum: ae251640d66a596223ddfc19f46bedb9
+ironic_agent_initramfs_checksum: c45721d0503e893580d4df494928a846
 ironic_update_nodes_metadata: '{{ images_base_url }}/openstack/openstack-tools:ussuri-bionic-20220113100346'
