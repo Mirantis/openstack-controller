@@ -41,7 +41,7 @@
       "additionalProperties": true
     },
     "kubernetes_apimachinery_pkg_runtime_RawExtension": {
-      "type": "object",
+      "type": ["object", "null"],
       "description": "",
       "additionalProperties": true
     },

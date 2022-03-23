@@ -17,3 +17,6 @@ class BaseValidator(object):
 
     def validate(self, review_request):
         raise NotImplementedError()
+
+    def validate_delete(self, review_request):
+        pass

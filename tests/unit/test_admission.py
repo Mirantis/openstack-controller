@@ -1133,3 +1133,36 @@ def test_panko_install_fail(client):
             response.json["response"]["allowed"] is False
         ), "Event service (Panko) was retired and is not available since OpenStack Xena release."
         assert response.json["response"]["status"]["code"] == 400
+
+
+def test_openstack_delete_ok(client, osdplst):
+    req = copy.deepcopy(ADMISSION_REQ)
+    osdplst.return_value.obj = {
+        "status": {"openstack_version": "train", "osdpl": {"state": "APPLIED"}}
+    }
+    get_osdpl_status_mock = mock.Mock()
+    get_osdpl_status_mock.return_value = "APPLIED"
+    osdplst.return_value.get_osdpl_status = get_osdpl_status_mock
+
+    req["request"]["operation"] = "DELETE"
+    req["request"]["oldObject"] = copy.deepcopy(req["request"]["object"])
+    response = client.simulate_post("/validate", json=req)
+    assert response.status == falcon.HTTP_OK
+    assert response.json["response"]["allowed"] is True
+
+
+def test_openstack_delete_not_allowed(client, osdplst):
+    req = copy.deepcopy(ADMISSION_REQ)
+    osdplst.return_value.obj = {
+        "status": {"openstack_version": "train", "osdpl": {"state": "APPYING"}}
+    }
+    get_osdpl_status_mock = mock.Mock()
+    get_osdpl_status_mock.return_value = "APPYING"
+    osdplst.return_value.get_osdpl_status = get_osdpl_status_mock
+
+    req["request"]["operation"] = "DELETE"
+    req["request"]["oldObject"] = copy.deepcopy(req["request"]["object"])
+    response = client.simulate_post("/validate", json=req)
+    assert response.status == falcon.HTTP_OK
+    assert response.json["response"]["allowed"] is False
+    assert response.json["response"]["status"]["code"] == 400

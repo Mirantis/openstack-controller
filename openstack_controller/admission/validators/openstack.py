@@ -38,6 +38,9 @@ class OpenStackValidator(base.BaseValidator):
         self._check_baremetal_allowed(new_obj)
         self._check_panko_allowed(new_obj)
 
+    def validate_delete(self, review_request):
+        self._check_delete_allowed(review_request)
+
     def _deny_master(self, new_obj):
         new_version = new_obj.get("spec", {}).get("openstack_version")
         if new_version == "master":
@@ -101,12 +104,16 @@ class OpenStackValidator(base.BaseValidator):
         ]
         return new_version != old_version
 
-    def _validate_for_another_upgrade(self, review_request):
+    def _is_osdpl_locked(self, review_request):
         osdplst = osdplstatus.OpenStackDeploymentStatus(
             review_request["name"], review_request["namespace"]
         )
         osdplst_status = osdplst.get_osdpl_status()
         if osdplst_status != osdplstatus.APPLIED:
+            return True
+
+    def _validate_for_another_upgrade(self, review_request):
+        if self._is_osdpl_locked(review_request):
             raise exception.OsDplValidationFailed(
                 "OpenStack version upgrade is not possible while another upgrade is in progress."
             )
@@ -137,4 +144,10 @@ class OpenStackValidator(base.BaseValidator):
             raise exception.OsDplValidationFailed(
                 "If spec.openstack_version is changed, "
                 "changing other values in the spec is not permitted."
+            )
+
+    def _check_delete_allowed(self, review_request):
+        if self._is_osdpl_locked(review_request):
+            raise exception.OsDplValidationFailed(
+                "OpenStack deletion is not allowed, while OpemStackDeploymentStatus is in transit state."
             )
