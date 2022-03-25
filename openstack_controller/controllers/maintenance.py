@@ -161,6 +161,15 @@ async def cluster_maintenance_request_change_handler(body, **kwargs):
     )
     osdplst_status = osdplst.get_osdpl_status()
     cwl = maintenance.ClusterWorkloadLock.get_resource(osdpl_name)
+
+    # Do not handle CMR while CWL release string contains old release.
+    if cwl.get_release() != settings.OSCTL_CLUSTER_RELEASE:
+        msg = (
+            f"Waitinging for cwl release is {settings.OSCTL_CLUSTER_RELEASE}."
+        )
+        cwl.set_error_message(msg)
+        raise kopf.TemporaryError(msg)
+
     if osdplst_status != osdplstatus.APPLIED:
         msg = (
             f"Waiting osdpl status APPLIED, current state is {osdplst_status}"

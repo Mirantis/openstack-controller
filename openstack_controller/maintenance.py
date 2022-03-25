@@ -99,7 +99,11 @@ class LockBase(pykube.objects.APIObject):
             # Explicitly set state to active to do not rely on default.
             self.set_state(LockState.active.value)
         if settings.OSCTL_CLUSTER_RELEASE:
-            self.set_release(settings.OSCTL_CLUSTER_RELEASE)
+            # NOTE(vsaienko): reset cwl to active if it was set to inactive
+            # by previous controller. PRODX-22757
+            if self.get_release() != settings.OSCTL_CLUSTER_RELEASE:
+                self.set_state(LockState.active.value)
+                self.set_release(settings.OSCTL_CLUSTER_RELEASE)
 
     def absent(self):
         if self.exists():
@@ -121,6 +125,10 @@ class LockBase(pykube.objects.APIObject):
 
     def set_release(self, release):
         self.patch({"status": {"release": release}}, subresource="status")
+
+    def get_release(self):
+        self.reload()
+        return self.obj["status"].get("release", None)
 
     def set_state_inactive(self):
         self.set_state(LockState.inactive.value)
