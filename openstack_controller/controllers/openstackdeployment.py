@@ -173,15 +173,16 @@ async def handle(body, meta, spec, logger, reason, **kwargs):
     osdplst = osdplstatus.OpenStackDeploymentStatus(name, namespace)
     osdplst.present(osdpl_obj=body)
 
+    osdplst.set_osdpl_status(
+        osdplstatus.APPLYING, body["spec"], kwargs["diff"], reason
+    )
+
     # Always create clusterworkloadlock, but set to inactive when we are not interested
     cwl = maintenance.ClusterWorkloadLock.get_resource(name)
     cwl.present()
 
     if not settings.OSCTL_NODE_MAINTENANCE_ENABLED:
         cwl.set_state_inactive()
-    osdplst.set_osdpl_status(
-        osdplstatus.APPLYING, body["spec"], kwargs["diff"], reason
-    )
 
     if spec.get("draft"):
         LOG.info("OpenStack deployment is in draft mode, skipping handling...")
