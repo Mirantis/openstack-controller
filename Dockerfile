@@ -22,7 +22,7 @@ ARG HELM_BINARY="https://binary.mirantis.com/openstack/bin/utils/helm/helm-v3.6.
 COPY --from=builder /tmp/get-pip.py /tmp/get-pip.py
 COPY --from=builder /opt/wheels /opt/wheels
 COPY --from=builder /opt/operator/uwsgi.ini /opt/operator/uwsgi.ini
-ADD kopf-session-timeout.patch /tmp/kopf-session-timeout.patch
+ADD kopf-patches /tmp/kopf-patches
 # NOTE(pas-ha) apt-get download + dpkg-deb -x is a dirty hack
 # to fetch distutils w/o pulling in most of python3.6
 # FIXME(pas-ha) strace/gdb is installed only temporary for now for debugging
@@ -45,7 +45,9 @@ RUN set -ex; \
     python3.8 /tmp/get-pip.py; \
     pip install --no-index --no-cache --find-links /opt/wheels openstack-controller; \
     cd /usr/local/lib/python3.8/dist-packages; \
-    patch -p1 < /tmp/kopf-session-timeout.patch; \
+    for p in $(ls /tmp/kopf-patches/*.patch); do \
+         patch -p1 < $p; \
+    done;  \
     cd -
 RUN wget -q -O /usr/local/bin/helm3 ${HELM_BINARY}; \
     chmod +x /usr/local/bin/helm3
@@ -53,7 +55,7 @@ RUN helm3 plugin install https://github.com/helm/helm-2to3
 RUN wget -q ${KUBECTL_BINARY} -O /usr/local/bin/kubectl; \
     chmod +x /usr/local/bin/kubectl
 
-RUN rm -rvf /tmp/kopf-session-timeout.patch
+RUN rm -rvf /tmp/kopf-patches
 RUN rm -rvf /opt/wheels; \
     apt-get -q clean; \
     rm -rvf /var/lib/apt/lists/*; \
