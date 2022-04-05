@@ -37,6 +37,7 @@ class OpenStackValidator(base.BaseValidator):
         self._check_masakari_allowed(new_obj)
         self._check_baremetal_allowed(new_obj)
         self._check_panko_allowed(new_obj)
+        self._deny_encrypted_api_key(new_obj)
 
     def validate_delete(self, review_request):
         self._check_delete_allowed(review_request)
@@ -150,4 +151,18 @@ class OpenStackValidator(base.BaseValidator):
         if self._is_osdpl_locked(review_request):
             raise exception.OsDplValidationFailed(
                 "OpenStack deletion is not allowed, while OpemStackDeploymentStatus is in transit state."
+            )
+
+    def _deny_encrypted_api_key(self, new_obj):
+        api_key = (
+            new_obj.get("spec", {})
+            .get("features", {})
+            .get("ssl", {})
+            .get("public_endpoints", {})
+            .get("api_key", "")
+        )
+        if "BEGIN ENCRYPTED PRIVATE KEY" in api_key:
+            raise exception.OsDplValidationFailed(
+                "Encrypted SSL key is not allowed yet. To use SSL "
+                "the key must be not encrypted."
             )

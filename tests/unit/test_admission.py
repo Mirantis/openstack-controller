@@ -21,6 +21,13 @@ import pytest
 
 from openstack_controller.admission import controller
 
+api_key_encrypted = """
+-----BEGIN ENCRYPTED PRIVATE KEY-----
+MIIFHDBOBgkqhkiG9w0BBQ0wQTApBgkqhkiG9w0BBQwwHAQIAojCIA9KqIQCAggA
+nMAwGCCqGSIb3DQIJBQAwFAYIKoZIhvcNAwcECP39f0UYq4xMBIIEyFd4XvL7QyMD
+eHsqIn80UxDLlkdC6xZ2Nwc/HgLQ5+rQGqssMot0HIpYd4FtgBCyCdJ6w56ndZL/
+"""
+
 
 # https://kubernetes.io/docs/reference/access-authn-authz/extensible-admission-controllers/#request
 ADMISSION_REQ_JSON = """
@@ -58,6 +65,11 @@ ADMISSION_REQ_JSON = """
                         "floating_network": {
                             "enabled": true,
                             "physnet": "physnet1"
+                        }
+                    },
+                    "ssl": {
+                        "public_endpoints": {
+                            "api_key": "-----BEGIN RSA PRIVATE KEY-----\\nMIIEpQIBAAKCAQEAsZ3tGp2wa1+L7F7/E8vXWZRnbZhcTmvY70WzYX72XfoYhDM/\\nef55tnffJePHHOoMFXiNvj8GYP9muHyxACKckLgG4BKNKdZyrKh9wVe6Djjw7kZU\\n9j0QB38ORilGKasW5hllEHvwgowBNqnby/rPhC+/MMCQBEPS3nMGHXbfY3TquQ5t"
                         }
                     }
                 }
@@ -307,17 +319,15 @@ def test_physnet_required_other_options_tf(client):
 
 def test_physnet_with_all_options_tf(client):
     req = copy.deepcopy(ADMISSION_REQ)
-    req["request"]["object"]["spec"].update(
+    req["request"]["object"]["spec"].update({"preset": "compute-tf"})
+    req["request"]["object"]["spec"]["features"].update(
         {
-            "preset": "compute-tf",
-            "features": {
-                "neutron": {
-                    "floating_network": {
-                        "network_type": "vlan",
-                        "segmentation_id": 4094,
-                    }
+            "neutron": {
+                "floating_network": {
+                    "network_type": "vlan",
+                    "segmentation_id": 4094,
                 }
-            },
+            }
         }
     )
     response = client.simulate_post("/validate", json=req)
@@ -327,11 +337,9 @@ def test_physnet_with_all_options_tf(client):
 
 def test_ipsec_tf(client):
     req = copy.deepcopy(ADMISSION_REQ)
-    req["request"]["object"]["spec"].update(
-        {
-            "preset": "compute-tf",
-            "features": {"neutron": {"ipsec": {"enabled": True}}},
-        }
+    req["request"]["object"]["spec"].update({"preset": "compute-tf"})
+    req["request"]["object"]["spec"]["features"].update(
+        {"neutron": {"ipsec": {"enabled": True}}}
     )
     response = client.simulate_post("/validate", json=req)
     assert response.status == falcon.HTTP_OK
@@ -390,13 +398,9 @@ def test_baremetal_non_empty_config(client):
 
 def test_bgpvpn_peers(client):
     req = copy.deepcopy(ADMISSION_REQ)
-    req["request"]["object"]["spec"].update(
-        {
-            "preset": "compute",
-            "features": {
-                "neutron": {"bgpvpn": {"enabled": True, "peers": ["1.2.3.4"]}}
-            },
-        }
+    req["request"]["object"]["spec"].update({"preset": "compute"})
+    req["request"]["object"]["spec"]["features"].update(
+        {"neutron": {"bgpvpn": {"enabled": True, "peers": ["1.2.3.4"]}}}
     )
     response = client.simulate_post("/validate", json=req)
     assert response.status == falcon.HTTP_OK
@@ -405,17 +409,15 @@ def test_bgpvpn_peers(client):
 
 def test_bgpvpn_route_reflector_enabled(client):
     req = copy.deepcopy(ADMISSION_REQ)
-    req["request"]["object"]["spec"].update(
+    req["request"]["object"]["spec"].update({"preset": "compute"})
+    req["request"]["object"]["spec"]["features"].update(
         {
-            "preset": "compute",
-            "features": {
-                "neutron": {
-                    "bgpvpn": {
-                        "enabled": True,
-                        "route_reflector": {"enabled": True},
-                    }
+            "neutron": {
+                "bgpvpn": {
+                    "enabled": True,
+                    "route_reflector": {"enabled": True},
                 }
-            },
+            }
         }
     )
     response = client.simulate_post("/validate", json=req)
@@ -425,17 +427,15 @@ def test_bgpvpn_route_reflector_enabled(client):
 
 def test_bgpvpn_route_reflector_disabled_no_peers(client):
     req = copy.deepcopy(ADMISSION_REQ)
-    req["request"]["object"]["spec"].update(
+    req["request"]["object"]["spec"].update({"preset": "compute"})
+    req["request"]["object"]["spec"]["features"].update(
         {
-            "preset": "compute",
-            "features": {
-                "neutron": {
-                    "bgpvpn": {
-                        "enabled": True,
-                        "route_reflector": {"enabled": False},
-                    }
+            "neutron": {
+                "bgpvpn": {
+                    "enabled": True,
+                    "route_reflector": {"enabled": False},
                 }
-            },
+            }
         }
     )
     response = client.simulate_post("/validate", json=req)
@@ -446,13 +446,9 @@ def test_bgpvpn_route_reflector_disabled_no_peers(client):
 
 def test_bgpvpn_tf(client):
     req = copy.deepcopy(ADMISSION_REQ)
-    req["request"]["object"]["spec"].update(
-        {
-            "preset": "compute-tf",
-            "features": {
-                "neutron": {"bgpvpn": {"enabled": True, "peers": ["1.2.3.4"]}}
-            },
-        }
+    req["request"]["object"]["spec"].update({"preset": "compute-tf"})
+    req["request"]["object"]["spec"]["features"].update(
+        {"neutron": {"bgpvpn": {"enabled": True, "peers": ["1.2.3.4"]}}}
     )
     response = client.simulate_post("/validate", json=req)
     assert response.status == falcon.HTTP_OK
@@ -1166,3 +1162,18 @@ def test_openstack_delete_not_allowed(client, osdplst):
     assert response.status == falcon.HTTP_OK
     assert response.json["response"]["allowed"] is False
     assert response.json["response"]["status"]["code"] == 400
+
+
+def test_openstack_encrypted_api_key(client):
+    req = copy.deepcopy(ADMISSION_REQ)
+    req["request"]["object"]["spec"]["features"]["ssl"][
+        "public_endpoints"
+    ].update({"api_key": api_key_encrypted})
+    response = client.simulate_post("/validate", json=req)
+    assert response.status == falcon.HTTP_OK
+    assert response.json["response"]["allowed"] is False
+    assert response.json["response"]["status"]["code"] == 400
+    assert (
+        "Encrypted SSL key is not allowed yet"
+        in response.json["response"]["status"]["message"]
+    )
