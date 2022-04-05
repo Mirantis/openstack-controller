@@ -8,9 +8,6 @@
           9f0a85c2-8194-11e7-bbb2-bbb93bcf2e77:
             reason: Test case id depricated
             # stepler/horizon/tests/test_credentials.py::TestAnyOne::test_download_rc_v2_via_menu
-          50dcf89e-370a-47d2-a0eb-c56dd77c968e:
-            reason: PRODX-12232
-            # stepler/horizon/tests/test_images.py::TestAnyOne::test_edit_image
           3167e844-1d13-44d5-aa1e-85c58c086240:
             reason: PRODX-19402
             # stepler/horizon/tests/test_images.py::TestAnyOne::test_set_image_disk_and_ram_size
@@ -26,9 +23,6 @@
           9f83be74-8194-11e7-ba35-7700980b0d3f:
             reason: Test case id depricated
             # stepler/horizon/tests/test_credentials.py::TestAnyOne::test_download_rc_v2_via_menu
-          8c85f869-993b-4447-98e4-fc1e4ebacb4e:
-            reason: PRODX-12232
-            # stepler/horizon/tests/test_images.py::TestAnyOne::test_edit_image
           e654d077-c645-4eb7-9a7b-763a1cee3a81:
             reason: Test case is depricated - will be removed from repo
             # stepler/horizon/tests/test_flavors.py::TestAdminOnly::test_update_flavor
@@ -44,9 +38,3 @@
           9acd7607-d72f-4e8c-9b13-1a0728d56975:
             reason: PRODX-11366
             # stepler/horizon/tests/test_projects.py::TestAdminOnly::test_switch_projects
-          4016e9af-257b-4df2-8c63-5716f134e5bb:
-            reason: PRODX-12232
-            # stepler/horizon/tests/test_images.py::TestAnyOne::test_remove_protected_image
-          637b39da-5648-4d46-bf3f-d51ca858928f:
-            reason: PRODX-12232
-            # stepler/horizon/tests/test_images.py::TestAnyOne::test_remove_protected_image
