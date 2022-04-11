@@ -191,8 +191,16 @@ async def handle(body, meta, spec, logger, reason, **kwargs):
     check_handling_allowed(kwargs["old"], kwargs["new"], reason)
 
     secrets.OpenStackAdminSecret(namespace).ensure()
+    osdplsecret = kube.OpenStackDeploymentSecret(name, namespace)
+    osdplsecret_spec = {}
+    if osdplsecret.exists():
+        osdplsecret.reload()
+        osdplsecret_spec = osdplsecret.obj["spec"]
 
-    mspec = layers.merge_spec(body["spec"], logger)
+    mspec = layers.merge_spec(
+        body["spec"], logger, osdplsecret_spec=osdplsecret_spec
+    )
+
     images = discover_images(mspec, logger)
     if images != await cache.images(meta["namespace"]):
         await cache.restart(images, body, mspec)
@@ -203,7 +211,7 @@ async def handle(body, meta, spec, logger, reason, **kwargs):
     if is_openstack_version_changed(kwargs["diff"]):
         # Suspend descheduler cronjob during the upgrade services
         service_instance_descheduler = services.registry["descheduler"](
-            body, logger, osdplst
+            body, logger, osdplst, osdplsecret
         )
         child_obj_descheduler = service_instance_descheduler.get_child_object(
             "CronJob", "descheduler"
@@ -219,7 +227,7 @@ async def handle(body, meta, spec, logger, reason, **kwargs):
         for service in services_to_upgrade:
             task_def = {}
             service_instance = services.registry[service](
-                body, logger, osdplst
+                body, logger, osdplst, osdplsecret
             )
             task_def[
                 asyncio.create_task(
@@ -247,7 +255,9 @@ async def handle(body, meta, spec, logger, reason, **kwargs):
     # and environment after upgrade/update are identical.
     task_def = {}
     for service in update:
-        service_instance = services.registry[service](body, logger, osdplst)
+        service_instance = services.registry[service](
+            body, logger, osdplst, osdplsecret
+        )
         task_def[
             asyncio.create_task(
                 service_instance.apply(
@@ -264,7 +274,9 @@ async def handle(body, meta, spec, logger, reason, **kwargs):
     if delete:
         LOG.info(f"deleting children {' '.join(delete)}")
     for service in delete:
-        service_instance = services.registry[service](body, logger, osdplst)
+        service_instance = services.registry[service](
+            body, logger, osdplst, osdplsecret
+        )
         task_def[
             asyncio.create_task(
                 service_instance.delete(
