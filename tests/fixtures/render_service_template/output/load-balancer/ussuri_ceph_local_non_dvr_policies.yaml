@@ -214,8 +214,6 @@ spec:
         secret_octavia_certs: false
       octavia:
         settings:
-          amphora_image_checksum: "md5summ"
-          amphora_image_url: https://amphora-image-url/latest
           enable_amphorav2: true
           lbmgmt_subnets:
             - pool_end: 192.168.0.254
