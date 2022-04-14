@@ -744,10 +744,15 @@ spec:
                             enabled:
                               type: boolean
                               description: Enable domain specific keystone configuration
+                            ks_domains:
+                              type: object
+                              x-kubernetes-preserve-unknown-fields: true
+                              description: "Domain specific configuration"
                             domains:
                               type: array
                               description: |
-                                The list of domain specific configuration options.
+                                The list of domain specific configuration options. Is deprecated format, use
+                                ks_domains instead.
                               items:
                                 type: object
                                 required:

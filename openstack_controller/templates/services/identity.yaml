@@ -113,6 +113,11 @@ spec:
           {{ domain.name }}: {{ domain.config }}
   {%- endif %}
 {%- endfor %}
+{%- for domain_name, data in keystone_domain_specific_config.get('ks_domains', {}).items() %}
+  {%- if data.enabled %}
+          {{ domain_name }}: {{ data.config }}
+  {%- endif %}
+{%- endfor %}
 {%- endif %}
         logging:
           logger_keystone:
