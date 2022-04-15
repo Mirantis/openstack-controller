@@ -6,7 +6,6 @@ metadata:
   annotations:
     "helm.sh/hook": "pre-install,pre-upgrade"
     "helm.sh/hook-delete-policy": "before-hook-creation"
-type: Opaque
 data:
 {{- $context := . }}
 {{- range $resource := tuple "10-namespaces.yaml" "22-kopfpeering-crd.yaml" "23-openstackdeployment-crd.yaml" "24-openstackdeploymentstatus-crd.yaml" "25-node-maintenances-crd.yaml" "26-redisfailover-crd.yaml" "50_kopfpeering.yaml" }}
