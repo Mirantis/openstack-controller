@@ -1177,3 +1177,66 @@ def test_openstack_encrypted_api_key(client):
         "Encrypted SSL key is not allowed yet"
         in response.json["response"]["status"]["message"]
     )
+
+
+def test_keystone_domains_old_format(client, osdplst):
+    req = copy.deepcopy(ADMISSION_REQ)
+    req["request"]["object"]["spec"]["features"]["keystone"] = {
+        "domain_specific_configuration": {
+            "enabled": True,
+            "domains": [
+                {"name": "test", "enabled": True, "config": {"foo": "bar"}}
+            ],
+        }
+    }
+    response = client.simulate_post("/validate", json=req)
+    assert response.status == falcon.HTTP_OK
+    assert response.json["response"]["allowed"] is True
+
+
+def test_keystone_domains_new_format(client, osdplst):
+    req = copy.deepcopy(ADMISSION_REQ)
+    req["request"]["object"]["spec"]["features"]["keystone"] = {
+        "domain_specific_configuration": {
+            "enabled": True,
+            "ks_domains": {
+                "test": {"enabled": True, "config": {"foo": "bar"}}
+            },
+        }
+    }
+    response = client.simulate_post("/validate", json=req)
+    assert response.status == falcon.HTTP_OK
+    assert response.json["response"]["allowed"] is True
+
+
+def test_keystone_domains_new_format_missing_key(client, osdplst):
+    req = copy.deepcopy(ADMISSION_REQ)
+    req["request"]["object"]["spec"]["features"]["keystone"] = {
+        "domain_specific_configuration": {
+            "enabled": True,
+            "ks_domains": {"test": {"config": {"foo": "bar"}}},
+        }
+    }
+    response = client.simulate_post("/validate", json=req)
+    assert response.status == falcon.HTTP_OK
+    assert response.json["response"]["allowed"] is False
+    assert response.json["response"]["status"]["code"] == 400
+
+
+def test_keystone_domains_new_format_old_format(client, osdplst):
+    req = copy.deepcopy(ADMISSION_REQ)
+    req["request"]["object"]["spec"]["features"]["keystone"] = {
+        "domain_specific_configuration": {
+            "enabled": True,
+            "ks_domains": {
+                "test": {"enabled": True, "config": {"foo": "bar"}}
+            },
+            "domains": [
+                {"name": "test", "enabled": True, "config": {"foo": "bar"}}
+            ],
+        }
+    }
+    response = client.simulate_post("/validate", json=req)
+    assert response.status == falcon.HTTP_OK
+    assert response.json["response"]["allowed"] is False
+    assert response.json["response"]["status"]["code"] == 400

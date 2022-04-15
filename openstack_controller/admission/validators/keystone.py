@@ -34,3 +34,23 @@ class KeystoneValidator(base.BaseValidator):
                 "Malformed OpenStackDeployment spec, if keycloak is "
                 "enabled for identity service, you need to specify url."
             )
+
+        domain_specific_config = (
+            review_request.get("object", {})
+            .get("spec", {})
+            .get("features", {})
+            .get("keystone", {})
+            .get("domain_specific_configuration", {})
+        )
+        if "ks_domains" in domain_specific_config:
+            if "domains" in domain_specific_config:
+                raise exception.OsDplValidationFailed(
+                    "Defining  both domains and ks_domains not supported, use ks_domains instead."
+                )
+            mandatory_fields = ["config", "enabled"]
+            for field in mandatory_fields:
+                for element in domain_specific_config["ks_domains"].values():
+                    if field not in element.keys():
+                        raise exception.OsDplValidationFailed(
+                            "Section ks_domains fields config and enabled are mandatory"
+                        )
