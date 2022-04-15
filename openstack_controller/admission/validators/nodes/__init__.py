@@ -18,7 +18,7 @@ import yaml
 from openstack_controller.admission.validators import base
 from openstack_controller import exception
 
-SCHEMA_FILE = "./schema.yaml"
+SCHEMA_FILE = "../schemas/nodes.yaml"
 SCHEMA = yaml.safe_load(
     open(os.path.join(os.path.abspath(os.path.dirname(__file__)), SCHEMA_FILE))
 )

@@ -1,0 +1,33 @@
+type: object
+additionalProperties: False
+patternProperties:
+  ".*":
+    type: object
+    additionalProperties: False
+    required:
+      - device_type
+      - ip
+      - username
+    properties:
+      device_type:
+        type: string
+        description: "Netmiko device type"
+      ip:
+        type: string
+        descriptions: "IP address of switch"
+      username:
+        type: string
+        descriptions: "Credential username"
+      password:
+        type: string
+        description: "Credential password"
+      ssh_private_key:
+        type: string
+        description:  SSH private key for switch.
+      secret:
+        type: string
+        description: Enable secret
+      raw:
+        additionalProperties: True
+        type: object
+        description: RAW config for device.

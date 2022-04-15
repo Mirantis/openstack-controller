@@ -359,6 +359,12 @@ spec:
             {%- break %}
           {%- endif %}
         {%- endfor %}
+        {%- for hw_dev_name, hw_dev in spec.features.neutron.get('baremetal', {}).get('ngs', {}).get('hardware', {}).items() %}
+          {%- if hw_dev.ssh_private_key is defined %}
+            {%- do ssh_private_key.update({ 'defined': True }) %}
+            {%- break %}
+          {%- endif %}
+        {%- endfor %}
         {%- if ssh_private_key['defined'] %}
         mounts:
           neutron_server:
@@ -368,6 +374,11 @@ spec:
                 - name: ngs-ssh-private
                   mountPath: /etc/neutron/ngs/{{ gs_dev.name }}.key
                   subPath: {{ gs_dev.name }}_ssh_private_key
+              {%- endfor %}
+              {%- for hw_dev_name, hw_dev in spec.features.neutron.get('baremetal', {}).get('ngs', {}).get('hardware', {}).items() %}
+                - name: ngs-ssh-private
+                  mountPath: /etc/neutron/ngs/{{ hw_dev_name }}.key
+                  subPath: {{ hw_dev_name }}_ssh_private_key
               {%- endfor %}
               volumes:
                 - name: ngs-ssh-private
@@ -666,6 +677,20 @@ spec:
               key_file: /etc/neutron/ngs/{{ gs_dev.name }}.key
               {%- endif %}
               {%- for key, val in  gs_dev.get('raw', {}).items() %}
+              {{ key }}: {{ val }}
+              {%- endfor %}
+            {%- endfor %}
+            {%- for hw_dev_name, hw_dev in spec.features.neutron.get('baremetal', {}).get('ngs', {}).get('hardware', {}).items() %}
+            genericswitch:{{ hw_dev_name }}:
+              device_type: {{ hw_dev.device_type }}
+              ip: {{ hw_dev.ip }}
+              username: {{ hw_dev.username }}
+              {% if hw_dev.password is defined %}password: {{ hw_dev.password }}{% endif %}
+              {% if hw_dev.secret is defined %}password: {{ hw_dev.secret }}{% endif %}
+              {%- if hw_dev.ssh_private_key is defined %}
+              key_file: /etc/neutron/ngs/{{ hw_dev_name }}.key
+              {%- endif %}
+              {%- for key, val in hw_dev.get('raw', {}).items() %}
               {{ key }}: {{ val }}
               {%- endfor %}
             {%- endfor %}
