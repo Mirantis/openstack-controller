@@ -83,6 +83,12 @@ ADMISSION_REQ_JSON = """
 
 ADMISSION_REQ = json.loads(ADMISSION_REQ_JSON)
 
+NGS_DEVICE = {
+    "device_type": "netmiko_ssh",
+    "ip": "1.2.3.4",
+    "username": "cisco",
+}
+
 
 @pytest.fixture
 def client():
@@ -1238,5 +1244,56 @@ def test_keystone_domains_new_format_old_format(client, osdplst):
     }
     response = client.simulate_post("/validate", json=req)
     assert response.status == falcon.HTTP_OK
+    assert response.json["response"]["allowed"] is False
+    assert response.json["response"]["status"]["code"] == 400
+
+
+def test_neutron_ngs_old_format(client, osdplst):
+    req = copy.deepcopy(ADMISSION_REQ)
+    ngs_device = copy.deepcopy(NGS_DEVICE)
+    ngs_device["name"] = "cisco-switch"
+    req["request"]["object"]["spec"]["features"]["neutron"].update(
+        {
+            "baremetal": {
+                "ngs": {"devices": [ngs_device]},
+            }
+        }
+    )
+    response = client.simulate_post("/validate", json=req)
+    assert response.status == falcon.HTTP_OK
+    assert response.json["response"]["allowed"] is True
+
+
+def test_neutron_ngs_new_format(client, osdplst):
+    req = copy.deepcopy(ADMISSION_REQ)
+    ngs_device = copy.deepcopy(NGS_DEVICE)
+    req["request"]["object"]["spec"]["features"]["neutron"].update(
+        {
+            "baremetal": {
+                "ngs": {"hardware": {"cisco-switch": ngs_device}},
+            }
+        }
+    )
+    response = client.simulate_post("/validate", json=req)
+    assert response.status == falcon.HTTP_OK
+    assert response.json["response"]["allowed"] is True
+
+
+def test_neutron_ngs_both_formats(client, osdplst):
+    req = copy.deepcopy(ADMISSION_REQ)
+    ngs_device = copy.deepcopy(NGS_DEVICE)
+    ngs_device_old = copy.deepcopy(NGS_DEVICE)
+    ngs_device_old["name"] = "cisco-switch"
+    req["request"]["object"]["spec"]["features"]["neutron"].update(
+        {
+            "baremetal": {
+                "ngs": {
+                    "hardware": {"cisco-switch": ngs_device},
+                    "devices": [ngs_device_old],
+                },
+            }
+        }
+    )
+    response = client.simulate_post("/validate", json=req)
     assert response.json["response"]["allowed"] is False
     assert response.json["response"]["status"]["code"] == 400

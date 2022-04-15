@@ -11,6 +11,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import os
+from jsonschema import validate
+import yaml
+
 from openstack_controller.admission.validators import base
 from openstack_controller import exception
 
@@ -33,6 +37,12 @@ class NeutronValidator(base.BaseValidator):
         ipsec = neutron_features.get("ipsec", {"enabled": False})
         bgpvpn = neutron_features.get("bgpvpn", {"enabled": False})
         tungstenfabric_enabled = spec["preset"] == "compute-tf"
+        ngs = neutron_features = (
+            spec.get("features", {})
+            .get("neutron", {})
+            .get("baremetal", {})
+            .get("ngs", {})
+        )
 
         if not tungstenfabric_enabled:
             if floating_network.get("enabled") and not floating_network.get(
@@ -65,3 +75,30 @@ class NeutronValidator(base.BaseValidator):
                         "floating network physnet name without network type "
                         "and segmentation id are not compatible."
                     )
+        if ngs:
+            self._validate_ngs_hardware(ngs)
+
+    def _validate_ngs_hardware(self, ngs):
+        ngs_hardware = ngs.get("hardware", {})
+        if not ngs_hardware:
+            return
+
+        if "devices" in ngs:
+            raise exception.OsDplValidationFailed(
+                "Use hardware section to describe ngs device."
+            )
+
+        schema_file = "./schemas/ngs_hardware.yaml"
+        schema = yaml.safe_load(
+            open(
+                os.path.join(
+                    os.path.abspath(os.path.dirname(__file__)), schema_file
+                )
+            )
+        )
+        try:
+            validate(instance=ngs_hardware, schema=schema)
+        except Exception as e:
+            raise exception.OsDplValidationFailed(
+                f"The ngs:hardware format is invalid. Failed to validate schema: {e}"
+            )

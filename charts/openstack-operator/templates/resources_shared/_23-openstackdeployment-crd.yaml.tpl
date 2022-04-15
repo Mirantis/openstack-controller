@@ -751,7 +751,7 @@ spec:
                             domains:
                               type: array
                               description: |
-                                The list of domain specific configuration options. Is deprecated format, use
+                                [Deprecated]: The list of domain specific configuration options. Use
                                 ks_domains instead.
                               items:
                                 type: object
@@ -914,8 +914,13 @@ spec:
                             ngs:
                               type: object
                               properties:
+                                hardware:
+                                  type: object
+                                  x-kubernetes-preserve-unknown-fields: true
+                                  # Validation performed in admission controller
                                 devices:
                                   type: array
+                                  description: "[Deprecated]: Array with devices configuration. Use hardware section instead."
                                   items:
                                     type: object
                                     required:

@@ -52,8 +52,8 @@ features:
     - vlan
     baremetal:
       ngs:
-        hardware:
-          br-host:
+        devices:
+          - name: br-host
             ip: 10.10.0.64
             ssh_private_key: |
               -----BEGIN RSA PRIVATE KEY-----
