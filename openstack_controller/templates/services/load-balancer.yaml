@@ -246,6 +246,7 @@ spec:
           node_selector_key: openstack-gateway
           node_selector_value: enabled
         health_manager:
+          node_affinity: false
           node_selector_key: openstack-gateway
           node_selector_value: enabled
         housekeeping:
