@@ -1334,6 +1334,20 @@ class Nova(OpenStackServiceWithCeph, MaintenanceApiMixin):
     async def _migrate_servers(self, os_client, host, cfg, nwl, concurrency=1):
         async def _check_migration_completed():
             all_servers = os_client.compute_get_all_servers(host=host)
+            all_servers = [
+                s
+                for s in all_servers
+                if s.vm_state
+                not in openstack_utils.SERVER_STATES_SAFE_FOR_REBOOT
+            ]
+
+            # Filter servers by power state
+            all_servers = [
+                s
+                for s in all_servers
+                if s.power_state
+                not in openstack_utils.SERVER_STOPPED_POWER_STATES
+            ]
             if all_servers:
                 servers_out = {s.id: s.status for s in all_servers}
                 msg = f"Some servers {servers_out} are still present on host {host}. Waiting unless all of them are migrated manually or instance_migration_mode is set to 'skip'"

@@ -14,6 +14,7 @@
 
 import base64
 from datetime import datetime
+from enum import IntEnum
 
 from keystoneauth1 import exceptions as ksa_exceptions
 import kopf
@@ -28,6 +29,36 @@ from openstack_controller import utils
 LOG = utils.get_logger(__name__)
 
 ADMIN_CREDS = None
+
+
+class SERVER_POWER_STATES(IntEnum):
+    NOSTATE = 0
+    RUNNING = 1
+    PAUSED = 3
+    SHUTDOWN = 4
+    CRASHED = 6
+    SUSPENDED = 7
+
+
+# States save to host reboot.
+SERVER_STOPPED_POWER_STATES = [
+    SERVER_POWER_STATES.SHUTDOWN,
+    SERVER_POWER_STATES.CRASHED,
+    SERVER_POWER_STATES.SUSPENDED,
+]
+
+
+# NOTE(vsaienko): skip pausing on instances in following states, as they are not running.
+# Avoid adding error here, as in this state instance might be running state.
+SERVER_STATES_SAFE_FOR_REBOOT = [
+    "building",
+    "deleted",
+    "soft_deleted",
+    "stopped",
+    "suspended",
+    "shelved",
+    "shelve_offloaded",
+]
 
 
 def get_keystone_admin_creds():
