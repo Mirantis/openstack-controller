@@ -161,7 +161,6 @@ spec:
                 features:
                   type: object
                   required:
-                    - ssl
                     - neutron
                     - nova
                   properties:
@@ -1258,6 +1257,13 @@ spec:
                               description: |
                                 The hash value for secret, is a trigger to reload ceph
                                 metadata
+                    osdplsecret:
+                      type: object
+                      properties:
+                        hash:
+                          type: string
+                          description: |
+                            The hash value of osdplsecret object.
                     neutron:
                       properties:
                         bgpvpn_neighbor_secret:

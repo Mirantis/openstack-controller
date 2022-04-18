@@ -36,6 +36,8 @@ osdpl:
       raw: {}
     osdplstatus:
       raw: {}
+    osdplsecret:
+      raw: {}
     node:
       raw: {}
     secrets:
@@ -61,6 +63,12 @@ osdpl:
            periodSeconds: 60
            timeoutSeconds: 5
       osdplstatus:
+       liveness:
+         params:
+           initialDelaySeconds: 120
+           periodSeconds: 60
+           timeoutSeconds: 5
+      osdplsecret:
        liveness:
          params:
            initialDelaySeconds: 120
@@ -101,9 +109,7 @@ stacklight:
 
 admission:
   enabled: true
-
   replicaCount: 1
-
   cluster_domain_suffix: cluster.local
 
 node_maintenance:

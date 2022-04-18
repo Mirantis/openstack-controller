@@ -510,6 +510,39 @@ spec:
             {{- toYaml .Values.osdpl.pod.controller.secrets.liveness.params | nindent 12}}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
+        - name: osdplsecret
+          image: {{ tuple . .Values.image | include "getImageUrl" }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command:
+            - kopf
+            - run
+            - '-n'
+            - {{ .Values.osdpl.namespace }}
+            - '-P'
+            - openstack-controller.osdplsecret
+            - '-m'
+            - openstack_controller.controllers.openstackdeploymentsecret
+            - '-m'
+            - openstack_controller.controllers.probe
+            - '-L'
+            - 'http://0.0.0.0:32776/healthz'
+          env:
+            {{- range $optionName, $optionValue := .Values.osdpl.settings.raw }}
+            - name: {{ $optionName }}
+              value: "{{ $optionValue }}"
+            {{- end }}
+            {{- range $optionName, $optionValue := .Values.osdpl.settings.osdplsecret.raw }}
+            - name: {{ $optionName }}
+              value: "{{ $optionValue }}"
+            {{- end }}
+{{ tuple . | include "openstack-controller.common_env" | indent 12 }}
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 32776
+            {{- toYaml .Values.osdpl.pod.controller.secrets.liveness.params | nindent 12}}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

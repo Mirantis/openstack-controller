@@ -25,6 +25,7 @@ available_controllers=(
     "-m openstack_controller.controllers.probe"
     "-m openstack_controller.controllers.maintenance"
     "-m openstack_controller.controllers.openstackdeploymentstatus"
+    "-m openstack_controller.controllers.openstackdeploymentsecret"
 )
 
 controllers="${available_controllers[*]}"

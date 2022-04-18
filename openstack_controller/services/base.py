@@ -120,7 +120,7 @@ class Service:
         super().__init_subclass__(*args, **kwargs)
         cls.registry[cls.service] = cls
 
-    def __init__(self, body, logger, osdplst):
+    def __init__(self, body, logger, osdplst, osdplsecret=None):
         # TODO(e0ne): we need to omit this object usage in the future to
         # not face side-effects with mutable PyKube OSDPL object.
         # We have to use self._get_osdpl() method instead of it.
@@ -130,7 +130,15 @@ class Service:
             self.namespace = body["metadata"]["namespace"]
         self.logger = logger
         self.openstack_version = self.body["spec"]["openstack_version"]
-        self.mspec = layers.merge_spec(self.body["spec"], self.logger)
+        self.osdplsecret = osdplsecret
+        osdplsecret_spec = {}
+        if self.osdplsecret and self.osdplsecret.exists():
+            self.osdplsecret.reload()
+            osdplsecret_spec = self.osdplsecret.obj["spec"]
+        self.mspec = layers.merge_spec(
+            self.body["spec"], self.logger, osdplsecret_spec=osdplsecret_spec
+        )
+
         self.helm_manager = helm.HelmManager(namespace=self.namespace)
         self.osdplst = osdplst
 

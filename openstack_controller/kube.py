@@ -83,6 +83,23 @@ class OpenStackDeployment(pykube.objects.NamespacedAPIObject):
     kopf_on_args = *version.split("/"), endpoint
 
 
+class OpenStackDeploymentSecret(pykube.objects.NamespacedAPIObject):
+    version = "lcm.mirantis.com/v1alpha1"
+    kind = "OpenStackDeploymentSecret"
+    endpoint = "openstackdeploymentsecrets"
+    kopf_on_args = *version.split("/"), endpoint
+
+    def __init__(self, name, namespace, *args, **kwargs):
+        self.dummy = {
+            "apiVersion": self.version,
+            "kind": self.kind,
+            "metadata": {"name": name, "namespace": namespace},
+            "spec": {},
+            "status": {},
+        }
+        return super().__init__(api, self.dummy)
+
+
 class HelmBundle(pykube.objects.NamespacedAPIObject):
     version = "lcm.mirantis.com/v1alpha1"
     kind = "HelmBundle"

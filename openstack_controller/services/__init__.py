@@ -1759,7 +1759,7 @@ class Tempest(Service):
             "redis",
         }:
             service_template_args = Service.registry[s](
-                self.body, self.logger, self.osdplst
+                self.body, self.logger, self.osdplst, self.osdplsecret
             ).template_args()
             try:
                 helmbundles_body[s] = layers.merge_all_layers(
