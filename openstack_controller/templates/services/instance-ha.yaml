@@ -99,6 +99,10 @@ spec:
           DEFAULT:
             os_privileged_user_name: {{ admin_creds.identity.username }}
             os_privileged_user_password: {{ admin_creds.identity.password }}
+          coordination:
+            #There are some problems with etcd3+http driver so we shouldn't use it
+            #BUG: https://mirantis.jira.com/browse/PRODX-21785
+            backend_url: etcd3://etcd:2379
           keystone_authtoken:
             memcache_security_strategy: ENCRYPT
             memcache_secret_key: {{ credentials.memcached }}
