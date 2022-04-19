@@ -144,7 +144,6 @@ spec:
             max_l3_agents_per_router: 2
             service_plugins: '<None>'
             core_plugin: neutron_plugin_contrail.plugins.opencontrail.contrail_plugin.NeutronPluginContrailCoreV2
-            api_extensions_path: 'extensions:/var/lib/openstack/lib/python3.6/site-packages/neutron_plugin_contrail/extensions'
           cache:
             backend: oslo_cache.memcache_pool
           keystone_authtoken:
