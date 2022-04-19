@@ -568,4 +568,66 @@ async def test_nova_migrate_servers_live_one_error_server(
     openstack_client.compute_get_servers_valid_for_live_migration.assert_called_once()
 
 
+@pytest.mark.asyncio
+async def test_nova_migrate_servers_live_ignore_powered_off_server(
+    mocker, openstack_client, node_maintenance_config, openstackdeployment
+):
+
+    osdplstmock = mock.Mock()
+    openstack_client.compute_get_servers_valid_for_live_migration.return_value = (
+        []
+    )
+    openstack_client.compute_get_all_servers.return_value = [
+        _get_server_obj({"power_state": 4}),
+        _get_server_obj({"power_state": 6}),
+        _get_server_obj({"power_state": 7}),
+    ]
+
+    node_maintenance_config.instance_migration_mode = "live"
+    nwl = mock.Mock()
+    mocker.patch.object(
+        maintenance.NodeWorkloadLock, "get_resource", return_value=nwl
+    )
+    await services.Nova(
+        openstackdeployment, logging, osdplstmock
+    )._migrate_servers(
+        openstack_client, "host1", node_maintenance_config, nwl, 1
+    )
+    nwl.set_error_message.assert_not_called()
+    openstack_client.compute_get_all_servers.assert_called_once()
+    openstack_client.compute_get_servers_valid_for_live_migration.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_nova_migrate_servers_live_one_power_unknown(
+    mocker, openstack_client, node_maintenance_config, openstackdeployment
+):
+
+    osdplstmock = mock.Mock()
+    openstack_client.compute_get_servers_valid_for_live_migration.return_value = (
+        []
+    )
+    openstack_client.compute_get_all_servers.return_value = [
+        _get_server_obj({"power_state": 4}),
+        _get_server_obj({"power_state": 6}),
+        _get_server_obj({"power_state": 7}),
+        _get_server_obj({"power_state": 0}),
+    ]
+
+    node_maintenance_config.instance_migration_mode = "live"
+    nwl = mock.Mock()
+    mocker.patch.object(
+        maintenance.NodeWorkloadLock, "get_resource", return_value=nwl
+    )
+    with pytest.raises(kopf.TemporaryError):
+        await services.Nova(
+            openstackdeployment, logging, osdplstmock
+        )._migrate_servers(
+            openstack_client, "host1", node_maintenance_config, nwl, 1
+        )
+    nwl.set_error_message.assert_called_once()
+    openstack_client.compute_get_all_servers.assert_called_once()
+    openstack_client.compute_get_servers_valid_for_live_migration.assert_called_once()
+
+
 # vsaienko(TODO): add more tests covering logic in _do_servers_migration()
