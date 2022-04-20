@@ -93,12 +93,6 @@ spec:
               pool_start: {{ subnet.pool_start }}
               pool_end: {{ subnet.pool_end }}
   {%- endfor %}
-  {%- set octavia_amphora_url = images["octavia_amphora"] %}
-    # amphora_image_url is env var inside octavia create resources job
-    # that's why () brakets are used
-    {%- set octavia_amphora_url = octavia_amphora_url | substitute_local_proxy_hostname("$(NODE_IP)") %}
-          amphora_image_url: {{ octavia_amphora_url }}
-          amphora_image_checksum: {{ images["octavia_amphora_checksum"] }}
 {%- if 'amphorav2' in provider_map.keys() %}
           enable_amphorav2: true
 {%- endif %}
