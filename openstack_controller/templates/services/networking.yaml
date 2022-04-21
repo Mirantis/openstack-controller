@@ -589,7 +589,6 @@ spec:
             service_plugins: {{ service_plugins|join(',') }}
           {%- if tungstenfabric_enabled %}
             core_plugin: neutron_plugin_contrail.plugins.opencontrail.contrail_plugin.NeutronPluginContrailCoreV2
-            api_extensions_path: 'extensions:/var/lib/openstack/lib/python3.6/site-packages/neutron_plugin_contrail/extensions'
           quotas:
             quota_driver: neutron_plugin_contrail.plugins.opencontrail.quota.driver.QuotaDriver
           {%- endif %}
