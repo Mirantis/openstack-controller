@@ -1,0 +1,247 @@
+#
+"context_is_admin": "role:admin or role:load-balancer_admin"
+
+#
+"load-balancer:owner": "project_id:%(project_id)s"
+
+#
+"load-balancer:admin": "is_admin:True or role:admin or role:load-balancer_admin"
+
+#
+"load-balancer:observer_and_owner": "role:load-balancer_observer and rule:load-balancer:owner"
+
+#
+"load-balancer:global_observer": "role:load-balancer_global_observer"
+
+#
+"load-balancer:member_and_owner": "role:load-balancer_member and rule:load-balancer:owner"
+
+#
+"load-balancer:read": "rule:load-balancer:observer_and_owner or rule:load-balancer:global_observer or rule:load-balancer:member_and_owner or rule:load-balancer:admin"
+
+#
+"load-balancer:read-global": "rule:load-balancer:global_observer or rule:load-balancer:admin"
+
+#
+"load-balancer:write": "rule:load-balancer:member_and_owner or rule:load-balancer:admin"
+
+#
+"load-balancer:read-quota": "rule:load-balancer:observer_and_owner or rule:load-balancer:global_observer or rule:load-balancer:member_and_owner or role:load-balancer_quota_admin or rule:load-balancer:admin"
+
+#
+"load-balancer:read-quota-global": "rule:load-balancer:global_observer or role:load-balancer_quota_admin or rule:load-balancer:admin"
+
+#
+"load-balancer:write-quota": "role:load-balancer_quota_admin or rule:load-balancer:admin"
+
+# List Health Monitors of a Pool
+# GET  /v2.0/lbaas/healthmonitors
+"os_load-balancer_api:healthmonitor:get_all": "rule:load-balancer:read"
+
+# List Health Monitors including resources owned by others
+# GET  /v2.0/lbaas/healthmonitors
+"os_load-balancer_api:healthmonitor:get_all-global": "rule:load-balancer:read-global"
+
+# Create a Health Monitor
+# POST  /v2.0/lbaas/healthmonitors
+"os_load-balancer_api:healthmonitor:post": "rule:load-balancer:write"
+
+# Show Health Monitor details
+# GET  /v2.0/lbaas/healthmonitors/{healthmonitor_id}
+"os_load-balancer_api:healthmonitor:get_one": "rule:load-balancer:read"
+
+# Update a Health Monitor
+# PUT  /v2.0/lbaas/healthmonitors/{healthmonitor_id}
+"os_load-balancer_api:healthmonitor:put": "rule:load-balancer:write"
+
+# Remove a Health Monitor
+# DELETE  /v2.0/lbaas/healthmonitors/{healthmonitor_id}
+"os_load-balancer_api:healthmonitor:delete": "rule:load-balancer:write"
+
+# List L7 Policys
+# GET  /v2.0/lbaas/l7policies
+"os_load-balancer_api:l7policy:get_all": "rule:load-balancer:read"
+
+# List L7 Policys including resources owned by others
+# GET  /v2.0/lbaas/l7policies
+"os_load-balancer_api:l7policy:get_all-global": "rule:load-balancer:read-global"
+
+# Create a L7 Policy
+# POST  /v2.0/lbaas/l7policies
+"os_load-balancer_api:l7policy:post": "rule:load-balancer:write"
+
+# Show L7 Policy details
+# GET  /v2.0/lbaas/l7policies/{l7policy_id}
+"os_load-balancer_api:l7policy:get_one": "rule:load-balancer:read"
+
+# Update a L7 Policy
+# PUT  /v2.0/lbaas/l7policies/{l7policy_id}
+"os_load-balancer_api:l7policy:put": "rule:load-balancer:write"
+
+# Remove a L7 Policy
+# DELETE  /v2.0/lbaas/l7policies/{l7policy_id}
+"os_load-balancer_api:l7policy:delete": "rule:load-balancer:write"
+
+# List L7 Rules
+# GET  /v2.0/lbaas/l7policies/{l7policy_id}/rules
+"os_load-balancer_api:l7rule:get_all": "rule:load-balancer:read"
+
+# Create a L7 Rule
+# POST  /v2.0/lbaas/l7policies/{l7policy_id}/rules
+"os_load-balancer_api:l7rule:post": "rule:load-balancer:write"
+
+# Show L7 Rule details
+# GET  /v2.0/lbaas/l7policies/{l7policy_id}/rules/{l7rule_id}
+"os_load-balancer_api:l7rule:get_one": "rule:load-balancer:read"
+
+# Update a L7 Rule
+# PUT  /v2.0/lbaas/l7policies/{l7policy_id}/rules/{l7rule_id}
+"os_load-balancer_api:l7rule:put": "rule:load-balancer:write"
+
+# Remove a L7 Rule
+# DELETE  /v2.0/lbaas/l7policies/{l7policy_id}/rules/{l7rule_id}
+"os_load-balancer_api:l7rule:delete": "rule:load-balancer:write"
+
+# List Listeners
+# GET  /v2.0/lbaas/listeners
+"os_load-balancer_api:listener:get_all": "rule:load-balancer:read"
+
+# List Listeners including resources owned by others
+# GET  /v2.0/lbaas/listeners
+"os_load-balancer_api:listener:get_all-global": "rule:load-balancer:read-global"
+
+# Create a Listener
+# POST  /v2.0/lbaas/listeners
+"os_load-balancer_api:listener:post": "rule:load-balancer:write"
+
+# Show Listener details
+# GET  /v2.0/lbaas/listeners/{listener_id}
+"os_load-balancer_api:listener:get_one": "rule:load-balancer:read"
+
+# Update a Listener
+# PUT  /v2.0/lbaas/listeners/{listener_id}
+"os_load-balancer_api:listener:put": "rule:load-balancer:write"
+
+# Remove a Listener
+# DELETE  /v2.0/lbaas/listeners/{listener_id}
+"os_load-balancer_api:listener:delete": "rule:load-balancer:write"
+
+# Show Listener statistics
+# GET  /v2.0/lbaas/listeners/{listener_id}/stats
+"os_load-balancer_api:listener:get_stats": "rule:load-balancer:read"
+
+# List Load Balancers
+# GET  /v2.0/lbaas/loadbalancers
+"os_load-balancer_api:loadbalancer:get_all": "rule:load-balancer:read"
+
+# List Load Balancers including resources owned by others
+# GET  /v2.0/lbaas/loadbalancers
+"os_load-balancer_api:loadbalancer:get_all-global": "rule:load-balancer:read-global"
+
+# Create a Load Balancer
+# POST  /v2.0/lbaas/loadbalancers
+"os_load-balancer_api:loadbalancer:post": "rule:load-balancer:write"
+
+# Show Load Balancer details
+# GET  /v2.0/lbaas/loadbalancers/{loadbalancer_id}
+"os_load-balancer_api:loadbalancer:get_one": "rule:load-balancer:read"
+
+# Update a Load Balancer
+# PUT  /v2.0/lbaas/loadbalancers/{loadbalancer_id}
+"os_load-balancer_api:loadbalancer:put": "rule:load-balancer:write"
+
+# Remove a Load Balancer
+# DELETE  /v2.0/lbaas/loadbalancers/{loadbalancer_id}
+"os_load-balancer_api:loadbalancer:delete": "rule:load-balancer:write"
+
+# Show Load Balancer statistics
+# GET  /v2.0/lbaas/loadbalancers/{loadbalancer_id}/stats
+"os_load-balancer_api:loadbalancer:get_stats": "rule:load-balancer:read"
+
+# Show Load Balancer status
+# GET  /v2.0/lbaas/loadbalancers/{loadbalancer_id}/status
+"os_load-balancer_api:loadbalancer:get_status": "rule:load-balancer:read"
+
+# Failover a Load Balancer
+# PUT  /v2.0/lbaas/loadbalancers/{loadbalancer_id}/failover
+"os_load-balancer_api:loadbalancer:put_failover": "rule:load-balancer:admin"
+
+# List Members of a Pool
+# GET  /v2.0/lbaas/pools/{pool_id}/members
+"os_load-balancer_api:member:get_all": "rule:load-balancer:read"
+
+# Create a Member
+# POST  /v2.0/lbaas/pools/{pool_id}/members
+"os_load-balancer_api:member:post": "rule:load-balancer:write"
+
+# Show Member details
+# GET  /v2.0/lbaas/pools/{pool_id}/members/{member_id}
+"os_load-balancer_api:member:get_one": "rule:load-balancer:read"
+
+# Update a Member
+# PUT  /v2.0/lbaas/pools/{pool_id}/members/{member_id}
+"os_load-balancer_api:member:put": "rule:load-balancer:write"
+
+# Remove a Member
+# DELETE  /v2.0/lbaas/pools/{pool_id}/members/{member_id}
+"os_load-balancer_api:member:delete": "rule:load-balancer:write"
+
+# List Pools
+# GET  /v2.0/lbaas/pools
+"os_load-balancer_api:pool:get_all": "rule:load-balancer:read"
+
+# List Pools including resources owned by others
+# GET  /v2.0/lbaas/pools
+"os_load-balancer_api:pool:get_all-global": "rule:load-balancer:read-global"
+
+# Create a Pool
+# POST  /v2.0/lbaas/pools
+"os_load-balancer_api:pool:post": "rule:load-balancer:write"
+
+# Show Pool details
+# GET  /v2.0/lbaas/pools/{pool_id}
+"os_load-balancer_api:pool:get_one": "rule:load-balancer:read"
+
+# Update a Pool
+# PUT  /v2.0/lbaas/pools/{pool_id}
+"os_load-balancer_api:pool:put": "rule:load-balancer:write"
+
+# Remove a Pool
+# DELETE  /v2.0/lbaas/pools/{pool_id}
+"os_load-balancer_api:pool:delete": "rule:load-balancer:write"
+
+# List Quotas
+# GET  /v2.0/lbaas/quotas
+"os_load-balancer_api:quota:get_all": "rule:load-balancer:read-quota"
+
+# List Quotas including resources owned by others
+# GET  /v2.0/lbaas/quotas
+"os_load-balancer_api:quota:get_all-global": "rule:load-balancer:read-quota-global"
+
+# Show Quota details
+# GET  /v2.0/lbaas/quotas/{project_id}
+"os_load-balancer_api:quota:get_one": "rule:load-balancer:read-quota"
+
+# Update a Quota
+# PUT  /v2.0/lbaas/quotas/{project_id}
+"os_load-balancer_api:quota:put": "rule:load-balancer:write-quota"
+
+# Reset a Quota
+# DELETE  /v2.0/lbaas/quotas/{project_id}
+"os_load-balancer_api:quota:delete": "rule:load-balancer:write-quota"
+
+# Show Default Quota for a Project
+# GET  /v2.0/lbaas/quotas/{project_id}/default
+"os_load-balancer_api:quota:get_defaults": "rule:load-balancer:read-quota"
+
+# List Amphorae
+# GET  /v2.0/octavia/amphorae
+"os_load-balancer_api:amphora:get_all": "rule:load-balancer:admin"
+
+# Show Amphora details
+# GET  /v2.0/octavia/amphorae/{amphora_id}
+"os_load-balancer_api:amphora:get_one": "rule:load-balancer:admin"
+
+# Failover Amphora
+# PUT  /v2.0/octavia/amphorae/{amphora_id}/failover
+"os_load-balancer_api:amphora:put_failover": "rule:load-balancer:admin"

@@ -1,0 +1,314 @@
+#
+"admin": "role:admin"
+
+#
+"observer": "role:observer"
+
+#
+"creator": "role:creator"
+
+#
+"audit": "role:audit"
+
+#
+"service_admin": "role:key-manager:service-admin"
+
+#
+"admin_or_creator": "rule:admin or rule:creator"
+
+#
+"all_but_audit": "rule:admin or rule:observer or rule:creator"
+
+#
+"all_users": "rule:admin or rule:observer or rule:creator or rule:audit or rule:service_admin"
+
+#
+"secret_project_match": "project_id:%(target.secret.project_id)s"
+
+#
+"secret_acl_read": "'read':%(target.secret.read)s"
+
+#
+"secret_private_read": "'False':%(target.secret.read_project_access)s"
+
+#
+"secret_creator_user": "user_id:%(target.secret.creator_id)s"
+
+#
+"container_project_match": "project_id:%(target.container.project_id)s"
+
+#
+"container_acl_read": "'read':%(target.container.read)s"
+
+#
+"container_private_read": "'False':%(target.container.read_project_access)s"
+
+#
+"container_creator_user": "user_id:%(target.container.creator_id)s"
+
+#
+"secret_non_private_read": "rule:all_users and rule:secret_project_match and not rule:secret_private_read"
+
+#
+"secret_decrypt_non_private_read": "rule:all_but_audit and rule:secret_project_match and not rule:secret_private_read"
+
+#
+"container_non_private_read": "rule:all_users and rule:container_project_match and not rule:container_private_read"
+
+#
+"secret_project_admin": "rule:admin and rule:secret_project_match"
+
+#
+"secret_project_creator": "rule:creator and rule:secret_project_match and rule:secret_creator_user"
+
+#
+"secret_project_creator_role": "rule:creator and rule:secret_project_match"
+
+#
+"container_project_admin": "rule:admin and rule:container_project_match"
+
+#
+"container_project_creator": "rule:creator and rule:container_project_match and rule:container_creator_user"
+
+#
+"container_project_creator_role": "rule:creator and rule:container_project_match"
+
+# Retrieve the ACL settings for a given secret.If no ACL is defined
+# for that secret, then Default ACL is returned.
+# GET  /v1/secrets/{secret-id}/acl
+# Intended scope(s): 
+"secret_acls:get": "rule:all_but_audit and rule:secret_project_match"
+
+# Delete the ACL settings for a given secret.
+# DELETE  /v1/secrets/{secret-id}/acl
+# Intended scope(s): 
+"secret_acls:delete": "rule:secret_project_admin or rule:secret_project_creator"
+
+# Create new, replaces, or updates existing ACL for a given secret.
+# PUT  /v1/secrets/{secret-id}/acl
+# PATCH  /v1/secrets/{secret-id}/acl
+# Intended scope(s): 
+"secret_acls:put_patch": "rule:secret_project_admin or rule:secret_project_creator"
+
+# Retrieve the ACL settings for a given container.
+# GET  /v1/containers/{container-id}/acl
+# Intended scope(s): 
+"container_acls:get": "rule:all_but_audit and rule:container_project_match"
+
+# Delete ACL for a given container. No content is returned in the case
+# of successful deletion.
+# DELETE  /v1/containers/{container-id}/acl
+# Intended scope(s): 
+"container_acls:delete": "rule:container_project_admin or rule:container_project_creator"
+
+# Create new or replaces existing ACL for a given container.
+# PUT  /v1/containers/{container-id}/acl
+# PATCH  /v1/containers/{container-id}/acl
+# Intended scope(s): 
+"container_acls:put_patch": "rule:container_project_admin or rule:container_project_creator"
+
+# List a specific consumer for a given container.
+# GET  /v1/containers/{container-id}/consumers/{consumer-id}
+# Intended scope(s): 
+"consumer:get": "rule:admin or rule:observer or rule:creator or rule:audit or rule:container_non_private_read or rule:container_project_creator or rule:container_project_admin or rule:container_acl_read"
+
+# List a containers consumers.
+# GET  /v1/containers/{container-id}/consumers
+# Intended scope(s): 
+"consumers:get": "rule:admin or rule:observer or rule:creator or rule:audit or rule:container_non_private_read or rule:container_project_creator or rule:container_project_admin or rule:container_acl_read"
+
+# Creates a consumer.
+# POST  /v1/containers/{container-id}/consumers
+# Intended scope(s): 
+"consumers:post": "rule:admin or rule:container_non_private_read or rule:container_project_creator or rule:container_project_admin or rule:container_acl_read"
+
+# Deletes a consumer.
+# DELETE  /v1/containers/{container-id}/consumers/{consumer-id}
+# Intended scope(s): 
+"consumers:delete": "rule:admin or rule:container_non_private_read or rule:container_project_creator or rule:container_project_admin or rule:container_acl_read"
+
+# Creates a container.
+# POST  /v1/containers
+# Intended scope(s): 
+"containers:post": "rule:admin_or_creator"
+
+# Lists a projects containers.
+# GET  /v1/containers
+# Intended scope(s): 
+"containers:get": "rule:all_but_audit"
+
+# Retrieves a single container.
+# GET  /v1/containers/{container-id}
+# Intended scope(s): 
+"container:get": "rule:container_non_private_read or rule:container_project_creator or rule:container_project_admin or rule:container_acl_read"
+
+# Deletes a container.
+# DELETE  /v1/containers/{uuid}
+# Intended scope(s): 
+"container:delete": "rule:container_project_admin or rule:container_project_creator"
+
+# Add a secret to an existing container.
+# POST  /v1/containers/{container-id}/secrets
+# Intended scope(s): 
+"container_secret:post": "rule:container_project_admin or rule:container_project_creator or rule:container_project_creator_role and rule:container_non_private_read"
+
+# Remove a secret from a container.
+# DELETE  /v1/containers/{container-id}/secrets/{secret-id}
+# Intended scope(s): 
+"container_secret:delete": "rule:container_project_admin or rule:container_project_creator or rule:container_project_creator_role and rule:container_non_private_read"
+
+# Gets list of all orders associated with a project.
+# GET  /v1/orders
+# Intended scope(s): 
+"orders:get": "rule:all_but_audit"
+
+# Creates an order.
+# POST  /v1/orders
+# Intended scope(s): 
+"orders:post": "rule:admin_or_creator"
+
+# Unsupported method for the orders API.
+# PUT  /v1/orders
+# Intended scope(s): 
+"orders:put": "rule:admin_or_creator"
+
+# Retrieves an orders metadata.
+# GET  /v1/orders/{order-id}
+# Intended scope(s): 
+"order:get": "rule:all_users and project_id:%(target.order.project_id)s"
+
+# Deletes an order.
+# DELETE  /v1/orders/{order-id}
+# Intended scope(s): 
+"order:delete": "rule:admin and project_id:%(target.order.project_id)s"
+
+# List quotas for the project the user belongs to.
+# GET  /v1/quotas
+# Intended scope(s): 
+"quotas:get": "rule:all_users"
+
+# List quotas for the specified project.
+# GET  /v1/project-quotas
+# GET  /v1/project-quotas/{uuid}
+# Intended scope(s): 
+"project_quotas:get": "rule:service_admin"
+
+# Create or update the configured project quotas for the project with
+# the specified UUID.
+# PUT  /v1/project-quotas/{uuid}
+# Intended scope(s): 
+"project_quotas:put": "rule:service_admin"
+
+# Delete the project quotas configuration for the project with the
+# requested UUID.
+# DELETE  /v1/quotas}
+# Intended scope(s): 
+"project_quotas:delete": "rule:service_admin"
+
+# metadata/: Lists a secrets user-defined metadata. || metadata/{key}:
+# Retrieves a secrets user-added metadata.
+# GET  /v1/secrets/{secret-id}/metadata
+# GET  /v1/secrets/{secret-id}/metadata/{meta-key}
+# Intended scope(s): 
+"secret_meta:get": "rule:secret_non_private_read or rule:secret_project_creator or rule:secret_project_admin or rule:secret_acl_read"
+
+# Adds a new key/value pair to the secrets user-defined metadata.
+# POST  /v1/secrets/{secret-id}/metadata/{meta-key}
+# Intended scope(s): 
+"secret_meta:post": "rule:secret_project_admin or rule:secret_project_creator or (rule:secret_project_creator_role and rule:secret_non_private_read)"
+
+# metadata/: Sets the user-defined metadata for a secret ||
+# metadata/{key}: Updates an existing key/value pair in the secrets
+# user-defined metadata.
+# PUT  /v1/secrets/{secret-id}/metadata
+# PUT  /v1/secrets/{secret-id}/metadata/{meta-key}
+# Intended scope(s): 
+"secret_meta:put": "rule:secret_project_admin or rule:secret_project_creator or (rule:secret_project_creator_role and rule:secret_non_private_read)"
+
+# Delete secret user-defined metadata by key.
+# DELETE  /v1/secrets/{secret-id}/metadata/{meta-key}
+# Intended scope(s): 
+"secret_meta:delete": "rule:secret_project_admin or rule:secret_project_creator or (rule:secret_project_creator_role and rule:secret_non_private_read)"
+
+# Retrieve a secrets payload.
+# GET  /v1/secrets/{uuid}/payload
+# Intended scope(s): 
+"secret:decrypt": "rule:secret_decrypt_non_private_read or rule:secret_project_creator or rule:secret_project_admin or rule:secret_acl_read"
+
+# Retrieves a secrets metadata.
+# GET"  /v1/secrets/{secret-id}
+# Intended scope(s): 
+"secret:get": "rule:secret_non_private_read or rule:secret_project_creator or rule:secret_project_admin or rule:secret_acl_read"
+
+# Add the payload to an existing metadata-only secret.
+# PUT  /v1/secrets/{secret-id}
+# Intended scope(s): 
+"secret:put": "rule:admin_or_creator and rule:secret_project_match"
+
+# Delete a secret by uuid.
+# DELETE  /v1/secrets/{secret-id}
+# Intended scope(s): 
+"secret:delete": "rule:secret_project_admin or rule:secret_project_creator or (rule:secret_project_creator_role and not rule:secret_private_read)"
+
+# Creates a Secret entity.
+# POST  /v1/secrets
+# Intended scope(s): 
+"secrets:post": "rule:admin_or_creator"
+
+# Lists a projects secrets.
+# GET  /v1/secrets
+# Intended scope(s): 
+"secrets:get": "rule:all_but_audit"
+
+# Get list of available secret store backends.
+# GET  /v1/secret-stores
+# Intended scope(s): 
+"secretstores:get": "rule:admin"
+
+# Get a reference to the secret store that is used as default secret
+# store backend for the deployment.
+# GET  /v1/secret-stores/global-default
+# Intended scope(s): 
+"secretstores:get_global_default": "rule:admin"
+
+# Get a reference to the preferred secret store if assigned
+# previously.
+# GET  /v1/secret-stores/preferred
+# Intended scope(s): 
+"secretstores:get_preferred": "rule:admin"
+
+# Set a secret store backend to be preferred store backend for their
+# project.
+# POST  /v1/secret-stores/{ss-id}/preferred
+# Intended scope(s): 
+"secretstore_preferred:post": "rule:admin"
+
+# Remove preferred secret store backend setting for their project.
+# DELETE  /v1/secret-stores/{ss-id}/preferred
+# Intended scope(s): 
+"secretstore_preferred:delete": "rule:admin"
+
+# Get details of secret store by its ID.
+# GET  /v1/secret-stores/{ss-id}
+# Intended scope(s): 
+"secretstore:get": "rule:admin"
+
+# Get a specific transport key.
+# GET  /v1/transport_keys/{key-id}}
+# Intended scope(s): 
+"transport_key:get": "rule:all_users"
+
+# Delete a specific transport key.
+# DELETE  /v1/transport_keys/{key-id}
+# Intended scope(s): 
+"transport_key:delete": "rule:admin"
+
+# Get a list of all transport keys.
+# GET  /v1/transport_keys
+# Intended scope(s): 
+"transport_keys:get": "rule:all_users"
+
+# Create a new transport key.
+# POST  /v1/transport_keys
+# Intended scope(s): 
+"transport_keys:post": "rule:admin"
