@@ -191,6 +191,9 @@ services:
             oslo_messaging_rabbit:
               rabbit_qos_prefetch_count: 64
             ovs:
+              of_connect_timeout: 300
+              of_inactivity_probe: 30
+              of_request_timeout: 300
               ovsdb_timeout: 30
           plugins:
             ml2_conf:
