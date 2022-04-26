@@ -1,0 +1,346 @@
+# Decides what is required for the 'is_admin:True' check to succeed.
+"context_is_admin": "role:admin and is_admin_project:True"
+
+# Default rule for project admin.
+"project_admin": "role:admin"
+
+# Default rule for deny stack user.
+"deny_stack_user": "not role:heat_stack_user"
+
+# Default rule for deny everybody.
+"deny_everybody": "!"
+
+# Default rule for allow everybody.
+"allow_everybody": ""
+
+# Performs non-lifecycle operations on the stack (Snapshot, Resume,
+# Cancel update, or check stack resources). This is the default for
+# all actions but can be overridden by more specific policies for
+# individual actions.
+# POST  /v1/{tenant_id}/stacks/{stack_name}/{stack_id}/actions
+"actions:action": "rule:deny_stack_user"
+
+# Create stack snapshot.
+# POST  /v1/{tenant_id}/stacks/{stack_name}/{stack_id}/actions
+"actions:snapshot": "rule:actions:action"
+
+# Suspend a stack.
+# POST  /v1/{tenant_id}/stacks/{stack_name}/{stack_id}/actions
+"actions:suspend": "rule:actions:action"
+
+# Resume a suspended stack.
+# POST  /v1/{tenant_id}/stacks/{stack_name}/{stack_id}/actions
+"actions:resume": "rule:actions:action"
+
+# Check stack resources.
+# POST  /v1/{tenant_id}/stacks/{stack_name}/{stack_id}/actions
+"actions:check": "rule:actions:action"
+
+# Cancel stack operation and roll back.
+# POST  /v1/{tenant_id}/stacks/{stack_name}/{stack_id}/actions
+"actions:cancel_update": "rule:actions:action"
+
+# Cancel stack operation without rolling back.
+# POST  /v1/{tenant_id}/stacks/{stack_name}/{stack_id}/actions
+"actions:cancel_without_rollback": "rule:actions:action"
+
+# Show build information.
+# GET  /v1/{tenant_id}/build_info
+"build_info:build_info": "rule:deny_stack_user"
+
+#
+"cloudformation:ListStacks": "rule:deny_stack_user"
+
+#
+"cloudformation:CreateStack": "rule:deny_stack_user"
+
+#
+"cloudformation:DescribeStacks": "rule:deny_stack_user"
+
+#
+"cloudformation:DeleteStack": "rule:deny_stack_user"
+
+#
+"cloudformation:UpdateStack": "rule:deny_stack_user"
+
+#
+"cloudformation:CancelUpdateStack": "rule:deny_stack_user"
+
+#
+"cloudformation:DescribeStackEvents": "rule:deny_stack_user"
+
+#
+"cloudformation:ValidateTemplate": "rule:deny_stack_user"
+
+#
+"cloudformation:GetTemplate": "rule:deny_stack_user"
+
+#
+"cloudformation:EstimateTemplateCost": "rule:deny_stack_user"
+
+#
+"cloudformation:DescribeStackResource": "rule:allow_everybody"
+
+#
+"cloudformation:DescribeStackResources": "rule:deny_stack_user"
+
+#
+"cloudformation:ListStackResources": "rule:deny_stack_user"
+
+# List events.
+# GET  /v1/{tenant_id}/stacks/{stack_name}/{stack_id}/events
+"events:index": "rule:deny_stack_user"
+
+# Show event.
+# GET  /v1/{tenant_id}/stacks/{stack_name}/{stack_id}/resources/{resource_name}/events/{event_id}
+"events:show": "rule:deny_stack_user"
+
+# List resources.
+# GET  /v1/{tenant_id}/stacks/{stack_name}/{stack_id}/resources
+"resource:index": "rule:deny_stack_user"
+
+# Show resource metadata.
+# GET  /v1/{tenant_id}/stacks/{stack_name}/{stack_id}/resources/{resource_name}/metadata
+"resource:metadata": "rule:allow_everybody"
+
+# Signal resource.
+# POST  /v1/{tenant_id}/stacks/{stack_name}/{stack_id}/resources/{resource_name}/signal
+"resource:signal": "rule:allow_everybody"
+
+# Mark resource as unhealthy.
+# PATCH  /v1/{tenant_id}/stacks/{stack_name}/{stack_id}/resources/{resource_name_or_physical_id}
+"resource:mark_unhealthy": "rule:deny_stack_user"
+
+# Show resource.
+# GET  /v1/{tenant_id}/stacks/{stack_name}/{stack_id}/resources/{resource_name}
+"resource:show": "rule:deny_stack_user"
+
+#
+"resource_types:OS::Nova::Flavor": "rule:project_admin"
+
+#
+"resource_types:OS::Cinder::EncryptedVolumeType": "rule:project_admin"
+
+#
+"resource_types:OS::Cinder::VolumeType": "rule:project_admin"
+
+#
+"resource_types:OS::Cinder::Quota": "rule:project_admin"
+
+#
+"resource_types:OS::Neutron::Quota": "rule:project_admin"
+
+#
+"resource_types:OS::Nova::Quota": "rule:project_admin"
+
+#
+"resource_types:OS::Octavia::Quota": "rule:project_admin"
+
+#
+"resource_types:OS::Manila::ShareType": "rule:project_admin"
+
+#
+"resource_types:OS::Neutron::ProviderNet": "rule:project_admin"
+
+#
+"resource_types:OS::Neutron::QoSPolicy": "rule:project_admin"
+
+#
+"resource_types:OS::Neutron::QoSBandwidthLimitRule": "rule:project_admin"
+
+#
+"resource_types:OS::Neutron::QoSDscpMarkingRule": "rule:project_admin"
+
+#
+"resource_types:OS::Neutron::QoSMinimumBandwidthRule": "rule:project_admin"
+
+#
+"resource_types:OS::Neutron::Segment": "rule:project_admin"
+
+#
+"resource_types:OS::Nova::HostAggregate": "rule:project_admin"
+
+#
+"resource_types:OS::Cinder::QoSSpecs": "rule:project_admin"
+
+#
+"resource_types:OS::Cinder::QoSAssociation": "rule:project_admin"
+
+#
+"resource_types:OS::Keystone::*": "rule:project_admin"
+
+#
+"resource_types:OS::Blazar::Host": "rule:project_admin"
+
+#
+"resource_types:OS::Octavia::Flavor": "rule:project_admin"
+
+#
+"resource_types:OS::Octavia::FlavorProfile": "rule:project_admin"
+
+#
+"service:index": "rule:context_is_admin"
+
+# List configs globally.
+# GET  /v1/{tenant_id}/software_configs
+"software_configs:global_index": "rule:deny_everybody"
+
+# List configs.
+# GET  /v1/{tenant_id}/software_configs
+"software_configs:index": "rule:deny_stack_user"
+
+# Create config.
+# POST  /v1/{tenant_id}/software_configs
+"software_configs:create": "rule:deny_stack_user"
+
+# Show config details.
+# GET  /v1/{tenant_id}/software_configs/{config_id}
+"software_configs:show": "rule:deny_stack_user"
+
+# Delete config.
+# DELETE  /v1/{tenant_id}/software_configs/{config_id}
+"software_configs:delete": "rule:deny_stack_user"
+
+# List deployments.
+# GET  /v1/{tenant_id}/software_deployments
+"software_deployments:index": "rule:deny_stack_user"
+
+# Create deployment.
+# POST  /v1/{tenant_id}/software_deployments
+"software_deployments:create": "rule:deny_stack_user"
+
+# Show deployment details.
+# GET  /v1/{tenant_id}/software_deployments/{deployment_id}
+"software_deployments:show": "rule:deny_stack_user"
+
+# Update deployment.
+# PUT  /v1/{tenant_id}/software_deployments/{deployment_id}
+"software_deployments:update": "rule:deny_stack_user"
+
+# Delete deployment.
+# DELETE  /v1/{tenant_id}/software_deployments/{deployment_id}
+"software_deployments:delete": "rule:deny_stack_user"
+
+# Show server configuration metadata.
+# GET  /v1/{tenant_id}/software_deployments/metadata/{server_id}
+"software_deployments:metadata": "rule:allow_everybody"
+
+# Abandon stack.
+# DELETE  /v1/{tenant_id}/stacks/{stack_name}/{stack_id}/abandon
+"stacks:abandon": "rule:deny_stack_user"
+
+# Create stack.
+# POST  /v1/{tenant_id}/stacks
+"stacks:create": "rule:deny_stack_user"
+
+# Delete stack.
+# DELETE  /v1/{tenant_id}/stacks/{stack_name}/{stack_id}
+"stacks:delete": "rule:deny_stack_user"
+
+# List stacks in detail.
+# GET  /v1/{tenant_id}/stacks
+"stacks:detail": "rule:deny_stack_user"
+
+# Export stack.
+# GET  /v1/{tenant_id}/stacks/{stack_name}/{stack_id}/export
+"stacks:export": "rule:deny_stack_user"
+
+# Generate stack template.
+# GET  /v1/{tenant_id}/stacks/{stack_name}/{stack_id}/template
+"stacks:generate_template": "rule:deny_stack_user"
+
+# List stacks globally.
+# GET  /v1/{tenant_id}/stacks
+"stacks:global_index": "rule:deny_everybody"
+
+# List stacks.
+# GET  /v1/{tenant_id}/stacks
+"stacks:index": "rule:deny_stack_user"
+
+# List resource types.
+# GET  /v1/{tenant_id}/resource_types
+"stacks:list_resource_types": "rule:deny_stack_user"
+
+# List template versions.
+# GET  /v1/{tenant_id}/template_versions
+"stacks:list_template_versions": "rule:deny_stack_user"
+
+# List template functions.
+# GET  /v1/{tenant_id}/template_versions/{template_version}/functions
+"stacks:list_template_functions": "rule:deny_stack_user"
+
+# Find stack.
+# GET  /v1/{tenant_id}/stacks/{stack_identity}
+"stacks:lookup": "rule:allow_everybody"
+
+# Preview stack.
+# POST  /v1/{tenant_id}/stacks/preview
+"stacks:preview": "rule:deny_stack_user"
+
+# Show resource type schema.
+# GET  /v1/{tenant_id}/resource_types/{type_name}
+"stacks:resource_schema": "rule:deny_stack_user"
+
+# Show stack.
+# GET  /v1/{tenant_id}/stacks/{stack_identity}
+"stacks:show": "rule:deny_stack_user"
+
+# Get stack template.
+# GET  /v1/{tenant_id}/stacks/{stack_name}/{stack_id}/template
+"stacks:template": "rule:deny_stack_user"
+
+# Get stack environment.
+# GET  /v1/{tenant_id}/stacks/{stack_name}/{stack_id}/environment
+"stacks:environment": "rule:deny_stack_user"
+
+# Get stack files.
+# GET  /v1/{tenant_id}/stacks/{stack_name}/{stack_id}/files
+"stacks:files": "rule:deny_stack_user"
+
+# Update stack.
+# PUT  /v1/{tenant_id}/stacks/{stack_name}/{stack_id}
+"stacks:update": "rule:deny_stack_user"
+
+# Update stack (PATCH).
+# PATCH  /v1/{tenant_id}/stacks/{stack_name}/{stack_id}
+"stacks:update_patch": "rule:deny_stack_user"
+
+# Preview update stack.
+# PUT  /v1/{tenant_id}/stacks/{stack_name}/{stack_id}/preview
+"stacks:preview_update": "rule:deny_stack_user"
+
+# Preview update stack (PATCH).
+# PATCH  /v1/{tenant_id}/stacks/{stack_name}/{stack_id}/preview
+"stacks:preview_update_patch": "rule:deny_stack_user"
+
+# Validate template.
+# POST  /v1/{tenant_id}/validate
+"stacks:validate_template": "rule:deny_stack_user"
+
+# Snapshot Stack.
+# POST  /v1/{tenant_id}/stacks/{stack_name}/{stack_id}/snapshots
+"stacks:snapshot": "rule:deny_stack_user"
+
+# Show snapshot.
+# GET  /v1/{tenant_id}/stacks/{stack_name}/{stack_id}/snapshots/{snapshot_id}
+"stacks:show_snapshot": "rule:deny_stack_user"
+
+# Delete snapshot.
+# DELETE  /v1/{tenant_id}/stacks/{stack_name}/{stack_id}/snapshots/{snapshot_id}
+"stacks:delete_snapshot": "rule:deny_stack_user"
+
+# List snapshots.
+# GET  /v1/{tenant_id}/stacks/{stack_name}/{stack_id}/snapshots
+"stacks:list_snapshots": "rule:deny_stack_user"
+
+# Restore snapshot.
+# POST  /v1/{tenant_id}/stacks/{stack_name}/{stack_id}/snapshots/{snapshot_id}/restore
+"stacks:restore_snapshot": "rule:deny_stack_user"
+
+# List outputs.
+# GET  /v1/{tenant_id}/stacks/{stack_name}/{stack_id}/outputs
+"stacks:list_outputs": "rule:deny_stack_user"
+
+# Show outputs.
+# GET  /v1/{tenant_id}/stacks/{stack_name}/{stack_id}/outputs/{output_key}
+"stacks:show_output": "rule:deny_stack_user"
