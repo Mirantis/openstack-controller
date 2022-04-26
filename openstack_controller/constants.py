@@ -141,3 +141,8 @@ class NodeRole(enum.Enum):
     compute = "compute"
     gateway = "gateway"
     controller = "controller"
+
+
+POLICY_IN_CODE_SERVICES = [
+    "keystone",
+]
