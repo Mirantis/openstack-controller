@@ -274,6 +274,21 @@ class Ceilometer(OpenStackService):
             kube.wait_for_secret(self.namespace, panko_secret.secret_name)
             panko_creds = panko_secret.get()
             t_args["event_credentials"] = panko_creds
+
+        kube.wait_for_secret(
+            settings.OSCTL_CEPH_SHARED_NAMESPACE,
+            ceph_api.OPENSTACK_KEYS_SECRET,
+        )
+        rgw_internal_cacert = secrets.get_secret_data(
+            settings.OSCTL_CEPH_SHARED_NAMESPACE,
+            ceph_api.OPENSTACK_KEYS_SECRET,
+        ).get("rgw_internal_cacert")
+        if rgw_internal_cacert:
+            rgw_internal_cacert = base64.b64decode(
+                rgw_internal_cacert
+            ).decode()
+            t_args["rgw_internal_cacert"] = rgw_internal_cacert
+
         return t_args
 
 

@@ -130,6 +130,9 @@ spec:
               tls:
                 ca: |
 {{ spec.features.ssl.public_endpoints.ca_cert | indent( width=18, first=True) }}
+{%- if rgw_internal_cacert is defined %}
+{{ rgw_internal_cacert | indent( width=18, first=True) }}
+{%- endif %}
                 crt: |
 {{ spec.features.ssl.public_endpoints.api_cert | indent( width=18, first=True) }}
                 key: |
@@ -144,6 +147,9 @@ spec:
               tls:
                 ca: |
 {{ spec.features.ssl.public_endpoints.ca_cert | indent( width=18, first=True) }}
+{%- if rgw_internal_cacert is defined %}
+{{ rgw_internal_cacert | indent( width=18, first=True) }}
+{%- endif %}
                 crt: |
 {{ spec.features.ssl.public_endpoints.api_cert | indent( width=18, first=True) }}
                 key: |
