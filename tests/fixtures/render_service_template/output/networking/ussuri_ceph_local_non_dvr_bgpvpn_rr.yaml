@@ -199,8 +199,6 @@ spec:
             mpls_interface: '*gre*'
             ovs_bridge: 'br-mpls'
             proxy_arp: False
-        ironic:
-          insecure: true
         l3_agent:
           agent:
             extensions: fip_qos,gateway_ip_qos
@@ -237,6 +235,8 @@ spec:
             topics: notifications,stacklight_notifications
           service_providers:
             service_provider: BGPVPN:BaGPipe:networking_bgpvpn.neutron.services.service_drivers.bagpipe.bagpipe_v2.BaGPipeBGPVPNDriver:default
+          ironic:
+            valid_interfaces: internal
         paste:
           app:neutronversions:
             paste.app_factory: neutron.pecan_wsgi.app:versions_factory
