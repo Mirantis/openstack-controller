@@ -167,6 +167,13 @@ spec:
                     policies:
                       type: object
                       properties:
+                        policy_in_code:
+                          type: object
+                          properties:
+                            enabled:
+                              type: boolean
+                              description: |
+                                Trigger to use built in policies provided by OpenStack components.
                         aodh: &custom_policies
                           type: object
                           x-kubernetes-preserve-unknown-fields: true

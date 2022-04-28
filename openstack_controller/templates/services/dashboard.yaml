@@ -7,7 +7,9 @@
 {%- set neutron_backend = spec.features.neutron.get('backend', 'ml2') %}
 {%- set custom_policies = {} %}
 {%- for service, policy in spec.get("features", {}).get("policies", {}).items() %}
+{%- if service != "policy_in_code" %}
 {%- do custom_policies.update({service: {"01-custom.yaml": policy }}) %}
+{% endif %}
 {%- endfor %}
 
 spec:
