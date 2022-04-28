@@ -15,6 +15,15 @@ common:
               namespace: {{ nginx_ingress_namespace_class }}
 
 features:
+  logging:
+    cinder:
+      level: DEBUG
+    neutron:
+      level: DEBUG
+    nova:
+      level: DEBUG
+    octavia:
+      level: DEBUG
   services:
     - block-storage
     - compute
