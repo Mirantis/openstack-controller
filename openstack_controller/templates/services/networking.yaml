@@ -603,6 +603,8 @@ spec:
           nova:
             live_migration_events: true
           {%- endif %}
+          ironic:
+            valid_interfaces: internal
         logging:
           logger_neutron:
             level: {{ spec.get('features', {}).get('logging', {}).get('neutron', {}).get('level', 'INFO') }}
@@ -622,10 +624,6 @@ spec:
             metadata_proxy_shared_secret: {{ credentials.metadata_secret }}
             nova_metadata_port: 8775
             nova_metadata_protocol: http
-        ironic:
-          # TODO(vsaienko): figure out why specifying endpoint type via valid_interfaces or interface
-          # or endpoint_typedoes not work.
-          insecure: True
 # TODO: make other networks types configurable
 {%- set networks = {'flat': [], 'vlan': []} %}
 {%- set bridge_mappings = [] %}

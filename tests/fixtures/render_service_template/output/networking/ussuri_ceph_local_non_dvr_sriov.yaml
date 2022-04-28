@@ -168,8 +168,6 @@ spec:
         auto_bridge_add:
           br-ex: veth-phy
           br-sriov: ens7
-        ironic:
-          insecure: true
         l3_agent:
           agent:
             extensions: fip_qos,gateway_ip_qos
@@ -204,6 +202,8 @@ spec:
             memcache_security_strategy: ENCRYPT
           oslo_messaging_notifications:
             topics: notifications,stacklight_notifications
+          ironic:
+            valid_interfaces: internal
         paste:
           app:neutronversions:
             paste.app_factory: neutron.pecan_wsgi.app:versions_factory
