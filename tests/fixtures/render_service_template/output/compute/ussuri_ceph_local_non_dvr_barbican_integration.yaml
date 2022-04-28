@@ -413,7 +413,7 @@ spec:
               liveness:
                 enabled: true
                 params:
-                  initialDelaySeconds: 0
+                  initialDelaySeconds: 300
                   periodSeconds: 50
                   timeoutSeconds: 40
               readiness:
