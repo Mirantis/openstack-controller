@@ -1297,3 +1297,37 @@ def test_neutron_ngs_both_formats(client, osdplst):
     response = client.simulate_post("/validate", json=req)
     assert response.json["response"]["allowed"] is False
     assert response.json["response"]["status"]["code"] == 400
+
+
+def test_policy_in_code_ok(client, osdplst):
+    req = copy.deepcopy(ADMISSION_REQ)
+    req["request"]["object"]["spec"]["openstack_version"] = "victoria"
+    req["request"]["object"]["spec"]["features"].update(
+        {
+            "policies": {
+                "policy_in_code": {
+                    "enabled": True,
+                }
+            }
+        }
+    )
+    response = client.simulate_post("/validate", json=req)
+    assert response.status == falcon.HTTP_OK
+    assert response.json["response"]["allowed"] is True
+
+
+def test_policy_in_code_old(client, osdplst):
+    req = copy.deepcopy(ADMISSION_REQ)
+    req["request"]["object"]["spec"]["openstack_version"] = "ussuri"
+    req["request"]["object"]["spec"]["features"].update(
+        {
+            "policies": {
+                "policy_in_code": {
+                    "enabled": True,
+                }
+            }
+        }
+    )
+    response = client.simulate_post("/validate", json=req)
+    assert response.json["response"]["allowed"] is False
+    assert response.json["response"]["status"]["code"] == 400
