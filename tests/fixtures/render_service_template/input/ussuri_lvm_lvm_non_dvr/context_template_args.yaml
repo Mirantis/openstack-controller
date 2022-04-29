@@ -81,6 +81,7 @@ coordination:
   credentials: null
   service_creds: []
 dashboard:
+  os_policy_services: ['cinder', 'nova', 'designate', 'keystone', 'glance', 'neutron', 'heat', 'octavia', 'barbican', 'placement', 'ironic', 'aodh', 'panko', 'gnocchi', 'masakari']
   credentials: &credentials_dashboard
     database:
       user:

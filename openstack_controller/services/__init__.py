@@ -669,6 +669,7 @@ class Horizon(OpenStackService):
                 rgw_internal_cacert
             ).decode()
             t_args["rgw_internal_cacert"] = rgw_internal_cacert
+        t_args["os_policy_services"] = constants.OS_POLICY_SERVICES.values()
 
         return t_args
 
