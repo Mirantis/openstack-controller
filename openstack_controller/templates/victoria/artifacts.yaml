@@ -137,7 +137,7 @@ placement_db_sync: '{{ images_base_url }}/openstack/placement:victoria-focal-202
 keystone_db_sync_expand: '{{ images_base_url }}/openstack/keystone:victoria-focal-20220429061041'
 keystone_db_sync_migrate: '{{ images_base_url }}/openstack/keystone:victoria-focal-20220429061041'
 keystone_db_sync_contract: '{{ images_base_url }}/openstack/keystone:victoria-focal-20220429061041'
-octavia_amphora: '{{ binary_base_url }}/openstack/bin/octavia/amphora-x64-haproxy-victoria-20220429063851.qcow2'
+octavia_amphora: '{{ binary_base_url }}/openstack/bin/octavia/amphora-x64-haproxy-victoria-20220429103343.qcow2'
 etcd: '{{ images_base_url }}/openstack/extra/etcd:3.2.26'
 etcd_db_compact: '{{ images_base_url }}/openstack/extra/etcd:3.2.26'
 cinder_db_sync_online: '{{ images_base_url }}/openstack/cinder:victoria-focal-20220429061041'
@@ -174,7 +174,7 @@ mariadb_controller: '{{ images_base_url }}/general/mariadb:10.6.7-bionic-2022040
 horizon_mirantis_theme_sha256summ: 385cb60c460e29cff2b205f77528d3d80fe2ac2f36032224b499e97252a1dd81
 horizon_mirantis_theme_url: '{{ binary_base_url }}/openstack/bin/horizon/mirantis-victoria-8f71802-20210119120707.tar.gz'
 ceph_config_helper: '{{ images_base_url }}/openstack/extra/ceph-config-helper:nautilus-bionic-20211025114106'
-octavia_amphora_checksum: 8e1fb0364bc88d85ceaf5d7102658a75
+octavia_amphora_checksum: c1c0dc77819fb1b5202a36b1d1313974
 masakari_db_sync: '{{ images_base_url }}/openstack/masakari:victoria-focal-20220429061041'
 masakari_api: '{{ images_base_url }}/openstack/masakari:victoria-focal-20220429061041'
 masakari_engine: '{{ images_base_url }}/openstack/masakari:victoria-focal-20220429061041'
