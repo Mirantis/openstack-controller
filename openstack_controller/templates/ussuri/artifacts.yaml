@@ -137,7 +137,7 @@ placement_db_sync: '{{ images_base_url }}/openstack/placement:ussuri-bionic-2022
 keystone_db_sync_expand: '{{ images_base_url }}/openstack/keystone:ussuri-bionic-20220415091323'
 keystone_db_sync_migrate: '{{ images_base_url }}/openstack/keystone:ussuri-bionic-20220415091323'
 keystone_db_sync_contract: '{{ images_base_url }}/openstack/keystone:ussuri-bionic-20220415091323'
-octavia_amphora: '{{ binary_base_url }}/openstack/bin/octavia/amphora-x64-haproxy-ussuri-20220415111432.qcow2'
+octavia_amphora: '{{ binary_base_url }}/openstack/bin/octavia/amphora-x64-haproxy-ussuri-20220428005913.qcow2'
 etcd: '{{ images_base_url }}/openstack/extra/etcd:3.2.26'
 etcd_db_compact: '{{ images_base_url }}/openstack/extra/etcd:3.2.26'
 cinder_db_sync_online: '{{ images_base_url }}/openstack/cinder:ussuri-bionic-20220415091323'
@@ -174,7 +174,7 @@ mariadb_controller: '{{ images_base_url }}/general/mariadb:10.6.7-bionic-2022040
 horizon_mirantis_theme_sha256summ: b1bab205a68770fc18cf4d1648a1b0a2c397af245d8988517fa4ad1a03ccea3c
 horizon_mirantis_theme_url: '{{ binary_base_url }}/openstack/bin/horizon/mirantis-ussuri-48f346e-20210119132403.tar.gz'
 ceph_config_helper: '{{ images_base_url }}/openstack/extra/ceph-config-helper:nautilus-bionic-20211025114106'
-octavia_amphora_checksum: ab549ab8c2846ed9130c5dfd3fed32c3
+octavia_amphora_checksum: 190b345d003a181b9933f28622df46a7
 masakari_db_sync: '{{ images_base_url }}/openstack/masakari:ussuri-bionic-20220415091323'
 masakari_api: '{{ images_base_url }}/openstack/masakari:ussuri-bionic-20220415091323'
 masakari_engine: '{{ images_base_url }}/openstack/masakari:ussuri-bionic-20220415091323'
