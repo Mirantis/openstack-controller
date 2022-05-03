@@ -145,4 +145,17 @@ class NodeRole(enum.Enum):
 
 POLICY_IN_CODE_SERVICES = [
     "keystone",
+    "glance",
+    "cinder",
+    "nova",
+    "designate",
+    "neutron",
+    "heat",
+    "octavia",
+    "barbican",
+    "placement",
+    "ironic",
+    "aodh",
+    "gnocchi",
+    "masakari",
 ]
