@@ -39,6 +39,8 @@ spec:
       endpoints:
         cluster_domain_suffix: {{ spec.internal_domain_name }}
 {% include 'base/_admin_identity.yaml' %}
+            tempest:
+              role: admin,key-manager:service-admin,creator
           host_fqdn_override:
             public:
               host: keystone.{{ spec.public_domain_name }}
@@ -124,8 +126,6 @@ spec:
             openstack router add subnet heat-router heat-subnet
             openstack router set --external-gateway {{ spec.features.neutron.get('floating_network', {}).get('name', 'public') }} heat-router
           fi
-          openstack role create --or-show "key-manager:service-admin"
-          openstack role create --or-show creator
 {%- if spec.features.neutron.get('backend') != 'tungstenfabric' %}
           openstack subnet pool show default_pool || \
             openstack subnet pool create --share --default \
