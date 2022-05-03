@@ -1166,7 +1166,7 @@ class Nova(OpenStackServiceWithCeph, MaintenanceApiMixin):
 
     @property
     def _required_accounts(self):
-        r_accounts = {"networking": ["neutron"]}
+        r_accounts = {"networking": ["neutron"], "block-storage": ["cinder"]}
         if self.openstack_version not in [
             "queens",
             "rocky",
