@@ -224,7 +224,11 @@ spec:
           coordination:
             #There are some problems with etcd3 driver so we shouldn't use it
             #BUG: https://mirantis.jira.com/browse/PRODX-21783
+{%- if spec.openstack_version in ['queens', 'rocky', 'stein', 'train', 'ussuri'] %}
             backend_url: "etcd3+http://etcd:2379"
+{% else %}
+            backend_url: "etcd3+http://etcd:2379?api_version=v3"
+{%- endif %}
           service_user:
             send_service_user_token: true
           backend_defaults:
