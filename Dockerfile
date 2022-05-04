@@ -1,4 +1,4 @@
-ARG FROM=docker-remote.docker.mirantis.net/ubuntu:bionic
+ARG FROM=docker-remote.docker.mirantis.net/ubuntu:focal
 
 FROM $FROM as builder
 # NOTE(pas-ha) need Git for pbr to install from source checkout w/o sdist
