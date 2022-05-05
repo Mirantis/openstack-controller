@@ -241,15 +241,16 @@ services:
               connection_recycle_time: 300
             oslo_messaging_rabbit:
               rabbit_qos_prefetch_count: 64
-            ovs:
-              of_connect_timeout: 300
-              of_inactivity_probe: 30
-              of_request_timeout: 300
-              ovsdb_timeout: 30
           plugins:
             ml2_conf:
               ml2_type_vxlan:
                 vni_ranges: 1:1000
+            openvswitch_agent:
+              ovs:
+                of_connect_timeout: 300
+                of_inactivity_probe: 30
+                of_request_timeout: 300
+                ovsdb_timeout: 30
     openvswitch:
       values:
         pod:
