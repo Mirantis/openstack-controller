@@ -24,6 +24,11 @@ features:
       level: DEBUG
     octavia:
       level: DEBUG
+{%- if openstack_version not in ['queens', 'rocky', 'stein', 'train', 'ussuri'] %}
+  policies:
+    policy_in_code:
+      enabled: true
+{%- endif %}
   services:
     - block-storage
     - compute
