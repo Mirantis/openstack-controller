@@ -24,8 +24,6 @@ os_compute_api:os-assisted-volume-snapshots:delete: rule:admin_api
 os_compute_api:os-assisted-volume-snapshots:discoverable: "@"
 os_compute_api:os-attach-interfaces: rule:admin_or_owner
 os_compute_api:os-attach-interfaces:discoverable: "@"
-os_compute_api:os-attach-interfaces:create: rule:admin_or_owner
-os_compute_api:os-attach-interfaces:delete: rule:admin_or_owner
 os_compute_api:os-availability-zone:list: "@"
 os_compute_api:os-availability-zone:discoverable: "@"
 os_compute_api:os-availability-zone:detail: rule:admin_api
@@ -76,7 +74,7 @@ os_compute_api:os-extended-status: rule:admin_or_owner
 os_compute_api:os-extended-volumes: rule:admin_or_owner
 os_compute_api:os-extended-volumes:discoverable: "@"
 os_compute_api:extension_info:discoverable: "@"
-os_compute_api:extensions: "@"
+os_compute_api:extensions: '@'
 os_compute_api:extensions:discoverable: "@"
 os_compute_api:os-fixed-ips:discoverable: "@"
 os_compute_api:os-fixed-ips: rule:admin_api
@@ -134,7 +132,6 @@ os_compute_api:os-keypairs:delete: rule:admin_api or user_id:%(user_id)s
 os_compute_api:os-keypairs:show: rule:admin_api or user_id:%(user_id)s
 os_compute_api:os-keypairs: rule:admin_or_owner
 os_compute_api:limits:discoverable: "@"
-os_compute_api:limits: "@"
 os_compute_api:os-lock-server:discoverable: "@"
 os_compute_api:os-lock-server:lock: rule:admin_or_owner
 os_compute_api:os-lock-server:unlock:unlock_override: rule:admin_api
@@ -258,3 +255,36 @@ os_compute_api:os-volumes-attachments:show: rule:admin_or_owner
 os_compute_api:os-volumes-attachments:discoverable: "@"
 os_compute_api:os-volumes-attachments:update: rule:admin_api
 os_compute_api:os-volumes-attachments:delete: rule:admin_or_owner
+os_compute_api:limits: "@"
+os_compute_api:limits:other_project: rule:system_reader_api
+os_compute_api:os-agents:create: rule:system_admin_api
+os_compute_api:os-agents:delete: rule:system_admin_api
+os_compute_api:os-agents:list: rule:system_reader_api
+os_compute_api:os-agents:update: rule:system_admin_api
+os_compute_api:os-attach-interfaces:create: rule:system_admin_or_owner
+os_compute_api:os-attach-interfaces:delete: rule:system_admin_or_owner
+os_compute_api:os-attach-interfaces:list: rule:system_or_project_reader
+os_compute_api:os-attach-interfaces:show: rule:system_or_project_reader
+os_compute_api:os-deferred-delete:force: rule:system_admin_or_owner
+os_compute_api:os-deferred-delete:restore: rule:system_admin_or_owner
+os_compute_api:os-hypervisors:list: rule:system_reader_api
+os_compute_api:os-hypervisors:list-detail: rule:system_reader_api
+os_compute_api:os-hypervisors:search: rule:system_reader_api
+os_compute_api:os-hypervisors:servers: rule:system_reader_api
+os_compute_api:os-hypervisors:show: rule:system_reader_api
+os_compute_api:os-hypervisors:statistics: rule:system_reader_api
+os_compute_api:os-hypervisors:uptime: rule:system_reader_api
+os_compute_api:os-instance-actions:list: rule:system_or_project_reader
+os_compute_api:os-instance-actions:show: rule:system_or_project_reader
+os_compute_api:os-instance-usage-audit-log:list: rule:system_reader_api
+os_compute_api:os-instance-usage-audit-log:show: rule:system_reader_api
+os_compute_api:os-security-groups:add: rule:system_admin_or_owner
+os_compute_api:os-security-groups:list: rule:system_or_project_reader
+os_compute_api:os-security-groups:remove: rule:system_admin_or_owner
+os_compute_api:os-server-password:clear: rule:system_admin_or_owner
+os_compute_api:os-server-password:show: rule:system_or_project_reader
+os_compute_api:os-services:delete: rule:system_admin_api
+os_compute_api:os-services:list: rule:system_reader_api
+os_compute_api:os-services:update: rule:system_admin_api
+os_compute_api:os-unrescue: rule:system_admin_or_owner
+
