@@ -15,8 +15,6 @@ spec:
           DEFAULT:
             os_privileged_user_name: admin
             os_privileged_user_password: ZUqTyP2XwsgEGKZ7qNhhecYyq9NLkGE6
-          coordination:
-            backend_url: etcd3://etcd:2379
           keystone_authtoken:
             memcache_secret_key: 3vySYJq0rDZ32KGG
             memcache_security_strategy: ENCRYPT
