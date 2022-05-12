@@ -199,3 +199,4 @@ ironic_agent_initramfs: '{{ binary_base_url }}/openstack/bin/ironic/tinyipa/tiny
 ironic_agent_kernel_checksum: 8bffc2d4ca84e7b6d1310fef7b8c6ddc
 ironic_agent_initramfs_checksum: b0604c5b2b4776bc58362eb4bf107d48
 ironic_update_nodes_metadata: '{{ images_base_url }}/openstack/openstack-tools:ussuri-bionic-20220415091323'
+ironic_pxe_http: '{{ images_base_url }}/stacklight/nginx:1.21.6'
