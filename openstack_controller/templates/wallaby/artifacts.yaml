@@ -97,7 +97,7 @@ prometheus_rabbitmq_exporter_helm_tests: '{{ images_base_url }}/openstack/heat:w
 rabbitmq_init: '{{ images_base_url }}/openstack/heat:wallaby-focal-20220505122717'
 rabbitmq: '{{ images_base_url }}/general/rabbitmq:3.9.8'
 rabbitmq_scripted_test: '{{ images_base_url }}/general/rabbitmq:3.9.8-management'
-tempest_run_tests: '{{ images_base_url }}/openstack/tempest:victoria-focal-20220505122717'
+tempest_run_tests: '{{ images_base_url }}/openstack/tempest:victoria-focal-20220509060017'
 tempest-uuids-init: '{{ images_base_url }}/openstack/heat:wallaby-focal-20220505122717'
 glance_metadefs_load: '{{ images_base_url }}/openstack/glance:wallaby-focal-20220505122717'
 memcached: '{{ images_base_url }}/general/memcached:1.6.6-alpine'
@@ -206,3 +206,4 @@ ironic_agent_initramfs: '{{ binary_base_url }}/openstack/bin/ironic/tinyipa/tiny
 ironic_agent_kernel_checksum: ab3a8196df5a84889f16494fde188799
 ironic_agent_initramfs_checksum: e1fa2f2e794b0950a9825f750dcbb745
 ironic_update_nodes_metadata: '{{ images_base_url }}/openstack/openstack-tools:ussuri-bionic-20220415091323'
+ironic_pxe_http: '{{ images_base_url }}/stacklight/nginx:1.21.6'
