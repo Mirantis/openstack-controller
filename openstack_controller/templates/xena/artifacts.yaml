@@ -97,7 +97,7 @@ prometheus_rabbitmq_exporter_helm_tests: '{{ images_base_url }}/openstack/heat:x
 rabbitmq_init: '{{ images_base_url }}/openstack/heat:xena-focal-20220505122717'
 rabbitmq: '{{ images_base_url }}/general/rabbitmq:3.9.8'
 rabbitmq_scripted_test: '{{ images_base_url }}/general/rabbitmq:3.9.8-management'
-tempest_run_tests: '{{ images_base_url }}/openstack/tempest:victoria-focal-20220505122717'
+tempest_run_tests: '{{ images_base_url }}/openstack/tempest:victoria-focal-20220509060017'
 tempest-uuids-init: '{{ images_base_url }}/openstack/heat:xena-focal-20220505122717'
 glance_metadefs_load: '{{ images_base_url }}/openstack/glance:xena-focal-20220505122717'
 memcached: '{{ images_base_url }}/general/memcached:1.6.6-alpine'
@@ -201,8 +201,9 @@ neutron_bootstrap: '{{ images_base_url }}/openstack/openstack-tools:ussuri-bioni
 cinder_drop_default_volume_type: '{{ images_base_url }}/openstack/openstack-tools:ussuri-bionic-20220415091323'
 cinder_create_internal_tenant: '{{ images_base_url }}/openstack/openstack-tools:ussuri-bionic-20220415091323'
 descheduler: '{{ images_base_url }}/openstack/extra/descheduler:v0.21.0'
-ironic_agent_kernel: '{{ binary_base_url }}/openstack/bin/ironic/tinyipa/tinyipa-stable-xena-20220318005512.vmlinuz'
-ironic_agent_initramfs: '{{ binary_base_url }}/openstack/bin/ironic/tinyipa/tinyipa-stable-xena-20220318005512.gz'
+ironic_agent_kernel: '{{ binary_base_url }}/openstack/bin/ironic/tinyipa/tinyipa-stable-xena-20220512122856.vmlinuz'
+ironic_agent_initramfs: '{{ binary_base_url }}/openstack/bin/ironic/tinyipa/tinyipa-stable-xena-20220512122856.gz'
 ironic_agent_kernel_checksum: ab3a8196df5a84889f16494fde188799
-ironic_agent_initramfs_checksum: c45721d0503e893580d4df494928a846
+ironic_agent_initramfs_checksum: 489dd74215bbee94451e6fe63ce2cb69
 ironic_update_nodes_metadata: '{{ images_base_url }}/openstack/openstack-tools:ussuri-bionic-20220415091323'
+ironic_pxe_http: '{{ images_base_url }}/stacklight/nginx:1.21.6'
