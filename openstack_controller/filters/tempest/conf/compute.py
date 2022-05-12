@@ -2,6 +2,7 @@ from openstack_controller.filters.tempest import base_section
 
 
 MICROVERSION_RELEASE_MAPPING = {
+    "yoga": {"min_microversion": "2.1", "max_microversion": "2.90"},
     "xena": {"min_microversion": "2.1", "max_microversion": "2.90"},
     "wallaby": {"min_microversion": "2.1", "max_microversion": "2.88"},
     "victoria": {"min_microversion": "2.1", "max_microversion": "2.87"},

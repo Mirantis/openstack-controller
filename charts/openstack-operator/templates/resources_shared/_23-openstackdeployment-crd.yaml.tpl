@@ -56,6 +56,7 @@ spec:
                     - victoria # LTS version
                     - wallaby # not supported, only for migration
                     - xena # not supported, only for migration
+                    - yoga # not supported
                     - master # not supported, only for example
                 preset:
                   description: Preset of features to deploy

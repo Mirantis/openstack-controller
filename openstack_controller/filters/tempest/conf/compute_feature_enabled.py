@@ -2,6 +2,7 @@ from openstack_controller.filters.tempest import base_section
 
 
 MULTIATTACH_CEPH_RELEASE_MAPPING = {
+    "yoga": True,
     "xena": True,
     "wallaby": True,
     "victoria": True,

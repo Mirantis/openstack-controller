@@ -133,6 +133,7 @@ class OpenStackVersion(enum.IntEnum):
     victoria = 6
     wallaby = 7
     xena = 8
+    yoga = 9
     master = sys.maxsize
 
 
