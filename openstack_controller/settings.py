@@ -132,6 +132,15 @@ OSCTL_CEPH_SHARED_NAMESPACE = os.environ.get(
     "OSCTL_CEPH_SHARED_NAMESPACE", "openstack-ceph-shared"
 )
 
+# The location of clouds.yaml with admin credentials
+OS_CLIENT_CONFIG_FILE = os.environ.get(
+    "OS_CLIENT_CONFIG_FILE", "/etc/openstack/clouds.yaml"
+)
+
+# The name of cloud in clouds.yaml
+OS_CLOUD = os.environ.get("OS_CLOUD", "osctl")
+OS_CLOUD_SYSTEM = os.environ.get("OS_CLOUD_SYSTEM", f"{OS_CLOUD}-system")
+
 # TODO(mkarpin): move openstack related settings to separate file
 # as settings.py is imported inside kube.py
 # Url for openstack binaries/helm charts

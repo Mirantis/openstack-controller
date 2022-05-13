@@ -310,6 +310,9 @@ spec:
             {{- toYaml .Values.osdpl.pod.controller.secrets.liveness.params | nindent 12}}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+            - name: os-clouds
+              mountPath: /etc/openstack/
         - name: secrets
           image: {{ tuple . .Values.image | include "getImageUrl" }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
@@ -343,6 +346,9 @@ spec:
             {{- toYaml .Values.osdpl.pod.controller.secrets.liveness.params | nindent 12}}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+            - name: os-clouds
+              mountPath: /etc/openstack/
         - name: health
           image: {{ tuple . .Values.image | include "getImageUrl" }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
@@ -376,6 +382,9 @@ spec:
             {{- toYaml .Values.osdpl.pod.controller.health.liveness.params | nindent 12}}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+            - name: os-clouds
+              mountPath: /etc/openstack/
         - name: node
           image: {{ tuple . .Values.image | include "getImageUrl" }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
@@ -409,6 +418,9 @@ spec:
             {{- toYaml .Values.osdpl.pod.controller.node.liveness.params | nindent 12}}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+            - name: os-clouds
+              mountPath: /etc/openstack/
 {{ if .Values.node_maintenance.enabled }}
         - name: nodemaintenancerequest
           image: {{ tuple . .Values.image | include "getImageUrl" }}
@@ -445,6 +457,9 @@ spec:
             {{- toYaml .Values.osdpl.pod.controller.node_maintenance_request.liveness.params | nindent 12}}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+            - name: os-clouds
+              mountPath: /etc/openstack/
 {{ end }}
         - name: ceph-secrets
           image: {{ tuple . .Values.image | include "getImageUrl" }}
@@ -477,6 +492,9 @@ spec:
             {{- toYaml .Values.osdpl.pod.controller.node_maintenance_request.liveness.params | nindent 12}}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+            - name: os-clouds
+              mountPath: /etc/openstack/
         - name: osdplstatus
           image: {{ tuple . .Values.image | include "getImageUrl" }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
@@ -510,6 +528,9 @@ spec:
             {{- toYaml .Values.osdpl.pod.controller.secrets.liveness.params | nindent 12}}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+            - name: os-clouds
+              mountPath: /etc/openstack/
         - name: osdplsecret
           image: {{ tuple . .Values.image | include "getImageUrl" }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
@@ -543,6 +564,12 @@ spec:
             {{- toYaml .Values.osdpl.pod.controller.secrets.liveness.params | nindent 12}}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+            - name: os-clouds
+              mountPath: /etc/openstack/
+      volumes:
+        - name: os-clouds
+          emptyDir: {}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

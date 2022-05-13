@@ -707,6 +707,7 @@ class Ironic(OpenStackService):
 class Keystone(OpenStackService):
     service = "identity"
     openstack_chart = "keystone"
+    _service_accounts = ["osctl"]
 
     @property
     def _child_generic_objects(self):

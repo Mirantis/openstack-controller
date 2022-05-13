@@ -749,7 +749,9 @@ class ServiceAccountsSecrets:
             service_creds = self.get_service_secrets(self.service)
         except pykube.exceptions.ObjectDoesNotExist:
             service_creds = []
-            for account in self.service_accounts:
+        existing_accounts = [x.account for x in service_creds]
+        for account in self.service_accounts:
+            if account not in existing_accounts:
                 service_creds.append(
                     OSServiceCreds(
                         account=account,

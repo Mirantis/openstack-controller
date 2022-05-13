@@ -15,6 +15,7 @@
 import base64
 from datetime import datetime
 from enum import IntEnum
+import os
 
 from keystoneauth1 import exceptions as ksa_exceptions
 import kopf
@@ -61,11 +62,10 @@ SERVER_STATES_SAFE_FOR_REBOOT = [
 ]
 
 
-def get_keystone_admin_creds():
+def init_keystone_admin_creds():
 
-    global ADMIN_CREDS
-    if ADMIN_CREDS:
-        return ADMIN_CREDS
+    if os.path.exists(settings.OS_CLIENT_CONFIG_FILE):
+        return
 
     keystone_secret = kube.resource_list(
         pykube.Secret,
@@ -77,20 +77,21 @@ def get_keystone_admin_creds():
         raise kopf.TemporaryError(
             "Keystone admin secret not found, can not get keystone admin creds."
         )
-    ADMIN_CREDS = {}
-    for k, v in keystone_secret.obj["data"].items():
-        ADMIN_CREDS[
-            (k[3:] if k.startswith("OS_") else k).lower()
-        ] = base64.b64decode(v).decode("utf-8")
 
-    return ADMIN_CREDS
+    clouds_yaml = base64.b64decode(
+        keystone_secret.obj["data"]["clouds.yaml"]
+    ).decode("utf-8")
+    with open(settings.OS_CLIENT_CONFIG_FILE, "w") as f:
+        f.write(clouds_yaml)
 
 
 class OpenStackClientManager:
-    def __init__(self, creds=None):
-        if not creds:
-            creds = get_keystone_admin_creds()
-        self.oc = openstack.connect(**creds)
+    def __init__(
+        self,
+        cloud=settings.OS_CLOUD,
+    ):
+        init_keystone_admin_creds()
+        self.oc = openstack.connect(cloud=cloud)
 
     def compute_get_services(self, host=None, binary="nova-compute"):
         return list(self.oc.compute.services(host=host, binary=binary))

@@ -119,7 +119,7 @@ OPENSTACK_STACKLIGHT_SHARED_NAMESPACE = "openstack-lma-shared"
 OPENSTACK_STACKLIGHT_SECRET = "rabbitmq-creds"
 OPENSTACK_IAM_SECRET = "openstack-iam-shared"
 
-COMPUTE_NODE_CONTROLLER_SECRET_NAME = "nova-keystone-admin"
+COMPUTE_NODE_CONTROLLER_SECRET_NAME = "keystone-os-clouds"
 
 
 class OpenStackVersion(enum.IntEnum):

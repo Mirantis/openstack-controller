@@ -13,12 +13,14 @@
 #    under the License.
 
 import base64
+from os import path
 from unittest import mock
 
 import kopf
 import pytest
 
 from openstack_controller import openstack_utils
+from openstack_controller import settings
 
 
 NODE_OBJ = {
@@ -35,23 +37,7 @@ NODE_OBJ = {
 
 
 @pytest.mark.asyncio
-async def test_get_keystone_admin_creds(kube_resource_list):
-    kube_resource_list.return_value.get_or_none.return_value = mock.Mock(
-        obj={
-            "data": {
-                "OS_FF": base64.b64encode("foo".encode("utf-8")),
-                "BAR": base64.b64encode("bar".encode("utf-8")),
-            }
-        }
-    )
-    assert {
-        "ff": "foo",
-        "bar": "bar",
-    } == openstack_utils.get_keystone_admin_creds()
-
-
-@pytest.mark.asyncio
-async def test_get_keystone_admin_creds_timeout(kube_resource_list):
+async def test_init_keystone_admin_creds_timeout(kube_resource_list):
     get_or_none_mock = mock.Mock()
     get_or_none_mock.return_value = None
     openstack_utils.ADMIN_CREDS = None
@@ -59,42 +45,36 @@ async def test_get_keystone_admin_creds_timeout(kube_resource_list):
     kube_resource_list.return_value.get_or_none.return_value = None
 
     with pytest.raises(kopf.TemporaryError):
-        openstack_utils.get_keystone_admin_creds()
+        openstack_utils.init_keystone_admin_creds()
 
 
 @pytest.mark.asyncio
-async def test_get_keystone_admin_creds_multiple_times(kube_resource_list):
+async def test_init_keystone_admin_creds_multiple_times(
+    mocker, kube_resource_list
+):
+    file_exists_mock = mocker.patch.object(path, "exists")
+    mocker.patch.object(
+        settings, "OS_CLIENT_CONFIG_FILE", "/tmp/osctl-clouds.yaml"
+    )
+    file_exists_mock.side_effect = [False, True]
     kube_resource_list.return_value.get_or_none.return_value = mock.Mock(
         obj={
             "data": {
-                "OS_FF": base64.b64encode("foo".encode("utf-8")),
-                "BAR": base64.b64encode("bar".encode("utf-8")),
+                "clouds.yaml": base64.b64encode("foo".encode("utf-8")),
             }
         }
     )
-    openstack_utils.get_keystone_admin_creds()
-    openstack_utils.get_keystone_admin_creds()
+    openstack_utils.init_keystone_admin_creds()
+    openstack_utils.init_keystone_admin_creds()
     kube_resource_list.assert_called_once()
 
 
 @pytest.mark.asyncio
 async def test_openstack_client_no_creds(mocker, openstack_connect):
-    get_keystone_creds_mock = mocker.patch.object(
-        openstack_utils, "get_keystone_admin_creds"
+    init_keystone_creds_mock = mocker.patch.object(
+        openstack_utils, "init_keystone_admin_creds"
     )
-    get_keystone_creds_mock.return_value = {"ff": "foo", "bar": "bar"}
+    init_keystone_creds_mock.return_value = None
 
     openstack_utils.OpenStackClientManager()
-    get_keystone_creds_mock.assert_called_once()
-    openstack_connect.assert_called_once_with(ff="foo", bar="bar")
-
-
-@pytest.mark.asyncio
-async def test_openstack_client_creds(mocker, openstack_connect):
-    get_keystone_creds_mock = mocker.patch.object(
-        openstack_utils, "get_keystone_admin_creds"
-    )
-    creds = {"ff": "foo", "bar": "bar"}
-    openstack_utils.OpenStackClientManager(creds)
-    get_keystone_creds_mock.assert_not_called()
-    openstack_connect.assert_called_once_with(**creds)
+    init_keystone_creds_mock.assert_called_once()
