@@ -19,6 +19,7 @@
 {%- set glance_cinder_backends = spec.get('features', {}).get('glance', {}).get('backends', {}).get('cinder', {}) %}
 {%- set glance_cinder_multi = {} %}
 {%- set cinder_db_cleanup = spec.get('features', {}).get('database', {}).get('cleanup', {}).get('cinder', {'enabled': true}) %}
+{%- from 'macros/etcd3.j2' import get_etcd3_endpoint %}
 
 spec:
   available_releases:
@@ -224,11 +225,7 @@ spec:
           coordination:
             #There are some problems with etcd3 driver so we shouldn't use it
             #BUG: https://mirantis.jira.com/browse/PRODX-21783
-{%- if spec.openstack_version in ['queens', 'rocky', 'stein', 'train', 'ussuri'] %}
-            backend_url: "etcd3+http://etcd:2379"
-{% else %}
-            backend_url: "etcd3+http://etcd:2379?api_version=v3"
-{%- endif %}
+            backend_url: {{ get_etcd3_endpoint(spec.openstack_version, 'etcd3gw') }}
           service_user:
             send_service_user_token: true
           backend_defaults:

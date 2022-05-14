@@ -6,6 +6,7 @@
 {%- set stacklight_enabled = spec.get('features', {}).get('stacklight', {}).get('enabled', False) %}
 {%- set notification_topics = ['notifications'] %}
 {%- set telemetry_mode = spec.get('features', {}).get('telemetry', {}).get('mode', 'autoscaling') %}
+{%- from 'macros/etcd3.j2' import get_etcd3_endpoint %}
 
 spec:
   available_releases:
@@ -59,7 +60,7 @@ spec:
           coordination:
             #There are some problems with etcd3+http driver so we shouldn't use it
             #BUG: https://mirantis.jira.com/browse/PRODX-21785
-            backend_url: etcd3://etcd:2379
+            backend_url: {{ get_etcd3_endpoint(spec.openstack_version, 'etcd3') }}
           api:
             aodh_is_enabled: "True"
           compute:
