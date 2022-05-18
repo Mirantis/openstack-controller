@@ -1014,8 +1014,12 @@ class Neutron(OpenStackService, MaintenanceApiMixin):
 
     @property
     def _child_objects(self):
-        neutron_jobs = {}
-
+        neutron_jobs = {
+            "neutron-db-sync": {
+                "images": ["neutron_db_sync"],
+                "manifest": "job_db_sync",
+            },
+        }
         if (
             utils.get_in(self.mspec["features"], ["neutron", "backend"])
             == "tungstenfabric"
@@ -1034,6 +1038,12 @@ class Neutron(OpenStackService, MaintenanceApiMixin):
         return {
             "neutron": {
                 "Job": neutron_jobs,
+                "Deployment": {
+                    "neutron-server": {
+                        "images": ["neutron_server"],
+                        "manifest": "deployment_server",
+                    },
+                },
             },
             "rabbitmq": {
                 "Job": {
@@ -1045,6 +1055,63 @@ class Neutron(OpenStackService, MaintenanceApiMixin):
                 }
             },
         }
+
+    @property
+    def _child_objects_dynamic(self):
+        if (
+            utils.get_in(self.mspec["features"], ["neutron", "backend"])
+            == "tungstenfabric"
+        ):
+            return {}
+        return {
+            "neutron": {
+                "DaemonSet": {
+                    "ovs-agent": {
+                        "selector": {
+                            "application__in": {"neutron"},
+                            "component__in": {"neutron-ovs-agent"},
+                        },
+                        "meta": {
+                            "images": ["neutron_openvswitch_agent"],
+                            "manifest": "daemonset_ovs_agent",
+                        },
+                    },
+                    "sriov-agent": {
+                        "selector": {
+                            "application__in": {"neutron"},
+                            "component__in": {"neutron-sriov-agent"},
+                        },
+                        "meta": {
+                            "images": ["neutron_sriov_agent"],
+                            "manifest": "daemonset_sriov_agent",
+                        },
+                    },
+                }
+            }
+        }
+
+    @layers.kopf_exception
+    async def _upgrade(self, event, **kwargs):
+        static_map = [
+            ("Job", "neutron-db-sync"),
+            ("Deployment", "neutron-server"),
+        ]
+
+        dynamic_map = [
+            ("DaemonSet", "sriov-agent"),
+            ("DaemonSet", "ovs-agent"),
+        ]
+
+        for kind, obj_name in static_map:
+            child_obj = self.get_child_object(kind, obj_name)
+            if kind == "Job":
+                await child_obj.purge()
+            await child_obj.enable(self.openstack_version, True)
+
+        for kind, abstract_name in dynamic_map:
+            child_objs = self.get_child_objects_dynamic(kind, abstract_name)
+            for child_obj in child_objs:
+                await child_obj.enable(self.openstack_version, True)
 
     async def apply(self, event, **kwargs):
         neutron_features = self.mspec["features"].get("neutron", {})

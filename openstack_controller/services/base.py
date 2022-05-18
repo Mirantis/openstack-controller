@@ -97,6 +97,20 @@ class Service:
         #       }
     }
 
+    _child_objects_dynamic = {
+        #       '<chart>' {
+        #           '<kind>': {
+        #               '<abstract_name>': {
+        #                   'selector': {},
+        #                   'meta': {
+        #                       'images': ['List of images'],
+        #                       'manifest': '<manifest flag>'
+        #                    }
+        #               }
+        #           }
+        #       }
+    }
+
     _service_accounts = []
     _required_accounts = {}
     _secret_class = secrets.OpenStackServiceSecret
@@ -248,6 +262,36 @@ class Service:
                 "repo_url": repos[repo],
                 "version": release["version"],
             }
+        return res
+
+    def get_child_objects_dynamic(self, kind, abstract_name):
+        res = []
+        for chart_name, charts in self._child_objects_dynamic.items():
+            child = {}
+            m_ext = {}
+            for kind, abstracts in charts.items():
+                child["kind"] = kind
+                abstract = abstracts[abstract_name]
+                meta = abstract["meta"]
+                m_ext = meta
+                if "hash_fields" not in meta:
+                    m_ext["hash_fields"] = []
+                m_ext["chart"] = chart_name
+                m_ext_obj = kube.HelmBundleExt(**m_ext)
+                for dynamic_object in kube.resource_list(
+                    kube.__getattribute__(kind),
+                    selector=abstract["selector"],
+                    namespace=self.namespace,
+                ):
+                    child_obj = kube.dummy(
+                        kube.__getattribute__(kind),
+                        dynamic_object.name,
+                        dynamic_object.namespace,
+                    )
+                    child_obj.helmbundle_ext = m_ext_obj
+                    child_obj.service = self
+
+                    res.append(child_obj)
         return res
 
     def get_child_object(self, kind, name):

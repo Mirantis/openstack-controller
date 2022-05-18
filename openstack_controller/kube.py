@@ -398,6 +398,20 @@ class Deployment(pykube.Deployment, HelmBundleMixin):
         return False
 
 
+class DaemonSet(pykube.DaemonSet, HelmBundleMixin):
+    @property
+    def ready(self):
+        return self.obj["status"]["observedGeneration"] >= self.obj[
+            "metadata"
+        ]["generation"] and self.obj["status"].get(
+            "updatedNumberScheduled"
+        ) == self.obj[
+            "status"
+        ].get(
+            "numberReady"
+        )
+
+
 class Pod(pykube.Pod):
 
     # NOTE(vsaienko): override delete method unless client accepts grace_period parameter
