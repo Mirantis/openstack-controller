@@ -7,6 +7,7 @@
 {%- set notification_topics = ['notifications'] %}
 {%- do notification_topics.append('stacklight_notifications') if stacklight_enabled %}
 {%- set aodh_db_cleanup = spec.get('features', {}).get('database', {}).get('cleanup', {}).get('aodh', {'enabled': true}) %}
+{%- from 'macros/etcd3.j2' import get_etcd3_endpoint %}
 
 spec:
   available_releases:
@@ -46,7 +47,7 @@ spec:
           coordination:
             #There are some problems with etcd3+http driver so we shouldn't use it
             #BUG: https://mirantis.jira.com/browse/PRODX-21784
-            backend_url: etcd3://etcd:2379
+            backend_url: {{ get_etcd3_endpoint(spec.openstack_version, 'etcd3') }}
           keystone_authtoken:
             memcache_security_strategy: ENCRYPT
             memcache_secret_key: {{ credentials.memcached }}

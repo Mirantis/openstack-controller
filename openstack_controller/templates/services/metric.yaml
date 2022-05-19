@@ -6,6 +6,7 @@
 {%- set stacklight_enabled = spec.get('features', {}).get('stacklight', {}).get('enabled', False) %}
 {%- set notification_topics = ['notifications'] %}
 {%- do notification_topics.append('stacklight_notifications') if stacklight_enabled %}
+{%- from 'macros/etcd3.j2' import get_etcd3_endpoint %}
 
 spec:
   available_releases:
@@ -96,7 +97,7 @@ spec:
             debug: false
             #There are some problems with etcd3+http driver so we shouldn't use it
             #BUG: https://mirantis.jira.com/browse/PRODX-21786
-            coordination_url: etcd3://etcd:2379
+            coordination_url: {{ get_etcd3_endpoint(spec.openstack_version, 'etcd3') }}
           storage:
             driver: redis
             redis_url: redis://:{{ redis_secret }}@rfs-openstack-redis.{{ redis_namespace }}:26379?sentinel=mymaster&db=0
