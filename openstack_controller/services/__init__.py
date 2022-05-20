@@ -754,6 +754,10 @@ class Keystone(OpenStackService):
                     "images": ["keystone_federations_create"],
                     "manifest": "job_federations_create",
                 },
+                "osctl-ks-user": {
+                    "images": ["ks_user"],
+                    "manifest": "job_ks_user",
+                },
             },
             "Deployment": {
                 "keystone-api": {
