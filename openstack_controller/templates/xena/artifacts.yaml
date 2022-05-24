@@ -137,7 +137,7 @@ placement_db_sync: '{{ images_base_url }}/openstack/placement:xena-focal-2022051
 keystone_db_sync_expand: '{{ images_base_url }}/openstack/keystone:xena-focal-20220519114151'
 keystone_db_sync_migrate: '{{ images_base_url }}/openstack/keystone:xena-focal-20220519114151'
 keystone_db_sync_contract: '{{ images_base_url }}/openstack/keystone:xena-focal-20220519114151'
-octavia_amphora: '{{ binary_base_url }}/openstack/bin/octavia/amphora-x64-haproxy-xena-20220519123650.qcow2'
+octavia_amphora: '{{ binary_base_url }}/openstack/bin/octavia/amphora-x64-haproxy-xena-20220524070159.qcow2'
 etcd: '{{ images_base_url }}/openstack/extra/etcd:3.5.2'
 etcd_db_compact: '{{ images_base_url }}/openstack/extra/etcd:3.5.2'
 cinder_db_sync_online: '{{ images_base_url }}/openstack/cinder:xena-focal-20220519114151'
@@ -174,7 +174,7 @@ mariadb_controller: '{{ images_base_url }}/general/mariadb:10.6.7-focal-20220503
 horizon_mirantis_theme_sha256summ: 3bd995aceef8d93ed76d83f667403aebbdca54bc12adc0fc4f80ebbe0e164336
 horizon_mirantis_theme_url: '{{ binary_base_url }}/openstack/bin/horizon/mirantis-xena-9f691e3-20220110111511.tar.gz'
 ceph_config_helper: '{{ images_base_url }}/openstack/extra/ceph-config-helper:octopus-focal-20220516093942'
-octavia_amphora_checksum: 7793ad52b1750135464065b3bc5c1112
+octavia_amphora_checksum: a365c189a74070e941c51846c3545d68
 masakari_db_sync: '{{ images_base_url }}/openstack/masakari:xena-focal-20220519114151'
 masakari_api: '{{ images_base_url }}/openstack/masakari:xena-focal-20220519114151'
 masakari_engine: '{{ images_base_url }}/openstack/masakari:xena-focal-20220519114151'
@@ -185,7 +185,7 @@ frr_info: '{{ images_base_url }}/openstack/extra/ceph-config-helper:octopus-foca
 frr: '{{ images_base_url }}/general/external/docker.io/frrouting/frr:v8.2.2'
 cinder_service_cleaner: '{{ images_base_url }}/openstack/cinder:xena-focal-20220519114151'
 iscsi_iscsi: '{{ images_base_url }}/openstack/cinder:xena-focal-20220519114151'
-iscsi_tgt: '{{ images_base_url }}/openstack/cinder:xena-focal-20220519114151'
+iscsi_tgt: '{{ images_base_url }}/general/tgt:1.0.x-focal-20220524092549'
 strongswan: '{{ images_base_url }}/openstack/extra/strongswan:alpine-5.9.1-20211018180158'
 keystone_init_secrets: '{{ images_base_url }}/openstack/extra/ceph-config-helper:octopus-focal-20220516093942'
 rsyslog: '{{ images_base_url }}/openstack/extra/rsyslog:v8.2001.0-20210901090922'
