@@ -62,6 +62,7 @@ async def node_maintenance_request_change_handler(body, **kwargs):
     osdpl = kube.get_osdpl()
     if not osdpl or not osdpl.exists():
         LOG.info("Can't find OpenStackDeployment object")
+        nwl.set_state_inactive()
         return
 
     if nwl.is_active():
@@ -96,6 +97,8 @@ async def node_maintenance_request_delete_handler(body, **kwargs):
     osdpl = kube.get_osdpl()
     if not osdpl or not osdpl.exists():
         LOG.info("Can't find OpenStackDeployment object")
+        nwl.set_inner_state_inactive()
+        nwl.set_state_active()
         return
 
     if nwl.is_maintenance():
