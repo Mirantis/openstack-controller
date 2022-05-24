@@ -180,7 +180,7 @@ frr_info: '{{ images_base_url }}/openstack/extra/ceph-config-helper:octopus-foca
 frr: '{{ images_base_url }}/general/external/docker.io/frrouting/frr:v8.2.2'
 cinder_service_cleaner: '{{ images_base_url }}/openstack/cinder:train-bionic-20220513073431'
 iscsi_iscsi: '{{ images_base_url }}/openstack/cinder:train-bionic-20220513073431'
-iscsi_tgt: '{{ images_base_url }}/openstack/cinder:train-bionic-20220513073431'
+iscsi_tgt: '{{ images_base_url }}/general/tgt:1.0.x-bionic-20220524121436'
 strongswan: '{{ images_base_url }}/openstack/extra/strongswan:alpine-5.9.1-20211018180158'
 keystone_init_secrets: '{{ images_base_url }}/openstack/extra/ceph-config-helper:octopus-focal-20220516093942'
 rsyslog: '{{ images_base_url }}/openstack/extra/rsyslog:v8.2001.0-20210901090922'
