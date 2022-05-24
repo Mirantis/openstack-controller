@@ -565,9 +565,13 @@ spec:
             # Combined DVR + L3 HA is not recommended until load tested (had issues in the past)
             {%- if spec.get('features', {}).get('neutron', {}).get('dvr', {}).get('enabled', False) %}
             l3_ha: False
+            # NOTE(vsaienko): Enable automatic l3 agent failover only when using non-HA routers, for example
+            # DVR case, to make sure SNAT parts are moved from dead node automatically. For HA routers we allow
+            # one node failure a time, as we have backup router.
             allow_automatic_l3agent_failover: True
             {%- else %}
             l3_ha: True
+            allow_automatic_l3agent_failover: False
             {%- endif %}
             max_l3_agents_per_router: 2
             l3_ha_network_type: vxlan

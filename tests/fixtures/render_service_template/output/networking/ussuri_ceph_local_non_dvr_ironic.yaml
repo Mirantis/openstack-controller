@@ -189,6 +189,7 @@ spec:
             dnsmasq_dns_servers: 10.172.1.100
             external_dns_driver: designate
             l3_ha: true
+            allow_automatic_l3agent_failover: false
             l3_ha_network_type: vxlan
             max_l3_agents_per_router: 2
             service_plugins: router,metering,qos
