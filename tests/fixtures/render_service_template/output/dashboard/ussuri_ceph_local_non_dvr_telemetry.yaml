@@ -16,6 +16,9 @@ spec:
             annotations:
               nginx.ingress.kubernetes.io/proxy-body-size: "0"
       conf:
+        software:
+          horizon:
+            dashboard_path: '/var/lib/openstack/lib/python3.6/site-packages/openstack_dashboard'
         policy.d: {}
         horizon:
           policy:

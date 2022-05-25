@@ -102,6 +102,15 @@ spec:
 {{ spec.features.ssl.public_endpoints.api_key | indent( width=18, first=True) }}
       conf:
         policy.d: {{ custom_policies }}
+        software:
+          horizon:
+{%- if spec.openstack_version == 'queens' %}
+            dashboard_path: /var/lib/openstack/lib/python2.7/site-packages/openstack_dashboard
+{%- elif spec.openstack_version in ['rocky', 'stein', 'train', 'ussuri', 'master' ] %}
+            dashboard_path: /var/lib/openstack/lib/python3.6/site-packages/openstack_dashboard
+{%- else %}
+            dashboard_path: /var/lib/openstack/lib/python3.8/site-packages/openstack_dashboard
+{%- endif %}
         horizon:
           policy:
   {%- for component, component_policy in service_policy.items() %}
