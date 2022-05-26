@@ -10,6 +10,8 @@ spec:
       conf:
         ingress:
           nginx-status-ipv4-whitelist: 0.0.0.0/0
+          client-header-buffer-size: 10k
+          large-client-header-buffers: 4 16k
       endpoints:
         cluster_domain_suffix: cluster.local
       images:

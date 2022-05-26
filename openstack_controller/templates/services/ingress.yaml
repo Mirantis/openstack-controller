@@ -37,6 +37,9 @@ spec:
         ingress:
           # TODO: allow only stacklight pods
           nginx-status-ipv4-whitelist: "0.0.0.0/0"
+          # NOTE(vsaienko) jwt tokens might be too big
+          client-header-buffer-size: 10k
+          large-client-header-buffers: 4 16k
       pod:
         probes:
           server:
