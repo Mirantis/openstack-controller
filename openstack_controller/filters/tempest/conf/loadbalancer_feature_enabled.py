@@ -1,3 +1,4 @@
+from openstack_controller import constants
 from openstack_controller.filters.tempest import base_section
 
 
@@ -13,6 +14,7 @@ class LoadBalancerFeatureEnabled(base_section.BaseSection):
         "l4_protocol",
         "spare_pool_enabled",
         "session_persistence_enabled",
+        "force_cleanup_enabled",
     ]
 
     @property
@@ -58,3 +60,12 @@ class LoadBalancerFeatureEnabled(base_section.BaseSection):
     @property
     def session_persistence_enabled(self):
         pass
+
+    @property
+    def force_cleanup_enabled(self):
+        if (
+            self.spec["openstack_version"] != "master"
+            and constants.OpenStackVersion[self.spec["openstack_version"]]
+            >= constants.OpenStackVersion["victoria"]
+        ):
+            return True
