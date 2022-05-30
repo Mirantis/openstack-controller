@@ -403,6 +403,10 @@ spec:
                     live_migration_interface: 'live01'
                   hypervisor:
                     host_interface: 'live01'
+                console:
+                  novnc:
+                    compute:
+                      vncserver_proxyclient_interface: 'live01'
             compute::local_migration_interface:
               values:
                 conf:
@@ -413,6 +417,10 @@ spec:
                     live_migration_interface: 'live01'
                   hypervisor:
                     host_interface: 'live01'
+                console:
+                  novnc:
+                    compute:
+                      vncserver_proxyclient_interface: 'live01'
             compute::local_sriov_disabled:
               values:
                 conf:
@@ -520,3 +528,7 @@ spec:
           novncproxy: false
         use_fqdn:
           compute: false
+      console:
+        novnc:
+          compute:
+            vncserver_proxyclient_interface: ens3

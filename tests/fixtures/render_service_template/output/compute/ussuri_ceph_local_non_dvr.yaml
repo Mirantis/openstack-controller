@@ -469,3 +469,7 @@ spec:
           novncproxy: false
         use_fqdn:
           compute: false
+      console:
+        novnc:
+          compute:
+            vncserver_proxyclient_interface: ens3
