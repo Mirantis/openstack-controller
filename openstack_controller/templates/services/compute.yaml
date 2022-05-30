@@ -281,6 +281,10 @@ spec:
                     live_migration_interface: {{ nova_override.live_migration_interface }}
                   hypervisor:
                     host_interface: {{ nova_override.live_migration_interface }}
+                console:
+                  novnc:
+                    compute:
+                      vncserver_proxyclient_interface: {{ nova_override.live_migration_interface }}
             {%- endif %}
           {%- endif %}
           {%- endif %}
@@ -663,16 +667,20 @@ spec:
         logging:
           logger_nova:
             level: {{ spec.get('features', {}).get('logging', {}).get('nova', {}).get('level', 'INFO') }}
-        {%- if spec.get('features', {}).get('nova', {}).get('live_migration_interface') %}
-        libvirt:
-          live_migration_interface: {{ spec.features.nova.live_migration_interface }}
-        hypervisor:
-          host_interface: {{ spec.features.nova.live_migration_interface }}
-        {%- endif %}
         ssh_private: |
           {{ ssh_credentials.private|indent(10)|trim }}
         ssh_public: |
           {{ ssh_credentials.public }}
+      {%- if spec.get('features', {}).get('nova', {}).get('live_migration_interface') %}
+        libvirt:
+          live_migration_interface: {{ spec.features.nova.live_migration_interface }}
+        hypervisor:
+          host_interface: {{ spec.features.nova.live_migration_interface }}
+      console:
+        novnc:
+          compute:
+            vncserver_proxyclient_interface: {{ spec.features.nova.live_migration_interface }}
+      {%- endif %}
       network:
         core_plugin: {{ neutron_backend }}
         {%- if neutron_backend == 'tungstenfabric' %}
