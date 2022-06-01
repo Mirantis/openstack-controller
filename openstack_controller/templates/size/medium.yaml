@@ -225,6 +225,8 @@ services:
                   max_unavailable: 10%
                 sriov_agent:
                   max_unavailable: 10%
+                netns_cleanup_cron:
+                  max_unavailable: 100%
         conf:
           neutron:
             DEFAULT:
