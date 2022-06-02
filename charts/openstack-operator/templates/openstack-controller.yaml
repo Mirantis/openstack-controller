@@ -304,9 +304,10 @@ spec:
               value: '{{ toJson .Values.global.proxy }}'
 {{ tuple . | include "openstack-controller.common_env" | indent 12 }}
           livenessProbe:
-            httpGet:
-              path: /healthz
-              port: 32768
+            exec:
+              command:
+                - curl
+                - http://127.0.0.1:32768/healthz
             {{- toYaml .Values.osdpl.pod.controller.secrets.liveness.params | nindent 12}}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
@@ -340,9 +341,10 @@ spec:
             {{- end }}
 {{ tuple . | include "openstack-controller.common_env" | indent 12 }}
           livenessProbe:
-            httpGet:
-              path: /healthz
-              port: 32770
+            exec:
+              command:
+                - curl
+                - http://127.0.0.1:32770/healthz
             {{- toYaml .Values.osdpl.pod.controller.secrets.liveness.params | nindent 12}}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
@@ -376,9 +378,10 @@ spec:
             {{- end }}
 {{ tuple . | include "openstack-controller.common_env" | indent 12 }}
           livenessProbe:
-            httpGet:
-              path: /healthz
-              port: 32771
+            exec:
+              command:
+                - curl
+                - http://127.0.0.1:32771/healthz
             {{- toYaml .Values.osdpl.pod.controller.health.liveness.params | nindent 12}}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
@@ -412,9 +415,10 @@ spec:
             {{- end }}
 {{ tuple . | include "openstack-controller.common_env" | indent 12 }}
           livenessProbe:
-            httpGet:
-              path: /healthz
-              port: 32772
+            exec:
+              command:
+                - curl
+                - http://127.0.0.1:32772/healthz
             {{- toYaml .Values.osdpl.pod.controller.node.liveness.params | nindent 12}}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
@@ -451,9 +455,10 @@ spec:
             {{- end }}
 {{ tuple . | include "openstack-controller.common_env" | indent 12 }}
           livenessProbe:
-            httpGet:
-              path: /healthz
-              port: 32773
+            exec:
+              command:
+                - curl
+                - http://127.0.0.1:32773/healthz
             {{- toYaml .Values.osdpl.pod.controller.node_maintenance_request.liveness.params | nindent 12}}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
@@ -486,9 +491,10 @@ spec:
               value: openstack-controller.ceph.secrets
 {{ tuple . | include "openstack-controller.common_env" | indent 12 }}
           livenessProbe:
-            httpGet:
-              path: /healthz
-              port: 32774
+            exec:
+              command:
+                - curl
+                - http://127.0.0.1:32774/healthz
             {{- toYaml .Values.osdpl.pod.controller.node_maintenance_request.liveness.params | nindent 12}}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
@@ -522,9 +528,10 @@ spec:
             {{- end }}
 {{ tuple . | include "openstack-controller.common_env" | indent 12 }}
           livenessProbe:
-            httpGet:
-              path: /healthz
-              port: 32775
+            exec:
+              command:
+                - curl
+                - http://127.0.0.1:32775/healthz
             {{- toYaml .Values.osdpl.pod.controller.secrets.liveness.params | nindent 12}}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
@@ -558,9 +565,10 @@ spec:
             {{- end }}
 {{ tuple . | include "openstack-controller.common_env" | indent 12 }}
           livenessProbe:
-            httpGet:
-              path: /healthz
-              port: 32776
+            exec:
+              command:
+                - curl
+                - http://127.0.0.1:32776/healthz
             {{- toYaml .Values.osdpl.pod.controller.secrets.liveness.params | nindent 12}}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
