@@ -745,6 +745,11 @@ spec:
                                    description: |
                                      Used to request specific scopes
                                      default: "openid email profile"
+                                OIDCClaimDelimiter:
+                                  type: string
+                                  description: |
+                                    The delimiter to use when setting multi-valued claims (openid-connect or oauth20) in the HTTP
+                                    headers/environment variables.
                         domain_specific_configuration:
                           type: object
                           properties:

@@ -73,6 +73,7 @@ spec:
               ErrorLog /dev/stdout
               SetEnvIf X-Forwarded-For "^.*\..*\..*\..*" forwarded proxy env=forwarded
               OIDCClaimPrefix "OIDC-"
+              OIDCClaimDelimiter ";"
               OIDCResponseType "id_token"
               OIDCScope "openid email profile"
               OIDCProviderMetadataURL https://keycloak.it.just.works/auth/realms/iam/.well-known/openid-configuration

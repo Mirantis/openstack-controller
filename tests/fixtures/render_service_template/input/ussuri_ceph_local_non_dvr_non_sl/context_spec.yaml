@@ -25,6 +25,7 @@ features:
       oidc:
         OIDCSSLValidateServer: false
         OIDCOAuthSSLValidateServer: false
+        OIDCClaimDelimiter: ";"
     domain_specific_configuration:
       enabled: true
       domains:
