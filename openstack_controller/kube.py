@@ -159,19 +159,13 @@ class HelmBundleMixin:
             await self.service.set_release_values(
                 self.helmbundle_ext.chart, diff
             )
+            await asyncio.sleep(delay)
+
             if not wait_completion:
                 return
             if self.exists():
                 self.reload()
-                applied_images = []
-                for image in self.helmbundle_ext.images:
-                    if self.image_applied(
-                        self.service.get_image(
-                            image, self.helmbundle_ext.chart, version
-                        )
-                    ):
-                        applied_images.append(image)
-                if len(applied_images) > 0 and self.ready:
+                if self.ready and not self.need_apply_images(version):
                     return
                 LOG.info(
                     f"The images are not updated yet for {self.kind} {self.name}."
@@ -180,7 +174,6 @@ class HelmBundleMixin:
                 f"The {self.kind} {self.name} is not ready. Waiting, attempt: {i}"
             )
             i += 1
-            await asyncio.sleep(delay)
 
     async def enable(
         self,
@@ -266,6 +259,21 @@ class HelmBundleMixin:
                     f"Found image in container {container['name']} for {self.kind}: {self.name}"
                 )
                 return True
+
+    def need_apply_images(self, version):
+        self.reload()
+        applied_images = []
+        for image in self.helmbundle_ext.images:
+            applied_images.append(
+                self.image_applied(
+                    self.service.get_image(
+                        image, self.helmbundle_ext.chart, version
+                    )
+                )
+            )
+        if not all(applied_images):
+            return True
+        return False
 
 
 class Secret(pykube.Secret, HelmBundleMixin):

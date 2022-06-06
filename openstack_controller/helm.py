@@ -175,10 +175,14 @@ class HelmManager:
     ):
         args = args or []
         repo = self._substitute_local_proxy(repo)
+        # Avoid using --reuse-values, it drops values for overrides related upstream
+        # https://github.com/helm/helm/issues/10214
         with tempfile.NamedTemporaryFile(
             mode="w", prefix=name, delete=True
         ) as tmp:
-            yaml.dump(values, tmp)
+            current_values = await self.get_release_values(name)
+            utils.merger.merge(current_values, values)
+            yaml.dump(current_values, tmp)
             cmd = [
                 "upgrade",
                 name,
@@ -193,7 +197,6 @@ class HelmManager:
                 tmp.name,
                 "--history-max",
                 self.max_history,
-                "--reuse-values",
                 *args,
             ]
             return await self.run_cmd(cmd, release_name=name)

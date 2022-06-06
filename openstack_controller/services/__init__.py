@@ -1167,6 +1167,23 @@ class Neutron(OpenStackService, MaintenanceApiMixin):
             tfs = secrets.TungstenFabricSecret()
             tfs.save(secret_data)
 
+        # NOTE(vsaienko): Ensure l2 agents updated prior all other services.
+        dynamic_map = [
+            ("DaemonSet", "sriov-agent"),
+            ("DaemonSet", "ovs-agent"),
+        ]
+        for kind, abstract_name in dynamic_map:
+            child_objs = self.get_child_objects_dynamic(kind, abstract_name)
+            for child_obj in child_objs:
+                if child_obj.exists() and child_obj.need_apply_images(
+                    self.openstack_version
+                ):
+                    await child_obj.enable(
+                        self.openstack_version,
+                        wait_completion=True,
+                        timeout=None,
+                    )
+
         await super().apply(event, **kwargs)
 
     async def remove_node_from_scheduling(self, node):
