@@ -8,6 +8,7 @@
 {%- do notification_topics.append('stacklight_notifications') if stacklight_enabled %}
 {%- set components_with_dedicated_messaging = spec.get('features', {}).get('messaging', {}).get('components_with_dedicated_messaging', []) %}
 {%- set masakari_db_cleanup = spec.get('features', {}).get('database', {}).get('cleanup', {}).get('masakari', {'enabled': true}) %}
+{%- from 'macros/etcd3.j2' import get_etcd3_endpoint %}
 
 spec:
   available_releases:
@@ -99,6 +100,8 @@ spec:
           DEFAULT:
             os_privileged_user_name: {{ admin_creds.identity.username }}
             os_privileged_user_password: {{ admin_creds.identity.password }}
+          coordination:
+            backend_url: {{ get_etcd3_endpoint(spec.openstack_version, 'etcd3gw') }}
           keystone_authtoken:
             memcache_security_strategy: ENCRYPT
             memcache_secret_key: {{ credentials.memcached }}
