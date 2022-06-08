@@ -137,9 +137,6 @@ spec:
             max_active_keys: 7
           cache:
             backend: oslo_cache.memcache_pool
-          oslo_policy:
-            # Trigger service restart to workaround PRODX-24237
-            policy_in_code: {{ spec.get("features", {}).get("policies", {}).get("policy_in_code", {}).get("enabled", False) }}
           oslo_messaging_notifications:
             topics: {{ notification_topics|join(',') }}
 {%- if keystone_domain_specific_config.get("enabled", False) %}
