@@ -221,6 +221,10 @@ spec:
         policy.d:
           01-controller-default.yaml: {{ service_policy }}
           02-custom.yaml: {{ spec.get("features", {}).get("policies", {}).get("glance", {}) }}
+        ceph:
+          config:
+            global:
+              mon_host: {{ ceph.mon_host }}
         glance:
           cors:
             allow_headers: Content-Type,Cache-Control,Content-Language,Expires,Last-Modified,Pragma,X-Custom-Header,X-Auth-Token
@@ -291,6 +295,7 @@ spec:
         job_rabbit_init: false
         job_storage_init: false
         secret_ca_bundle: true
+        ceph_conf: true
 {%- if signature.enabled %}
         job_barbican_cert_init: true
 {%- endif %}

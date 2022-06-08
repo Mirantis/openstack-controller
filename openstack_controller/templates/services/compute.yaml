@@ -117,6 +117,7 @@ spec:
 {%- endfor %}
       manifests:
         network_policy: false
+        ceph_conf: true
 {%- if ceph_enabled %}
       ceph_client:
         configmap: rook-ceph-config
@@ -129,6 +130,9 @@ spec:
           cinder:
             user: {{ ceph.nova.username }}
             keyring: {{ ceph.nova.keyring }}
+          config:
+            global:
+              mon_host: {{ ceph.mon_host }}
 {%- else %}
           enabled: false
 {%- endif %}
@@ -382,6 +386,7 @@ spec:
         cron_job_db_purge: {{ nova_db_cleanup.enabled }}
         network_policy: false
         job_rabbit_init: false
+        ceph_conf: true
 {%- if spec.openstack_version not in ['queens', 'rocky'] %}
         deployment_consoleauth: false
 # Since Rocky placemnt is deployed as separate service
@@ -575,6 +580,9 @@ spec:
           cinder:
             user: {{ ceph.nova.username }}
             keyring: {{ ceph.nova.keyring }}
+          config:
+            global:
+              mon_host: {{ ceph.mon_host }}
 {%- else %}
           enabled: false
 {%- endif %}

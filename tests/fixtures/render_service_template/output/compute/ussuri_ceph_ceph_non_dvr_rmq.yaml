@@ -101,6 +101,12 @@ spec:
             keyring: AQDNZLJf8S+fORAA6hg50Jo+vBq07kxtBXB9PQ==
             user: nova
           enabled: true
+          config:
+            global:
+              mon_host:
+                - "10.10.10.1:6789"
+                - "10.10.10.2:6789"
+                - "10.10.10.3:6789"
         libvirt:
           listen_addr: 0.0.0.0
         qemu:
@@ -126,6 +132,7 @@ spec:
           image_repo_sync: image-repo-sync:latest
           libvirt: libvirt:latest
       manifests:
+        ceph_conf: true
         network_policy: false
   - chart: osh/nova
     name: openstack-nova
@@ -142,6 +149,12 @@ spec:
           cinder:
             user: nova
             keyring: AQDNZLJf8S+fORAA6hg50Jo+vBq07kxtBXB9PQ==
+          config:
+            global:
+              mon_host:
+                - "10.10.10.1:6789"
+                - "10.10.10.2:6789"
+                - "10.10.10.3:6789"
         hypervisor:
           host_interface: ens3
         libvirt:
@@ -476,6 +489,7 @@ spec:
         secret_keystone_placement: false
         service_ingress_placement: false
         service_placement: false
+        ceph_conf: true
       network:
         core_plugin: ml2
         sshd:

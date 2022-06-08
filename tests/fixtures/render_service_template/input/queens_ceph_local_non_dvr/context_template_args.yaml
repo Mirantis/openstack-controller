@@ -13,6 +13,10 @@ block-storage:
           role: volumes
       secrets: cinder-rbd-keyring
       username: cinder
+    mon_host:
+      - "10.10.10.1:6789"
+      - "10.10.10.2:6789"
+      - "10.10.10.3:6789"
   credentials: &credentials_block-storage
     database:
       user:
@@ -20,7 +24,7 @@ block-storage:
         username: cinder1rKIan
     memcached: 76HsSsABaJvTQU6I
     messaging:
-      user: 
+      user:
         password: KgjY6ghlVbGSKJL6DH2jQXH50EtBVsiC
         username: cinder0Jhxmf
     notifications:
@@ -46,6 +50,10 @@ compute:
           role: vms
       secrets: nova-rbd-keyring
       username: nova
+    mon_host:
+      - "10.10.10.1:6789"
+      - "10.10.10.2:6789"
+      - "10.10.10.3:6789"
   credentials: &credentials_compute
     database:
       user:
@@ -176,6 +184,10 @@ image:
           role: images
       secrets: glance-rbd-keyring
       username: glance
+    mon_host:
+      - "10.10.10.1:6789"
+      - "10.10.10.2:6789"
+      - "10.10.10.3:6789"
   credentials: &credentials_image
     database:
       user:
