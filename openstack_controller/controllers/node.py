@@ -32,6 +32,11 @@ async def node_status_update_handler(name, body, old, new, reason, **kwargs):
     LOG.debug(f"Handling node status {reason} event.")
     LOG.info(f"The node {name} changes are: {kwargs['diff']}")
 
+    osdpl = kube.get_osdpl()
+    if not osdpl or not osdpl.exists():
+        LOG.info("Can't find OpenStackDeployment object")
+        return
+
     # NOTE(vsaienko) get conditions from the object to avoid fake reporing by
     # calico when kubelet is down on the node.
     # Do not remove pods from flapping node.
