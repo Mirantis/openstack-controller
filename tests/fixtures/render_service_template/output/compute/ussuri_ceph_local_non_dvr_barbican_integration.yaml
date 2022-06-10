@@ -111,6 +111,7 @@ spec:
         nova_ironic:
           DEFAULT:
             compute_driver: ironic.IronicDriver
+            force_config_drive: true
             reserved_host_cpu: 0
             reserved_host_disk_mb: 0
             reserved_host_memory_mb: 0
