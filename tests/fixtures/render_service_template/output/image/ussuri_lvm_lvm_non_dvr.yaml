@@ -69,6 +69,13 @@ spec:
         policy.d:
           01-controller-default.yaml: {'image_rule1': 'image_value1'}
           02-custom.yaml: {}
+        ceph:
+          config:
+            global:
+              mon_host:
+                - "10.10.10.1:6789"
+                - "10.10.10.2:6789"
+                - "10.10.10.3:6789"
         glance:
           DEFAULT:
             enable_v1_api: true
@@ -274,6 +281,7 @@ spec:
         job_storage_init: false
         network_policy: false
         secret_ca_bundle: true
+        ceph_conf: true
       pod:
         replicas:
           api: 1

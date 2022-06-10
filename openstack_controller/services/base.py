@@ -758,7 +758,6 @@ class OpenStackServiceWithCeph(OpenStackService):
         # deployment. For example additional service is deployed,
         # we need to handle this.
         self.save_ceph_secrets(oscp)
-        self.save_ceph_configmap(oscp)
         LOG.info("Ceph resources were created successfully.")
 
     def save_ceph_secrets(self, params: ceph_api.OSCephParams):
@@ -775,24 +774,6 @@ class OpenStackServiceWithCeph(OpenStackService):
             except Exception:
                 # TODO check for resource exists exception.
                 pass
-
-    def save_ceph_configmap(self, params: ceph_api.OSCephParams):
-        mon_host = ",".join(
-            [f"{ip}:{port}" for ip, port in params.mon_endpoints]
-        )
-        ceph_conf = f"[global]\n        mon host = {mon_host}\n"
-        configmap = {
-            "metadata": {
-                "name": ceph_api.CEPH_OPENSTACK_TARGET_CONFIGMAP,
-                "namespace": self.namespace,
-            },
-            "data": {"ceph.conf": ceph_conf},
-        }
-        try:
-            pykube.ConfigMap(kube.api, configmap).create()
-        except Exception:
-            # TODO check for resource exists exception.
-            pass
 
     @staticmethod
     def get_ceph_role_pools(oscp: ceph_api.OSServiceCreds):
@@ -822,6 +803,9 @@ class OpenStackServiceWithCeph(OpenStackService):
                     ),
                     "pools": self.get_ceph_role_pools(oscp_service),
                 }
+        ceph_config["mon_host"] = [
+            f"{ip}:{port}" for ip, port in oscp.mon_endpoints
+        ]
         return {"ceph": ceph_config}
 
     async def apply(self, event, **kwargs):
