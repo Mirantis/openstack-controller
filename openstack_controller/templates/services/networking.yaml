@@ -745,6 +745,11 @@ spec:
             dataplane_local_address: {{ bgpvpn.get('dataplane_interface', spec.features.neutron.tunnel_interface) }}
             vxlan_dst_port: {{ bgpvpn.get('evpn_vxlan_port', vxlan_udp_port) }}
       {%- endif %}
+      # turn on option for versions starting from victoria besides master
+      {%- if spec.openstack_version in openstack_versions[openstack_versions.index('victoria'):-1] %}
+        netns_cleanup:
+          orphaned_ports: true
+      {%- endif %}
       labels:
         sriov:
           node_selector_key: openstack-compute-node
