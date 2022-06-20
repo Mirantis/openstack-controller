@@ -804,6 +804,7 @@ spec:
                           enum:
                             - ml2
                             - tungstenfabric
+                            - ml2/ovn
                         dvr:
                           type: object
                           required:

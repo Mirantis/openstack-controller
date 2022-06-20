@@ -154,7 +154,11 @@ spec:
         plugins: {{ enabled_plugins }}
 {%- endif %}
       network:
-        core_plugin: {{ spec.features.neutron.get('backend', 'ml2') }}
+{%- set core_plugin = spec.features.neutron.get('backend', 'ml2')%}
+{%- if core_plugin == "ml2/ovn" %}
+{%- set core_plugin = "ml2" %}
+{%- endif %}
+        core_plugin: {{ core_plugin }}
       endpoints:
         cluster_domain_suffix: {{ spec.internal_domain_name }}
 {% include 'base/_admin_identity.yaml' %}
