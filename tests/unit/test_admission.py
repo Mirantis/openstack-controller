@@ -353,6 +353,17 @@ def test_ipsec_tf(client):
     assert response.json["response"]["status"]["code"] == 400
 
 
+def test_ipsec_ovn(client):
+    req = copy.deepcopy(ADMISSION_REQ)
+    req["request"]["object"]["spec"]["features"].update(
+        {"neutron": {"backend": "ml2/ovn", "ipsec": {"enabled": True}}}
+    )
+    response = client.simulate_post("/validate", json=req)
+    assert response.status == falcon.HTTP_OK
+    assert response.json["response"]["allowed"] is False
+    assert response.json["response"]["status"]["code"] == 400
+
+
 def test_baremetal_tf(client):
     req = copy.deepcopy(ADMISSION_REQ)
     req["request"]["object"]["spec"]["preset"] = "compute-tf"
@@ -455,6 +466,34 @@ def test_bgpvpn_tf(client):
     req["request"]["object"]["spec"].update({"preset": "compute-tf"})
     req["request"]["object"]["spec"]["features"].update(
         {"neutron": {"bgpvpn": {"enabled": True, "peers": ["1.2.3.4"]}}}
+    )
+    response = client.simulate_post("/validate", json=req)
+    assert response.status == falcon.HTTP_OK
+    assert response.json["response"]["allowed"] is False
+    assert response.json["response"]["status"]["code"] == 400
+
+
+def test_ovn_tf(client):
+    req = copy.deepcopy(ADMISSION_REQ)
+    req["request"]["object"]["spec"].update({"preset": "compute-tf"})
+    req["request"]["object"]["spec"]["features"].update(
+        {"neutron": {"backend": "ml2/ovn"}}
+    )
+    response = client.simulate_post("/validate", json=req)
+    assert response.status == falcon.HTTP_OK
+    assert response.json["response"]["allowed"] is False
+    assert response.json["response"]["status"]["code"] == 400
+
+
+def test_bgpvpn_ovn(client):
+    req = copy.deepcopy(ADMISSION_REQ)
+    req["request"]["object"]["spec"]["features"].update(
+        {
+            "neutron": {
+                "backend": "ml2/ovn",
+                "bgpvpn": {"enabled": True, "peers": ["1.2.3.4"]},
+            }
+        }
     )
     response = client.simulate_post("/validate", json=req)
     assert response.status == falcon.HTTP_OK
@@ -1331,3 +1370,26 @@ def test_policy_in_code_old(client, osdplst):
     response = client.simulate_post("/validate", json=req)
     assert response.json["response"]["allowed"] is False
     assert response.json["response"]["status"]["code"] == 400
+
+
+def test_ovn_before_yoga(client):
+    req = copy.deepcopy(ADMISSION_REQ)
+    req["request"]["object"]["spec"]["features"]["neutron"] = {
+        "backend": "ml2/ovn"
+    }
+    req["request"]["object"]["spec"]["openstack_version"] = "victoria"
+    response = client.simulate_post("/validate", json=req)
+    assert response.status == falcon.HTTP_OK
+    assert response.json["response"]["status"]["code"] == 400
+    assert response.json["response"]["allowed"] is False
+
+
+def test_ovn_yoga(client):
+    req = copy.deepcopy(ADMISSION_REQ)
+    req["request"]["object"]["spec"]["features"]["neutron"] = {
+        "backend": "ml2/ovn"
+    }
+    req["request"]["object"]["spec"]["openstack_version"] = "yoga"
+    response = client.simulate_post("/validate", json=req)
+    assert response.status == falcon.HTTP_OK
+    assert response.json["response"]["allowed"] is True
