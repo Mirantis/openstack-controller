@@ -94,15 +94,17 @@ spec:
   - chart: osh-infra/openvswitch
     name: openstack-openvswitch
     values:
-      overrides:
-        openvswitch_openvswitch-vswitchd:
-          labels: null
-      endpoints:
-        cluster_domain_suffix: cluster.local
       conf:
         neutron:
           DEFAULT:
-            support_sync_ovs_info: true
+            support_sync_ovs_info: false
+        openvswitch_db_server:
+          ptcp_port: 6640
+      volume:
+        ovn_db:
+          class_name: 'lvp-fake-root'
+      endpoints:
+        cluster_domain_suffix: cluster.local
       images:
         tags:
           dep_check: dep-check:latest
@@ -116,6 +118,41 @@ spec:
           openvswitch_ovn_vswitchd: openvswitch-ovn-vswitchd:latest
           openvswitch_ovn_db: openvswitch-ovn-db:latest
           openvswitch_ovn_controller: openvswitch-ovn-controller:latest
+      manifests:
+        statefulset_ovn_db: true
+        statefulset_ovn_northd: true
+        service_discovery_ovn_db: true
+        service_master_ovn_db: true
+        daemonset_ovn_controller: true
+        daemonset_ovs_db: false
+        daemonset_ovs_vswitchd: false
+      network: 
+        interface:
+          tunnel: ens3
+      overrides:
+        openvswitch_ovn-controller:
+          overrides_default: false
+          labels:
+            openstack-compute-node::enabled:
+              values:
+                conf:
+                  external-ids:
+                    ovn-encap-type: 'geneve'
+                    ovn-bridge-mappings: 'physnet1:br-ex'
+                  ovs_bridges:
+                    br-ex:
+                      nics:
+                      - name: veth-phy
+            openstack-gateway::enabled:
+              values:
+                conf:
+                  external-ids:
+                    ovn-bridge-mappings: 'physnet1:br-ex'
+                    ovn-cms-options: 'enable-chassis-as-gw'
+                  ovs_bridges:
+                    br-ex:
+                      nics:
+                      - name: veth-phy
       pod:
         probes:
           ovs_db:
@@ -150,6 +187,49 @@ spec:
                   initialDelaySeconds: 0
                   periodSeconds: 10
                   timeoutSeconds: 5
+          ovn:
+           northd:
+             liveness:
+               params:
+                 initialDelaySeconds: 10
+             readiness:
+               params:
+                 initialDelaySeconds: 10
+           nb:
+             liveness:
+               params:
+                 initialDelaySeconds: 10
+             readiness:
+               params:
+                 initialDelaySeconds: 10
+           sb:
+             liveness:
+               params:
+                 initialDelaySeconds: 10
+             readiness:
+               params:
+                 initialDelaySeconds: 10
+           vswitchd:
+             liveness:
+               params:
+                 initialDelaySeconds: 10
+             readiness:
+               params:
+                 initialDelaySeconds: 10
+           controller:
+             liveness:
+               params:
+                 initialDelaySeconds: 10
+             readiness:
+               params:
+                 initialDelaySeconds: 10
+           db:
+             liveness:
+               params:
+                 initialDelaySeconds: 10
+             readiness:
+               params:
+                 initialDelaySeconds: 10
   - chart: osh/neutron
     name: openstack-neutron
     values:
@@ -172,12 +252,13 @@ spec:
           router:
             name: r1
       conf:
+        netns_cleanup:
+          orphaned_ports: true
         policy.d:
           01-controller-default.yaml: {'networking_rule1': 'networking_value1'}
           02-custom.yaml: {}
         auto_bridge_add:
           br-ex: veth-phy
-          br-sriov: ens7
         l3_agent:
           agent:
             extensions: fip_qos,gateway_ip_qos
@@ -193,12 +274,15 @@ spec:
             metadata_proxy_shared_secret: mN0aLDTcg1AVqyLWNDjCd2Jz6DA61cZJ
             nova_metadata_port: 8775
             nova_metadata_protocol: http
+          ovs:
+            ovsdb_connection: 'tcp:127.0.0.1:6640'
         neutron:
           DEFAULT:
             api_workers: 4
-            support_sync_ovs_info: true
-            support_sync_ha_routers_info: true
+            support_sync_ovs_info: false
+            support_sync_ha_routers_info: false
             router_processes_greentlet_max: 10
+            dhcp_agent_notification: false
             dhcp_agents_per_network: 2
             dns_domain: openstack.internal.
             dnsmasq_dns_servers: 10.172.1.100
@@ -207,7 +291,7 @@ spec:
             allow_automatic_l3agent_failover: false
             l3_ha_network_type: vxlan
             max_l3_agents_per_router: 2
-            service_plugins: router,metering,qos
+            service_plugins: ovn-router,metering,qos
           cache:
             backend: oslo_cache.memcache_pool
           keystone_authtoken:
@@ -215,6 +299,10 @@ spec:
             memcache_security_strategy: ENCRYPT
           oslo_messaging_notifications:
             topics: notifications,stacklight_notifications
+          ovn:
+            enable_distributed_floating_ip: False
+          nova:
+            live_migration_events: True
           ironic:
             valid_interfaces: internal
         paste:
@@ -223,25 +311,30 @@ spec:
         plugins:
           linuxbridge_agent:
             linux_bridge:
-              bridge_mappings: physnet1:br-ex,sriov01:br-sriov
+              bridge_mappings: physnet1:br-ex
           ml2_conf:
             ml2:
               extension_drivers:
               - port_security
               - qos
               - dns_domain_ports
-              tenant_network_types: vxlan
+              tenant_network_types: geneve
+              type_drivers: 'local,flat,vlan,geneve,vxlan'
+              mechanism_drivers: ovn
             ml2_type_flat:
               flat_networks: physnet1
-            ml2_type_vlan:
-              network_vlan_ranges: sriov01:100:200
+            ml2_type_geneve:
+              max_header_size: 38
+              vni_ranges: '1:65536'
+            ovn:
+              ovn_metadata_enabled: true
           openvswitch_agent:
             agent:
               extensions: qos
               tunnel_types: vxlan
               vxlan_udp_port: 4790
             ovs:
-              bridge_mappings: physnet1:br-ex,sriov01:br-sriov
+              bridge_mappings: physnet1:br-ex
             securitygroup:
               firewall_driver: openvswitch
       dependencies:
@@ -405,7 +498,13 @@ spec:
       manifests:
         job_rabbit_init: false
         secret_ca_bundle: true
-        daemonset_sriov_agent: true
+        daemonset_dhcp_agent: false
+        daemonset_l3_agent: false
+        daemonset_lb_agent: false
+        daemonset_ovs_agent: false
+        daemonset_sriov_agent: false
+        pod_rally_test: false
+        daemonset_netns_cleanup_cron: false
       network:
         server:
           ingress:
@@ -415,22 +514,10 @@ spec:
         interface:
           tunnel: ens3
         backend:
-        - openvswitch
-        - sriovnicswitch
+          - ovn
       overrides:
         neutron_ovs-agent:
           labels: null
-        neutron_sriov-agent:
-          overrides_default: false
-          labels:
-            kubernetes.io/hostname::kaas-node-99ea7b55-0555-45f7-bdc5-f75da9f17c1a:
-              values:
-                network:
-                  interface:
-                    sriov:
-                      - device: enp0
-                        num_vfs: 7
-                        physnet: sriov01
       labels:
         sriov:
           node_selector_key: openstack-compute-node
@@ -438,6 +525,10 @@ spec:
         netns_cleanup_cron:
           node_selector_key: openvswitch
           node_selector_value: enabled
+        agent:
+          metadata:
+            node_selector_key: openvswitch
+            node_selector_value: enabled
       pod:
         probes:
           dhcp_agent:

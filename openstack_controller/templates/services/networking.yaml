@@ -4,6 +4,13 @@
 {%- set service = 'neutron' %}
 {%- set components_with_dedicated_messaging = spec.get('features', {}).get('messaging', {}).get('components_with_dedicated_messaging', []) %}
 {%- set stacklight_enabled = spec.get('features', {}).get('stacklight', {}).get('enabled', False) %}
+{%- set default_tenant_network_types = ['vxlan'] %}
+{%- set core_plugin = spec.features.neutron.get('backend', 'ml2') %}
+{%- set ovn_enabled = core_plugin == 'ml2/ovn'%}
+{%- if ovn_enabled %}
+{%- set default_tenant_network_types = ['geneve'] %}
+{%- set core_plugin = "ml2" %}
+{%- endif %}
 {%- set tungstenfabric_enabled = spec.features.neutron.get('backend', 'ml2') == 'tungstenfabric' %}
 {%- set tungstenfabric_custom_api_opts = tf_api_service is defined and tf_api_port is defined %}
 {%- set bgpvpn = spec.features.neutron.get('bgpvpn', {'enabled': False}) %}
@@ -17,6 +24,9 @@
   {%- endif %}
 {%- else %}
   {%- set service_plugins = ['router', 'metering', 'qos'] %}
+  {%- if ovn_enabled %}
+    {%- set service_plugins = ['ovn-router', 'metering', 'qos'] %}
+  {%- endif %}
 {%- endif %}
 {%- do service_plugins.append('bgpvpn') if bgpvpn.enabled %}
 {%- do notification_topics.append('stacklight_notifications') if stacklight_enabled %}
@@ -39,6 +49,31 @@
 # NOTE(vsaienko): change default 4789 port to do not conflict with docker swarm
 # overlay networks.
 {%- set vxlan_udp_port = 4790 %}
+
+# TODO: make other networks types configurable
+{%- set networks = {'flat': [], 'vlan': []} %}
+{%- set bridge_mappings = [] %}
+{%- set physnet_vlan_mappings = [] %}
+{%- set physnet_mtus = [] %}
+{%- for network in spec.features.neutron.external_networks %}
+    {%- for network_type in network.network_types %}
+        {%- do networks[network_type].append(network.physnet) %}
+    {%- endfor %}
+    {%- if network.get('vlan_ranges') %}
+        {%- for range in network.vlan_ranges.split(',') %}
+            {%- do physnet_vlan_mappings.append(network.physnet + ':' + range) %}
+        {%- endfor %}
+    {%- endif %}
+    {%- do bridge_mappings.append(network.physnet + ':' + network.bridge) %}
+    {%- if network.get('mtu') %}
+        {%- do physnet_mtus.append(network.physnet + ':' + network.mtu|string) %}
+    {%- endif %}
+{%- endfor %}
+
+{%- set support_sync_ovs_info = True %}
+{%- if spec.openstack_version in ["master"] or ovn_enabled %}
+{%- set support_sync_ovs_info = False %}
+{%- endif %}
 
 spec:
   available_releases:
@@ -116,11 +151,21 @@ spec:
   - name: openstack-openvswitch
     chart: {{spec.common.infra.repo}}/openvswitch
     values:
-      {%- if spec.openstack_version in ["master"] %}
       conf:
         neutron:
           DEFAULT:
-            support_sync_ovs_info: false
+            support_sync_ovs_info: {{ support_sync_ovs_info }}
+      {%- if ovn_enabled %}
+        openvswitch_db_server:
+          ptcp_port: 6640
+      volume:
+        ovn_db:
+          class_name: {{ spec.get('local_volume_storage_class', 'openstack-operator-bind-mounts') }}
+      {%- if spec.get('features', {}).get('neutron', {}).get('tunnel_interface') %}
+      network:
+        interface:
+          tunnel: {{ spec.features.neutron.tunnel_interface }}
+      {%- endif %}
       {%- endif %}
       pod:
         probes:
@@ -156,6 +201,51 @@ spec:
                   failureThreshold: 3
                   periodSeconds: 10
                   timeoutSeconds: 5
+{%- if ovn_enabled %}
+          ovn:
+           northd:
+             liveness:
+               params:
+                 initialDelaySeconds: 10
+             readiness:
+               params:
+                 initialDelaySeconds: 10
+           nb:
+             liveness:
+               params:
+                 initialDelaySeconds: 10
+             readiness:
+               params:
+                 initialDelaySeconds: 10
+           sb:
+             liveness:
+               params:
+                 initialDelaySeconds: 10
+             readiness:
+               params:
+                 initialDelaySeconds: 10
+           vswitchd:
+             liveness:
+               params:
+                 initialDelaySeconds: 10
+             readiness:
+               params:
+                 initialDelaySeconds: 10
+           controller:
+             liveness:
+               params:
+                 initialDelaySeconds: 10
+             readiness:
+               params:
+                 initialDelaySeconds: 10
+           db:
+             liveness:
+               params:
+                 initialDelaySeconds: 10
+             readiness:
+               params:
+                 initialDelaySeconds: 10
+{%- endif %}
       images:
         tags:
 {%- for image in [
@@ -163,17 +253,63 @@ spec:
     "openvswitch_vswitchd",
     "openvswitch_vswitchd_dpdk",
     "dep_check",
-    "image_repo_sync",] %}
+    "image_repo_sync",
+    "openvswitch_ovn_db_nb",
+    "openvswitch_ovn_db_sb",
+    "openvswitch_ovn_northd",
+    "openvswitch_ovn_vswitchd",
+    "openvswitch_ovn_db",
+    "openvswitch_ovn_controller"] %}
         {%- if image in images %}
           {{ image }}: {{ images[image] }}
         {%- endif %}
 {%- endfor %}
+{%- if ovn_enabled %}
+      manifests:
+        statefulset_ovn_db: true
+        statefulset_ovn_northd: true
+        service_discovery_ovn_db: true
+        service_master_ovn_db: true
+        daemonset_ovn_controller: true
+        daemonset_ovs_db: false
+        daemonset_ovs_vswitchd: false
+{%- endif %}
       endpoints:
         cluster_domain_suffix: {{ spec.internal_domain_name }}
   {%- endif %}
   # NODE SPECIFIC START
-  {%- if neutron_node_specific %}
+  {%- if neutron_node_specific or ovn_enabled %}
       overrides:
+    {%- if ovn_enabled %}
+        openvswitch_ovn-controller:
+          overrides_default: false
+          labels:
+            openstack-gateway::enabled:
+              values:
+                conf:
+                  external-ids:
+                    ovn-cms-options: "enable-chassis-as-gw"
+                    ovn-bridge-mappings: {{ ','.join(bridge_mappings) }}
+                  ovs_bridges:
+      {%- for network in spec.features.neutron.external_networks %}
+                    {{ network.bridge }}:
+                      nics:
+                        - name: {{ network.interface }}
+      {%- endfor %}
+            openstack-compute-node::enabled:
+              values:
+                conf:
+                  external-ids:
+                    ovn-encap-type: geneve
+                    ovn-bridge-mappings: {{ ','.join(bridge_mappings) }}
+                  ovs_bridges:
+        {%- for network in spec.features.neutron.external_networks %}
+                   {{ network.bridge }}:
+                     nics:
+                       - name: {{ network.interface }}
+        {%- endfor %}
+    {%- endif %}
+    # TODO(vsaienko): implement ovn + dpdk support
     {%- if dpdk.enabled %}
        openvswitch_openvswitch-vswitchd:
           labels:
@@ -496,14 +632,17 @@ spec:
         deployment_ironic_agent: true
       {%- endif %}
         secret_ca_bundle: true
-      {%- if tungstenfabric_enabled %}
+      {%- if tungstenfabric_enabled or ovn_enabled %}
         daemonset_dhcp_agent: false
         daemonset_l3_agent: false
         daemonset_lb_agent: false
-        daemonset_metadata_agent: false
         daemonset_ovs_agent: false
         daemonset_sriov_agent: false
+        daemonset_netns_cleanup_cron: false
         pod_rally_test: false
+      {%- endif %}
+      {%- if tungstenfabric_enabled %}
+        daemonset_metadata_agent: false
       {%- endif %}
       {%- if bgpvpn.enabled %}
         daemonset_bagpipe_bgp: true
@@ -513,12 +652,17 @@ spec:
           ingress:
             annotations:
               nginx.ingress.kubernetes.io/proxy-read-timeout: "120"
-        core_plugin: {{ spec.features.neutron.get('backend', 'ml2') }}
+        core_plugin: {{ core_plugin }}
       {%- if spec.get('features', {}).get('neutron', {}).get('tunnel_interface') %}
         interface:
           tunnel: {{ spec.features.neutron.tunnel_interface }}
       {%- endif %}
-      {%- set neutron_backends = ["openvswitch"] %}
+      {%- set neutron_backends = [] %}
+      {%- if ovn_enabled %}
+        {%- do neutron_backends.extend(["ovn"]) %}
+      {%- else %}
+        {%- do neutron_backends.extend(["openvswitch"]) %}
+      {%- endif %}
       {%- if baremetal_enabled %}
           {%- do neutron_backends.extend(["baremetal", "genericswitch"]) %}
       {%- endif %}
@@ -550,17 +694,22 @@ spec:
           app:neutronversions:
             paste.app_factory: neutron.pecan_wsgi.app:versions_factory
         neutron:
+          {%- if ovn_enabled %}
+          ovn:
+            enable_distributed_floating_ip: {{ spec.get('features', {}).get('neutron', {}).get('dvr', {}).get('enabled', False) }}
+          {%- endif %}
           cache:
             backend: oslo_cache.memcache_pool
           keystone_authtoken:
             memcache_security_strategy: ENCRYPT
             memcache_secret_key: {{ credentials.memcached }}
           DEFAULT:
-            {%- if spec.openstack_version in ["master"] %}
-            support_sync_ovs_info: False
-            support_sync_ha_routers_info: False
-            {%- endif %}
+            support_sync_ovs_info: {{ support_sync_ovs_info }}
+            support_sync_ha_routers_info: {{ support_sync_ovs_info }}
             router_processes_greentlet_max: 10
+            {%- if ovn_enabled %}
+            dhcp_agent_notification: false
+            {%- endif %}
             api_workers: 4
             # Combined DVR + L3 HA is not recommended until load tested (had issues in the past)
             {%- if spec.get('features', {}).get('neutron', {}).get('dvr', {}).get('enabled', False) %}
@@ -628,34 +777,32 @@ spec:
             metadata_proxy_shared_secret: {{ credentials.metadata_secret }}
             nova_metadata_port: 8775
             nova_metadata_protocol: http
-# TODO: make other networks types configurable
-{%- set networks = {'flat': [], 'vlan': []} %}
-{%- set bridge_mappings = [] %}
-{%- set physnet_vlan_mappings = [] %}
-{%- set physnet_mtus = [] %}
-{%- for network in spec.features.neutron.external_networks %}
-    {%- for network_type in network.network_types %}
-        {%- do networks[network_type].append(network.physnet) %}
-    {%- endfor %}
-    {%- if network.get('vlan_ranges') %}
-        {%- for range in network.vlan_ranges.split(',') %}
-            {%- do physnet_vlan_mappings.append(network.physnet + ':' + range) %}
-        {%- endfor %}
-    {%- endif %}
-    {%- do bridge_mappings.append(network.physnet + ':' + network.bridge) %}
-    {%- if network.get('mtu') %}
-        {%- do physnet_mtus.append(network.physnet + ':' + network.mtu|string) %}
-    {%- endif %}
-{%- endfor %}
+          {%- if ovn_enabled %}
+          ovs:
+            ovsdb_connection: tcp:127.0.0.1:6640
+          {%- endif %}
         plugins:
           ml2_conf:
+            {%- if ovn_enabled %}
+            ovn:
+              ovn_metadata_enabled: true
+            {%- endif %}
             {%- if physnet_vlan_mappings %}
             ml2_type_vlan:
               network_vlan_ranges: {{ ','.join(physnet_vlan_mappings) }}
             {%- endif %}
             ml2_type_flat:
               flat_networks: {{ ','.join(networks.flat) }}
+            {%- if ovn_enabled %}
+            ml2_type_geneve:
+              max_header_size: 38
+              vni_ranges: 1:65536
+            {%- endif %}
             ml2:
+            {%- if ovn_enabled %}
+              mechanism_drivers: ovn
+              type_drivers: local,flat,vlan,geneve,vxlan
+            {%- endif %}
             {%- if physnet_mtus %}
               physical_network_mtus: {{ physnet_mtus }}
             {%- endif %}
@@ -665,7 +812,7 @@ spec:
               {%- if 'dns' in spec.features.services %}
                 - dns_domain_ports
               {%- endif %}
-              tenant_network_types: {{ spec.features.neutron.get('tenant_network_types', ['vxlan'])|join(',') }}
+              tenant_network_types: {{ spec.features.neutron.get('tenant_network_types', default_tenant_network_types)|join(',') }}
           {%- if baremetal_enabled %}
             {%- for gs_dev in spec.features.neutron.get('baremetal', {}).get('ngs', {}).get('devices', []) %}
             genericswitch:{{ gs_dev.name }}:
@@ -757,6 +904,13 @@ spec:
         netns_cleanup_cron:
           node_selector_key: openvswitch
           node_selector_value: enabled
+      {%- if ovn_enabled %}
+        # NOTE(vsaienko): for Ironic use-case metadata is provided from gtw node
+        agent:
+          metadata:
+            node_selector_key: openvswitch
+            node_selector_value: enabled
+      {%- endif %}
       # NODE SPECIFIC START
       overrides:
       {%- if spec.get('features', {}).get('neutron', {}).get('dvr', {}).get('enabled', False) %}

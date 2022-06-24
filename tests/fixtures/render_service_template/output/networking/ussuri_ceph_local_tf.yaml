@@ -132,6 +132,8 @@ spec:
         neutron:
           DEFAULT:
             api_workers: 4
+            support_sync_ovs_info: true
+            support_sync_ha_routers_info: true
             router_processes_greentlet_max: 10
             dhcp_agents_per_network: 2
             dns_domain: openstack.internal.
@@ -385,6 +387,7 @@ spec:
         daemonset_metadata_agent: false
         daemonset_ovs_agent: false
         daemonset_sriov_agent: false
+        daemonset_netns_cleanup_cron: false
         pod_rally_test: false
       network:
         server:

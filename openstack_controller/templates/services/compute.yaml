@@ -7,6 +7,10 @@
 {%- set notification_topics = ['notifications'] %}
 {%- do notification_topics.append('stacklight_notifications') if stacklight_enabled %}
 {%- set neutron_backend = spec.features.neutron.get('backend', 'ml2') %}
+{%- set ovn_enabled = neutron_backend == 'ml2/ovn'%}
+{%- if ovn_enabled %}
+{%- set neutron_backend = "ml2" %}
+{%- endif %}
 {%- set baremetal_enabled = 'baremetal' in spec.features.services %}
 {%- set node_specific = {} %}
 {%- set overrides = namespace(enabled=false) %}
@@ -164,6 +168,11 @@ spec:
       {%- if neutron_backend == 'tungstenfabric' %}
       network:
         backend: []
+      {%- endif %}
+      {%- if ovn_enabled %}
+      network:
+        backend:
+         - ovn
       {%- endif %}
       pod:
         probes:
@@ -694,6 +703,10 @@ spec:
         core_plugin: {{ neutron_backend }}
         {%- if neutron_backend == 'tungstenfabric' %}
         backend: []
+        {%- endif %}
+        {%- if ovn_enabled %}
+        backend:
+         - ovn
         {%- endif %}
         sshd:
           enabled: true

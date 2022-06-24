@@ -96,6 +96,10 @@ spec:
     values:
       endpoints:
         cluster_domain_suffix: cluster.local
+      conf:
+        neutron:
+          DEFAULT:
+            support_sync_ovs_info: true
       images:
         tags:
           dep_check: dep-check:latest
@@ -103,6 +107,12 @@ spec:
           openvswitch_db_server: openvswitch-db-server:latest
           openvswitch_vswitchd: openvswitch-vswitchd:latest
           openvswitch_vswitchd_dpdk: openvswitch-vswitchd-dpdk:latest
+          openvswitch_ovn_db_nb: openvswitch-ovn-db-nb:latest
+          openvswitch_ovn_db_sb: openvswitch-ovn-db-sb:latest
+          openvswitch_ovn_northd: openvswitch-ovn-northd:latest
+          openvswitch_ovn_vswitchd: openvswitch-ovn-vswitchd:latest
+          openvswitch_ovn_db: openvswitch-ovn-db:latest
+          openvswitch_ovn_controller: openvswitch-ovn-controller:latest
       pod:
         probes:
           ovs_db:
@@ -182,6 +192,8 @@ spec:
         neutron:
           DEFAULT:
             api_workers: 4
+            support_sync_ovs_info: true
+            support_sync_ha_routers_info: true
             router_processes_greentlet_max: 10
             dhcp_agents_per_network: 2
             dns_domain: openstack.internal.
