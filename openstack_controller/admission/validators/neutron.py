@@ -16,6 +16,7 @@ from jsonschema import validate
 import yaml
 
 from openstack_controller.admission.validators import base
+from openstack_controller import constants
 from openstack_controller import exception
 
 
@@ -36,6 +37,8 @@ class NeutronValidator(base.BaseValidator):
         floating_network = neutron_features.get("floating_network", {})
         ipsec = neutron_features.get("ipsec", {"enabled": False})
         bgpvpn = neutron_features.get("bgpvpn", {"enabled": False})
+        ovn_enabled = neutron_features.get("backend", "ml2") == "ml2/ovn"
+        openstack_version = spec["openstack_version"]
         tungstenfabric_enabled = spec["preset"] == "compute-tf"
         ngs = neutron_features = (
             spec.get("features", {})
@@ -77,6 +80,26 @@ class NeutronValidator(base.BaseValidator):
                     )
         if ngs:
             self._validate_ngs_hardware(ngs)
+        if ovn_enabled:
+            if (
+                constants.OpenStackVersion[openstack_version].value
+                < constants.OpenStackVersion["yoga"]
+            ):
+                raise exception.OsDplValidationFailed(
+                    "OVN deployment is supported from Yoga release."
+                )
+            if tungstenfabric_enabled:
+                raise exception.OsDplValidationFailed(
+                    "TungstenFabric and OVN are mutually exclusive."
+                )
+            if bgpvpn["enabled"]:
+                raise exception.OsDplValidationFailed(
+                    "BGPVPN and OVN are not supported."
+                )
+            if ipsec["enabled"]:
+                raise exception.OsDplValidationFailed(
+                    "IPSEC and OVN are not supported."
+                )
 
     def _validate_ngs_hardware(self, ngs):
         ngs_hardware = ngs.get("hardware", {})
