@@ -1128,6 +1128,13 @@ spec:
                     octavia:
                       type: object
                       properties:
+                        default_provider:
+                          type: string
+                          description: |
+                            Default provider driver used for loadbalancers.
+                          enum:
+                            - amphorav2
+                            - ovn
                         lb_network:
                           type: object
                           required:

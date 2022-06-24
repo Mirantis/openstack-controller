@@ -2,11 +2,16 @@
 #kind: HelmBundle
 
 {%- set service = 'octavia' %}
+{%- set core_plugin = spec.features.neutron.get('backend', 'ml2') %}
+{%- set ovn_enabled = core_plugin == 'ml2/ovn'%}
 {%- set provider_map = {'amphora': 'amphora:The Octavia Amphora driver.',
-                        'octavia': 'octavia:Deprecated alias of the Octavia Amphora driver.'}%}
+                        'octavia': 'octavia:Deprecated alias of the Octavia Amphora driver.'} %}
 # NOTE: amphorav2 is supported only from Ussuri
 {%- if spec.openstack_version not in ['queens', 'rocky', 'stein', 'train'] %}
 {%- do provider_map.update({'amphorav2': 'amphorav2:Extented Octavia Amphora driver with jobboard support.'})%}
+{%- endif %}
+{%- if ovn_enabled %}
+  {%- do provider_map.update({'ovn': 'ovn:OVN provider driver'}) %}
 {%- endif %}
 {%- set components_with_dedicated_messaging = spec.get('features', {}).get('messaging', {}).get('components_with_dedicated_messaging', []) %}
 {%- set stacklight_enabled = spec.get('features', {}).get('stacklight', {}).get('enabled', False) %}
@@ -259,6 +264,9 @@ spec:
 {%- if 'amphorav2' in provider_map.keys() %}
         job_db_sync_persistence: true
 {%- endif %}
+{%- if ovn_enabled %}
+        octavia_driver_agent: true
+{%- endif %}
       network:
       {%- if ovn_enabled %}
         backend:
@@ -271,6 +279,10 @@ spec:
           01-controller-default.yaml: {{ service_policy }}
           02-custom.yaml: {{ spec.get("features", {}).get("policies", {}).get("octavia", {}) }}
         octavia:
+{%- if ovn_enabled %}
+          driver_agent:
+            enabled_provider_agents: ovn
+{%- endif %}
           api_settings:
 {% set _default_provider_driver = 'amphorav2' %}
 {%- if spec.openstack_version in ['queens'] %}
@@ -282,7 +294,10 @@ spec:
   {% set _default_provider_driver = 'tungstenfabric' %}
   {%- set provider_map = {'tungstenfabric': 'tungstenfabric:TungstenFabricProviderDriver'} %}
 {%- endif %}
-            default_provider_driver: {{ _default_provider_driver }}
+{%- if ovn_enabled %}
+  {% set _default_provider_driver = 'ovn' %}
+{%- endif %}
+            default_provider_driver: {{ spec.features.get('octavia', {}).get('default_provider', _default_provider_driver) }}
             enabled_provider_drivers: {{ ','.join(provider_map.values()) }}
 {%- if 'amphorav2' in provider_map.keys() %}
           task_flow:
