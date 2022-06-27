@@ -446,6 +446,27 @@ spec:
                                 backup will be taken every week and if cron is set to 0 0 * * *, incremental backup
                                 will be performed on daily basis.
                               type: integer
+                            backend:
+                              description: |
+                                Backend to perform backup to. Could be: pvc, pv_nfs. Default is pvc.
+                              type: string
+                              enum:
+                                - pvc
+                                - pv_nfs
+                            pv_nfs:
+                              type: object
+                              required:
+                                - server
+                                - path
+                              properties:
+                                server:
+                                  description: |
+                                    Ip address or domain name of nfs server
+                                  type: string
+                                path:
+                                  description: |
+                                    Path to the nfs share on the server.
+                                  type: string
                     telemetry:
                       type: object
                       required:

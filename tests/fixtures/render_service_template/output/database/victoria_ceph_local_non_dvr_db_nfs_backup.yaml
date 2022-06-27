@@ -17,7 +17,7 @@ spec:
             innodb_io_capacity_max=5000
         phy_backup:
           backup_type: incremental
-          backend: pvc
+          backend: pv_nfs
       endpoints:
         cluster_domain_suffix: cluster.local
         oslo_db:
@@ -55,8 +55,8 @@ spec:
           prometheus_mysql_exporter_helm_tests: prometheus-mysql-exporter-helm-tests:latest
       jobs:
         phy_backup_mariadb:
-          cron: 0 1 * * *
-          suspend: true
+          cron: 0 0 * * *
+          suspend: false
       manifests:
         configmap_ingress_conf: false
         configmap_ingress_etc: false
@@ -83,3 +83,6 @@ spec:
         phy_backup:
           class_name: mirablock-k8s-block-hdd
           enabled: true
+          nfs:
+            server: 1.2.3.4
+            path: /share
