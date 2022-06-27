@@ -53,6 +53,7 @@ spec:
             backup_ceph_user: cinder
             backup_driver: cinder.backup.drivers.ceph.CephBackupDriver
             cluster: cinder-ceph-cluster
+            control_exchange: cinder
             default_volume_type: volumes-hdd
             enabled_backends: volumes-hdd
             host: <None>

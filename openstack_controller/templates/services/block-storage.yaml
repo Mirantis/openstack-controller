@@ -218,6 +218,7 @@ spec:
   {%- endif %}
 {%- endfor %}
 {%- endif %}
+            control_exchange: cinder
             enabled_backends: {{ enabled_backends|join(',') }}
             default_volume_type: {{ enabled_backends[0] }}
             scheduler_default_filters: AvailabilityZoneFilter,CapacityFilter,CapabilitiesFilter,InstanceLocalityFilter
