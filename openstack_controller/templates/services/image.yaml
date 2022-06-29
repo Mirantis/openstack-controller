@@ -142,6 +142,7 @@ spec:
               properties:
                 os_distro: cirros
               source_url: {{ spec.artifacts.binary_base_url }}/openstack/bin/cirros/0.5.1/
+              checksum: {{ images["cirros_checksum"] }}
 {%- if signature.enabled %}
               signature:
                 enabled: true
@@ -157,6 +158,7 @@ spec:
               properties:
                 os_distro: fedora
               source_url: {{ spec.artifacts.binary_base_url }}/openstack/bin/Fedora/27/
+              checksum: {{ images["fedora_checksum"] }}
 {%- if signature.enabled %}
               signature:
                 enabled: true
@@ -172,6 +174,7 @@ spec:
               properties:
                 os_distro: ubuntu
               source_url: {{ spec.artifacts.binary_base_url }}/openstack/bin/ubuntu/18.04/
+              checksum: {{ images["ubuntu_checksum"] }}
 {%- if signature.enabled %}
               signature:
                 enabled: true

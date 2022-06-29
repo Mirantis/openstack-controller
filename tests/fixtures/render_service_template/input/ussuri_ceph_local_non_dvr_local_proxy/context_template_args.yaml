@@ -185,6 +185,9 @@ images:
   openvswitch_ovn_vswitchd: openvswitch-ovn-vswitchd:latest
   openvswitch_ovn_db: openvswitch-ovn-db:latest
   openvswitch_ovn_controller: openvswitch-ovn-controller:latest
+  cirros_checksum: 050056e630cf
+  fedora_checksum: 8bc56d70a3e2
+  ubuntu_checksum: 3fb7422b5843
 block-storage:
   ceph:
     cinder:

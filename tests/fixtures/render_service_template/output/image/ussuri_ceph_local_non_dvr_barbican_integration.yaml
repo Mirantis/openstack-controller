@@ -12,6 +12,7 @@ spec:
         structured:
           images:
             cirros:
+              checksum: 050056e630cf
               container_format: bare
               image_file: cirros-0.5.1-x86_64-disk.img
               image_type: qcow2
@@ -25,6 +26,7 @@ spec:
                 enabled: true
                 hash_method: SHA-256
             fedora:
+              checksum: 8bc56d70a3e2
               container_format: bare
               image_file: Fedora-Cloud-Base-27-1.6.x86_64.qcow2
               image_type: qcow2
@@ -38,6 +40,7 @@ spec:
                 enabled: true
                 hash_method: SHA-256
             ubuntu:
+              checksum: 3fb7422b5843
               container_format: bare
               image_file: bionic-server-cloudimg-amd64.img
               image_type: qcow2
