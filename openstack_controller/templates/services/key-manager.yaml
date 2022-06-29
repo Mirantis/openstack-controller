@@ -109,6 +109,7 @@ spec:
             sql_idle_timeout: 3600
             sql_max_retries: -1
             sql_retry_interval: 1
+            control_exchange: barbican
 {%- if spec.get('features', {}).get('barbican', {}).get('backends', {}).get('vault', {}).get('enabled', False) %}
           secretstore:
             enable_multiple_secret_stores: True
