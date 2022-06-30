@@ -16,6 +16,7 @@ spec:
             sql_idle_timeout: 3600
             sql_max_retries: -1
             sql_retry_interval: 1
+            control_exchange: barbican
           keystone_authtoken:
             memcache_secret_key: 3vySYJq0rDZ32KGG
             memcache_security_strategy: ENCRYPT
