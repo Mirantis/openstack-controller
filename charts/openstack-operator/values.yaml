@@ -50,11 +50,6 @@ osdpl:
     node_maintenance_request:
       OSCTL_LOGGING_CONF: {}
       raw: {}
-    helm2to3:
-      raw:
-        TILLER_NAMESPACE: "stacklight"
-        RELEASE_STORAGE: "configmaps"
-        RELEASE_VERSION_MAX: "3"
   pod:
     controller:
       osdpl:

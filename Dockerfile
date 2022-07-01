@@ -51,7 +51,6 @@ RUN set -ex; \
     cd -
 RUN wget -q -O /usr/local/bin/helm3 ${HELM_BINARY}; \
     chmod +x /usr/local/bin/helm3
-RUN helm3 plugin install https://github.com/helm/helm-2to3
 RUN wget -q ${KUBECTL_BINARY} -O /usr/local/bin/kubectl; \
     chmod +x /usr/local/bin/kubectl
 

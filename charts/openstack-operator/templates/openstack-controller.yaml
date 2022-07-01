@@ -253,18 +253,6 @@ spec:
         - name: net.ipv4.ip_local_port_range
           value: 32800 60999
       initContainers:
-        - name: 2to3
-          command:
-          - osctl-2to3
-          env:
-            {{- range $optionName, $optionValue := .Values.osdpl.settings.helm2to3.raw }}
-            - name: {{ $optionName }}
-              value: "{{ $optionValue }}"
-            {{- end }}
-            - name: HELMBUNDLE_NAMESPACE
-              value: {{ .Values.osdpl.namespace }}
-          image: {{ tuple . .Values.image | include "getImageUrl" }}
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
         - name: remove-default-finalizer
           command:
           - osctl-remove-default-finalizer
