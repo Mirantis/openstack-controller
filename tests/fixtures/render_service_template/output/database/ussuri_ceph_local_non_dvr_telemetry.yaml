@@ -17,6 +17,7 @@ spec:
             innodb_io_capacity_max=5000
         phy_backup:
           backup_type: incremental
+          backend: pvc
       endpoints:
         cluster_domain_suffix: cluster.local
         oslo_db:

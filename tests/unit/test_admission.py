@@ -1393,3 +1393,44 @@ def test_ovn_yoga(client):
     response = client.simulate_post("/validate", json=req)
     assert response.status == falcon.HTTP_OK
     assert response.json["response"]["allowed"] is True
+
+
+def test_db_backup_backend_nfs_opts_incorrect(client):
+    req = copy.deepcopy(ADMISSION_REQ)
+    req["request"]["object"]["spec"]["features"]["database"] = {
+        "backup": {"enabled": True, "backend": "pv_nfs"}
+    }
+    response = client.simulate_post("/validate", json=req)
+    assert response.json["response"]["allowed"] is False
+    assert response.json["response"]["status"]["code"] == 400
+    assert (
+        "When backup backend is set to pv_nfs, pv_nfs.server and pv_nfs.path options are required"
+        in response.json["response"]["status"]["message"]
+    )
+
+
+def test_db_backup_backend_nfs_opts_correct(client):
+    req = copy.deepcopy(ADMISSION_REQ)
+    req["request"]["object"]["spec"]["features"]["database"] = {
+        "backup": {
+            "enabled": True,
+            "backend": "pv_nfs",
+            "pv_nfs": {"server": "1.2.3.4", "path": "/share"},
+        }
+    }
+    response = client.simulate_post("/validate", json=req)
+    assert response.status == falcon.HTTP_OK
+    assert response.json["response"]["allowed"] is True
+
+
+def test_db_backup_backend_default_opts_correct(client):
+    req = copy.deepcopy(ADMISSION_REQ)
+    req["request"]["object"]["spec"]["features"]["database"] = {
+        "backup": {
+            "enabled": True,
+            "backend": "pvc",
+        }
+    }
+    response = client.simulate_post("/validate", json=req)
+    assert response.status == falcon.HTTP_OK
+    assert response.json["response"]["allowed"] is True
