@@ -16,6 +16,8 @@ common:
 
 features:
   logging:
+    cadf:
+      enabled: false
     cinder:
       level: DEBUG
     neutron:

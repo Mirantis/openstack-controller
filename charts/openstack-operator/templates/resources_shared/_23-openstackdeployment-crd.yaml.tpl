@@ -1200,6 +1200,16 @@ spec:
                     logging:
                       type: object
                       properties:
+                        cadf:
+                          type: object
+                          required:
+                            - enabled
+                          properties:
+                            enabled:
+                              type: boolean
+                              description: |
+                                Enable CADF audit notifications
+                                default: false
                         cinder: &logging_level
                           type: object
                           properties:
