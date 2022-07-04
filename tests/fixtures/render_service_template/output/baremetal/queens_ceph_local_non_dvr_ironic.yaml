@@ -29,6 +29,11 @@ spec:
             enabled_vendor_interfaces: fake,ipmitool,no-vendor
           agent:
             image_download_source: http
+          audit:
+            enabled: true
+            ignore_req_list: GET, HEAD
+          audit_middleware_notifications:
+            driver: noop
           conductor:
             automated_clean: true
           deploy:

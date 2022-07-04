@@ -16,6 +16,8 @@ spec:
             memcache_security_strategy: ENCRYPT
           clients_swift:
             endpoint_type: public
+          audit_middleware_notifications:
+            driver: noop
           oslo_messaging_notifications:
             topics: notifications,stacklight_notifications
         logging:

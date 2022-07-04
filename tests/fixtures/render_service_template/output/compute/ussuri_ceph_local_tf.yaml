@@ -101,6 +101,8 @@ spec:
             virt_type: kvm
           neutron:
             metadata_proxy_shared_secret: mN0aLDTcg1AVqyLWNDjCd2Jz6DA61cZJ
+          audit_middleware_notifications:
+            driver: noop
           oslo_messaging_notifications:
             topics: notifications,stacklight_notifications
           service_user:

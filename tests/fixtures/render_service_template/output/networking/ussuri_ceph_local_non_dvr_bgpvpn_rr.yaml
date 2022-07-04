@@ -244,6 +244,8 @@ spec:
           keystone_authtoken:
             memcache_secret_key: 4zDhycwch09UPx4j
             memcache_security_strategy: ENCRYPT
+          audit_middleware_notifications:
+            driver: noop
           oslo_messaging_notifications:
             topics: notifications,stacklight_notifications
           service_providers:

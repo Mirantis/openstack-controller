@@ -11,6 +11,7 @@
 
 {%- set signature = spec.get('features', {}).get('glance', {}).get("signature", {"enabled": false}) %}
 {%- set glance_db_cleanup = spec.get('features', {}).get('database', {}).get('cleanup', {}).get('glance', {'enabled': true}) %}
+{%- set cadf_audit = spec.get('features', {}).get('logging', {}).get('cadf', {'enabled': false}) %}
 
 spec:
   available_releases:
@@ -267,6 +268,10 @@ spec:
           {%- endif %}
 {%- if not multi_backends %}
 {% include 'base/_rbd_store_opts.yaml' %}
+{%- endif %}
+{%- if not cadf_audit.enabled %}
+          audit_middleware_notifications:
+            driver: noop
 {%- endif %}
           oslo_messaging_notifications:
             topics: {{ notification_topics|join(',') }}

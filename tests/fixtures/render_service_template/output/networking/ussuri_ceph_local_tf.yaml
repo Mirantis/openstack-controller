@@ -152,6 +152,8 @@ spec:
             memcache_security_strategy: ENCRYPT
           quotas:
             quota_driver: neutron_plugin_contrail.plugins.opencontrail.quota.driver.QuotaDriver
+          audit_middleware_notifications:
+            driver: noop
           oslo_messaging_notifications:
             topics: notifications,stacklight_notifications
           ironic:
