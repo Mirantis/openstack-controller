@@ -17,37 +17,46 @@ class LoadBalancerFeatureEnabled(base_section.BaseSection):
         "force_cleanup_enabled",
     ]
 
-    @property
-    def not_implemented_is_error(self):
+    def _tf_enabled(self):
         try:
             if self.spec["features"]["neutron"]["backend"] == "tungstenfabric":
-                return False
+                return True
         except:
             pass
+
+    def _ovn_enabled(self):
+        return "ovn" in self.get_values_item(
+            "octavia",
+            "conf.octavia.api_settings.default_provider_driver",
+            "amphora",
+        )
+
+    @property
+    def not_implemented_is_error(self):
+        if self._tf_enabled():
+            return False
+        if self._ovn_enabled():
+            return False
 
     @property
     def health_monitor_enabled(self):
-        try:
-            if self.spec["features"]["neutron"]["backend"] == "tungstenfabric":
-                return False
-        except:
-            pass
+        if self._tf_enabled():
+            return False
 
     @property
     def terminated_tls_enabled(self):
-        try:
-            if self.spec["features"]["neutron"]["backend"] == "tungstenfabric":
-                return False
-        except:
-            pass
+        if self._tf_enabled():
+            return False
 
     @property
     def l7_protocol_enabled(self):
-        pass
+        if self._ovn_enabled():
+            return False
 
     @property
     def pool_algorithms_enabled(self):
-        pass
+        if self._ovn_enabled():
+            return False
 
     @property
     def l4_protocol(self):
@@ -59,7 +68,8 @@ class LoadBalancerFeatureEnabled(base_section.BaseSection):
 
     @property
     def session_persistence_enabled(self):
-        pass
+        if self._ovn_enabled():
+            return False
 
     @property
     def force_cleanup_enabled(self):
