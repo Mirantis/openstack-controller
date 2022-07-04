@@ -131,6 +131,8 @@ spec:
           01-controller-default.yaml: {{ service_policy }}
           02-custom.yaml: {{ spec.get("features", {}).get("policies", {}).get("heat", {}) }}
         heat:
+          DEFAULT:
+            server_keystone_endpoint_type: public
           keystone_authtoken:
             memcache_security_strategy: ENCRYPT
             memcache_secret_key: {{ credentials.memcached }}
