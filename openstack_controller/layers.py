@@ -297,6 +297,10 @@ def merge_spec(spec, logger, osdplsecret_spec=None):
             .get("baremetal", {})
             .get("network_type")
             == "vlan",
+            ovn_enabled=spec.get("features", {})
+            .get("neutron", {})
+            .get("backend", "ml2")
+            == "ml2/ovn",
         )
     )
     # Order for artifacts base urls overrides:
