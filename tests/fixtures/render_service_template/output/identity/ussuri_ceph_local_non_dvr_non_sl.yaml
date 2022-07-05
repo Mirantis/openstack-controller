@@ -18,6 +18,8 @@ spec:
           01-controller-default.yaml: {'identity_rule1': 'identity_value1'}
           02-custom.yaml: {}
         keystone:
+          DEFAULT:
+            notification_format: cadf
           fernet_tokens:
             max_active_keys: 7
           token:

@@ -16,6 +16,8 @@ common:
               namespace: {{ nginx_ingress_namespace_class }}
 features:
   logging:
+    cadf:
+      enabled: false
     cinder:
       level: DEBUG
     neutron:

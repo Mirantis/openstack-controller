@@ -123,6 +123,8 @@ spec:
           logger_keystone:
             level: {{ spec.get('features', {}).get('logging', {}).get('keystone', {}).get('level', 'INFO') }}
         keystone:
+          DEFAULT:
+            notification_format: cadf
           token:
             expiration: 43200  # 12h
             allow_expired_window: 172800 # 48h - default in Keystone, but set it explicitly here
