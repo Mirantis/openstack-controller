@@ -11,6 +11,8 @@ spec:
           01-controller-default.yaml: {'orchestration_rule1': 'orchestration_value1'}
           02-custom.yaml: {}
         heat:
+          DEFAULT:
+            server_keystone_endpoint_type: public
           keystone_authtoken:
             memcache_secret_key: 7JNLzlMydG5nxe80
             memcache_security_strategy: ENCRYPT
