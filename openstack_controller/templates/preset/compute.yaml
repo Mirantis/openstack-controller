@@ -260,6 +260,10 @@ services:
             # These tests require four pre-created compute availability zones in a cluster
             - (?:octavia_tempest_plugin.tests.api.v2.test_availability_zone)
             - (?:octavia_tempest_plugin.tests.api.v2.test_availability_zone_profile)
+           {%- if ovn_enabled  %}
+            # Use HTTP scheme that is not supported by OVN
+            - (?:heat_tempest_plugin.tests.scenario.test_octavia_lbaas.LoadBalancerTest)
+           {%- endif %}
             # Skip SoftwareConfigIntegrationTest because it requires a custom image
             # https://github.com/openstack/heat/blob/stable/train/heat_integrationtests/prepare_test_env.sh
             - (?:heat_tempest_plugin.tests.scenario.test_server_software_config.SoftwareConfigIntegrationTest)
