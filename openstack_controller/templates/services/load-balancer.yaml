@@ -19,6 +19,7 @@
 {%- set ovn_enabled = spec.features.neutron.get('backend', 'ml2') == 'ml2/ovn'%}
 {%- set notification_topics = ['notifications'] %}
 {%- do notification_topics.append('stacklight_notifications') if stacklight_enabled %}
+{%- set cadf_audit = spec.get('features', {}).get('logging', {}).get('cadf', {'enabled': false}) %}
 
 spec:
   available_releases:
@@ -283,6 +284,10 @@ spec:
           driver_agent:
             enabled_provider_agents: ovn
 {%- endif %}
+          audit:
+            enabled: true
+            # TODO: remove GET when issue with probes PRODX-25190 is fixed
+            ignore_req_list: GET, HEAD
           api_settings:
 {% set _default_provider_driver = 'amphorav2' %}
 {%- if spec.openstack_version in ['queens'] %}
@@ -325,6 +330,10 @@ spec:
             connect_retries: 10
           nova:
             endpoint_type: internalURL
+{%- if not cadf_audit.enabled %}
+          audit_middleware_notifications:
+            driver: noop
+{%- endif %}
           oslo_messaging_notifications:
             topics: {{ notification_topics|join(',') }}
         logging:

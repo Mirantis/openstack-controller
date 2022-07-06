@@ -7,6 +7,7 @@
 {%- set notification_topics = ['notifications'] %}
 {%- do notification_topics.append('stacklight_notifications') if stacklight_enabled %}
 {%- set barbican_db_cleanup = spec.get('features', {}).get('database', {}).get('cleanup', {}).get('barbican', {'enabled': true}) %}
+{%- set cadf_audit = spec.get('features', {}).get('logging', {}).get('cadf', {'enabled': false}) %}
 
 spec:
   available_releases:
@@ -99,11 +100,19 @@ spec:
         policy.d:
           01-controller-default.yaml: {{ service_policy }}
           02-custom.yaml: {{ spec.get("features", {}).get("policies", {}).get("barbican", {}) }}
+        paste:
+          composite:main:
+            /v1: barbican-api-keystone-audit
         barbican:
           keystone_authtoken:
             memcache_security_strategy: ENCRYPT
             memcache_secret_key: {{ credentials.memcached }}
+{%- if not cadf_audit.enabled %}
+          audit_middleware_notifications:
+            driver: noop
+{%- endif %}
           oslo_messaging_notifications:
+            driver: messagingv2
             topics: {{ notification_topics|join(',') }}
           DEFAULT:
             sql_idle_timeout: 3600

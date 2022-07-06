@@ -29,6 +29,11 @@ spec:
             enabled_provider_drivers: amphora:The Octavia Amphora driver.,octavia:Deprecated
               alias of the Octavia Amphora driver.,amphorav2:Extented Octavia Amphora
               driver with jobboard support.,ovn:OVN provider driver
+          audit:
+            enabled: true
+            ignore_req_list: GET, HEAD
+          audit_middleware_notifications:
+            driver: noop
           certificates:
             endpoint_type: internalURL
           glance:

@@ -74,6 +74,7 @@
 {%- if spec.openstack_version in ["master"] or ovn_enabled %}
 {%- set support_sync_ovs_info = False %}
 {%- endif %}
+{%- set cadf_audit = spec.get('features', {}).get('logging', {}).get('cadf', {'enabled': false}) %}
 
 spec:
   available_releases:
@@ -744,6 +745,10 @@ spec:
             core_plugin: neutron_plugin_contrail.plugins.opencontrail.contrail_plugin.NeutronPluginContrailCoreV2
           quotas:
             quota_driver: neutron_plugin_contrail.plugins.opencontrail.quota.driver.QuotaDriver
+          {%- endif %}
+          {%- if not cadf_audit.enabled %}
+          audit_middleware_notifications:
+            driver: noop
           {%- endif %}
           oslo_messaging_notifications:
             topics: {{ notification_topics|join(',') }}

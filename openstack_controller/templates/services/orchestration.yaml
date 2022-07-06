@@ -10,6 +10,7 @@
 {%- set notification_topics = ['notifications'] %}
 {%- do notification_topics.append('stacklight_notifications') if stacklight_enabled %}
 {%- set heat_db_cleanup = spec.get('features', {}).get('database', {}).get('cleanup', {}).get('heat', {'enabled': true}) %}
+{%- set cadf_audit = spec.get('features', {}).get('logging', {}).get('cadf', {'enabled': false}) %}
 
 spec:
   available_releases:
@@ -136,6 +137,10 @@ spec:
             memcache_secret_key: {{ credentials.memcached }}
           clients_swift:
             endpoint_type: public
+{%- if not cadf_audit.enabled %}
+          audit_middleware_notifications:
+            driver: noop
+{%- endif %}
           oslo_messaging_notifications:
             topics: {{ notification_topics|join(',') }}
         logging:

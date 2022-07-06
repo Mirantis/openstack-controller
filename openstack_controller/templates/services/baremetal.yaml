@@ -24,6 +24,7 @@
 {%- if spec.openstack_version not in ["queens"] %}
 {%- do enabled_management_interfaces.append('noop') %}
 {%- endif %}
+{%- set cadf_audit = spec.get('features', {}).get('logging', {}).get('cadf', {'enabled': false}) %}
 
 spec:
   available_releases:
@@ -180,6 +181,14 @@ spec:
             enabled_raid_interfaces: fake,agent,no-raid
             enabled_rescue_interfaces: fake,no-rescue
             enabled_vendor_interfaces: fake,ipmitool,no-vendor
+          audit:
+            enabled: true
+            # TODO: remove GET when issue with probes PRODX-25190 is fixed
+            ignore_req_list: GET, HEAD
+{%- if not cadf_audit.enabled %}
+          audit_middleware_notifications:
+            driver: noop
+{%- endif %}
           oslo_messaging_notifications:
             topics: {{ notification_topics|join(',') }}
           conductor:

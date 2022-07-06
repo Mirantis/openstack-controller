@@ -10,6 +10,9 @@ spec:
         policy.d:
           01-controller-default.yaml: {'key-manager_rule1': 'key-manager_value1'}
           02-custom.yaml: {}
+        paste:
+          composite:main:
+            /v1: barbican-api-keystone-audit
         barbican:
           DEFAULT:
             sql_idle_timeout: 3600
@@ -19,7 +22,10 @@ spec:
           keystone_authtoken:
             memcache_secret_key: 3vySYJq0rDZ32KGG
             memcache_security_strategy: ENCRYPT
+          audit_middleware_notifications:
+            driver: noop
           oslo_messaging_notifications:
+            driver: messagingv2
             topics: notifications,stacklight_notifications
           secretstore:
             enable_multiple_secret_stores: true

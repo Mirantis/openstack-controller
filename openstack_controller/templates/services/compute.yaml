@@ -35,6 +35,7 @@
 {%- set ceph_enabled = spec.get('features', {}).get('nova', {}).get('images', {}).get('backend') == 'ceph' or spec.get('features', {}).get('cinder', {}).get('volume', {}).get('backend') == 'ceph' %}
 {%- set ephemeral_encryption = spec.get('features', {}).get('nova', {}).get('images', {}).get("encryption", {}) %}
 {%- set nova_db_cleanup = spec.get('features', {}).get('database', {}).get('cleanup', {}).get('nova', {'enabled': true}) %}
+{%- set cadf_audit = spec.get('features', {}).get('logging', {}).get('cadf', {'enabled': false}) %}
 
 spec:
   available_releases:
@@ -665,6 +666,10 @@ spec:
 {%- for pools, pools_config in ceph.nova.pools.items() %}
             images_rbd_pool: {{ pools_config.name }}
 {%- endfor %}
+{%- if not cadf_audit.enabled %}
+          audit_middleware_notifications:
+            driver: noop
+{%- endif %}
           oslo_messaging_notifications:
             topics: {{ notification_topics|join(',') }}
           service_user:
