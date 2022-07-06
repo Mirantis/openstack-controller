@@ -34,7 +34,10 @@ class NetworkFeatureEnabled(base_section.BaseSection):
             "project-id",
         ]
 
-        if self.get_spec_item("features.neutron.dvr.enabled", False):
+        if (
+            self.get_spec_item("features.neutron.dvr.enabled", False)
+            and self.get_spec_item("features.neutron.backend", "ml2") == "ml2"
+        ):
             api_extensions_default.append("dvr")
 
         if self.get_spec_item("features.neutron.backend") == "ml2":
