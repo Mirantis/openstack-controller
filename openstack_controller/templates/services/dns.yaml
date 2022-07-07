@@ -11,6 +11,7 @@
   {%- set powerdns_protocol = spec.get('features', {}).get('designate', {}).get('backend', {}).get('protocol', 'udp') %}
   {%- set powerdns_external_ip = spec.get('features', {}).get('designate', {}).get('backend', {}).get('external_ip') %}
 {%- endif %}
+{%- set cadf_audit = spec.get('features', {}).get('logging', {}).get('cadf', {'enabled': false}) %}
 
 
 spec:
@@ -114,6 +115,10 @@ spec:
             memcache_secret_key: {{ credentials.memcached }}
           service:api:
             enabled_extensions_admin: quotas
+{%- if not cadf_audit.enabled %}
+          audit_middleware_notifications:
+            driver: noop
+{%- endif %}
           oslo_messaging_notifications:
             topics: {{ notification_topics|join(',') }}
         logging:
