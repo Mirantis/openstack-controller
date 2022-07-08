@@ -677,6 +677,18 @@ spec:
                             For OpenStack Stein and older, only single value can be provided.
                             Default is "host-model" for a optimal compromise between performance
                             and live-migration support.
+                        console:
+                          type: object
+                          properties:
+                            novnc:
+                              type: object
+                              properties:
+                                tls:
+                                  type: object
+                                  properties:
+                                    enabled:
+                                      type: boolean
+                                      description: "Enable TLS for VNC console between libvirt and VNCProxy"
                         images:
                           type: object
                           properties:

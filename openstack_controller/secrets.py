@@ -150,6 +150,16 @@ class SignedCertificate:
 
 
 @dataclass
+class VncSignedCertificate:
+    ca_cert: str
+    ca_key: str
+    server_cert: str
+    server_key: str
+    client_cert: str
+    client_key: str
+
+
+@dataclass
 class KeycloackCreds:
     passphrase: str
 
@@ -735,6 +745,181 @@ class SignedCertificateSecret(Secret):
             "cert_all": client_cert + client_key,
         }
         return SignedCertificate(**data)
+
+
+class VncSignedCertificateSecret(Secret):
+    secret_class = VncSignedCertificate
+
+    def __init__(self, namespace, service, san_name, cn_name):
+        super().__init__(namespace)
+        self.secret_name = f"{service}-certs"
+        self.san_name = san_name
+        self.cn_name = cn_name
+
+    def decode(self, data):
+        return self.secret_class(**data)
+
+    def save(self, secret):
+        data = asdict(secret)
+        for kind, key in data.items():
+            if not isinstance(key, bytes):
+                key = key.encode()
+            data[kind] = base64.b64encode(key).decode()
+        kube.save_secret_data(self.namespace, self.secret_name, data)
+
+    def _generate_cert(self, issuer, ca_cert, ca_key):
+        cert_key = rsa.generate_private_key(
+            public_exponent=65537,
+            key_size=2048,
+            backend=crypto_default_backend(),
+        )
+        new_subject = x509.Name(
+            [
+                x509.NameAttribute(x509.oid.NameOID.COMMON_NAME, self.cn_name),
+            ]
+        )
+        cert = (
+            x509.CertificateBuilder()
+            .subject_name(new_subject)
+            .issuer_name(ca_cert.issuer)
+            .public_key(cert_key.public_key())
+            .serial_number(x509.random_serial_number())
+            .not_valid_before(datetime.datetime.utcnow())
+            .not_valid_after(
+                datetime.datetime.utcnow() + datetime.timedelta(days=10 * 365)
+            )
+            .add_extension(
+                x509.SubjectAlternativeName([x509.DNSName(self.san_name)]),
+                critical=False,
+            )
+            .add_extension(
+                x509.BasicConstraints(ca=False, path_length=None),
+                critical=True,
+            )
+            .add_extension(
+                x509.KeyUsage(
+                    digital_signature=True,
+                    key_encipherment=True,
+                    data_encipherment=False,
+                    key_agreement=False,
+                    content_commitment=False,
+                    key_cert_sign=False,
+                    crl_sign=False,
+                    encipher_only=False,
+                    decipher_only=False,
+                ),
+                critical=True,
+            )
+            .add_extension(
+                x509.ExtendedKeyUsage(
+                    [
+                        x509.oid.ExtendedKeyUsageOID.SERVER_AUTH,
+                        x509.oid.ExtendedKeyUsageOID.CLIENT_AUTH,
+                    ]
+                ),
+                critical=True,
+            )
+            .sign(ca_key, hashes.SHA256(), crypto_default_backend())
+        )
+        cert_pem = cert.public_bytes(
+            encoding=crypto_serialization.Encoding.PEM
+        )
+
+        cert_key_pem = cert_key.private_bytes(
+            encoding=crypto_serialization.Encoding.PEM,
+            format=crypto_serialization.PrivateFormat.TraditionalOpenSSL,
+            encryption_algorithm=crypto_serialization.NoEncryption(),
+        )
+
+        return {"cert_pem": cert_pem, "cert_key_pem": cert_key_pem}
+
+    def create(self):
+        # Generate CA cert
+        key = rsa.generate_private_key(
+            public_exponent=65537,
+            key_size=2048,
+            backend=crypto_default_backend(),
+        )
+        builder = x509.CertificateBuilder()
+
+        issuer = x509.Name(
+            [
+                x509.NameAttribute(x509.oid.NameOID.COUNTRY_NAME, "US"),
+                x509.NameAttribute(
+                    x509.oid.NameOID.STATE_OR_PROVINCE_NAME, "CA"
+                ),
+                x509.NameAttribute(
+                    x509.oid.NameOID.LOCALITY_NAME, "San Francisco"
+                ),
+                x509.NameAttribute(
+                    x509.oid.NameOID.ORGANIZATION_NAME, "Mirantis Inc"
+                ),
+                x509.NameAttribute(x509.oid.NameOID.COMMON_NAME, "Mirantis"),
+            ]
+        )
+        builder = (
+            builder.issuer_name(issuer)
+            .subject_name(issuer)
+            .serial_number(x509.random_serial_number())
+            .not_valid_before(datetime.datetime.utcnow())
+            .not_valid_after(
+                datetime.datetime.utcnow() + datetime.timedelta(days=10 * 365)
+            )
+            .public_key(key.public_key())
+            .add_extension(
+                x509.BasicConstraints(ca=True, path_length=None), critical=True
+            )
+            .add_extension(
+                x509.KeyUsage(
+                    digital_signature=True,
+                    key_encipherment=True,
+                    data_encipherment=False,
+                    key_agreement=False,
+                    content_commitment=False,
+                    key_cert_sign=True,
+                    crl_sign=False,
+                    encipher_only=False,
+                    decipher_only=False,
+                ),
+                critical=True,
+            )
+        )
+
+        certificate = builder.sign(
+            private_key=key,
+            algorithm=hashes.SHA256(),
+            backend=crypto_default_backend(),
+        )
+        ca_cert = certificate.public_bytes(crypto_serialization.Encoding.PEM)
+        ca_key = key.private_bytes(
+            encoding=crypto_serialization.Encoding.PEM,
+            format=crypto_serialization.PrivateFormat.TraditionalOpenSSL,
+            encryption_algorithm=crypto_serialization.NoEncryption(),
+        )
+
+        root_key = crypto_serialization.load_pem_private_key(
+            ca_key, password=None, backend=crypto_default_backend()
+        )
+        root_cert = x509.load_pem_x509_certificate(
+            ca_cert, crypto_default_backend()
+        )
+
+        # Generate server sertificates
+        server_cert = self._generate_cert(issuer, root_cert, root_key)
+
+        # Generate client sertificates
+        client_cert = self._generate_cert(issuer, root_cert, root_key)
+
+        data = {
+            "ca_cert": ca_cert,
+            "ca_key": ca_key,
+            "server_cert": server_cert["cert_pem"],
+            "server_key": server_cert["cert_key_pem"],
+            "client_cert": client_cert["cert_pem"],
+            "client_key": client_cert["cert_key_pem"],
+        }
+        data = {k: v.decode() for k, v in data.items()}
+        return VncSignedCertificate(**data)
 
 
 class KeycloakSecret(Secret):

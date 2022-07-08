@@ -44,6 +44,8 @@
 {%- set cadf_audit = spec.get('features', {}).get('logging', {}).get('cadf', {'enabled': false}) %}
 {%- set cadf_audit_driver = spec.get('features', {}).get('logging', {}).get('cadf', {}).get('driver', 'messagingv2') %}
 
+{%- set vnc_tls_enabled = spec.get('features', {}).get('nova', {}).get('console', {}).get('novnc', {}).get('tls', {}).get('enabled', false) %}
+
 spec:
   releases:
 {%- if 'compute' in components_with_dedicated_messaging %}
@@ -125,9 +127,31 @@ spec:
           {{ image }}: {{ images[image] }}
         {%- endif %}
 {%- endfor %}
+{%- if vnc_tls_enabled %}
+      secrets:
+        tls:
+          libvirt:
+            vnc:
+              vnc_server: libvirt-vnc-server-tls-certs
+      endpoints:
+        libvirt:
+          host_fqdn_override:
+            vnc_server:
+              tls:
+                ca: |
+{{ libvirt_vnc_certs.ca_cert | indent( width=18, first=True) }}
+                crt: |
+{{ libvirt_vnc_certs.server_cert | indent( width=18, first=True) }}
+                key: |
+{{ libvirt_vnc_certs.server_key | indent( width=18, first=True) }}
+{%- endif %}
       manifests:
         network_policy: false
         ceph_conf: true
+{%- if vnc_tls_enabled %}
+        secret_libvirt_vnc_server_tls: true
+        secret_ca_bundle: true
+{%- endif %}
 {%- if ceph_enabled %}
       ceph_client:
         configmap: rook-ceph-config
@@ -150,6 +174,10 @@ spec:
           listen_addr: 0.0.0.0
         qemu:
           security_driver: apparmor
+        {%- if vnc_tls_enabled %}
+          vnc_tls: "1"
+          vnc_tls_x509_verify: "1"
+        {%- endif %}
       {%- if dpdk.enabled %}
         apparmor:
           templates:
@@ -270,6 +298,12 @@ spec:
                 conf:
             {%- if nova_override.get("images", {}).get("backend") or nova_override.get("vcpu_type") %}
                   nova:
+                  {%- if vnc_tls_enabled %}
+                    # Both auth schemes are enabled in favor of supporting backward compatibility
+                    # when VM instances were launched without TLS support.
+                    vnc:
+                      auth_schemes: vencrypt,none
+                  {%- endif %}
                     libvirt:
                 {%- if nova_override.get("vcpu_type") in ("host-model", "host-passthrough") %}
                       cpu_mode: {{ nova_override.vcpu_type }}
@@ -300,8 +334,15 @@ spec:
                     live_migration_interface: {{ nova_override.live_migration_interface }}
                   hypervisor:
                     host_interface: {{ nova_override.live_migration_interface }}
+            {%- endif %}
+            {%- if nova_override.get('live_migration_interface') or vnc_tls_enabled %}
                 console:
                   novnc:
+            {%- endif %}
+                  {%- if vnc_tls_enabled %}
+                    tls_enabled: true
+                  {%- endif %}
+            {%- if nova_override.get('live_migration_interface') %}
                     compute:
                       vncserver_proxyclient_interface: {{ nova_override.live_migration_interface }}
             {%- endif %}
@@ -420,6 +461,9 @@ spec:
       {%- if baremetal_enabled %}
         statefulset_compute_ironic: true
       {%- endif %}
+      {%- if vnc_tls_enabled %}
+        secret_novncproxy_tls: true
+      {%- endif %}
       endpoints:
         cluster_domain_suffix: {{ spec.internal_domain_name }}
 {% include 'base/_admin_identity.yaml' %}
@@ -524,11 +568,24 @@ spec:
             public: https
         compute_novnc_proxy:
           host_fqdn_override:
+          {%- if vnc_tls_enabled %}
+            client:
+              tls:
+                ca: |
+{{ libvirt_vnc_certs.ca_cert | indent( width=18, first=True) }}
+                crt: |
+{{ libvirt_vnc_certs.client_cert | indent( width=18, first=True) }}
+                key: |
+{{ libvirt_vnc_certs.client_key | indent( width=18, first=True) }}
+          {%- endif %}
             public:
               host: novncproxy.{{ spec.public_domain_name }}
               tls:
                 ca: |
 {{ spec.features.ssl.public_endpoints.ca_cert | indent(width=18, first=True) }}
+{%- if vnc_tls_enabled %}
+{{ libvirt_vnc_certs.ca_cert | indent( width=18, first=True) }}
+{%- endif %}
                 crt: |
 {{ spec.features.ssl.public_endpoints.api_cert | indent(width=18, first=True) }}
                 key: |
@@ -685,6 +742,12 @@ spec:
             topics: {{ notification_topics|join(',') }}
           service_user:
             send_service_user_token: true
+        {%- if vnc_tls_enabled %}
+          # Both auth schemes are enabled in favor of supporting backward compatibility
+          # when VM instances were launched without TLS support.
+          vnc:
+            auth_schemes: vencrypt,none
+        {%- endif %}
       {%- if baremetal_enabled %}
         nova_ironic:
           DEFAULT:
@@ -710,8 +773,15 @@ spec:
           live_migration_interface: {{ spec.features.nova.live_migration_interface }}
         hypervisor:
           host_interface: {{ spec.features.nova.live_migration_interface }}
+      {%- endif %}
+    {%- if spec.get('features', {}).get('nova', {}).get('live_migration_interface') or vnc_tls_enabled %}
       console:
         novnc:
+    {%- endif %}
+        {%- if vnc_tls_enabled %}
+          tls_enabled: true
+        {%- endif %}
+      {%- if spec.get('features', {}).get('nova', {}).get('live_migration_interface') %}
           compute:
             vncserver_proxyclient_interface: {{ spec.features.nova.live_migration_interface }}
       {%- endif %}

@@ -28,6 +28,13 @@ CREDS_KWARGS = {
     "ceph": {
         "nova": {"username": "", "secrets": "", "keyring": "", "pools": {}}
     },
+    "libvirt_vnc_certs": {
+        "ca_cert": "",
+        "server_cert": "",
+        "server_key": "",
+        "client_cert": "",
+        "client_key": "",
+    },
 }
 
 
@@ -150,6 +157,13 @@ def test_render_template(openstackdeployment):
         ssh_credentials={
             "private": "nova_private_key",
             "public": "nova_public_key",
+        },
+        libvirt_vnc_certs={
+            "ca_cert": "",
+            "server_cert": "",
+            "server_key": "",
+            "client_cert": "",
+            "client_key": "",
         },
     )
     assert len(data) == 1 and "spec" in data

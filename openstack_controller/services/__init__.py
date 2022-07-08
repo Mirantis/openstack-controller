@@ -14,6 +14,7 @@
 
 import asyncio
 import base64
+from dataclasses import asdict
 import json
 import random
 
@@ -1454,6 +1455,16 @@ class Nova(OpenStackServiceWithCeph, MaintenanceApiMixin):
         t_args["metadata_secret"] = neutron_creds.metadata_secret
 
         neutron_features = self.mspec["features"].get("neutron", {})
+
+        # Generare server-side certs for VNC TLS
+        vnc_cert_secret = secrets.VncSignedCertificateSecret(
+            self.namespace,
+            "libvirt-vnc-tls",
+            f"*.{self.mspec['internal_domain_name']}",
+            f"*.{self.mspec['public_domain_name']}",
+        )
+        libvirt_vnc_certs = asdict(vnc_cert_secret.ensure())
+        t_args["libvirt_vnc_certs"] = libvirt_vnc_certs
 
         # Read secret from shared namespace with TF deployment to
         # get value of vrouter port for setting it as env variable

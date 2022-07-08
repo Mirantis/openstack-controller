@@ -134,6 +134,7 @@ def test_service_keystone_render(
     ]
 
 
+@mock.patch.object(secrets.VncSignedCertificateSecret, "ensure")
 @mock.patch.object(services.base.OpenStackServiceWithCeph, "ceph_config")
 @mock.patch.object(secrets.SSHSecret, "ensure")
 @mock.patch.object(services.base.Service, "template_args")
@@ -143,6 +144,7 @@ def test_service_nova_with_ceph_render(
     mock_template_args,
     mock_ssh,
     mock_ceph_template_args,
+    mock_vnc,
     openstackdeployment,
     kubeapi,
 ):
@@ -161,6 +163,15 @@ def test_service_nova_with_ceph_render(
     service_creds = [secrets.OSServiceCreds("test", "test", "test")]
 
     mock_ssh.return_value = secrets.SshKey("public", "private")
+    mock_vnc.return_value = secrets.VncSignedCertificate(
+        "ca_cert",
+        "ca_key",
+        "server_cert",
+        "server_key",
+        "client_cert",
+        "client_key",
+    )
+
     mock_osdpl.return_value = MockOsdpl()
     osdplstmock = mock.MagicMock()
     mock_template_args.return_value = {
@@ -193,6 +204,7 @@ def test_service_nova_with_ceph_render(
     ]
 
     mock_ssh.assert_called_once()
+    mock_vnc.assert_called_once()
     mock_ceph_template_args.assert_called_once()
 
 
