@@ -512,6 +512,15 @@ spec:
                       required:
                        - public_endpoints
                       properties:
+                        tls_proxy:
+                          type: object
+                          required:
+                            - enabled
+                          properties:
+                            enabled:
+                              type: boolean
+                              description: |
+                                Enable FIPS compliant TLS proxy for public endpoints.
                         public_endpoints:
                           type: object
                           required:
