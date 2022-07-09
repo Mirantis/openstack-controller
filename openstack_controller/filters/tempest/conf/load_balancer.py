@@ -41,7 +41,7 @@ class LoadBalancer(base_section.BaseSection):
 
     @property
     def region(self):
-        pass
+        return self.get_spec_item("region_name", "RegionOne")
 
     @property
     def catalog_type(self):

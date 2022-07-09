@@ -65,9 +65,11 @@ spec:
             aodh:
               username: aodheGbd
               password: 9iaJ9hP83P41Mz8WMww1IggDCclZXWFM
+              region_name: 'RegionOne'
             test:
               username: testZL04
               password: DExly456mr4ZGIlmtccQRs5jsmMR1W9A
+              region_name: 'RegionOne'
         oslo_cache:
           statefulset:
             name: openstack-memcached-memcached

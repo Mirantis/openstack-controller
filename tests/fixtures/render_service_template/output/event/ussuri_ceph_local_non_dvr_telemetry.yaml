@@ -69,9 +69,11 @@ spec:
             panko:
               username: pankoTbxwz
               password: SIHgf22Fj2Npfpym6TmmZMqadSrI0fbH
+              region_name: 'RegionOne'
             test:
               username: testKfHK
               password: ycC0TyHUHrKAk1ZmvWsKnSrAzgwBCDDA
+              region_name: 'RegionOne'
         oslo_cache:
           statefulset:
             name: openstack-memcached-memcached

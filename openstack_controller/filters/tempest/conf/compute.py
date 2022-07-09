@@ -113,7 +113,7 @@ class Compute(base_section.BaseSection):
 
     @property
     def region(self):
-        pass
+        return self.get_spec_item("region_name", "RegionOne")
 
     @property
     def shelved_offload_time(self):

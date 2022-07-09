@@ -76,9 +76,11 @@ spec:
             octavia:
               password: VdeaqYEJb5UWW3TCxCMBNWIlzkcy94W7
               username: octaviafgirF49
+              region_name: 'RegionOne'
             test:
               password: Y6tYdn0ShRF69ZrXKeaa3sNYT8Y7AlP8
               username: testcnVC
+              region_name: 'RegionOne'
         load_balancer:
           host_fqdn_override:
             public:

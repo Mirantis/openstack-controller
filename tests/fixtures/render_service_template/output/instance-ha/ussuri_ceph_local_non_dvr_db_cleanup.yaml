@@ -42,9 +42,11 @@ spec:
             masakari:
               password: fUPlF2xntwICHH8KDYEjuc4Seb1TNQ8d
               username: masakari8Xfl6MhP
+              region_name: 'RegionOne'
             test:
               password: KI40mJVQ9fZP3MBZLpgrFSf2nqZIbbqg
               username: testC7BY
+              region_name: 'RegionOne'
         instance_ha:
           host_fqdn_override:
             public:

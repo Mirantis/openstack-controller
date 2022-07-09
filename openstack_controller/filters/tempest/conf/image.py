@@ -48,6 +48,4 @@ class Image(base_section.BaseSection):
 
     @property
     def region(self):
-        return self.get_values_item(
-            "keystone", "endpoints.identity.auth.admin.region"
-        )
+        return self.get_spec_item("region_name", "RegionOne")

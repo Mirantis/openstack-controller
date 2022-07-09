@@ -118,9 +118,11 @@ spec:
             gnocchi:
               username: gnocchicx1gn3j
               password: 4WEYNKaBF95C8UqMpj7ZD8u1q7Z3WdcR
+              region_name: 'RegionOne'
             test:
               username: testSTmV
               password: 5s94mESUaC5t4gTrNKmFIIEAVj3JEJ6p
+              region_name: 'RegionOne'
         oslo_cache:
           statefulset:
             name: openstack-memcached-memcached

@@ -79,15 +79,19 @@ spec:
             heat:
               password: u21jJUD1Gfy1aJ0aLmP9vZCHwc6KP1Ct
               username: heatJAfw
+              region_name: 'RegionOne'
             heat_stack_user:
               password: NcS3SPS193Kzn6thbf3z4NgaQhnQJvd0
               username: heat_stack_useraPNg9FUFALHAHdG
+              region_name: 'RegionOne'
             heat_trustee:
               password: Y2Lue7K2AP7MSqZBcFDlsaCbdBMaW612
               username: heat_trustee2Z9xQdWPIsCJ
+              region_name: 'RegionOne'
             test:
               password: nDsJytWemY6VcFv0jxqsg7QHBRgetQF7
               username: testyRGH
+              region_name: 'RegionOne'
         orchestration:
           host_fqdn_override:
             public:

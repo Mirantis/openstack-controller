@@ -114,9 +114,11 @@ spec:
             keystone:
               password: CZTF3XgNSfbahGGcx0EnjzqTQspr9aPi
               username: keystonesCHMyIkz
+              region_name: 'RegionOne'
             test:
               password: lIaVpAA3RiymRzerAWbNYFj5XfSitjcL
               username: testQALi
+              region_name: 'RegionOne'
           host_fqdn_override:
             public:
               host: keystone.it.just.works

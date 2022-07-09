@@ -103,9 +103,11 @@ spec:
             horizon:
               password: MNysGxHJy8xYI8LmZjS3QrJC6N10XsFZ
               username: horizonhGcF8rA
+              region_name: 'RegionOne'
             test:
               password: 5Q52SdTD0ern0aJ6AMcraLqh0rbUbGJr
               username: test5JeB
+              region_name: 'RegionOne'
         oslo_cache:
           statefulset:
             name: openstack-memcached-memcached

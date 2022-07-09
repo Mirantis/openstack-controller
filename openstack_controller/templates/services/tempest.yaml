@@ -41,6 +41,7 @@ spec:
 {% include 'base/_admin_identity.yaml' %}
             tempest:
               role: admin,key-manager:service-admin,creator
+              region_name: {{ spec.get('region_name', 'RegionOne') }}
           host_fqdn_override:
             public:
               host: keystone.{{ spec.public_domain_name }}
