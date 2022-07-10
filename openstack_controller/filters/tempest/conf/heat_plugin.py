@@ -169,7 +169,7 @@ class HeatPlugin(base_section.BaseSection):
 
     @property
     def region(self):
-        return self.get_keystone_credential("region_name")
+        return self.get_spec_item("region_name", "RegionOne")
 
     @property
     def sighup_config_edit_retries(self):

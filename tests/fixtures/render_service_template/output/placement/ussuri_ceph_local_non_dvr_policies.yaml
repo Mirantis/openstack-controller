@@ -37,9 +37,11 @@ spec:
             placement:
               password: AEYVXR3LFUbLcePQlkxSFvbQ1WyWtaiY
               username: placementR3AqaC4te
+              region_name: 'RegionOne'
             test:
               password: b1szm2wvF9n2tdCvDQQZEZM5GzpVtQkP
               username: testXByW
+              region_name: 'RegionOne'
         oslo_cache:
           statefulset:
             name: openstack-memcached-memcached

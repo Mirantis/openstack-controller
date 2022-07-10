@@ -365,15 +365,19 @@ spec:
             designate:
               password: KBecvsPZsWBFzDqYnevHWArm7tFycZKr
               username: designateLeRjiDsyT
+              region_name: 'RegionOne'
             neutron:
               password: 9d4CIP5ismqTa7l5N5FdD8MAuFMXx9EV
               username: neutronnmAhFsr
+              region_name: 'RegionOne'
             nova:
               password: BLFKrb8JhAMBb1v9BnRGDckMaYY7XUbq
               username: novaZzHG
+              region_name: 'RegionOne'
             test:
               password: q38BqVBqRH8mwfvI3uZeTmwe7JhKm3q1
               username: testLJtA
+              region_name: 'RegionOne'
         network:
           host_fqdn_override:
             public:

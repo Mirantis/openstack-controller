@@ -66,9 +66,11 @@ spec:
             barbican:
               password: fUPlF2xntwICHH8KDYEjuc4Seb1TNQ8d
               username: barbican8Xfl6MhP
+              region_name: 'RegionOne'
             test:
               password: KI40mJVQ9fZP3MBZLpgrFSf2nqZIbbqg
               username: testC7BY
+              region_name: 'RegionOne'
         key_manager:
           host_fqdn_override:
             public:

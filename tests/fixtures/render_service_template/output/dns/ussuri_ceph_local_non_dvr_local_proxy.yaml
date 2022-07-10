@@ -77,9 +77,11 @@ spec:
             designate:
               password: KBecvsPZsWBFzDqYnevHWArm7tFycZKr
               username: designateLeRjiDsyT
+              region_name: 'RegionOne'
             test:
               password: YspSgibZuHb2lFBxM8kzDDtstsrEqbWM
               username: testQuxr
+              region_name: 'RegionOne'
         mdns:
           host_fqdn_override:
             public:

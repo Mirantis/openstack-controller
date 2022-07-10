@@ -148,9 +148,11 @@ spec:
             glance:
               password: tAXKyhKBuNVBHlbRPvC1C24f3U4wqbhm
               username: glancefVB5ZF
+              region_name: 'RegionOne'
             test:
               password: UBCA8WZMUg3PDSAD5ppiLNNZrNjWAEBI
               username: test5RyH
+              region_name: 'RegionOne'
         image:
           host_fqdn_override:
             public:

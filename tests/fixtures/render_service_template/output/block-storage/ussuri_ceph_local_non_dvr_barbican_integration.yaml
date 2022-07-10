@@ -101,9 +101,11 @@ spec:
             cinder:
               password: 7SJvTD3HZ4gm3eU2UDGdjrcZC4wyj2zA
               username: cinderJCh8Iz
+              region_name: 'RegionOne'
             test:
               password: 55Y1R3QdGFvuntBCtD2iNZQcZiQUnsTJ
               username: testtFQE
+              region_name: 'RegionOne'
         oslo_cache:
           statefulset:
             name: openstack-memcached-memcached

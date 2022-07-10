@@ -86,7 +86,7 @@ class Network(base_section.BaseSection):
 
     @property
     def region(self):
-        pass
+        return self.get_spec_item("region_name", "RegionOne")
 
     @property
     def shared_physical_network(self):

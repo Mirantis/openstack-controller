@@ -44,6 +44,9 @@ spec:
                       description: |
                         "base URL for repo with helm charts & other binaries"
                         default: "https://binary.mirantis.com"
+                region_name:
+                  type: string
+                  description: The name of region.
                 openstack_version:
                   description: version of OpenStack to deploy
                   type: string
@@ -707,11 +710,6 @@ spec:
                             admin:
                               type: object
                               properties:
-                                region_name:
-                                  description: |
-                                    OpenStack region name
-                                    default: "RegionOne"
-                                  type: string
                                 project_name:
                                   description: |
                                     Project name for admin of OpenStack deployment

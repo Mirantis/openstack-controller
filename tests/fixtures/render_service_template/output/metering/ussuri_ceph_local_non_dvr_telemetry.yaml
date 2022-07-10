@@ -744,9 +744,11 @@ spec:
             ceilometer:
               username: ceilometerXhxs2HihzX
               password: Tnhbrnl6g31pzRaFdbxvyeMr1CSe7yDF
+              region_name: 'RegionOne'
             test:
               username: testHl4x
               password: CTKDtRix0ZAAHJZCVuQ60hWe2MiUHxAg
+              region_name: 'RegionOne'
         oslo_cache:
           statefulset:
             name: openstack-memcached-memcached
