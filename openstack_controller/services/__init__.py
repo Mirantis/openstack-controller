@@ -1785,7 +1785,7 @@ class RadosGateWay(Service):
                     "password": service_cred.password,
                     "project_domain_name": "service",
                     "project_name": "service",
-                    "region_name": "RegionOne",
+                    "region_name": self.mspec.get("region_name", "RegionOne"),
                     "user_domain_name": "service",
                     "username": service_cred.username,
                     "public_domain": self.mspec["public_domain_name"],
