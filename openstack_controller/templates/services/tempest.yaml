@@ -145,6 +145,8 @@ spec:
       conf:
         static_accounts:
           project_count: 20
+          project_count_with_network: 10
+          project_count_without_network: 10
           user_count: 5
         convert_to_uuid:
           identity:

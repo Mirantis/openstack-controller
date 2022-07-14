@@ -14,6 +14,7 @@ class Auth(base_section.BaseSection):
         "tempest_roles",
         "test_accounts_file",
         "use_dynamic_credentials",
+        "separate_projects_by_network_existence",
     ]
 
     @property
@@ -62,3 +63,7 @@ class Auth(base_section.BaseSection):
         if admin_username and admin_password:
             return True
         return False
+
+    @property
+    def separate_projects_by_network_existence(self):
+        return True
