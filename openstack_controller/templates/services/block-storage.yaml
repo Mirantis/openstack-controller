@@ -370,6 +370,9 @@ spec:
         volume:
           enabled: false
         volumev2:
+{%- if spec.openstack_version not in ['queens', 'rocky', 'stein', 'train', 'ussuri', 'victoria', 'wallaby'] %}
+          state:  absent
+{%- endif %}
           host_fqdn_override:
             public:
               host: cinder.{{ spec.public_domain_name }}
