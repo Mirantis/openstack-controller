@@ -37,6 +37,7 @@ spec:
           keystone_authtoken:
             memcache_security_strategy: ENCRYPT
             memcache_secret_key: vaT1fSWMgCwFlXem
+            service_type: alarming
         logging:
           logger_aodh:
             level: INFO

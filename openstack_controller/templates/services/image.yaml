@@ -235,6 +235,9 @@ spec:
           keystone_authtoken:
             memcache_security_strategy: ENCRYPT
             memcache_secret_key: {{ credentials.memcached }}
+            {%- if spec.openstack_version not in ("queens", "rocky", "stein") %}
+            service_type: image
+            {%- endif %}
       {%- if multi_backends %}
       {%- set enabled_backends = [] %}
       {%- for type, backend in multi_backends.items() %}
@@ -286,6 +289,9 @@ spec:
           keystone_authtoken:
             memcache_security_strategy: ENCRYPT
             memcache_secret_key: {{ credentials.memcached }}
+            {%- if spec.openstack_version not in ("queens", "rocky", "stein") %}
+            service_type: image
+            {%- endif %}
         logging:
           logger_glance:
             level: {{ spec.get('features', {}).get('logging', {}).get('glance', {}).get('level', 'INFO') }}

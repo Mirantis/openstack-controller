@@ -108,6 +108,7 @@ spec:
           keystone_authtoken:
             memcache_secret_key: JinzIdQzLdIslgxu
             memcache_security_strategy: ENCRYPT
+            service_type: compute
           libvirt:
             cpu_mode: host-model
             images_rbd_pool: vms-hdd

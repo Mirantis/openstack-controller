@@ -107,6 +107,9 @@ spec:
           keystone_authtoken:
             memcache_security_strategy: ENCRYPT
             memcache_secret_key: {{ credentials.memcached }}
+            {%- if spec.openstack_version not in ("queens", "rocky", "stein") %}
+            service_type: key-manager
+            {%- endif %}
 {%- if not cadf_audit.enabled %}
           audit_middleware_notifications:
             driver: noop

@@ -45,6 +45,7 @@ spec:
           keystone_authtoken:
             memcache_security_strategy: ENCRYPT
             memcache_secret_key: 4zDhycwch09UPx4j
+            service_type: baremetal
           neutron:
             cleaning_network: ironic-provisioning
             port_setup_delay: 30

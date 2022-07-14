@@ -42,6 +42,7 @@ spec:
           keystone_authtoken:
             memcache_security_strategy: ENCRYPT
             memcache_secret_key: FXKXZ3Tp0KDcDCY3
+            service_type: event
         logging:
           logger_panko:
             level: INFO

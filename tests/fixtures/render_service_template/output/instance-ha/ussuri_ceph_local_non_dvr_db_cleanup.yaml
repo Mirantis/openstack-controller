@@ -19,6 +19,7 @@ spec:
           keystone_authtoken:
             memcache_secret_key: 3vySYJq0rDZ32KGG
             memcache_security_strategy: ENCRYPT
+            service_type: instance-ha
         logging:
           logger_masakari:
             level: INFO

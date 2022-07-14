@@ -51,6 +51,9 @@ spec:
           keystone_authtoken:
             memcache_security_strategy: ENCRYPT
             memcache_secret_key: {{ credentials.memcached }}
+            {%- if spec.openstack_version not in ("queens", "rocky", "stein") %}
+            service_type: alarming
+            {%- endif %}
           database:
             alarm_history_time_to_live: {{ aodh_db_cleanup.get('age', 1) * 86400 }}
         logging:

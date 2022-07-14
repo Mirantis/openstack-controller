@@ -17,6 +17,7 @@ spec:
           keystone_authtoken:
             memcache_secret_key: 7JNLzlMydG5nxe80
             memcache_security_strategy: ENCRYPT
+            service_type: orchestration
           clients_swift:
             endpoint_type: public
           audit_middleware_notifications:

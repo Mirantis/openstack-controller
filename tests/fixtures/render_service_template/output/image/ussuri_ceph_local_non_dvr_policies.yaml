@@ -97,6 +97,7 @@ spec:
           keystone_authtoken:
             memcache_secret_key: yXjj5J8Ad1hHdCCh
             memcache_security_strategy: ENCRYPT
+            service_type: image
           audit_middleware_notifications:
             driver: noop
           oslo_messaging_notifications:
@@ -107,6 +108,7 @@ spec:
           keystone_authtoken:
             memcache_secret_key: yXjj5J8Ad1hHdCCh
             memcache_security_strategy: ENCRYPT
+            service_type: image
         logging:
           logger_glance:
             level: INFO
