@@ -206,6 +206,9 @@ spec:
           keystone_authtoken:
             memcache_security_strategy: ENCRYPT
             memcache_secret_key: {{ credentials.memcached }}
+            {%- if spec.openstack_version not in ("queens", "rocky", "stein") %}
+            service_type: baremetal
+            {%- endif %}
           neutron:
             port_setup_delay: 30
             cleaning_network: {{ network.get('name', 'baremetal') }}

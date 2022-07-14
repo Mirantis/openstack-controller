@@ -150,6 +150,7 @@ spec:
           keystone_authtoken:
             memcache_secret_key: 4zDhycwch09UPx4j
             memcache_security_strategy: ENCRYPT
+            service_type: network
           quotas:
             quota_driver: neutron_plugin_contrail.plugins.opencontrail.quota.driver.QuotaDriver
           audit_middleware_notifications:

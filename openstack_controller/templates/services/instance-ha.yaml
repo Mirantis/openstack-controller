@@ -105,6 +105,9 @@ spec:
           keystone_authtoken:
             memcache_security_strategy: ENCRYPT
             memcache_secret_key: {{ credentials.memcached }}
+            {%- if spec.openstack_version not in ("queens", "rocky", "stein") %}
+            service_type: instance-ha
+            {%- endif %}
         logging:
           logger_masakari:
             level: {{ spec.get('features', {}).get('logging', {}).get('masakari', {}).get('level', 'INFO') }}

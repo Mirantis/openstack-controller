@@ -15,6 +15,7 @@ spec:
           keystone_authtoken:
             memcache_secret_key: zdLlg6VAsGH6E7tX
             memcache_security_strategy: ENCRYPT
+            service_type: dns
           audit_middleware_notifications:
             driver: noop
           oslo_messaging_notifications:

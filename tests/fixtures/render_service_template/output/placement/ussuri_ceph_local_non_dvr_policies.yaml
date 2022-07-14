@@ -17,6 +17,7 @@ spec:
           keystone_authtoken:
             memcache_secret_key: 0NZmrV1NcBFwzDmv
             memcache_security_strategy: ENCRYPT
+            service_type: placement
       dependencies:
         static:
           db_init:

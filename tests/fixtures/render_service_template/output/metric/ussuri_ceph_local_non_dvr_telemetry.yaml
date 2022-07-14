@@ -83,6 +83,7 @@ spec:
           keystone_authtoken:
             memcache_security_strategy: ENCRYPT
             memcache_secret_key: mAcisvqaTNUVKNeE
+            service_type: metric
           indexer:
             driver: mysql
         logging:

@@ -40,6 +40,7 @@ spec:
           keystone_authtoken:
             memcache_secret_key: cAZLeChP79lxHJ1Z
             memcache_security_strategy: ENCRYPT
+            service_type: load-balancer
           neutron:
             endpoint_type: internalURL
             connect_retries: 10

@@ -104,6 +104,7 @@ spec:
           keystone_authtoken:
             memcache_secret_key: JinzIdQzLdIslgxu
             memcache_security_strategy: ENCRYPT
+            service_type: compute
           os_vif_ovs:
             isolate_vif: true
           libvirt:

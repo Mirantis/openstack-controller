@@ -105,6 +105,7 @@ spec:
           keystone_authtoken:
             memcache_secret_key: 76HsSsABaJvTQU6I
             memcache_security_strategy: ENCRYPT
+            service_type: volumev3
           audit_middleware_notifications:
             driver: noop
           oslo_messaging_notifications:

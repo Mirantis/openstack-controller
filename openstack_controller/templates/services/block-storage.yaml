@@ -201,6 +201,10 @@ spec:
           keystone_authtoken:
             memcache_security_strategy: ENCRYPT
             memcache_secret_key: {{ credentials.memcached }}
+            {%- if spec.openstack_version not in ("queens", "rocky", "stein") %}
+            # TODO(pas-ha) register block-storage service type and catalog entry as well
+            service_type: volumev3
+            {%- endif %}
           DEFAULT:
             # use unique host for both cluster and non-cluster mode,
             # otherwise messaging between API and cinder-volume will

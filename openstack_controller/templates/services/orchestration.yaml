@@ -137,6 +137,9 @@ spec:
           keystone_authtoken:
             memcache_security_strategy: ENCRYPT
             memcache_secret_key: {{ credentials.memcached }}
+            {%- if spec.openstack_version not in ("queens", "rocky", "stein") %}
+            service_type: orchestration
+            {%- endif %}
           clients_swift:
             endpoint_type: public
 {%- if not cadf_audit.enabled %}
