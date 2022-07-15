@@ -23,15 +23,12 @@ async def test_hook_called():
     }
     osdpl = {
         "name": "fake-name",
-        "status": {
-            "health": {"nova": {"compute-default": {"status": constants.BAD}}}
-        },
         "spec": {
             "openstack_version": "master",
             "artifacts": {"images_base_url": "", "binary_base_url": ""},
         },
     }
-
+    osdplst_health = {"nova": {"compute-default": {"status": constants.BAD}}}
     cronjob = {
         "metadata": {"annotations": ""},
         "spec": {
@@ -55,9 +52,13 @@ async def test_hook_called():
         "kopf.adopt"
     ), mock.patch("openstack_controller.kube.resource"), mock.patch(
         "openstack_controller.kube.find"
-    ) as find:
+    ) as find, mock.patch(
+        "openstack_controller.osdplstatus.OpenStackDeploymentStatus"
+    ) as osdplst:
         find.return_value.obj = cronjob
         o.return_value.obj = osdpl
+        osdplst.return_value.get_osdpl_health.return_value = osdplst_health
+        osdplst.return_value.exists.return_value = True
         ds_hooks = health.DAEMONSET_HOOKS[(constants.BAD, constants.OK)]
         # make sure mapping is correct
         assert compute_ds_name in ds_hooks

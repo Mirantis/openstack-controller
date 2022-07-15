@@ -23,8 +23,10 @@ LOG = utils.get_logger(__name__)
 # 2. from Progressing to Ready
 DAEMONSET_HOOKS = {
     (constants.BAD, constants.OK): {
-        "nova-compute-default": hooks.run_nova_cell_setup,
-        "octavia-health-manager-default": hooks.run_octavia_create_resources,
+        "nova-compute-default": hooks.run_nova_cell_setup
+    },
+    (constants.OK, constants.BAD): {
+        "octavia-health-manager-default": hooks.run_octavia_create_resources
     },
 }
 
@@ -65,17 +67,20 @@ async def daemonsets(name, namespace, meta, status, reason, **kwargs):
     osdpl = kube.get_osdpl(namespace)
     if not osdpl:
         return
+    osdplst = osdplstatus.OpenStackDeploymentStatus(
+        osdpl.name, osdpl.namespace
+    )
+    if not osdplst.exists():
+        return
+
     application, component = health.ident(meta)
     if reason == "delete":
-        osdplst = osdplstatus.OpenStackDeploymentStatus(
-            osdpl.name, osdpl.namespace
-        )
         osdplst.remove_osdpl_service_health(application, component)
         return
     res_health = health.daemonset_health_status(kwargs["body"])
     prev_res_health = utils.get_in(
-        osdpl.obj,
-        ["status", "health", application, component],
+        osdplst.get_osdpl_health(),
+        [application, component],
         {"status": ""},
     )
     LOG.debug(
