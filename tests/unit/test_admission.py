@@ -891,6 +891,7 @@ def test_nodes_features_neutron_sriov_keys(client):
                                     "hooks": {"init": "echo 'Init hook'"},
                                     "physnet": "tenant",
                                     "mtu": 1500,
+                                    "trusted": "true",
                                 }
                             ],
                         }

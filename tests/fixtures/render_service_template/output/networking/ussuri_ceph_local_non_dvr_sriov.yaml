@@ -438,6 +438,7 @@ spec:
                       - device: enp0
                         num_vfs: 7
                         physnet: sriov01
+                        trusted: "true"
       labels:
         sriov:
           node_selector_key: openstack-compute-node

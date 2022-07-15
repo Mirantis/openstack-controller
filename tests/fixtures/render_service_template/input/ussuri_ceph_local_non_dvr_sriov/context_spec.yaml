@@ -9,6 +9,7 @@ nodes:
             - device: enp0
               num_vfs: 7
               physnet: sriov01
+              trusted: "true"
 features:
   barbican:
     backends:
