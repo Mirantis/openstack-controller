@@ -123,6 +123,12 @@ patternProperties:
                         mtu:
                           type: integer
                           description: The NIC MTU
+                        trusted:
+                          type: string
+                          enum:
+                            - "true"
+                            - "false"
+                          description: Enable trusted mode on sriov VIF
               dpdk:
                 type: object
                 additionalProperties: False

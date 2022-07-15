@@ -65,6 +65,7 @@ spec:
                       - device: enp0
                         num_vfs: 7
                         physnet: sriov01
+                        trusted: "true"
       ceph_client:
         configmap: rook-ceph-config
         user_secret_name: nova-rbd-keyring
