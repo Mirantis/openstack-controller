@@ -106,7 +106,7 @@ async def handle_neutron_configmap_secret(
     LOG.debug(f"Handling secret create {name}")
     LOG.info(f"The secret {name} changes are: {diff}")
     metadata = base64.b64decode(body["data"]["metadata_agent.ini"]).decode()
-    config = configparser.ConfigParser()
+    config = configparser.ConfigParser(strict=False)
     config.read_string(metadata)
 
     secret_data = {
@@ -242,7 +242,7 @@ async def handle_rabbitmq_secret(
     keystone_conf = base64.b64decode(
         keystone_config_secret.obj["data"]["keystone.conf"]
     ).decode()
-    config = configparser.ConfigParser()
+    config = configparser.ConfigParser(strict=False)
     config.read_string(keystone_conf)
 
     transport_url = urlsplit(
