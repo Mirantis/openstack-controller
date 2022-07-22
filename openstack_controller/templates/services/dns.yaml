@@ -12,6 +12,7 @@
   {%- set powerdns_external_ip = spec.get('features', {}).get('designate', {}).get('backend', {}).get('external_ip') %}
 {%- endif %}
 {%- set cadf_audit = spec.get('features', {}).get('logging', {}).get('cadf', {'enabled': false}) %}
+{%- set cadf_audit_driver = spec.get('features', {}).get('logging', {}).get('cadf', {}).get('driver', ['messagingv2']) %}
 
 
 spec:
@@ -118,7 +119,10 @@ spec:
             {%- endif %}
           service:api:
             enabled_extensions_admin: quotas
-{%- if not cadf_audit.enabled %}
+{%- if cadf_audit.enabled %}
+          audit_middleware_notifications:
+            driver: {{ cadf_audit_driver|join(',') }}
+{%- else %}
           audit_middleware_notifications:
             driver: noop
 {%- endif %}

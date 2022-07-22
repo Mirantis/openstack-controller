@@ -75,6 +75,7 @@
 {%- set support_sync_ovs_info = False %}
 {%- endif %}
 {%- set cadf_audit = spec.get('features', {}).get('logging', {}).get('cadf', {'enabled': false}) %}
+{%- set cadf_audit_driver = spec.get('features', {}).get('logging', {}).get('cadf', {}).get('driver', ['messagingv2']) %}
 
 spec:
   available_releases:
@@ -749,7 +750,10 @@ spec:
           quotas:
             quota_driver: neutron_plugin_contrail.plugins.opencontrail.quota.driver.QuotaDriver
           {%- endif %}
-          {%- if not cadf_audit.enabled %}
+          {%- if cadf_audit.enabled %}
+          audit_middleware_notifications:
+            driver: {{ cadf_audit_driver|join(',') }}
+          {%- else %}
           audit_middleware_notifications:
             driver: noop
           {%- endif %}

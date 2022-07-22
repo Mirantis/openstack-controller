@@ -18,6 +18,8 @@ features:
   logging:
     cadf:
       enabled: false
+      driver:
+        - messagingv2
     cinder:
       level: DEBUG
     neutron:

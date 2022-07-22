@@ -1217,6 +1217,16 @@ spec:
                               description: |
                                 Enable CADF audit notifications
                                 default: false
+                            driver:
+                              type: array
+                              description: |
+                                List of drivers to handle sending audit notifications
+                                default: messagingv2
+                              items:
+                                type: string
+                                enum:
+                                  - messagingv2
+                                  - log
                         cinder: &logging_level
                           type: object
                           properties:

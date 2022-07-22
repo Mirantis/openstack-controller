@@ -21,6 +21,7 @@
 {%- set cinder_db_cleanup = spec.get('features', {}).get('database', {}).get('cleanup', {}).get('cinder', {'enabled': true}) %}
 {%- from 'macros/etcd3.j2' import get_etcd3_endpoint %}
 {%- set cadf_audit = spec.get('features', {}).get('logging', {}).get('cadf', {'enabled': false}) %}
+{%- set cadf_audit_driver = spec.get('features', {}).get('logging', {}).get('cadf', {}).get('driver', ['messagingv2']) %}
 
 spec:
   available_releases:
@@ -227,7 +228,10 @@ spec:
             enabled_backends: {{ enabled_backends|join(',') }}
             default_volume_type: {{ enabled_backends[0] }}
             scheduler_default_filters: AvailabilityZoneFilter,CapacityFilter,CapabilitiesFilter,InstanceLocalityFilter
-{%- if not cadf_audit.enabled %}
+{%- if cadf_audit.enabled %}
+          audit_middleware_notifications:
+            driver: {{ cadf_audit_driver|join(',') }}
+{%- else %}
           audit_middleware_notifications:
             driver: noop
 {%- endif %}

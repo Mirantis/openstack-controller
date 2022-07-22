@@ -11,6 +11,7 @@
 {%- do notification_topics.append('stacklight_notifications') if stacklight_enabled %}
 {%- set heat_db_cleanup = spec.get('features', {}).get('database', {}).get('cleanup', {}).get('heat', {'enabled': true}) %}
 {%- set cadf_audit = spec.get('features', {}).get('logging', {}).get('cadf', {'enabled': false}) %}
+{%- set cadf_audit_driver = spec.get('features', {}).get('logging', {}).get('cadf', {}).get('driver', ['messagingv2']) %}
 
 spec:
   available_releases:
@@ -142,7 +143,10 @@ spec:
             {%- endif %}
           clients_swift:
             endpoint_type: public
-{%- if not cadf_audit.enabled %}
+{%- if cadf_audit.enabled %}
+          audit_middleware_notifications:
+            driver: {{ cadf_audit_driver|join(',') }}
+{%- else %}
           audit_middleware_notifications:
             driver: noop
 {%- endif %}
