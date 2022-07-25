@@ -25,7 +25,7 @@
 {%- do enabled_management_interfaces.append('noop') %}
 {%- endif %}
 {%- set cadf_audit = spec.get('features', {}).get('logging', {}).get('cadf', {'enabled': false}) %}
-{%- set cadf_audit_driver = spec.get('features', {}).get('logging', {}).get('cadf', {}).get('driver', ['messagingv2']) %}
+{%- set cadf_audit_driver = spec.get('features', {}).get('logging', {}).get('cadf', {}).get('driver', 'messagingv2') %}
 
 spec:
   available_releases:
@@ -188,7 +188,7 @@ spec:
             ignore_req_list: GET, HEAD
 {%- if cadf_audit.enabled %}
           audit_middleware_notifications:
-            driver: {{ cadf_audit_driver|join(',') }}
+            driver: {{ cadf_audit_driver }}
 {%- else %}
           audit_middleware_notifications:
             driver: noop
