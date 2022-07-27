@@ -84,7 +84,6 @@ spec:
   - name: openstack-octavia
     chart: {{spec.common.openstack.get('repo', spec.common.charts.repo)}}/octavia
     values:
-  {%- if not tungstenfabric_enabled %}
       octavia:
         settings:
           lbmgmt_subnets:
@@ -103,7 +102,6 @@ spec:
   {%- endfor %}
 {%- if 'amphorav2' in provider_map.keys() %}
           enable_amphorav2: true
-{%- endif %}
 {%- endif %}
       images:
         tags:
@@ -274,6 +272,13 @@ spec:
         backend:
           - ovn
       {%- endif %}
+      {%- if tungstenfabric_enabled %}
+        core_plugin: tungstenfabric
+        {%- if spec.get('features', {}).get('neutron', {}).get('tunnel_interface') %}
+        interface:
+          tunnel: {{ spec.features.neutron.tunnel_interface }}
+        {%- endif %}
+      {%- endif %}
         proxy:
 {% include 'base/_proxy_vars.yaml' %}
       conf:
@@ -281,28 +286,41 @@ spec:
           01-controller-default.yaml: {{ service_policy }}
           02-custom.yaml: {{ spec.get("features", {}).get("policies", {}).get("octavia", {}) }}
         octavia:
-{%- if ovn_enabled %}
-          driver_agent:
-            enabled_provider_agents: ovn
-{%- endif %}
-          audit:
-            enabled: true
-            # TODO: remove GET when issue with probes PRODX-25190 is fixed
-            ignore_req_list: GET, HEAD
-          api_settings:
 {% set _default_provider_driver = 'amphorav2' %}
 {%- if spec.openstack_version in ['queens'] %}
   {% set _default_provider_driver = 'octavia' %}
 {%- elif spec.openstack_version in ['rocky', 'stein', 'train', 'ussuri'] %}
   {% set _default_provider_driver = 'amphora' %}
 {%- endif %}
-{%- if tungstenfabric_enabled %}
-  {% set _default_provider_driver = 'tungstenfabric' %}
-  {%- set provider_map = {'tungstenfabric': 'tungstenfabric:TungstenFabricProviderDriver'} %}
-{%- endif %}
 {%- if ovn_enabled %}
   {% set _default_provider_driver = 'ovn' %}
+          driver_agent:
+            enabled_provider_agents: ovn
 {%- endif %}
+{%- if tungstenfabric_enabled %}
+  {% set default_provider_driver = spec.features.get('octavia', {}).get('default_provider', 'tungstenfabric') %}
+  {% set _default_provider_driver = 'tungstenfabric' %}
+  {% set provider_map = {'tungstenfabric': 'tungstenfabric:TungstenFabricProviderDriver',
+                         'amphorav2': 'amphorav2:Extented Octavia Amphora driver with jobboard support.'} %}
+          apiserver:
+            api_server_ip: tf-config-api.tf.svc.cluster.local
+            api_server_port: 8082
+{%- endif %}
+{%- if 'tungstenfabric' in provider_map.keys() and default_provider_driver == 'tungstenfabric' %}
+          driver_agent:
+              enabled_provider_agents: tungstenfabric-agent
+              max_process_warning_percent: 0.75
+              provider_agent_shutdown_timeout: 60
+              stats_max_processes: 50
+              stats_request_timeout: 5
+              status_max_processes: 50
+              status_request_timeout: 5
+{%- endif %}
+          audit:
+            enabled: true
+            # TODO: remove GET when issue with probes PRODX-25190 is fixed
+            ignore_req_list: GET, HEAD
+          api_settings:
             default_provider_driver: {{ spec.features.get('octavia', {}).get('default_provider', _default_provider_driver) }}
             enabled_provider_drivers: {{ ','.join(provider_map.values()) }}
 {%- if 'amphorav2' in provider_map.keys() %}
