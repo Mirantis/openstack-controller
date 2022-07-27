@@ -143,7 +143,7 @@ placement_db_sync: '{{ images_base_url }}/openstack/placement:train-bionic-20220
 keystone_db_sync_expand: '{{ images_base_url }}/openstack/keystone:train-bionic-20220513073431'
 keystone_db_sync_migrate: '{{ images_base_url }}/openstack/keystone:train-bionic-20220513073431'
 keystone_db_sync_contract: '{{ images_base_url }}/openstack/keystone:train-bionic-20220513073431'
-octavia_amphora: '{{ binary_base_url }}/openstack/bin/octavia/amphora-x64-haproxy-train-20220713064032.qcow2'
+octavia_amphora: '{{ binary_base_url }}/openstack/bin/octavia/amphora-x64-haproxy-train-20220727064033.qcow2'
 etcd: '{{ images_base_url }}/openstack/extra/etcd:3.2.26'
 etcd_db_compact: '{{ images_base_url }}/openstack/extra/etcd:3.2.26'
 cinder_db_sync_online: '{{ images_base_url }}/openstack/cinder:train-bionic-20220513073431'
@@ -180,7 +180,7 @@ mariadb_controller: '{{ images_base_url }}/general/mariadb:10.6.7-focal-20220526
 horizon_mirantis_theme_sha256summ: bb94716f89c9053c061574bb2eff9d43b0ab37dbff0c3a78305a1f442fa2c414
 horizon_mirantis_theme_url: '{{ binary_base_url }}/openstack/bin/horizon/mirantis-train-7f6846a-20210119130337.tar.gz'
 ceph_config_helper: '{{ images_base_url }}/openstack/extra/ceph-config-helper:pacific-focal-20220705100042'
-octavia_amphora_checksum: ea251ef0e37761abaf6f8b7fd10b0fbf
+octavia_amphora_checksum: 3da45642ceeb5c563a8c5fdb0dff7719
 frr_init: '{{ images_base_url }}/openstack/extra/ceph-config-helper:pacific-focal-20220705100042'
 frr_info: '{{ images_base_url }}/openstack/extra/ceph-config-helper:pacific-focal-20220705100042'
 frr: '{{ images_base_url }}/general/external/docker.io/frrouting/frr:v8.2.2'
