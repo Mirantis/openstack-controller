@@ -398,7 +398,9 @@ event:
       password: ycC0TyHUHrKAk1ZmvWsKnSrAzgwBCDDA
       username: testKfHK
 metering:
-  credentials: &credentials_metering 
+  rgw_metrics_user_secret_key: D0Elptf91fPJiJBQltgWrc3AoC4nxjQjsTc6hfTG
+  rgw_metrics_user_access_key: WMBSY70L0DTKJVRENQ9A
+  credentials: &credentials_metering
     database:
       user:
         password: U9KwPjPgK1txi5kMm9pvVdlJDvtUr1lM
