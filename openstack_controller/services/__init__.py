@@ -279,15 +279,18 @@ class Ceilometer(OpenStackService):
             settings.OSCTL_CEPH_SHARED_NAMESPACE,
             ceph_api.OPENSTACK_KEYS_SECRET,
         )
-        rgw_internal_cacert = secrets.get_secret_data(
-            settings.OSCTL_CEPH_SHARED_NAMESPACE,
-            ceph_api.OPENSTACK_KEYS_SECRET,
-        ).get("rgw_internal_cacert")
-        if rgw_internal_cacert:
-            rgw_internal_cacert = base64.b64decode(
-                rgw_internal_cacert
-            ).decode()
-            t_args["rgw_internal_cacert"] = rgw_internal_cacert
+        for rgw_key in [
+            "rgw_internal_cacert",
+            "rgw_metrics_user_secret_key",
+            "rgw_metrics_user_access_key",
+        ]:
+            rgw_value = secrets.get_secret_data(
+                settings.OSCTL_CEPH_SHARED_NAMESPACE,
+                ceph_api.OPENSTACK_KEYS_SECRET,
+            ).get(rgw_key)
+            if rgw_value:
+                rgw_decoded = base64.b64decode(rgw_value).decode()
+                t_args[rgw_key] = rgw_decoded
 
         return t_args
 

@@ -77,6 +77,15 @@ spec:
             backend: oslo_cache.memcache_pool
           polling:
             fail_on_no_pollsters: "True"
+{%- if rgw_metrics_user_access_key is defined and rgw_metrics_user_secret_key is defined %}
+          service_types:
+            radosgw: object-store
+          rgw_client:
+            implicit_tenants: "True"
+          rgw_admin_credentials:
+            access_key: {{ rgw_metrics_user_access_key }}
+            secret_key: {{ rgw_metrics_user_secret_key }}
+{%- endif %}
         logging:
           logger_ceilometer:
             level: {{ spec.get('features', {}).get('logging', {}).get('ceilometer', {}).get('level', 'INFO') }}
