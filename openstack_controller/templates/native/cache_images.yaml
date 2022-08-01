@@ -4,7 +4,6 @@
 - octavia_api
 - dep_check
 - scripted_test
-- image_repo_sync
 - error_pages
 - nova_service_cleaner
 - rabbitmq
