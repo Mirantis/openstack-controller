@@ -117,7 +117,9 @@ class Compute(base_section.BaseSection):
 
     @property
     def shelved_offload_time(self):
-        pass
+        return self.get_values_item(
+            "nova", "conf.nova.DEFAULT.shelved_offload_time"
+        )
 
     @property
     def volume_device_name(self):
