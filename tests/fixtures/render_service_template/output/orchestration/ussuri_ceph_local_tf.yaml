@@ -143,6 +143,9 @@ spec:
             admin:
               password: 2tnAuP0j9MsgaVHErehZkC5HCK3ZxYLr
               username: rabbitmq
+            guest:
+              password: 7TnAuP0dKMsgaVHErehZkC5HCK3ZxOi4
+              username: guest
             heat:
               password: BY5CvE9aGG3jUkQghTCACvcDZbp6VcUI
               username: heatekEb

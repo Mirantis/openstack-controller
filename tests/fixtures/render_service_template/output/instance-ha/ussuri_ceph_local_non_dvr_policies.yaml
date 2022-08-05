@@ -100,6 +100,9 @@ spec:
             admin:
               password: 2tnAuP0j9MsgaVHErehZkC5HCK3ZxYLr
               username: rabbitmq
+            guest:
+              password: 7TnAuP0dKMsgaVHErehZkC5HCK3ZxOi4
+              username: guest
             masakari:
               password: iHMN1WsAMxAi8G4d0r64iggSdedSRR1p
               username: masakariVuqCvFid

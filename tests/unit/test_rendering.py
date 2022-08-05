@@ -36,6 +36,9 @@ def get_render_kwargs(service, context, default_args):
         service_t_args["admin_creds"] = context_template_args.get(
             "admin_creds", default_args["admin_creds"]
         )
+        service_t_args["guest_creds"] = context_template_args.get(
+            "guest_creds", default_args["guest_creds"]
+        )
         service_t_args["proxy_vars"] = context_template_args.get(
             "proxy_vars", default_args["proxy_vars"]
         )

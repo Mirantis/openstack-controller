@@ -132,6 +132,11 @@ class OpenStackAdminCredentials:
 
 
 @dataclass
+class RabbitmqGuestCredentials:
+    password: str
+
+
+@dataclass
 class SshKey:
     public: str
     private: str
@@ -274,6 +279,40 @@ class OpenStackAdminSecret(Secret):
             database=db, messaging=messaging, identity=identity
         )
         return admin_creds
+
+
+class RabbitmqGuestSecret(Secret):
+    secret_name = "generated-rabbitmq-password"
+    secret_class = RabbitmqGuestCredentials
+
+    def create(self) -> RabbitmqGuestCredentials:
+        return RabbitmqGuestCredentials(password=generate_password())
+
+    def decode(self, data):
+        params = {}
+        for kind, creds in data.items():
+            decoded = base64.b64decode(creds).decode()
+            params[kind] = decoded
+
+        return self.secret_class(**params)
+
+    def save(self, secret) -> None:
+        data = asdict(secret)
+
+        for key in data.keys():
+            data[key] = base64.b64encode(data[key].encode()).decode()
+
+        kube.save_secret_data(self.namespace, self.secret_name, data)
+
+    def ensure(self):
+        try:
+            secret = self.get()
+        except pykube.exceptions.ObjectDoesNotExist:
+            secret = self.create()
+            if secret:
+                self.save(secret)
+                secret = self.get()
+        return secret
 
 
 class OpenStackServiceSecret(Secret):

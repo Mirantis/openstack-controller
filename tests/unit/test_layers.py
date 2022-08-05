@@ -22,6 +22,9 @@ CREDS_KWARGS = {
         "identity": {"password": "", "username": ""},
         "messaging": {"password": "", "username": ""},
     },
+    "guest_creds": {
+        "password": "",
+    },
     "ceph": {
         "nova": {"username": "", "secrets": "", "keyring": "", "pools": {}}
     },
@@ -134,6 +137,7 @@ def test_render_template(openstackdeployment):
         logging,
         credentials=mock.Mock(),
         admin_creds=mock.Mock(),
+        guest_creds=mock.Mock(),
         images=images_mock,
         ceph={
             "nova": {

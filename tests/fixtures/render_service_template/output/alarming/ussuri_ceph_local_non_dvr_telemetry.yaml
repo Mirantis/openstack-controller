@@ -89,6 +89,9 @@ spec:
             user:
               username: rabbitmq
               password: 2tnAuP0j9MsgaVHErehZkC5HCK3ZxYLr
+            guest:
+              username: guest
+              password: 7TnAuP0dKMsgaVHErehZkC5HCK3ZxOi4
             aodh:
               username: aodhfe3v
               password: D3R9K371zxx2bygGZRXgz2Mrp2XsL1P6
