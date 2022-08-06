@@ -63,15 +63,9 @@ class ComputeFeatureEnabled(base_section.BaseSection):
 
     @property
     def attach_encrypted_volume(self):
-        if (
-            self.get_values_item("cinder", "conf.cinder.keymgr.api_class")
-            == "cinder.keymgr.barbican.BarbicanKeyManager"
-            and self.get_values_item("nova", "conf.nova.keymgr.api_class")
-            == "nova.keymgr.barbican.BarbicanKeyManager"
-        ):
-            return True
-        else:
-            return False
+        # Detect if attach encrypted volume is support in tempest init script
+        # By checking if volume type with encryption is present.
+        pass
 
     @property
     def barbican_integration_enabled(self):
