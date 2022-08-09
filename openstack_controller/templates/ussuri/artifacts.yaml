@@ -192,7 +192,7 @@ frr_info: '{{ images_base_url }}/openstack/extra/ceph-config-helper:pacific-foca
 cinder_service_cleaner: '{{ images_base_url }}/openstack/cinder:ussuri-bionic-20220705064724'
 iscsi_iscsi: '{{ images_base_url }}/openstack/cinder:ussuri-bionic-20220705064724'
 iscsi_tgt: '{{ images_base_url }}/general/tgt:1.0.x-bionic-20220804094816'
-strongswan: '{{ images_base_url }}/openstack/extra/strongswan:alpine-5.9.1-20211018180158'
+strongswan: '{{ images_base_url }}/openstack/extra/strongswan:alpine-5.9.5-20220809060458'
 keystone_init_secrets: '{{ images_base_url }}/openstack/extra/ceph-config-helper:pacific-focal-20220705100042'
 rsyslog: '{{ images_base_url }}/openstack/extra/rsyslog:v8.2001.0-20210901090922'
 glance_bootstrap: '{{ images_base_url }}/openstack/openstack-tools:victoria-focal-20220808060016'
