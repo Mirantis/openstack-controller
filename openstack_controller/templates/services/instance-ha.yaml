@@ -100,6 +100,7 @@ spec:
           DEFAULT:
             os_privileged_user_name: {{ admin_creds.identity.username }}
             os_privileged_user_password: {{ admin_creds.identity.password }}
+            nova_catalog_admin_info: compute:nova:internalURL
           coordination:
             backend_url: {{ get_etcd3_endpoint(spec.openstack_version, 'etcd3gw') }}
           keystone_authtoken:
