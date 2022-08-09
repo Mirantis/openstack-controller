@@ -3,8 +3,6 @@
 
 {%- set service = 'placement' %}
 spec:
-  available_releases:
-    - "openstack-placement"
   releases:
 {%- if spec.get('migration', {}).get('placement', {}).get('deploy_main_service', True) %}
   - name: openstack-placement

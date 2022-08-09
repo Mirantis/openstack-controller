@@ -1,10 +1,4 @@
 spec:
-  available_releases:
-    - "openstack-neutron-rabbitmq"
-    - "openstack-openvswitch"
-    - "openstack-neutron-frrouting"
-    - "openstack-ipsec"
-    - "openstack-neutron"
   releases:
   - chart: osh-infra/openvswitch
     name: openstack-openvswitch

@@ -248,17 +248,18 @@ class HelmManager:
         if stderr and "Release not loaded" not in stderr:
             raise kopf.TemporaryError(f"Helm command failed: {stderr}")
 
-    async def delete_bundle(self, data):
-        for release in data["spec"]["releases"]:
-            await self.delete(release["name"])
+    async def delete_bundle(self, available_releases):
+        current_releases = [x["name"] for x in await self.list()]
+        to_delete = set(current_releases).intersection(available_releases)
+        for release in to_delete:
+            await self.delete(release)
 
-    async def delete_not_active_releases(self, data):
+    async def delete_not_active_releases(self, data, available_releases):
         """Remove releases which a dynamic and enabled by feature flag."""
 
-        if not "available_releases" in data["spec"]:
+        if not available_releases:
             return
         current_releases = [r["name"] for r in data["spec"]["releases"]]
-        available_releases = data["spec"]["available_releases"]
         to_remove = set(available_releases) - set(current_releases)
 
         for release in to_remove:

@@ -14,9 +14,6 @@
 {%- set cadf_audit_driver = spec.get('features', {}).get('logging', {}).get('cadf', {}).get('driver', 'messagingv2') %}
 
 spec:
-  available_releases:
-    - "openstack-heat-rabbitmq"
-    - "openstack-heat"
   releases:
 {%- if 'orchestration' in components_with_dedicated_messaging %}
   - name: openstack-heat-rabbitmq

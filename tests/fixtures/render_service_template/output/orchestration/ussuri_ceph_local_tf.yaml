@@ -1,7 +1,4 @@
 spec:
-  available_releases:
-    - "openstack-heat-rabbitmq"
-    - "openstack-heat"
   releases:
   - chart: osh/heat
     name: openstack-heat

@@ -11,9 +11,6 @@
 {%- from 'macros/etcd3.j2' import get_etcd3_endpoint %}
 
 spec:
-  available_releases:
-    - "openstack-masakari-rabbitmq"
-    - "openstack-masakari"
   releases:
 {%- if 'instance-ha' in components_with_dedicated_messaging %}
   - name: openstack-masakari-rabbitmq

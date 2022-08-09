@@ -1,6 +1,4 @@
 spec:
-  available_releases:
-    - "openstack-horizon"
   releases:
   - chart: osh/horizon
     name: openstack-horizon

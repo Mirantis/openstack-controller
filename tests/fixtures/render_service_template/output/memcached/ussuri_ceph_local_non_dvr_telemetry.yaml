@@ -1,6 +1,4 @@
 spec:
-  available_releases:
-    - "openstack-memcached"
   releases:
   - chart: osh-infra/memcached
     name: openstack-memcached

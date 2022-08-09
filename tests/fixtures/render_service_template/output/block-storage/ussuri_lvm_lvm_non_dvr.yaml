@@ -1,8 +1,4 @@
 spec:
-  available_releases:
-    - "openstack-cinder-rabbitmq"
-    - "openstack-iscsi"
-    - "openstack-cinder"
   releases:
   - chart: osh-infra/iscsi
     name: openstack-iscsi

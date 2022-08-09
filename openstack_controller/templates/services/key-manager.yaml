@@ -11,9 +11,6 @@
 {%- set cadf_audit_driver = spec.get('features', {}).get('logging', {}).get('cadf', {}).get('driver', 'messagingv2') %}
 
 spec:
-  available_releases:
-    - "openstack-barbican-rabbitmq"
-    - "openstack-barbican"
   releases:
 {%- if 'key-manager' in components_with_dedicated_messaging %}
   - name: openstack-barbican-rabbitmq

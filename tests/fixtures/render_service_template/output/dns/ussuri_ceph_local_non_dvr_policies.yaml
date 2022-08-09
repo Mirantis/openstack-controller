@@ -1,7 +1,4 @@
 spec:
-  available_releases:
-    - "openstack-designate-rabbitmq"
-    - "openstack-designate"
   releases:
   - chart: osh/designate
     name: openstack-designate

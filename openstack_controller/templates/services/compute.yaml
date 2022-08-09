@@ -39,10 +39,6 @@
 {%- set cadf_audit_driver = spec.get('features', {}).get('logging', {}).get('cadf', {}).get('driver', 'messagingv2') %}
 
 spec:
-  available_releases:
-    - "openstack-nova-rabbitmq"
-    - "openstack-libvirt"
-    - "openstack-nova"
   releases:
 {%- if 'compute' in components_with_dedicated_messaging %}
   - name: openstack-nova-rabbitmq

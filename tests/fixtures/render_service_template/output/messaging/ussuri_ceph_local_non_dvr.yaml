@@ -1,6 +1,4 @@
 spec:
-  available_releases:
-    - "openstack-rabbitmq"
   releases:
   - chart: osh-infra/rabbitmq
     name: openstack-rabbitmq

@@ -1,6 +1,4 @@
 spec:
-  available_releases:
-    - "openstack-gnocchi"
   releases:
   - name: openstack-gnocchi
     chart: osh-infra/gnocchi

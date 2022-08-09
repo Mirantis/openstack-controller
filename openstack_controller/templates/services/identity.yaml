@@ -10,8 +10,6 @@
 {%- do notification_topics.append('stacklight_notifications') if stacklight_enabled %}
 
 spec:
-  available_releases:
-    - "openstack-keystone"
   releases:
   - name: openstack-keystone
     chart: {{spec.common.openstack.repo}}/keystone

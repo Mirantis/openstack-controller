@@ -4,8 +4,6 @@
 {%- set service = 'stepler' %}
 
 spec:
-  available_releases:
-    - "openstack-stepler"
   releases:
   - name: openstack-stepler
     chart: {{spec.common.openstack.repo}}/stepler
