@@ -16,9 +16,6 @@
 
 
 spec:
-  available_releases:
-    - "openstack-designate-rabbitmq"
-    - "openstack-designate"
   releases:
 {%- if 'dns' in components_with_dedicated_messaging %}
   - name: openstack-designate-rabbitmq

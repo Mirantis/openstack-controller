@@ -387,3 +387,6 @@ messaging:
     orchestration: null
     placement: null
     redis: null
+descheduler:
+    openstack_namespace: "openstack"
+

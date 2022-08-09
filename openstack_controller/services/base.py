@@ -86,6 +86,7 @@ class Service:
     version = "v1alpha1"
     kind = "HelmBundle"
     registry = {}
+    available_releases = []
     _child_objects = {
         #       '<chart>': {
         #           '<Kind>': {
@@ -489,8 +490,7 @@ class Service:
         LOG.info(f"Deleting config for {self.service}")
         self.set_children_status("Deleting")
         # TODO(e0ne): remove credentials of the deleted services
-        data = self.render()
-        await self.helm_manager.delete_bundle(data)
+        await self.helm_manager.delete_bundle(self.available_releases)
         msg = f"Deleted helm release {self.resource_name} for service {self.service}"
         LOG.info(msg)
 
@@ -533,7 +533,9 @@ class Service:
         except:
             raise
 
-        await self.helm_manager.delete_not_active_releases(data)
+        await self.helm_manager.delete_not_active_releases(
+            data, self.available_releases
+        )
 
         LOG.info(f"Config applied for {self.service}")
         kopf.info(

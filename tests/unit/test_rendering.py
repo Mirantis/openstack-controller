@@ -63,6 +63,7 @@ def test_render_service_template(
         "ingress",
         "redis",
         "coordination",
+        "descheduler",
     }
     all_services = (
         set(constants.OS_SERVICES_MAP.keys())

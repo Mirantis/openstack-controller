@@ -6,8 +6,6 @@
 {%- set backup_backend = backup_params.get('backend', 'pvc') %}
 
 spec:
-  available_releases:
-    - "openstack-mariadb"
   releases:
   - name: openstack-mariadb
     chart: {{spec.common.infra.repo}}/mariadb

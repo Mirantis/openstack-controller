@@ -1,7 +1,4 @@
 spec:
-  available_releases:
-    - "openstack-barbican-rabbitmq"
-    - "openstack-barbican"
   releases:
   - chart: osh/barbican
     name: openstack-barbican

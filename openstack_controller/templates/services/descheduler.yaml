@@ -1,6 +1,4 @@
 spec:
-  available_releases:
-    - "openstack-descheduler"
   releases:
   - name: openstack-descheduler
     chart: {{spec.common.infra.repo}}/descheduler

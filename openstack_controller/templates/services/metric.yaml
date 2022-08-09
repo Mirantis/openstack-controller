@@ -9,8 +9,6 @@
 {%- from 'macros/etcd3.j2' import get_etcd3_endpoint %}
 
 spec:
-  available_releases:
-    - "openstack-gnocchi"
   releases:
 {%- if spec.get('migration', {}).get('telemetry', {}).get('deploy_main_service', True) %}
   - name: openstack-gnocchi

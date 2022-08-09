@@ -1,7 +1,4 @@
 spec:
-  available_releases:
-    - "openstack-glance-rabbitmq"
-    - "openstack-glance"
   releases:
   - chart: osh/glance
     name: openstack-glance

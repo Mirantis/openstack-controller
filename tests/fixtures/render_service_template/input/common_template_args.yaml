@@ -42,6 +42,7 @@ images:
   db_drop: db-drop:latest
   db_init: db-init:latest
   dep_check: dep-check:latest
+  descheduler: descheduler:latest
   designate_api: designate-api:latest
   designate_central: designate-central:latest
   designate_db_sync: designate-db-sync:latest

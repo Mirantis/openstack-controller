@@ -47,6 +47,7 @@ LOG = utils.get_logger(__name__)
 
 class Ingress(Service):
     service = "ingress"
+    available_releases = ["ingress-openstack"]
 
     @property
     def health_groups(self):
@@ -55,6 +56,7 @@ class Ingress(Service):
 
 class Coordination(Service):
     service = "coordination"
+    available_releases = ["etcd"]
 
     @property
     def health_groups(self):
@@ -147,6 +149,7 @@ class Redis(Service):
 
 class MariaDB(Service):
     service = "database"
+    available_releases = ["openstack-mariadb"]
 
     @property
     def health_groups(self):
@@ -172,11 +175,15 @@ class MariaDB(Service):
         admin_creds = self._get_admin_creds()
         galera_secret = secrets.GaleraSecret(self.namespace)
         galera_creds = galera_secret.ensure()
-        return {"admin_creds": admin_creds, "galera_creds": galera_creds}
+        return {
+            "admin_creds": admin_creds,
+            "galera_creds": galera_creds,
+        }
 
 
 class Memcached(Service):
     service = "memcached"
+    available_releases = ["openstack-memcached"]
 
     @property
     def health_groups(self):
@@ -185,6 +192,7 @@ class Memcached(Service):
 
 class RabbitMQ(Service):
     service = "messaging"
+    available_releases = ["openstack-rabbitmq"]
 
     @property
     def health_groups(self):
@@ -229,6 +237,7 @@ class RabbitMQ(Service):
 
 class Descheduler(Service):
     service = "descheduler"
+    available_releases = ["openstack-descheduler"]
 
     def template_args(self):
         t_args = super().template_args()
@@ -254,16 +263,19 @@ class Descheduler(Service):
 class Aodh(OpenStackService):
     service = "alarming"
     openstack_chart = "aodh"
+    available_releases = ["openstack-aodh"]
 
 
 class Panko(OpenStackService):
     service = "event"
     openstack_chart = "panko"
+    available_releases = ["openstack-panko"]
 
 
 class Ceilometer(OpenStackService):
     service = "metering"
     openstack_chart = "ceilometer"
+    available_releases = ["openstack-ceilometer"]
 
     def template_args(self):
         t_args = super().template_args()
@@ -298,6 +310,7 @@ class Ceilometer(OpenStackService):
 class Gnocchi(OpenStackService):
     service = "metric"
     openstack_chart = "gnocchi"
+    available_releases = ["openstack-gnocchi"]
 
     def template_args(self):
         t_args = super().template_args()
@@ -320,6 +333,7 @@ class Gnocchi(OpenStackService):
 class Barbican(OpenStackService):
     service = "key-manager"
     openstack_chart = "barbican"
+    available_releases = ["openstack-barbican-rabbitmq", "openstack-barbican"]
     _secret_class = secrets.BarbicanSecret
     _child_objects = {
         "rabbitmq": {
@@ -337,6 +351,11 @@ class Barbican(OpenStackService):
 class Cinder(OpenStackServiceWithCeph):
     service = "block-storage"
     openstack_chart = "cinder"
+    available_releases = [
+        "openstack-cinder-rabbitmq",
+        "openstack-iscsi",
+        "openstack-cinder",
+    ]
     _child_objects = {
         "cinder": {
             "Job": {
@@ -416,6 +435,7 @@ class Cinder(OpenStackServiceWithCeph):
 
 class Stepler(OpenStackService):
     service = "stepler"
+    available_releases = ["openstack-stepler"]
 
     _child_objects = {
         "stepler": {
@@ -441,6 +461,7 @@ class Designate(OpenStackService):
     service = "dns"
     backend_service = "powerdns"
     openstack_chart = "designate"
+    available_releases = ["openstack-designate"]
     _child_objects = {
         "designate": {
             "Job": {
@@ -477,6 +498,7 @@ class Designate(OpenStackService):
 class Glance(OpenStackServiceWithCeph):
     service = "image"
     openstack_chart = "glance"
+    available_releases = ["openstack-glance-rabbitmq", "openstack-glance"]
 
     _child_objects = {
         "glance": {
@@ -536,6 +558,7 @@ class Glance(OpenStackServiceWithCeph):
 class Heat(OpenStackService):
     service = "orchestration"
     openstack_chart = "heat"
+    available_releases = ["openstack-heat-rabbitmq", "openstack-heat"]
     _service_accounts = ["heat_trustee", "heat_stack_user"]
     _child_objects = {
         "heat": {
@@ -650,6 +673,7 @@ class Heat(OpenStackService):
 class Horizon(OpenStackService):
     service = "dashboard"
     openstack_chart = "horizon"
+    available_releases = ["openstack-horizon"]
     _secret_class = secrets.HorizonSecret
 
     @property
@@ -680,6 +704,7 @@ class Horizon(OpenStackService):
 class Ironic(OpenStackService):
     service = "baremetal"
     openstack_chart = "ironic"
+    available_releases = ["openstack-ironic-rabbitmq", "openstack-ironic"]
 
     @property
     def _required_accounts(self):
@@ -710,6 +735,7 @@ class Ironic(OpenStackService):
 class Keystone(OpenStackService):
     service = "identity"
     openstack_chart = "keystone"
+    available_releases = ["openstack-keystone"]
     _service_accounts = ["osctl"]
 
     @property
@@ -925,6 +951,13 @@ class Keystone(OpenStackService):
 class Neutron(OpenStackService, MaintenanceApiMixin):
     service = "networking"
     openstack_chart = "neutron"
+    available_releases = [
+        "openstack-neutron-rabbitmq",
+        "openstack-openvswitch",
+        "openstack-neutron-frrouting",
+        "openstack-ipsec",
+        "openstack-neutron",
+    ]
     _secret_class = secrets.NeutronSecret
 
     @property
@@ -1245,6 +1278,11 @@ class Neutron(OpenStackService, MaintenanceApiMixin):
 class Nova(OpenStackServiceWithCeph, MaintenanceApiMixin):
     service = "compute"
     openstack_chart = "nova"
+    available_releases = [
+        "openstack-nova-rabbitmq",
+        "openstack-libvirt",
+        "openstack-nova",
+    ]
 
     @property
     def _service_accounts(self):
@@ -1593,6 +1631,7 @@ class Nova(OpenStackServiceWithCeph, MaintenanceApiMixin):
 class Placement(OpenStackService):
     service = "placement"
     openstack_chart = "placement"
+    available_releases = ["openstack-placement"]
 
     @property
     def _child_generic_objects(self):
@@ -1686,6 +1725,7 @@ class Placement(OpenStackService):
 class Octavia(OpenStackService):
     service = "load-balancer"
     openstack_chart = "octavia"
+    available_releases = ["openstack-octavia-rabbitmq", "openstack-octavia"]
 
     @property
     def _child_objects(self):
@@ -1743,6 +1783,7 @@ class Octavia(OpenStackService):
 
 class RadosGateWay(Service):
     service = "object-storage"
+    available_releases = ["openstack-ceph-rgw"]
 
     _child_objects = {
         "ceph-rgw": {
@@ -1848,6 +1889,7 @@ class RadosGateWay(Service):
 
 class Tempest(Service):
     service = "tempest"
+    available_releases = ["openstack-tempest"]
 
     _child_objects = {
         "tempest": {
@@ -1905,6 +1947,7 @@ class Tempest(Service):
 class Masakari(OpenStackService):
     service = "instance-ha"
     openstack_chart = "masakari"
+    available_releases = ["openstack-masakari-rabbitmq", "openstack-masakari"]
 
 
 registry = Service.registry

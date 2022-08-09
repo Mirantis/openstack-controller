@@ -1,6 +1,4 @@
 spec:
-  available_releases:
-    - "openstack-ceilometer"
   releases:
   - name: openstack-ceilometer
     chart: osh/ceilometer

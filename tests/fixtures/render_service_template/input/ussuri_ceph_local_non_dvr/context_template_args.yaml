@@ -443,3 +443,5 @@ messaging:
     placement: null
     redis: null
     instance-ha: null
+descheduler:
+    openstack_namespace: "openstack"

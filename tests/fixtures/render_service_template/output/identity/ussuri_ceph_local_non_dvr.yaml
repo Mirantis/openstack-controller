@@ -1,6 +1,4 @@
 spec:
-  available_releases:
-    - "openstack-keystone"
   releases:
   - chart: osh/keystone
     name: openstack-keystone

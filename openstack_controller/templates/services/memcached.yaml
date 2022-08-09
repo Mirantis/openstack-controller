@@ -4,8 +4,6 @@
 {%- set stacklight_enabled = spec.get('features', {}).get('stacklight', {}).get('enabled', False) %}
 
 spec:
-  available_releases:
-    - "openstack-memcached"
   releases:
   - name: openstack-memcached
     chart: {{spec.common.infra.repo}}/memcached

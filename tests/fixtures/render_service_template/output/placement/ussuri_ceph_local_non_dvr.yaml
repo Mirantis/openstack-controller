@@ -1,6 +1,4 @@
 spec:
-  available_releases:
-    - "openstack-placement"
   releases:
   - chart: osh/placement
     name: openstack-placement

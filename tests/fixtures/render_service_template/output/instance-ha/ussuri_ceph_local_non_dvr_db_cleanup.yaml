@@ -1,7 +1,4 @@
 spec:
-  available_releases:
-    - "openstack-masakari-rabbitmq"
-    - "openstack-masakari"
   releases:
   - chart: osh/masakari
     name: openstack-masakari

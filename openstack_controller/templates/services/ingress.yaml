@@ -2,8 +2,6 @@
 #kind: HelmBundle
 
 spec:
-  available_releases:
-    - "ingress-openstack"
   releases:
   - name: ingress-openstack
     chart: {{spec.common.infra.repo}}/ingress

@@ -1,6 +1,4 @@
 spec:
-  available_releases:
-    - "openstack-panko"
   releases:
   - name: openstack-panko
     chart: osh/panko
