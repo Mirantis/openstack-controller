@@ -16,7 +16,6 @@ ADD . /opt/operator
 RUN pip wheel --wheel-dir /opt/wheels --find-links /opt/wheels /opt/operator
 
 FROM $FROM
-ARG KUBECTL_BINARY="http://binary.mirantis.com/openstack/bin/utils/kubectl/kubectl-1.18.8-linux"
 ARG HELM_BINARY="https://binary.mirantis.com/openstack/bin/utils/helm/helm-v3.9.2-linux-amd64"
 
 COPY --from=builder /tmp/get-pip.py /tmp/get-pip.py
@@ -51,8 +50,6 @@ RUN set -ex; \
     cd -
 RUN wget -q -O /usr/local/bin/helm3 ${HELM_BINARY}; \
     chmod +x /usr/local/bin/helm3
-RUN wget -q ${KUBECTL_BINARY} -O /usr/local/bin/kubectl; \
-    chmod +x /usr/local/bin/kubectl
 
 RUN rm -rvf /tmp/kopf-patches
 RUN rm -rvf /opt/wheels; \
