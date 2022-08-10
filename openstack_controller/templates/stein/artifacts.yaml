@@ -182,7 +182,7 @@ horizon_mirantis_theme_sha256summ: ae046e1aed6ceb28d5677127bdc1442030fa019f586a5
 horizon_mirantis_theme_url: '{{ binary_base_url }}/openstack/bin/horizon/mirantis-stein-677becb-20210119130025.tar.gz'
 ceph_config_helper: '{{ images_base_url }}/openstack/extra/ceph-config-helper:pacific-focal-20220705100042'
 octavia_amphora_checksum: fbbd0a50dfe94e89d20eab02baa83df2
-frr: '{{ images_base_url }}/general/external/docker.io/frrouting/frr:v8.2.2'
+frr: '{{ images_base_url }}/general/external/docker.io/frrouting/frr:v8.3.0'
 frr_init: '{{ images_base_url }}/openstack/extra/ceph-config-helper:pacific-focal-20220705100042'
 frr_info: '{{ images_base_url }}/openstack/extra/ceph-config-helper:pacific-focal-20220705100042'
 cinder_service_cleaner: '{{ images_base_url }}/openstack/cinder:stein-bionic-20220513073431'
