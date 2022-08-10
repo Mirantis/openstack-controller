@@ -11,6 +11,7 @@ spec:
           DEFAULT:
             os_privileged_user_name: admin
             os_privileged_user_password: ZUqTyP2XwsgEGKZ7qNhhecYyq9NLkGE6
+            nova_catalog_admin_info: compute:nova:internalURL
           coordination:
             backend_url: etcd3+http://etcd:2379
           keystone_authtoken:
