@@ -17,7 +17,7 @@ RUN pip wheel --wheel-dir /opt/wheels --find-links /opt/wheels /opt/operator
 
 FROM $FROM
 ARG KUBECTL_BINARY="http://binary.mirantis.com/openstack/bin/utils/kubectl/kubectl-1.18.8-linux"
-ARG HELM_BINARY="https://binary.mirantis.com/openstack/bin/utils/helm/helm-v3.6.2-linux-amd64"
+ARG HELM_BINARY="https://binary.mirantis.com/openstack/bin/utils/helm/helm-v3.9.2-linux-amd64"
 
 COPY --from=builder /tmp/get-pip.py /tmp/get-pip.py
 COPY --from=builder /opt/wheels /opt/wheels
