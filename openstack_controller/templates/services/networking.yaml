@@ -386,6 +386,13 @@ spec:
           config:
             type: psk
             key: {{ credentials.ipsec_secret_key }}
+        strongswan:
+          charon:
+            plugins:
+              # When enabled, all local networks will be automatically bypassed by default
+              # https://docs.strongswan.org/docs/5.9/plugins/bypass-lan.html
+              bypass-lan:
+                interfaces_ignore: {{ spec.features.neutron.tunnel_interface }}
 {%- endif %}
   - name: openstack-neutron
     chart: {{spec.common.openstack.repo}}/neutron
