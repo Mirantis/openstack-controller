@@ -301,6 +301,11 @@ def merge_spec(spec, logger, osdplsecret_spec=None):
             .get("neutron", {})
             .get("backend", "ml2")
             == "ml2/ovn",
+            nova_img_encrypt_enabled=spec.get("features", {})
+            .get("nova", {})
+            .get("images", {})
+            .get("encryption", {})
+            .get("enabled", False),
         )
     )
     # Order for artifacts base urls overrides:

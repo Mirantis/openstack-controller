@@ -289,6 +289,10 @@ services:
             # Skip because of PRODX-9184 has won't fix resolution. Should be executed only for victoria and upper environments.
             - (?:octavia_tempest_plugin.tests.scenario.v2.test_traffic_ops.TrafficOperationsScenarioTest.test_basic_traffic)
           {%- endif %}
+          {%- if nova_img_encrypt_enabled %}
+            # Skip because of PRODX-25762. Should be executed only without nova images encryption.
+            - (?:tempest.api.compute.admin.test_servers.ServersAdmin275Test.test_rebuild_update_server_275)
+          {%- endif %}
           {%- if signature_enabled %}
             # Skip TEST failed, that doesn't work with static accounts correctly
             # TODO(vsaienko): remove when PRODX-18761 is fixed
