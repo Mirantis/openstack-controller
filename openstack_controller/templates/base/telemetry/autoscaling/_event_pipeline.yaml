@@ -2,7 +2,9 @@
           sinks:
             - name: event_sink
               publishers:
+ {%- if 'event' in spec.features.services %}
                 - panko://
+ {%- endif %}
                 - notifier://?topic=alarm.all
               transformers: null
           sources:
