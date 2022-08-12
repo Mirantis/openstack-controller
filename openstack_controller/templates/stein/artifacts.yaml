@@ -187,7 +187,7 @@ frr_init: '{{ images_base_url }}/openstack/extra/ceph-config-helper:pacific-foca
 frr_info: '{{ images_base_url }}/openstack/extra/ceph-config-helper:pacific-focal-20220705100042'
 cinder_service_cleaner: '{{ images_base_url }}/openstack/cinder:stein-bionic-20220513073431'
 iscsi_iscsi: '{{ images_base_url }}/openstack/cinder:stein-bionic-20220513073431'
-iscsi_tgt: '{{ images_base_url }}/general/tgt:1.0.x-bionic-20220804094816'
+iscsi_tgt: '{{ images_base_url }}/general/tgt:1.0.x-bionic-20220811094924'
 strongswan: '{{ images_base_url }}/openstack/extra/strongswan:alpine-5.9.5-20220809060458'
 keystone_init_secrets: '{{ images_base_url }}/openstack/extra/ceph-config-helper:pacific-focal-20220705100042'
 rsyslog: '{{ images_base_url }}/openstack/extra/rsyslog:v8.2001.0-20210901090922'
