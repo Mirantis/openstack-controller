@@ -191,7 +191,7 @@ frr_info: '{{ images_base_url }}/openstack/extra/ceph-config-helper:pacific-foca
 frr: '{{ images_base_url }}/general/external/docker.io/frrouting/frr:v8.3.0'
 cinder_service_cleaner: '{{ images_base_url }}/openstack/cinder:wallaby-focal-20220728175040'
 iscsi_iscsi: '{{ images_base_url }}/openstack/cinder:wallaby-focal-20220728175040'
-iscsi_tgt: '{{ images_base_url }}/general/tgt:1.0.x-focal-20220810174545'
+iscsi_tgt: '{{ images_base_url }}/general/tgt:1.0.x-focal-20220811132755'
 strongswan: '{{ images_base_url }}/openstack/extra/strongswan:alpine-5.9.5-20220809060458'
 keystone_init_secrets: '{{ images_base_url }}/openstack/extra/ceph-config-helper:pacific-focal-20220705100042'
 rsyslog: '{{ images_base_url }}/openstack/extra/rsyslog:v8.2001.0-20210901090922'
