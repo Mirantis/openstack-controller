@@ -213,6 +213,7 @@ class RabbitMQ(Service):
     def template_args(self):
         credentials = {}
         admin_creds = self._get_admin_creds()
+        guest_creds = self._get_guest_creds()
         services = set(self.mspec["features"].get("services", [])) - set(
             ["tempest"]
         )
@@ -232,6 +233,7 @@ class RabbitMQ(Service):
             "services": services,
             "credentials": credentials,
             "admin_creds": admin_creds,
+            "guest_creds": guest_creds,
         }
 
 

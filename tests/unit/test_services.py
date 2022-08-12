@@ -94,6 +94,9 @@ def test_service_keystone_render(
     osdplstmock = mock.MagicMock()
     creds = secrets.OSSytemCreds("test", "test")
     admin_creds = secrets.OpenStackAdminCredentials(creds, creds, creds)
+    guest_creds = secrets.RabbitmqGuestCredentials(
+        password="secret",
+    )
     creds_dict = {"user": creds, "admin": creds}
     credentials = secrets.OpenStackCredentials(
         database=creds_dict,
@@ -107,6 +110,7 @@ def test_service_keystone_render(
     mock_template_args.return_value = {
         "credentials": credentials,
         "admin_creds": admin_creds,
+        "guest_creds": guest_creds,
         "service_creds": service_creds,
     }
     openstackdeployment["spec"]["common"]["openstack"] = {
@@ -144,6 +148,9 @@ def test_service_nova_with_ceph_render(
 ):
     creds = secrets.OSSytemCreds("test", "test")
     admin_creds = secrets.OpenStackAdminCredentials(creds, creds, creds)
+    guest_creds = secrets.RabbitmqGuestCredentials(
+        password="secret",
+    )
     creds_dict = {"user": creds, "admin": creds}
     credentials = secrets.OpenStackCredentials(
         database=creds_dict,
@@ -159,6 +166,7 @@ def test_service_nova_with_ceph_render(
     mock_template_args.return_value = {
         "credentials": credentials,
         "admin_creds": admin_creds,
+        "guest_creds": guest_creds,
         "service_creds": service_creds,
     }
 

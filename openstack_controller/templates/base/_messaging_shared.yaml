@@ -3,6 +3,9 @@
             admin:
               username: {{ admin_creds.messaging.username }}
               password: {{ admin_creds.messaging.password }}
+            guest:
+              username: guest
+              password: {{ guest_creds.password }}
             user:
               username: {{ admin_creds.messaging.username }}
               password: {{ admin_creds.messaging.password }}

@@ -166,6 +166,10 @@ class Service:
         admin_secret = secrets.OpenStackAdminSecret(self.namespace)
         return admin_secret.ensure()
 
+    def _get_guest_creds(self) -> secrets.RabbitmqGuestCredentials:
+        guest_secret = secrets.RabbitmqGuestSecret(self.namespace)
+        return guest_secret.ensure()
+
     @property
     def resource_name(self):
         return f"openstack-{self.service}"
@@ -603,6 +607,7 @@ class Service:
         credentials = secret.ensure()
 
         admin_creds = self._get_admin_creds()
+        guest_creds = self._get_guest_creds()
         service_secrets = secrets.ServiceAccountsSecrets(
             self.namespace,
             self.service,
@@ -614,6 +619,7 @@ class Service:
         template_args = {
             "credentials": credentials,
             "admin_creds": admin_creds,
+            "guest_creds": guest_creds,
             "service_creds": service_creds,
         }
 

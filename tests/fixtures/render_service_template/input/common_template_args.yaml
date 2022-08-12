@@ -8,6 +8,8 @@ admin_creds:
   messaging:
     password: 2tnAuP0j9MsgaVHErehZkC5HCK3ZxYLr
     username: rabbitmq
+guest_creds:
+  password: 7TnAuP0dKMsgaVHErehZkC5HCK3ZxOi4
 images:
   aodh_db_purge: aodh-db-purge:latest
   aodh_api: aodh-api:latest

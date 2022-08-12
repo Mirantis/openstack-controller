@@ -169,6 +169,9 @@ spec:
             admin:
               password: 2tnAuP0j9MsgaVHErehZkC5HCK3ZxYLr
               username: rabbitmq
+            guest:
+              password: 7TnAuP0dKMsgaVHErehZkC5HCK3ZxOi4
+              username: guest
             keystone:
               password: i1LUJuYCIEeUdpKbztpemVvIQhmJ56cn
               username: keystoneeYwYK03G
