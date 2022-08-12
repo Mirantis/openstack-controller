@@ -5,14 +5,8 @@
 features:
   messaging:
     components_with_dedicated_messaging:
-      - block-storage
       - compute
-      - dns
-      - image
       - networking
-      - orchestration
-      - load-balancer
-      - key-manager
 services:
   redis:
     redisfailover:
