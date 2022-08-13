@@ -17,6 +17,7 @@ from openstack_controller.admission.validators import base
 from openstack_controller import constants
 from openstack_controller import exception
 from openstack_controller import osdplstatus
+from openstack_controller.utils import CronValidator
 
 
 class OpenStackValidator(base.BaseValidator):
@@ -39,6 +40,7 @@ class OpenStackValidator(base.BaseValidator):
         self._check_panko_allowed(new_obj)
         self._deny_encrypted_api_key(new_obj)
         self._deny_policy_in_code(new_obj)
+        self._check_schedules(new_obj)
 
     def validate_delete(self, review_request):
         self._check_delete_allowed(review_request)
@@ -184,4 +186,40 @@ class OpenStackValidator(base.BaseValidator):
             ):
                 raise exception.OsDplValidationFailed(
                     "Using policy in code is allowed only from Victoria release."
+                )
+
+    def _check_schedules(self, new_obj):
+        cleaners = (
+            new_obj.get("spec", {})
+            .get("features", {})
+            .get("database", {})
+            .get("cleanup", {})
+        )
+        if cleaners:
+            for cleaner_cron in [
+                "barbican",
+                "masakari",
+                "nova",
+                "cinder",
+                "glance",
+                "heat",
+                "aodh",
+            ]:
+                schedule = cleaners.get(cleaner_cron, {}).get("schedule")
+                if schedule:
+                    if not CronValidator(schedule).validate():
+                        raise exception.OsDplValidationFailed(
+                            f"Schedule string '{schedule}' has wrong values. Please recheck them."
+                        )
+        backup = (
+            new_obj.get("spec", {})
+            .get("features", {})
+            .get("database", {})
+            .get("backup", {})
+            .get("schedule_time")
+        )
+        if backup:
+            if not CronValidator(backup).validate():
+                raise exception.OsDplValidationFailed(
+                    f"Schedule string '{backup}' has wrong values. Please recheck them."
                 )
