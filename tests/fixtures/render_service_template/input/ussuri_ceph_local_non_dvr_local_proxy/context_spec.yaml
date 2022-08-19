@@ -48,6 +48,7 @@ features:
     live_migration_interface: ens3
   octavia:
     lb_network:
+      name: lb-service-management
       subnets:
       - pool_end: 10.255.255.254
         pool_start: 10.255.1.0

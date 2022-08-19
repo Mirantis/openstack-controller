@@ -91,9 +91,11 @@ spec:
   {%- if not tungstenfabric_enabled %}
       octavia:
         settings:
+  {%- set lb_network = spec.features.get('octavia', {}).get('lb_network', {}) %}
+          lbmgmt_network_name: {{ lb_network.get('name', 'lb-mgmt-net') }}
           lbmgmt_subnets:
   {%- set lb_subnets = [] %}
-  {%- if spec.features.get('octavia', {}).get('lb_network', {}).get('subnets', []) %}
+  {%- if lb_network.get('subnets', []) %}
       {%- do lb_subnets.extend(spec.features.octavia.lb_network.subnets) %}
   {%- else %}
       {%- do lb_subnets.append({"range": "10.255.0.0/16",

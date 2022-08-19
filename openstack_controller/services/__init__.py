@@ -1193,6 +1193,20 @@ class Neutron(OpenStackService, MaintenanceApiMixin):
                     .get("ssl", {})
                     .get("public_endpoints", {})
                 )
+                octavia_mgmt_network = utils.get_in(
+                    self.mspec["features"],
+                    ["octavia", "lb_network"],
+                    {
+                        "subnets": [
+                            {
+                                "range": "10.255.0.0/16",
+                                "pool_start": "10.255.1.0",
+                                "pool_end": "10.255.255.254",
+                            }
+                        ]
+                    },
+                )
+                octavia_mgmt_network.setdefault("name", "lb-mgmt-net")
                 b64encode = lambda v: base64.b64encode(v.encode()).decode()
                 secret_data = {
                     "tunnel_interface": b64encode(
@@ -1223,6 +1237,9 @@ class Neutron(OpenStackService, MaintenanceApiMixin):
                             ],
                             "nginx-cluster",
                         )
+                    ),
+                    "octavia_mgmt_network": b64encode(
+                        json.dumps(octavia_mgmt_network)
                     ),
                 }
 

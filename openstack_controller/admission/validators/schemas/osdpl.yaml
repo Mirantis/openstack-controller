@@ -1323,6 +1323,8 @@ properties:
             required:
               - subnets
             properties:
+              name:
+                type: string
               subnets:
                 type: array
                 items:
