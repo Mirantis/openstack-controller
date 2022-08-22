@@ -292,6 +292,8 @@ services:
             - (?:heat_tempest_plugin.tests.functional.test_create_update_neutron_subnet.UpdateSubnetTest.test_update_gateway_ip)
             - (?:heat_tempest_plugin.tests.functional.test_create_update_neutron_subnet.UpdateSubnetTest.test_update_gateway_ip_to_empty)
             - (?:heat_tempest_plugin.tests.functional.test_create_update_neutron_subnet.UpdateSubnetTest.test_update_to_no_gateway_ip)
+            # Not supported by TF (PRODX-21320)
+            - (?:heat_tempest_plugin.tests.functional.test_create_update_neutron_trunk.UpdateTrunkTest.test_update_trunk_name_and_description)
             # TODO(ibumarskov): not supported by TF (PRODX-5188)
             - (?:neutron_tempest_plugin.scenario.test_floatingip.DefaultSnatToExternal.test_snat_external_ip)
             # TODO(ibumarskov): not supported by TF (PRODX-5252)
