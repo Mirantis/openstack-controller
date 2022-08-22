@@ -145,6 +145,9 @@ spec:
           project_count: 20
           project_count_with_network: 10
           project_count_without_network: 10
+          {%- if spec.openstack_version not in ['queens', 'rocky', 'stein', 'train', 'ussuri', 'victoria', 'wallaby', 'xena'] %}
+          create_reader_user: true
+          {%- endif %}
           user_count: 5
         convert_to_uuid:
           identity:
