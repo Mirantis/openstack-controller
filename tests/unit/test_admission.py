@@ -1435,3 +1435,23 @@ def test_db_backup_backend_default_opts_correct(client):
     response = client.simulate_post("/validate", json=req)
     assert response.status == falcon.HTTP_OK
     assert response.json["response"]["allowed"] is True
+
+
+def test_cron_validation(client):
+    req = copy.deepcopy(ADMISSION_REQ)
+    req["request"]["object"]["spec"]["features"]["database"] = {
+        "backup": {"schedule_time": "05-40 */05 07 Jan mon"}
+    }
+
+    response = client.simulate_post("/validate", json=req)
+    assert response.status == falcon.HTTP_OK
+    assert response.json["response"]["allowed"] is True
+
+    req["request"]["object"]["spec"]["features"]["database"] = {
+        "cleanup": {"heat": {"schedule": "22 06 15 17 *"}}
+    }
+
+    response = client.simulate_post("/validate", json=req)
+    assert response.status == falcon.HTTP_OK
+    assert response.json["response"]["allowed"] is False
+    assert response.json["response"]["status"]["code"] == 400

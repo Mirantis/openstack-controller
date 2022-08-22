@@ -191,3 +191,143 @@ def substitute_local_proxy_hostname(url, hostname):
     if parsed.port:
         new_netloc = f"{new_netloc}:{parsed.port}"
     return parsed._replace(netloc=new_netloc).geturl()
+
+
+class cronScheduleNotValid(Exception):
+    """Class for cron validator exceptions"""
+
+
+class CronValidatorBase:
+    min = None
+    max = None
+
+    def __init__(self, expression):
+        self.expression = expression
+
+    def _check_item(self, element):
+        if element.isdigit():
+            return int(element) >= self.min and int(element) <= self.max
+        elif element == "*":
+            return True
+        else:
+            return False
+
+    def _check_range(self, element):
+        parts = element.split("-")
+        if len(parts) == 2:
+            if parts[0].isdigit() and parts[1].isdigit():
+                if self._check_item(parts[0]) and self._check_item(parts[1]):
+                    return int(parts[0]) <= int(parts[1])
+        return False
+
+    def _check_step(self, element):
+        parts = element.split("/")
+        if len(parts) == 2:
+            if parts[1].isdigit():
+                if self._check_item(parts[1]):
+                    if "-" in parts[0]:
+                        return self._check_range(parts[0])
+                    elif parts[0] == "*":
+                        return True
+        return False
+
+    def _check_list(self, element):
+        parts = element.split(",")
+        for item in parts:
+            if "/" in item:
+                result = self._check_step(item)
+            elif "-" in item:
+                result = self._check_range(item)
+            else:
+                result = self._check_item(item)
+            if not result:
+                break
+        return result
+
+    def validate(self):
+        if not self._check_list(self.expression):
+            raise cronScheduleNotValid()
+
+
+class CronValidateMinutes(CronValidatorBase):
+    min = 0
+    max = 59
+
+
+class CronValidateHours(CronValidatorBase):
+    min = 0
+    max = 23
+
+
+class CronValidateDays(CronValidatorBase):
+    min = 1
+    max = 31
+
+
+class CronValidateMonths(CronValidatorBase):
+    min = 1
+    max = 12
+    names = [
+        "jan",
+        "feb",
+        "mar",
+        "apr",
+        "may",
+        "jun",
+        "jul",
+        "aug",
+        "sep",
+        "oct",
+        "nov",
+        "dec",
+    ]
+
+    def _check_item(self, element):
+        if element in self.names:
+            return True
+        else:
+            return super()._check_item(element)
+
+    def _check_list(self, element):
+        parts = element.split(",")
+        if len(parts) > 1 and len(set(parts) & set(self.names)) != 0:
+            return False
+        return super()._check_list(element)
+
+
+class CronValidateDaysOfWeek(CronValidateMonths):
+    min = 0
+    max = 7
+    names = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"]
+
+
+class CronValidator:
+    nicknames = [
+        "@yearly",
+        "@annually",
+        "@monthly",
+        "@weekly",
+        "@daily",
+        "@hourly",
+    ]
+
+    def __init__(self, schedule):
+        self.schedule = schedule.strip().lower()
+
+    def _is_nickname(self):
+        return self.schedule in self.nicknames
+
+    def validate(self):
+        if self._is_nickname():
+            return True
+        blocks = self.schedule.split(" ")
+        try:
+            minutes, hours, days, month, dow = blocks
+            CronValidateMinutes(minutes).validate()
+            CronValidateHours(hours).validate()
+            CronValidateDays(days).validate()
+            CronValidateMonths(month).validate()
+            CronValidateDaysOfWeek(dow).validate()
+        except (TypeError, ValueError, cronScheduleNotValid):
+            return False
+        return True
