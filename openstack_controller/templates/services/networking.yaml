@@ -784,6 +784,9 @@ spec:
           {%- if spec.get('features', {}).get('neutron', {}).get('dvr', {}).get('enabled', False) %}
           DEFAULT:
             agent_mode: dvr_snat
+          {%- elif spec.openstack_version in openstack_versions[openstack_versions.index('ussuri'):] %}
+          DEFAULT:
+            cleanup_on_shutdown: True
           {%- endif %}
         metadata_agent:
           DEFAULT:

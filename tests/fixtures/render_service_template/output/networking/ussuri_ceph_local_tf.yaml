@@ -114,6 +114,8 @@ spec:
         l3_agent:
           agent:
             extensions: fip_qos,gateway_ip_qos
+          DEFAULT:
+            cleanup_on_shutdown: true
         logging:
           logger_neutron:
             level: INFO
