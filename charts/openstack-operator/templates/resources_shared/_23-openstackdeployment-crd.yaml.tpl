@@ -1163,7 +1163,6 @@ spec:
                           enum:
                             - amphorav2
                             - ovn
-                            - tungstenfabric
                         lb_network:
                           type: object
                           required:
