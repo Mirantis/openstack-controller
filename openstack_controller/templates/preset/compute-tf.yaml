@@ -170,13 +170,27 @@ services:
           nova:
             filter_scheduler:
               enabled_filters:
+              - AggregateInstanceExtraSpecsFilter
+              # - AggregateImagePropertiesIsolation
+              # - AggregateIoOpsFilter
+              # - AggregateMultiTenancyIsolation
+              # - AggregateNumInstancesFilter
+              - AggregateTypeAffinityFilter
+              # - AllHostsFilter
               - AvailabilityZoneFilter
               - ComputeFilter
               - ComputeCapabilitiesFilter
+              - DifferentHostFilter
               - ImagePropertiesFilter
+              - IsolatedHostsFilter
+              # - IoOpsFilter
+              # - MetricsFilter
+              - SameHostFilter
               - ServerGroupAntiAffinityFilter
               - ServerGroupAffinityFilter
+              - SimpleCIDRAffinityFilter
               - NUMATopologyFilter
+              # - NumInstancesFilter
               - PciPassthroughFilter
             libvirt:
               live_migration_use_ip_to_scp_configdrive: true
