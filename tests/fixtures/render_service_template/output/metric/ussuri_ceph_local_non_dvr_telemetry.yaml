@@ -84,9 +84,6 @@ spec:
             service_type: metric
           indexer:
             driver: mysql
-        logging:
-          logger_gnocchi:
-            level: INFO
       dependencies:
         static:
           db_init:
