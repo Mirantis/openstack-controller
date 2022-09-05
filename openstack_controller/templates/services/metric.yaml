@@ -7,6 +7,7 @@
 {%- set notification_topics = ['notifications'] %}
 {%- do notification_topics.append('stacklight_notifications') if stacklight_enabled %}
 {%- from 'macros/etcd3.j2' import get_etcd3_endpoint %}
+{%- set logging_level = spec.get('features', {}).get('logging', {}).get('gnocchi', {}).get('level', 'INFO') %}
 
 spec:
   releases:
@@ -92,7 +93,11 @@ spec:
             oslo_config_project: gnocchi
         gnocchi:
           DEFAULT:
+{%- if logging_level == 'DEBUG' %}
+            debug: true
+{%- else %}
             debug: false
+{%- endif %}
             #There are some problems with etcd3+http driver so we shouldn't use it
             #BUG: https://mirantis.jira.com/browse/PRODX-21786
             coordination_url: {{ get_etcd3_endpoint(spec.openstack_version, 'etcd3') }}
@@ -107,9 +112,6 @@ spec:
             {%- endif %}
           indexer:
             driver: mysql
-        logging:
-          logger_gnocchi:
-            level: {{ spec.get('features', {}).get('logging', {}).get('gnocchi', {}).get('level', 'INFO') }}
       dependencies:
         static:
           db_init:
