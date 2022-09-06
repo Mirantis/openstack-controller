@@ -303,7 +303,10 @@ def merge_spec(spec, logger, osdplsecret_spec=None):
             nova_img_encrypt_enabled=spec.get("features", {})
             .get("nova", {})
             .get("images", {})
-            .get("encryption", {})
+            .get("encryption", {}),
+            neutron_dvr_enabled=spec.get("features", {})
+            .get("neutron", {})
+            .get("dvr", {})
             .get("enabled", False),
         )
     )
