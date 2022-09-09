@@ -43,16 +43,27 @@ class NetworkFeatureEnabled(base_section.BaseSection):
         if self.get_spec_item("features.neutron.backend") == "ml2":
             api_extensions_default.extend(
                 [
+                    "l3-ha",
+                    "l3-flavors",
+                    "l3_agent_scheduler",
+                    "dhcp_agent_scheduler",
+                ]
+            )
+
+        if self.get_spec_item("features.neutron.backend") in [
+            "ml2",
+            "ml2/ovn",
+        ]:
+            api_extensions_default.extend(
+                [
                     "auto-allocated-topology",
                     "network-ip-availability",
                     "network_availability_zone",
                     "subnet_allocation",
                     "flavors",
                     "availability_zone",
-                    "l3-ha",
                     "multi-provider",
                     "subnet-service-types",
-                    "l3-flavors",
                     "standard-attr-revisions",
                     "router_availability_zone",
                     "filter-validation",
@@ -66,11 +77,9 @@ class NetworkFeatureEnabled(base_section.BaseSection):
                     "default-subnetpools",
                     "ext-gw-mode",
                     "agent",
-                    "l3_agent_scheduler",
                     "net-mtu",
                     "address-scope",
                     "extraroute",
-                    "dhcp_agent_scheduler",
                     "rbac-policies",
                     "standard-attr-tag",
                 ]
