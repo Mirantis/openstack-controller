@@ -50,6 +50,7 @@ features:
     tunnel_interface: ens3
     tenant_network_types:
     - vlan
+    - vxlan
     baremetal:
       ngs:
         devices:
