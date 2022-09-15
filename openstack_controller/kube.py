@@ -442,7 +442,7 @@ class Pod(pykube.Pod):
 
     @property
     def job_child(self):
-        for owner in self.metadata["ownerReferences"]:
+        for owner in self.metadata.get("ownerReferences", []):
             if owner["kind"] == "Job":
                 return True
         return False
