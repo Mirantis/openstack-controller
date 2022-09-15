@@ -1437,6 +1437,192 @@ def test_db_backup_backend_default_opts_correct(client):
     assert response.json["response"]["allowed"] is True
 
 
+def test_db_backup_sync_remote_incorrect(client):
+    req = copy.deepcopy(ADMISSION_REQ)
+    req["request"]["object"]["spec"]["features"]["database"] = {
+        "backup": {
+            "enabled": True,
+            "sync_remote": {
+                "enabled": True,
+                "remotes": {
+                    "ceph_mariadb": {
+                        "conf": {
+                            "type": "s3",
+                            "provider": "Ceph",
+                            "endpoint": "https://rgw.endpoint.tst",
+                            "access_key_id": "12345678",
+                            "secret_access_key": "10111213",
+                        },
+                    }
+                },
+            },
+        }
+    }
+    required_fields = "['conf', 'path']"
+    response = client.simulate_post("/validate", json=req)
+    assert response.status == falcon.HTTP_OK
+    assert response.json["response"]["allowed"] is False
+    assert (
+        f"Remote ceph_mariadb fields {required_fields} are mandatory"
+        in response.json["response"]["status"]["message"]
+    )
+
+
+def test_db_backup_sync_ceph_conf_correct(client):
+    req = copy.deepcopy(ADMISSION_REQ)
+    req["request"]["object"]["spec"]["features"]["database"] = {
+        "backup": {
+            "enabled": True,
+            "sync_remote": {
+                "enabled": True,
+                "remotes": {
+                    "ceph_mariadb": {
+                        "path": "testbucket/backups",
+                        "conf": {
+                            "type": "s3",
+                            "provider": "Ceph",
+                            "endpoint": "https://rgw.endpoint.tst",
+                            "access_key_id": "12345678",
+                            "secret_access_key": "10111213",
+                        },
+                    }
+                },
+            },
+        }
+    }
+    response = client.simulate_post("/validate", json=req)
+    assert response.status == falcon.HTTP_OK
+    assert response.json["response"]["allowed"] is True
+
+
+def test_db_backup_sync_aws_conf_correct(client):
+    req = copy.deepcopy(ADMISSION_REQ)
+    req["request"]["object"]["spec"]["features"]["database"] = {
+        "backup": {
+            "enabled": True,
+            "sync_remote": {
+                "enabled": True,
+                "remotes": {
+                    "aws_mariadb": {
+                        "path": "testbucket/backups",
+                        "conf": {
+                            "type": "s3",
+                            "provider": "AWS",
+                            "access_key_id": "12345678",
+                            "secret_access_key": "10111213",
+                        },
+                    }
+                },
+            },
+        }
+    }
+    response = client.simulate_post("/validate", json=req)
+    assert response.status == falcon.HTTP_OK
+    assert response.json["response"]["allowed"] is True
+
+
+def test_db_backup_sync_ceph_conf_incorrect(client):
+    req = copy.deepcopy(ADMISSION_REQ)
+    req["request"]["object"]["spec"]["features"]["database"] = {
+        "backup": {
+            "enabled": True,
+            "sync_remote": {
+                "enabled": True,
+                "remotes": {
+                    "ceph_mariadb": {
+                        "path": "testbucket/backups",
+                        "conf": {
+                            "type": "s3",
+                            "provider": "Ceph",
+                            "access_key_id": "12345678",
+                            "secret_access_key": "10111213",
+                        },
+                    }
+                },
+            },
+        }
+    }
+    required_fields = "['type', 'provider', 'access_key_id', 'secret_access_key', 'endpoint']"
+    response = client.simulate_post("/validate", json=req)
+    assert response.status == falcon.HTTP_OK
+    assert response.json["response"]["allowed"] is False
+    assert (
+        f"Remote ceph_mariadb section conf fields {required_fields} are mandatory"
+        in response.json["response"]["status"]["message"]
+    )
+
+
+def test_db_backup_sync_aws_conf_incorrect(client):
+    req = copy.deepcopy(ADMISSION_REQ)
+    req["request"]["object"]["spec"]["features"]["database"] = {
+        "backup": {
+            "enabled": True,
+            "sync_remote": {
+                "enabled": True,
+                "remotes": {
+                    "aws_mariadb": {
+                        "path": "testbucket/backups",
+                        "conf": {
+                            "type": "s3",
+                            "provider": "AWS",
+                            "secret_access_key": "10111213",
+                        },
+                    }
+                },
+            },
+        }
+    }
+    required_fields = (
+        "['type', 'provider', 'access_key_id', 'secret_access_key']"
+    )
+    response = client.simulate_post("/validate", json=req)
+    assert response.status == falcon.HTTP_OK
+    assert response.json["response"]["allowed"] is False
+    assert (
+        f"Remote aws_mariadb section conf fields {required_fields} are mandatory"
+        in response.json["response"]["status"]["message"]
+    )
+
+
+def test_db_backup_sync_remotes_not_allowed(client):
+    req = copy.deepcopy(ADMISSION_REQ)
+    req["request"]["object"]["spec"]["features"]["database"] = {
+        "backup": {
+            "enabled": True,
+            "sync_remote": {
+                "enabled": True,
+                "remotes": {
+                    "ceph_mariadb": {
+                        "path": "testbucket/backups",
+                        "conf": {
+                            "type": "s3",
+                            "provider": "Ceph",
+                            "access_key_id": "12345678",
+                            "secret_access_key": "10111213",
+                        },
+                    },
+                    "aws_mariadb": {
+                        "path": "testbucket/backups",
+                        "conf": {
+                            "type": "s3",
+                            "provider": "AWS",
+                            "access_key_id": "12345678",
+                            "secret_access_key": "10111213",
+                        },
+                    },
+                },
+            },
+        }
+    }
+    response = client.simulate_post("/validate", json=req)
+    assert response.status == falcon.HTTP_OK
+    assert response.json["response"]["allowed"] is False
+    assert (
+        "Only one remote is allowed in remotes section"
+        in response.json["response"]["status"]["message"]
+    )
+
+
 def test_cron_validation(client):
     req = copy.deepcopy(ADMISSION_REQ)
     req["request"]["object"]["spec"]["features"]["database"] = {

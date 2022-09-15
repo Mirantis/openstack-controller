@@ -35,6 +35,11 @@ spec:
             sst:
               password: RbLblzhS7yNE8WQ4nY829uRQpvTegI87
               username: sstybw
+          host_fqdn_override:
+            public:
+              tls:
+                ca: |
+                  TEST CA
           namespace: null
       images:
         tags:
@@ -66,6 +71,7 @@ spec:
         network_policy: false
         service_ingress: false
         service_master: true
+        secret_ca_bundle: true
       monitoring:
         prometheus:
           enabled: true

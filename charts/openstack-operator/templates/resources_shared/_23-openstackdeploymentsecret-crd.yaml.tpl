@@ -77,6 +77,18 @@ spec:
                                   description: |
                                      Specifies the secret ID created for the app role
                                   type: string
+                    database:
+                      type: object
+                      properties:
+                        backup:
+                          type: object
+                          properties:
+                            sync_remote:
+                              type: object
+                              properties:
+                                remotes:
+                                  type: object
+                                  x-kubernetes-preserve-unknown-fields: true
                     keystone:
                       type: object
                       properties:

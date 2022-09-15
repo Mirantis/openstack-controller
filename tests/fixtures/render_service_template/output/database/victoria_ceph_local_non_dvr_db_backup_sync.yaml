@@ -13,9 +13,20 @@ spec:
             [mysqld]
             innodb_io_capacity=2000
             innodb_io_capacity_max=5000
+        rclone:
+          ceph_mariadb:
+            type: s3
+            provider: Ceph
+            endpoint: https://rgw.endpoint.tst
+            access_key_id: "ceph12345678"
+            secret_access_key: "ceph10111213"
         phy_backup:
           backup_type: incremental
-          backend: pv_nfs
+          backend: pvc
+          sync_remote:
+            enabled: true
+            remote: ceph_mariadb
+            path: "cephbucket/backups"
       endpoints:
         cluster_domain_suffix: cluster.local
         oslo_db:
@@ -87,6 +98,3 @@ spec:
         phy_backup:
           class_name: mirablock-k8s-block-hdd
           enabled: true
-          nfs:
-            server: 1.2.3.4
-            path: /share

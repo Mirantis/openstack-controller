@@ -470,6 +470,24 @@ spec:
                                   description: |
                                     Path to the nfs share on the server.
                                   type: string
+                            sync_remote:
+                              type: object
+                              required:
+                                - enabled
+                                - remotes
+                              properties:
+                                enabled:
+                                  type: boolean
+                                  description: Whether to enable syncing backups to/from remote.
+                                remotes:
+                                  type: object
+                                  description: |
+                                    Dictionary with remotes configuration in format:
+                                      <remote_name>:
+                                        path: "<path/to/dir>"
+                                        conf: <rclone opts dictionary>
+                                    Currently configuration of only 1 remote is allowed.
+                                  x-kubernetes-preserve-unknown-fields: true
                     telemetry:
                       type: object
                       required:
