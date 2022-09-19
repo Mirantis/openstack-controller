@@ -288,7 +288,7 @@ spec:
             external_dns_driver: designate
             l3_ha: true
             allow_automatic_l3agent_failover: false
-            l3_ha_network_type: vxlan
+            l3_ha_network_type: geneve
             max_l3_agents_per_router: 2
             service_plugins: ovn-router,metering,qos
           cache:

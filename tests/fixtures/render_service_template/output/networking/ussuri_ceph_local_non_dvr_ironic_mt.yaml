@@ -229,7 +229,7 @@ spec:
               - port_security
               - qos
               - dns_domain_ports
-              tenant_network_types: vlan
+              tenant_network_types: vlan,vxlan
             ml2_type_flat:
               flat_networks: physnet1
             ml2_type_vlan:
