@@ -409,10 +409,12 @@ class Deployment(pykube.Deployment, HelmBundleMixin):
 class DaemonSet(pykube.DaemonSet, HelmBundleMixin):
     @property
     def ready(self):
+        # NOTE(vsaienko): updatedNumberScheduled is not present with have 0
+        # pods, return default of 0 to treat this ds as ready.
         return self.obj["status"]["observedGeneration"] >= self.obj[
             "metadata"
         ]["generation"] and self.obj["status"].get(
-            "updatedNumberScheduled"
+            "updatedNumberScheduled", 0
         ) == self.obj[
             "status"
         ].get(
