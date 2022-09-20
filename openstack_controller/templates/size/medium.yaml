@@ -37,6 +37,17 @@ services:
         volume:
           phy_backup:
             size: "80Gi"
+  descheduler:
+    descheduler:
+      values:
+        pod:
+          resources:
+            jobs:
+              descheduler:
+                requests:
+                  memory: "1Gi"
+                limits:
+                  memory: "2Gi"
   ingress:
     ingress:
       values:
