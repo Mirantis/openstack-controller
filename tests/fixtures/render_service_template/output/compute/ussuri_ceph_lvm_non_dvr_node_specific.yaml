@@ -265,6 +265,9 @@ spec:
               password: sZ43nXhtf9PEV0UaNBk5VITz0FTwDAM8
               username: novaQvW6
         oslo_messaging:
+          port:
+            amqp:
+              default: 5673
           auth:
             admin:
               password: 2tnAuP0j9MsgaVHErehZkC5HCK3ZxYLr
@@ -295,7 +298,7 @@ spec:
           path: /openstack
           port:
             amqp:
-              default: 5672
+              default: 5673
             http:
               default: 15672
           scheme: rabbit

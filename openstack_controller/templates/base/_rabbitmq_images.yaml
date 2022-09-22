@@ -7,6 +7,7 @@
     'rabbitmq',
     'dep_check',
     'rabbitmq_scripted_test',
+    'rabbitmq_amqproxy',
     'image_repo_sync'] %}
           {{ image }}: {{ images[image] }}
 {%- endfor %}
