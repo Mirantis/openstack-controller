@@ -188,6 +188,7 @@ images:
   cirros_checksum: 050056e630cf
   fedora_checksum: 8bc56d70a3e2
   ubuntu_checksum: 3fb7422b5843
+  rabbitmq_amqproxy: amqproxy:latest
 block-storage:
   ceph:
     cinder:

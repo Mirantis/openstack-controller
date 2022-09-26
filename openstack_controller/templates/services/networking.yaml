@@ -119,6 +119,7 @@ spec:
       manifests:
         network_policy: false
         job_users_create: true
+        amqproxy: true
       volume:
         enabled: false
       endpoints:
@@ -563,9 +564,9 @@ spec:
               username: {{ credentials.database.user.username }}
               password: {{ credentials.database.user.password }}
 {%- if 'networking' in components_with_dedicated_messaging %}
-{% include 'base/_messaging_dedicated.yaml' %}
+{% include 'base/_messaging_dedicated_proxy.yaml' %}
 {%- else %}
-{% include 'base/_messaging_shared.yaml' %}
+{% include 'base/_messaging_shared_proxy.yaml' %}
 {%- endif %}
 {% include 'base/_notifications.yaml' %}
         network:

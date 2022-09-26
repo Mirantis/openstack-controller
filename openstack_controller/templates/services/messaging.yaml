@@ -33,6 +33,7 @@ spec:
       manifests:
         network_policy: false
         job_users_create: true
+        amqproxy: true
       volume:
         enabled: false
       conf:

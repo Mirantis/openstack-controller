@@ -66,8 +66,10 @@ spec:
           rabbitmq: rabbitmq:latest
           rabbitmq_init: rabbitmq-init:latest
           rabbitmq_scripted_test: rabbitmq-scripted-test:latest
+          rabbitmq_amqproxy: amqproxy:latest
       manifests:
         job_users_create: true
+        amqproxy: true
         network_policy: false
       monitoring:
         prometheus:
