@@ -63,6 +63,7 @@ async def node_maintenance_request_change_handler(body, **kwargs):
     if not osdpl or not osdpl.exists():
         LOG.info("Can't find OpenStackDeployment object")
         nwl.set_state_inactive()
+        nwl.unset_error_message()
         return
 
     if nwl.is_active():
@@ -78,6 +79,7 @@ async def node_maintenance_request_change_handler(body, **kwargs):
                     f"The node {node_name} is ready for maintenance for {service_class.service}"
                 )
     nwl.set_state_inactive()
+    nwl.unset_error_message()
     LOG.info(f"Released NodeWorkloadLock for node {node_name}")
 
 
@@ -99,6 +101,7 @@ async def node_maintenance_request_delete_handler(body, **kwargs):
         LOG.info("Can't find OpenStackDeployment object")
         nwl.set_inner_state_inactive()
         nwl.set_state_active()
+        nwl.unset_error_message()
         return
 
     if nwl.is_maintenance():
@@ -138,6 +141,7 @@ async def node_maintenance_request_delete_handler(body, **kwargs):
                 )
     nwl.set_inner_state_inactive()
     nwl.set_state_active()
+    nwl.unset_error_message()
     LOG.info(f"Acquired NodeWorkloadLock for node {node_name}")
 
 
@@ -207,4 +211,5 @@ async def cluster_maintenance_request_delete_handler(body, **kwargs):
     name = osdpl.metadata["name"]
     cwl = maintenance.ClusterWorkloadLock.get_resource(name)
     cwl.set_state_active()
+    cwl.unset_error_message()
     LOG.info(f"Acquired ClusterWorkloadLock {name}")
