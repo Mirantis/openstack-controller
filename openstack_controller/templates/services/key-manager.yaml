@@ -48,17 +48,18 @@ spec:
             pattern: '^(?!amq\.).*'
             definition:
               message-ttl: 120000
+              expires: 600000
           - vhost: barbican
             name: results_expire
             pattern: '^results\.'
             definition:
-              expires: 3600000
+              expires: 600000
             priority: 1
           - vhost: barbican
             name: tasks_expire
             pattern: '^tasks\.'
             definition:
-              expires: 3600000
+              expires: 600000
             priority: 1
   {%- if stacklight_enabled %}
         prometheus_exporter:

@@ -8,17 +8,18 @@ spec:
           policies:
           - definition:
               message-ttl: 120000
+              expires: 600000
             name: default-policy
             pattern: ^(?!amq\.).*
             vhost: glance
           - definition:
-              expires: 3600000
+              expires: 600000
             name: results_expire
             pattern: ^results\.
             priority: 1
             vhost: glance
           - definition:
-              expires: 3600000
+              expires: 600000
             name: tasks_expire
             pattern: ^tasks\.
             priority: 1
