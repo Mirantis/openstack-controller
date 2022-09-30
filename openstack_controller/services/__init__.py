@@ -1975,4 +1975,22 @@ class Masakari(OpenStackService):
     available_releases = ["openstack-masakari-rabbitmq", "openstack-masakari"]
 
 
+class Manila(OpenStackService):
+    service = "shared-file-system"
+    openstack_chart = "manila"
+    available_releases = [
+        "openstack-manila",
+    ]
+
+    @property
+    def _required_accounts(self):
+        r_accounts = {
+            "networking": ["neutron"],
+            "block-storage": ["cinder"],
+            "image": ["glance"],
+            "compute": ["nova"],
+        }
+        return r_accounts
+
+
 registry = Service.registry

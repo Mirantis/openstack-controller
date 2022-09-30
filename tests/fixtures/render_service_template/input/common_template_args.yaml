@@ -113,6 +113,12 @@ images:
   ks_user: ks-user:latest
   ks_trusts: ks-trusts:latest
   libvirt: libvirt:latest
+  manila_api: manila:latest
+  manila_db_sync: manila:latest
+  manila_db_purge: manila:latest
+  manila_scheduler: manila:latest
+  manila_share: manila:latest
+  manila-uuids-init: heat:latest
   mariadb: mariadb:latest
   mariadb_backup: mariadb-backup:latest
   mariadb_controller: mariadb-controller:latest

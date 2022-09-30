@@ -245,6 +245,21 @@ spec:
                 password: {{ credentials['instance-ha'].notifications.user.password }}
             path: /openstack
           {%- endif %}
+          {%- if 'shared-file-system' in services %}
+          {%- do enabled_vhosts.append('manila') %}
+          manila_service:
+            auth:
+              manila:
+                username: {{ credentials['shared-file-system'].messaging.user.username }}
+                password: {{ credentials['shared-file-system'].messaging.user.password }}
+            path: /manila
+          manila_service_notifications:
+            auth:
+              manila:
+                username: {{ credentials['shared-file-system'].notifications.user.username }}
+                password: {{ credentials['shared-file-system'].notifications.user.password }}
+            path: /openstack
+          {%- endif %}
           {%- if external_notifications_enabled %}
           {%- for topic in external_notifications_topics %}
           {{ topic }}_external_notifications:

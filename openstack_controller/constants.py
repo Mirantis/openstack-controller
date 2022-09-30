@@ -29,6 +29,7 @@ CHART_GROUP_MAPPING = {
         "panko",
         "ceilometer",
         "masakari",
+        "manila",
     ],
     "infra": [
         "rabbitmq",
@@ -67,6 +68,7 @@ OS_SERVICES_MAP = {
     "tempest": "tempest",
     "object-storage": "ceph-rgw",
     "instance-ha": "masakari",
+    "shared-file-system": "manila",
 }
 
 OS_POLICY_SERVICES = {
@@ -85,6 +87,7 @@ OS_POLICY_SERVICES = {
     "event": "panko",
     "metric": "gnocchi",
     "instance-ha": "masakari",
+    "shared-file-system": "manila",
 }
 
 OPENSTACK_SERVICES_UPGRADE_ORDER = [
@@ -101,6 +104,7 @@ OPENSTACK_SERVICES_UPGRADE_ORDER = [
     "dashboard",
     "object-storage",
     "instance-ha",
+    "shared-file-system",
 ]
 
 RGW_KEYSTONE_SECRET = "ceph-keystone-user"
@@ -159,4 +163,5 @@ POLICY_IN_CODE_SERVICES = [
     "aodh",
     "gnocchi",
     "masakari",
+    "manila",
 ]

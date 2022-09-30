@@ -160,6 +160,7 @@ class Share(base_section.BaseSection):
         "client_vm_flavor_ref",
         "image_with_share_tools",
         "image_password",
+        "catalog_type",
     ]
 
     @property
@@ -278,9 +279,14 @@ class Share(base_section.BaseSection):
     # Defines name of image with share tools.
     @property
     def image_with_share_tools(self):
-        pass
+        return "manila-service-image"
 
     # Defines password for image with share tools.
     @property
     def image_password(self):
         pass
+
+    # Defines catalog type for tests
+    @property
+    def catalog_type(self):
+        return "sharev2"
