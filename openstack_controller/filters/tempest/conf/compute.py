@@ -117,9 +117,14 @@ class Compute(base_section.BaseSection):
 
     @property
     def shelved_offload_time(self):
-        return self.get_values_item(
+        shelved_offload_time = self.get_values_item(
             "nova", "conf.nova.DEFAULT.shelved_offload_time"
         )
+        # NOTE(vsaienko): we use 5G flavors, it takes significant time to take a snapshot and
+        # push it to glance. Give extra time here explicitly for shelved tests.
+        if not shelved_offload_time:
+            shelved_offload_time = 300
+        return shelved_offload_time
 
     @property
     def volume_device_name(self):
