@@ -287,4 +287,3 @@ os_compute_api:os-services:delete: rule:system_admin_api
 os_compute_api:os-services:list: rule:system_reader_api
 os_compute_api:os-services:update: rule:system_admin_api
 os_compute_api:os-unrescue: rule:system_admin_or_owner
-
