@@ -86,6 +86,12 @@ spec:
       monitoring:
         prometheus:
           enabled: true
+      network:
+        proxy:
+          enabled: true
+          env_vars:
+            HTTP_PROXY: http://127.0.0.1:3128
+            NO_PROXY: .svc.cluster.local
       pod:
         affinity:
           anti:
