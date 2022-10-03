@@ -4,6 +4,8 @@
 {%- set latest_openstack_versions = openstack_versions[openstack_versions.index(spec.openstack_version):openstack_versions.index(spec.openstack_version)+2] %}
 {%- set stacklight_enabled = spec.get('features', {}).get('stacklight', {}).get('enabled', False) %}
 {%- set enabled_vhosts = ['openstack'] %}
+{%- set external_notifications_enabled = spec.get('features', {}).get('messaging', {}).get('notifications', {}).get('external', {}).get('enabled', False) %}
+{%- set external_notifications_topics = spec.get('features', {}).get('messaging', {}).get('notifications', {}).get('external', {}).get('topics', []) %}
 
 spec:
   releases:
@@ -242,6 +244,16 @@ spec:
                 username: {{ credentials['instance-ha'].notifications.user.username }}
                 password: {{ credentials['instance-ha'].notifications.user.password }}
             path: /openstack
+          {%- endif %}
+          {%- if external_notifications_enabled %}
+          {%- for topic in external_notifications_topics %}
+          {{ topic }}_external_notifications:
+            auth:
+              {{ topic }}:
+                username: {{ notifications_creds[topic].username }}
+                password: {{ notifications_creds[topic].password }}
+            path: /openstack
+          {%- endfor %}
           {%- endif %}
         aux_conf:
           policies:

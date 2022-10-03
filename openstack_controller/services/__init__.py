@@ -212,6 +212,7 @@ class RabbitMQ(Service):
 
     def template_args(self):
         credentials = {}
+        notifications_creds = {}
         admin_creds = self._get_admin_creds()
         guest_creds = self._get_guest_creds()
         services = set(self.mspec["features"].get("services", [])) - set(
@@ -229,11 +230,33 @@ class RabbitMQ(Service):
             self.namespace
         ).ensure()
 
+        external_topics_enabled = (
+            self.mspec.get("features", {})
+            .get("messaging", {})
+            .get("notifications", {})
+            .get("external", {})
+            .get("enabled", False)
+        )
+
+        if external_topics_enabled:
+            external_topics = self.mspec["features"]["messaging"][
+                "notifications"
+            ]["external"].get("topics", [])
+            # TODO(dbiletskyi): figure out how to remove the secret
+            # when the topic is removed
+            for topic in external_topics:
+                notifications_creds[
+                    topic
+                ] = secrets.ExternalTopicPasswordSecret(
+                    self.namespace, topic
+                ).ensure()
+
         return {
             "services": services,
             "credentials": credentials,
             "admin_creds": admin_creds,
             "guest_creds": guest_creds,
+            "notifications_creds": notifications_creds,
         }
 
 

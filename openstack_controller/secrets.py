@@ -528,6 +528,47 @@ class StackLightPasswordSecret(Secret):
         kube.save_secret_data(self.namespace, self.secret_name, data)
 
 
+class ExternalTopicPasswordSecret(Secret):
+    secret_class = OSSytemCreds
+
+    def __init__(self, namespace: str, topic: str):
+        super().__init__(namespace)
+        self.secret_name = f"generated-notifications-{topic}-passwords"
+        self.topic = topic
+
+    def decode(self, data):
+        params = {}
+        for kind, creds in data.items():
+            decoded = base64.b64decode(creds).decode()
+            params[kind] = decoded
+
+        return self.secret_class(**params)
+
+    def create(self) -> OSSytemCreds:
+        return OSSytemCreds(
+            password=generate_password(length=32),
+            username=generate_name(prefix=self.topic, length=16),
+        )
+
+    def ensure(self):
+        try:
+            secret = self.get()
+        except pykube.exceptions.ObjectDoesNotExist:
+            secret = self.create()
+            if secret:
+                self.save(secret)
+                secret = self.get()
+        return secret
+
+    def save(self, secret) -> None:
+        data = asdict(secret)
+
+        for key in data.keys():
+            data[key] = base64.b64encode(data[key].encode()).decode()
+
+        kube.save_secret_data(self.namespace, self.secret_name, data)
+
+
 class PowerDNSSecret(Secret):
     secret_name = "generated-powerdns-passwords"
     secret_class = PowerDnsCredentials

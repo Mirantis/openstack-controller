@@ -8,6 +8,12 @@
 {%- set stacklight_enabled = spec.get('features', {}).get('stacklight', {}).get('enabled', False) %}
 {%- set notification_topics = ['notifications'] %}
 {%- do notification_topics.append('stacklight_notifications') if stacklight_enabled %}
+{%- set external_notifications_enabled = spec.get('features', {}).get('messaging', {}).get('notifications', {}).get('external', {}).get('enabled', False) %}
+{%- if external_notifications_enabled %}
+  {%- for topic in spec.get('features', {}).get('messaging', {}).get('notifications', {}).get('external', {}).get('topics', []) %}
+    {%- do notification_topics.append(topic) %}
+  {%- endfor %}
+{%- endif  %}
 
 spec:
   releases:
