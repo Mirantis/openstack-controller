@@ -251,25 +251,25 @@ spec:
             name: heat_engine_rpc_expire
             pattern: '^heat-engine-listener\.'
             definition:
-              expires: 3600000
+              expires: 600000
             priority: 1
           - vhost: heat_{{ version }}
             name: heat_worker_rpc_expire
             pattern: '^engine_worker\.'
             definition:
-              expires: 3600000
+              expires: 600000
             priority: 1
           - vhost: heat_{{ version }}
             name: results_expire
             pattern: '^results\.'
             definition:
-              expires: 3600000
+              expires: 600000
             priority: 1
           - vhost: heat_{{ version }}
             name: tasks_expire
             pattern: '^tasks\.'
             definition:
-              expires: 3600000
+              expires: 600000
             priority: 1
           - vhost: heat_{{ version }}
             name: default-policy
@@ -284,17 +284,18 @@ spec:
             pattern: '^(?!amq\.).*'
             definition:
               message-ttl: 120000
+              expires: 600000
           - vhost: {{ item }}
             name: results_expire_{{ item }}
             pattern: '^results\.'
             definition:
-              expires: 3600000
+              expires: 600000
             priority: 1
           - vhost: {{ item }}
             name: tasks_expire_{{ item }}
             pattern: '^tasks\.'
             definition:
-              expires: 3600000
+              expires: 600000
             priority: 1
   {%- endfor %}
   {%- if stacklight_enabled %}
