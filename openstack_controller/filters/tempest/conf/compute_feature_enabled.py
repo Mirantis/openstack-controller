@@ -226,7 +226,9 @@ class ComputeFeatureEnabled(base_section.BaseSection):
 
     @property
     def swap_volume(self):
-        pass
+        if self.is_service_enabled("ironic"):
+            return False
+        return True
 
     @property
     def vnc_console(self):
