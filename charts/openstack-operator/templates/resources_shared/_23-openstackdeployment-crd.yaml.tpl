@@ -1080,6 +1080,23 @@ spec:
                               - compute
                               - image
                               - baremetal
+                        notifications:
+                          type: object
+                          properties:
+                            external:
+                              type: object
+                              properties:
+                                enabled:
+                                  type: boolean
+                                  description: |
+                                    enable RabbitMQ external endpoints
+                                    default: false
+                                topics:
+                                  type: array
+                                  description: |
+                                    List of RabbitMQ external topics
+                                  items:
+                                    type: string
                     ironic:
                       type: object
                       required:

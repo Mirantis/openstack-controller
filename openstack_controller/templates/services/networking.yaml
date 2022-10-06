@@ -30,6 +30,12 @@
 {%- endif %}
 {%- do service_plugins.append('bgpvpn') if bgpvpn.enabled %}
 {%- do notification_topics.append('stacklight_notifications') if stacklight_enabled %}
+{%- set external_notifications_enabled = spec.get('features', {}).get('messaging', {}).get('notifications', {}).get('external', {}).get('enabled', False) %}
+{%- if external_notifications_enabled %}
+  {%- for topic in spec.get('features', {}).get('messaging', {}).get('notifications', {}).get('external', {}).get('topics', []) %}
+    {%- do notification_topics.append(topic) %}
+  {%- endfor %}
+{%- endif  %}
 {%- set floating_network = spec.features.neutron.get('floating_network', {}) %}
 {%- set baremetal_enabled = 'baremetal' in spec.features.get('services', []) %}
 {%- set neutron_node_specific = {} %}
