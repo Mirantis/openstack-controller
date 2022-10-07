@@ -263,3 +263,107 @@ async def handle_rabbitmq_secret(
 
     sls = secrets.StackLightSecret()
     sls.save({**credentials, **location_path})
+
+
+@kopf.on.update(
+    "",
+    "v1",
+    "secrets",
+    labels={"application": "rabbitmq", "component": "server"},
+)
+@kopf.on.create(
+    "",
+    "v1",
+    "secrets",
+    labels={"application": "rabbitmq", "component": "server"},
+)
+@utils.collect_handler_metrics
+async def handle_rabbitmq_external_secret(
+    body,
+    meta,
+    name,
+    status,
+    logger,
+    diff,
+    **kwargs,
+):
+    if name != constants.RABBITMQ_USERS_CREDENTIALS_SECRET:
+        return
+
+    osdpl = kube.get_osdpl(settings.OSCTL_OS_DEPLOYMENT_NAMESPACE)
+    if (
+        not osdpl.obj.get("spec", {})
+        .get("features", {})
+        .get("messaging", {})
+        .get("notifications", {})
+        .get("external", {})
+        .get("enabled", False)
+    ):
+        return
+
+    LOG.debug(f"Handling secret create {name}")
+    LOG.info(f"The secret {name} changes are: {diff}")
+
+    secret_data = json.loads(
+        base64.b64decode(body["data"]["RABBITMQ_USERS"]).decode()
+    )
+
+    kube.wait_for_service(
+        meta["namespace"], constants.RABBITMQ_EXTERNAL_SERVICE
+    )
+    rabbitmq_external_service = kube.find(
+        pykube.Service,
+        constants.RABBITMQ_EXTERNAL_SERVICE,
+        meta["namespace"],
+    )
+
+    try:
+        rabbitmq_external_ingress = rabbitmq_external_service.obj["status"][
+            "loadBalancer"
+        ]["ingress"]
+    except KeyError:
+        raise kopf.TemporaryError(
+            f"Service {constants.RABBITMQ_EXTERNAL_SERVICE} doesn't have ingress status data"
+        )
+
+    rabbitmq_external_ip = None
+    for tpl in rabbitmq_external_ingress:
+        for key in tpl:
+            if key == "ip":
+                rabbitmq_external_ip = tpl[key]
+    if not rabbitmq_external_ip:
+        raise kopf.TemporaryError(
+            f"Service {constants.RABBITMQ_EXTERNAL_SERVICE} doesn't have load balancer external IP"
+        )
+
+    additional_external_params = {
+        key: base64.b64encode(value.encode()).decode()
+        for key, value in {
+            "hosts": rabbitmq_external_ip,
+            "vhost": "/openstack",
+        }.items()
+    }
+
+    external_topics = (
+        osdpl.obj.get("spec", {})
+        .get("features", {})
+        .get("messaging", {})
+        .get("notifications", {})
+        .get("external", {})
+        .get("topics", [])
+    )
+    for topic in external_topics:
+        if f"{topic}_external_notifications" not in secret_data:
+            LOG.debug(f"The {topic} data is not present in secret.")
+            continue
+
+        credentials = {
+            key: base64.b64encode(value.encode()).decode()
+            for key, value in secret_data[f"{topic}_external_notifications"][
+                "auth"
+            ][topic].items()
+        }
+
+        name = utils.get_topic_normalized_name(topic)
+        ets = secrets.ExternalTopicSecret(name)
+        ets.save({**credentials, **additional_external_params})

@@ -245,10 +245,11 @@ class RabbitMQ(Service):
             # TODO(dbiletskyi): figure out how to remove the secret
             # when the topic is removed
             for topic in external_topics:
+                name = utils.get_topic_normalized_name(topic)
                 notifications_creds[
                     topic
                 ] = secrets.ExternalTopicPasswordSecret(
-                    self.namespace, topic
+                    self.namespace, topic, name
                 ).ensure()
 
         return {

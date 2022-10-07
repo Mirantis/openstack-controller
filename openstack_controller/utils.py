@@ -19,6 +19,8 @@ import functools
 import logging
 import os
 import threading
+import re
+import hashlib
 from typing import Dict, List
 
 import deepmerge
@@ -110,6 +112,17 @@ async def async_retry(function, *args, **kwargs):
         if result:
             return result
         await asyncio.sleep(10)
+
+
+def get_topic_normalized_name(name):
+    if bool(re.match(r"^[a-z0-9-.]*$", name)):
+        return name
+    else:
+        name = name.lower()
+        hash_suffix = hashlib.sha256(name.encode("utf-8")).hexdigest()[:5]
+        name = re.sub("[^a-z0-9-.]", "", name)
+        name = "-".join([name, hash_suffix])
+        return name
 
 
 class TypeConflictFail(

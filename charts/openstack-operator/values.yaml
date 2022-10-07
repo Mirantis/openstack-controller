@@ -103,6 +103,10 @@ stacklight:
   createSharedNamespace: true
   sharedNamespace: openstack-lma-shared
 
+external_topics:
+  createSharedNamespace: true
+  sharedNamespace: openstack-external
+
 admission:
   enabled: true
   replicaCount: 1
