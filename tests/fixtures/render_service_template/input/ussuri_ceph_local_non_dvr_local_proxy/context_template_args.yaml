@@ -100,6 +100,7 @@ images:
   ks_user: ks-user:latest
   ks_trusts: ks-trusts:latest
   libvirt: libvirt:latest
+  manila_service_image: https://manila-service-image-url/latest
   mariadb: mariadb:latest
   mariadb_backup: mariadb-backup:latest
   mariadb_controller: mariadb-controller:latest

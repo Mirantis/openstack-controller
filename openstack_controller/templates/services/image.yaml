@@ -200,6 +200,19 @@ spec:
                 enabled: true
                 hash_method: SHA-256
 {%- endif %}
+            manila-service-image:
+              container_format: bare
+              image_type: qcow2
+              name: manila-service-image
+              private: true
+              properties:
+                os_distro: ubuntu
+              source_url: {{ images["manila_service_image"] }}
+{%- if signature.enabled %}
+              signature:
+                enabled: true
+                hash_method: SHA-256
+{%- endif %}
 {%- if "baremetal" in spec.features.services %}
   {%- set ironic_agent_images = spec.features.ironic.get('agent_images', {}) %}
   {%- set ironic_images_base_url = ironic_agent_images.get('base_url', spec.artifacts.binary_base_url ~ '/openstack/bin/ironic/tinyipa') %}

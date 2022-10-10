@@ -52,6 +52,14 @@ spec:
               source_url: 'http://127.0.0.1:8282/bin/latest'
               tags:
                 - amphora
+            manila-service-image:
+              container_format: bare
+              image_type: qcow2
+              name: manila-service-image
+              private: True
+              properties:
+                os_distro: ubuntu
+              source_url: 'https://manila-service-image-url/latest'
       ceph_client:
         configmap: rook-ceph-config
         user_secret_name: glance-rbd-keyring
