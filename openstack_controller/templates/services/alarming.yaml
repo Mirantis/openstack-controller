@@ -72,7 +72,7 @@ spec:
             jobs:
               - openstack-mariadb-cluster-wait
       manifests:
-        cron_job_db_purge: {{ aodh_db_cleanup.enabled }}
+        cron_job_db_purge: true
         network_policy: false
         job_rabbit_init: false
         secret_ca_bundle: true
@@ -131,5 +131,6 @@ spec:
       jobs:
 {% include 'base/_ks_jobs.yaml' %}
         db_purge:
+          enabled: {{ aodh_db_cleanup.enabled }}
           cron: {{ aodh_db_cleanup.get('schedule', '1 6 * * 1') }}
 {%- endif %}

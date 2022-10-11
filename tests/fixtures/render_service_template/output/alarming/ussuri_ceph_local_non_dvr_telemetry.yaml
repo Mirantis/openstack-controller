@@ -156,6 +156,7 @@ spec:
       jobs:
         db_purge:
           cron: '1 6 * * 1'
+          enabled: true
         ks_service:
           restartPolicy: Never
         ks_endpoints:

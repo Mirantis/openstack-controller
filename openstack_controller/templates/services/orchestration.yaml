@@ -127,7 +127,7 @@ spec:
             jobs:
               - openstack-mariadb-cluster-wait
       manifests:
-        cron_job_db_purge: {{ heat_db_cleanup.enabled }}
+        cron_job_db_purge: true
         network_policy: false
         job_rabbit_init: false
         secret_ca_bundle: true
