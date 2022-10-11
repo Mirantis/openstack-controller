@@ -312,7 +312,7 @@ spec:
       secrets:
         rbd: {{ ceph.glance.secrets }}
       manifests:
-        cron_job_db_purge: {{ glance_db_cleanup.enabled }}
+        cron_job_db_purge: true
         network_policy: false
         job_rabbit_init: false
         job_storage_init: false

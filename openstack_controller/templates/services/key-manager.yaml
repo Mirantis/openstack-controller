@@ -169,7 +169,7 @@ spec:
           logger_barbican:
             level: {{ spec.get('features', {}).get('logging', {}).get('barbican', {}).get('level', 'INFO') }}
       manifests:
-        cron_job_db_purge: {{ barbican_db_cleanup.enabled }}
+        cron_job_db_purge: true
         network_policy: false
         job_rabbit_init: false
         secret_ca_bundle: true
