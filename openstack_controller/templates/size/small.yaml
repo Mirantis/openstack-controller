@@ -299,6 +299,35 @@ services:
               connection_recycle_time: 300
             oslo_messaging_rabbit:
               rabbit_qos_prefetch_count: 64
+  shared-file-system:
+    manila:
+      values:
+        pod:
+          replicas:
+            api: 3
+            scheduler: 3
+            share: 3
+          lifecycle:
+            disruption_budget:
+              api:
+                min_available: 2
+            upgrades:
+              deployments:
+                pod_replacement_strategy: RollingUpdate
+                rolling_update:
+                  max_unavailable: 10%
+                  max_surge: 10%
+        conf:
+          manila:
+            DEFAULT:
+              rpc_response_timeout: 3600
+              osapi_share_workers: 3
+            database:
+              max_pool_size: 10
+              max_retries: -1
+              max_overflow: 30
+            oslo_messaging_rabbit:
+              rabbit_qos_prefetch_count: 64
   orchestration:
     heat:
       values:

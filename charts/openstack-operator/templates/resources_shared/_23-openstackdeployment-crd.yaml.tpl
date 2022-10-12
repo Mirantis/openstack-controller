@@ -200,6 +200,8 @@ spec:
                           <<: *custom_policies
                         masakari:
                           <<: *custom_policies
+                        manila:
+                          <<: *custom_policies
                         neutron:
                           <<: *custom_policies
                         nova:
@@ -413,6 +415,27 @@ spec:
                                   type: integer
                                   description: |
                                     Number of days that alarm histories are kept in the database for (<= 0 means forever)
+                            manila:
+                              type: object
+                              required:
+                                - enabled
+                              properties:
+                                enabled:
+                                  type: boolean
+                                  description: |
+                                    Enable periodic cleanup of database for Manila.
+                                    default: true
+                                schedule:
+                                  type: string
+                                  description: |
+                                    Cron schedule for periodic cleanup.
+                                    default: "1 7 * * 1"
+                                age:
+                                  type: integer
+                                  description: |
+                                    Number of days to keep deleted entries. When set to 0 all entries from shadow tables
+                                    are deleted.
+                                    default: 30
                         backup:
                           type: object
                           required:
@@ -637,6 +660,7 @@ spec:
                           - metering
                           - metric
                           - instance-ha
+                          - shared-file-system
                     nova:
                       type: object
                       required:
@@ -1297,6 +1321,8 @@ spec:
                         gnocchi:
                           <<: *logging_level
                         ceilometer:
+                          <<: *logging_level
+                        manila:
                           <<: *logging_level
                         masakari:
                           <<: *logging_level

@@ -1641,3 +1641,43 @@ def test_cron_validation(client):
     assert response.status == falcon.HTTP_OK
     assert response.json["response"]["allowed"] is False
     assert response.json["response"]["status"]["code"] == 400
+
+
+def test_manila_install_ok(client):
+    allow_in = ["yoga"]
+    req = copy.deepcopy(ADMISSION_REQ)
+    req["request"]["object"]["spec"]["features"]["services"].append(
+        "shared-file-system"
+    )
+    for os_version in allow_in:
+        req["request"]["object"]["spec"]["openstack_version"] = os_version
+        response = client.simulate_post("/validate", json=req)
+        assert response.status == falcon.HTTP_OK
+        assert (
+            response.json["response"]["allowed"] is True
+        ), "Shared Filesystems (Manila) does not supported in OpenStack version before Yoga release."
+
+
+def test_manila_install_fail(client):
+    deny_in = [
+        "queens",
+        "rocky",
+        "stein",
+        "train",
+        "ussuri",
+        "victoria",
+        "wallaby",
+        "xena",
+    ]
+    req = copy.deepcopy(ADMISSION_REQ)
+    req["request"]["object"]["spec"]["features"]["services"].append(
+        "shared-file-system"
+    )
+    for os_version in deny_in:
+        req["request"]["object"]["spec"]["openstack_version"] = os_version
+        response = client.simulate_post("/validate", json=req)
+        assert response.status == falcon.HTTP_OK
+        assert (
+            response.json["response"]["allowed"] is False
+        ), "Shared Filesystems (Manila) does not supported in OpenStack version before Yoga release."
+        assert response.json["response"]["status"]["code"] == 400

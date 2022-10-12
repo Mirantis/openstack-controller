@@ -38,6 +38,7 @@ class OpenStackValidator(base.BaseValidator):
         self._check_masakari_allowed(new_obj)
         self._check_baremetal_allowed(new_obj)
         self._check_panko_allowed(new_obj)
+        self._check_manila_allowed(new_obj)
         self._deny_encrypted_api_key(new_obj)
         self._deny_policy_in_code(new_obj)
         self._check_schedules(new_obj)
@@ -204,6 +205,7 @@ class OpenStackValidator(base.BaseValidator):
                 "glance",
                 "heat",
                 "aodh",
+                "manila",
             ]:
                 schedule = cleaners.get(cleaner_cron, {}).get("schedule")
                 if schedule:
@@ -223,3 +225,19 @@ class OpenStackValidator(base.BaseValidator):
                 raise exception.OsDplValidationFailed(
                     f"Schedule string '{backup}' has wrong values. Please recheck them."
                 )
+
+    def _check_manila_allowed(self, new_obj):
+        openstack_services = (
+            new_obj.get("spec", {}).get("features", {}).get("services", [])
+        )
+        os_num_version = constants.OpenStackVersion[
+            new_obj["spec"]["openstack_version"]
+        ].value
+        if (
+            "shared-file-system" in openstack_services
+            and os_num_version < constants.OpenStackVersion["yoga"].value
+        ):
+            raise exception.OsDplValidationFailed(
+                "Shared Filesystems (Manila) does not supported "
+                "in OpenStack version before Yoga release."
+            )
