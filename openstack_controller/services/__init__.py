@@ -14,7 +14,6 @@
 
 import asyncio
 import base64
-from dataclasses import asdict
 import json
 import random
 
@@ -1463,7 +1462,8 @@ class Nova(OpenStackServiceWithCeph, MaintenanceApiMixin):
             f"*.{self.mspec['internal_domain_name']}",
             f"*.{self.mspec['public_domain_name']}",
         )
-        libvirt_vnc_certs = asdict(vnc_cert_secret.ensure())
+        vnc_cert_secret.ensure()
+        libvirt_vnc_certs = vnc_cert_secret.get()
         t_args["libvirt_vnc_certs"] = libvirt_vnc_certs
 
         # Read secret from shared namespace with TF deployment to
