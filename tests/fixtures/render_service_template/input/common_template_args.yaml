@@ -118,6 +118,7 @@ images:
   manila_db_purge: manila:latest
   manila_scheduler: manila:latest
   manila_share: manila:latest
+  manila_service_image: https://manila-service-image-url/latest
   manila-uuids-init: heat:latest
   mariadb: mariadb:latest
   mariadb_backup: mariadb-backup:latest
