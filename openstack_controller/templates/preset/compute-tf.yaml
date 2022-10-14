@@ -1,6 +1,11 @@
 # IMPORTANT: list items specified here is not possible to override as they
 # appended during merging
 {%- set nginx_ingress_namespace_class = "openstack-ingress-nginx" %}
+{%- if openstack_version not in ("queens", "rocky", "stein", "train", "ussuri", "victoria", "wallaby", "xena") %}
+  {%- set cirros_image_name = "Cirros-6.0" %}
+{%- else %}
+  {%- set cirros_image_name = "Cirros-5.1" %}
+{%- endif %}
 internal_domain_name: cluster.local
 common:
   charts:
@@ -257,8 +262,8 @@ services:
             network:
               public_network_id: public
             compute:
-              image_ref: Cirros-5.1
-              image_ref_alt: Cirros-5.1
+              image_ref: {{ cirros_image_name }}
+              image_ref_alt: {{ cirros_image_name }}
               flavor_ref:  m1.extra_tiny_test
               flavor_ref_alt: m1.tiny_test
           blacklist:
@@ -362,7 +367,7 @@ services:
             heat_plugin:
               image_ref: Fedora-27-1.6
               instance_type: m1.tiny_test
-              minimal_image_ref: Cirros-5.1
+              minimal_image_ref: {{ cirros_image_name }}
               minimal_instance_type: m1.extra_tiny_test
             identity:
               ca_certificates_file: /certs/ca-bundle.pem

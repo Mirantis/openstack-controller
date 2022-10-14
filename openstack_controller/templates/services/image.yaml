@@ -139,14 +139,22 @@ spec:
           images:
             cirros:
               container_format: bare
+            {%- if spec.openstack_version not in ("queens", "rocky", "stein", "train", "ussuri", "victoria", "wallaby", "xena") %}
+                {%- set cirros_version = "0.6.0" %}
+                {%- set cirros_image_name = "Cirros-6.0" %}
+            {%- else %}
+                {%- set cirros_version = "0.5.1" %}
+                {%- set cirros_image_name = "Cirros-5.1" %}
               image_file: cirros-0.5.1-x86_64-disk.img
+            {%- endif %}
+              image_file: cirros-{{ cirros_version }}-x86_64-disk.img
               image_type: qcow2
               min_disk: 1
-              name: Cirros-5.1
+              name: {{ cirros_image_name }}
               private: false
               properties:
                 os_distro: cirros
-              source_url: {{ spec.artifacts.binary_base_url }}/openstack/bin/cirros/0.5.1/
+              source_url: {{ spec.artifacts.binary_base_url }}/openstack/bin/cirros/{{ cirros_version }}/
               checksum: {{ images["cirros_checksum"] }}
 {%- if signature.enabled %}
               signature:
