@@ -623,7 +623,7 @@ class SSHSecret(Secret):
         )
         private_key = key.private_bytes(
             crypto_serialization.Encoding.PEM,
-            crypto_serialization.PrivateFormat.PKCS8,
+            crypto_serialization.PrivateFormat.TraditionalOpenSSL,
             crypto_serialization.NoEncryption(),
         )
         public_key = key.public_key().public_bytes(
