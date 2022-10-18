@@ -1,3 +1,4 @@
+from openstack_controller.constants import OpenStackVersion
 from openstack_controller.filters.tempest import base_section
 
 
@@ -21,11 +22,13 @@ class IdentityFeatureEnabled(base_section.BaseSection):
 
     @property
     def api_v2(self):
-        pass
+        """API version 2 is not supported anymore"""
+        return False
 
     @property
     def api_v2_admin(self):
-        pass
+        """API version 2 is not supported anymore"""
+        return False
 
     @property
     def api_v3(self):
@@ -59,8 +62,24 @@ class IdentityFeatureEnabled(base_section.BaseSection):
 
     @property
     def security_compliance(self):
-        pass
+        """
+        For now, we do not enable security compliance by default, or provide an easy
+        mechanism to enable it
+        """
+        return False
 
     @property
     def trust(self):
         pass
+
+    @property
+    def access_rules(self):
+        """
+        Access rules for application credentials were added in the Train release
+        """
+        if (
+            OpenStackVersion[self.spec["openstack_version"]]
+            >= OpenStackVersion["train"]
+        ):
+            return True
+        return False
