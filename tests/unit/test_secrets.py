@@ -65,6 +65,7 @@ def test_get_proxy_vars_from_secret(mock_data, override_setting):
         "HTTPS_PROXY": "aHR0cDovL3NxdWlkLm9wZW5zdGFjay5zdmMuY2x1c3Rlci5sb2NhbDo4MA==",
         # test.domain.local
         "NO_PROXY": "dGVzdC5kb21haW4ubG9jYWw=",
+        "PROXY_CA_CERTIFICATE": "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCnRlc3RfY2EKLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQo=",
     }
 
     secret = secrets.ProxySecret()
