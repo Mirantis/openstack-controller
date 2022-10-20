@@ -1681,3 +1681,17 @@ def test_manila_install_fail(client):
             response.json["response"]["allowed"] is False
         ), "Shared Filesystems (Manila) does not supported in OpenStack version before Yoga release."
         assert response.json["response"]["status"]["code"] == 400
+
+
+def test_manila_install_fail_with_TF(client):
+    req = copy.deepcopy(ADMISSION_REQ)
+    req["request"]["object"]["spec"]["features"]["services"].append(
+        "shared-file-system"
+    )
+    req["request"]["object"]["spec"]["preset"] = "compute-tf"
+    response = client.simulate_post("/validate", json=req)
+    assert response.status == falcon.HTTP_OK
+    assert (
+        response.json["response"]["allowed"] is False
+    ), "Shared Filesystems (Manila) services is not supported with TungstenFabric networking."
+    assert response.json["response"]["status"]["code"] == 400
