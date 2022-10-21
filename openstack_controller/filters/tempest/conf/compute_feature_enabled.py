@@ -56,6 +56,7 @@ class ComputeFeatureEnabled(base_section.BaseSection):
         "vnc_server_header",
         "volume_multiattach",
         "volume_backed_live_migration",
+        "hostname_fqdn_sanitization",
     ]
 
     @property
@@ -259,4 +260,17 @@ class ComputeFeatureEnabled(base_section.BaseSection):
     def volume_backed_live_migration(self):
         # NOTE(vsaineko): this is originally disabled in upstream due to buggy qemu.
         # try with new version https://bugs.launchpad.net/nova/+bug/1524898
+        return True
+
+    @property
+    def hostname_fqdn_sanitization(self):
+        if self.get_spec_item("openstack_version").lower() in [
+            "queens",
+            "rocky",
+            "stein",
+            "train",
+            "ussuri",
+            "victoria",
+        ]:
+            return False
         return True
