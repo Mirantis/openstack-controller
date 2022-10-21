@@ -2,6 +2,22 @@ from openstack_controller.filters.tempest import base_section
 
 
 DNS_FEATURES_RELEASE_MAPPING = {
+    "yoga": {
+        "api_admin": True,
+        "api_v1": False,
+        "api_v2": True,
+        "bug_1573141_fixed": True,
+        "api_v2_quotas": True,
+        "api_v2_root_recordsets": True,
+    },
+    "victoria": {
+        "api_admin": True,
+        "api_v1": False,
+        "api_v2": True,
+        "bug_1573141_fixed": True,
+        "api_v2_quotas": True,
+        "api_v2_root_recordsets": True,
+    },
     "stein": {
         "api_admin": True,
         "api_v1": False,
