@@ -32,3 +32,10 @@ apiVersion: v1
 kind: Namespace
 metadata:
   name: {{ .Values.osdpl.namespace }}
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: {{ .Values.external_topics.sharedNamespace }}
+  annotations:
+    "openstackdeployments.lcm.mirantis.com/shared_resource_action": {{ if .Values.external_topics.createSharedNamespace }}"create"{{ else }}"wait"{{ end }}

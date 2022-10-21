@@ -122,6 +122,8 @@ TF_OPENSTACK_SECRET = "ost-data"
 OPENSTACK_STACKLIGHT_SHARED_NAMESPACE = "openstack-lma-shared"
 OPENSTACK_STACKLIGHT_SECRET = "rabbitmq-creds"
 OPENSTACK_IAM_SECRET = "openstack-iam-shared"
+OPENSTACK_EXTERNAL_NAMESPACE = "openstack-external"
+RABBITMQ_EXTERNAL_SERVICE = "rabbitmq-external"
 PROXY_VARS_NAMES = {
     "http_proxy",
     "https_proxy",

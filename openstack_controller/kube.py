@@ -556,6 +556,10 @@ def wait_for_secret(namespace, name):
     wait_for_resource(pykube.Secret, name, namespace)
 
 
+def wait_for_service(namespace, name):
+    wait_for_resource(pykube.Service, name, namespace)
+
+
 def save_secret_data(
     namespace: str, name: str, data: Dict[str, str], labels=None
 ):

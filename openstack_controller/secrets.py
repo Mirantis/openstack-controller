@@ -541,9 +541,9 @@ class StackLightPasswordSecret(Secret):
 class ExternalTopicPasswordSecret(Secret):
     secret_class = OSSytemCreds
 
-    def __init__(self, namespace: str, topic: str):
+    def __init__(self, namespace: str, topic: str, name: str):
         super().__init__(namespace)
-        self.secret_name = f"generated-notifications-{topic}-passwords"
+        self.secret_name = f"generated-notifications-{name}-passwords"
         self.topic = topic
 
     def decode(self, data):
@@ -966,6 +966,16 @@ class StackLightSecret(SecretCopy):
         self, namespace=constants.OPENSTACK_STACKLIGHT_SHARED_NAMESPACE
     ):
         super().__init__(namespace)
+
+
+class ExternalTopicSecret(SecretCopy):
+    def __init__(
+        self,
+        name,
+        namespace=constants.OPENSTACK_EXTERNAL_NAMESPACE,
+    ):
+        super().__init__(namespace)
+        self.secret_name = f"openstack-{name}-notifications"
 
 
 @dataclass
