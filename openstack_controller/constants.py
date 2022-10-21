@@ -122,6 +122,14 @@ TF_OPENSTACK_SECRET = "ost-data"
 OPENSTACK_STACKLIGHT_SHARED_NAMESPACE = "openstack-lma-shared"
 OPENSTACK_STACKLIGHT_SECRET = "rabbitmq-creds"
 OPENSTACK_IAM_SECRET = "openstack-iam-shared"
+PROXY_VARS_NAMES = {
+    "http_proxy",
+    "https_proxy",
+    "no_proxy",
+    "HTTP_PROXY",
+    "HTTPS_PROXY",
+    "NO_PROXY",
+}
 
 COMPUTE_NODE_CONTROLLER_SECRET_NAME = "keystone-os-clouds"
 

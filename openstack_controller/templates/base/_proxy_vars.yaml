@@ -2,7 +2,7 @@
           enabled: true
           env_vars:
             {%- for key, val in proxy_vars.items() %}
-            {{ key }}: {{ val }}
+            {{ key }}: "{{ val }}"
             {%- endfor %}
           {%- else %}
           enabled: false

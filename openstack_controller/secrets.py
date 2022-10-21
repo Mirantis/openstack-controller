@@ -1129,7 +1129,8 @@ class ProxySecret:
     def get_proxy_vars(self, no_proxy=None):
         data = self.decode(get_secret_data(self.namespace, self.name))
         proxy_vars = {}
-        for var, value in data.items():
+        for var in constants.PROXY_VARS_NAMES.intersection(data.keys()):
+            value = data[var]
             if var.lower() == "no_proxy" and no_proxy:
                 value = ",".join(sorted(set(value.split(",")).union(no_proxy)))
             proxy_vars[var] = value
