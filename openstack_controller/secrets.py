@@ -757,7 +757,12 @@ class VncSignedCertificateSecret(Secret):
         self.cn_name = cn_name
 
     def decode(self, data):
-        return self.secret_class(**data)
+        certs = {}
+        for k, cert in data.items():
+            decoded = base64.b64decode(cert).decode()
+            certs[k] = decoded
+
+        return self.secret_class(**certs)
 
     def save(self, secret):
         data = asdict(secret)
@@ -918,7 +923,6 @@ class VncSignedCertificateSecret(Secret):
             "client_cert": client_cert["cert_pem"],
             "client_key": client_cert["cert_key_pem"],
         }
-        data = {k: v.decode() for k, v in data.items()}
         return VncSignedCertificate(**data)
 
 
