@@ -202,17 +202,21 @@ spec:
         prometheus_exporter:
           rabbit_exporters: "overview,exchange,node"
   {%- endif %}
-        backends:
-          generic:
-            driver_handles_share_servers: True
-            share_backend_name: GENERIC
-            share_driver: manila.share.drivers.generic.GenericShareDriver
-            service_image_name: manila-service-image
-            service_instance_user: manila
-            service_instance_password: manila
-            interface_driver: manila.network.linux.interface.OVSInterfaceDriver
-            service_network_name: fs-mgmt-net
-            service_network_cidr: 10.254.0.0/16
+        standalone_backends:
+          daemonset:
+            conf:
+              generic:
+                driver_handles_share_servers: True
+                share_backend_name: GENERIC
+                share_driver: manila.share.drivers.generic.GenericShareDriver
+                service_image_name: manila-service-image
+                service_instance_user: manila
+                service_instance_password: manila
+                interface_driver: manila.network.linux.interface.OVSInterfaceDriver
+                service_network_name: fs-mgmt-net
+                service_network_cidr: 10.254.0.0/16
+              DEFAULT:
+                enabled_share_backends: generic
         logging:
           logger_manila:
             level: {{ spec.get('features', {}).get('logging', {}).get('manila', {}).get('level', 'INFO') }}
@@ -234,3 +238,4 @@ spec:
       manifests:
         secret_ca_bundle: true
         cron_job_db_purge: {{ manila_db_cleanup.enabled }}
+        daemonset_share: true

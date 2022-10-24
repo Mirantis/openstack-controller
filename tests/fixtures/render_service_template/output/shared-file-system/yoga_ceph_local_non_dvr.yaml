@@ -39,17 +39,21 @@ spec:
           02-custom.yaml: {}
         prometheus_exporter:
           rabbit_exporters: overview,exchange,node
-        backends:
-          generic:
-            driver_handles_share_servers: True
-            share_backend_name: GENERIC
-            share_driver: manila.share.drivers.generic.GenericShareDriver
-            service_image_name: manila-service-image
-            service_instance_user: manila
-            service_instance_password: manila
-            interface_driver: manila.network.linux.interface.OVSInterfaceDriver
-            service_network_name: fs-mgmt-net
-            service_network_cidr: 10.254.0.0/16
+        standalone_backends:
+          daemonset:
+            conf:
+              generic:
+                driver_handles_share_servers: True
+                share_backend_name: GENERIC
+                share_driver: manila.share.drivers.generic.GenericShareDriver
+                service_image_name: manila-service-image
+                service_instance_user: manila
+                service_instance_password: manila
+                interface_driver: manila.network.linux.interface.OVSInterfaceDriver
+                service_network_name: fs-mgmt-net
+                service_network_cidr: 10.254.0.0/16
+              DEFAULT:
+                enabled_share_backends: generic
       dependencies:
         static:
           db_init:
@@ -204,3 +208,4 @@ spec:
       manifests:
         secret_ca_bundle: True
         cron_job_db_purge: True
+        daemonset_share: True
