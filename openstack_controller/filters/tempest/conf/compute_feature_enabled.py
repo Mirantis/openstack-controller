@@ -44,6 +44,7 @@ class ComputeFeatureEnabled(base_section.BaseSection):
         "personality",
         "rdp_console",
         "rescue",
+        "stable_rescue",
         "resize",
         "scheduler_available_filters",
         "serial_console",
@@ -170,6 +171,17 @@ class ComputeFeatureEnabled(base_section.BaseSection):
     def rescue(self):
         if self.is_service_enabled("ironic"):
             return False
+
+    @property
+    def stable_rescue(self):
+        if self.get_spec_item("openstack_version").lower() in [
+            "queens",
+            "rocky",
+            "stein",
+            "train",
+        ]:
+            return False
+        return True
 
     @property
     def resize(self):
