@@ -2,7 +2,11 @@
 #kind: HelmBundle
 
 {%- set service = 'stepler' %}
-
+{%- if spec.openstack_version not in ("queens", "rocky", "stein", "train", "ussuri", "victoria", "wallaby", "xena") %}
+  {%- set cirros_image_name = "Cirros-6.0" %}
+{%- else %}
+    {%- set cirros_image_name = "Cirros-5.1" %}
+{%- endif %}
 spec:
   releases:
   - name: openstack-stepler
@@ -98,5 +102,7 @@ spec:
       conf:
         skiplist: |
 {% include 'base/_stepler_skiplist.yaml' %}
+        stepler_env:
+          HORIZON_TEST_IMAGE_CIRROS: {{ cirros_image_name }}
       bootstrap:
         enabled: false
