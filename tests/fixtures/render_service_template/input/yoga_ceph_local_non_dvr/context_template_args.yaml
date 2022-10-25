@@ -464,3 +464,6 @@ shared-file-system:
   - account: test
     password: FfYMQLEZJ5fLRz32VzawQ9I7ezMJGVw6
     username: testFrbP
+  ssh_credentials:
+    private: MANILA TEST SSH PRIVATE KEY
+    public: MANILA TEST SSH PUBLIC KEY

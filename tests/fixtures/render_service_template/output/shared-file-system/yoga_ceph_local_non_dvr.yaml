@@ -48,10 +48,11 @@ spec:
                 share_driver: manila.share.drivers.generic.GenericShareDriver
                 service_image_name: manila-service-image
                 service_instance_user: manila
-                service_instance_password: manila
                 interface_driver: manila.network.linux.interface.OVSInterfaceDriver
                 service_network_name: fs-mgmt-net
                 service_network_cidr: 10.254.0.0/16
+                path_to_private_key: /etc/manila/ssh/manila
+                path_to_public_key: /etc/manila/ssh/manila.pub
               DEFAULT:
                 enabled_share_backends: generic
       dependencies:
@@ -209,3 +210,12 @@ spec:
         secret_ca_bundle: True
         cron_job_db_purge: True
         daemonset_share: True
+        service_instance_ssh_key: True
+      secrets:
+        service_instance_ssh_key:
+          private: 'MANILA TEST SSH PRIVATE KEY
+
+          '
+          public: 'MANILA TEST SSH PUBLIC KEY
+
+          '
