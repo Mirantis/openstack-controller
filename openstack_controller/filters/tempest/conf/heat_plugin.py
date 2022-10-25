@@ -54,7 +54,7 @@ class HeatPlugin(base_section.BaseSection):
 
     @property
     def admin_password(self):
-        pass
+        return self.get_keystone_credential("password")
 
     @property
     def admin_project_name(self):

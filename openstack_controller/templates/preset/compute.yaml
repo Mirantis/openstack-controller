@@ -330,6 +330,15 @@ services:
             - (?:tempest.scenario.test_minimum_basic.TestMinimumBasicScenario.test_minimum_basic_scenario)
             - (?:tempest.scenario.test_snapshot_pattern.TestSnapshotPattern.test_snapshot_pattern)
             - (?:tempest.scenario.test_stamp_pattern.TestStampPattern.test_stamp_pattern)
+            # SKIPPED: messaging service is not supported in MOSK currently
+            - (?:heat_tempest_plugin.tests.functional.test_event_sinks.ZaqarEventSinkTest.test_events)
+            - (?:heat_tempest_plugin.tests.functional.test_software_config.ZaqarSignalTransportTest.test_signal_queues)
+            - (?:heat_tempest_plugin.tests.functional.test_waitcondition.ZaqarWaitConditionTest.test_signal_queues)
+            # SKIPPED: LBaasv2 extension is deprecated and is not supported
+            - (?:heat_tempest_plugin.tests.scenario.test_autoscaling_lbv2.AutoscalingLoadBalancerv2Test.test_autoscaling_loadbalancer_neutron)
+            # SKIPPED: multi-cloud feature is not configured in our CI
+            # TODO: enable this test, needs a barbican secret with clouds.yaml for 'another cloud', can reuse ourselves, may be with different account.
+            - (?:heat_tempest_plugin.tests.functional.test_remote_stack.RemoteStackTest.test_stack_create_with_cloud_credential)
           {%- endif %}
           script: |
             tempest run --config-file /etc/tempest/tempest.conf -w 4 --smoke --blacklist-file  /etc/tempest/test-blacklist
@@ -407,21 +416,21 @@ services:
             service-clients:
               http_timeout: 120
           tempest_logging:
-              handler_file:
-                args: ('/var/lib/tempest/data/tempest.log',)
-                class: FileHandler
-                formatter: tests
-                level: DEBUG
-              handler_stdout:
-                level: WARN
-              handlers:
-                keys: file,stdout
-              logger_root:
-                handlers: stdout,file
-                level: DEBUG
-              logger_tempest:
-                handlers: stdout,file
-                level: DEBUG
+            handler_file:
+              args: ('/var/lib/tempest/data/tempest.log',)
+              class: FileHandler
+              formatter: tests
+              level: DEBUG
+            handler_stdout:
+              level: WARN
+            handlers:
+              keys: file,stdout
+            logger_root:
+              handlers: stdout,file
+              level: DEBUG
+            logger_tempest:
+              handlers: stdout,file
+              level: DEBUG
 
         manifests:
           job_bootstrap: true
