@@ -1994,6 +1994,12 @@ class Manila(OpenStackService):
         "openstack-manila",
     ]
 
+    def template_args(self):
+        template_args = super().template_args()
+        ssh_secret = secrets.SSHSecret(self.namespace, self.service)
+        template_args["ssh_credentials"] = ssh_secret.ensure()
+        return template_args
+
     @property
     def _required_accounts(self):
         r_accounts = {
