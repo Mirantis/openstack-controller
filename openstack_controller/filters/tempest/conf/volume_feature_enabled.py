@@ -45,7 +45,7 @@ class VolumeFeatureEnabled(base_section.BaseSection):
 
     @property
     def extend_attached_volume(self):
-        pass
+        return True
 
     @property
     def manage_snapshot(self):
