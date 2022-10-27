@@ -285,7 +285,6 @@ spec:
       {%- endfor %}
       {%- endif %}
           DEFAULT:
-            enable_v1_api: True
             enable_v2_registry: True
             # show_multiple_locations is set True because of the fact that glance uses always
             # Ceph as backend. The parameter exposes additional information about the images

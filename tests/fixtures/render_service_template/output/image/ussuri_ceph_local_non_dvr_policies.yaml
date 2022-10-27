@@ -87,7 +87,6 @@ spec:
                 - "10.10.10.3:6789"
         glance:
           DEFAULT:
-            enable_v1_api: true
             enable_v2_registry: true
             show_multiple_locations: true
           cors:
