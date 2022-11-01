@@ -28,3 +28,40 @@
             - (?:heat_tempest_plugin.tests.functional.test_waitcondition.ZaqarWaitConditionTest)
             # SKIPPED: LBaasv2 extension is deprecated and is not supported
             - (?:heat_tempest_plugin.tests.scenario.test_autoscaling_lbv2.AutoscalingLoadBalancerv2Test)
+            # os-agents API in nova is deprecated and removed
+            - (?:tempest.api.compute.admin.test_agents.AgentsAdminTestJSON)
+            # nova-network is deprecated and removed
+            - (?:tempest.api.compute.admin.test_fixed_ips.FixedIPsTestJson)
+            - (?:tempest.api.compute.admin.test_fixed_ips_negative.FixedIPsNegativeTestJson)
+            - (?:tempest.api.compute.admin.test_floating_ips_bulk.FloatingIPsBulkAdminTestJSON)
+            - (?:tempest.api.compute.security_groups.test_security_groups_negative.SecurityGroupsNegativeTestJSON.test_security_group_create_with_duplicate_name)
+            - (?:tempest.api.compute.security_groups.test_security_groups_negative.SecurityGroupsNegativeTestJSON.test_update_security_group_with_invalid_sg_des)
+            - (?:tempest.api.compute.security_groups.test_security_groups_negative.SecurityGroupsNegativeTestJSON.test_update_security_group_with_invalid_sg_id)
+            - (?:tempest.api.compute.security_groups.test_security_groups_negative.SecurityGroupsNegativeTestJSON.test_update_security_group_with_invalid_sg_name)
+            - (?:tempest.api.compute.servers.test_virtual_interfaces.VirtualInterfacesTestJSON)
+            - (?:tempest.api.compute.servers.test_virtual_interfaces_negative.VirtualInterfacesNegativeTestJSON)
+            - (?:tempest.api.compute.test_networks.ComputeNetworksTest)
+            # trunk extension is not enabled/supported
+            - (?:tempest.api.compute.admin.test_live_migration.LiveMigrationTest.test_live_migration_with_trunk)
+            - (?:tempest.api.compute.admin.test_live_migration.LiveAutoBlockMigrationV225Test.test_live_migration_with_trunk)
+            # serialproxy not supported
+            - (?:tempest.api.compute.admin.test_live_migration.LiveMigrationRemoteConsolesV26Test.test_live_migration_serial_console)
+            # deprecated and was supported only on xen
+            - (?:tempest.api.compute.admin.test_servers.ServersAdminTestJSON.test_reset_network_inject_network_info)
+            - (?:tempest.api.compute.servers.test_server_metadata_negative.ServerMetadataNegativeTestJSON.test_delete_metadata_non_existent_server)
+            - (?:tempest.api.compute.servers.test_server_metadata_negative.ServerMetadataNegativeTestJSON.test_metadata_items_limit)
+            - (?:tempest.api.compute.servers.test_server_metadata_negative.ServerMetadataNegativeTestJSON.test_set_metadata_invalid_key)
+            - (?:tempest.api.compute.servers.test_server_metadata_negative.ServerMetadataNegativeTestJSON.test_set_metadata_non_existent_server)
+            - (?:tempest.api.compute.servers.test_server_metadata_negative.ServerMetadataNegativeTestJSON.test_set_server_metadata_blank_key)
+            - (?:tempest.api.compute.servers.test_server_metadata_negative.ServerMetadataNegativeTestJSON.test_set_server_metadata_missing_metadata)
+            - (?:tempest.api.compute.servers.test_server_metadata_negative.ServerMetadataNegativeTestJSON.test_update_metadata_non_existent_server)
+            - (?:tempest.api.compute.servers.test_server_metadata_negative.ServerMetadataNegativeTestJSON.test_update_metadata_with_blank_key)
+            - (?:tempest.api.compute.servers.test_server_metadata.ServerMetadataTestJSON)
+            # deprecated and removed in Pike
+            - (?:tempest.api.compute.certificates.test_certificates.CertificatesV2TestJSON)
+            # deprecated
+            - (?:tempest.api.compute.servers.test_server_personality.ServerPersonalityTestJSON)
+            - (?:tempest.api.compute.servers.test_server_actions.ServerActionsTestJSON.test_change_server_password)
+            - (?:tempest.api.compute.servers.test_servers_negative.ServersNegativeTestJSON.test_personality_file_contents_not_encoded)
+            # Certificate trusts not supported
+            - (?:tempest.api.compute.servers.test_servers.ServerShowV263Test.test_show_update_rebuild_list_server)
