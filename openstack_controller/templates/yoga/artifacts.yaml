@@ -226,3 +226,4 @@ manila_scheduler: '{{ images_base_url }}/openstack/manila:yoga-focal-20221031202
 manila_share: '{{ images_base_url }}/openstack/manila:yoga-focal-20221031202205'
 manila-uuids-init: '{{ images_base_url }}/openstack/heat:yoga-focal-20221031202205'
 manila_share_daemonset: '{{ images_base_url }}/openstack/manila:yoga-focal-20221031202205'
+manila_db_purge: '{{ images_base_url }}/openstack/manila:yoga-focal-20221031202205'
