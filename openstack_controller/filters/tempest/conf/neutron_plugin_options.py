@@ -26,6 +26,7 @@ class NeutronPluginOptions(base_section.BaseSection):
         "ssh_proxy_jump_port",
         "ssh_proxy_jump_username",
         "test_mtu_networks",
+        "firewall_driver",
     ]
 
     @property
@@ -42,7 +43,14 @@ class NeutronPluginOptions(base_section.BaseSection):
 
     @property
     def available_type_drivers(self):
-        pass
+        default_type_drivers = "flat,vlan,vxlan"
+        return (
+            self.get_values_item(
+                "neutron",
+                "conf.plugins.ml2_conf.ml2.type_drivers",
+            )
+            or default_type_drivers
+        )
 
     @property
     def agent_availability_zone(self):
@@ -118,3 +126,10 @@ class NeutronPluginOptions(base_section.BaseSection):
     @property
     def test_mtu_networks(self):
         pass
+
+    @property
+    def firewall_driver(self):
+        return self.get_values_item(
+            "neutron",
+            "conf.plugins.openvswitch_agent.securitygroup.firewall_driver",
+        )
