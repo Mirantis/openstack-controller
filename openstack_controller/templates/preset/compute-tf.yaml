@@ -281,28 +281,6 @@ services:
               flavor_ref:  m1.extra_tiny_test
               flavor_ref_alt: m1.tiny_test
           blacklist:
-            - (?:tempest\.fake\.test)
-            # Skip neutron tempest plugin tests that are already contains in tempest
-            - (?:neutron_tempest_plugin.api.admin.test_agent_management)
-            - (?:neutron_tempest_plugin.api.admin.test_dhcp_agent_scheduler.DHCPAgentSchedulersTestJSON.test_add_remove_network_from_dhcp_agent)
-            - (?:neutron_tempest_plugin.api.admin.test_dhcp_agent_scheduler.DHCPAgentSchedulersTestJSON.test_list_dhcp_agent_hosting_network)
-            - (?:neutron_tempest_plugin.api.admin.test_dhcp_agent_scheduler.DHCPAgentSchedulersTestJSON.test_list_networks_hosted_by_one_dhcp)
-            - (?:neutron_tempest_plugin.api.admin.test_quotas.QuotasTest.test_quotas)
-            - (?:neutron_tempest_plugin.api.admin.test_routers_dvr)
-            - (?:neutron_tempest_plugin.api.test_dhcp_ipv6)
-            - (?:neutron_tempest_plugin.api.test_metering_extensions)
-            - (?:neutron_tempest_plugin.api.test_networks.NetworksTestJSON.test_show_network)
-            - (?:neutron_tempest_plugin.api.test_security_groups.SecGroupTest.test_create_list_update_show_delete_security_group)
-            - (?:neutron_tempest_plugin.api.test_service_type_management.ServiceTypeManagementTest.test_service_provider_list)
-            - (?:neutron_tempest_plugin.api.test_flavors_extensions.TestFlavorsIpV6TestJSON.test_list_service_profiles)
-            - (?:neutron_tempest_plugin.api.test_flavors_extensions.TestFlavorsJson.test_list_service_profiles)
-            - (?:neutron_tempest_plugin.api.test_flavors_extensions.TestFlavorsIpV6TestJSON.test_show_service_profile)
-            - (?:neutron_tempest_plugin.api.test_flavors_extensions.TestFlavorsJson.test_show_service_profile)
-            - (?:neutron_tempest_plugin.api.test_routers)
-            - (?:neutron_tempest_plugin.api.test_allowed_address_pair.AllowedAddressPairIpV6TestJSON)
-            - (?:neutron_tempest_plugin.api.test_allowed_address_pair.AllowedAddressPairTestJSON)
-            - (?:neutron_tempest_plugin.api.test_extra_dhcp_options.ExtraDHCPOptionsIpV6TestJSON)
-            - (?:neutron_tempest_plugin.api.test_extra_dhcp_options.ExtraDHCPOptionsTestJSON)
             # Skip unsupported Tungsenfabric tests
             # TODO(vsaienko): remove when PRODX-3721 resolved.
             - (?:tempest.api.network.test_subnetpools_extensions.SubnetPoolsTestJSON)
@@ -344,8 +322,6 @@ services:
             # Skip SoftwareConfigIntegrationTest because it requires a custom image
             # https://github.com/openstack/heat/blob/stable/train/heat_integrationtests/prepare_test_env.sh
             - (?:heat_tempest_plugin.tests.scenario.test_server_software_config.SoftwareConfigIntegrationTest)
-            # Skip patrole tempest plugin tests until PRODX-5954 will be resolved
-            - (?:patrole_tempest_plugin)
             # The test below is skipped while upstream bug (https://bugs.launchpad.net/tempest/+bug/1317133) is not fixed.
             - (?:tempest.api.object_storage.test_container_sync_middleware.ContainerSyncMiddlewareTest.test_container_synchronization)
             # Do not run test that plays plugs real computes to agregates on the fly, dengerous for production PRODX-14770
@@ -368,16 +344,11 @@ services:
             - (?:tempest.scenario.test_minimum_basic.TestMinimumBasicScenario.test_minimum_basic_scenario)
             - (?:tempest.scenario.test_snapshot_pattern.TestSnapshotPattern.test_snapshot_pattern)
             - (?:tempest.scenario.test_stamp_pattern.TestStampPattern.test_stamp_pattern)
-            # SKIPPED: messaging service is not supported in MOSK currently
-            - (?:heat_tempest_plugin.tests.functional.test_event_sinks.ZaqarEventSinkTest.test_events)
-            - (?:heat_tempest_plugin.tests.functional.test_software_config.ZaqarSignalTransportTest.test_signal_queues)
-            - (?:heat_tempest_plugin.tests.functional.test_waitcondition.ZaqarWaitConditionTest.test_signal_queues)
-            # SKIPPED: LBaasv2 extension is deprecated and is not supported
-            - (?:heat_tempest_plugin.tests.scenario.test_autoscaling_lbv2.AutoscalingLoadBalancerv2Test.test_autoscaling_loadbalancer_neutron)
-            # SKIPPED: multi-cloud feature is not configured in our CI
             # TODO: enable this test, needs a barbican secret with clouds.yaml for 'another cloud', can reuse ourselves, may be with different account.
             - (?:heat_tempest_plugin.tests.functional.test_remote_stack.RemoteStackTest.test_stack_create_with_cloud_credential)
           {%- endif %}
+            # Tests NOT supported by product
+{% include 'base/_tempest_blacklist_no_supported.yaml' %}
           script: |
             tempest run --config-file /etc/tempest/tempest.conf -w 4 --smoke --blacklist-file  /etc/tempest/test-blacklist
           tempest:
