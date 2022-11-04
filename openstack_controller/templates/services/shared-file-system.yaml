@@ -22,6 +22,7 @@
   {%- endif %}
 {%- endfor %}
 {%- set manila_db_cleanup = spec.get('features', {}).get('database', {}).get('cleanup', {}).get('manila', {'enabled': true}) %}
+{%- from 'macros/etcd3.j2' import get_etcd3_endpoint %}
 {%- set cadf_audit = spec.get('features', {}).get('logging', {}).get('cadf', {'enabled': false}) %}
 {%- set cadf_audit_driver = spec.get('features', {}).get('logging', {}).get('cadf', {}).get('driver', 'messagingv2') %}
 
@@ -162,6 +163,8 @@ spec:
           01-controller-default.yaml: {{ service_policy }}
           02-custom.yaml: {{ spec.get("features", {}).get("policies", {}).get("manila", {}) }}
         manila:
+          coordination:
+            backend_url: {{ get_etcd3_endpoint(spec.openstack_version, 'etcd3gw') }}
 {%- if cadf_audit.enabled %}
           audit_middleware_notifications:
             driver: {{ cadf_audit_driver }}

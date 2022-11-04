@@ -28,6 +28,8 @@ spec:
           logger_manila:
             level: INFO
         manila:
+          coordination:
+            backend_url: etcd3+http://etcd:2379?api_version=auto
           audit_middleware_notifications:
             driver:
               noop
