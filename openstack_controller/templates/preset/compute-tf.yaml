@@ -319,6 +319,8 @@ services:
             - (?:tempest.scenario.test_network_basic_ops.TestNetworkBasicOps.test_port_security_macspoofing_port)
             # not supported by TF (PRODX-4801)
             - (?:neutron_tempest_plugin.api.admin.test_floating_ips_admin_actions.FloatingIPAdminTestJSON.test_create_floatingip_with_specified_ip_address)
+            # Not supported by TF (PRODX-26371)
+            - (?:octavia_tempest_plugin.tests.scenario.v2.test_traffic_ops.TrafficOperationsScenarioTest.test_insert_headers)
             # Skip SoftwareConfigIntegrationTest because it requires a custom image
             # https://github.com/openstack/heat/blob/stable/train/heat_integrationtests/prepare_test_env.sh
             - (?:heat_tempest_plugin.tests.scenario.test_server_software_config.SoftwareConfigIntegrationTest)
