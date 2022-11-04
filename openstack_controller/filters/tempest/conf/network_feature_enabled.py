@@ -20,6 +20,7 @@ class NetworkFeatureEnabled(base_section.BaseSection):
             "binding",
             "external-net",
             "quotas",
+            "quota_details",
             "provider",
             "standard-attr-timestamp",
             "service-type",
@@ -32,6 +33,7 @@ class NetworkFeatureEnabled(base_section.BaseSection):
             "router",
             "allowed-address-pairs",
             "project-id",
+            "ip-substring-filtering",
         ]
 
         if (
@@ -69,11 +71,6 @@ class NetworkFeatureEnabled(base_section.BaseSection):
                     "filter-validation",
                     "dns-domain-ports",
                     "dns-integration",
-                    "qos",
-                    "qos-default",
-                    "qos-rule-type-details",
-                    "qos-bw-limit-direction",
-                    "qos-fip",
                     "default-subnetpools",
                     "ext-gw-mode",
                     "agent",
@@ -82,13 +79,62 @@ class NetworkFeatureEnabled(base_section.BaseSection):
                     "extraroute",
                     "rbac-policies",
                     "standard-attr-tag",
+                    "qos-specs",
+                    "qos",
+                    "qos-bw-limit-direction",
+                    "qos-bw-minimum-ingress",
+                    "qos-default",
+                    "qos-fip",
+                    "qos-gateway-ip",
+                    "qos-port-network-policy",
+                    "qos-pps-minimum",
+                    "qos-pps-minimum-rule-alias",
+                    "qos-pps",
+                    "qos-rule-type-details",
+                    "qos-rules-alias",
+                    "subnetpool-prefix-ops",
+                    "floatingip-pools",
                 ]
             )
             if (
                 constants.OpenStackVersion[self.spec["openstack_version"]]
                 >= constants.OpenStackVersion["ussuri"]
             ):
-                api_extensions_default.append("rbac-address-scope")
+                api_extensions_default.extend(
+                    [
+                        "rbac-address-scope",
+                        "rbac-address-group",
+                        "rbac-security-groups",
+                        "rbac-subnetpool",
+                        "stateful-security-group",
+                        "fip-port-details",
+                        "l3-conntrack-helper",
+                        "standard-attr-segment",
+                        "port-mac-address-regenerate",
+                    ]
+                )
+
+            if (
+                constants.OpenStackVersion[self.spec["openstack_version"]]
+                >= constants.OpenStackVersion["victoria"]
+            ):
+                api_extensions_default.extend(["net-mtu-writable"])
+
+            if (
+                constants.OpenStackVersion[self.spec["openstack_version"]]
+                >= constants.OpenStackVersion["wallaby"]
+            ):
+                api_extensions_default.extend(
+                    ["address-group", "security-groups-remote-address-group"]
+                )
+
+            if (
+                constants.OpenStackVersion[self.spec["openstack_version"]]
+                >= constants.OpenStackVersion["xena"]
+            ):
+                api_extensions_default.extend(
+                    ["port-resource-request", "port-resource-request-groups"]
+                )
 
         if self.get_spec_item("features.neutron.bgpvpn.enabled"):
             api_extensions_default.extend(
