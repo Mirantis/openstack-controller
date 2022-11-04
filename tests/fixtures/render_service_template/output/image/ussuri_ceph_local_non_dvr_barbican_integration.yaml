@@ -82,17 +82,6 @@ spec:
                 enabled: true
                 hash_method: 'SHA-256'
               source_url: 'https://binary.mirantis.com/openstack/bin/ironic/tinyipa/tinyipa-stable-ussuri-20201008064914.vmlinuz'
-            manila-service-image:
-              container_format: bare
-              image_type: qcow2
-              name: manila-service-image
-              private: True
-              properties:
-                os_distro: ubuntu
-              source_url: 'https://manila-service-image-url/latest'
-              signature:
-                enabled: true
-                hash_method: SHA-256
       ceph_client:
         configmap: rook-ceph-config
         user_secret_name: glance-rbd-keyring
