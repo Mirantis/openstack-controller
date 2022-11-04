@@ -1,11 +1,13 @@
             - (?:tempest\.fake\.test)
+
+            # NEUTRON
             # Skip neutron tempest plugin tests that are already contains in tempest
             - (?:neutron_tempest_plugin.api.admin.test_agent_management)
             - (?:neutron_tempest_plugin.api.admin.test_dhcp_agent_scheduler.DHCPAgentSchedulersTestJSON.test_add_remove_network_from_dhcp_agent)
             - (?:neutron_tempest_plugin.api.admin.test_dhcp_agent_scheduler.DHCPAgentSchedulersTestJSON.test_list_dhcp_agent_hosting_network)
             - (?:neutron_tempest_plugin.api.admin.test_dhcp_agent_scheduler.DHCPAgentSchedulersTestJSON.test_list_networks_hosted_by_one_dhcp)
             - (?:neutron_tempest_plugin.api.admin.test_quotas.QuotasTest.test_quotas)
-            - (?:neutron_tempest_plugin.api.admin.test_routers_dvr)  
+            - (?:neutron_tempest_plugin.api.admin.test_routers_dvr)
             - (?:neutron_tempest_plugin.api.test_dhcp_ipv6)
             - (?:neutron_tempest_plugin.api.test_metering_extensions)
             - (?:neutron_tempest_plugin.api.test_networks.NetworksTestJSON.test_show_network)
@@ -22,12 +24,16 @@
             - (?:neutron_tempest_plugin.api.test_extra_dhcp_options.ExtraDHCPOptionsTestJSON)
             # Skip patrole tempest plugin tests until PRODX-5954 will be resolved
             - (?:patrole_tempest_plugin)
+
+            # HEAT
             # SKIPPED: messaging service is not supported in MOSK currently
             - (?:heat_tempest_plugin.tests.functional.test_event_sinks.ZaqarEventSinkTest)
             - (?:heat_tempest_plugin.tests.functional.test_software_config.ZaqarSignalTransportTest)
             - (?:heat_tempest_plugin.tests.functional.test_waitcondition.ZaqarWaitConditionTest)
             # SKIPPED: LBaasv2 extension is deprecated and is not supported
             - (?:heat_tempest_plugin.tests.scenario.test_autoscaling_lbv2.AutoscalingLoadBalancerv2Test)
+
+            # COMPUTE
             # os-agents API in nova is deprecated and removed
             - (?:tempest.api.compute.admin.test_agents.AgentsAdminTestJSON)
             # nova-network is deprecated and removed
@@ -65,3 +71,19 @@
             - (?:tempest.api.compute.servers.test_servers_negative.ServersNegativeTestJSON.test_personality_file_contents_not_encoded)
             # Certificate trusts not supported
             - (?:tempest.api.compute.servers.test_servers.ServerShowV263Test.test_show_update_rebuild_list_server)
+
+            # IRONIC
+            # Skip schedule to all nodes, as in case of concurrent tests, this will highly likely to fail
+            - (?:tempest.scenario.test_server_multinode.TestServerMultinode.test_schedule_to_all_nodes)
+            # Skip ironic boot from volume
+            - (?:ironic_tempest_plugin.tests.scenario.test_baremetal_boot_from_volume.BaremetalBFV.test_baremetal_boot_from_volume)
+            # Skip node introspection tests, MOSK does not support Ironic Inspector
+            - (?:ironic_tempest_plugin.tests.scenario.test_introspection_basic.InspectorBasicTest)
+            - (?:ironic_tempest_plugin.tests.scenario.test_introspection_basic.InspectorDiscoveryTest)
+            # Skip ironic rescue mode tests, rescue mode is not configured in MOSK properly as of now
+            # TODO: PRODX-28092 - support configuration of rescue mode in Ironic
+            - (?:ironic_tempest_plugin.tests.scenario.test_baremetal_basic_ops.BaremetalBasicOpsAndRescue)
+            # Skip multi-tenancy tests, they are partially covered by test_network_basic_ops in smoke
+            # TODO: PRODX-28093 run full multi-tenancy tests for Ironic to fully cover network isolation tests
+            - (?:ironic_tempest_plugin.tests.scenario.test_baremetal_single_tenant.BaremetalSingleTenant)
+            - (?:ironic_tempest_plugin.tests.scenario.test_baremetal_multitenancy.BaremetalMultitenancy)
