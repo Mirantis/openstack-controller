@@ -208,6 +208,7 @@ spec:
                 enabled: true
                 hash_method: SHA-256
 {%- endif %}
+{%- if "shared-file-system" in spec.features.services %}
             manila-service-image:
               container_format: bare
               image_type: qcow2
@@ -216,10 +217,11 @@ spec:
               properties:
                 os_distro: ubuntu
               source_url: {{ images["manila_service_image"] }}
-{%- if signature.enabled %}
+  {%- if signature.enabled %}
               signature:
                 enabled: true
                 hash_method: SHA-256
+  {%- endif %}
 {%- endif %}
 {%- if "baremetal" in spec.features.services %}
   {%- set ironic_agent_images = spec.features.ironic.get('agent_images', {}) %}
