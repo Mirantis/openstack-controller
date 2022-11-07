@@ -27,6 +27,7 @@ class NeutronPluginOptions(base_section.BaseSection):
         "ssh_proxy_jump_username",
         "test_mtu_networks",
         "firewall_driver",
+        "create_shared_resources",
     ]
 
     @property
@@ -133,3 +134,9 @@ class NeutronPluginOptions(base_section.BaseSection):
             "neutron",
             "conf.plugins.openvswitch_agent.securitygroup.firewall_driver",
         )
+
+    @property
+    def create_shared_resources(self):
+        if self.spec["features"]["neutron"]["backend"] == "tungstenfabric":
+            return False
+        return True
