@@ -22,6 +22,33 @@
             - (?:neutron_tempest_plugin.api.test_allowed_address_pair.AllowedAddressPairTestJSON)
             - (?:neutron_tempest_plugin.api.test_extra_dhcp_options.ExtraDHCPOptionsIpV6TestJSON)
             - (?:neutron_tempest_plugin.api.test_extra_dhcp_options.ExtraDHCPOptionsTestJSON)
+            # Neutron TAG Extension
+            - (?:tempest.api.network.test_tags.TagsTest)
+            # Neutron Metering Extension
+            - (?:tempest.api.network.admin.test_metering_extensions)
+            # Neutron Subnetpool Extenstion
+            - (?:neutron_tempest_plugin.api.test_subnetpool_prefix_ops)
+            - (?:neutron_tempest_plugin.api.test_subnetpools_negative)
+            # Neutron dvr_snat (only works when all nodes have same config)
+            - (?:neutron_tempest_plugin.scenario.test_dvr.NetworkDvrTest.test_vm_reachable_through_compute)
+            - (?:neutron_tempest_plugin.scenario.test_migration.NetworkMigrationFromDVR.test_from_dvr_to_dvr_ha)
+            - (?:neutron_tempest_plugin.scenario.test_migration.NetworkMigrationFromDVR.test_from_dvr_to_ha)
+            - (?:neutron_tempest_plugin.scenario.test_migration.NetworkMigrationFromDVR.test_from_dvr_to_legacy)
+            - (?:neutron_tempest_plugin.scenario.test_migration.NetworkMigrationFromLegacy.test_from_legacy_to_dvr)
+            - (?:neutron_tempest_plugin.scenario.test_migration.NetworkMigrationFromLegacy.test_from_legacy_to_dvr_ha)
+            - (?:neutron_tempest_plugin.scenario.test_migration.NetworkMigrationFromDVRHA.test_from_dvr_ha_to_dvr)
+            - (?:neutron_tempest_plugin.scenario.test_migration.NetworkMigrationFromDVRHA.test_from_dvr_ha_to_ha)
+            - (?:neutron_tempest_plugin.scenario.test_migration.NetworkMigrationFromDVRHA.test_from_dvr_ha_to_legacy)
+            - (?:neutron_tempest_plugin.scenario.test_migration.NetworkMigrationFromHA.test_from_ha_to_dvr)
+            - (?:neutron_tempest_plugin.scenario.test_migration.NetworkMigrationFromHA.test_from_ha_to_dvr_ha)
+            # Neutron requires both vxlan and gre encaps
+            - (?:neutron_tempest_plugin.scenario.test_mtu.NetworkWritableMtuTest)
+            # Neutron FIP64 Only supported for Midonet
+            - (?:neutron_tempest_plugin.scenario.test_fip64.Fip64)
+            # Neutron other
+            - (?:neutron_tempest_plugin.scenario.test_basic.NetworkBasicTest.test_ping_global_ip_from_vm_with_fip)
+            - (?:neutron_tempest_plugin.api.test_timestamp.TestTimeStamp.test_segment_with_timestamp)
+
             # Skip patrole tempest plugin tests until PRODX-5954 will be resolved
             - (?:patrole_tempest_plugin)
 
