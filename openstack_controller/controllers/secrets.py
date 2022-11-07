@@ -336,12 +336,26 @@ async def handle_rabbitmq_external_secret(
             f"Service {constants.RABBITMQ_EXTERNAL_SERVICE} doesn't have load balancer external IP"
         )
 
-    additional_external_params = {
+    external_secret_data = {
+        "hosts": rabbitmq_external_ip,
+        "vhost": "openstack",
+    }
+
+    try:
+        rabbitmq_external_ports = rabbitmq_external_service.obj["spec"][
+            "ports"
+        ]
+    except KeyError:
+        raise kopf.TemporaryError(
+            f"Service {constants.RABBITMQ_EXTERNAL_SERVICE} doesn't have ingress status data"
+        )
+
+    for port in rabbitmq_external_ports:
+        external_secret_data[f'port_{port["name"]}'] = str(port["port"])
+
+    external_sercret_data_enc = {
         key: base64.b64encode(value.encode()).decode()
-        for key, value in {
-            "hosts": rabbitmq_external_ip,
-            "vhost": "openstack",
-        }.items()
+        for key, value in external_secret_data.items()
     }
 
     external_topics = (
@@ -366,4 +380,4 @@ async def handle_rabbitmq_external_secret(
 
         name = utils.get_topic_normalized_name(topic)
         ets = secrets.ExternalTopicSecret(name)
-        ets.save({**credentials, **additional_external_params})
+        ets.save({**credentials, **external_sercret_data_enc})
