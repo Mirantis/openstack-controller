@@ -340,7 +340,7 @@ async def handle_rabbitmq_external_secret(
         key: base64.b64encode(value.encode()).decode()
         for key, value in {
             "hosts": rabbitmq_external_ip,
-            "vhost": "/openstack",
+            "vhost": "openstack",
         }.items()
     }
 
