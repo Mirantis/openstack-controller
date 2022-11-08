@@ -175,3 +175,5 @@ POLICY_IN_CODE_SERVICES = [
     "masakari",
     "manila",
 ]
+
+OSCTL_SECRET_LABEL = ("openstack.lcm.mirantis.com/osdpl_secret", "true")

@@ -197,8 +197,9 @@ async def handle(body, meta, spec, logger, reason, **kwargs):
         osdplsecret.reload()
         osdplsecret_spec = osdplsecret.obj["spec"]
 
+    subs_spec = layers.substitude_osdpl(body["spec"])
     mspec = layers.merge_spec(
-        body["spec"], logger, osdplsecret_spec=osdplsecret_spec
+        subs_spec, logger, osdplsecret_spec=osdplsecret_spec
     )
 
     images = discover_images(mspec, logger)

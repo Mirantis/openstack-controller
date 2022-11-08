@@ -20,6 +20,7 @@ from falcon import testing
 import pytest
 
 from openstack_controller.admission import controller
+from openstack_controller import exception
 
 api_key_encrypted = """
 -----BEGIN ENCRYPTED PRIVATE KEY-----
@@ -1135,6 +1136,79 @@ def test_barbican_features_namespace_before_victoria(client):
     assert response.json["response"]["allowed"] is False
 
 
+def test_barbican_features_fields_ok(client):
+    allowed_vault_fileds = [
+        ("enabled", True),
+        ("approle_role_id", "role"),
+        ("approle_secret_id", "secret"),
+        ("vault_url", "url"),
+        ("namespace", "namespace"),
+        ("kv_mountpoint", "mountpoint"),
+        ("use_ssl", False),
+        ("ssl_ca_crt_file", "content"),
+    ]
+
+    for field, value in allowed_vault_fileds:
+        req = copy.deepcopy(ADMISSION_REQ)
+        req["request"]["object"]["spec"]["features"]["barbican"] = {
+            "backends": {"vault": {field: value}}
+        }
+        req["request"]["object"]["spec"]["openstack_version"] = "victoria"
+        response = client.simulate_post("/validate", json=req)
+        assert response.status == falcon.HTTP_OK
+        assert response.json["response"]["allowed"] is True
+
+
+def test_barbican_features_fields_unknown(client):
+    req = copy.deepcopy(ADMISSION_REQ)
+    req["request"]["object"]["spec"]["features"]["barbican"] = {
+        "backends": {"vault": {"foo": "bar"}}
+    }
+    req["request"]["object"]["spec"]["openstack_version"] = "victoria"
+    response = client.simulate_post("/validate", json=req)
+    assert response.status == falcon.HTTP_OK
+    assert response.json["response"]["allowed"] is False
+    assert response.json["response"]["status"]["code"] == 400
+
+
+def test_barbican_features_fields_value_from_fail(client, substitute_mock):
+    allowed_vault_fileds = [
+        ("vault_url", VALUE_FROM_DICT),
+        ("approle_role_id", {"incorrect": "obj"}),
+        ("approle_secret_id", {"incorrect": "obj"}),
+    ]
+
+    for field, value in allowed_vault_fileds:
+        req = copy.deepcopy(ADMISSION_REQ)
+        substitute_mock.return_value = req["request"]["object"]["spec"]
+        req["request"]["object"]["spec"]["features"]["barbican"] = {
+            "backends": {"vault": {field: value}}
+        }
+        req["request"]["object"]["spec"]["openstack_version"] = "victoria"
+        response = client.simulate_post("/validate", json=req)
+        assert response.status == falcon.HTTP_OK
+        assert response.json["response"]["allowed"] is False
+        assert response.json["response"]["status"]["code"] == 400
+
+
+def test_barbican_features_fields_value_from_ok(client, substitute_mock):
+    allowed_vault_fileds = [
+        ("approle_role_id", VALUE_FROM_DICT),
+        ("approle_secret_id", VALUE_FROM_DICT),
+    ]
+
+    for field, value in allowed_vault_fileds:
+        req = copy.deepcopy(ADMISSION_REQ)
+        substitute_mock.return_value = req["request"]["object"]["spec"]
+        req["request"]["object"]["spec"]["features"]["barbican"] = {
+            "backends": {"vault": {field: value}}
+        }
+        req["request"]["object"]["spec"]["openstack_version"] = "victoria"
+        response = client.simulate_post("/validate", json=req)
+        assert response.status == falcon.HTTP_OK
+        assert response.json["response"]["allowed"] is True
+
+
 def test_nova_features_vcpu_type(client):
     req = copy.deepcopy(ADMISSION_REQ)
     req["request"]["object"]["spec"]["features"]["nova"].update(
@@ -1365,6 +1439,33 @@ def test_neutron_ngs_both_formats(client, osdplst):
     response = client.simulate_post("/validate", json=req)
     assert response.json["response"]["allowed"] is False
     assert response.json["response"]["status"]["code"] == 400
+
+
+def test_neutron_ngs_value_from(client, osdplst, substitute_mock):
+    allowed_fields = [
+        ("password", "string"),
+        ("password", VALUE_FROM_DICT),
+        ("ssh_private_key", "string"),
+        ("ssh_private_key", VALUE_FROM_DICT),
+        ("secret", "string"),
+        ("secret", VALUE_FROM_DICT),
+    ]
+
+    for field, value in allowed_fields:
+        req = copy.deepcopy(ADMISSION_REQ)
+        ngs_device = copy.deepcopy(NGS_DEVICE)
+        ngs_device.update({field: value})
+        substitute_mock.return_value = req["request"]["object"]["spec"]
+        req["request"]["object"]["spec"]["features"]["neutron"].update(
+            {
+                "baremetal": {
+                    "ngs": {"hardware": {"cisco-switch": ngs_device}},
+                }
+            }
+        )
+        response = client.simulate_post("/validate", json=req)
+        assert response.status == falcon.HTTP_OK
+        assert response.json["response"]["allowed"] is True
 
 
 def test_policy_in_code_ok(client, osdplst):
@@ -1723,4 +1824,23 @@ def test_manila_install_fail_with_TF(client):
     assert (
         response.json["response"]["allowed"] is False
     ), "Shared Filesystems (Manila) services is not supported with TungstenFabric networking."
+    assert response.json["response"]["status"]["code"] == 400
+
+
+def test_value_substitution_ok(client, substitute_mock):
+    req = copy.deepcopy(ADMISSION_REQ)
+    substitute_mock.return_value = req["request"]["object"]["spec"]
+
+    req = copy.deepcopy(ADMISSION_REQ)
+    response = client.simulate_post("/validate", json=req)
+    assert response.status == falcon.HTTP_OK
+    assert response.json["response"]["allowed"] is True
+
+
+def test_value_substitution_exception(client, substitute_mock):
+    substitute_mock.side_effect = exception.OsdplSubstitutionFailed()
+    req = copy.deepcopy(ADMISSION_REQ)
+    response = client.simulate_post("/validate", json=req)
+    assert response.status == falcon.HTTP_OK
+    assert response.json["response"]["allowed"] is False
     assert response.json["response"]["status"]["code"] == 400

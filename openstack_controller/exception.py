@@ -23,3 +23,9 @@ class HelmRollback(OpenStackControllerException):
     def __init__(self, message="Trying to rollback stuck release."):
         super().__init__()
         self.message = message
+
+
+class OsdplSubstitutionFailed(OpenStackControllerException):
+    def __init__(self, message="Trying to substitute osdpl fileds failed."):
+        super().__init__()
+        self.message = message

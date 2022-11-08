@@ -12,7 +12,11 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import base64
+import pytest
+
 from openstack_controller import utils
+from openstack_controller import exception
 
 
 def test_divide_into_groups_of():
@@ -83,3 +87,143 @@ def test_cron_validator():
     ]
     for schedule, res in samples:
         assert utils.CronValidator(schedule).validate() == res
+
+
+def test_find_and_substitute_ok():
+    secrets = {
+        "mysecret": {
+            "opt1": base64.encodebytes("sval1".encode("ascii")).decode(
+                "ascii"
+            ),
+            "opt2": base64.encodebytes("sval2".encode("ascii")).decode(
+                "ascii"
+            ),
+        },
+        "mysecret2": {
+            "opt1": base64.encodebytes("sval1".encode("ascii")).decode(
+                "ascii"
+            ),
+            "opt2": base64.encodebytes("sval2".encode("ascii")).decode(
+                "ascii"
+            ),
+        },
+    }
+    in_data = {
+        "spec": {
+            "features": {
+                "ssl": {
+                    "api_key": {
+                        "value_from": {
+                            "secret_key_ref": {
+                                "name": "mysecret",
+                                "key": "opt1",
+                            }
+                        }
+                    }
+                }
+            },
+            "s3": {
+                "value_from": {
+                    "secret_key_ref": {"name": "mysecret2", "key": "opt2"}
+                }
+            },
+        }
+    }
+
+    expected = {
+        "spec": {"features": {"ssl": {"api_key": "sval1"}}, "s3": "sval2"}
+    }
+    res = utils.find_and_substitute(in_data, secrets)
+    assert res == expected
+
+
+def test_find_and_substitute_secret_not_found():
+    secrets = {
+        "mysecret": {
+            "opt1": base64.encodebytes("sval1".encode("ascii")).decode(
+                "ascii"
+            ),
+            "opt2": base64.encodebytes("sval2".encode("ascii")).decode(
+                "ascii"
+            ),
+        },
+        "mysecret2": {
+            "opt1": base64.encodebytes("sval1".encode("ascii")).decode(
+                "ascii"
+            ),
+            "opt2": base64.encodebytes("sval2".encode("ascii")).decode(
+                "ascii"
+            ),
+        },
+    }
+    in_data = {
+        "spec": {
+            "features": {
+                "ssl": {
+                    "api_key": {
+                        "value_from": {
+                            "secret_key_ref": {
+                                "name": "mysecret",
+                                "key": "opt1",
+                            }
+                        }
+                    }
+                }
+            },
+            "s3": {
+                "value_from": {
+                    "secret_key_ref": {"name": "mysecret3", "key": "opt2"}
+                }
+            },
+        }
+    }
+
+    with pytest.raises(exception.OsdplSubstitutionFailed) as e:
+        utils.find_and_substitute(in_data, secrets)
+        assert "Specified secret mysecret3 not found" in e.message
+
+
+def test_find_and_substitute_key_not_found():
+    secrets = {
+        "mysecret": {
+            "opt1": base64.encodebytes("sval1".encode("ascii")).decode(
+                "ascii"
+            ),
+            "opt2": base64.encodebytes("sval2".encode("ascii")).decode(
+                "ascii"
+            ),
+        },
+        "mysecret2": {
+            "opt1": base64.encodebytes("sval1".encode("ascii")).decode(
+                "ascii"
+            ),
+            "opt2": base64.encodebytes("sval2".encode("ascii")).decode(
+                "ascii"
+            ),
+        },
+    }
+    in_data = {
+        "spec": {
+            "features": {
+                "ssl": {
+                    "api_key": {
+                        "value_from": {
+                            "secret_key_ref": {
+                                "name": "mysecret",
+                                "key": "opt1",
+                            }
+                        }
+                    }
+                }
+            },
+            "s3": {
+                "value_from": {
+                    "secret_key_ref": {"name": "mysecret2", "key": "opt3"}
+                }
+            },
+        }
+    }
+
+    with pytest.raises(exception.OsdplSubstitutionFailed) as e:
+        utils.find_and_substitute(in_data, secrets)
+        assert "Specified key opt3 not found in mysecret2" in e.message

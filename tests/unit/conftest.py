@@ -187,3 +187,12 @@ def helm_error_rollout_restart():
     with open(fixture_file, "rb") as f:
         error = f.read()
     yield error
+
+
+@pytest.fixture
+def substitute_mock(mocker):
+    substitute_mock = mocker.patch(
+        f"openstack_controller.layers.substitude_osdpl",
+    )
+    yield substitute_mock
+    mocker.stopall()
