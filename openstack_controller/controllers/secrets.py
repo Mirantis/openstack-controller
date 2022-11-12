@@ -123,11 +123,13 @@ async def handle_neutron_configmap_secret(
     "",
     "v1",
     "secrets",
+    labels={"application": "frr"},
 )
 @kopf.on.create(
     "",
     "v1",
     "secrets",
+    labels={"application": "frr"},
 )
 @utils.collect_handler_metrics
 async def handle_bgpvpnsecret(
