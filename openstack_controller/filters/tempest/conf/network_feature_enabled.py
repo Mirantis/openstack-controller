@@ -79,7 +79,6 @@ class NetworkFeatureEnabled(base_section.BaseSection):
                     "extraroute",
                     "rbac-policies",
                     "standard-attr-tag",
-                    "qos-specs",
                     "qos",
                     "qos-bw-limit-direction",
                     "qos-bw-minimum-ingress",
@@ -108,8 +107,6 @@ class NetworkFeatureEnabled(base_section.BaseSection):
                         "rbac-subnetpool",
                         "stateful-security-group",
                         "fip-port-details",
-                        "l3-conntrack-helper",
-                        "standard-attr-segment",
                         "port-mac-address-regenerate",
                     ]
                 )
