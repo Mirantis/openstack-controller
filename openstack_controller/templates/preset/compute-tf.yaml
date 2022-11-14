@@ -3,6 +3,7 @@
 {%- set nginx_ingress_namespace_class = "openstack-ingress-nginx" %}
 {%- if openstack_version not in ("queens", "rocky", "stein", "train", "ussuri", "victoria", "wallaby", "xena") %}
   {%- set cirros_image_name = "Cirros-6.0" %}
+  {%- set dhcp_client = "dhcpcd" %}
 {%- else %}
   {%- set cirros_image_name = "Cirros-5.1" %}
 {%- endif %}
@@ -407,6 +408,10 @@ services:
               enabled_import_methods: 'web-download,glance-direct,copy-image'
             service-clients:
               http_timeout: 120
+            {%- if dhcp_client is defined %}
+            scenario:
+              dhcp_client: {{ dhcp_client }}
+            {%- endif %}
           tempest_logging:
             handler_file:
               args: ('/var/lib/tempest/data/tempest.log',)
