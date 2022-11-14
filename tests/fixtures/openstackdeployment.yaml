@@ -184,7 +184,7 @@ spec:
                 flavor_ref: m1.extra_tiny_test
                 flavor_ref_alt: m1.tiny_test
                 image_ref: Cirros-5.1
-                image_ref_alt: Cirros-5.1
+                image_ref_alt: Cirros-5.1.alt
               network:
                 public_network_id: public
             script: 'tempest run --config-file /etc/tempest/tempest.conf -w 4 --smoke

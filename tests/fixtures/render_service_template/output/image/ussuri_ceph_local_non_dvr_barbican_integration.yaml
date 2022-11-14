@@ -8,13 +8,27 @@ spec:
         ks_user: glance
         structured:
           images:
-            cirros:
+            cirros-5.1:
               checksum: 050056e630cf
               container_format: bare
               image_file: cirros-0.5.1-x86_64-disk.img
               image_type: qcow2
               min_disk: 1
               name: Cirros-5.1
+              private: false
+              properties:
+                os_distro: cirros
+              source_url: https://artifactory.mcp.mirantis.net/binary-dev-kaas-local/openstack/bin/cirros/0.5.1/
+              signature:
+                enabled: true
+                hash_method: SHA-256
+            cirros-5.1.alt:
+              checksum: 050056e630cf
+              container_format: bare
+              image_file: cirros-0.5.1-x86_64-disk.img
+              image_type: qcow2
+              min_disk: 1
+              name: Cirros-5.1.alt
               private: false
               properties:
                 os_distro: cirros

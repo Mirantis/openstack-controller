@@ -241,7 +241,7 @@ services:
               public_network_id: public
             compute:
               image_ref: {{ cirros_image_name }}
-              image_ref_alt: {{ cirros_image_name }}
+              image_ref_alt: {{ cirros_image_name ~ '.alt' }}
             {%- if ironic_enabled %}
               # TODO(vsaienko): change name to more generic
               flavor_ref:  baremetal-ram1024-cpus2-disk10
