@@ -66,21 +66,8 @@ spec:
             vhost: heat_victoria
           - definition:
               message-ttl: 120000
-              expires: 600000
             name: default-policy-openstack
-            pattern: ^(?!amq\.).*
-            vhost: openstack
-          - definition:
-              expires: 600000
-            name: results_expire_openstack
-            pattern: ^results\.
-            priority: 1
-            vhost: openstack
-          - definition:
-              expires: 600000
-            name: tasks_expire_openstack
-            pattern: ^tasks\.
-            priority: 1
+            pattern: '.*'
             vhost: openstack
           - definition:
               message-ttl: 120000

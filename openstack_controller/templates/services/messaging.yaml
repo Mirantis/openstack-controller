@@ -3,7 +3,8 @@
 
 {%- set latest_openstack_versions = openstack_versions[openstack_versions.index(spec.openstack_version):openstack_versions.index(spec.openstack_version)+2] %}
 {%- set stacklight_enabled = spec.get('features', {}).get('stacklight', {}).get('enabled', False) %}
-{%- set enabled_vhosts = ['openstack'] %}
+{%- set enabled_vhosts = [] %}
+{%- set notification_vhost = 'openstack' %}
 {%- set external_notifications_enabled = spec.get('features', {}).get('messaging', {}).get('notifications', {}).get('external', {}).get('enabled', False) %}
 {%- set external_notifications_topics = spec.get('features', {}).get('messaging', {}).get('notifications', {}).get('external', {}).get('topics', []) %}
 
@@ -308,6 +309,13 @@ spec:
               message-ttl: 120000
   {%- endfor %}
   {%- endif %}
+          - vhost: {{ notification_vhost }}
+            name: default-policy-{{ notification_vhost }}
+            pattern: '.*'
+            definition:
+              message-ttl: 120000
+              # NOTE(vsaienko): for notifications set only message TTL, we assume
+              # all queues here created for a long time and shouldn't be deleted.
   {%- for item in enabled_vhosts %}
           - vhost: {{ item }}
             name: default-policy-{{ item }}
