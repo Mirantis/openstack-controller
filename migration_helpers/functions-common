@@ -208,7 +208,7 @@ function expose_mcp2_memcached {
 
 
 function get_mcp2_internal_domain_name {
-  echo $(kubectl get osdpl osh-dev -n openstack -o jsonpath='{.spec.internal_domain_name}')
+  echo "cluster.local"
 }
 
 function get_mcp2_public_domain_name {
@@ -237,8 +237,8 @@ function get_token_project {
 }
 
 function get_mcp1_public_endpoint {
-  # TODO: unhardcode
-  echo "https://10.13.0.80"
+    local public_endpoint=$(salt -C 'I@keystone:server:role:primary' cmd.run '. /root/keystonercv3; openstack endpoint list --interface public --service keystone -f value -c URL' --out json | jq '.[]' | tr -d '"')
+  echo ${public_endpoint::-6}
 }
 
 function get_mcp2_public_endpoint {
