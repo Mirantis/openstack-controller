@@ -250,12 +250,15 @@ async def handle_rabbitmq_secret(
     transport_url = urlsplit(
         config["oslo_messaging_notifications"]["transport_url"]
     )
+
+    # NOTE(vsaienko): do not use amqproxy for stacklight due to issue
+    # with heartbeat negotiation PRODX-28358
     location_path = {
         key: base64.b64encode(value.encode()).decode()
         for key, value in {
             "hosts": json.dumps(
                 [
-                    host.split("@")[1]
+                    f"{host.split('@')[1].split(':')[0]}:5672"
                     for host in transport_url.netloc.split(",")
                 ]
             ),
