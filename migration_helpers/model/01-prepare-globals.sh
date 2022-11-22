@@ -88,6 +88,7 @@ EOF
   # memcached
   # Use dns to make sure URL in mcp1 and mcp2 are the same
   for component in $COMPONENTS_TO_MIGRATE; do
+    local service_type=$(service_name_to_type $component)
     local mcp2_memcached_component_secret_key=$(kubectl -n openstack get secrets generated-${service_type}-passwords -o jsonpath="{.data.memcached}" | base64 -d | tr -d '"')
 cat <<EOF >> $RUN_DIR/cluster/migration/init.yml
     mcp2_memcached_${component}_members:
@@ -104,7 +105,7 @@ EOF
   done
 
   # get public cert from MCP2
-  local mcp2_public_ca=$(kubectl get osdpl osh-dev -n openstack -o jsonpath='{.spec.features.ssl.public_endpoints.ca_cert}')
+  local mcp2_public_ca=$(kubectl -n openstack get secrets keystone-tls-public -o jsonpath='{.data.ca\.crt}' | base64 -d)
 
 cat <<EOF >> $RUN_DIR/cluster/migration/init.yml
     mcp2_public_ca: |
@@ -190,7 +191,7 @@ EOF
   done
 
   # get public cert from MCP2
-  local mcp2_public_ca=$(kubectl get osdpl osh-dev -n openstack -o jsonpath='{.spec.features.ssl.public_endpoints.ca_cert}')
+  local mcp2_public_ca=$(kubectl -n openstack get secrets keystone-tls-public -o jsonpath='{.data.ca\.crt}' | base64 -d)
 
 cat <<EOF >> $RUN_DIR/cluster/migration/init.yml
     system:
