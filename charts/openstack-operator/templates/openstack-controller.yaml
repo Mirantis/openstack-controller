@@ -278,6 +278,8 @@ spec:
             - '-L'
             - 'http://0.0.0.0:32768/healthz'
           env:
+            - name: OSCTL_HEARTBEAT_PEERING_OBJECT_NAME
+              value: openstack-controller.osdpl
             {{- range $optionName, $optionValue := .Values.osdpl.settings.raw }}
             - name: {{ $optionName }}
               value: "{{ $optionValue }}"
@@ -319,6 +321,8 @@ spec:
             - '-L'
             - 'http://0.0.0.0:32770/healthz'
           env:
+            - name: OSCTL_HEARTBEAT_PEERING_OBJECT_NAME
+              value: openstack-controller.secrets
             {{- range $optionName, $optionValue := .Values.osdpl.settings.raw }}
             - name: {{ $optionName }}
               value: "{{ $optionValue }}"
@@ -356,6 +360,8 @@ spec:
             - '-L'
             - 'http://0.0.0.0:32771/healthz'
           env:
+            - name: OSCTL_HEARTBEAT_PEERING_OBJECT_NAME
+              value: openstack-controller.health
             {{- range $optionName, $optionValue := .Values.osdpl.settings.raw }}
             - name: {{ $optionName }}
               value: "{{ $optionValue }}"
@@ -393,6 +399,8 @@ spec:
             - '-L'
             - 'http://0.0.0.0:32772/healthz'
           env:
+            - name: OSCTL_HEARTBEAT_PEERING_OBJECT_NAME
+              value: openstack-controller.node
             {{- range $optionName, $optionValue := .Values.osdpl.settings.raw }}
             - name: {{ $optionName }}
               value: "{{ $optionValue }}"
@@ -431,6 +439,8 @@ spec:
             - '-L'
             - 'http://0.0.0.0:32773/healthz'
           env:
+            - name: OSCTL_HEARTBEAT_PEERING_OBJECT_NAME
+              value: openstack-controller.nodemaintenancerequest
             - name: OSCTL_LOGGING_CONF
               value: '{{ toJson .Values.osdpl.settings.node_maintenance_request.OSCTL_LOGGING_CONF }}'
             {{- range $optionName, $optionValue := .Values.osdpl.settings.raw }}
@@ -471,12 +481,12 @@ spec:
             - '-L'
             - 'http://0.0.0.0:32774/healthz'
           env:
+            - name: OSCTL_HEARTBEAT_PEERING_OBJECT_NAME
+              value: openstack-controller.ceph.secrets
             {{- range $optionName, $optionValue := .Values.osdpl.settings.raw }}
             - name: {{ $optionName }}
               value: "{{ $optionValue }}"
             {{- end }}
-            - name: OSCTL_HEARTBEAT_PEERING_OBJECT_NAME
-              value: openstack-controller.ceph.secrets
 {{ tuple . | include "openstack-controller.common_env" | indent 12 }}
           livenessProbe:
             exec:
@@ -506,6 +516,8 @@ spec:
             - '-L'
             - 'http://0.0.0.0:32775/healthz'
           env:
+            - name: OSCTL_HEARTBEAT_PEERING_OBJECT_NAME
+              value: openstack-controller.osdplstatus
             {{- range $optionName, $optionValue := .Values.osdpl.settings.raw }}
             - name: {{ $optionName }}
               value: "{{ $optionValue }}"
@@ -543,6 +555,8 @@ spec:
             - '-L'
             - 'http://0.0.0.0:32776/healthz'
           env:
+            - name: OSCTL_HEARTBEAT_PEERING_OBJECT_NAME
+              value: openstack-controller.osdplsecret
             {{- range $optionName, $optionValue := .Values.osdpl.settings.raw }}
             - name: {{ $optionName }}
               value: "{{ $optionValue }}"
