@@ -56,12 +56,17 @@ ADMISSION_REQ_JSON = """
                 "openstack_version": "ussuri",
                 "preset": "compute",
                 "size": "tiny",
+                "public_domain_name": "it.just.works",
                 "features": {
                     "services": [
                        "key-manager",
                        "object-storage"
                     ],
+                    "nova": {
+                        "live_migration_interface": "live-int"
+                    },
                     "neutron": {
+                        "tunnel_interface": "neutron-tun",
                         "floating_network": {
                             "enabled": true,
                             "physnet": "physnet1"
@@ -69,7 +74,9 @@ ADMISSION_REQ_JSON = """
                     },
                     "ssl": {
                         "public_endpoints": {
-                            "api_key": "-----BEGIN RSA PRIVATE KEY-----\\nMIIEpQIBAAKCAQEAsZ3tGp2wa1+L7F7/E8vXWZRnbZhcTmvY70WzYX72XfoYhDM/\\nef55tnffJePHHOoMFXiNvj8GYP9muHyxACKckLgG4BKNKdZyrKh9wVe6Djjw7kZU\\n9j0QB38ORilGKasW5hllEHvwgowBNqnby/rPhC+/MMCQBEPS3nMGHXbfY3TquQ5t"
+                            "api_key": "key",
+                            "api_cert": "cert",
+                            "ca_cert": "ca_cert"
                         }
                     }
                 }
@@ -87,6 +94,12 @@ NGS_DEVICE = {
     "device_type": "netmiko_ssh",
     "ip": "1.2.3.4",
     "username": "cisco",
+}
+
+VALUE_FROM_DICT = {
+    "value_from": {
+        "secret_key_ref": {"name": "secret_name", "key": "secret_key"}
+    }
 }
 
 
@@ -326,13 +339,11 @@ def test_physnet_required_other_options_tf(client):
 def test_physnet_with_all_options_tf(client):
     req = copy.deepcopy(ADMISSION_REQ)
     req["request"]["object"]["spec"].update({"preset": "compute-tf"})
-    req["request"]["object"]["spec"]["features"].update(
+    req["request"]["object"]["spec"]["features"]["neutron"].update(
         {
-            "neutron": {
-                "floating_network": {
-                    "network_type": "vlan",
-                    "segmentation_id": 4094,
-                }
+            "floating_network": {
+                "network_type": "vlan",
+                "segmentation_id": 4094,
             }
         }
     )
@@ -344,8 +355,8 @@ def test_physnet_with_all_options_tf(client):
 def test_ipsec_tf(client):
     req = copy.deepcopy(ADMISSION_REQ)
     req["request"]["object"]["spec"].update({"preset": "compute-tf"})
-    req["request"]["object"]["spec"]["features"].update(
-        {"neutron": {"ipsec": {"enabled": True}}}
+    req["request"]["object"]["spec"]["features"]["neutron"].update(
+        {"ipsec": {"enabled": True}}
     )
     response = client.simulate_post("/validate", json=req)
     assert response.status == falcon.HTTP_OK
@@ -355,8 +366,8 @@ def test_ipsec_tf(client):
 
 def test_ipsec_ovn(client):
     req = copy.deepcopy(ADMISSION_REQ)
-    req["request"]["object"]["spec"]["features"].update(
-        {"neutron": {"backend": "ml2/ovn", "ipsec": {"enabled": True}}}
+    req["request"]["object"]["spec"]["features"]["neutron"].update(
+        {"backend": "ml2/ovn", "ipsec": {"enabled": True}}
     )
     response = client.simulate_post("/validate", json=req)
     assert response.status == falcon.HTTP_OK
@@ -370,7 +381,10 @@ def test_baremetal_tf(client):
     req["request"]["object"]["spec"]["features"]["services"].append(
         "baremetal"
     )
-    req["request"]["object"]["spec"]["features"]["ironic"] = {"test": "test"}
+    req["request"]["object"]["spec"]["features"]["ironic"] = {
+        "provisioning_interface": "prov-int",
+        "baremetal_network_name": "baremetal-network",
+    }
     response = client.simulate_post("/validate", json=req)
     assert response.status == falcon.HTTP_OK
     assert response.json["response"]["status"]["code"] == 400
@@ -383,7 +397,10 @@ def test_baremetal_ovs(client):
     req["request"]["object"]["spec"]["features"]["services"].append(
         "baremetal"
     )
-    req["request"]["object"]["spec"]["features"]["ironic"] = {"test": "test"}
+    req["request"]["object"]["spec"]["features"]["ironic"] = {
+        "provisioning_interface": "prov-int",
+        "baremetal_network_name": "baremetal-network",
+    }
     response = client.simulate_post("/validate", json=req)
     assert response.status == falcon.HTTP_OK
     assert response.json["response"]["allowed"] is True
@@ -407,7 +424,10 @@ def test_baremetal_non_empty_config(client):
     req["request"]["object"]["spec"]["features"]["services"].append(
         "baremetal"
     )
-    req["request"]["object"]["spec"]["features"]["ironic"] = {"test": "test"}
+    req["request"]["object"]["spec"]["features"]["ironic"] = {
+        "provisioning_interface": "prov-int",
+        "baremetal_network_name": "baremetal-network",
+    }
     response = client.simulate_post("/validate", json=req)
     assert response.status == falcon.HTTP_OK
     assert response.json["response"]["allowed"] is True
@@ -416,8 +436,14 @@ def test_baremetal_non_empty_config(client):
 def test_bgpvpn_peers(client):
     req = copy.deepcopy(ADMISSION_REQ)
     req["request"]["object"]["spec"].update({"preset": "compute"})
-    req["request"]["object"]["spec"]["features"].update(
-        {"neutron": {"bgpvpn": {"enabled": True, "peers": ["1.2.3.4"]}}}
+    req["request"]["object"]["spec"]["features"]["neutron"].update(
+        {
+            "bgpvpn": {
+                "enabled": True,
+                "as_number": 64512,
+                "peers": ["1.2.3.4"],
+            }
+        }
     )
     response = client.simulate_post("/validate", json=req)
     assert response.status == falcon.HTTP_OK
@@ -427,13 +453,12 @@ def test_bgpvpn_peers(client):
 def test_bgpvpn_route_reflector_enabled(client):
     req = copy.deepcopy(ADMISSION_REQ)
     req["request"]["object"]["spec"].update({"preset": "compute"})
-    req["request"]["object"]["spec"]["features"].update(
+    req["request"]["object"]["spec"]["features"]["neutron"].update(
         {
-            "neutron": {
-                "bgpvpn": {
-                    "enabled": True,
-                    "route_reflector": {"enabled": True},
-                }
+            "bgpvpn": {
+                "enabled": True,
+                "route_reflector": {"enabled": True},
+                "as_number": 64512,
             }
         }
     )
@@ -445,13 +470,12 @@ def test_bgpvpn_route_reflector_enabled(client):
 def test_bgpvpn_route_reflector_disabled_no_peers(client):
     req = copy.deepcopy(ADMISSION_REQ)
     req["request"]["object"]["spec"].update({"preset": "compute"})
-    req["request"]["object"]["spec"]["features"].update(
+    req["request"]["object"]["spec"]["features"]["neutron"].update(
         {
-            "neutron": {
-                "bgpvpn": {
-                    "enabled": True,
-                    "route_reflector": {"enabled": False},
-                }
+            "bgpvpn": {
+                "enabled": True,
+                "route_reflector": {"enabled": False},
+                "as_number": 64512,
             }
         }
     )
@@ -464,8 +488,10 @@ def test_bgpvpn_route_reflector_disabled_no_peers(client):
 def test_bgpvpn_tf(client):
     req = copy.deepcopy(ADMISSION_REQ)
     req["request"]["object"]["spec"].update({"preset": "compute-tf"})
-    req["request"]["object"]["spec"]["features"].update(
-        {"neutron": {"bgpvpn": {"enabled": True, "peers": ["1.2.3.4"]}}}
+    req["request"]["object"]["spec"]["features"]["neutron"].update(
+        {
+            "bgpvpn": {"enabled": True, "peers": ["1.2.3.4"]},
+        }
     )
     response = client.simulate_post("/validate", json=req)
     assert response.status == falcon.HTTP_OK
@@ -476,8 +502,8 @@ def test_bgpvpn_tf(client):
 def test_ovn_tf(client):
     req = copy.deepcopy(ADMISSION_REQ)
     req["request"]["object"]["spec"].update({"preset": "compute-tf"})
-    req["request"]["object"]["spec"]["features"].update(
-        {"neutron": {"backend": "ml2/ovn"}}
+    req["request"]["object"]["spec"]["features"]["neutron"].update(
+        {"backend": "ml2/ovn"}
     )
     response = client.simulate_post("/validate", json=req)
     assert response.status == falcon.HTTP_OK
@@ -487,12 +513,10 @@ def test_ovn_tf(client):
 
 def test_bgpvpn_ovn(client):
     req = copy.deepcopy(ADMISSION_REQ)
-    req["request"]["object"]["spec"]["features"].update(
+    req["request"]["object"]["spec"]["features"]["neutron"].update(
         {
-            "neutron": {
-                "backend": "ml2/ovn",
-                "bgpvpn": {"enabled": True, "peers": ["1.2.3.4"]},
-            }
+            "backend": "ml2/ovn",
+            "bgpvpn": {"enabled": True, "peers": ["1.2.3.4"]},
         }
     )
     response = client.simulate_post("/validate", json=req)
@@ -504,14 +528,16 @@ def test_bgpvpn_ovn(client):
 def test_nova_encryption(client):
     req = copy.deepcopy(ADMISSION_REQ)
     req["request"]["object"]["spec"]["features"]["nova"] = {
-        "images": {"backend": "local", "encryption": {"enabled": False}}
+        "images": {"backend": "local", "encryption": {"enabled": False}},
+        "live_migration_interface": "live-int",
     }
     response = client.simulate_post("/validate", json=req)
     assert response.status == falcon.HTTP_OK
     assert response.json["response"]["allowed"] is True
 
     req["request"]["object"]["spec"]["features"]["nova"] = {
-        "images": {"backend": "local", "encryption": {"enabled": True}}
+        "images": {"backend": "local", "encryption": {"enabled": True}},
+        "live_migration_interface": "live-int",
     }
     response = client.simulate_post("/validate", json=req)
     assert response.status == falcon.HTTP_OK
@@ -519,14 +545,16 @@ def test_nova_encryption(client):
     assert response.json["response"]["allowed"] is False
 
     req["request"]["object"]["spec"]["features"]["nova"] = {
-        "images": {"backend": "lvm", "encryption": {"enabled": True}}
+        "images": {"backend": "lvm", "encryption": {"enabled": True}},
+        "live_migration_interface": "live-int",
     }
     response = client.simulate_post("/validate", json=req)
     assert response.status == falcon.HTTP_OK
     assert response.json["response"]["allowed"] is True
 
     req["request"]["object"]["spec"]["features"]["nova"] = {
-        "images": {"backend": "lvm", "encryption": {"enabled": False}}
+        "images": {"backend": "lvm", "encryption": {"enabled": False}},
+        "live_migration_interface": "live-int",
     }
     response = client.simulate_post("/validate", json=req)
     assert response.status == falcon.HTTP_OK
@@ -1109,9 +1137,9 @@ def test_barbican_features_namespace_before_victoria(client):
 
 def test_nova_features_vcpu_type(client):
     req = copy.deepcopy(ADMISSION_REQ)
-    req["request"]["object"]["spec"]["features"]["nova"] = {
-        "vcpu_type": "spam,ham"
-    }
+    req["request"]["object"]["spec"]["features"]["nova"].update(
+        {"vcpu_type": "spam,ham"}
+    )
     response = client.simulate_post("/validate", json=req)
     assert response.status == falcon.HTTP_OK
     assert response.json["response"]["allowed"] is True
@@ -1388,7 +1416,8 @@ def test_ovn_before_yoga(client):
 def test_ovn_yoga(client):
     req = copy.deepcopy(ADMISSION_REQ)
     req["request"]["object"]["spec"]["features"]["neutron"] = {
-        "backend": "ml2/ovn"
+        "backend": "ml2/ovn",
+        "tunnel_interface": "tunnel",
     }
     req["request"]["object"]["spec"]["openstack_version"] = "yoga"
     response = client.simulate_post("/validate", json=req)
@@ -1626,7 +1655,7 @@ def test_db_backup_sync_remotes_not_allowed(client):
 def test_cron_validation(client):
     req = copy.deepcopy(ADMISSION_REQ)
     req["request"]["object"]["spec"]["features"]["database"] = {
-        "backup": {"schedule_time": "05-40 */05 07 Jan mon"}
+        "backup": {"enabled": True, "schedule_time": "05-40 */05 07 Jan mon"}
     }
 
     response = client.simulate_post("/validate", json=req)

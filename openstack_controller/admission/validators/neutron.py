@@ -11,10 +11,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import os
-from jsonschema import validate
-import yaml
-
 from openstack_controller.admission.validators import base
 from openstack_controller import constants
 from openstack_controller import exception
@@ -111,17 +107,4 @@ class NeutronValidator(base.BaseValidator):
                 "Use hardware section to describe ngs device."
             )
 
-        schema_file = "./schemas/ngs_hardware.yaml"
-        schema = yaml.safe_load(
-            open(
-                os.path.join(
-                    os.path.abspath(os.path.dirname(__file__)), schema_file
-                )
-            )
-        )
-        try:
-            validate(instance=ngs_hardware, schema=schema)
-        except Exception as e:
-            raise exception.OsDplValidationFailed(
-                f"The ngs:hardware format is invalid. Failed to validate schema: {e}"
-            )
+        base.validate_schema("ngs_hardware.yaml", ngs_hardware)

@@ -19,6 +19,7 @@ import falcon
 import jsonschema
 
 from openstack_controller.admission import validators
+from openstack_controller.admission.validators import base as validators_base
 from openstack_controller import exception
 from openstack_controller import layers
 
@@ -102,24 +103,26 @@ class ValidationResource(object):
             ):
                 validators = ["openstack", "nodes"]
                 validate_func_name = "validate"
-                if review_request["operation"] == "DELETE":
-                    validate_func_name = "validate_delete"
-                else:
-                    spec = review_request.get("object", {}).get("spec", {})
-                    # Validate all the enabled services, if there is a
-                    # corresponding validator.
-                    # Not validating services that are about to be deleted
-                    validators.extend(
-                        layers.services(spec, LOG)[0] & _VALIDATORS.keys()
-                    )
-                for service in validators:
-                    try:
+                try:
+                    if review_request["operation"] == "DELETE":
+                        validate_func_name = "validate_delete"
+                    else:
+                        spec = review_request.get("object", {}).get("spec", {})
+                        validators_base.validate_schema("osdpl.yaml", spec)
+
+                        # Validate all the enabled services, if there is a
+                        # corresponding validator.
+                        # No validating services that are about to be deleted
+                        validators.extend(
+                            layers.services(spec, LOG)[0] & _VALIDATORS.keys()
+                        )
+
+                    for service in validators:
                         getattr(_VALIDATORS[service], validate_func_name)(
                             review_request
                         )
-                    except exception.OsDplValidationFailed as e:
-                        response.set_error(e.code, e.message)
-                        break
+                except (exception.OsDplValidationFailed) as e:
+                    response.set_error(400, e.message)
         resp.text = json.dumps(response.to_json())
 
 
