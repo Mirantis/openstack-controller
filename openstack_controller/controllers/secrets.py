@@ -386,3 +386,43 @@ async def handle_rabbitmq_external_secret(
         name = utils.get_topic_normalized_name(topic)
         ets = secrets.ExternalTopicSecret(name)
         ets.save({**credentials, **external_sercret_data_enc})
+
+
+@kopf.on.update(
+    "",
+    "v1",
+    "secrets",
+    labels={constants.OSCTL_SECRET_LABEL[0]: constants.OSCTL_SECRET_LABEL[1]},
+)
+@kopf.on.create(
+    "",
+    "v1",
+    "secrets",
+    labels={constants.OSCTL_SECRET_LABEL[0]: constants.OSCTL_SECRET_LABEL[1]},
+)
+@utils.collect_handler_metrics
+async def handle_substitution_secrets(
+    body,
+    meta,
+    name,
+    status,
+    logger,
+    diff,
+    **kwargs,
+):
+    LOG.debug(f"Handling secret create/update {name}")
+    osdpl = kube.get_osdpl(settings.OSCTL_OS_DEPLOYMENT_NAMESPACE)
+
+    hasher = hashlib.sha256()
+    hasher.update(json.dumps(body["data"], sort_keys=True).encode())
+    secret_hash = hasher.hexdigest()
+
+    osdpl.patch(
+        {
+            "status": {
+                "watched": {
+                    "value_from": {"secret": {name: {"hash": secret_hash}}}
+                }
+            }
+        }
+    )
