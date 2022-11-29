@@ -89,7 +89,7 @@ function dump_openstack_component_dbs {
 
   component_dbs=$(get_service_dbs $component)
   info "Running dump of databases ${component_dbs} from mysql host ${host}"
-  mysqldump -u${db_admin} -p$db_password  -h${host} --routines --events --single-transaction --databases ${component_dbs} --result-file="$DATABASE_DIR/${component}-dump.sql" || die $LINENO "Failed to dump ${component} database"
+  mysqldump -u${db_admin} -p$db_password  -h${host} --no-tablespaces --routines --events --single-transaction --databases ${component_dbs} --result-file="$DATABASE_DIR/${component}-dump.sql" || die $LINENO "Failed to dump ${component} database"
   info "Dump completed"
 }
 
