@@ -80,6 +80,9 @@ spec:
             level: INFO
         nova:
           DEFAULT:
+            cpu_allocation_ratio: 8.0
+            disk_allocation_ratio: 1.6
+            ram_allocation_ratio: 1.0
             allow_resize_to_same_host: true
             default_schedule_zone: nova
           cache:

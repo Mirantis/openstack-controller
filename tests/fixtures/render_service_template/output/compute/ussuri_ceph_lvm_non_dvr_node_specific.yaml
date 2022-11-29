@@ -75,6 +75,12 @@ spec:
             level: INFO
         nova:
           DEFAULT:
+            initial_cpu_allocation_ratio: 8.0
+            initial_disk_allocation_ratio: 1.6
+            initial_ram_allocation_ratio: 1.0
+            cpu_allocation_ratio: 0
+            disk_allocation_ratio: 0
+            ram_allocation_ratio: 0
             allow_resize_to_same_host: true
             default_schedule_zone: nova
           cache:
@@ -426,6 +432,14 @@ spec:
             compute::migration_interface:
               values:
                 conf:
+                  nova:
+                    DEFAULT:
+                      initial_cpu_allocation_ratio: 8.0
+                      initial_disk_allocation_ratio: 1.6
+                      initial_ram_allocation_ratio: 1.0
+                      cpu_allocation_ratio: 0
+                      disk_allocation_ratio: 0
+                      ram_allocation_ratio: 0
                   libvirt:
                     live_migration_interface: 'live01'
                   hypervisor:
@@ -438,6 +452,13 @@ spec:
               values:
                 conf:
                   nova:
+                    DEFAULT:
+                      initial_cpu_allocation_ratio: 8.0
+                      initial_disk_allocation_ratio: 1.6
+                      initial_ram_allocation_ratio: 1.0
+                      cpu_allocation_ratio: 0
+                      disk_allocation_ratio: 0
+                      ram_allocation_ratio: 0
                     libvirt:
                       images_type: 'qcow2'
                   libvirt:
@@ -452,18 +473,39 @@ spec:
               values:
                 conf:
                   nova:
+                    DEFAULT:
+                      initial_cpu_allocation_ratio: 8.0
+                      initial_disk_allocation_ratio: 1.6
+                      initial_ram_allocation_ratio: 1.0
+                      cpu_allocation_ratio: 0
+                      disk_allocation_ratio: 0
+                      ram_allocation_ratio: 0
                     libvirt:
                       images_type: 'qcow2'
             compute::local:
               values:
                 conf:
                   nova:
+                    DEFAULT:
+                      initial_cpu_allocation_ratio: 8.0
+                      initial_disk_allocation_ratio: 1.6
+                      initial_ram_allocation_ratio: 1.0
+                      cpu_allocation_ratio: 0
+                      disk_allocation_ratio: 0
+                      ram_allocation_ratio: 0
                     libvirt:
                       images_type: 'qcow2'
             compute::lvm_custom:
               values:
                 conf:
                   nova:
+                    DEFAULT:
+                      initial_cpu_allocation_ratio: 8.0
+                      initial_disk_allocation_ratio: 1.6
+                      initial_ram_allocation_ratio: 1.0
+                      cpu_allocation_ratio: 0
+                      disk_allocation_ratio: 0
+                      ram_allocation_ratio: 0
                     libvirt:
                       images_type: 'lvm'
                       images_volume_group: 'override-group'
@@ -471,6 +513,13 @@ spec:
               values:
                 conf:
                   nova:
+                    DEFAULT:
+                      initial_cpu_allocation_ratio: 8.0
+                      initial_disk_allocation_ratio: 1.6
+                      initial_ram_allocation_ratio: 1.0
+                      cpu_allocation_ratio: 0
+                      disk_allocation_ratio: 0
+                      ram_allocation_ratio: 0
                     libvirt:
                       images_type: 'lvm'
                       images_volume_group: 'override-group'
