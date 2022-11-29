@@ -1180,71 +1180,85 @@ class Neutron(OpenStackService, MaintenanceApiMixin):
                 await child_obj.enable(self.openstack_version, True)
 
     async def apply(self, event, **kwargs):
-        neutron_features = self.mspec["features"].get("neutron", {})
-        if neutron_features.get("backend", "") == "tungstenfabric":
-            ssl_public_endpoints = (
-                self.mspec["features"]
-                .get("ssl", {})
-                .get("public_endpoints", {})
-            )
-            b64encode = lambda v: base64.b64encode(v.encode()).decode()
-            secret_data = {
-                "tunnel_interface": b64encode(
-                    neutron_features.get("tunnel_interface", "")
-                ),
-                "public_domain": b64encode(self.mspec["public_domain_name"]),
-                "certificate_authority": b64encode(
-                    ssl_public_endpoints.get("ca_cert")
-                ),
-                "certificate": b64encode(ssl_public_endpoints.get("api_cert")),
-                "private_key": b64encode(ssl_public_endpoints.get("api_key")),
-                "ingress_namespace_class": b64encode(
-                    utils.get_in(
-                        self.mspec["services"],
-                        [
-                            "ingress",
-                            "ingress",
-                            "values",
-                            "deployment",
-                            "cluster",
-                            "class",
-                        ],
-                        "nginx-cluster",
-                    )
-                ),
-            }
+        if (
+            self.mspec.get("migration", {})
+            .get("neutron", {})
+            .get("deploy_main_service", True)
+        ):
+            neutron_features = self.mspec["features"].get("neutron", {})
+            if neutron_features.get("backend", "") == "tungstenfabric":
+                ssl_public_endpoints = (
+                    self.mspec["features"]
+                    .get("ssl", {})
+                    .get("public_endpoints", {})
+                )
+                b64encode = lambda v: base64.b64encode(v.encode()).decode()
+                secret_data = {
+                    "tunnel_interface": b64encode(
+                        neutron_features.get("tunnel_interface", "")
+                    ),
+                    "public_domain": b64encode(
+                        self.mspec["public_domain_name"]
+                    ),
+                    "certificate_authority": b64encode(
+                        ssl_public_endpoints.get("ca_cert")
+                    ),
+                    "certificate": b64encode(
+                        ssl_public_endpoints.get("api_cert")
+                    ),
+                    "private_key": b64encode(
+                        ssl_public_endpoints.get("api_key")
+                    ),
+                    "ingress_namespace_class": b64encode(
+                        utils.get_in(
+                            self.mspec["services"],
+                            [
+                                "ingress",
+                                "ingress",
+                                "values",
+                                "deployment",
+                                "cluster",
+                                "class",
+                            ],
+                            "nginx-cluster",
+                        )
+                    ),
+                }
 
-            nodes = {}
-            if self.mspec.get("nodes"):
-                for label_key in self.mspec["nodes"]:
-                    if utils.get_in(
-                        self.mspec["nodes"][label_key], ["features", "neutron"]
-                    ):
-                        nodes[label_key] = utils.get_in(
+                nodes = {}
+                if self.mspec.get("nodes"):
+                    for label_key in self.mspec["nodes"]:
+                        if utils.get_in(
                             self.mspec["nodes"][label_key],
                             ["features", "neutron"],
+                        ):
+                            nodes[label_key] = utils.get_in(
+                                self.mspec["nodes"][label_key],
+                                ["features", "neutron"],
+                            )
+                secret_data["nodes"] = b64encode(json.dumps(nodes))
+
+                tfs = secrets.TungstenFabricSecret()
+                tfs.save(secret_data)
+
+            # NOTE(vsaienko): Ensure l2 agents updated prior all other services.
+            dynamic_map = [
+                ("DaemonSet", "sriov-agent"),
+                ("DaemonSet", "ovs-agent"),
+            ]
+            for kind, abstract_name in dynamic_map:
+                child_objs = self.get_child_objects_dynamic(
+                    kind, abstract_name
+                )
+                for child_obj in child_objs:
+                    if child_obj.exists() and child_obj.need_apply_images(
+                        self.openstack_version
+                    ):
+                        await child_obj.enable(
+                            self.openstack_version,
+                            wait_completion=True,
+                            timeout=None,
                         )
-            secret_data["nodes"] = b64encode(json.dumps(nodes))
-
-            tfs = secrets.TungstenFabricSecret()
-            tfs.save(secret_data)
-
-        # NOTE(vsaienko): Ensure l2 agents updated prior all other services.
-        dynamic_map = [
-            ("DaemonSet", "sriov-agent"),
-            ("DaemonSet", "ovs-agent"),
-        ]
-        for kind, abstract_name in dynamic_map:
-            child_objs = self.get_child_objects_dynamic(kind, abstract_name)
-            for child_obj in child_objs:
-                if child_obj.exists() and child_obj.need_apply_images(
-                    self.openstack_version
-                ):
-                    await child_obj.enable(
-                        self.openstack_version,
-                        wait_completion=True,
-                        timeout=None,
-                    )
 
         await super().apply(event, **kwargs)
 
