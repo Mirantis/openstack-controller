@@ -14,7 +14,7 @@ values:
     identity:
       auth:
         heat_stack_user:
-          domain_name: $(salt-call pillar.get _param:mcp1_heat_domain_name --out json | jq -r '.[]')
-          username: $(salt-call pillar.get _param:mcp1_heat_username --out json | jq -r '.[]')
-          password: $(salt-call pillar.get _param:mcp1_heat_username_password --out json | jq -r '.[]')
+          domain_name: $(reclass -n $(hostname -f)  -o json | jq -r .parameters._param.mcp1_heat_domain_name)
+          username: $(reclass -n $(hostname -f)  -o json | jq -r .parameters._param.mcp1_heat_username)
+          password: $(reclass -n $(hostname -f)  -o json | jq -r .parameters._param.mcp1_heat_username_password)
 "
