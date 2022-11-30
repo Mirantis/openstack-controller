@@ -49,6 +49,7 @@ class ComputeFeatureEnabled(base_section.BaseSection):
         "scheduler_available_filters",
         "serial_console",
         "shelve",
+        "shelve_migrate",
         "snapshot",
         "spice_console",
         "suspend",
@@ -223,6 +224,16 @@ class ComputeFeatureEnabled(base_section.BaseSection):
             "nova", "conf.nova.glance.verify_glance_signatures", False
         ):
             return False
+
+    @property
+    def shelve_migrate(self):
+        if self.is_service_enabled("ironic"):
+            return False
+        if self.get_values_item(
+            "nova", "conf.nova.glance.verify_glance_signatures", False
+        ):
+            return False
+        return True
 
     @property
     def snapshot(self):
