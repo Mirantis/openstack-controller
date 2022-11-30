@@ -629,8 +629,12 @@ class Service:
             domain_names = [
                 self.mspec["internal_domain_name"],
             ]
-            proxy_vars = proxy_secret.get_proxy_vars(no_proxy=domain_names)
+            proxy_vars, proxy_settings = proxy_secret.get_proxy_vars(
+                no_proxy=domain_names
+            )
+
             template_args["proxy_vars"] = proxy_vars
+            template_args["proxy_settings"] = proxy_settings
             LOG.debug(
                 f"Set proxy variables for {self.service}: {template_args['proxy_vars']}"
             )
