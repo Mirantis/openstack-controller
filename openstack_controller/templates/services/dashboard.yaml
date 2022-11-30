@@ -138,7 +138,13 @@ spec:
                   {% endif %}
                   auth:
                     {% if not profile %}
+                    {% if auth_type == 'mapped' %}
+                    # v3oidcpassword does not work with unversioned identity endpoint
+                    # TODO: remove once LP bug/1998366 is fixed and released
+                    auth_url: {{ "{{" }} auth_url {{ "}}/v3" }}
+                    {% else %}
                     auth_url: {{ "{{" }} auth_url {{ "}}" }}
+                    {% endif %}
                     {% endif %}
                     username: "{{ "{{" }} user.username {{ "}}" }}"
                     project_id: {{ "{{" }} tenant_id {{ "}}" }}
@@ -192,7 +198,13 @@ spec:
               # OpenStack API is version 3. For example, your cloud provider may implement
               # Image API v1.1, Block Storage API v2, and Compute API v2.0. OS_AUTH_URL is
               # only for the Identity API served through keystone.
+              {% if auth_type == 'mapped' %}
+              # v3oidcpassword does not work with unversioned identity endpoint
+              # TODO: remove once LP bug/1998366 is fixed and released
+              export OS_AUTH_URL={{ "{{" }} auth_url {{ "}}/v3" }}
+              {% else %}
               export OS_AUTH_URL={{ "{{" }} auth_url {{ "}}" }}
+              {% endif %}
 
               # With the addition of Keystone we have standardized on the term **project**
               # as the entity that owns the resources.
