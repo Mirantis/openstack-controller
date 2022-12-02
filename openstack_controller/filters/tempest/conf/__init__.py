@@ -33,6 +33,7 @@ from openstack_controller.filters.tempest.conf import (
 )
 from openstack_controller.filters.tempest.conf import orchestration
 from openstack_controller.filters.tempest.conf import oslo_concurrency
+from openstack_controller.filters.tempest.conf import placement
 from openstack_controller.filters.tempest.conf import patrole_plugin
 from openstack_controller.filters.tempest.conf import scenario
 from openstack_controller.filters.tempest.conf import service_clients
@@ -72,6 +73,7 @@ SECTIONS = [
     orchestration.Orchestration,
     oslo_concurrency.OsloConcurrency,
     patrole_plugin.PatrolePlugin,
+    placement.Placement,
     scenario.Scenario,
     service_clients.ServiceClients,
     service_available.ServiceAvailable,
