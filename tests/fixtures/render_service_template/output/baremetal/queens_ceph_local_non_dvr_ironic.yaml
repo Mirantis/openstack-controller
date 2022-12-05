@@ -50,6 +50,7 @@ spec:
             topics: notifications,stacklight_notifications
           pxe:
             pxe_append_params: nofb nomodeset vga=normal ipa-insecure=1 ipa-debug=1
+            ipxe_timeout: 120
           service_catalog:
             valid_interfaces: public,internal
         logging:
