@@ -210,6 +210,6 @@ ingress_tls_proxy: '{{ images_base_url }}/openstack/tls-proxy:focal-202208040828
 cirros_checksum: 1d3062cd89af34e419f7100277f38b2b
 fedora_checksum: e0713a4f26427691da90701ff7a823da
 ubuntu_checksum: 30d459e0dc0562e629d3683970e55efa
-rabbitmq_amqproxy: '{{ images_base_url }}/general/amqproxy:v0.7.0'
+rabbitmq_amqproxy: '{{ images_base_url }}/general/amqproxy:v0.8.2'
 manila_service_image: '{{ binary_base_url }}/openstack/bin/manila/manila-service-image-1.3.0-77.qcow2'
 manila-uuids-init: '{{ images_base_url }}/openstack/heat:queens-bionic-20221025065941'
