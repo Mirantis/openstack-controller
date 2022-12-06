@@ -154,7 +154,7 @@ class OpenStackValidator(base.BaseValidator):
     def _check_delete_allowed(self, review_request):
         if self._is_osdpl_locked(review_request):
             raise exception.OsDplValidationFailed(
-                "OpenStack deletion is not allowed, while OpemStackDeploymentStatus is in transit state."
+                "OpenStack deletion is not allowed, while OpenStackDeploymentStatus is in transit state."
             )
 
     def _deny_encrypted_api_key(self, new_obj):
