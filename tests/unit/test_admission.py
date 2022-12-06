@@ -525,6 +525,56 @@ def test_bgpvpn_ovn(client):
     assert response.json["response"]["status"]["code"] == 400
 
 
+def test_vpnaas(client):
+    req = copy.deepcopy(ADMISSION_REQ)
+    req["request"]["object"]["spec"]["openstack_version"] = "yoga"
+    req["request"]["object"]["spec"].update({"preset": "compute"})
+    req["request"]["object"]["spec"]["features"]["neutron"].update(
+        {
+            "extensions": {
+                "vpnaas": {
+                    "enabled": True,
+                }
+            }
+        }
+    )
+    response = client.simulate_post("/validate", json=req)
+    assert response.status == falcon.HTTP_OK
+    assert response.json["response"]["allowed"] is True
+
+
+def test_vpnaas_unknown_field(client):
+    req = copy.deepcopy(ADMISSION_REQ)
+    req["request"]["object"]["spec"]["openstack_version"] = "yoga"
+    req["request"]["object"]["spec"].update({"preset": "compute"})
+    req["request"]["object"]["spec"]["features"]["neutron"].update(
+        {"extensions": {"vpnaas": {"enabled": True, "foo": "bar"}}}
+    )
+    response = client.simulate_post("/validate", json=req)
+    assert response.status == falcon.HTTP_OK
+    assert response.json["response"]["allowed"] is False
+    assert response.json["response"]["status"]["code"] == 400
+
+
+def test_vpnaas_tf(client):
+    req = copy.deepcopy(ADMISSION_REQ)
+    req["request"]["object"]["spec"]["openstack_version"] = "yoga"
+    req["request"]["object"]["spec"].update({"preset": "compute-tf"})
+    req["request"]["object"]["spec"]["features"]["neutron"].update(
+        {
+            "extensions": {
+                "vpnaas": {
+                    "enabled": True,
+                }
+            }
+        }
+    )
+    response = client.simulate_post("/validate", json=req)
+    assert response.status == falcon.HTTP_OK
+    assert response.json["response"]["allowed"] is False
+    assert response.json["response"]["status"]["code"] == 400
+
+
 def test_nova_encryption(client):
     req = copy.deepcopy(ADMISSION_REQ)
     req["request"]["object"]["spec"]["features"]["nova"] = {

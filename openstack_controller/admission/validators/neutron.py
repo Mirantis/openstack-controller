@@ -33,6 +33,9 @@ class NeutronValidator(base.BaseValidator):
         floating_network = neutron_features.get("floating_network", {})
         ipsec = neutron_features.get("ipsec", {"enabled": False})
         bgpvpn = neutron_features.get("bgpvpn", {"enabled": False})
+        vpnaas = neutron_features.get("extensions", {}).get(
+            "vpnaas", {"enabled": False}
+        )
         ovn_enabled = neutron_features.get("backend", "ml2") == "ml2/ovn"
         openstack_version = spec["openstack_version"]
         tungstenfabric_enabled = spec["preset"] == "compute-tf"
@@ -95,6 +98,18 @@ class NeutronValidator(base.BaseValidator):
             if ipsec["enabled"]:
                 raise exception.OsDplValidationFailed(
                     "IPSEC and OVN are not supported."
+                )
+        if vpnaas["enabled"]:
+            if (
+                constants.OpenStackVersion[openstack_version].value
+                < constants.OpenStackVersion["yoga"]
+            ):
+                raise exception.OsDplValidationFailed(
+                    "VPNaaS is supported from Yoga release."
+                )
+            if tungstenfabric_enabled:
+                raise exception.OsDplValidationFailed(
+                    "TungstenFabric and VPNaaS are mutually exclusive."
                 )
 
     def _validate_ngs_hardware(self, ngs):

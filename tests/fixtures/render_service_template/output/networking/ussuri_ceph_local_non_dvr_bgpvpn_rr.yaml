@@ -252,7 +252,10 @@ spec:
           oslo_messaging_notifications:
             topics: notifications,stacklight_notifications
           service_providers:
-            service_provider: BGPVPN:BaGPipe:networking_bgpvpn.neutron.services.service_drivers.bagpipe.bagpipe_v2.BaGPipeBGPVPNDriver:default
+            service_provider:
+              type: multistring
+              values:
+              - 'BGPVPN:BaGPipe:networking_bgpvpn.neutron.services.service_drivers.bagpipe.bagpipe_v2.BaGPipeBGPVPNDriver:default'
           ironic:
             valid_interfaces: internal
         paste:

@@ -201,7 +201,9 @@ spec:
             proxy_arp: False
         l3_agent:
           agent:
-            extensions: fip_qos,gateway_ip_qos
+            extensions: fip_qos,gateway_ip_qos,vpnaas
+          vpnagent:
+            vpn_device_driver: 'neutron_vpnaas.services.vpn.device_drivers.strongswan_ipsec.StrongSwanDriver'
           DEFAULT:
             cleanup_on_shutdown: true
         logging:
@@ -216,6 +218,8 @@ spec:
             metadata_proxy_shared_secret: mN0aLDTcg1AVqyLWNDjCd2Jz6DA61cZJ
             nova_metadata_port: 8775
             nova_metadata_protocol: http
+        netns_cleanup:
+          orphaned_ports: true
         neutron:
           DEFAULT:
             api_workers: 4
@@ -230,7 +234,9 @@ spec:
             allow_automatic_l3agent_failover: false
             l3_ha_network_type: vxlan
             max_l3_agents_per_router: 2
-            service_plugins: router,metering,qos,bgpvpn
+            service_plugins: router,metering,qos,bgpvpn,vpnaas
+          nova:
+            live_migration_events: true
           cache:
             backend: oslo_cache.memcache_pool
           keystone_authtoken:
@@ -246,6 +252,7 @@ spec:
               type: multistring
               values:
                - 'BGPVPN:BaGPipe:networking_bgpvpn.neutron.services.service_drivers.bagpipe.bagpipe_v2.BaGPipeBGPVPNDriver:default'
+               - 'VPN:strongswan:neutron_vpnaas.services.vpn.service_drivers.ipsec.IPsecVPNDriver:default'
           ironic:
             valid_interfaces: internal
         paste:

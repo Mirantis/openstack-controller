@@ -1031,6 +1031,19 @@ properties:
                     description: |
                       "The name of public router"
                       default: "r1"
+          extensions:
+            type: object
+            additionalProperties: false
+            properties:
+              vpnaas:
+                type: object
+                additionalProperties: false
+                properties:
+                  enabled:
+                    type: boolean
+                    description: |
+                        [Technology Preview] Enable VPNaaS plugin/service
+                        default: false
           baremetal:
             type: object
             additionalProperties: false
@@ -1090,7 +1103,7 @@ properties:
               enabled:
                 type: boolean
                 description: |
-                  Enable BGPVPN plugin/service
+                  [Technology Preview] Enable BGPVPN plugin/service
                   default: false
               control_interface:
                 type: string

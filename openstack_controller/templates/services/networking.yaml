@@ -15,6 +15,9 @@
 {%- set tungstenfabric_custom_api_opts = tf_api_service is defined and tf_api_port is defined %}
 {%- set bgpvpn = spec.features.neutron.get('bgpvpn', {'enabled': False}) %}
 {%- set ipsec = spec.features.neutron.get('ipsec', {'enabled': False}) %}
+{%- set vpnaas = spec.features.neutron.get("extensions", {}).get("vpnaas", {"enabled": False}) %}
+{%- set service_providers = [] %}
+{%- set l3_agent_extensions = ["fip_qos", "gateway_ip_qos"] %}
 {%- set notification_topics = ['notifications'] %}
 {%- if tungstenfabric_enabled %}
   {%- if spec.openstack_version not in ['queens', 'rocky', 'stein', 'train', 'ussuri'] %}
@@ -29,6 +32,10 @@
   {%- endif %}
 {%- endif %}
 {%- do service_plugins.append('bgpvpn') if bgpvpn.enabled %}
+{%- do service_providers.append("BGPVPN:BaGPipe:networking_bgpvpn.neutron.services.service_drivers.bagpipe.bagpipe_v2.BaGPipeBGPVPNDriver:default") if bgpvpn.enabled %}
+{%- do service_plugins.append('vpnaas') if vpnaas.enabled %}
+{%- do service_providers.append("VPN:strongswan:neutron_vpnaas.services.vpn.service_drivers.ipsec.IPsecVPNDriver:default") if vpnaas.enabled %}
+{%- do l3_agent_extensions.append("vpnaas") if  vpnaas.enabled %}
 {%- do notification_topics.append('stacklight_notifications') if stacklight_enabled %}
 {%- set external_notifications_enabled = spec.get('features', {}).get('messaging', {}).get('notifications', {}).get('external', {}).get('enabled', False) %}
 {%- if external_notifications_enabled %}
@@ -786,9 +793,11 @@ spec:
           {%- endif %}
           oslo_messaging_notifications:
             topics: {{ notification_topics|join(',') }}
-          {%- if bgpvpn.enabled %}
+          {%- if service_providers %}
           service_providers:
-            service_provider: BGPVPN:BaGPipe:networking_bgpvpn.neutron.services.service_drivers.bagpipe.bagpipe_v2.BaGPipeBGPVPNDriver:default
+            service_provider:
+              type: multistring
+              values: {{ service_providers }}
           {%- endif %}
           # TODO: option will be removed in Yoga, it will be default behavior.
           {%- if spec.openstack_version not in ['queens', 'rocky', 'stein', 'train', 'ussuri'] %}
@@ -806,7 +815,11 @@ spec:
              qualname: neutron_lib
         l3_agent:
           agent:
-            extensions: fip_qos,gateway_ip_qos
+            extensions: {{ ','.join(l3_agent_extensions) }}
+          {%- if vpnaas.enabled %}
+          vpnagent:
+            vpn_device_driver: neutron_vpnaas.services.vpn.device_drivers.strongswan_ipsec.StrongSwanDriver
+          {%- endif %}
           {%- if spec.get('features', {}).get('neutron', {}).get('dvr', {}).get('enabled', False) %}
           DEFAULT:
             agent_mode: dvr_snat
