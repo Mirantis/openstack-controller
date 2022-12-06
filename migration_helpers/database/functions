@@ -8,37 +8,37 @@ TOP_DIR=$( cd $(dirname $RUN_DIR/../../) && pwd)
 . $TOP_DIR/functions-common
 
 function get_mcp1_database_address {
-  local mcp1_db_address=$(salt-call pillar.items  _param:mcp1_database_address --out json | jq '.local|.[]' | tr -d '"')
+  local mcp1_db_address=$(reclass -n $(hostname -f)  -o json | jq -r .parameters._param.mcp1_database_address)
   echo "$mcp1_db_address"
 }
 
 function get_mcp2_database_address {
-  local mcp2_db_address=$(salt-call pillar.items  _param:mcp2_database_address --out json | jq '.local|.[]' | tr -d '"')
+  local mcp2_db_address=$(reclass -n $(hostname -f)  -o json | jq -r .parameters._param.mcp2_database_address)
   echo "$mcp2_db_address"
 }
 
 function get_mcp1_database_username {
   local component=$1
-  local mcp1_db_user=$(salt-call pillar.items _param:mcp1_database_${component}_username --out json | jq '.local|.[]' | tr -d '"')
+  local mcp1_db_user=$(reclass -n $(hostname -f)  -o json | jq -r .parameters._param.mcp1_database_${component}_username)
   echo "$mcp1_db_user"
 }
 
 
 function get_mcp1_database_password {
   local component=$1
-  local mcp1_db_password=$(salt-call pillar.items _param:mcp1_database_${component}_password --out json | jq '.local|.[]' | tr -d '"')
+  local mcp1_db_password=$(reclass -n $(hostname -f)  -o json | jq -r .parameters._param.mcp1_database_${component}_password)
   echo "$mcp1_db_password"
 }
 
 function get_mcp2_database_username {
   local component=$1
-  local mcp2_db_user=$(salt-call pillar.items _param:mcp2_database_${component}_username --out json | jq '.local|.[]' | tr -d '"')
+  local mcp2_db_user=$(reclass -n $(hostname -f)  -o json | jq -r .parameters._param.mcp2_database_${component}_username)
   echo "$mcp2_db_user"
 }
 
 function get_mcp2_database_password {
   local component=$1
-  local mcp2_db_password=$(salt-call pillar.items _param:mcp2_database_${component}_password --out json | jq '.local|.[]' | tr -d '"')
+  local mcp2_db_password=$(reclass -n $(hostname -f)  -o json | jq -r .parameters._param.mcp2_database_${component}_password)
   echo "$mcp2_db_password"
 }
 
