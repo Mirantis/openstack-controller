@@ -437,6 +437,10 @@ spec:
         backend: []
         sshd:
           enabled: true
+        novncproxy:
+          ingress:
+            annotations:
+              nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
       pod:
         probes:
           compute:

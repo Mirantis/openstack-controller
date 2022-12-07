@@ -796,6 +796,10 @@ spec:
         {%- endif %}
         sshd:
           enabled: true
+        novncproxy:
+          ingress:
+            annotations:
+              nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
       jobs:
 {% include 'base/_ks_jobs.yaml' %}
 {%- if nova_db_cleanup.enabled %}
