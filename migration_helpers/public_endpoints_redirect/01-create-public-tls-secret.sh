@@ -9,12 +9,30 @@ TOP_DIR=$(cd $(dirname $RUN_DIR/../../) && pwd)
 
 kubectl create ns ${HELMBUNDLE_NS}
 
+CA=$(salt 'prx01*' pillar.get _param:apache_horizon_ssl:chain --out=newline_values_only | base64 -w 0)
+if [ -z "$CA" ]; then
+  CA_FILE=$(salt 'prx01*' pillar.get _param:apache_horizon_ssl:chain_file --out=newline_values_only)
+  CA=$(salt 'prx01*' file.read ${CA_FILE} --out=newline_values_only | base64 -w 0)
+fi
+
+CERT=$(salt 'prx01*' pillar.get _param:apache_horizon_ssl:cert --out=newline_values_only | base64 -w 0)
+if [ -z "$CERT" ]; then
+  CERT_FILE=$(salt 'prx01*' pillar.get _param:apache_horizon_ssl:cert_file --out=newline_values_only)
+  CERT=$(salt 'prx01*' file.read ${CERT_FILE} --out=newline_values_only | base64 -w 0)
+fi
+
+KEY=$(salt 'prx01*' pillar.get _param:apache_horizon_ssl:key --out=newline_values_only | base64 -w 0)
+if [ -z "$KEY" ]; then
+  KEY_FILE=$(salt 'prx01*' pillar.get _param:apache_horizon_ssl:key_file --out=newline_values_only)
+  KEY=$(salt 'prx01*' file.read ${KEY_FILE} --out=newline_values_only | base64 -w 0 )
+fi
+
 cat << EOF | kubectl apply -f -
 apiVersion: v1
 data:
-  ca.crt: $(salt 'prx01*' pillar.items _param:apache_horizon_ssl:cert --out json | jq -r '.[][]' | base64 | tr -d '\n')
-  tls.crt: $(salt 'prx01*' pillar.items _param:apache_horizon_ssl:chain --out json | jq -r '.[][]' | base64 | tr -d '\n')
-  tls.key: $(salt 'prx01*' pillar.items _param:apache_horizon_ssl:key --out json | jq -r '.[][]' | base64 | tr -d '\n')
+  ca.crt: $CA
+  tls.crt: $CERT
+  tls.key: $KEY
 kind: Secret
 metadata:
   annotations:
@@ -22,4 +40,3 @@ metadata:
   namespace: ${FORWARDER_NS}
 type: tls
 EOF
-
