@@ -22,6 +22,7 @@ class NetworkFeatureEnabled(base_section.BaseSection):
             "quotas",
             "quota_details",
             "provider",
+            "standard-attr-tag",
             "standard-attr-timestamp",
             "service-type",
             "port-security",
@@ -33,7 +34,6 @@ class NetworkFeatureEnabled(base_section.BaseSection):
             "router",
             "allowed-address-pairs",
             "project-id",
-            "ip-substring-filtering",
         ]
 
         if (
@@ -78,7 +78,6 @@ class NetworkFeatureEnabled(base_section.BaseSection):
                     "address-scope",
                     "extraroute",
                     "rbac-policies",
-                    "standard-attr-tag",
                     "qos",
                     "qos-bw-limit-direction",
                     "qos-bw-minimum-ingress",
@@ -93,6 +92,7 @@ class NetworkFeatureEnabled(base_section.BaseSection):
                     "qos-rules-alias",
                     "subnetpool-prefix-ops",
                     "floatingip-pools",
+                    "ip-substring-filtering",
                 ]
             )
             if (
@@ -137,6 +137,13 @@ class NetworkFeatureEnabled(base_section.BaseSection):
             api_extensions_default.extend(
                 ["bgpvpn", "bgpvpn-routes-control", "bgpvpn-vni"]
             )
+
+        if self.get_spec_item("features.neutron.backend") == "tungstenfabric":
+            if (
+                constants.OpenStackVersion[self.spec["openstack_version"]]
+                >= constants.OpenStackVersion["victoria"]
+            ):
+                api_extensions_default.extend(["net-mtu", "net-mtu-writable"])
 
         return ", ".join(api_extensions_default)
 

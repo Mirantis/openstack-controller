@@ -45,6 +45,8 @@ class NeutronPluginOptions(base_section.BaseSection):
     @property
     def available_type_drivers(self):
         default_type_drivers = "flat,vlan,vxlan"
+        if self.tf_enabled():
+            return
         return (
             self.get_values_item(
                 "neutron",
@@ -137,6 +139,6 @@ class NeutronPluginOptions(base_section.BaseSection):
 
     @property
     def create_shared_resources(self):
-        if self.spec["features"]["neutron"]["backend"] == "tungstenfabric":
+        if self.tf_enabled():
             return False
         return True
