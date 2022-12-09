@@ -215,7 +215,8 @@ spec:
             # be broken
             host: "<None>"
 # NOTE(vsaienko): active/active mode is supported by rbd starting from Rocky
-{%- if spec.openstack_version not in ['queens'] %}
+# but in rocky it is not stable, so apply only from stein
+{%- if spec.openstack_version not in ['queens', 'rocky'] %}
             cluster: "cinder-ceph-cluster"
 {%- endif %}
 {%- if spec.get('features', {}).get('cinder', {}).get('backup', {}).get('backend') == 'ceph' %}
