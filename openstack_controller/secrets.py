@@ -1139,16 +1139,23 @@ class ProxySecret:
     def get_proxy_vars(self, no_proxy=None):
         data = self.decode(get_secret_data(self.namespace, self.name))
         proxy_vars = {}
-        for var in constants.PROXY_VARS_NAMES.intersection(data.keys()):
-            value = data[var]
-            if var.lower() == "no_proxy" and no_proxy:
+        custom_vars = {}
+
+        def _set_proxy_var(key, value):
+            if key.lower() == "no_proxy" and no_proxy:
                 value = ",".join(sorted(set(value.split(",")).union(no_proxy)))
-            proxy_vars[var] = value
+            proxy_vars[key] = value
             # Different programs can parse upper or lower case
             # proxy variables.
-            if var == var.lower():
-                converted = var.upper()
+            if key == key.lower():
+                converted = key.upper()
             else:
-                converted = var.lower()
+                converted = key.lower()
             proxy_vars[converted] = value
-        return proxy_vars
+
+        for key, value in data.items():
+            if key in constants.PROXY_VARS_NAMES:
+                _set_proxy_var(key, value)
+            else:
+                custom_vars[key.lower()] = value
+        return proxy_vars, custom_vars

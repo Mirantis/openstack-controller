@@ -70,7 +70,7 @@ def test_get_proxy_vars_from_secret(mock_data, override_setting):
 
     secret = secrets.ProxySecret()
 
-    proxy_vars = secret.get_proxy_vars(
+    proxy_vars, proxy_settings = secret.get_proxy_vars(
         no_proxy=["svc.cluster.local", "it.just.works"]
     )
     expected_proxy = "http://squid.openstack.svc.cluster.local:80"
@@ -85,7 +85,15 @@ def test_get_proxy_vars_from_secret(mock_data, override_setting):
         "no_proxy": expected_no_proxy,
     }
 
+    expected_ca_cert = (
+        "-----BEGIN CERTIFICATE-----\n"
+        "test_ca\n"
+        "-----END CERTIFICATE-----\n"
+    )
+    expected_settings = {"proxy_ca_certificate": expected_ca_cert}
+
     assert expected_vars == proxy_vars
+    assert expected_settings == proxy_settings
 
 
 @mock.patch("openstack_controller.secrets.get_secret_data")
