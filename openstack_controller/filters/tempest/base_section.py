@@ -16,6 +16,13 @@ class BaseSection(object):
     def options():
         """ """
 
+    def tf_enabled(self):
+        try:
+            if self.spec["features"]["neutron"]["backend"] == "tungstenfabric":
+                return True
+        except:
+            pass
+
     def get_values_item(self, service_name, item_path, item_default=None):
         for component_name, component in self.helmbundles_body.items():
             for release in component.get("spec", {}).get("releases", []):

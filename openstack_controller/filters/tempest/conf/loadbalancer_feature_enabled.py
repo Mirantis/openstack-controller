@@ -17,13 +17,6 @@ class LoadBalancerFeatureEnabled(base_section.BaseSection):
         "force_cleanup_enabled",
     ]
 
-    def _tf_enabled(self):
-        try:
-            if self.spec["features"]["neutron"]["backend"] == "tungstenfabric":
-                return True
-        except:
-            pass
-
     def _ovn_enabled(self):
         return "ovn" in self.get_values_item(
             "octavia",
@@ -33,19 +26,19 @@ class LoadBalancerFeatureEnabled(base_section.BaseSection):
 
     @property
     def not_implemented_is_error(self):
-        if self._tf_enabled():
+        if self.tf_enabled():
             return False
         if self._ovn_enabled():
             return False
 
     @property
     def health_monitor_enabled(self):
-        if self._tf_enabled():
+        if self.tf_enabled():
             return False
 
     @property
     def terminated_tls_enabled(self):
-        if self._tf_enabled():
+        if self.tf_enabled():
             return False
 
     @property

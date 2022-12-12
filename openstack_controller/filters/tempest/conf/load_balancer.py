@@ -138,11 +138,8 @@ class LoadBalancer(base_section.BaseSection):
 
     @property
     def test_with_ipv6(self):
-        try:
-            if self.spec["features"]["neutron"]["backend"] == "tungstenfabric":
-                return False
-        except:
-            pass
+        if self.tf_enabled():
+            return False
 
     @property
     def enable_security_groups(self):
