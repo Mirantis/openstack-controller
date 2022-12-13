@@ -3,6 +3,8 @@ import os
 import yaml
 from unittest import mock
 
+import pytest
+
 from openstack_controller import constants
 from openstack_controller import layers
 
@@ -10,6 +12,21 @@ logger = logging.getLogger(__name__)
 
 OUTPUT_DIR = "tests/fixtures/render_service_template/output"
 INPUT_DIR = "tests/fixtures/render_service_template/input"
+
+# Remove excluded services once contexts with these services are added
+excluded_services = {
+    "tempest",
+    "object-storage",
+}
+infra_services = {
+    "messaging",
+    "database",
+    "memcached",
+    "ingress",
+    "redis",
+    "coordination",
+    "descheduler",
+}
 
 
 def render_helmbundle(service, spec, **kwargs):
@@ -52,50 +69,44 @@ def get_render_kwargs(service, context, default_args):
     return spec, service_t_args
 
 
-@mock.patch.object(layers, "_get_dashboard_default_policy")
-@mock.patch.object(layers, "_get_default_policy")
-def test_render_service_template(
-    gdp_mock, gddp_mock, common_template_args, dashboard_policy_default
-):
-    # Remove excluded services once contexts with these services are added
-    excluded_services = {
-        "tempest",
-        "object-storage",
-    }
-    infra_services = {
-        "messaging",
-        "database",
-        "memcached",
-        "ingress",
-        "redis",
-        "coordination",
-        "descheduler",
-    }
+def get_services_and_contexts():
     all_services = (
         set(constants.OS_SERVICES_MAP.keys())
         .union(infra_services)
         .difference(excluded_services)
     )
+    params = []
     for service in all_services:
         srv_dir = f"{OUTPUT_DIR}/{service}"
         contexts = [name.split(".")[0] for name in os.listdir(srv_dir)]
         if not contexts:
             raise RuntimeError(f"No contexts provided for service {service}")
         for context in contexts:
-            if service == "dashboard":
-                gdp_mock.return_value = {}
-                gddp_mock.return_value = dashboard_policy_default
-            elif service in infra_services:
-                gdp_mock.return_value = {}
-            else:
-                gdp_mock.return_value = {
-                    f"{service}_rule1": f"{service}_value1"
-                }
-            logger.info(f"Rendering service {service} for context {context}")
-            spec, kwargs = get_render_kwargs(
-                service, context, common_template_args
-            )
-            data = render_helmbundle(service, spec, **kwargs)
-            with open(f"{srv_dir}/{context}.yaml") as f:
-                output = yaml.safe_load(f)
-                assert data == output
+            params.append((service, context))
+    return params
+
+
+@pytest.mark.parametrize("service,context", get_services_and_contexts())
+@mock.patch.object(layers, "_get_dashboard_default_policy")
+@mock.patch.object(layers, "_get_default_policy")
+def test_render_service_template(
+    gdp_mock,
+    gddp_mock,
+    common_template_args,
+    dashboard_policy_default,
+    service,
+    context,
+):
+    if service == "dashboard":
+        gdp_mock.return_value = {}
+        gddp_mock.return_value = dashboard_policy_default
+    elif service in infra_services:
+        gdp_mock.return_value = {}
+    else:
+        gdp_mock.return_value = {f"{service}_rule1": f"{service}_value1"}
+    logger.info(f"Rendering service {service} for context {context}")
+    spec, kwargs = get_render_kwargs(service, context, common_template_args)
+    data = render_helmbundle(service, spec, **kwargs)
+    with open(f"{OUTPUT_DIR}/{service}/{context}.yaml") as f:
+        output = yaml.safe_load(f)
+        assert data == output, f"Mismatch when comparing to file {f.name}"
