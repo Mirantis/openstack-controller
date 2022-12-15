@@ -11,6 +11,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import os
+import yaml
+from jsonschema import validate
+
+from openstack_controller import exception
+
 
 class BaseValidator(object):
     service = None
@@ -20,3 +26,17 @@ class BaseValidator(object):
 
     def validate_delete(self, review_request):
         pass
+
+
+def validate_schema(schema_file, obj):
+    schema_file = os.path.join(
+        os.path.abspath(os.path.dirname(__file__)), "schemas", schema_file
+    )
+    with open(schema_file) as f:
+        schema = yaml.safe_load(f)
+    try:
+        validate(instance=obj, schema=schema)
+    except Exception as e:
+        raise exception.OsDplValidationFailed(
+            f"Failed to validate schema {schema_file}: {e}"
+        )
