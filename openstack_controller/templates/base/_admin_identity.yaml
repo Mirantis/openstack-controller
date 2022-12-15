@@ -13,4 +13,7 @@
               username: {{ account.username }}
               password: {{ account.password }}
               region_name: {{ spec.get('region_name', 'RegionOne') }}
+              {%- if account.account == 'tempest' %}
+              role: admin,key-manager:service-admin,creator
+              {%- endif %}
 {%- endfor %}
