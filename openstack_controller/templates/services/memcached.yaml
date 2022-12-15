@@ -33,19 +33,3 @@ spec:
       pod:
         replicas:
           server: 3
-      scripts:
-        prometheus_memcached_exporter: |
-          #!/bin/bash
-          set -ex
-          COMMAND="${@:-start}"
-
-          function start () {
-            memcached_exporter --memcached.address "$MEMCACHED_HOST:$MEMCACHED_PORT"
-          }
-
-          function stop () {
-            kill -TERM 1
-          }
-
-          $COMMAND
-
