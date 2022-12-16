@@ -41,6 +41,21 @@ patternProperties:
             type: object
             additionalProperties: False
             properties:
+              allocation_ratios:
+                type: object
+                additionalProperties: False
+                description: >
+                  Defines allowed compute resource overconsumption.
+                  For Queens and Rocky - these values are constantly enforced.
+                  For Stein and later - these values are set once for new compute
+                  nodes, further changes should be done via the Placement API.
+                properties:
+                  cpu:
+                    type: number
+                  disk:
+                    type: number
+                  ram:
+                    type: number
               live_migration_interface:
                 type: string
                 description: "Physical interface used for live migration."

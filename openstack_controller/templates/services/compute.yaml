@@ -45,6 +45,9 @@
 {%- set cadf_audit_driver = spec.get('features', {}).get('logging', {}).get('cadf', {}).get('driver', 'messagingv2') %}
 
 {%- set vnc_tls_enabled = spec.get('features', {}).get('nova', {}).get('console', {}).get('novnc', {}).get('tls', {}).get('enabled', false) %}
+# COMPUTE OVERCOMMITS
+{%- set compute_overcommits = {"cpu": 8.0, "disk": 1.6, "ram": 1.0} %}  # INTERNAL DEFAULTS
+{%- do compute_overcommits.update(spec.get('features', {}).get('nova', {}).get('allocation_ratios', {})) %}
 
 spec:
   releases:
@@ -276,82 +279,94 @@ spec:
           compute_ironic:
             node_selector_key: openstack-control-plane
             node_selector_value: enabled
-      # NODE SPECIFIC START
-      {%- if overrides.enabled %}
+# NODE SPECIFIC START
+{%- if overrides.enabled %}
       overrides:
         nova_compute:
           labels:
-        {%- for label, override in node_specific.items() %}
-          {%- set neutron_override = override.get("neutron", {}) %}
-          {%- set nova_override = override.get("nova", {}) %}
-          {%- if neutron_override.get("sriov", {}).get("enabled", False) or nova_override %}
+  {%- for label, override in node_specific.items() %}
+    {%- set neutron_override = override.get("neutron", {}) %}
+    {%- set nova_override = override.get("nova", {}) %}
+    {%- if neutron_override.get("sriov", {}).get("enabled", False) or nova_override %}
             {{ label }}:
               values:
-          {%- if neutron_override.get("sriov", {}).get("enabled", False) %}
+      {%- if neutron_override.get("sriov", {}).get("enabled", False) %}
                 network:
                   backend:
                     - sriovnicswitch
                   interface:
                     sriov: {{ neutron_override.sriov.nics }}
-          {%- endif %}
-          {%- if nova_override.get("images", {}).get("backend") or nova_override.get('live_migration_interface') or nova_override.get("vcpu_type") %}
+      {%- endif %}
                 conf:
-            {%- if nova_override.get("images", {}).get("backend") or nova_override.get("vcpu_type") %}
                   nova:
-                  {%- if vnc_tls_enabled %}
+                    DEFAULT:
+      {%- if spec.openstack_version in ("queens", "rocky") %}
+                      cpu_allocation_ratio: {{ nova_override.get("allocation_ratios", {}).get("cpu", compute_overcommits["cpu"]) }}
+                      disk_allocation_ratio: {{ nova_override.get("allocation_ratios", {}).get("disk", compute_overcommits["disk"]) }}
+                      ram_allocation_ratio: {{ nova_override.get("allocation_ratios", {}).get("ram", compute_overcommits["ram"]) }}
+      {%- else %}
+                      initial_cpu_allocation_ratio: {{ nova_override.get("allocation_ratios", {}).get("cpu", compute_overcommits["cpu"]) }}
+                      initial_disk_allocation_ratio: {{ nova_override.get("allocation_ratios", {}).get("disk", compute_overcommits["disk"]) }}
+                      initial_ram_allocation_ratio: {{ nova_override.get("allocation_ratios", {}).get("ram", compute_overcommits["ram"]) }}
+                      cpu_allocation_ratio: 0
+                      disk_allocation_ratio: 0
+                      ram_allocation_ratio: 0
+      {%- endif %}
+      {%- if vnc_tls_enabled %}
                     # Both auth schemes are enabled in favor of supporting backward compatibility
                     # when VM instances were launched without TLS support.
                     vnc:
                       auth_schemes: vencrypt,none
-                  {%- endif %}
+      {%- endif %}
+      {%- if nova_override.get("images", {}).get("backend") or nova_override.get("vcpu_type") %}
                     libvirt:
-                {%- if nova_override.get("vcpu_type") in ("host-model", "host-passthrough") %}
+      {%- endif %}
+      {%- if nova_override.get("vcpu_type") in ("host-model", "host-passthrough") %}
                       cpu_mode: {{ nova_override.vcpu_type }}
-                {%- elif nova_override.get("vcpu_type") and spec.openstack_version in ("queens", "rocky", "stein") %}
+      {%- elif nova_override.get("vcpu_type") and spec.openstack_version in ("queens", "rocky", "stein") %}
                       cpu_mode: custom
                       cpu_model: {{ vcpu_type }}
-                {%- elif nova_override.get("vcpu_type") %}
+      {%- elif nova_override.get("vcpu_type") %}
                       cpu_mode: custom
                       cpu_models: {{ vcpu_type }}
-                {%- endif %}
-              {%- if nova_override.images.backend == 'ceph' %}
+      {%- endif %}
+      {%- if nova_override.get("images", {}).get("backend") %}
+        {%- if nova_override.images.backend == 'ceph' %}
                       images_type: rbd
-              {%- elif nova_override.images.backend == 'local' %}
+        {%- elif nova_override.images.backend == 'local' %}
                       images_type: qcow2
-              {%- elif nova_override.images.backend == 'lvm' %}
+        {%- elif nova_override.images.backend == 'lvm' %}
                       images_type: lvm
                       images_volume_group: {{ nova_override.images.get('lvm', {}).get("volume_group", "nova-vol") }}
-                {%- if nova_override.get("images", {}).get("encryption", {}).get("enabled", false) %}
+          {%- if nova_override.get("images", {}).get("encryption", {}).get("enabled", false) %}
                     ephemeral_storage_encryption:
                       enabled: true
-                      cipher: {{ nova_override.images.encryption.get("cipher", "aes-xts-plain64") }}
-                      key_size: {{ nova_override.images.encryption.get("key_size", 256) }}
-                {%- endif %}
-              {%- endif %}
-            {%- endif %}
-            {%- if nova_override.get('live_migration_interface') %}
+                      cipher: {{ nova_override.images.encryption.get("cipher", "aes-xts-plain64") }}  # INTERNAL DEFAULT
+                      key_size: {{ nova_override.images.encryption.get("key_size", 256) }}  # INTERNAL DEFAULT
+          {%- endif %}
+        {%- endif %}
+      {%- endif %}
+      {%- if nova_override.get('live_migration_interface') %}
                   libvirt:
                     live_migration_interface: {{ nova_override.live_migration_interface }}
                   hypervisor:
                     host_interface: {{ nova_override.live_migration_interface }}
-            {%- endif %}
-            {%- if nova_override.get('live_migration_interface') or vnc_tls_enabled %}
+      {%- endif %}
+      {%- if nova_override.get('live_migration_interface') or vnc_tls_enabled %}
                 console:
                   novnc:
-            {%- endif %}
-                  {%- if vnc_tls_enabled %}
+      {%- endif %}
+      {%- if vnc_tls_enabled %}
                     tls_enabled: true
-                  {%- endif %}
-            {%- if nova_override.get('live_migration_interface') %}
+      {%- endif %}
+      {%- if nova_override.get('live_migration_interface') %}
                     compute:
                       vncserver_proxyclient_interface: {{ nova_override.live_migration_interface }}
-            {%- endif %}
-          {%- endif %}
-          {%- endif %}
-
-        {%- endfor %}
-        {%- endif %}
-      # NODE SPECIFIC END
+      {%- endif %}
+    {%- endif %}
+  {%- endfor %}
+{%- endif %}
+# NODE SPECIFIC END
       pod:
         # NOTE(ohryhorov): use_fqdn is disabled not to use FQDN
         # in service hostnames
@@ -670,6 +685,18 @@ spec:
             # deployed as well.
             default_schedule_zone: nova
             allow_resize_to_same_host: true
+{%- if spec.openstack_version in ("queens", "rocky") %}
+            cpu_allocation_ratio: {{ compute_overcommits.cpu }}
+            disk_allocation_ratio: {{ compute_overcommits.disk }}
+            ram_allocation_ratio: {{ compute_overcommits.ram }}
+{%- else %}
+            initial_cpu_allocation_ratio: {{ compute_overcommits.cpu }}
+            initial_disk_allocation_ratio: {{ compute_overcommits.disk }}
+            initial_ram_allocation_ratio: {{ compute_overcommits.ram }}
+            cpu_allocation_ratio: 0
+            disk_allocation_ratio: 0
+            ram_allocation_ratio: 0
+{%- endif %}
 {%- if signature.enabled %}
           glance:
             verify_glance_signatures: true

@@ -152,9 +152,6 @@ services:
                 metadata: 2
           nova:
             DEFAULT:
-              cpu_allocation_ratio: 8.0
-              ram_allocation_ratio: 1.1
-              disk_allocation_ratio: 1.6
               metadata_workers: 1
               osapi_compute_workers: 1
               block_device_allocate_retries: 600
