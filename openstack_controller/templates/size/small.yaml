@@ -460,10 +460,9 @@ services:
                   max_unavailable: 10%
                   max_surge: 10%
         conf:
-          software:
-            apache2:
-              processes:
-                api: 2
+          apache_wsgi:
+            config:
+              processes: 2
           designate:
             service:api:
               workers: 2
