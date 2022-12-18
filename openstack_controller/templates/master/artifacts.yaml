@@ -49,6 +49,7 @@ neutron_db_sync: '{{ images_base_url }}/openstack/neutron:master-bionic-20210524
 neutron_netns_cleanup_cron: '{{ images_base_url }}/openstack/neutron:master-bionic-20210524060023'
 neutron_dhcp: '{{ images_base_url }}/openstack/neutron:master-bionic-20210524060023'
 neutron_l3: '{{ images_base_url }}/openstack/neutron:master-bionic-20210524060023'
+neutron_dr: '{{ images_base_url }}/openstack/neutron:master-bionic-20210524060023'
 neutron_linuxbridge_agent: '{{ images_base_url }}/openstack/neutron:master-bionic-20210524060023'
 neutron_metadata: '{{ images_base_url }}/openstack/neutron:master-bionic-20210524060023'
 neutron_openvswitch_agent: '{{ images_base_url }}/openstack/neutron:master-bionic-20210524060023'

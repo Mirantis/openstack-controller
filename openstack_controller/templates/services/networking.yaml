@@ -16,6 +16,7 @@
 {%- set bgpvpn = spec.features.neutron.get('bgpvpn', {'enabled': False}) %}
 {%- set ipsec = spec.features.neutron.get('ipsec', {'enabled': False}) %}
 {%- set vpnaas = spec.features.neutron.get("extensions", {}).get("vpnaas", {"enabled": False}) %}
+{%- set dynamic_routing = spec.features.neutron.get("extensions", {}).get("dynamic_routing", {"enabled": False}) %}
 {%- set service_providers = [] %}
 {%- set l3_agent_extensions = ["fip_qos", "gateway_ip_qos"] %}
 {%- set notification_topics = ['notifications'] %}
@@ -35,6 +36,7 @@
 {%- do service_providers.append("BGPVPN:BaGPipe:networking_bgpvpn.neutron.services.service_drivers.bagpipe.bagpipe_v2.BaGPipeBGPVPNDriver:default") if bgpvpn.enabled %}
 {%- do service_plugins.append('vpnaas') if vpnaas.enabled %}
 {%- do service_providers.append("VPN:strongswan:neutron_vpnaas.services.vpn.service_drivers.ipsec.IPsecVPNDriver:default") if vpnaas.enabled %}
+{%- do service_plugins.append('bgp') if dynamic_routing.enabled %}
 {%- do l3_agent_extensions.append("vpnaas") if  vpnaas.enabled %}
 {%- do notification_topics.append('stacklight_notifications') if stacklight_enabled %}
 {%- set external_notifications_enabled = spec.get('features', {}).get('messaging', {}).get('notifications', {}).get('external', {}).get('enabled', False) %}
@@ -444,6 +446,7 @@ spec:
     "neutron_netns_cleanup_cron",
     "ks_endpoints",
     "neutron_l3",
+    "neutron_dr",
     "neutron_sriov_agent_init",
     "bootstrap",
     "neutron_bootstrap",
@@ -682,6 +685,9 @@ spec:
       {%- endif %}
       {%- if bgpvpn.enabled %}
         daemonset_bagpipe_bgp: true
+      {%- endif %}
+      {%- if dynamic_routing.enabled %}
+        daemonset_dr_agent: true
       {%- endif %}
       network:
         server:

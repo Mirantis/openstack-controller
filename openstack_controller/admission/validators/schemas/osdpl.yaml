@@ -1044,6 +1044,15 @@ properties:
                     description: |
                         [Technology Preview] Enable VPNaaS plugin/service
                         default: false
+              dynamic_routing:
+                type: object
+                additionalProperties: false
+                properties:
+                  enabled:
+                    type: boolean
+                    description: |
+                        [Technology Preview] Enable BGP Dynamic Routing plugin/service
+                        default: false
           baremetal:
             type: object
             additionalProperties: false

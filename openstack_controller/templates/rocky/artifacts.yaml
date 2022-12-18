@@ -48,6 +48,7 @@ neutron_db_sync: '{{ images_base_url }}/openstack/neutron:rocky-bionic-202210250
 neutron_netns_cleanup_cron: '{{ images_base_url }}/openstack/neutron:rocky-bionic-20221025065949'
 neutron_dhcp: '{{ images_base_url }}/openstack/neutron:rocky-bionic-20221025065949'
 neutron_l3: '{{ images_base_url }}/openstack/neutron:rocky-bionic-20221025065949'
+neutron_dr: '{{ images_base_url }}/openstack/neutron:rocky-bionic-20221025065949'
 neutron_linuxbridge_agent: '{{ images_base_url }}/openstack/neutron:rocky-bionic-20221025065949'
 neutron_metadata: '{{ images_base_url }}/openstack/neutron:rocky-bionic-20221025065949'
 neutron_openvswitch_agent: '{{ images_base_url }}/openstack/neutron:rocky-bionic-20221025065949'
