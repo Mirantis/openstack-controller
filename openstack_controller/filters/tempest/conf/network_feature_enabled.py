@@ -137,9 +137,11 @@ class NetworkFeatureEnabled(base_section.BaseSection):
             api_extensions_default.extend(
                 ["bgpvpn", "bgpvpn-routes-control", "bgpvpn-vni"]
             )
-        if self.get_spec_item("features.neutron.vpnaas.enabled"):
+        if self.get_spec_item("features.neutron.extensions.vpnaas.enabled"):
             api_extensions_default.extend(["vpnaas"])
-        if self.get_spec_item("features.neutron.dynamic_routing.enabled"):
+        if self.get_spec_item(
+            "features.neutron.extensions.dynamic_routing.enabled"
+        ):
             api_extensions_default.extend(["bgp"])
 
         if self.get_spec_item("features.neutron.backend") == "tungstenfabric":
