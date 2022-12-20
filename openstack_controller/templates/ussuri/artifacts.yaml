@@ -52,7 +52,6 @@ neutron_db_sync: '{{ images_base_url }}/openstack/neutron:ussuri-bionic-20221025
 neutron_netns_cleanup_cron: '{{ images_base_url }}/openstack/neutron:ussuri-bionic-20221025065941'
 neutron_dhcp: '{{ images_base_url }}/openstack/neutron:ussuri-bionic-20221025065941'
 neutron_l3: '{{ images_base_url }}/openstack/neutron:ussuri-bionic-20221025065941'
-neutron_dr: '{{ images_base_url }}/openstack/neutron:ussuri-bionic-20221025065941'
 neutron_linuxbridge_agent: '{{ images_base_url }}/openstack/neutron:ussuri-bionic-20221025065941'
 neutron_metadata: '{{ images_base_url }}/openstack/neutron:ussuri-bionic-20221025065941'
 neutron_openvswitch_agent: '{{ images_base_url }}/openstack/neutron:ussuri-bionic-20221025065941'
