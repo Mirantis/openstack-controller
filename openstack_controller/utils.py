@@ -30,6 +30,7 @@ from deepmerge.strategy import list as merge_list
 import deepmerge.strategy.type_conflict
 from urllib.parse import urlsplit
 
+from openstack_controller import exception
 from openstack_controller import settings
 from kopf._core.engines.posting import event_queue_var
 
@@ -344,3 +345,32 @@ class CronValidator:
         except (TypeError, ValueError, cronScheduleNotValid):
             return False
         return True
+
+
+def find_and_substitute(obj, secrets):
+    if not isinstance(obj, dict):
+        return obj
+    for k, v in obj.items():
+        if isinstance(v, dict) and "value_from" in v:
+            obj[k] = substitute_hidden_field(v["value_from"], secrets)
+        # do not allow double substitution
+        else:
+            find_and_substitute(v, secrets)
+    return obj
+
+
+def substitute_hidden_field(ref, secrets):
+    if "secret_key_ref" in ref:
+        ref = ref["secret_key_ref"]
+        secret_name = ref["name"]
+        secret_key = ref["key"]
+        if secret_name not in secrets:
+            raise exception.OsdplSubstitutionFailed(
+                f"Specified secret {secret_name} not found."
+            )
+        data = secrets[secret_name].get(secret_key)
+        if data is None:
+            raise exception.OsdplSubstitutionFailed(
+                f"Specified key {secret_key} not found in secret {secret_name}."
+            )
+        return from_base64(data)

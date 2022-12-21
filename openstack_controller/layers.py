@@ -19,6 +19,7 @@ from openstack_controller.filters.common_filters import (
     raise_error,
 )
 from openstack_controller import utils
+from openstack_controller import kube
 from openstack_controller.utils import merger
 
 LOG = utils.get_logger(__name__)
@@ -382,3 +383,15 @@ def render_artifacts(spec):
             images_base_url=images_base_url, binary_base_url=binary_base_url
         )
     )
+
+
+def substitude_osdpl(obj):
+    subs_secrets = {
+        s.name: s.obj["data"]
+        for s in kube.resource_list(
+            kube.Secret,
+            selector=f"{constants.OSCTL_SECRET_LABEL[0]}={constants.OSCTL_SECRET_LABEL[1]}",
+            namespace=settings.OSCTL_OS_DEPLOYMENT_NAMESPACE,
+        )
+    }
+    return utils.find_and_substitute(obj, subs_secrets)

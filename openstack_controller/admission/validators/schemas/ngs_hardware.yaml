@@ -15,17 +15,34 @@ patternProperties:
         type: string
         descriptions: "IP address of switch"
       username:
-        type: string
         descriptions: "Credential username"
+        anyOf: &value_from_or_string
+        - type: string
+        - type: object
+          properties:
+            value_from:
+              type: object
+              additionalProperties: false
+              properties:
+                secret_key_ref:
+                  type: object
+                  additionalProperties: false
+                  properties:
+                    name:
+                      type: string
+                      description: The name of secret to get data from.
+                    key:
+                      type: string
+                      description: The name of secret key to get data from.
       password:
-        type: string
         description: "Credential password"
+        anyOf: *value_from_or_string
       ssh_private_key:
-        type: string
         description:  SSH private key for switch.
+        anyOf: *value_from_or_string
       secret:
-        type: string
         description: Enable secret
+        anyOf: *value_from_or_string
       raw:
         additionalProperties: True
         type: object

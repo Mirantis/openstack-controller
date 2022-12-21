@@ -600,3 +600,4 @@ def get_osdpl(namespace=settings.OSCTL_OS_DEPLOYMENT_NAMESPACE):
 
 
 find_osdpl = functools.partial(find, OpenStackDeployment)
+find_secret = functools.partial(find, Secret)

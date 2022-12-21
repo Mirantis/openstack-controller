@@ -109,6 +109,7 @@ class ValidationResource(object):
                     else:
                         spec = review_request.get("object", {}).get("spec", {})
                         validators_base.validate_schema("osdpl.yaml", spec)
+                        spec = layers.substitude_osdpl(spec)
 
                         # Validate all the enabled services, if there is a
                         # corresponding validator.
@@ -121,7 +122,10 @@ class ValidationResource(object):
                         getattr(_VALIDATORS[service], validate_func_name)(
                             review_request
                         )
-                except (exception.OsDplValidationFailed) as e:
+                except (
+                    exception.OsDplValidationFailed,
+                    exception.OsdplSubstitutionFailed,
+                ) as e:
                     response.set_error(400, e.message)
         resp.text = json.dumps(response.to_json())
 
