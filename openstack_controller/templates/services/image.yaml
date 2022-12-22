@@ -225,14 +225,14 @@ spec:
   {%- endif %}
 {%- endif %}
 {%- if "baremetal" in spec.features.services %}
-  {%- set ironic_agent_images = spec.features.ironic.get('agent_images', {}) %}
-  {%- set ironic_images_base_url = ironic_agent_images.get('base_url', spec.artifacts.binary_base_url ~ '/openstack/bin/ironic/tinyipa') %}
             ironic-agent.kernel:
               container_format: aki
               image_type: aki
-              name: ironic-agent.kernel
+              name: {{ images["ironic_agent_kernel"].split('/')[-1] }}
               private: true
-              source_url: {{ironic_images_base_url}}/{{ ironic_agent_images.get('kernel', 'tinyipa-stable-' ~ spec.openstack_version ~ '.vmlinuz') }}
+              tags: ['openstack-controller:managed-image','openstack-controller:baremetal-image-kernel']
+              source_url: {{ images["ironic_agent_kernel"] }}
+              checksum: {{ images["ironic_agent_kernel_checksum"] }}
   {%- if signature.enabled %}
               signature:
                 enabled: true
@@ -241,9 +241,11 @@ spec:
             ironic-agent.initramfs:
               container_format: ari
               image_type: ari
-              name: ironic-agent.initramfs
+              name: {{ images["ironic_agent_initramfs"].split('/')[-1] }}
               private: true
-              source_url: {{ironic_images_base_url}}/{{ ironic_agent_images.get('initramfs', 'tinyipa-stable-' ~ spec.openstack_version ~ '.gz') }}
+              tags: ['openstack-controller:managed-image','openstack-controller:baremetal-image-ramdisk']
+              source_url: {{ images["ironic_agent_initramfs"] }}
+              checksum: {{ images["ironic_agent_initramfs_checksum"] }}
   {%- if signature.enabled %}
               signature:
                 enabled: true

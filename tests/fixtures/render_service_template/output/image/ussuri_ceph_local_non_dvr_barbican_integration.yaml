@@ -81,21 +81,29 @@ spec:
             ironic-agent.initramfs:
               container_format: 'ari'
               image_type: 'ari'
-              name: 'ironic-agent.initramfs'
+              name: 'ironic-agent-initramfs:latest'
               private: true
               signature:
                 enabled: true
                 hash_method: 'SHA-256'
-              source_url: 'https://binary.mirantis.com/openstack/bin/ironic/tinyipa/tinyipa-stable-ussuri-20201008064914.gz'
+              source_url: 'ironic-agent-initramfs:latest'
+              tags:
+                - openstack-controller:managed-image
+                - openstack-controller:baremetal-image-ramdisk
+              checksum: md5summ
             ironic-agent.kernel:
               container_format: 'aki'
               image_type: 'aki'
-              name: 'ironic-agent.kernel'
+              name: 'ironic-agent-kernel:latest'
               private: true
               signature:
                 enabled: true
                 hash_method: 'SHA-256'
-              source_url: 'https://binary.mirantis.com/openstack/bin/ironic/tinyipa/tinyipa-stable-ussuri-20201008064914.vmlinuz'
+              source_url: 'ironic-agent-kernel:latest'
+              tags:
+                - openstack-controller:managed-image
+                - openstack-controller:baremetal-image-kernel
+              checksum: md5summ
       ceph_client:
         configmap: rook-ceph-config
         user_secret_name: glance-rbd-keyring

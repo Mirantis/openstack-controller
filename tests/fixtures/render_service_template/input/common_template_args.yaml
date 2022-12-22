@@ -86,6 +86,10 @@ images:
   ingress: ingress:latest
   ingress_module_init: ingress-module-init:latest
   ingress_routed_vip: ingress-routed-vip:latest
+  ironic_agent_initramfs: ironic-agent-initramfs:latest
+  ironic_agent_initramfs_checksum: md5summ
+  ironic_agent_kernel: ironic-agent-kernel:latest
+  ironic_agent_kernel_checksum: md5summ
   ironic_api: ironic-api:latest
   ironic_conductor: ironic-conductor:latest
   ironic_db_sync: ironic-db-sync:latest
