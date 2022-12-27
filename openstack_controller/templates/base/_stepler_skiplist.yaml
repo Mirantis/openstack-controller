@@ -1,7 +1,4 @@
           #Horizon
-          3167e844-1d13-44d5-aa1e-85c58c086240:
-            reason: PRODX-19402
-            # stepler/horizon/tests/test_images.py::TestAnyOne::test_set_image_disk_and_ram_size
           7f43197f-ba2c-4962-a07a-43cbf77a779b:
             reason: PRODX-11370
             # stepler/horizon/tests/test_volume_backups.py::TestAnyOne::test_volume_backups_pagination[admin]
@@ -11,93 +8,15 @@
           e654d077-c645-4eb7-9a7b-763a1cee3a81:
             reason: Test case is depricated - will be removed from repo
             # stepler/horizon/tests/test_flavors.py::TestAdminOnly::test_update_flavor
-          b846cf53-d3fa-4cca-8b10-fbaf50749f7c:
-            reason: PRODX-19402
-            # stepler/horizon/tests/test_images.py::TestUserOnly::test_big_image_create_delete
           e585242-9443-4e78-a7fe-3ee6097459bb:
             reason: The test will be removed as depricated
             # stepler/horizon/tests/test_volumes.py::TestAdminOnly::test_migrate_volume
           9acd7607-d72f-4e8c-9b13-1a0728d56975:
             reason: PRODX-11366
             # stepler/horizon/tests/test_projects.py::TestAdminOnly::test_switch_projects
-          083edf5e-ba16-414a-854d-d0ddcbbe7186:
-            reason: PRODX-23675
-            # stepler/horizon/tests/test_images.py::TestAnyOne::test_delete_images
-          ace4a999-9318-4446-a957-57143e52703d:
-            reason: PRODX-23675
-            # stepler/horizon/tests/test_images.py::TestAnyOne::test_delete_images
-          a7330cae-30ea-4131-a819-42a71f87576d:
-            reason: PRODX-23675
-            # stepler/horizon/tests/test_images.py::TestAnyOne::test_view_image
-          2454c803-bc07-44c7-b842-0151c510c7d2:
-            reason: PRODX-23675
-            # stepler/horizon/tests/test_images.py::TestAnyOne::test_images_pagination
-          1b439ae8-32aa-476d-abf9-3e2ae796de46:
-            reason: PRODX-23675
-            # stepler/horizon/tests/test_images.py::TestAnyOne::test_update_image_metadata
-          637b39da-5648-4d46-bf3f-d51ca858928f:
-            reason: PRODX-23675
-            # stepler/horizon/tests/test_images.py::TestAnyOne::test_remove_protected_image
-          8c85f869-993b-4447-98e4-fc1e4ebacb4e:
-            reason: PRODX-23675
-            # stepler/horizon/tests/test_images.py::TestAnyOne::test_edit_image
-          f2bb54d2-f926-4c7c-85ce-2737e109000d:
-            reason: PRODX-23675
-            # stepler/horizon/tests/test_images.py::TestAnyOne::test_create_volume_from_image
-          7187dbc4-6f56-4f5c-9e88-b61c3aed7b01:
-            reason: PRODX-23675
-            # stepler/horizon/tests/test_images.py::TestAnyOne::test_public_image_visibility
-          782940f1-f958-4275-b716-232a56fea743:
-            reason: PRODX-23675
-            # stepler/horizon/tests/test_images.py::TestAnyOne::test_launch_instance_from_image
-          e3ed0226-2e69-44bd-88ea-a7d9228111fe:
-            reason: PRODX-23675
-            # stepler/horizon/tests/test_images.py::TestAnyOne::test_edit_image_description
-          796fcdf5-c258-4acc-8d93-786641615c48:
-            reason: PRODX-23675
-            # stepler/horizon/tests/test_images.py::TestAnyOne::test_edit_image_disk_and_ram
-          71c60320-d5d1-4e04-a3fd-1222f054d577:
-            reason: PRODX-23675
-            # stepler/horizon/tests/test_images.py::TestAnyOne::test_add_delete_image_metadata
-          dc5e9a46-cd20-47f7-bd84-739563864af2:
-            reason: PRODX-23675
-            # stepler/horizon/tests/test_images.py::TestAnyOne::test_open_image_info_in_new_tab
-          8e7492d2-4fa8-11e9-b070-e79da97535e4:
-            reason: PRODX-23675
-            # stepler/horizon/tests/test_images.py::TestAnyOne::test_impossible_update_image_format_created_image
-          a4ab8682-eed6-4d00-8975-4289e2aac4d3:
-            reason: PRODX-23675
-            # stepler/horizon/tests/test_volumes.py::TestAnyOne::test_upload_volume_to_image
-          b9b944b4-b2fe-42f3-86f3-d43837a4065a:
-            reason: PRODX-24679
-            # stepler/horizon/tests/test_dns_zones.py::TestAdminOnly::test_edit_dns_zone
           ea9e9ac5-381d-40cc-b5e0-0393b07c6c5d:
             reason: PRODX-25139
             # stepler/horizon/tests/test_users.py::TestUserOnly::test_unavailable_users_list_for_unprivileged_user
-          de45feb0-85bb-4b54-b8dc-0ead39620bfa:
-            reason: PRODX-25226
-            # stepler/horizon/tests/test_instances.py::TestUserOnly::test_instances_pagination
-          74a1d870-4cf2-11e7-9757-57cda13b370c:
-            reason: PRODX-25226
-            # stepler/horizon/tests/test_instances.py::TestUserOnly::test_instances_pagination_filter
           439e8ca5-0d87-49aa-9458-a239fa6ff1e1:
             reason: PRODX-25140
             # stepler/horizon/tests/test_volumes.py::TestUserOnly::test_launch_volume_as_instance
-          81869139-da99-4595-9bee-55862112ae1b:
-            reason: PRODX-25133
-            # stepler/horizon/tests/test_networks.py::TestUserOnly::test_not_create_shared_network
-          6031f347-8a36-4939-b2b8-f01957511d3c:
-            reason: PRODX-25227
-            # stepler/horizon/tests/test_containers.py::TestAnyOne::test_upload_file_to_folder[user]
-          8c627f7b-c2c9-4421-91e9-d90bc47346c3:
-            reason: PRODX-25227
-            # stepler/horizon/tests/test_containers.py::TestAnyOne::test_upload_file_to_container
-          762249c5-ae19-4480-9295-b51501c0c817:
-            reason: PRODX-25227
-            # stepler/horizon/tests/test_containers.py::TestAnyOne::test_upload_file_to_folder[admin]
-          27f9647e-a7be-454b-95c5-fe1aa84d665d:
-            reason: PRODX-25227
-            # stepler/horizon/tests/test_containers.py::TestAnyOne::test_upload_file_to_container[admin]
-          108ae5e7-a61a-4fd7-a6fb-2109102fe899:
-            reason: PRODX-22769
-            # stepler/horizon/tests/test_security_groups::TestAnyOne::test_add_delete_rule[user]
