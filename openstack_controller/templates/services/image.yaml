@@ -442,6 +442,6 @@ spec:
           script:
             config:
               age: {{ glance_db_cleanup.get("age", 30) }}
-              max_rows: {{ glance_db_cleanup.get("batch", 1000) }}
+              max_rows: {{ glance_db_cleanup.get("batch", -1) }}
 {%- endif %}
 {%- endif %}

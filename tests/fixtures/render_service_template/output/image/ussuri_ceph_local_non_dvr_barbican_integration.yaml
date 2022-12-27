@@ -323,7 +323,7 @@ spec:
           script:
             config:
               age: 30
-              max_rows: 1000
+              max_rows: -1
       manifests:
         cron_job_db_purge: true
         job_rabbit_init: false

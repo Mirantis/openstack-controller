@@ -352,7 +352,9 @@ properties:
                     type: integer
                     description: |
                       The batch size for each iteration.
-                      default: 1000
+                      Note that setting it to non-default value will
+                      quite probably fail the DB cleanup.
+                      default: -1
               heat:
                 type: object
                 additionalProperties: false
