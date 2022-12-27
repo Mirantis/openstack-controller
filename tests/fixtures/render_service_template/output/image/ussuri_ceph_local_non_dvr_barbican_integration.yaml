@@ -81,6 +81,24 @@ spec:
             ironic-agent.initramfs:
               container_format: 'ari'
               image_type: 'ari'
+              name: 'ironic-agent.initramfs'
+              private: true
+              signature:
+                enabled: true
+                hash_method: 'SHA-256'
+              source_url: 'https://binary.mirantis.com/openstack/bin/ironic/tinyipa/tinyipa-stable-ussuri-20201008064914.gz'
+            ironic-agent.kernel:
+              container_format: 'aki'
+              image_type: 'aki'
+              name: 'ironic-agent.kernel'
+              private: true
+              signature:
+                enabled: true
+                hash_method: 'SHA-256'
+              source_url: 'https://binary.mirantis.com/openstack/bin/ironic/tinyipa/tinyipa-stable-ussuri-20201008064914.vmlinuz'
+            ironic-agent.initramfs.os-controller:
+              container_format: 'ari'
+              image_type: 'ari'
               name: 'ironic-agent-initramfs:latest'
               private: true
               signature:
@@ -91,7 +109,7 @@ spec:
                 - openstack-controller:managed-image
                 - openstack-controller:baremetal-image-ramdisk
               checksum: md5summ
-            ironic-agent.kernel:
+            ironic-agent.kernel.os-controller:
               container_format: 'aki'
               image_type: 'aki'
               name: 'ironic-agent-kernel:latest'
