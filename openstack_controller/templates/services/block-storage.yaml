@@ -151,6 +151,13 @@ spec:
           anti:
             type:
               backup: "requiredDuringSchedulingIgnoredDuringExecution"
+{%- if overrides.enabled %}
+        # migration process from source RBD based volume (hosted by sts) to
+        # destination ISCSI/LVM volume requires host networking to properly
+        # make an iscsi discover and login
+        useHostNetwork:
+          volume: true
+{%- endif %}
       storage: ceph
       ceph_client:
         configmap: rook-ceph-config

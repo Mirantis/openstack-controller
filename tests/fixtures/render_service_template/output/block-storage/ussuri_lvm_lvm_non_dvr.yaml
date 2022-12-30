@@ -323,6 +323,8 @@ spec:
         replicas:
           api: 1
           registry: 1
+        useHostNetwork:
+          volume: true
       secrets:
         rbd:
           backup: cinder-rbd-keyring
