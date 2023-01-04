@@ -39,6 +39,13 @@ spec:
                     is watching for. Changin fields of this object will trigger update of
                     all children.
                   properties:
+                    value_from:
+                      type: object
+                      properties:
+                        secret:
+                          type: object
+                          x-kubernetes-preserve-unknown-fields: true
+                          description: Contains hash value of secrets for value substitution object.
                     ceph:
                       type: object
                       properties:
