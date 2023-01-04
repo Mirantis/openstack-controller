@@ -7,6 +7,7 @@ class NetworkFeatureEnabled(base_section.BaseSection):
     name = "network-feature-enabled"
     options = [
         "api_extensions",
+        "available_features",
         "floating_ips",
         "ipv6",
         "ipv6_subnet_attributes",
@@ -152,6 +153,11 @@ class NetworkFeatureEnabled(base_section.BaseSection):
                 api_extensions_default.extend(["net-mtu", "net-mtu-writable"])
 
         return ", ".join(api_extensions_default)
+
+    @property
+    def available_features(self):
+        if self.tf_enabled():
+            return ""
 
     @property
     def floating_ips(self):
