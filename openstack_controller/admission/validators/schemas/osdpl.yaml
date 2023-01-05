@@ -1428,6 +1428,8 @@ properties:
             <<: *logging_level
           barbican:
             <<: *logging_level
+          placement:
+            <<: *logging_level
   migration:
     additionalProperties: true
     type: object
