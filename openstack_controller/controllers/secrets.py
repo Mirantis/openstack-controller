@@ -412,6 +412,8 @@ async def handle_substitution_secrets(
 ):
     LOG.debug(f"Handling secret create/update {name}")
     osdpl = kube.get_osdpl(settings.OSCTL_OS_DEPLOYMENT_NAMESPACE)
+    if not osdpl:
+        return
 
     hasher = hashlib.sha256()
     hasher.update(json.dumps(body["data"], sort_keys=True).encode())
