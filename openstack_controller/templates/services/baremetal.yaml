@@ -165,6 +165,10 @@ spec:
         pxe:
           device: {{ spec.get('features', {}).get('ironic', {}).get('provisioning_interface', 'ironic-pxe') }}
           convert_cleaning_network_name_to_uuid: false
+          # TODO(vsaienko): drop when switch to images with jammy
+          {%- if spec.openstack_version in openstack_versions[openstack_versions.index('yoga'):-1] %}
+          loader_file_paths: snponly.efi:/usr/lib/ipxe/ipxe.efi
+          {%- endif %}
       conf:
         policy.d:
           01-controller-default.yaml: {{ service_policy }}
