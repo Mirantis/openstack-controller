@@ -219,7 +219,7 @@ cirros_checksum: f4027b89e99e238184e13089a3155b74
 fedora_checksum: e0713a4f26427691da90701ff7a823da
 ubuntu_checksum: 30d459e0dc0562e629d3683970e55efa
 rabbitmq_amqproxy: '{{ images_base_url }}/general/amqproxy:v0.8.2'
-manila_service_image: '{{ binary_base_url }}/openstack/bin/manila/manila-service-image-1.3.0-77.qcow2'
+manila_service_image: '{{ binary_base_url }}/openstack/bin/manila/manila-service-image-20221228132450.qcow2'
 manila_db_sync: '{{ images_base_url }}/openstack/manila:yoga-focal-20230104071829'
 manila_api: '{{ images_base_url }}/openstack/manila:yoga-focal-20230104071829'
 manila_scheduler: '{{ images_base_url }}/openstack/manila:yoga-focal-20230104071829'
