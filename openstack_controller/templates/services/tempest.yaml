@@ -144,13 +144,13 @@ spec:
 {%- endif %}
       conf:
         static_accounts:
-          project_count: 20
+          project_count: 25
           project_count_with_network: 10
-          project_count_without_network: 10
+          project_count_without_network: 15
           {%- if spec.openstack_version not in ['queens', 'rocky', 'stein', 'train', 'ussuri', 'victoria', 'wallaby', 'xena'] %}
           create_reader_user: true
           {%- endif %}
-          user_count: 5
+          user_count: 3
         convert_to_uuid:
           identity:
 {%- if signature.enabled %}
