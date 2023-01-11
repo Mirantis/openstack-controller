@@ -221,7 +221,6 @@ async def test_service_apply(
     mock_render = mocker.patch.object(services.base.Service, "render")
     mock_render.return_value = compute_helmbundle_all
 
-    mock_update_status = mocker.patch.object(services.Nova, "update_status")
     mock_ceph_secrets = mocker.patch.object(
         services.Nova, "ensure_ceph_secrets"
     )
@@ -244,12 +243,6 @@ async def test_service_apply(
     await service.apply("test_event")
 
     mock_render.assert_called_once()
-    mock_update_status.has_calls(
-        [
-            mock.call({"children": {service.resource_name: "Applying"}}),
-            mock.call({"children": {service.resource_name: True}}),
-        ]
-    )
     mock_ceph_secrets.assert_called_once()
     mock_info.assert_called_once()
     helm_run_cmd.assert_called()
