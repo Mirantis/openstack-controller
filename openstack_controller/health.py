@@ -9,7 +9,6 @@ from openstack_controller.services import base
 from openstack_controller import constants
 from openstack_controller import settings
 from openstack_controller import layers
-from openstack_controller import osdplstatus
 
 LOG = logging.getLogger(__name__)
 
@@ -88,10 +87,7 @@ def set_multi_application_health(osdplst, patch):
     osdplst.set_osdpl_health(patch)
 
 
-def is_application_ready(application, osdpl):
-    osdplst = osdplstatus.OpenStackDeploymentStatus(
-        osdpl.name, osdpl.namespace
-    )
+def is_application_ready(application, osdplst):
     osdplst.reload()
 
     app_status = (
@@ -123,10 +119,10 @@ def is_application_ready(application, osdpl):
 
 
 async def _wait_application_ready(
-    application, osdpl, delay=settings.OSCTL_WAIT_APPLICATION_READY_DELAY
+    application, osdplst, delay=settings.OSCTL_WAIT_APPLICATION_READY_DELAY
 ):
     i = 1
-    while not is_application_ready(application, osdpl):
+    while not is_application_ready(application, osdplst):
         LOG.info(f"Checking application {application} health, attempt: {i}")
         i += 1
         await asyncio.sleep(delay)
@@ -134,13 +130,13 @@ async def _wait_application_ready(
 
 async def wait_application_ready(
     application,
-    osdpl,
+    osdplst,
     timeout=settings.OSCTL_WAIT_APPLICATION_READY_TIMEOUT,
     delay=settings.OSCTL_WAIT_APPLICATION_READY_DELAY,
 ):
     LOG.info(f"Waiting for application becomes ready for {timeout}s")
     await asyncio.wait_for(
-        _wait_application_ready(application, osdpl, delay=delay),
+        _wait_application_ready(application, osdplst, delay=delay),
         timeout=timeout,
     )
 

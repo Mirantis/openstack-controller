@@ -570,7 +570,7 @@ class Service:
                 "timeout", settings.OSCTL_WAIT_APPLICATION_READY_TIMEOUT
             )
             await health.wait_application_ready(
-                health_group, self.osdpl, delay=delay, timeout=timeout
+                health_group, self.osdplst, delay=delay, timeout=timeout
             )
 
     async def _upgrade(self, event, **kwargs):
