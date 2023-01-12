@@ -169,7 +169,6 @@ async def handle(body, meta, spec, logger, reason, **kwargs):
     # TODO(vsaienko): remove legacy status
     kwargs["patch"].setdefault("status", {})
     kwargs["patch"]["status"]["version"] = version.release_string
-    kwargs["patch"]["status"]["fingerprint"] = layers.spec_hash(body["spec"])
     osdplst = osdplstatus.OpenStackDeploymentStatus(name, namespace)
     osdplst.present(osdpl_obj=body)
 
@@ -191,28 +190,23 @@ async def handle(body, meta, spec, logger, reason, **kwargs):
     check_handling_allowed(kwargs["old"], kwargs["new"], reason)
 
     secrets.OpenStackAdminSecret(namespace).ensure()
-    osdplsecret = kube.OpenStackDeploymentSecret(name, namespace)
-    osdplsecret_spec = {}
-    if osdplsecret.exists():
-        osdplsecret.reload()
-        osdplsecret_spec = osdplsecret.obj["spec"]
 
-    subs_spec = layers.substitude_osdpl(body["spec"])
-    mspec = layers.merge_spec(
-        subs_spec, logger, osdplsecret_spec=osdplsecret_spec
-    )
+    osdpl = kube.get_osdpl()
+    mspec = osdpl.mspec
+
+    kwargs["patch"]["status"]["fingerprint"] = layers.spec_hash(mspec)
 
     images = discover_images(mspec, logger)
     if images != await cache.images(meta["namespace"]):
         await cache.restart(images, body, mspec)
     await cache.wait_ready(meta["namespace"])
 
-    update, delete = layers.services(spec, logger, **kwargs)
+    update, delete = layers.services(mspec, logger, **kwargs)
 
     if is_openstack_version_changed(kwargs["diff"]):
         # Suspend descheduler cronjob during the upgrade services
         service_instance_descheduler = services.registry["descheduler"](
-            body, logger, osdplst, osdplsecret
+            mspec, logger, osdplst
         )
         child_obj_descheduler = service_instance_descheduler.get_child_object(
             "CronJob", "descheduler"
@@ -228,7 +222,7 @@ async def handle(body, meta, spec, logger, reason, **kwargs):
         for service in services_to_upgrade:
             task_def = {}
             service_instance = services.registry[service](
-                body, logger, osdplst, osdplsecret
+                mspec, logger, osdplst
             )
             task_def[
                 asyncio.create_task(
@@ -256,9 +250,7 @@ async def handle(body, meta, spec, logger, reason, **kwargs):
     # and environment after upgrade/update are identical.
     task_def = {}
     for service in update:
-        service_instance = services.registry[service](
-            body, logger, osdplst, osdplsecret
-        )
+        service_instance = services.registry[service](mspec, logger, osdplst)
         task_def[
             asyncio.create_task(
                 service_instance.apply(
@@ -275,9 +267,7 @@ async def handle(body, meta, spec, logger, reason, **kwargs):
     if delete:
         LOG.info(f"deleting children {' '.join(delete)}")
     for service in delete:
-        service_instance = services.registry[service](
-            body, logger, osdplst, osdplsecret
-        )
+        service_instance = services.registry[service](mspec, logger, osdplst)
         task_def[
             asyncio.create_task(
                 service_instance.delete(
@@ -294,7 +284,7 @@ async def handle(body, meta, spec, logger, reason, **kwargs):
     kwargs["patch"]["status"]["children"] = None
     kwargs["patch"]["status"]["deployed"] = None
     osdplst.set_osdpl_status(
-        osdplstatus.APPLIED, body["spec"], kwargs["diff"], reason
+        osdplstatus.APPLIED, mspec, kwargs["diff"], reason
     )
 
     cleanup_helm_cache()
@@ -309,12 +299,14 @@ async def delete(name, meta, body, spec, logger, reason, **kwargs):
     # TODO(pas-ha) remove secrets and so on?
     LOG.info(f"Deleting {name}")
     namespace = meta["namespace"]
+    osdpl = kube.get_osdpl()
+    mspec = osdpl.mspec
     osdplst = osdplstatus.OpenStackDeploymentStatus(name, namespace)
-    delete_services = layers.services(spec, logger, **kwargs)[0]
+    delete_services = layers.services(mspec, logger, **kwargs)[0]
     for service in delete_services:
         LOG.info(f"Deleting {service} service")
         task_def = {}
-        service_instance = services.registry[service](body, logger, osdplst)
+        service_instance = services.registry[service](mspec, logger, osdplst)
         task_def[
             asyncio.create_task(
                 service_instance.delete(

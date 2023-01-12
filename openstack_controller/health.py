@@ -141,12 +141,12 @@ async def wait_application_ready(
     )
 
 
-async def wait_services_healthy(osdpl):
+async def wait_services_healthy(mspec):
     """Wait all openstack related services are healthy."""
 
     services = [
-        base.Service.registry[i](osdpl.obj, LOG, {})
-        for i in layers.services(osdpl.obj["spec"], LOG)[0]
+        base.Service.registry[i](mspec, LOG, {})
+        for i in layers.services(mspec, LOG)[0]
     ]
     for service in services:
         try:
