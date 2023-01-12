@@ -405,9 +405,6 @@ class Service:
         new_hash = self.generate_child_object_hash(child_object, new_values)
         return new_hash != current_hash
 
-    def update_status(self, patch):
-        self.osdpl.patch({"status": patch})
-
     async def cleanup_immutable_resources(self, new_obj, force=False):
         """
         Remove immmutable resources for helmbundle object when:
