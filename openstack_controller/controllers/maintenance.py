@@ -41,10 +41,10 @@ async def node_maintenance_request_change_handler(body, **kwargs):
     LOG.info(
         f"The node maintenance request {name} changes are: {kwargs['diff']}"
     )
-    node = kube.find(kube.Node, node_name)
+    node = kube.find(kube.Node, node_name, silent=True)
     nwl = maintenance.NodeWorkloadLock.get_resource(node_name)
     nmr = maintenance.NodeMaintenanceRequest.get_resource(body)
-    if not nwl.required_for_node(node):
+    if not node or not nwl.required_for_node(node):
         return
 
     nwl.present()
@@ -89,10 +89,10 @@ async def node_maintenance_request_delete_handler(body, **kwargs):
     node_name = maintenance_node_name(body)
     LOG.info(f"Got node maintenance request delete event {name}")
 
-    node = kube.find(kube.Node, node_name)
+    node = kube.find(kube.Node, node_name, silent=True)
     nwl = maintenance.NodeWorkloadLock.get_resource(node_name)
     nmr = maintenance.NodeMaintenanceRequest.get_resource(body)
-    if not nwl.required_for_node(node):
+    if not node or not nwl.required_for_node(node):
         nwl.absent()
         return
 
