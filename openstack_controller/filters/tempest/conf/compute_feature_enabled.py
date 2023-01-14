@@ -180,7 +180,7 @@ class ComputeFeatureEnabled(base_section.BaseSection):
             "rocky",
             "stein",
             "train",
-        ]:
+        ] or self.get_spec_item("features.nova.images.backend") in ["lvm"]:
             return False
         return True
 
