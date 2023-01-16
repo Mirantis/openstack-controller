@@ -161,6 +161,7 @@ async def cluster_maintenance_request_change_handler(body, **kwargs):
         LOG.info("Can't find OpenStackDeployment object")
         return
 
+    mspec = osdpl.mspec
     osdpl_name = osdpl.metadata["name"]
     osdpl_namespace = osdpl.metadata["namespace"]
     osdplst = osdplstatus.OpenStackDeploymentStatus(
@@ -189,7 +190,7 @@ async def cluster_maintenance_request_change_handler(body, **kwargs):
         # not wait for health
         return
     cwl.set_error_message("Waiting for all OpenStack services are healthy.")
-    await health.wait_services_healthy(osdpl)
+    await health.wait_services_healthy(mspec)
 
     cwl.set_state_inactive()
     cwl.unset_error_message()

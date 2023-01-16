@@ -85,10 +85,8 @@ def spec_hash(spec):
 
 
 # TODO(avolkov): remove  logger arg
-def services(spec, logger, **kwargs):
-    base = merge_spec(spec, logger)
-
-    to_apply = set(base["features"].get("services", []))
+def services(mspec, logger, **kwargs):
+    to_apply = set(mspec["features"].get("services", []))
     LOG.debug(f"Working with openstack services: {to_apply}")
 
     to_delete = {}
@@ -131,9 +129,7 @@ def _get_dashboard_default_policy(spec, charts):
 
 
 @kopf_exception
-def render_service_template(
-    service, body, meta, spec, logger, **template_args
-):
+def render_service_template(service, mspec, logger, **template_args):
     tpl = ENV.get_template(f"services/{service}.yaml")
     LOG.debug(f"Using template {tpl.filename}")
 
@@ -143,18 +139,16 @@ def render_service_template(
     # Add default policies
     if service in constants.OS_POLICY_SERVICES:
         chart = constants.OS_POLICY_SERVICES[service]
-        service_policy = _get_default_policy(spec, chart)
+        service_policy = _get_default_policy(mspec, chart)
     elif service == "dashboard":
-        os_services = set(spec.get("features", {}).get("services", []))
+        os_services = set(mspec.get("features", {}).get("services", []))
         charts = set(constants.OS_POLICY_SERVICES.values()).intersection(
             os_services
         )
-        service_policy = _get_dashboard_default_policy(spec, charts)
+        service_policy = _get_dashboard_default_policy(mspec, charts)
 
     text = tpl.render(
-        body=body,
-        meta=meta,
-        spec=spec,
+        spec=mspec,
         openstack_versions=openstack_versions,
         service_policy=service_policy,
         **template_args,
@@ -246,35 +240,39 @@ def merge_service_layer(service, spec, kind, data):
 
 
 @kopf_exception
-def merge_all_layers(service, body, meta, spec, logger, **template_args):
+def merge_all_layers(service, mspec, logger, **template_args):
     """Merge releases and values from osdpl crd into service HelmBundle"""
 
-    orig_spec = copy.deepcopy(body["spec"])
-    spec = copy.deepcopy(dict(spec))
-    images = render_artifacts(spec)
+    mspec = copy.deepcopy(dict(mspec))
+    images = render_artifacts(mspec)
     service_helmbundle = render_service_template(
-        service, body, meta, spec, logger, images=images, **template_args
+        service, mspec, logger, images=images, **template_args
     )
 
     # FIXME(pas-ha) either move to dict merging stage before,
     # or move to the templates themselves
-    service_helmbundle["spec"]["repositories"] = spec["common"]["charts"][
+    service_helmbundle["spec"]["repositories"] = mspec["common"]["charts"][
         "repositories"
     ]
-    # first merge osdpl with preset and sizes
-    service_helmbundle = merge_osdpl_into_helmbundle(
-        service, spec, service_helmbundle
-    )
+
     # and than an "original" osdpl on top of that
     service_helmbundle = merge_osdpl_into_helmbundle(
-        service, orig_spec, service_helmbundle
+        service, mspec, service_helmbundle
     )
     return service_helmbundle
 
 
 @kopf_exception
 def merge_spec(spec, logger, osdplsecret_spec=None):
-    """Merge user-defined OsDpl spec with base for preset and OS version"""
+    """Merge user-defined OsDpl spec with base for preset and OS version
+
+    The merging is done in following order, higher overrides. It is important
+    to keep the order to ensure user defined data takes higher precedence.
+    1. Preset
+    2. Size
+    3. User defined osdpl spec.
+
+    """
     osdplsecret_spec = osdplsecret_spec or {}
     spec = copy.deepcopy(dict(spec))
     preset = spec["preset"]

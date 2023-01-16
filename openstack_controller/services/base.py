@@ -135,32 +135,18 @@ class Service:
         super().__init_subclass__(*args, **kwargs)
         cls.registry[cls.service] = cls
 
-    def __init__(self, body, logger, osdplst, osdplsecret=None):
-        # TODO(e0ne): we need to omit this object usage in the future to
-        # not face side-effects with mutable PyKube OSDPL object.
-        # We have to use self._get_osdpl() method instead of it.
-        self.osdpl = kube.OpenStackDeployment(kube.api, body)
-        self.body = body
-        if self.namespace is None:
-            self.namespace = body["metadata"]["namespace"]
+    def __init__(self, mspec, logger, osdplst):
+        self.mspec = mspec
         self.logger = logger
-        self.openstack_version = self.body["spec"]["openstack_version"]
-        self.osdplsecret = osdplsecret
-        osdplsecret_spec = {}
-        if self.osdplsecret and self.osdplsecret.exists():
-            self.osdplsecret.reload()
-            osdplsecret_spec = self.osdplsecret.obj["spec"]
-        self.mspec = layers.merge_spec(
-            self.body["spec"], self.logger, osdplsecret_spec=osdplsecret_spec
-        )
+
+        # The osdpl object is used only to send events. Should not be
+        # changed. For any source of data mspec should be used.
+        self.osdpl = kube.get_osdpl()
+        self.namespace = settings.OSCTL_OS_DEPLOYMENT_NAMESPACE
+        self.openstack_version = mspec["openstack_version"]
 
         self.helm_manager = helm.HelmManager(namespace=self.namespace)
         self.osdplst = osdplst
-
-    def _get_osdpl(self):
-        osdpl = kube.OpenStackDeployment(kube.api, self.body)
-        osdpl.reload()
-        return osdpl
 
     def _get_admin_creds(self) -> secrets.OpenStackAdminCredentials:
         admin_secret = secrets.OpenStackAdminSecret(self.namespace)
@@ -509,13 +495,12 @@ class Service:
         delete_status = ("Deleting",)
         deleted_status = (None,)
 
-        osdpl_spec = self.osdpl.obj["spec"]
         if status in apply_statuses:
-            self.osdplst.set_service_status(self.service, APPLYING, osdpl_spec)
+            self.osdplst.set_service_status(self.service, APPLYING, self.mspec)
         elif status in applied_status:
-            self.osdplst.set_service_status(self.service, APPLIED, osdpl_spec)
+            self.osdplst.set_service_status(self.service, APPLIED, self.mspec)
         elif status in delete_status:
-            self.osdplst.set_service_status(self.service, DELETING, osdpl_spec)
+            self.osdplst.set_service_status(self.service, DELETING, self.mspec)
         elif status in deleted_status:
             self.osdplst.remove_service_status(self.service)
 
@@ -644,8 +629,6 @@ class Service:
         template_args = self.template_args()
         data = layers.merge_all_layers(
             self.service,
-            self.body,
-            self.body["metadata"],
             self.mspec,
             self.logger,
             **template_args,
@@ -656,15 +639,12 @@ class Service:
 
         # Add internal data to helm release
 
-        fingerprint = layers.spec_hash(self.body["spec"])
+        fingerprint = layers.spec_hash(self.mspec)
         helm_data = self._genenrate_helm_metadata(data)
         child_hashes = self.generate_child_object_hashes(data)
         internal_data = {
             f"{self.group}/{self.version}": {
                 "openstack-controller": {
-                    "osdpl_generation": self._get_osdpl().metadata[
-                        "generation"
-                    ],
                     "version": version.release_string,
                     "fingerprint": fingerprint,
                     "child-objects": child_hashes,

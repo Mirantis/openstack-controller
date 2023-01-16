@@ -33,8 +33,6 @@ def render_helmbundle(service, spec, **kwargs):
     data = layers.render_service_template(
         service,
         # osdpl body and metadata are not used in templates rendering
-        {},
-        {},
         spec,
         logging,
         **kwargs,

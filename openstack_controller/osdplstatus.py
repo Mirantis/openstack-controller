@@ -50,18 +50,18 @@ class OpenStackDeploymentStatus(pykube.objects.NamespacedAPIObject):
     def set_osdpl_state(self, state):
         self.patch({"status": {"osdpl": {"state": state}}})
 
-    def _generate_osdpl_status_generic(self, osdpl_spec):
+    def _generate_osdpl_status_generic(self, mspec):
         timestamp = datetime.datetime.utcnow()
         osdpl_generic = {
-            "openstack_version": osdpl_spec["openstack_version"],
+            "openstack_version": mspec["openstack_version"],
             "controller_version": version.release_string,
-            "fingerprint": layers.spec_hash(osdpl_spec),
+            "fingerprint": layers.spec_hash(mspec),
             "timestamp": str(timestamp),
         }
         return osdpl_generic
 
-    def set_osdpl_status(self, state, osdpl_spec, osdpl_diff, osdpl_cause):
-        patch = self._generate_osdpl_status_generic(osdpl_spec)
+    def set_osdpl_status(self, state, mspec, osdpl_diff, osdpl_cause):
+        patch = self._generate_osdpl_status_generic(mspec)
         patch["changes"] = str(osdpl_diff)
         patch["cause"] = osdpl_cause
         patch["state"] = state
@@ -71,8 +71,8 @@ class OpenStackDeploymentStatus(pykube.objects.NamespacedAPIObject):
         self.reload()
         return self.obj["status"]["osdpl"]["state"]
 
-    def set_service_status(self, service_name, state, osdpl_spec):
-        patch = self._generate_osdpl_status_generic(osdpl_spec)
+    def set_service_status(self, service_name, state, mspec):
+        patch = self._generate_osdpl_status_generic(mspec)
         patch["state"] = state
         self.patch({"status": {"services": {service_name: patch}}})
 

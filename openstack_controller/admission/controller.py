@@ -110,12 +110,13 @@ class ValidationResource(object):
                         spec = review_request.get("object", {}).get("spec", {})
                         validators_base.validate_schema("osdpl.yaml", spec)
                         spec = layers.substitude_osdpl(spec)
+                        mspec = layers.merge_spec(spec, LOG)
 
                         # Validate all the enabled services, if there is a
                         # corresponding validator.
                         # No validating services that are about to be deleted
                         validators.extend(
-                            layers.services(spec, LOG)[0] & _VALIDATORS.keys()
+                            layers.services(mspec, LOG)[0] & _VALIDATORS.keys()
                         )
 
                     for service in validators:

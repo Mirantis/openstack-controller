@@ -68,7 +68,10 @@ class Redis(Service):
     group = "databases.spotahome.com"
     version = "v1"
     kind = "RedisFailover"
-    namespace = settings.OSCTL_REDIS_NAMESPACE
+
+    def __init__(self, mspec, logger, osdplst):
+        super().__init__(mspec, logger, osdplst)
+        self.namespace = settings.OSCTL_REDIS_NAMESPACE
 
     def template_args(self):
         redis_secret = secrets.RedisSecret(self.namespace)
@@ -80,8 +83,6 @@ class Redis(Service):
         images = layers.render_artifacts(self.mspec)
         data = layers.render_service_template(
             self.service,
-            self.body,
-            self.body["metadata"],
             self.mspec,
             self.logger,
             images=images,
@@ -1702,7 +1703,7 @@ class Placement(OpenStackService):
         LOG.info(f"Upgrading {self.service} started.")
         # NOTE(mkarpin): skip health check for stein release,
         # as this is first release where placement is added
-        if self.body["spec"]["openstack_version"] == "stein":
+        if self.mspec["openstack_version"] == "stein":
             self._child_objects = {
                 "placement": {
                     "Job": {
@@ -1724,7 +1725,7 @@ class Placement(OpenStackService):
                 ("Ingress", "placement"),
             ]
             compute_service_instance = Service.registry["compute"](
-                self.body, self.logger, self.osdplst
+                self.mspec, self.logger, self.osdplst
             )
             try:
                 LOG.info(
@@ -1974,13 +1975,11 @@ class Tempest(Service):
             "redis",
         }:
             service_template_args = Service.registry[s](
-                self.body, self.logger, self.osdplst, self.osdplsecret
+                self.mspec, self.logger, self.osdplst
             ).template_args()
             try:
                 helmbundles_body[s] = layers.merge_all_layers(
                     s,
-                    self.body,
-                    self.body["metadata"],
                     self.mspec,
                     self.logger,
                     **service_template_args,

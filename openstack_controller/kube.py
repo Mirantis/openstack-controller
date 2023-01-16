@@ -13,6 +13,7 @@ from typing import Dict
 from . import constants as const
 from . import settings
 from . import utils
+from . import layers
 
 LOG = utils.get_logger(__name__)
 
@@ -81,6 +82,20 @@ class OpenStackDeployment(pykube.objects.NamespacedAPIObject):
     kind = "OpenStackDeployment"
     endpoint = "openstackdeployments"
     kopf_on_args = *version.split("/"), endpoint
+
+    @property
+    def mspec(self):
+        osdplsecret = OpenStackDeploymentSecret(self.name, self.namespace)
+
+        osdplsecret_spec = None
+        if osdplsecret.exists():
+            osdplsecret.reload()
+            osdplsecret_spec = osdplsecret.obj["spec"]
+        subs_spec = layers.substitude_osdpl(self.obj["spec"])
+        mspec = layers.merge_spec(
+            subs_spec, LOG, osdplsecret_spec=osdplsecret_spec
+        )
+        return mspec
 
 
 class OpenStackDeploymentSecret(pykube.objects.NamespacedAPIObject):

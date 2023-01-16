@@ -16,11 +16,13 @@ import asyncio
 import logging
 from unittest import mock
 from openstack_controller import kube
+from openstack_controller import layers
 
 import pytest
 import yaml
 
 logging.basicConfig(level=logging.DEBUG)
+LOG = logging.getLogger(__name__)
 
 
 # TODO(vdrok): Remove with switch to python3.8 as mock itself will be able
@@ -41,6 +43,16 @@ def openstackdeployment():
 
 
 @pytest.fixture
+def openstackdeployment_mspec():
+    osdpl = yaml.safe_load(open("tests/fixtures/openstackdeployment.yaml"))
+    mspec = layers.merge_spec(osdpl["spec"], LOG)
+    # Set explicit version for tests
+    mspec["common"]["openstack"]["releases"]["version"] = "0.1.0-os-0"
+    mspec["common"]["infra"]["releases"]["version"] = "0.1.0-infra-0"
+    return mspec
+
+
+@pytest.fixture
 def common_template_args():
     yield yaml.safe_load(
         open(
@@ -51,27 +63,31 @@ def common_template_args():
 
 def _osdpl_minimal(os_release):
     return {
-        "spec": {
-            "openstack_version": os_release,
-            "size": "tiny",
-            "preset": "compute",
-        }
+        "openstack_version": os_release,
+        "size": "tiny",
+        "preset": "compute",
     }
+
+
+def _osdpl_mspec(os_release):
+    osdpl = _osdpl_minimal(os_release)
+    mspec = layers.merge_spec(osdpl, LOG)
+    return mspec
 
 
 @pytest.fixture
 def osdpl_min_train():
-    return _osdpl_minimal("train")
+    return _osdpl_mspec("train")
 
 
 @pytest.fixture
 def osdpl_min_stein():
-    return _osdpl_minimal("stein")
+    return _osdpl_mspec("stein")
 
 
 @pytest.fixture
 def osdpl_min_rocky():
-    return _osdpl_minimal("rocky")
+    return _osdpl_mspec("rocky")
 
 
 @pytest.fixture
