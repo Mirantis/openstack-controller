@@ -1,4 +1,3 @@
-from openstack_controller import constants
 from openstack_controller.filters.tempest import base_section
 
 
@@ -86,9 +85,6 @@ class NetworkFeatureEnabled(base_section.BaseSection):
                     "qos-fip",
                     "qos-gateway-ip",
                     "qos-port-network-policy",
-                    "qos-pps-minimum",
-                    "qos-pps-minimum-rule-alias",
-                    "qos-pps",
                     "qos-rule-type-details",
                     "qos-rules-alias",
                     "subnetpool-prefix-ops",
@@ -96,42 +92,39 @@ class NetworkFeatureEnabled(base_section.BaseSection):
                     "ip-substring-filtering",
                 ]
             )
-            if (
-                constants.OpenStackVersion[self.spec["openstack_version"]]
-                >= constants.OpenStackVersion["ussuri"]
-            ):
+
+            if self.os_version_compare("ussuri", "ge"):
                 api_extensions_default.extend(
                     [
                         "rbac-address-scope",
-                        "rbac-address-group",
                         "rbac-security-groups",
                         "rbac-subnetpool",
                         "stateful-security-group",
                         "fip-port-details",
                         "port-mac-address-regenerate",
-                    ]
+                    ],
                 )
-
-            if (
-                constants.OpenStackVersion[self.spec["openstack_version"]]
-                >= constants.OpenStackVersion["victoria"]
-            ):
+            if self.os_version_compare("victoria", "ge"):
                 api_extensions_default.extend(["net-mtu-writable"])
-
-            if (
-                constants.OpenStackVersion[self.spec["openstack_version"]]
-                >= constants.OpenStackVersion["wallaby"]
-            ):
+            if self.os_version_compare("wallaby", "ge"):
                 api_extensions_default.extend(
-                    ["address-group", "security-groups-remote-address-group"]
+                    [
+                        "address-group",
+                        "rbac-address-group",
+                        "security-groups-remote-address-group",
+                    ],
                 )
-
-            if (
-                constants.OpenStackVersion[self.spec["openstack_version"]]
-                >= constants.OpenStackVersion["xena"]
-            ):
+            if self.os_version_compare("xena", "ge"):
                 api_extensions_default.extend(
-                    ["port-resource-request", "port-resource-request-groups"]
+                    ["port-resource-request", "port-resource-request-groups"],
+                )
+            if self.os_version_compare("yoga", "ge"):
+                api_extensions_default.extend(
+                    [
+                        "qos-pps-minimum",
+                        "qos-pps-minimum-rule-alias",
+                        "qos-pps",
+                    ],
                 )
 
         if self.get_spec_item("features.neutron.bgpvpn.enabled"):
@@ -145,12 +138,11 @@ class NetworkFeatureEnabled(base_section.BaseSection):
         ):
             api_extensions_default.extend(["bgp"])
 
-        if self.get_spec_item("features.neutron.backend") == "tungstenfabric":
-            if (
-                constants.OpenStackVersion[self.spec["openstack_version"]]
-                >= constants.OpenStackVersion["victoria"]
-            ):
-                api_extensions_default.extend(["net-mtu", "net-mtu-writable"])
+        if self.tf_enabled():
+            if self.os_version_compare("victoria", "ge"):
+                api_extensions_default.extend(
+                    ["net-mtu", "net-mtu-writable"],
+                )
 
         return ", ".join(api_extensions_default)
 

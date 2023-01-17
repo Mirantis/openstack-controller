@@ -1,5 +1,8 @@
 import abc
+import operator
 from jsonpath_ng import parse
+
+from openstack_controller import constants
 
 
 class BaseSection(object):
@@ -62,3 +65,14 @@ class BaseSection(object):
                 if chart_name == service:
                     return True
         return False
+
+    def os_version_compare(self, version, expression):
+        """Compare OpenStack versions based on expression
+
+        version: OpenStack version
+        expression: valid math expression
+        """
+        return getattr(operator, expression)(
+            constants.OpenStackVersion[self.spec["openstack_version"]],
+            constants.OpenStackVersion[version],
+        )
