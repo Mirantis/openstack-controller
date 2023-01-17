@@ -1284,6 +1284,40 @@ def test_barbican_features_fields_unknown(client):
     assert response.json["response"]["status"]["code"] == 400
 
 
+def test_barbican_features_fields_value_from_fail(client):
+    allowed_vault_fileds = [
+        ("vault_url", VALUE_FROM_DICT),
+        ("approle_role_id", {"incorrect": "obj"}),
+        ("approle_secret_id", {"incorrect": "obj"}),
+    ]
+    for field, value in allowed_vault_fileds:
+        req = copy.deepcopy(ADMISSION_REQ)
+        req["request"]["object"]["spec"]["features"]["barbican"] = {
+            "backends": {"vault": {field: value}}
+        }
+        req["request"]["object"]["spec"]["openstack_version"] = "victoria"
+        response = client.simulate_post("/validate", json=req)
+        assert response.status == falcon.HTTP_OK
+        assert response.json["response"]["allowed"] is False
+        assert response.json["response"]["status"]["code"] == 400
+
+
+def test_barbican_features_fields_value_from_ok(client):
+    allowed_vault_fileds = [
+        ("approle_role_id", VALUE_FROM_DICT),
+        ("approle_secret_id", VALUE_FROM_DICT),
+    ]
+    for field, value in allowed_vault_fileds:
+        req = copy.deepcopy(ADMISSION_REQ)
+        req["request"]["object"]["spec"]["features"]["barbican"] = {
+            "backends": {"vault": {field: value}}
+        }
+        req["request"]["object"]["spec"]["openstack_version"] = "victoria"
+        response = client.simulate_post("/validate", json=req)
+        assert response.status == falcon.HTTP_OK
+        assert response.json["response"]["allowed"] is True
+
+
 def test_nova_features_vcpu_type(client):
     req = copy.deepcopy(ADMISSION_REQ)
     req["request"]["object"]["spec"]["features"]["nova"].update(
@@ -1514,6 +1548,31 @@ def test_neutron_ngs_both_formats(client, osdplst):
     response = client.simulate_post("/validate", json=req)
     assert response.json["response"]["allowed"] is False
     assert response.json["response"]["status"]["code"] == 400
+
+
+def test_neutron_ngs_value_from(client, osdplst):
+    allowed_fields = [
+        ("password", "string"),
+        ("password", VALUE_FROM_DICT),
+        ("ssh_private_key", "string"),
+        ("ssh_private_key", VALUE_FROM_DICT),
+        ("secret", "string"),
+        ("secret", VALUE_FROM_DICT),
+    ]
+    for field, value in allowed_fields:
+        req = copy.deepcopy(ADMISSION_REQ)
+        ngs_device = copy.deepcopy(NGS_DEVICE)
+        ngs_device.update({field: value})
+        req["request"]["object"]["spec"]["features"]["neutron"].update(
+            {
+                "baremetal": {
+                    "ngs": {"hardware": {"cisco-switch": ngs_device}},
+                }
+            }
+        )
+        response = client.simulate_post("/validate", json=req)
+        assert response.status == falcon.HTTP_OK
+        assert response.json["response"]["allowed"] is True
 
 
 def test_policy_in_code_ok(client, osdplst):
