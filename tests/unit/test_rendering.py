@@ -17,6 +17,7 @@ INPUT_DIR = "tests/fixtures/render_service_template/input"
 excluded_services = {
     "tempest",
     "object-storage",
+    "stepler",
 }
 infra_services = {
     "messaging",
