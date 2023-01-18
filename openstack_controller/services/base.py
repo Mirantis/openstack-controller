@@ -610,6 +610,7 @@ class Service:
             proxy_secret.wait()
             domain_names = [
                 self.mspec["internal_domain_name"],
+                "$(NODE_IP)",
             ]
             proxy_vars, proxy_settings = proxy_secret.get_proxy_vars(
                 no_proxy=domain_names
