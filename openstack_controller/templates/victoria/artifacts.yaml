@@ -9,7 +9,7 @@ cinder_scheduler: '{{ images_base_url }}/openstack/cinder:victoria-focal-2023011
 cinder_volume: '{{ images_base_url }}/openstack/cinder:victoria-focal-20230116132550'
 cinder_volume_daemonset: '{{ images_base_url }}/openstack/cinder:victoria-focal-20230116132550'
 cinder_volume_usage_audit: '{{ images_base_url }}/openstack/cinder:victoria-focal-20230116132550'
-stepler_run_tests: '{{ images_base_url }}/openstack/stepler:victoria-focal-20221028141116'
+stepler_run_tests: '{{ images_base_url }}/openstack/stepler:victoria-focal-20230117191915'
 db_drop: '{{ images_base_url }}/openstack/heat:victoria-focal-20230116132550'
 db_init: '{{ images_base_url }}/openstack/heat:victoria-focal-20230116132550'
 dep_check: '{{ images_base_url }}/openstack/extra/kubernetes-entrypoint:v1.0.1-48d1e8a-20220919122849'
