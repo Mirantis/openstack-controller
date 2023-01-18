@@ -76,6 +76,7 @@ features:
     tunnel_interface: ens3
   octavia:
     lb_network:
+      name: lb-service-management
       subnets:
       - range: '192.168.0.0/24'
         pool_start: '192.168.0.1'

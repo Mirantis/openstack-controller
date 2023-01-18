@@ -223,6 +223,7 @@ spec:
       octavia:
         settings:
           enable_amphorav2: true
+          lbmgmt_network_name: lb-mgmt-net
           lbmgmt_subnets:
             - pool_end: 10.255.255.254
               pool_start: 10.255.1.0
