@@ -69,6 +69,7 @@ OS_SERVICES_MAP = {
     "object-storage": "ceph-rgw",
     "instance-ha": "masakari",
     "shared-file-system": "manila",
+    "stepler": "stepler",
 }
 
 OS_POLICY_SERVICES = {
