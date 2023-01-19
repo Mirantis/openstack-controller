@@ -16,6 +16,7 @@ class VolumeFeatureEnabled(base_section.BaseSection):
         "manage_volume",
         "multi_backend",
         "snapshot",
+        "volume_locked_by_snapshot",
         "instance_locality_enabled",
     ]
 
@@ -62,6 +63,21 @@ class VolumeFeatureEnabled(base_section.BaseSection):
     @property
     def snapshot(self):
         pass
+
+    @property
+    def volume_locked_by_snapshot(self):
+        rbd_flatten_volume_from_snapshot = []
+        for backend in self.get_values_item(
+            "cinder", "conf.cinder.DEFAULT.enabled_backends"
+        ).split(","):
+            rbd_flatten_volume_from_snapshot.append(
+                self.get_values_item(
+                    "cinder",
+                    f"conf.backends.{backend}.rbd_flatten_volume_from_snapshot",
+                    False,
+                )
+            )
+        return not any(rbd_flatten_volume_from_snapshot)
 
     @property
     def instance_locality_enabled(self):
