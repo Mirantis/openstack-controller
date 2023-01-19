@@ -744,7 +744,12 @@ class Ironic(OpenStackService):
                 "ironic-manage-networks": {
                     "images": ["ironic_manage_networks"],
                     "manifest": "job_manage_networks",
-                }
+                },
+                "ironic-update-nodes-metadata": {
+                    "images": ["ironic_update_nodes_metadata"],
+                    "manifest": "job_update_nodes_metadata",
+                    "hash_fields": ["conf.nodes.*"],
+                },
             }
         },
         "rabbitmq": {
