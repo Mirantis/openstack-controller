@@ -341,7 +341,7 @@ def configure(settings: kopf.OperatorSettings, **_):
     settings.watching.client_timeout = 1 * 600
     # setting unique finalizer name for each controller
     settings.persistence.finalizer = (
-        f"lcm.mirantis.com/{settings.peering.name}-finalizer"
+        f"lcm.mirantis.com/{OSCTL_HEARTBEAT_PEERING_OBJECT_NAME}-finalizer"
     )
     if OSCTL_METRICS_PORT > 0:
         start_http_server(OSCTL_METRICS_PORT)
