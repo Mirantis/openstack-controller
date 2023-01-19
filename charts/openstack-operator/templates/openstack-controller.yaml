@@ -248,6 +248,8 @@ spec:
     spec:
       serviceAccountName: openstack-controller-account
       securityContext:
+        seccompProfile:
+          type: RuntimeDefault
         # NOTE(vsaienko): The range 32768 60999 is default range used by application
         # to bind on local ports. Exclude 32768 - 32799 and use them for health probes
         sysctls:
