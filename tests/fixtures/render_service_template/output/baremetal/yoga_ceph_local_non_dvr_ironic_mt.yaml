@@ -60,6 +60,9 @@ spec:
         policy.d:
           01-controller-default.yaml: {'baremetal_rule1': 'baremetal_value1'}
           02-custom.yaml: {}
+        nodes:
+          deploy_kernel_image: 'ironic-agent-kernel:latest'
+          deploy_ramdisk_image: 'ironic-agent-initramfs:latest'
       dependencies:
         static:
           db_init:
@@ -194,6 +197,7 @@ spec:
           ironic_conductor: ironic-conductor:latest
           ironic_db_sync: ironic-db-sync:latest
           ironic_manage_networks: ironic-manage-networks:latest
+          ironic_update_nodes_metadata: ironic-update-nodes-metadata:latest
           ironic_pxe: ironic-pxe:latest
           ironic_pxe_init: ironic-pxe-init:latest
           ironic_retrieve_networks: ironic-retrieve-networks:latest
@@ -213,6 +217,7 @@ spec:
         job_rabbit_init: false
         network_policy: false
         secret_ca_bundle: true
+        job_update_nodes_metadata: true
       network:
         cleaning: &id001
           external: true
