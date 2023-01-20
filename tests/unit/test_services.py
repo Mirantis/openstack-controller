@@ -368,6 +368,12 @@ async def test_nova_add_node_to_scheduling(
 ):
     node = kube.Node(mock.Mock, copy.deepcopy(NODE_OBJ))
     osdplstmock = mock.Mock()
+    openstack_client.return_value.compute_get_services.return_value = [
+        {
+            "host": "host1",
+            "disabled_reason": "OSDPL: Node is under maintenance",
+        }
+    ]
     await services.Nova(
         openstackdeployment_mspec, logging, osdplstmock
     ).add_node_to_scheduling(node)
