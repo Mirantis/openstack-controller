@@ -84,7 +84,7 @@ openvswitch_ovn_northd: '{{ images_base_url }}/general/openvswitch:2.11-bionic-2
 openvswitch_ovn_vswitchd: '{{ images_base_url }}/general/openvswitch:2.11-bionic-20230112094818'
 openvswitch_ovn_db: '{{ images_base_url }}/general/openvswitch:2.11-bionic-20230112094818'
 openvswitch_ovn_controller: '{{ images_base_url }}/general/openvswitch:2.11-bionic-20230112094818'
-create_resources: '{{ images_base_url }}/openstack/extra/ceph-config-helper:pacific-focal-20221027123328'
+create_resources: '{{ images_base_url }}/openstack/openstack-tools:yoga-focal-20230109060016'
 octavia_worker: '{{ images_base_url }}/openstack/octavia:rocky-bionic-20230112190210'
 mariadb: '{{ images_base_url }}/general/mariadb:10.6.7-focal-20221028120155'
 prometheus_create_mysql_user: '{{ images_base_url }}/general/mariadb:10.6.7-focal-20221028120155'
@@ -212,5 +212,5 @@ fedora_checksum: e0713a4f26427691da90701ff7a823da
 ubuntu_checksum: 30d459e0dc0562e629d3683970e55efa
 rabbitmq_amqproxy: '{{ images_base_url }}/general/amqproxy:v0.8.2'
 manila_service_image: '{{ binary_base_url }}/openstack/bin/manila/manila-service-image-20221228132450.qcow2'
-manila-uuids-init: '{{ images_base_url }}/openstack/heat:rocky-bionic-20230112190210'
+manila-uuids-init: '{{ images_base_url }}/openstack/openstack-tools:yoga-focal-20230109060016'
 neutron_dr: '{{ images_base_url }}/openstack/neutron:rocky-bionic-20230112190210'
