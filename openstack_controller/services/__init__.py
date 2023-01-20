@@ -1871,6 +1871,21 @@ class Octavia(OpenStackService):
         ssh_secret = secrets.SSHSecret(self.namespace, self.service)
         t_args["ssh_credentials"] = ssh_secret.ensure()
 
+        neutron_features = self.mspec["features"].get("neutron", {})
+        if neutron_features.get("backend", "") == "tungstenfabric":
+            # Get Octavia HM IPs from shared OS+TF namespace
+            kube.wait_for_secret(
+                constants.OPENSTACK_TF_SHARED_NAMESPACE,
+                constants.TF_OPENSTACK_SECRET,
+            )
+            octavia_hm_list = base64.b64decode(
+                secrets.get_secret_data(
+                    constants.OPENSTACK_TF_SHARED_NAMESPACE,
+                    constants.TF_OPENSTACK_SECRET,
+                )["octavia_hm_list"]
+            ).decode()
+            t_args["octavia_hm_list"] = json.loads(octavia_hm_list)
+
         if "redis" in self.mspec["features"]["services"]:
             t_args["redis_namespace"] = settings.OSCTL_REDIS_NAMESPACE
 

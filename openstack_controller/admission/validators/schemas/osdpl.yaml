@@ -1318,6 +1318,7 @@ properties:
             enum:
               - amphorav2
               - ovn
+              - tungstenfabric
           lb_network:
             type: object
             additionalProperties: false
