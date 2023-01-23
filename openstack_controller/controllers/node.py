@@ -27,7 +27,6 @@ LOG = utils.get_logger(__name__)
 
 
 @kopf.on.field("", "v1", "nodes", field="status.conditions")
-@utils.collect_handler_metrics
 async def node_status_update_handler(name, body, old, new, reason, **kwargs):
     LOG.debug(f"Handling node status {reason} event.")
     LOG.info(f"The node {name} changes are: {kwargs['diff']}")

@@ -156,7 +156,6 @@ def cleanup_helm_cache():
 @kopf.on.resume(*kube.OpenStackDeployment.kopf_on_args)
 @kopf.on.update(*kube.OpenStackDeployment.kopf_on_args)
 @kopf.on.create(*kube.OpenStackDeployment.kopf_on_args)
-@utils.collect_handler_metrics
 async def handle(body, meta, spec, logger, reason, **kwargs):
     # TODO(pas-ha) remove all this kwargs[*] nonsense, accept explicit args,
     # pass further only those that are really needed
@@ -293,7 +292,6 @@ async def handle(body, meta, spec, logger, reason, **kwargs):
 
 
 @kopf.on.delete(*kube.OpenStackDeployment.kopf_on_args)
-@utils.collect_handler_metrics
 async def delete(name, meta, body, spec, logger, reason, **kwargs):
     # TODO(pas-ha) wait for children to be deleted
     # TODO(pas-ha) remove secrets and so on?

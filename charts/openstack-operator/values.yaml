@@ -149,3 +149,38 @@ nodeSelector:
 tolerations: []
 
 affinity: {}
+
+exporter:
+  enabled: true
+  pod:
+    liveness:
+      params:
+        initialDelaySeconds: 60
+        periodSeconds: 60
+        timeoutSeconds: 5
+    readiness:
+      params:
+        initialDelaySeconds: 10
+        periodSeconds: 60
+        timeoutSeconds: 5
+  settings:
+    certificates:
+      certs_info:
+        libvirt_vnc_server:
+          name: libvirt-vnc-tls-certs
+          namespace: openstack
+          key_name: server_cert
+        libvirt_vnc_client:
+          name: libvirt-vnc-tls-certs
+          namespace: openstack
+          key_name: client_cert
+        octavia_amphora_ca:
+          name: octavia-certs
+          namespace: openstack
+          key_name: cert
+        keystone_public:
+          name: keystone-tls-public 
+          namespace: openstack
+          key_name: tls.crt
+    raw:
+      OSCTL_EXPORTER_BIND_PORT: 9102

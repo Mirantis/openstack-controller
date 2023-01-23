@@ -88,12 +88,14 @@ def init_keystone_admin_creds():
 
 
 class OpenStackClientManager:
-    def __init__(
-        self,
-        cloud=settings.OS_CLOUD,
-    ):
+    def __init__(self, cloud=settings.OS_CLOUD, metrics=None):
         init_keystone_admin_creds()
-        self.oc = openstack.connect(cloud=cloud)
+        # NOTE(vsaienko): disable built in opestacksdk metrics as they
+        # leads to deadlock in custom collectors.
+        # https://github.com/prometheus/client_python/issues/353
+        if metrics is None:
+            metrics = {"prometheus": {"enabled": False}}
+        self.oc = openstack.connect(cloud=cloud, metrics=metrics)
 
     def compute_get_services(self, host=None, binary="nova-compute"):
         return list(self.oc.compute.services(host=host, binary=binary))
@@ -131,6 +133,29 @@ class OpenStackClientManager:
 
     def compute_get_servers_in_migrating_state(self, host=None):
         return self.compute_get_all_servers(host=host, status="MIGRATING")
+
+    def baremetal_get_nodes(self):
+        return self.oc.baremetal.nodes()
+
+    def baremetal_is_node_available(self, node):
+        """Check if node is available for provisioning
+
+        The node is threated as available for provisioning when:
+        1. maintenance flag is Flase
+        2. No instance_uuid is assigned
+        3. The provision_state is available
+
+        """
+
+        return all(
+            # TODO(vsaienko) use maintenance, instance_uuid
+            # when switch to osclient of zed version.
+            [
+                node["is_maintenance"] is False,
+                node["instance_id"] is None,
+                node["provision_state"] == "available",
+            ]
+        )
 
     def instance_ha_create_notification(
         self, type, hostname, payload, generated_time=None

@@ -19,7 +19,6 @@ import logging.config
 import json
 import kopf
 from kopf._core.engines.posting import event_queue_var
-from prometheus_client import start_http_server, Gauge, Counter, Summary
 from pathlib import Path
 
 from openstack_controller import constants as const
@@ -183,32 +182,6 @@ OSCTL_PYKUBE_HTTP_REQUEST_TIMEOUT = float(
 
 OSCTL_MAX_TASKS = int(os.environ.get("OSCTL_MAX_TASKS", 150))
 
-# The port number for /metrics endpoint. If the value is less or equal to zero
-# metrics http server will not start.
-OSCTL_METRICS_PORT = int(os.environ.get("OSCTL_METRICS_PORT", -1))
-
-METRICS = {
-    "queue": Gauge(
-        "openstack_controller_task_queue_size", "The size of task queue."
-    ),
-    "threads": Gauge("openstack_controller_threads", "The number of threads."),
-    "handler_latency": Summary(
-        "openstack_controller_handler_latency_seconds",
-        "Time for a handler.",
-        labelnames=["handler"],
-    ),
-    "handler_errors": Counter(
-        "openstack_controller_handler_errors_total",
-        "The nubmer of errors for a handler.",
-        labelnames=["handler"],
-    ),
-    "handler_last": Gauge(
-        "openstack_controller_handler_last_time_seconds",
-        "The last time a k8s event was served by openstack-controller specific handler.",
-        labelnames=["handler"],
-    ),
-}
-
 OSCTL_HEARTBEAT_PEERING_OBJECT_NAME = os.environ.get(
     "OSCTL_HEARTBEAT_PEERING_OBJECT_NAME", "openstack-controller.osdpl"
 )
@@ -344,9 +317,6 @@ def configure(settings: kopf.OperatorSettings, **_):
     settings.persistence.finalizer = (
         f"lcm.mirantis.com/{OSCTL_HEARTBEAT_PEERING_OBJECT_NAME}-finalizer"
     )
-    if OSCTL_METRICS_PORT > 0:
-        start_http_server(OSCTL_METRICS_PORT)
-
     settings.networking.error_backoffs = InfiniteBackoffsWithJitter()
 
 

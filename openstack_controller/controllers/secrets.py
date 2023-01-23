@@ -45,7 +45,6 @@ AUTH_KEYS = [
     "secrets",
     labels={"application": "neutron", "component": "server"},
 )
-@utils.collect_handler_metrics
 async def handle_neutron_secret(
     body,
     meta,
@@ -87,7 +86,6 @@ async def handle_neutron_secret(
     "secrets",
     labels={"application": "neutron", "component": "configmap_etc"},
 )
-@utils.collect_handler_metrics
 async def handle_neutron_configmap_secret(
     body,
     meta,
@@ -131,7 +129,6 @@ async def handle_neutron_configmap_secret(
     "secrets",
     labels={"application": "frr"},
 )
-@utils.collect_handler_metrics
 async def handle_bgpvpnsecret(
     body,
     meta,
@@ -170,7 +167,6 @@ async def handle_bgpvpnsecret(
     "secrets",
     labels={"application": "keystone", "component": "server"},
 )
-@utils.collect_handler_metrics
 async def handle_keystone_secret(
     body,
     meta,
@@ -205,7 +201,6 @@ async def handle_keystone_secret(
     "secrets",
     labels={"application": "rabbitmq", "component": "server"},
 )
-@utils.collect_handler_metrics
 async def handle_rabbitmq_secret(
     body,
     meta,
@@ -281,7 +276,6 @@ async def handle_rabbitmq_secret(
     "secrets",
     labels={"application": "rabbitmq", "component": "server"},
 )
-@utils.collect_handler_metrics
 async def handle_rabbitmq_external_secret(
     body,
     meta,
@@ -399,7 +393,6 @@ async def handle_rabbitmq_external_secret(
     "secrets",
     labels={constants.OSCTL_SECRET_LABEL[0]: constants.OSCTL_SECRET_LABEL[1]},
 )
-@utils.collect_handler_metrics
 async def handle_substitution_secrets(
     body,
     meta,
