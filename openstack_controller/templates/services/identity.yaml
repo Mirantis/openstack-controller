@@ -145,6 +145,11 @@ spec:
             backend: oslo_cache.memcache_pool
           oslo_messaging_notifications:
             topics: {{ notification_topics|join(',') }}
+{%- if spec.get("features", {}).get("policies", {}).get("strict_admin_policy", {}).get('enabled') %}
+          resource:
+            admin_project_name: admin
+            admin_project_domain_name: Default
+{%- endif %}
 {%- if keystone_domain_specific_config.get("enabled", False) %}
           identity:
             driver: sql

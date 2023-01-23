@@ -153,6 +153,16 @@ properties:
         type: object
         additionalProperties: false
         properties:
+          strict_admin:
+            type: object
+            additionalProperties: false
+            properties:
+              enabled:
+                type: boolean
+                description: |
+                  Trigger additional policies that enforce stricter global admin definition of
+                  role 'admin' in 'admin' project of 'Default' domain, or role 'service'.
+                  This option is available for OpenStack Yoga or newer.
           aodh: &custom_policies
             type: object
             additionalProperties: true
