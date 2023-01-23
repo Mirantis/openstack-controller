@@ -784,6 +784,11 @@ class Keystone(OpenStackService):
     _child_objects = {
         "keystone": {
             "Job": {
+                "keystone-bootstrap": {
+                    "images": ["bootstrap"],
+                    "manifest": "job_bootstrap",
+                    "hash_fields": ["endpoints.*"],
+                },
                 "keystone-domain-manage": {
                     "images": ["keystone_domain_manage"],
                     "manifest": "job_domain_manage",
@@ -798,6 +803,11 @@ class Keystone(OpenStackService):
                     "images": ["keystone_credential_setup"],
                     "manifest": "job_credential_setup",
                     "hash_fields": ["conf.*"],
+                },
+                "keystone-db-sync": {
+                    "images": ["keystone_db_sync"],
+                    "manifest": "job_db_sync",
+                    "hash_fields": ["endpoints.*"],
                 },
                 "keystone-db-sync-expand": {
                     "images": ["keystone_db_sync_expand"],
