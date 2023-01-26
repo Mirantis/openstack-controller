@@ -60,16 +60,21 @@ async def node_maintenance_request_change_handler(body, **kwargs):
         raise kopf.TemporaryError(msg)
 
     osdpl = kube.get_osdpl()
+    mspec = osdpl.mspec
     if not osdpl or not osdpl.exists():
         LOG.info("Can't find OpenStackDeployment object")
         nwl.set_state_inactive()
         nwl.unset_error_message()
         return
 
+    osdplst = osdplstatus.OpenStackDeploymentStatus(
+        osdpl.name, osdpl.namespace
+    )
+
     if nwl.is_active():
         nwl.set_inner_state_active()
         for service, service_class in ORDERED_SERVICES:
-            service = service_class(osdpl.obj, LOG, {})
+            service = service_class(mspec, LOG, osdplst)
             if service.maintenance_api:
                 LOG.info(
                     f"Got moving node {node_name} into maintenance for {service_class.service}"
