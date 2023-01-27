@@ -13,6 +13,25 @@ RUN apt-get update; \
         git; \
     python3.8 /tmp/get-pip.py
 ADD . /opt/operator
+
+RUN set -ex; \
+    EXTRA_DEPS=""; \
+    if [[ -d /opt/operator/source_requirements ]]; then \
+        echo "" > /opt/operator/source-requirements.txt; \
+        for req in $(ls -d /opt/operator/source_requirements/*/); do \
+            EXTRA_DEPS="${EXTRA_DEPS} $req"; \
+            pushd $req; \
+                req_name=$(python3.8 setup.py --name 2>/dev/null |grep -v "Generating ChangeLog"); \ 
+                req_version=$(python3.8 setup.py --version 2>/dev/null |grep -v "Generating ChangeLog"); \
+            popd; \
+            echo "$req_name==$req_version" >> /opt/operator/source-requirements.txt; \
+        done; \
+    fi; \
+    if [[ -n "${EXTRA_DEPS}" ]]; then \
+        pip wheel --wheel-dir /opt/wheels --find-links /opt/wheels $EXTRA_DEPS; \
+    fi; \
+    rm -rf /opt/operator/source_requirements
+
 RUN pip wheel --wheel-dir /opt/wheels --find-links /opt/wheels /opt/operator
 
 FROM $FROM
@@ -21,6 +40,7 @@ ARG HELM_BINARY="https://binary.mirantis.com/openstack/bin/utils/helm/helm-v3.9.
 COPY --from=builder /tmp/get-pip.py /tmp/get-pip.py
 COPY --from=builder /opt/wheels /opt/wheels
 COPY --from=builder /opt/operator/uwsgi.ini /opt/operator/uwsgi.ini
+COPY --from=builder /opt/operator/source-requirements.txt /opt/operator/source-requirements.txt
 ADD kopf-patches /tmp/kopf-patches
 # NOTE(pas-ha) apt-get download + dpkg-deb -x is a dirty hack
 # to fetch distutils w/o pulling in most of python3.6
@@ -42,6 +62,7 @@ RUN set -ex; \
     dpkg-deb -x python3-distutils*.deb /; \
     rm -vf python3-distutils*.deb; \
     python3.8 /tmp/get-pip.py; \
+    pip install --no-index --no-cache --find-links /opt/wheels --pre -r /opt/operator/source-requirements.txt; \
     pip install --no-index --no-cache --find-links /opt/wheels openstack-controller; \
     cd /usr/local/lib/python3.8/dist-packages; \
     for p in $(ls /tmp/kopf-patches/*.patch); do \
