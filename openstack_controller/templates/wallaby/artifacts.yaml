@@ -207,10 +207,10 @@ neutron_bootstrap: '{{ images_base_url }}/openstack/openstack-tools:yoga-focal-2
 cinder_drop_default_volume_type: '{{ images_base_url }}/openstack/openstack-tools:yoga-focal-20230109060016'
 cinder_create_internal_tenant: '{{ images_base_url }}/openstack/openstack-tools:yoga-focal-20230109060016'
 descheduler: '{{ images_base_url }}/openstack/extra/descheduler:v0.25.0-amd64-20220922181123'
-ironic_agent_kernel: '{{ binary_base_url }}/openstack/bin/ironic/tinyipa/tinyipa-stable-wallaby-20221216064710.vmlinuz'
-ironic_agent_initramfs: '{{ binary_base_url }}/openstack/bin/ironic/tinyipa/tinyipa-stable-wallaby-20221216064710.gz'
+ironic_agent_kernel: '{{ binary_base_url }}/openstack/bin/ironic/tinyipa/tinyipa-stable-wallaby-20230128064713.vmlinuz'
+ironic_agent_initramfs: '{{ binary_base_url }}/openstack/bin/ironic/tinyipa/tinyipa-stable-wallaby-20230128064713.gz'
 ironic_agent_kernel_checksum: ab3a8196df5a84889f16494fde188799
-ironic_agent_initramfs_checksum: 798d62fad193318b8657480e79493fed
+ironic_agent_initramfs_checksum: 9927b0046bf2d48eb2c9bf7e2828cac4
 ironic_update_nodes_metadata: '{{ images_base_url }}/openstack/openstack-tools:yoga-focal-20230109060016'
 ironic_pxe_http: '{{ images_base_url }}/openstack/extra/nginx:1.23.2-alpine'
 ingress_tls_proxy: '{{ images_base_url }}/openstack/tls-proxy:focal-20220804082840'
