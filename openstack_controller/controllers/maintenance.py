@@ -108,6 +108,10 @@ async def node_maintenance_request_delete_handler(body, **kwargs):
         nwl.set_state_active()
         nwl.unset_error_message()
         return
+    mspec = osdpl.mspec
+    osdplst = osdplstatus.OpenStackDeploymentStatus(
+        osdpl.name, osdpl.namespace
+    )
 
     if nwl.is_maintenance():
         LOG.info(f"Waiting for {node.name} is ready.")
@@ -135,7 +139,7 @@ async def node_maintenance_request_delete_handler(body, **kwargs):
             break
 
         for service, service_class in reversed(ORDERED_SERVICES):
-            service = service_class(osdpl.obj, LOG, {})
+            service = service_class(mspec, LOG, osdplst)
             if service.maintenance_api:
                 LOG.info(
                     f"Moving node {node_name} to operational state for {service_class.service}"
