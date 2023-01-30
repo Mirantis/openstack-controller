@@ -224,18 +224,67 @@ class Secret(abc.ABC):
         username = generate_name(prefix=prefix, length=username_length)
         return OSSytemCreds(username=username, password=password)
 
-    def _generate_new_fields(self, *args):
-        return {}
+    def _fill_new_fields(self, secret, to_update: dict):
+        """
+        Create/add/modify fields according to secret format
+
+        The method can modify secret by adding new fields or
+        modify existing fields in secret (e.g update password).
+        Returns object of self.secret_class - e.g. OpenStackAdminCredentials
+
+        :param secret: Dict(str, <obj>) or dataclass
+                       object.
+                       Example:
+                            {"creds_name1": OSSytemCreds(....)}
+                            or
+                            OpenStackAdminCredentials(...)
+        :param to_update: dictionary with fields and subfields mapping
+        """
+        new_obj = self.create()
+        new_dict = asdict(new_obj)
+        if isinstance(secret, self.secret_class):
+            secret = self._pack_fields(asdict(secret))
+        for creds_name, creds_fields in to_update.items():
+            LOG.info(
+                f"Filling credentials {creds_name} in secret {self.secret_name}"
+            )
+            if not creds_fields or creds_name not in secret.keys():
+                secret[creds_name] = getattr(new_obj, creds_name)
+            else:
+                for field in creds_fields:
+                    setattr(
+                        secret[creds_name], field, new_dict[creds_name][field]
+                    )
+                    LOG.info(
+                        f"Updating {creds_name} {field} in secret {self.secret_name}"
+                    )
+        return self.secret_class(**secret)
 
     @abc.abstractmethod
     def create(self):
         pass
 
-    def decode(self, data):
+    def _pack_fields(self, data):
+        """
+        Transform data dictionary to dictionary of objects
+
+        The method takes dictionary of base64 encoded string
+        or dictionary of dictionaries and returns dictionary
+        of objects of needed class.
+
+        :param data: Dict(str, str) or Dict(str, dict)
+        """
         params = {}
         for kind, creds in data.items():
-            decoded = json.loads(base64.b64decode(creds))
+            try:
+                decoded = json.loads(base64.b64decode(creds))
+            except TypeError:
+                decoded = creds
             params[kind] = OSSytemCreds(**decoded)
+        return params
+
+    def decode(self, data):
+        params = self._pack_fields(data)
 
         try:
             return self.secret_class(**params)
@@ -245,14 +294,19 @@ class Secret(abc.ABC):
             )
             all_fields = [f.name for f in fields(self.secret_class)]
             new_fields = set(all_fields) - set(params)
-            params.update(self._generate_new_fields(*new_fields))
-            secret = self.secret_class(**params)
+            new_fields_map = {}
+            for field in new_fields:
+                new_fields_map[field] = []
+            secret = self._fill_new_fields(params, new_fields_map)
             self.save(secret)
             return secret
 
-    def ensure(self):
+    def ensure(self, new_fields=None):
         try:
             secret = self.get()
+            if new_fields:
+                secret = self._fill_new_fields(secret, new_fields)
+                self.save(secret)
         except pykube.exceptions.ObjectDoesNotExist:
             secret = self.create()
             if secret:
@@ -389,7 +443,7 @@ class NeutronSecret(OpenStackServiceSecret):
     def _generate_ipsec_secret_key(self):
         return generate_password(length=16)
 
-    def _generate_new_fields(self, *args):
+    def _fill_new_fields(self, *args):
         creds = {}
         for field in args:
             if field == "ipsec_secret_key":
@@ -431,18 +485,6 @@ class GaleraSecret(Secret):
     def _generate_backup_creds(self):
         return self._generate_credentials("backup", 8)
 
-    def _generate_new_fields(self, *args):
-        creds = {}
-        for field in args:
-            if field == "backup":
-                creds["backup"] = self._generate_backup_creds()
-            else:
-                LOG.warning(
-                    f"Not supported field '{field}' requested for secret "
-                    f"'{self.secret_name}'."
-                )
-        return creds
-
     def create(self) -> GaleraCredentials:
         return GaleraCredentials(
             sst=self._generate_credentials("sst", 3),
@@ -450,21 +492,6 @@ class GaleraSecret(Secret):
             audit=self._generate_credentials("audit", 8),
             backup=self._generate_backup_creds(),
         )
-
-    def ensure(self):
-        try:
-            secret = self.get()
-            # To avoid breaking updates backup field will be ensured here
-            # till PRODX-6506 is fixed properly
-            if not getattr(secret, "backup"):
-                backup_creds = self._generate_credentials("backup", 8)
-                setattr(secret, "backup", backup_creds)
-                self.save(secret)
-        except pykube.exceptions.ObjectDoesNotExist:
-            secret = self.create()
-            if secret:
-                self.save(secret)
-        return secret
 
 
 class RedisSecret(Secret):

@@ -29,6 +29,25 @@ def test_openstack_admin_secret_create_password(mock_password):
     assert mock_password.call_count == 3
 
 
+@mock.patch("openstack_controller.secrets.generate_password")
+def test_openstack_admin_secret_new_password(mock_password):
+    password = "password"
+    mock_password.return_value = password
+    secret = secrets.OpenStackAdminSecret("ns")
+    creds = secret.create()
+
+    new_password = "password1"
+    mock_password.return_value = new_password
+    new = secret._fill_new_fields(creds, {"identity": ["password"]})
+
+    assert new.database.username == "root"
+    assert new.database.password == password
+    assert new.identity.username == "admin"
+    assert new.identity.password == new_password
+    assert new.messaging.username == "rabbitmq"
+    assert new.messaging.password == password
+
+
 @mock.patch("openstack_controller.secrets.get_secret_data")
 @mock.patch("openstack_controller.secrets.generate_password")
 def test_keycloak_secret_serialization(mock_password, mock_data):
@@ -125,8 +144,98 @@ def test_galera_secret(mock_name, mock_password, mock_secret_data):
         backup=system_creds,
     )
 
-    mock_name.assert_called_once_with(prefix="backup", length=8)
-    mock_password.assert_called_once_with(length=32)
+    mock_name.assert_called_with(prefix="backup", length=8)
+    mock_password.assert_called_with(length=32)
     mock_secret_data.assert_called_once_with("ns", galera_secret.secret_name)
 
     assert actual == expected
+
+
+@mock.patch("openstack_controller.secrets.get_secret_data")
+@mock.patch("openstack_controller.secrets.generate_password")
+@mock.patch("openstack_controller.secrets.generate_name")
+def test_galera_secret_new_password(
+    mock_name, mock_password, mock_secret_data
+):
+    old_name = "username"
+    old_password = "password"
+
+    creds_b64 = base64.b64encode(
+        json.dumps({"username": old_name, "password": old_password}).encode()
+    )
+
+    mock_name.return_value = "username"
+    mock_password.return_value = "password"
+    mock_secret_data.return_value = {
+        "sst": creds_b64,
+        "exporter": creds_b64,
+        "audit": creds_b64,
+        "backup": creds_b64,
+    }
+    galera_secret = secrets.GaleraSecret("ns")
+    actual = galera_secret.get()
+
+    new_name = "username1"
+    new_password = "password1"
+    mock_name.return_value = new_name
+    mock_password.return_value = new_password
+    new = galera_secret._fill_new_fields(
+        actual, {"sst": ["password"], "exporter": ["password"]}
+    )
+
+    old_creds = secrets.OSSytemCreds(username=old_name, password=old_password)
+    new_creds = secrets.OSSytemCreds(username=old_name, password=new_password)
+    expected = secrets.GaleraCredentials(
+        sst=new_creds,
+        exporter=new_creds,
+        audit=old_creds,
+        backup=old_creds,
+    )
+
+    mock_secret_data.assert_called_once_with("ns", galera_secret.secret_name)
+
+    assert new == expected
+
+
+@mock.patch("openstack_controller.secrets.get_secret_data")
+@mock.patch("openstack_controller.secrets.generate_password")
+@mock.patch("openstack_controller.secrets.generate_name")
+def test_galera_secret_new_credentials(
+    mock_name, mock_password, mock_secret_data
+):
+    old_name = "username"
+    old_password = "password"
+
+    creds_b64 = base64.b64encode(
+        json.dumps({"username": old_name, "password": old_password}).encode()
+    )
+
+    mock_name.return_value = "username"
+    mock_password.return_value = "password"
+    mock_secret_data.return_value = {
+        "sst": creds_b64,
+        "exporter": creds_b64,
+        "audit": creds_b64,
+        "backup": creds_b64,
+    }
+    galera_secret = secrets.GaleraSecret("ns")
+    actual = galera_secret.get()
+
+    new_name = "username1"
+    new_password = "password1"
+    mock_name.return_value = new_name
+    mock_password.return_value = new_password
+    new = galera_secret._fill_new_fields(actual, {"sst": [], "exporter": []})
+
+    old_creds = secrets.OSSytemCreds(username=old_name, password=old_password)
+    new_creds = secrets.OSSytemCreds(username=new_name, password=new_password)
+    expected = secrets.GaleraCredentials(
+        sst=new_creds,
+        exporter=new_creds,
+        audit=old_creds,
+        backup=old_creds,
+    )
+
+    mock_secret_data.assert_called_once_with("ns", galera_secret.secret_name)
+
+    assert new == expected
