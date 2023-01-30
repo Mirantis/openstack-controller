@@ -157,9 +157,13 @@ services:
               daemonsets:
                 pod_replacement_strategy: RollingUpdate
                 dhcp_agent:
-                  max_unavailable: 1
+                  max_unavailable: 10%
                 l3_agent:
+                {%- if neutron_dvr_enabled %}
+                  max_unavailable: 10%
+                {%- else %}
                   max_unavailable: 1
+                {%- endif %}
                 lb_agent:
                   max_unavailable: 10%
                 metadata_agent:
