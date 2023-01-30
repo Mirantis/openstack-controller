@@ -62,6 +62,9 @@ SERVER_STATES_SAFE_FOR_REBOOT = [
 ]
 
 
+COMPUTE_SERVICE_DISABLE_REASON = "OSDPL: Node is under maintenance"
+
+
 def init_keystone_admin_creds():
 
     if os.path.exists(settings.OS_CLIENT_CONFIG_FILE):
@@ -98,11 +101,15 @@ class OpenStackClientManager:
 
     def compute_ensure_service_enabled(self, service):
         if service["status"].lower() != "enabled":
-            self.oc.compute.enable_service(service)
+            self.oc.compute.update_service(service["id"], status="enabled")
 
     def compute_ensure_service_disabled(self, service, disabled_reason=None):
         if service["status"].lower() != "disabled":
-            self.oc.compute.disable_service(service, disabled_reason)
+            self.oc.compute.update_service(
+                service["id"],
+                status="disabled",
+                disabled_reason=disabled_reason,
+            )
 
     def compute_get_all_servers(self, host=None, status=None):
         filters = {}

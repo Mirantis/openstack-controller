@@ -1553,7 +1553,8 @@ class Nova(OpenStackServiceWithCeph, MaintenanceApiMixin):
             os_client = openstack_utils.OpenStackClientManager()
             target_service = os_client.compute_get_services(host=node.name)[0]
             os_client.compute_ensure_service_disabled(
-                target_service, "Node is under maintenance"
+                target_service,
+                disabled_reason=openstack_utils.COMPUTE_SERVICE_DISABLE_REASON,
             )
         except exceptions.SDKException as e:
             LOG.error(f"Cannot execute openstack commands, error: {e}")
@@ -1705,7 +1706,11 @@ class Nova(OpenStackServiceWithCeph, MaintenanceApiMixin):
             service = os_client.compute_get_services(host=node.name)[0]
             # Enable service, in case this is a compute that was previously
             # removed and now is being added back
-            os_client.compute_ensure_service_enabled(service)
+            if (
+                service["disabled_reason"]
+                == openstack_utils.COMPUTE_SERVICE_DISABLE_REASON
+            ):
+                os_client.compute_ensure_service_enabled(service)
         except openstack.exceptions.SDKException as e:
             msg = f"Can not bring node back to scheduling. Cannot execute openstack commands, error: {e}"
             nwl.set_error_message(msg)
