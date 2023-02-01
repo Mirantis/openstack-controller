@@ -2,7 +2,6 @@ from openstack_controller.filters.tempest import base_section
 
 
 class Dns(base_section.BaseSection):
-
     name = "dns"
     options = [
         "build_interval",

@@ -2,7 +2,6 @@ from openstack_controller.filters.tempest import base_section
 
 
 class Identity(base_section.BaseSection):
-
     name = "identity"
     options = [
         "admin_domain_scope",

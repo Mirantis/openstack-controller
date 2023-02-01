@@ -2,7 +2,6 @@ from openstack_controller.filters.tempest import base_section
 
 
 class LoadBalancer(base_section.BaseSection):
-
     name = "load_balancer"
     options = [
         "region",

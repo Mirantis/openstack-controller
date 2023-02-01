@@ -2,7 +2,6 @@ from openstack_controller.filters.tempest import base_section
 
 
 class BaremetalFeatureEnabled(base_section.BaseSection):
-
     name = "baremetal_feature_enabled"
     options = ["ipxe_enabled", "adoption", "fast_track_discovery"]
 

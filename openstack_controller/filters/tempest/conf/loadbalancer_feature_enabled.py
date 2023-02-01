@@ -3,7 +3,6 @@ from openstack_controller.filters.tempest import base_section
 
 
 class LoadBalancerFeatureEnabled(base_section.BaseSection):
-
     name = "loadbalancer-feature-enabled"
     options = [
         "not_implemented_is_error",

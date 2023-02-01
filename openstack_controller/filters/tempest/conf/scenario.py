@@ -2,7 +2,6 @@ from openstack_controller.filters.tempest import base_section
 
 
 class Scenario(base_section.BaseSection):
-
     name = "scenario"
     options = [
         "aki_img_file",

@@ -14,7 +14,6 @@ MICROVERSION_RELEASE_MAPPING = {
 
 
 class Volume(base_section.BaseSection):
-
     name = "volume"
     options = [
         "backend_names",

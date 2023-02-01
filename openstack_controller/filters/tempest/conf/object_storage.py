@@ -2,7 +2,6 @@ from openstack_controller.filters.tempest import base_section
 
 
 class ObjectStorage(base_section.BaseSection):
-
     name = "object-storage"
     options = [
         "api_prefix",

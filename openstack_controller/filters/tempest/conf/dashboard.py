@@ -2,7 +2,6 @@ from openstack_controller.filters.tempest import base_section
 
 
 class Dashboard(base_section.BaseSection):
-
     name = "dashboard"
     options = [
         "dashboard_url",

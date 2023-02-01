@@ -2,7 +2,6 @@ from openstack_controller.filters.tempest import base_section
 
 
 class NeutronPluginOptions(base_section.BaseSection):
-
     name = "neutron_plugin_options"
     options = [
         "advanced_image_ref",

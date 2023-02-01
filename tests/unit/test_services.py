@@ -88,7 +88,6 @@ def test_get_admin_creds(
 def test_service_keystone_render(
     mock_template_args, openstackdeployment_mspec, mock_osdpl
 ):
-
     osdplstmock = mock.MagicMock()
     creds = secrets.OSSytemCreds("test", "test")
     admin_creds = secrets.OpenStackAdminCredentials(creds, creds, creds)
@@ -349,7 +348,6 @@ async def test_nova_prepare_node_after_reboot_openstacksdk_exception(
     openstackdeployment_mspec,
     mock_osdpl,
 ):
-
     openstack_client.side_effect = openstack.exceptions.SDKException("foo")
     node = kube.Node(mock.Mock, copy.deepcopy(NODE_OBJ))
     osdplstmock = mock.Mock()
@@ -564,7 +562,6 @@ async def test_nova_migrate_servers_manual_one_server(
     openstackdeployment_mspec,
     mock_osdpl,
 ):
-
     osdplstmock = mock.Mock()
     openstack_client.compute_get_servers_valid_for_live_migration.return_value = (
         []
@@ -595,7 +592,6 @@ async def test_nova_migrate_servers_live_one_error_server(
     openstackdeployment_mspec,
     mock_osdpl,
 ):
-
     osdplstmock = mock.Mock()
     openstack_client.compute_get_servers_valid_for_live_migration.return_value = (
         []
@@ -629,7 +625,6 @@ async def test_nova_migrate_servers_live_ignore_powered_off_server(
     openstackdeployment_mspec,
     mock_osdpl,
 ):
-
     osdplstmock = mock.Mock()
     openstack_client.compute_get_servers_valid_for_live_migration.return_value = (
         []
@@ -663,7 +658,6 @@ async def test_nova_migrate_servers_live_one_power_unknown(
     openstackdeployment_mspec,
     mock_osdpl,
 ):
-
     osdplstmock = mock.Mock()
     openstack_client.compute_get_servers_valid_for_live_migration.return_value = (
         []

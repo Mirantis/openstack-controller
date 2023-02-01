@@ -19,7 +19,6 @@ MICROVERSION_RELEASE_MAPPING = {
 
 
 class Compute(base_section.BaseSection):
-
     name = "compute"
     options = [
         "build_interval",

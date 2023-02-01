@@ -2,7 +2,6 @@ from openstack_controller.filters.tempest import base_section
 
 
 class Image(base_section.BaseSection):
-
     name = "image"
     options = [
         "build_interval",

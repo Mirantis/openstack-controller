@@ -2,7 +2,6 @@ from openstack_controller.filters.tempest import base_section
 
 
 class Orchestration(base_section.BaseSection):
-
     name = "orchestration"
     options = [
         "build_interval",

@@ -2,7 +2,6 @@ from openstack_controller.filters.tempest import base_section
 
 
 class OsloConcurrency(base_section.BaseSection):
-
     name = "oslo_concurrency"
     options = ["disable_process_locking", "lock_path"]
 

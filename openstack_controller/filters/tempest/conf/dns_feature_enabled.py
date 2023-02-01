@@ -65,7 +65,6 @@ DNS_FEATURES_RELEASE_MAPPING = {
 
 
 class DnsFeatureEnabled(base_section.BaseSection):
-
     name = "dns_feature_enabled"
     options = [
         "api_admin",

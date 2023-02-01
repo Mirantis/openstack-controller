@@ -2,7 +2,6 @@ from openstack_controller.filters.tempest import base_section
 
 
 class EphemeralStorageEncryption(base_section.BaseSection):
-
     name = "ephemeral_storage_encryption"
     options = ["enabled", "cipher", "key_size"]
 

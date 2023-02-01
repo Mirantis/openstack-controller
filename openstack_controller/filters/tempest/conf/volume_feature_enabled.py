@@ -2,7 +2,6 @@ from openstack_controller.filters.tempest import base_section
 
 
 class VolumeFeatureEnabled(base_section.BaseSection):
-
     name = "volume-feature-enabled"
     options = [
         "api_extensions",

@@ -78,7 +78,6 @@ def test_keycloak_secret_serialization(mock_password, mock_data):
     indirect=["override_setting"],
 )
 def test_get_proxy_vars_from_secret(mock_data, override_setting):
-
     mock_data.return_value = {
         "HTTP_PROXY": "aHR0cDovL3NxdWlkLm9wZW5zdGFjay5zdmMuY2x1c3Rlci5sb2NhbDo4MA==",
         "HTTPS_PROXY": "aHR0cDovL3NxdWlkLm9wZW5zdGFjay5zdmMuY2x1c3Rlci5sb2NhbDo4MA==",

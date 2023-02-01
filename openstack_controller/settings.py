@@ -243,6 +243,7 @@ OSCTL_NODE_MAINTENANCE_ENABLED = bool_from_env(
 # The version of curren cluster release, example 8.4.0-rc+22.1
 OSCTL_CLUSTER_RELEASE = os.environ.get("OSCTL_CLUSTER_RELEASE", "")
 
+
 # A dict of OpenStack node labels per role in json format.
 # See the structure below
 # If a node has one of specified labels with the matching value,

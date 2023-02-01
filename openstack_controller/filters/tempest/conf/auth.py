@@ -2,7 +2,6 @@ from openstack_controller.filters.tempest import base_section
 
 
 class Auth(base_section.BaseSection):
-
     name = "auth"
     options = [
         "admin_domain_name",

@@ -190,7 +190,6 @@ async def test_install_remove_immutable_1_item(
     kube_wait_for_deleted,
     helm_error_1_item,
 ):
-
     hc = helm.HelmManager()
     subprocess_shell.return_value.returncode = 1
     subprocess_shell.return_value.communicate.return_value = (
@@ -218,7 +217,6 @@ async def test_install_remove_immutable_5_item(
     kube_wait_for_deleted,
     helm_error_5_item,
 ):
-
     hc = helm.HelmManager()
     subprocess_shell.return_value.returncode = 1
     subprocess_shell.return_value.communicate.return_value = (
@@ -257,7 +255,6 @@ async def test_install_remove_immutable_5_item(
 
 @pytest.mark.asyncio
 async def test_install_rollback(subprocess_shell, helm_error_rollout_restart):
-
     hc = helm.HelmManager()
     subprocess_shell.return_value.returncode = 1
     subprocess_shell.return_value.communicate.return_value = (

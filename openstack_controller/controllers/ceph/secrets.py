@@ -29,7 +29,6 @@ async def handle_ceph_shared_secret(
     diff,
     **kwargs,
 ):
-
     if name != ceph_api.OPENSTACK_KEYS_SECRET:
         return
     LOG.debug(f"Handling secret create/update {name}")

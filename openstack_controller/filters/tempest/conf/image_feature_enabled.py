@@ -2,7 +2,6 @@ from openstack_controller.filters.tempest import base_section
 
 
 class ImageFeatureEnabled(base_section.BaseSection):
-
     name = "image-feature-enabled"
     options = [
         "api_v1",

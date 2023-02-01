@@ -66,7 +66,6 @@ COMPUTE_SERVICE_DISABLE_REASON = "OSDPL: Node is under maintenance"
 
 
 def init_keystone_admin_creds():
-
     if os.path.exists(settings.OS_CLIENT_CONFIG_FILE):
         return
 

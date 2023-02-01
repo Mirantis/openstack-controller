@@ -75,7 +75,6 @@ def from_base64(value: str) -> str:
 
 
 def collect_handler_metrics(func):
-
     handler_latency = settings.METRICS["handler_latency"].labels(func.__name__)
     handler_errors = settings.METRICS["handler_errors"].labels(func.__name__)
     handler_last = settings.METRICS["handler_last"].labels(func.__name__)

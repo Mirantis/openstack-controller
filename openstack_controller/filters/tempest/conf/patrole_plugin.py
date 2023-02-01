@@ -2,7 +2,6 @@ from openstack_controller.filters.tempest import base_section
 
 
 class PatrolePlugin(base_section.BaseSection):
-
     name = "patrole"
     options = [
         "enable_rbac",

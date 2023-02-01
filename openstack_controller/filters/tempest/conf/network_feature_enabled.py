@@ -2,7 +2,6 @@ from openstack_controller.filters.tempest import base_section
 
 
 class NetworkFeatureEnabled(base_section.BaseSection):
-
     name = "network-feature-enabled"
     options = [
         "api_extensions",

@@ -2,7 +2,6 @@ from openstack_controller.filters.tempest import base_section
 
 
 class ObjectStorageFeatureEnabled(base_section.BaseSection):
-
     name = "object-storage-feature-enabled"
     options = [
         "container_sync",

@@ -20,7 +20,6 @@ MULTIATTACH_CEPH_RELEASE_MAPPING = {
 
 
 class ComputeFeatureEnabled(base_section.BaseSection):
-
     name = "compute-feature-enabled"
     options = [
         "api_extensions",

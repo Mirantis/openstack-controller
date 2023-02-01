@@ -2,7 +2,6 @@ from openstack_controller.filters.tempest import base_section
 
 
 class ServiceAvailable(base_section.BaseSection):
-
     name = "service_available"
     options = [
         "aodh",

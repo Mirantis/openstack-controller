@@ -141,7 +141,6 @@ async def handle_bgpvpnsecret(
     diff,
     **kwargs,
 ):
-
     if name != settings.OSCTL_BGPVPN_NEIGHBOR_INFO_SECRET_NAME:
         return
     LOG.info(f"The secret {name} changes are: {diff}")

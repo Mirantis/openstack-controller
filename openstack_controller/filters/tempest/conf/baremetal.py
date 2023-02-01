@@ -15,7 +15,6 @@ IRONIC_MICROVERSION_RELEASE_MAPPING = {
 
 
 class Baremetal(base_section.BaseSection):
-
     name = "baremetal"
     options = [
         "active_timeout",

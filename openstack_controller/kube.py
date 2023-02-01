@@ -133,7 +133,6 @@ class HelmBundleExt:
 
 
 class HelmBundleMixin:
-
     __helmbundle_ext = {}
     immutable = False
 
@@ -317,7 +316,6 @@ class Ingress(pykube.objects.NamespacedAPIObject, HelmBundleMixin):
 
 
 class Job(pykube.Job, HelmBundleMixin):
-
     immutable = True
 
     @property
@@ -438,7 +436,6 @@ class DaemonSet(pykube.DaemonSet, HelmBundleMixin):
 
 
 class Pod(pykube.Pod):
-
     # NOTE(vsaienko): override delete method unless client accepts grace_period parameter
     def delete(
         self, propagation_policy: str = None, grace_period_seconds=None

@@ -79,7 +79,6 @@ class GenericChildObject:
 
 
 class Service:
-
     service = None
     namespace = None
     group = "lcm.mirantis.com"

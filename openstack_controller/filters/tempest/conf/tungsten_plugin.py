@@ -2,7 +2,6 @@ from openstack_controller.filters.tempest import base_section
 
 
 class TungstenPlugin(base_section.BaseSection):
-
     name = "sdn"
     options = [
         "service_name",

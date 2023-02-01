@@ -2,7 +2,6 @@ from openstack_controller.filters.tempest import base_section
 
 
 class Validation(base_section.BaseSection):
-
     name = "validation"
     options = [
         "auth_method",

@@ -2,7 +2,6 @@ from openstack_controller.filters.tempest import base_section
 
 
 class Default(base_section.BaseSection):
-
     name = "DEFAULT"
     options = [
         "debug",

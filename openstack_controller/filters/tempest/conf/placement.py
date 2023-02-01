@@ -9,7 +9,6 @@ MICROVERSION_RELEASE_MAPPING = {
 
 
 class Placement(base_section.BaseSection):
-
     name = "placement"
     options = [
         "max_microversion",

@@ -2,7 +2,6 @@ from openstack_controller.filters.tempest import base_section
 
 
 class Network(base_section.BaseSection):
-
     name = "network"
     options = [
         "build_interval",

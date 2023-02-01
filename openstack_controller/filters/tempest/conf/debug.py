@@ -2,7 +2,6 @@ from openstack_controller.filters.tempest import base_section
 
 
 class Debug(base_section.BaseSection):
-
     name = "debug"
     options = ["trace_requests"]
 
