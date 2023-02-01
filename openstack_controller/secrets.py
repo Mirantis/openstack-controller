@@ -20,6 +20,7 @@ from cryptography.hazmat.backends import (
 )
 
 from openstack_controller import constants
+from openstack_controller import exception
 from openstack_controller import kube
 from openstack_controller import utils
 from openstack_controller import settings
@@ -283,34 +284,41 @@ class Secret(abc.ABC):
             params[kind] = OSSytemCreds(**decoded)
         return params
 
-    def decode(self, data):
+    def _update_format(self, data):
         params = self._pack_fields(data)
+        all_fields = [f.name for f in fields(self.secret_class)]
+        new_fields = {f: [] for f in set(all_fields) - set(params)}
+        return self._fill_new_fields(params, new_fields)
 
+    def decode(self, data):
         try:
-            return self.secret_class(**params)
+            params = self._pack_fields(data)
+            secret = self.secret_class(**params)
         except TypeError:
-            LOG.info(
-                f"Secret {self.secret_name} has incorrect format. Updating it..."
-            )
-            all_fields = [f.name for f in fields(self.secret_class)]
-            new_fields = set(all_fields) - set(params)
-            new_fields_map = {}
-            for field in new_fields:
-                new_fields_map[field] = []
-            secret = self._fill_new_fields(params, new_fields_map)
-            self.save(secret)
-            return secret
+            raise exception.SecretFormatException()
+        return secret
 
     def ensure(self, new_fields=None):
+        save_secret = False
         try:
             secret = self.get()
-            if new_fields:
-                secret = self._fill_new_fields(secret, new_fields)
-                self.save(secret)
         except pykube.exceptions.ObjectDoesNotExist:
             secret = self.create()
             if secret:
-                self.save(secret)
+                save_secret = True
+        except exception.SecretFormatException:
+            LOG.info(
+                f"Secret {self.secret_name} has incorrect format. Updating it..."
+            )
+            data = get_secret_data(self.namespace, self.secret_name)
+            secret = self._update_format(data)
+            save_secret = True
+
+        if new_fields:
+            secret = self._fill_new_fields(secret, new_fields)
+
+        if any([save_secret, new_fields]):
+            self.save(secret)
         return secret
 
     def save(self, secret) -> None:

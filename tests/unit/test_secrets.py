@@ -131,7 +131,7 @@ def test_galera_secret(mock_name, mock_password, mock_secret_data):
         "audit": creds_b64,
     }
     galera_secret = secrets.GaleraSecret("ns")
-    actual = galera_secret.get()
+    actual = galera_secret.ensure()
 
     system_creds = secrets.OSSytemCreds(
         username="username", password="password"
@@ -145,7 +145,7 @@ def test_galera_secret(mock_name, mock_password, mock_secret_data):
 
     mock_name.assert_called_with(prefix="backup", length=8)
     mock_password.assert_called_with(length=32)
-    mock_secret_data.assert_called_once_with("ns", galera_secret.secret_name)
+    mock_secret_data.assert_called_with("ns", galera_secret.secret_name)
 
     assert actual == expected
 

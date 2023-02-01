@@ -29,3 +29,7 @@ class OsdplSubstitutionFailed(OpenStackControllerException):
     def __init__(self, message="Trying to substitute osdpl fileds failed."):
         super().__init__()
         self.message = message
+
+
+class SecretFormatException(Exception):
+    """Class for secret format exceptions"""
