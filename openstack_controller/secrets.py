@@ -4,7 +4,7 @@ from dataclasses import asdict, dataclass, fields
 import datetime
 import json
 from os import urandom
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, final
 
 import pykube
 
@@ -18,9 +18,10 @@ from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.backends import (
     default_backend as crypto_default_backend,
 )
+import marshmallow
+import marshmallow_dataclass
 
 from openstack_controller import constants
-from openstack_controller import exception
 from openstack_controller import kube
 from openstack_controller import utils
 from openstack_controller import settings
@@ -29,7 +30,18 @@ LOG = utils.get_logger(__name__)
 
 
 @dataclass
-class OSSytemCreds:
+class Serializer:
+    def to_json(self):
+        return asdict(self)
+
+    @classmethod
+    def from_json(cls, data):
+        schema = marshmallow_dataclass.class_schema(cls)()
+        return schema.load(data)
+
+
+@dataclass
+class OSSytemCreds(Serializer):
     username: str
     password: str
 
@@ -40,7 +52,7 @@ class OSServiceCreds(OSSytemCreds):
 
 
 @dataclass
-class OpenStackCredentials:
+class OpenStackCredentials(Serializer):
     database: Dict[str, OSSytemCreds]
     messaging: Dict[str, OSSytemCreds]
     notifications: Dict[str, OSSytemCreds]
@@ -107,7 +119,7 @@ class NeutronCredentials(OpenStackCredentials):
 
 
 @dataclass
-class GaleraCredentials:
+class GaleraCredentials(Serializer):
     sst: OSSytemCreds
     exporter: OSSytemCreds
     audit: OSSytemCreds
@@ -115,43 +127,43 @@ class GaleraCredentials:
 
 
 @dataclass
-class RedisCredentials:
+class RedisCredentials(Serializer):
     password: str
 
 
 @dataclass
-class PowerDnsCredentials:
+class PowerDnsCredentials(Serializer):
     api_key: str
     database: OSSytemCreds
 
 
 @dataclass
-class OpenStackAdminCredentials:
+class OpenStackAdminCredentials(Serializer):
     database: Optional[OSSytemCreds]
     messaging: Optional[OSSytemCreds]
     identity: Optional[OSSytemCreds]
 
 
 @dataclass
-class RabbitmqGuestCredentials:
+class RabbitmqGuestCredentials(Serializer):
     password: str
 
 
 @dataclass
-class SshKey:
+class SshKey(Serializer):
     public: str
     private: str
 
 
 @dataclass
-class SignedCertificate:
+class SignedCertificate(Serializer):
     cert: str
     key: str
     cert_all: str
 
 
 @dataclass
-class VncSignedCertificate:
+class VncSignedCertificate(Serializer):
     ca_cert: str
     ca_key: str
     server_cert: str
@@ -161,7 +173,7 @@ class VncSignedCertificate:
 
 
 @dataclass
-class KeycloackCreds:
+class KeycloackCreds(Serializer):
     passphrase: str
 
 
@@ -205,10 +217,6 @@ def generate_name(prefix="", length=16):
         )
     )
     return "".join(res)
-
-
-# TODO(pas-ha) openstack-helm doesn't support password update by design,
-# we will need to get back here when it is solved.
 
 
 class Secret(abc.ABC):
@@ -263,6 +271,7 @@ class Secret(abc.ABC):
 
     @abc.abstractmethod
     def create(self):
+        """Initialize secret in cls.secret_class format"""
         pass
 
     def _pack_fields(self, data):
@@ -290,15 +299,15 @@ class Secret(abc.ABC):
         new_fields = {f: [] for f in set(all_fields) - set(params)}
         return self._fill_new_fields(params, new_fields)
 
-    def decode(self, data):
-        try:
-            params = self._pack_fields(data)
-            secret = self.secret_class(**params)
-        except TypeError:
-            raise exception.SecretFormatException()
-        return secret
-
     def ensure(self, new_fields=None):
+        """Ensure k8s secret exists and is in correct format.
+
+        Make sure k8s representation of cls.secret_class:
+          * Exists
+          * Is in correct format
+        :returns : TODO(vsaienko) should not return anything.
+        """
+
         save_secret = False
         try:
             secret = self.get()
@@ -306,7 +315,7 @@ class Secret(abc.ABC):
             secret = self.create()
             if secret:
                 save_secret = True
-        except exception.SecretFormatException:
+        except marshmallow.exceptions.ValidationError:
             LOG.info(
                 f"Secret {self.secret_name} has incorrect format. Updating it..."
             )
@@ -321,19 +330,29 @@ class Secret(abc.ABC):
             self.save(secret)
         return secret
 
+    @final
     def save(self, secret) -> None:
-        data = asdict(secret)
+        """Save cls.secret_class instance to k8s secret"""
+        data = self.secret_class.to_json(secret)
 
         for key in data.keys():
-            data[key] = base64.b64encode(
-                json.dumps(data[key]).encode()
-            ).decode()
-
+            value = data[key]
+            if isinstance(value, dict):
+                value = json.dumps(value)
+            data[key] = base64.b64encode(value.encode()).decode()
         kube.save_secret_data(self.namespace, self.secret_name, data)
 
+    @final
     def get(self):
+        """Get data from k8s and return instance of cls.secret_class"""
         data = get_secret_data(self.namespace, self.secret_name)
-        return self.decode(data)
+        for key in data.keys():
+            value = base64.b64decode(data[key]).decode()
+            try:
+                data[key] = json.loads(value)
+            except json.decoder.JSONDecodeError:
+                data[key] = value
+        return self.secret_class.from_json(data)
 
 
 class OpenStackAdminSecret(Secret):
@@ -360,32 +379,6 @@ class RabbitmqGuestSecret(Secret):
     def create(self) -> RabbitmqGuestCredentials:
         return RabbitmqGuestCredentials(password=generate_password())
 
-    def decode(self, data):
-        params = {}
-        for kind, creds in data.items():
-            decoded = base64.b64decode(creds).decode()
-            params[kind] = decoded
-
-        return self.secret_class(**params)
-
-    def save(self, secret) -> None:
-        data = asdict(secret)
-
-        for key in data.keys():
-            data[key] = base64.b64encode(data[key].encode()).decode()
-
-        kube.save_secret_data(self.namespace, self.secret_name, data)
-
-    def ensure(self):
-        try:
-            secret = self.get()
-        except pykube.exceptions.ObjectDoesNotExist:
-            secret = self.create()
-            if secret:
-                self.save(secret)
-                secret = self.get()
-        return secret
-
 
 class OpenStackServiceSecret(Secret):
     secret_class = OpenStackCredentials
@@ -394,22 +387,6 @@ class OpenStackServiceSecret(Secret):
         super().__init__(namespace)
         self.secret_name = f"generated-{service}-passwords"
         self.service = service
-
-    def decode(self, data):
-        os_creds = self.secret_class()
-
-        for kind, creds in data.items():
-            decoded = json.loads(base64.b64decode(creds))
-            if kind not in ["database", "messaging", "identity"]:
-                setattr(os_creds, kind, decoded)
-                continue
-            cr = getattr(os_creds, kind)
-            for account, c in decoded.items():
-                cr[account] = OSSytemCreds(
-                    username=c["username"], password=c["password"]
-                )
-
-        return os_creds
 
     def create(self) -> Optional[OpenStackCredentials]:
         os_creds = self.secret_class()
@@ -448,41 +425,10 @@ class HorizonSecret(OpenStackServiceSecret):
 class NeutronSecret(OpenStackServiceSecret):
     secret_class = NeutronCredentials
 
-    def _generate_ipsec_secret_key(self):
-        return generate_password(length=16)
-
-    def _fill_new_fields(self, *args):
-        creds = {}
-        for field in args:
-            if field == "ipsec_secret_key":
-                creds["ipsec_secret_key"] = self._generate_ipsec_secret_key()
-            else:
-                LOG.warning(
-                    f"Not supported field '{field}' requested for secret "
-                    f"'{self.secret_name}'."
-                )
-        return creds
-
-    def ensure(self):
-        try:
-            secret = self.get()
-            if not getattr(secret, "ipsec_secret_key"):
-                setattr(
-                    secret,
-                    "ipsec_secret_key",
-                    self._generate_ipsec_secret_key(),
-                )
-                self.save(secret)
-        except pykube.exceptions.ObjectDoesNotExist:
-            secret = self.create()
-            if secret:
-                self.save(secret)
-        return secret
-
     def create(self):
         os_creds = super().create()
         os_creds.metadata_secret = generate_password(length=32)
-        os_creds.ipsec_secret_key = self._generate_ipsec_secret_key()
+        os_creds.ipsec_secret_key = generate_password(length=16)
         return os_creds
 
 
@@ -490,15 +436,12 @@ class GaleraSecret(Secret):
     secret_name = "generated-galera-passwords"
     secret_class = GaleraCredentials
 
-    def _generate_backup_creds(self):
-        return self._generate_credentials("backup", 8)
-
     def create(self) -> GaleraCredentials:
         return GaleraCredentials(
             sst=self._generate_credentials("sst", 3),
             exporter=self._generate_credentials("exporter", 8),
             audit=self._generate_credentials("audit", 8),
-            backup=self._generate_backup_creds(),
+            backup=self._generate_credentials("backup", 8),
         )
 
 
@@ -509,68 +452,16 @@ class RedisSecret(Secret):
     def create(self) -> RedisCredentials:
         return RedisCredentials(password=generate_password(length=32))
 
-    def decode(self, data):
-        params = {}
-        for kind, creds in data.items():
-            decoded = base64.b64decode(creds).decode()
-            params[kind] = decoded
-
-        return self.secret_class(**params)
-
-    def save(self, secret) -> None:
-        data = asdict(secret)
-
-        for key in data.keys():
-            data[key] = base64.b64encode(data[key].encode()).decode()
-
-        kube.save_secret_data(self.namespace, self.secret_name, data)
-
-    def ensure(self):
-        try:
-            secret = self.get()
-        except pykube.exceptions.ObjectDoesNotExist:
-            secret = self.create()
-            if secret:
-                self.save(secret)
-                secret = self.get()
-        return secret
-
 
 class StackLightPasswordSecret(Secret):
     secret_name = "generated-stacklight-password"
     secret_class = OSSytemCreds
-
-    def decode(self, data):
-        params = {}
-        for kind, creds in data.items():
-            decoded = base64.b64decode(creds).decode()
-            params[kind] = decoded
-
-        return self.secret_class(**params)
 
     def create(self) -> OSSytemCreds:
         return OSSytemCreds(
             password=generate_password(length=32),
             username=generate_name(prefix="stacklight", length=16),
         )
-
-    def ensure(self):
-        try:
-            secret = self.get()
-        except pykube.exceptions.ObjectDoesNotExist:
-            secret = self.create()
-            if secret:
-                self.save(secret)
-                secret = self.get()
-        return secret
-
-    def save(self, secret) -> None:
-        data = asdict(secret)
-
-        for key in data.keys():
-            data[key] = base64.b64encode(data[key].encode()).decode()
-
-        kube.save_secret_data(self.namespace, self.secret_name, data)
 
 
 class ExternalTopicPasswordSecret(Secret):
@@ -581,51 +472,16 @@ class ExternalTopicPasswordSecret(Secret):
         self.secret_name = f"generated-notifications-{name}-passwords"
         self.topic = topic
 
-    def decode(self, data):
-        params = {}
-        for kind, creds in data.items():
-            decoded = base64.b64decode(creds).decode()
-            params[kind] = decoded
-
-        return self.secret_class(**params)
-
     def create(self) -> OSSytemCreds:
         return OSSytemCreds(
             password=generate_password(length=32),
             username=generate_name(prefix=self.topic, length=16),
         )
 
-    def ensure(self):
-        try:
-            secret = self.get()
-        except pykube.exceptions.ObjectDoesNotExist:
-            secret = self.create()
-            if secret:
-                self.save(secret)
-                secret = self.get()
-        return secret
-
-    def save(self, secret) -> None:
-        data = asdict(secret)
-
-        for key in data.keys():
-            data[key] = base64.b64encode(data[key].encode()).decode()
-
-        kube.save_secret_data(self.namespace, self.secret_name, data)
-
 
 class PowerDNSSecret(Secret):
     secret_name = "generated-powerdns-passwords"
     secret_class = PowerDnsCredentials
-
-    def decode(self, data):
-        data["api_key"] = base64.b64decode(data["api_key"]).decode()
-        data["database"] = json.loads(
-            base64.b64decode(data["database"]).decode()
-        )
-        return self.secret_class(
-            api_key=data["api_key"], database=OSSytemCreds(**data["database"])
-        )
 
     def create(self):
         return PowerDnsCredentials(
@@ -641,14 +497,6 @@ class SSHSecret(Secret):
         super().__init__(namespace)
         self.secret_name = f"generated-{service}-ssh-creds"
         self.key_size = key_size
-
-    def decode(self, data):
-        params = {}
-        for kind, creds in data.items():
-            decoded = json.loads(base64.b64decode(creds))
-            params[kind] = decoded
-
-        return self.secret_class(**params)
 
     def create(self):
         key = rsa.generate_private_key(
@@ -686,17 +534,6 @@ class SignedCertificateSecret(Secret):
     def __init__(self, namespace, service):
         super().__init__(namespace)
         self.secret_name = f"{service}-certs"
-
-    def decode(self, data):
-        return self.secret_class(**data)
-
-    def save(self, secret):
-        data = asdict(secret)
-        for kind, key in data.items():
-            if not isinstance(key, bytes):
-                key = key.encode()
-            data[kind] = base64.b64encode(key).decode()
-        kube.save_secret_data(self.namespace, self.secret_name, data)
 
     def create(self):
         key = rsa.generate_private_key(
@@ -779,6 +616,7 @@ class SignedCertificateSecret(Secret):
             "key": client_key,
             "cert_all": client_cert + client_key,
         }
+        data = {k: v.decode() for k, v in data.items()}
         return SignedCertificate(**data)
 
 
@@ -790,22 +628,6 @@ class VncSignedCertificateSecret(Secret):
         self.secret_name = f"{service}-certs"
         self.san_name = san_name
         self.cn_name = cn_name
-
-    def decode(self, data):
-        certs = {}
-        for k, cert in data.items():
-            decoded = base64.b64decode(cert).decode()
-            certs[k] = decoded
-
-        return self.secret_class(**certs)
-
-    def save(self, secret):
-        data = asdict(secret)
-        for kind, key in data.items():
-            if not isinstance(key, bytes):
-                key = key.encode()
-            data[kind] = base64.b64encode(key).decode()
-        kube.save_secret_data(self.namespace, self.secret_name, data)
 
     def _generate_cert(self, issuer, ca_cert, ca_key):
         cert_key = rsa.generate_private_key(
@@ -958,18 +780,13 @@ class VncSignedCertificateSecret(Secret):
             "client_cert": client_cert["cert_pem"],
             "client_key": client_cert["cert_key_pem"],
         }
+        data = {k: v.decode() for k, v in data.items()}
         return VncSignedCertificate(**data)
 
 
 class KeycloakSecret(Secret):
     secret_name = "oidc-crypto-passphrase"
     secret_class = KeycloackCreds
-
-    def decode(self, data):
-        data["passphrase"] = json.loads(
-            base64.b64decode(data["passphrase"]).decode()
-        )
-        return self.secret_class(**data)
 
     def create(self):
         salt = generate_password()
@@ -1037,10 +854,6 @@ class IAMSecret:
         kube.save_secret_data(
             self.namespace, self.secret_name, data, labels=self.labels
         )
-
-
-class KeystoneAdminSecret(SecretCopy):
-    secret_name = constants.KEYSTONE_ADMIN_SECRET
 
 
 # NOTE(e0ne): Service accounts is a special case so we don't inherit it from
