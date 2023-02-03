@@ -133,6 +133,7 @@ def test_service_keystone_render(
 
 
 @mock.patch.object(secrets.VncSignedCertificateSecret, "get")
+@mock.patch.object(secrets.NeutronSecret, "get")
 @mock.patch.object(services.base.OpenStackServiceWithCeph, "ceph_config")
 @mock.patch.object(secrets.SSHSecret, "ensure")
 @mock.patch.object(services.base.Service, "template_args")
@@ -140,6 +141,7 @@ def test_service_nova_with_ceph_render(
     mock_template_args,
     mock_ssh,
     mock_ceph_template_args,
+    mock_neutron_secret,
     mock_vnc,
     openstackdeployment_mspec,
     kubeapi,
@@ -167,6 +169,13 @@ def test_service_nova_with_ceph_render(
         "server_key",
         "client_cert",
         "client_key",
+    )
+    mock_neutron_secret.return_value = secrets.NeutronCredentials(
+        database=creds_dict,
+        messaging=creds_dict,
+        notifications=creds_dict,
+        metadata_secret="metadata_secret",
+        ipsec_secret_key="ipsec_secret",
     )
 
     osdplstmock = mock.MagicMock()

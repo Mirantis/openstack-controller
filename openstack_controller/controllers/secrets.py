@@ -161,34 +161,6 @@ async def handle_bgpvpnsecret(
     )
 
 
-@kopf.on.create(
-    "",
-    "v1",
-    "secrets",
-    labels={"application": "keystone", "component": "server"},
-)
-async def handle_keystone_secret(
-    body,
-    meta,
-    name,
-    status,
-    logger,
-    diff,
-    **kwargs,
-):
-    if name != constants.KEYSTONE_ADMIN_SECRET:
-        return
-
-    LOG.debug(f"Handling secret create {name}")
-
-    secret_data = {}
-    for key in AUTH_KEYS:
-        secret_data[key[3:].lower()] = body["data"][key]
-
-    ksadmin_secret = secrets.KeystoneAdminSecret(meta["namespace"])
-    ksadmin_secret.save(secret_data)
-
-
 @kopf.on.update(
     "",
     "v1",

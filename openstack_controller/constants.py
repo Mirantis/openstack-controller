@@ -114,7 +114,6 @@ RGW_KEYSTONE_SECRET = "ceph-keystone-user"
 UNKNOWN, OK, PROGRESS, BAD = "Unknown", "Ready", "Progressing", "Unhealthy"
 
 NEUTRON_KEYSTONE_SECRET = "neutron-keystone-admin"
-KEYSTONE_ADMIN_SECRET = "keystone-keystone-admin"
 KEYSTONE_CONFIG_SECRET = "keystone-etc"
 RABBITMQ_USERS_CREDENTIALS_SECRET = "openstack-rabbitmq-users-credentials"
 OPENSTACK_TF_SHARED_NAMESPACE = "openstack-tf-shared"
