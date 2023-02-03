@@ -241,63 +241,35 @@ class Secret(abc.ABC):
         modify existing fields in secret (e.g update password).
         Returns object of self.secret_class - e.g. OpenStackAdminCredentials
 
-        :param secret: Dict(str, <obj>) or dataclass
-                       object.
-                       Example:
-                            {"creds_name1": OSSytemCreds(....)}
-                            or
-                            OpenStackAdminCredentials(...)
-        :param to_update: dictionary with fields and subfields mapping
+        :param secret: Dict
+        :param to_update: Dict of next format {"creds_name":["field1", "field2"]}
+                          TODO(mkarpin): add ability to work with nested fields
+        :returns cls.secret_class instance
         """
-        new_obj = self.create()
-        new_dict = asdict(new_obj)
-        if isinstance(secret, self.secret_class):
-            secret = self._pack_fields(asdict(secret))
+        new_dict = self.secret_class.to_json(self.create())
         for creds_name, creds_fields in to_update.items():
             LOG.info(
                 f"Filling credentials {creds_name} in secret {self.secret_name}"
             )
             if not creds_fields or creds_name not in secret.keys():
-                secret[creds_name] = getattr(new_obj, creds_name)
+                secret[creds_name] = new_dict[creds_name]
             else:
                 for field in creds_fields:
-                    setattr(
-                        secret[creds_name], field, new_dict[creds_name][field]
-                    )
+                    secret[creds_name][field] = new_dict[creds_name][field]
                     LOG.info(
                         f"Updating {creds_name} {field} in secret {self.secret_name}"
                     )
-        return self.secret_class(**secret)
+        return self.secret_class.from_json(secret)
 
     @abc.abstractmethod
     def create(self):
         """Initialize secret in cls.secret_class format"""
         pass
 
-    def _pack_fields(self, data):
-        """
-        Transform data dictionary to dictionary of objects
-
-        The method takes dictionary of base64 encoded string
-        or dictionary of dictionaries and returns dictionary
-        of objects of needed class.
-
-        :param data: Dict(str, str) or Dict(str, dict)
-        """
-        params = {}
-        for kind, creds in data.items():
-            try:
-                decoded = json.loads(base64.b64decode(creds))
-            except TypeError:
-                decoded = creds
-            params[kind] = OSSytemCreds(**decoded)
-        return params
-
     def _update_format(self, data):
-        params = self._pack_fields(data)
         all_fields = [f.name for f in fields(self.secret_class)]
-        new_fields = {f: [] for f in set(all_fields) - set(params)}
-        return self._fill_new_fields(params, new_fields)
+        new_fields = {f: [] for f in set(all_fields) - set(data)}
+        return self._fill_new_fields(data, new_fields)
 
     def ensure(self, new_fields=None):
         """Ensure k8s secret exists and is in correct format.
@@ -319,12 +291,14 @@ class Secret(abc.ABC):
             LOG.info(
                 f"Secret {self.secret_name} has incorrect format. Updating it..."
             )
-            data = get_secret_data(self.namespace, self.secret_name)
+            data = self.get_data()
             secret = self._update_format(data)
             save_secret = True
 
         if new_fields:
-            secret = self._fill_new_fields(secret, new_fields)
+            secret = self._fill_new_fields(
+                self.secret_class.to_json(secret), new_fields
+            )
 
         if any([save_secret, new_fields]):
             self.save(secret)
@@ -342,16 +316,22 @@ class Secret(abc.ABC):
             data[key] = base64.b64encode(value.encode()).decode()
         kube.save_secret_data(self.namespace, self.secret_name, data)
 
-    @final
-    def get(self):
-        """Get data from k8s and return instance of cls.secret_class"""
-        data = get_secret_data(self.namespace, self.secret_name)
-        for key in data.keys():
-            value = base64.b64decode(data[key]).decode()
+    def get_data(self):
+        """Get data from k8s and return dict"""
+        data = {}
+        raw_data = get_secret_data(self.namespace, self.secret_name)
+        for key in raw_data.keys():
+            value = base64.b64decode(raw_data[key]).decode()
             try:
                 data[key] = json.loads(value)
             except json.decoder.JSONDecodeError:
                 data[key] = value
+        return data
+
+    @final
+    def get(self):
+        """Get data from k8s and return instance of cls.secret_class"""
+        data = self.get_data()
         return self.secret_class.from_json(data)
 
 
