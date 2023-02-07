@@ -3,8 +3,11 @@ ARG FROM=docker-remote.docker.mirantis.net/ubuntu:focal
 FROM $FROM as builder
 # NOTE(pas-ha) need Git for pbr to install from source checkout w/o sdist
 ADD https://bootstrap.pypa.io/get-pip.py /tmp/get-pip.py
+
 RUN apt-get update; \
-    apt-get install -y \
+    apt-get -y upgrade
+
+RUN apt-get install -y \
         python3-distutils \
         build-essential \
         python3.8-dev \
@@ -42,6 +45,8 @@ COPY --from=builder /opt/wheels /opt/wheels
 COPY --from=builder /opt/operator/uwsgi.ini /opt/operator/uwsgi.ini
 COPY --from=builder /opt/operator/source-requirements.txt /opt/operator/source-requirements.txt
 ADD kopf-patches /tmp/kopf-patches
+RUN apt-get update; \
+    apt-get -y upgrade
 # NOTE(pas-ha) apt-get download + dpkg-deb -x is a dirty hack
 # to fetch distutils w/o pulling in most of python3.6
 # FIXME(pas-ha) strace/gdb is installed only temporary for now for debugging
