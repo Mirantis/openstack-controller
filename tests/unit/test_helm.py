@@ -19,6 +19,7 @@ import pytest
 
 from openstack_controller import helm
 from openstack_controller import exception
+import kopf
 
 
 def get_helm_release(name):
@@ -278,3 +279,52 @@ async def test_install_rollback(subprocess_shell, helm_error_rollout_restart):
         ],
         any_order=True,
     )
+
+
+@pytest.mark.asyncio
+async def test_install_remove_forbidden_item(
+    subprocess_shell,
+    kube_get_object_by_kind,
+    kube_find,
+    kube_wait_for_deleted,
+    helm_error_forbidden_item,
+):
+    hc = helm.HelmManager()
+    subprocess_shell.return_value.returncode = 1
+    subprocess_shell.return_value.communicate.return_value = (
+        b"",
+        helm_error_forbidden_item,
+    )
+    kube_find.return_value = mock.AsyncMock()
+    kube_get_object_by_kind.return_value = mock.AsyncMock()
+
+    with pytest.raises(exception.HelmImmutableFieldChange):
+        await hc.run_cmd("helm upgrade --install test-release")
+    kube_find.assert_called_with(
+        mock.ANY, "etcd-etcd", "openstack", silent=True
+    )
+    kube_get_object_by_kind.assert_called_with("StatefulSet")
+    kube_find.return_value.exists.assert_called_once()
+    kube_find.return_value.delete.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_install_pvc_test(
+    subprocess_shell,
+    kube_get_object_by_kind,
+    kube_find,
+    kube_wait_for_deleted,
+    helm_error_pvc_test,
+):
+    hc = helm.HelmManager()
+    subprocess_shell.return_value.returncode = 1
+    subprocess_shell.return_value.communicate.return_value = (
+        b"",
+        helm_error_pvc_test,
+    )
+    kube_find.return_value = mock.AsyncMock()
+    kube_get_object_by_kind.return_value = mock.AsyncMock()
+
+    with pytest.raises(kopf.TemporaryError):
+        await hc.run_cmd("helm upgrade --install test-release")
+    kube_find.return_value.delete.assert_not_called()
