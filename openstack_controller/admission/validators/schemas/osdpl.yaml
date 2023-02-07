@@ -153,14 +153,6 @@ properties:
         type: object
         additionalProperties: false
         properties:
-          policy_in_code:
-            type: object
-            additionalProperties: false
-            properties:
-              enabled:
-                type: boolean
-                description: |
-                  Trigger to use built in policies provided by OpenStack components.
           aodh: &custom_policies
             type: object
             additionalProperties: true
