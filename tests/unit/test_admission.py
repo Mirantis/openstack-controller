@@ -285,6 +285,228 @@ def test_upgrade_with_extra_changes_fail(client):
     )
 
 
+def test_credentials_rotation_ok(client, osdplst):
+    req = copy.deepcopy(ADMISSION_REQ)
+    osdplst.return_value.obj = {
+        "status": {"openstack_version": "train", "osdpl": {"state": "APPLIED"}}
+    }
+    get_osdpl_status_mock = mock.Mock()
+    # FIXME add test on applying
+    get_osdpl_status_mock.return_value = "APPLIED"
+    osdplst.return_value.get_osdpl_status = get_osdpl_status_mock
+
+    rotation_group = "admin"
+    rotation_creds = "identity"
+    req["request"]["operation"] = "UPDATE"
+    req["request"]["oldObject"] = copy.deepcopy(req["request"]["object"])
+    req["request"]["object"]["spec"]["features"]["credentials"] = {
+        rotation_group: {rotation_creds: {"rotation_id": 1}}
+    }
+    response = client.simulate_post("/validate", json=req)
+    assert response.status == falcon.HTTP_OK
+    assert response.json["response"]["allowed"] is True
+
+
+def test_credentials_rotation_with_extra_changes_fail(client, osdplst):
+    req = copy.deepcopy(ADMISSION_REQ)
+    osdplst.return_value.obj = {
+        "status": {"openstack_version": "train", "osdpl": {"state": "APPLIED"}}
+    }
+    get_osdpl_status_mock = mock.Mock()
+    get_osdpl_status_mock.return_value = "APPLIED"
+    osdplst.return_value.get_osdpl_status = get_osdpl_status_mock
+
+    rotation_group = "admin"
+    rotation_creds = "identity"
+    req["request"]["operation"] = "UPDATE"
+    req["request"]["oldObject"] = copy.deepcopy(req["request"]["object"])
+    req["request"]["object"]["spec"]["features"]["credentials"] = {
+        rotation_group: {rotation_creds: {"rotation_id": 1}}
+    }
+    req["request"]["object"]["spec"]["size"] = "small"
+    response = client.simulate_post("/validate", json=req)
+    assert response.status == falcon.HTTP_OK
+    assert response.json["response"]["allowed"] is False
+    assert response.json["response"]["status"]["code"] == 400
+    assert (
+        "changing other values in the spec is not permitted"
+        in response.json["response"]["status"]["message"]
+    )
+
+
+def test_credentials_generation_decrease_fail(client, osdplst):
+    req = copy.deepcopy(ADMISSION_REQ)
+    osdplst.return_value.obj = {
+        "status": {"openstack_version": "train", "osdpl": {"state": "APPLIED"}}
+    }
+    get_osdpl_status_mock = mock.Mock()
+    get_osdpl_status_mock.return_value = "APPLIED"
+    osdplst.return_value.get_osdpl_status = get_osdpl_status_mock
+
+    rotation_group = "admin"
+    rotation_creds = "identity"
+    req["request"]["operation"] = "UPDATE"
+    req["request"]["oldObject"] = copy.deepcopy(req["request"]["object"])
+    req["request"]["oldObject"]["spec"]["features"]["credentials"] = {
+        rotation_group: {rotation_creds: {"rotation_id": 2}}
+    }
+    req["request"]["object"]["spec"]["features"]["credentials"] = {
+        rotation_group: {rotation_creds: {"rotation_id": 1}}
+    }
+    response = client.simulate_post("/validate", json=req)
+    assert response.status == falcon.HTTP_OK
+    assert response.json["response"]["allowed"] is False
+    assert response.json["response"]["status"]["code"] == 400
+    assert (
+        f"Decreasing {rotation_group} {rotation_creds} rotation_id is not allowed"
+        in response.json["response"]["status"]["message"]
+    )
+
+
+def test_credentials_generation_float_fail(client, osdplst):
+    req = copy.deepcopy(ADMISSION_REQ)
+    osdplst.return_value.obj = {
+        "status": {"openstack_version": "train", "osdpl": {"state": "APPLIED"}}
+    }
+    get_osdpl_status_mock = mock.Mock()
+    get_osdpl_status_mock.return_value = "APPLIED"
+    osdplst.return_value.get_osdpl_status = get_osdpl_status_mock
+
+    rotation_group = "admin"
+    rotation_creds = "identity"
+    req["request"]["operation"] = "UPDATE"
+    req["request"]["oldObject"] = copy.deepcopy(req["request"]["object"])
+    req["request"]["object"]["spec"]["features"]["credentials"] = {
+        rotation_group: {rotation_creds: {"rotation_id": 1.1}}
+    }
+    response = client.simulate_post("/validate", json=req)
+    assert response.status == falcon.HTTP_OK
+    assert response.json["response"]["allowed"] is False
+    assert response.json["response"]["status"]["code"] == 400
+
+
+def test_credentials_generation_zero_fail(client, osdplst):
+    req = copy.deepcopy(ADMISSION_REQ)
+    osdplst.return_value.obj = {
+        "status": {"openstack_version": "train", "osdpl": {"state": "APPLIED"}}
+    }
+    get_osdpl_status_mock = mock.Mock()
+    get_osdpl_status_mock.return_value = "APPLIED"
+    osdplst.return_value.get_osdpl_status = get_osdpl_status_mock
+
+    rotation_group = "admin"
+    rotation_creds = "identity"
+    req["request"]["operation"] = "UPDATE"
+    req["request"]["oldObject"] = copy.deepcopy(req["request"]["object"])
+    req["request"]["object"]["spec"]["features"]["credentials"] = {
+        rotation_group: {rotation_creds: {"rotation_id": 0}}
+    }
+    response = client.simulate_post("/validate", json=req)
+    assert response.status == falcon.HTTP_OK
+    assert response.json["response"]["allowed"] is False
+    assert response.json["response"]["status"]["code"] == 400
+
+
+def test_credentials_generation_subzero_fail(client, osdplst):
+    req = copy.deepcopy(ADMISSION_REQ)
+    osdplst.return_value.obj = {
+        "status": {"openstack_version": "train", "osdpl": {"state": "APPLIED"}}
+    }
+    get_osdpl_status_mock = mock.Mock()
+    get_osdpl_status_mock.return_value = "APPLIED"
+    osdplst.return_value.get_osdpl_status = get_osdpl_status_mock
+
+    rotation_group = "admin"
+    rotation_creds = "identity"
+    req["request"]["operation"] = "UPDATE"
+    req["request"]["oldObject"] = copy.deepcopy(req["request"]["object"])
+    req["request"]["object"]["spec"]["features"]["credentials"] = {
+        rotation_group: {rotation_creds: {"rotation_id": -1}}
+    }
+    response = client.simulate_post("/validate", json=req)
+    assert response.status == falcon.HTTP_OK
+    assert response.json["response"]["allowed"] is False
+    assert response.json["response"]["status"]["code"] == 400
+
+
+def test_credentials_generation_remove_fail(client, osdplst):
+    req = copy.deepcopy(ADMISSION_REQ)
+    osdplst.return_value.obj = {
+        "status": {"openstack_version": "train", "osdpl": {"state": "APPLIED"}}
+    }
+    get_osdpl_status_mock = mock.Mock()
+    get_osdpl_status_mock.return_value = "APPLIED"
+    osdplst.return_value.get_osdpl_status = get_osdpl_status_mock
+
+    rotation_group = "admin"
+    rotation_creds = "identity"
+    req["request"]["operation"] = "UPDATE"
+    req["request"]["oldObject"] = copy.deepcopy(req["request"]["object"])
+    req["request"]["oldObject"]["spec"]["features"]["credentials"] = {
+        rotation_group: {rotation_creds: {"rotation_id": 2}}
+    }
+    req["request"]["object"]["spec"]["features"]["credentials"] = {}
+
+    response = client.simulate_post("/validate", json=req)
+    assert response.status == falcon.HTTP_OK
+    assert response.json["response"]["allowed"] is False
+    assert response.json["response"]["status"]["code"] == 400
+    assert (
+        f"Removing {rotation_group} {rotation_creds} rotation config is not allowed"
+        in response.json["response"]["status"]["message"]
+    )
+
+
+def test_credentials_increase_fail(client, osdplst):
+    req = copy.deepcopy(ADMISSION_REQ)
+    osdplst.return_value.obj = {
+        "status": {"openstack_version": "train", "osdpl": {"state": "APPLIED"}}
+    }
+    get_osdpl_status_mock = mock.Mock()
+    get_osdpl_status_mock.return_value = "APPLIED"
+    osdplst.return_value.get_osdpl_status = get_osdpl_status_mock
+
+    rotation_group = "admin"
+    rotation_creds = "identity"
+    req["request"]["operation"] = "UPDATE"
+    req["request"]["oldObject"] = copy.deepcopy(req["request"]["object"])
+    req["request"]["oldObject"]["spec"]["features"]["credentials"] = {
+        rotation_group: {rotation_creds: {"rotation_id": 2}}
+    }
+    req["request"]["object"]["spec"]["features"]["credentials"] = {
+        rotation_group: {rotation_creds: {"rotation_id": 4}}
+    }
+
+    response = client.simulate_post("/validate", json=req)
+    assert response.status == falcon.HTTP_OK
+    assert response.json["response"]["allowed"] is False
+    assert response.json["response"]["status"]["code"] == 400
+    assert (
+        f"Increasing {rotation_group} {rotation_creds} rotation_id more than by 1 is not allowed"
+        in response.json["response"]["status"]["message"]
+    )
+
+
+def test_credentials_generation_on_create_fail(client):
+    req = copy.deepcopy(ADMISSION_REQ)
+
+    rotation_group = "admin"
+    rotation_creds = "identity"
+    req["request"]["operation"] = "CREATE"
+    req["request"]["object"]["spec"]["features"]["credentials"] = {
+        rotation_group: {rotation_creds: {"rotation_id": 2}}
+    }
+
+    response = client.simulate_post("/validate", json=req)
+    assert response.status == falcon.HTTP_OK
+    assert response.json["response"]["allowed"] is False
+    assert response.json["response"]["status"]["code"] == 400
+    assert (
+        f"Confguring {rotation_group} {rotation_creds} rotation is not allowed on CREATE"
+        in response.json["response"]["status"]["message"]
+    )
+
+
 def test_physnet_required_no_tf(client):
     req = copy.deepcopy(ADMISSION_REQ)
     req["request"]["object"]["spec"]["features"]["neutron"][

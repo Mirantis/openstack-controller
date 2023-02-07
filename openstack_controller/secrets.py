@@ -6,6 +6,7 @@ import json
 from os import urandom
 from typing import Dict, List, Optional, final
 
+import kopf
 import pykube
 
 from cryptography import x509
@@ -190,6 +191,16 @@ def get_secret_data(namespace: str, name: str):
 def get_secret_priority(secret):
     secret.reload()
     return int(secret.annotations.get(constants.SECRET_PRIORITY, 0))
+
+
+def set_secret_priority(secret, priority):
+    secret.patch(
+        {
+            "metadata": {
+                "annotations": {constants.SECRET_PRIORITY: str(priority)}
+            }
+        }
+    )
 
 
 def get_secrets_sorted(namespace, names):
@@ -379,8 +390,8 @@ class MultiSecret(abc.ABC):
 
     def k8s_get_data(self, name):
         for secret in self.k8s_secrets:
-            secret.reload()
             if secret.name == name:
+                secret.reload()
                 return secret.obj["data"]
         raise pykube.exceptions.ObjectDoesNotExist()
 
@@ -409,6 +420,11 @@ class MultiSecret(abc.ABC):
     @abc.abstractmethod
     def create(self):
         """Initialize secret in cls.secret_class format"""
+        pass
+
+    @abc.abstractmethod
+    def rotate(self):
+        """Rotate/change credentials in secret"""
         pass
 
     def _update_format(self, data):
@@ -484,12 +500,42 @@ class OpenStackAdminSecret(MultiSecret):
         messaging = OSSytemCreds(
             username="rabbitmq", password=generate_password()
         )
-        identity = OSSytemCreds(username="admin", password=generate_password())
-
+        identity = OSSytemCreds(
+            username=generate_name("admin"), password=generate_password()
+        )
         admin_creds = OpenStackAdminCredentials(
             database=db, messaging=messaging, identity=identity
         )
         return admin_creds
+
+    def rotate(self, rotation_id):
+        active, backup = self.k8s_secrets
+
+        secret_rotation_id = get_secret_priority(active)
+        if secret_rotation_id == rotation_id:
+            LOG.info(f"Secret {active.name} already is rotated")
+            return
+        # for case when osdpl object was recreated on environment
+        # where rotation has been performed and existing secrets may have
+        # rotation_id set to some value
+        elif secret_rotation_id > rotation_id:
+            raise kopf.TemporaryError(
+                f"Cannot rotate, secret {active.name} has greater rotation_id, than requested"
+            )
+
+        LOG.info(f"Starting rotation of active secret {active.name}")
+        LOG.info(f"Backup secret {backup.name} will be promoted to active")
+
+        active_data = self.get_data(active.name)
+        backup_data = self.get_data(backup.name)
+        # currently only identity rotation is supported
+        # other fields should be copied
+        for field in active_data.keys():
+            if field != "identity":
+                backup_data[field] = active_data[field]
+        secret = self._fill_new_fields(backup_data, {"identity": ["password"]})
+        self.save(secret, backup.name)
+        set_secret_priority(backup, rotation_id)
 
 
 class RabbitmqGuestSecret(Secret):

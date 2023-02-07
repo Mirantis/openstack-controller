@@ -151,6 +151,26 @@ def cleanup_helm_cache():
             os.remove(os.path.join(root, file))
 
 
+def rotate_credentials(old, new, namespace):
+    new_credentials = utils.get_in(
+        new, ["spec", "features", "credentials"], {}
+    )
+    new_rotation_id = utils.get_in(
+        new_credentials, ["admin", "identity", "rotation_id"], 0
+    )
+
+    if new_rotation_id:
+        old_credentials = utils.get_in(
+            old, ["spec", "features", "credentials"], {}
+        )
+        old_rotation_id = utils.get_in(
+            old_credentials, ["admin", "identity", "rotation_id"], 0
+        )
+
+        if new_rotation_id != old_rotation_id:
+            secrets.OpenStackAdminSecret(namespace).rotate(new_rotation_id)
+
+
 # on.field to force storing that field to be reacting on its changes
 @kopf.on.field(*kube.OpenStackDeployment.kopf_on_args, field="status.watched")
 @kopf.on.resume(*kube.OpenStackDeployment.kopf_on_args)
@@ -189,6 +209,7 @@ async def handle(body, meta, spec, logger, reason, **kwargs):
     check_handling_allowed(kwargs["old"], kwargs["new"], reason)
 
     secrets.OpenStackAdminSecret(namespace).ensure()
+    rotate_credentials(kwargs["old"], kwargs["new"], namespace)
 
     osdpl = kube.get_osdpl()
     mspec = osdpl.mspec

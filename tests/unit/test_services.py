@@ -56,6 +56,7 @@ def mock_osdpl(mocker):
     mocker.stopall()
 
 
+@mock.patch("openstack_controller.secrets.generate_name")
 @mock.patch("openstack_controller.secrets.generate_password")
 @mock.patch.object(secrets.OpenStackAdminSecret, "k8s_get_data")
 @mock.patch.object(secrets, "get_secret_priority")
@@ -63,6 +64,7 @@ def test_get_admin_creds(
     mock_priority,
     mock_data,
     mock_password,
+    mock_name,
     openstackdeployment_mspec,
     mock_osdpl,
 ):
@@ -70,10 +72,12 @@ def test_get_admin_creds(
     service = services.Nova(openstackdeployment_mspec, logging, osdplstmock)
     mock_osdpl.assert_called_once()
 
+    mock_name.return_value = "admin1234"
     mock_password.return_value = "password"
+
     mock_data.return_value = {
         "database": "eyJ1c2VybmFtZSI6ICJyb290IiwgInBhc3N3b3JkIjogInBhc3N3b3JkIn0=",
-        "identity": "eyJ1c2VybmFtZSI6ICJhZG1pbiIsICJwYXNzd29yZCI6ICJwYXNzd29yZCJ9",
+        "identity": "eyJ1c2VybmFtZSI6ICJhZG1pbjEyMzQiLCJwYXNzd29yZCI6ICJwYXNzd29yZCJ9Cg==",
         "messaging": "eyJ1c2VybmFtZSI6ICJyYWJiaXRtcSIsICJwYXNzd29yZCI6ICJwYXNzd29yZCJ9",
     }
     mock_priority.return_value = 0

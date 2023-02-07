@@ -14,24 +14,31 @@ def test_openstack_service_secret_name():
 
 
 @mock.patch("openstack_controller.secrets.generate_password")
-def test_openstack_admin_secret_create_password(mock_password):
+@mock.patch("openstack_controller.secrets.generate_name")
+def test_openstack_admin_secret_create(mock_name, mock_password):
+    username = "adminxav1"
     password = "password"
+    mock_name.return_value = username
     mock_password.return_value = password
     secret = secrets.OpenStackAdminSecret("ns")
     creds = secret.create()
     assert creds.database.username == "root"
     assert creds.database.password == password
-    assert creds.identity.username == "admin"
+    assert creds.identity.username == username
     assert creds.identity.password == password
     assert creds.messaging.username == "rabbitmq"
     assert creds.messaging.password == password
 
+    assert mock_name.call_count == 1
     assert mock_password.call_count == 3
 
 
 @mock.patch("openstack_controller.secrets.generate_password")
-def test_openstack_admin_secret_new_password(mock_password):
+@mock.patch("openstack_controller.secrets.generate_name")
+def test_openstack_admin_secret_new_password(mock_name, mock_password):
+    username = "adminxav1"
     password = "password"
+    mock_name.return_value = username
     mock_password.return_value = password
     secret = secrets.OpenStackAdminSecret("ns")
     creds = secret.secret_class.to_json(secret.create())
@@ -42,7 +49,31 @@ def test_openstack_admin_secret_new_password(mock_password):
 
     assert new.database.username == "root"
     assert new.database.password == password
-    assert new.identity.username == "admin"
+    assert new.identity.username == username
+    assert new.identity.password == new_password
+    assert new.messaging.username == "rabbitmq"
+    assert new.messaging.password == password
+
+
+@mock.patch("openstack_controller.secrets.generate_password")
+@mock.patch("openstack_controller.secrets.generate_name")
+def test_openstack_admin_secret_new_identity(mock_name, mock_password):
+    username = "adminxav1"
+    password = "password"
+    mock_name.return_value = username
+    mock_password.return_value = password
+    secret = secrets.OpenStackAdminSecret("ns")
+    creds = secret.secret_class.to_json(secret.create())
+
+    new_username = "admin1abc"
+    new_password = "password1"
+    mock_name.return_value = new_username
+    mock_password.return_value = new_password
+    new = secret._fill_new_fields(creds, {"identity": []})
+
+    assert new.database.username == "root"
+    assert new.database.password == password
+    assert new.identity.username == new_username
     assert new.identity.password == new_password
     assert new.messaging.username == "rabbitmq"
     assert new.messaging.password == password

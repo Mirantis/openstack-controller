@@ -149,6 +149,24 @@ properties:
       - neutron
       - nova
     properties:
+      credentials:
+        type: object
+        additionalProperties: false
+        properties:
+          admin:
+            type: object
+            additionalProperties: false
+            properties:
+              identity:
+                type: object
+                additionalProperties: false
+                properties:
+                  rotation_id:
+                    type: integer
+                    description: |
+                      Integer incremental field for trigerring keystone admin user credentials rotation.
+                      Should be greater than 0. Increase only by one is allowed. Once added, removing
+                      this field is not allowed.
       policies:
         type: object
         additionalProperties: false
