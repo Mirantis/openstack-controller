@@ -182,3 +182,5 @@ KINDS_FOR_MANUAL_UPDATE = [
     "PersistentVolume",
     "PersistentVolumeClaim",
 ]
+
+SECRET_PRIORITY = "openstack.lcm.mirantis.com/secret_priority"
