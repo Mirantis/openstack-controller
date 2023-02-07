@@ -1036,6 +1036,18 @@ class Neutron(OpenStackService, MaintenanceApiMixin):
                     ngs_ssh_keys[f"{device['name']}_ssh_private_key"] = device[
                         "ssh_private_key"
                     ]
+            for device_name, device in (
+                self.mspec["features"]
+                .get("neutron", {})
+                .get("baremetal", {})
+                .get("ngs", {})
+                .get("hardware", {})
+                .items()
+            ):
+                if "ssh_private_key" in device:
+                    ngs_ssh_keys[f"{device_name}_ssh_private_key"] = device[
+                        "ssh_private_key"
+                    ]
         if ngs_ssh_keys:
             ngs_secret = secrets.NgsSSHSecret(self.namespace)
             ngs_secret.save(ngs_ssh_keys)
