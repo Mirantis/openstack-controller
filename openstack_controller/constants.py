@@ -177,3 +177,8 @@ POLICY_IN_CODE_SERVICES = [
 ]
 
 OSCTL_SECRET_LABEL = ("openstack.lcm.mirantis.com/osdpl_secret", "true")
+
+KINDS_FOR_MANUAL_UPDATE = [
+    "PersistentVolume",
+    "PersistentVolumeClaim",
+]

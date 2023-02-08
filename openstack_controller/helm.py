@@ -10,6 +10,7 @@ from asyncio.subprocess import PIPE
 import kopf
 
 from openstack_controller import utils
+from openstack_controller import constants
 from openstack_controller import exception
 from openstack_controller import kube
 
@@ -53,6 +54,12 @@ class HelmManager:
                 name, kind = match
             except:
                 kopf.TemporaryError("Failed to guess name and kind.")
+
+            if kind in constants.KINDS_FOR_MANUAL_UPDATE:
+                raise kopf.TemporaryError(
+                    f"The {kind} object can't be updated automatically. Please do this update manually."
+                )
+
             LOG.info(f"Trying to remove kind: {kind} with name: {name}")
             kube_class = kube.get_object_by_kind(kind)
             if not kube_class:
@@ -110,8 +117,10 @@ class HelmManager:
                     stdout,
                     stderr,
                 )
-                if "field is immutable" in stderr:
-                    LOG.warning("Trying to modify immutable object")
+                if stderr.rstrip().endswith(
+                    ("field is immutable", "are forbidden")
+                ):
+                    LOG.warning("Trying to modify object")
                     await self._guess_and_delete(stderr)
                     raise exception.HelmImmutableFieldChange()
                 if (

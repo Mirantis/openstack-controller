@@ -198,6 +198,14 @@ def helm_error_5_item():
 
 
 @pytest.fixture
+def helm_error_forbidden_item():
+    fixture_file = "tests/fixtures/test_helm/forbidden_item.txt"
+    with open(fixture_file, "rb") as f:
+        error = f.read()
+    yield error
+
+
+@pytest.fixture
 def helm_error_rollout_restart():
     fixture_file = "tests/fixtures/test_helm/rollout_restart.txt"
     with open(fixture_file, "rb") as f:
@@ -212,3 +220,11 @@ def substitute_mock(mocker):
     )
     yield substitute_mock
     mocker.stopall()
+
+
+@pytest.fixture
+def helm_error_pvc_test():
+    fixture_file = "tests/fixtures/test_helm/pvc_test.txt"
+    with open(fixture_file, "rb") as f:
+        error = f.read()
+    yield error
