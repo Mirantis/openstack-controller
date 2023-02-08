@@ -1091,7 +1091,7 @@ class Neutron(OpenStackService, MaintenanceApiMixin):
             # secret
             if neighbors_secret.kube_obj.exists():
                 peers = neighbors_secret.get_peer_ips()
-            self.mspec["features"]["neutron"]["bgpvpn"]["peers"] = peers
+            t_args["bgpvpn_reflector_peers"] = peers
 
         return t_args
 
