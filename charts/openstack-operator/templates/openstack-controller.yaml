@@ -36,6 +36,9 @@ rules:
     resources: [openstackdeploymentstatus]
     verbs: [list, get, watch]
   - apiGroups: [lcm.mirantis.com]
+    resources: [openstackdeploymentsecrets]
+    verbs: [list, get, watch]
+  - apiGroups: [lcm.mirantis.com]
     resources: [helmbundles]
     verbs: [list, get, watch]
 
@@ -89,6 +92,11 @@ rules:
   # Application: watching & handling for the custom resource we declare.
   - apiGroups: [lcm.mirantis.com]
     resources: [openstackdeploymentstatus]
+    verbs: [list, get, watch, patch]
+
+  # Application: watching & handling for the custom resource we declare.
+  - apiGroups: [lcm.mirantis.com]
+    resources: [openstackdeploymentsecrets]
     verbs: [list, get, watch, patch]
 
   # Application: resources we produce and manipulate.
