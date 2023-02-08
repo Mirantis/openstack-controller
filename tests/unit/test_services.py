@@ -57,9 +57,14 @@ def mock_osdpl(mocker):
 
 
 @mock.patch("openstack_controller.secrets.generate_password")
-@mock.patch.object(secrets, "get_secret_data")
+@mock.patch.object(secrets.OpenStackAdminSecret, "k8s_get_data")
+@mock.patch.object(secrets, "get_secret_priority")
 def test_get_admin_creds(
-    mock_data, mock_password, openstackdeployment_mspec, mock_osdpl
+    mock_priority,
+    mock_data,
+    mock_password,
+    openstackdeployment_mspec,
+    mock_osdpl,
 ):
     osdplstmock = mock.MagicMock()
     service = services.Nova(openstackdeployment_mspec, logging, osdplstmock)
@@ -71,17 +76,18 @@ def test_get_admin_creds(
         "identity": "eyJ1c2VybmFtZSI6ICJhZG1pbiIsICJwYXNzd29yZCI6ICJwYXNzd29yZCJ9",
         "messaging": "eyJ1c2VybmFtZSI6ICJyYWJiaXRtcSIsICJwYXNzd29yZCI6ICJwYXNzd29yZCJ9",
     }
+    mock_priority.return_value = 0
 
     expected_secret = secrets.OpenStackAdminSecret("namespace")
     expected_creds = expected_secret.create()
 
-    admin_creeds = service._get_admin_creds()
-    assert expected_creds.database.username == admin_creeds.database.username
-    assert expected_creds.database.password == admin_creeds.database.password
-    assert expected_creds.identity.username == admin_creeds.identity.username
-    assert expected_creds.identity.password == admin_creeds.identity.password
-    assert expected_creds.messaging.username == admin_creeds.messaging.username
-    assert expected_creds.messaging.password == admin_creeds.messaging.password
+    admin_creds = service._get_admin_creds()
+    assert expected_creds.database.username == admin_creds.database.username
+    assert expected_creds.database.password == admin_creds.database.password
+    assert expected_creds.identity.username == admin_creds.identity.username
+    assert expected_creds.identity.password == admin_creds.identity.password
+    assert expected_creds.messaging.username == admin_creds.messaging.username
+    assert expected_creds.messaging.password == admin_creds.messaging.password
 
 
 @mock.patch.object(services.Keystone, "template_args")

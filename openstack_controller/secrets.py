@@ -177,9 +177,49 @@ class KeycloackCreds(Serializer):
     passphrase: str
 
 
+def get_secret(namespace: str, name: str, silent: bool = False):
+    secret = kube.find(pykube.Secret, name, namespace, silent=silent)
+    return secret
+
+
 def get_secret_data(namespace: str, name: str):
-    secret = kube.find(pykube.Secret, name, namespace)
+    secret = get_secret(namespace, name)
     return secret.obj["data"]
+
+
+def get_secret_priority(secret):
+    secret.reload()
+    return int(secret.annotations.get(constants.SECRET_PRIORITY, 0))
+
+
+def get_secrets_sorted(namespace, names):
+    """
+    Get secret objects by names and sort them by priority
+
+    Method creates list of found secrets having priority, and sorts it,
+    secrets which don't have priority are appended to end of
+    the list.
+
+    :param namespace: string name of secrets namespace
+    :param names: list of secret names to search and sort
+
+    :returns list of pykube.Secret objects and/or NoneType objects
+    """
+    res_map = {}
+    no_priority = []
+    for name in names:
+        secret = get_secret(namespace, name, silent=True)
+        if secret is not None:
+            priority = get_secret_priority(secret)
+            if priority != 0:
+                res_map[priority] = secret
+            else:
+                no_priority.append(secret)
+    res = []
+    for priority in sorted(res_map.keys(), reverse=True):
+        res.append(res_map[priority])
+    res.extend(no_priority)
+    return res
 
 
 def generate_password(length: int = 32):
@@ -219,19 +259,20 @@ def generate_name(prefix="", length=16):
     return "".join(res)
 
 
+def generate_credentials(
+    prefix: str, username_length: int = 16, password_length: int = 32
+) -> OSSytemCreds:
+    password = generate_password(length=password_length)
+    username = generate_name(prefix=prefix, length=username_length)
+    return OSSytemCreds(username=username, password=password)
+
+
 class Secret(abc.ABC):
     secret_name = None
     secret_class = None
 
     def __init__(self, namespace: str):
         self.namespace = namespace
-
-    def _generate_credentials(
-        self, prefix: str, username_length: int = 16, password_length: int = 32
-    ) -> OSSytemCreds:
-        password = generate_password(length=password_length)
-        username = generate_name(prefix=prefix, length=username_length)
-        return OSSytemCreds(username=username, password=password)
 
     def _fill_new_fields(self, secret, to_update: dict):
         """
@@ -248,17 +289,11 @@ class Secret(abc.ABC):
         """
         new_dict = self.secret_class.to_json(self.create())
         for creds_name, creds_fields in to_update.items():
-            LOG.info(
-                f"Filling credentials {creds_name} in secret {self.secret_name}"
-            )
             if not creds_fields or creds_name not in secret.keys():
                 secret[creds_name] = new_dict[creds_name]
             else:
                 for field in creds_fields:
                     secret[creds_name][field] = new_dict[creds_name][field]
-                    LOG.info(
-                        f"Updating {creds_name} {field} in secret {self.secret_name}"
-                    )
         return self.secret_class.from_json(secret)
 
     @abc.abstractmethod
@@ -271,7 +306,7 @@ class Secret(abc.ABC):
         new_fields = {f: [] for f in set(all_fields) - set(data)}
         return self._fill_new_fields(data, new_fields)
 
-    def ensure(self, new_fields=None):
+    def ensure(self):
         """Ensure k8s secret exists and is in correct format.
 
         Make sure k8s representation of cls.secret_class:
@@ -279,29 +314,20 @@ class Secret(abc.ABC):
           * Is in correct format
         :returns : TODO(vsaienko) should not return anything.
         """
-
-        save_secret = False
         try:
             secret = self.get()
         except pykube.exceptions.ObjectDoesNotExist:
             secret = self.create()
             if secret:
-                save_secret = True
+                self.save(secret)
         except marshmallow.exceptions.ValidationError:
             LOG.info(
                 f"Secret {self.secret_name} has incorrect format. Updating it..."
             )
             data = self.get_data()
             secret = self._update_format(data)
-            save_secret = True
-
-        if new_fields:
-            secret = self._fill_new_fields(
-                self.secret_class.to_json(secret), new_fields
-            )
-
-        if any([save_secret, new_fields]):
             self.save(secret)
+
         return secret
 
     @final
@@ -316,6 +342,7 @@ class Secret(abc.ABC):
             data[key] = base64.b64encode(value.encode()).decode()
         kube.save_secret_data(self.namespace, self.secret_name, data)
 
+    @final
     def get_data(self):
         """Get data from k8s and return dict"""
         data = {}
@@ -335,8 +362,121 @@ class Secret(abc.ABC):
         return self.secret_class.from_json(data)
 
 
-class OpenStackAdminSecret(Secret):
-    secret_name = constants.ADMIN_SECRET_NAME
+class MultiSecret(abc.ABC):
+    secret_base_name = None
+    secret_class = None
+
+    def __init__(self, namespace: str):
+        self.namespace = namespace
+        self._secret_names = [
+            self.secret_base_name,
+            f"{self.secret_base_name}-1",
+        ]
+
+    @property
+    def k8s_secrets(self):
+        return get_secrets_sorted(self.namespace, self._secret_names)
+
+    def k8s_get_data(self, name):
+        for secret in self.k8s_secrets:
+            secret.reload()
+            if secret.name == name:
+                return secret.obj["data"]
+        raise pykube.exceptions.ObjectDoesNotExist()
+
+    def _fill_new_fields(self, secret, to_update: dict):
+        """
+        Create/add/modify fields according to secret format
+
+        The method can modify secret by adding new fields or
+        modify existing fields in secret (e.g update password).
+        Returns object of self.secret_class - e.g. OpenStackAdminCredentials
+
+        :param secret: Dict
+        :param to_update: Dict of next format {"creds_name":["field1", "field2"]}
+                          TODO(mkarpin): add ability to work with nested fields
+        :returns cls.secret_class instance
+        """
+        new_dict = self.secret_class.to_json(self.create())
+        for creds_name, creds_fields in to_update.items():
+            if not creds_fields or creds_name not in secret.keys():
+                secret[creds_name] = new_dict[creds_name]
+            else:
+                for field in creds_fields:
+                    secret[creds_name][field] = new_dict[creds_name][field]
+        return self.secret_class.from_json(secret)
+
+    @abc.abstractmethod
+    def create(self):
+        """Initialize secret in cls.secret_class format"""
+        pass
+
+    def _update_format(self, data):
+        all_fields = [f.name for f in fields(self.secret_class)]
+        new_fields = {f: [] for f in set(all_fields) - set(data)}
+        return self._fill_new_fields(data, new_fields)
+
+    def ensure(self):
+        """Ensure k8s secrets exist and are in correct format.
+
+        Make sure k8s representation of each secret of cls.secret_class:
+          * Exist
+          * Is in correct format
+        :returns : TODO(vsaienko) should not return anything.
+        """
+        for name in self._secret_names:
+            try:
+                secret = self.get(name=name)
+            except pykube.exceptions.ObjectDoesNotExist:
+                secret = self.create()
+                if secret:
+                    self.save(secret, name)
+            except marshmallow.exceptions.ValidationError:
+                LOG.info(f"Secret {name} has incorrect format. Updating it...")
+                data = self.get_data(name)
+                secret = self._update_format(data)
+                self.save(secret, name)
+        # there are some OpenstackServiceSecret secrets which
+        # return None on self.create() e.g memcached
+        if secret:
+            return self.get()
+
+    @final
+    def save(self, secret, name) -> None:
+        """Save cls.secret_class instance to k8s secret"""
+        data = self.secret_class.to_json(secret)
+
+        for key in data.keys():
+            value = data[key]
+            if isinstance(value, dict):
+                value = json.dumps(value)
+            data[key] = base64.b64encode(value.encode()).decode()
+        kube.save_secret_data(self.namespace, name, data)
+
+    @final
+    def get_data(self, name):
+        """Get data from k8s and return dict"""
+        data = {}
+        raw_data = self.k8s_get_data(name)
+        for key in raw_data.keys():
+            value = base64.b64decode(raw_data[key]).decode()
+            try:
+                data[key] = json.loads(value)
+            except json.decoder.JSONDecodeError:
+                data[key] = value
+        return data
+
+    @final
+    def get(self, seq=0, name=None):
+        """Get data from k8s and return instance of cls.secret_class"""
+        if not name:
+            name = self.k8s_secrets[seq].name
+        data = self.get_data(name)
+        return self.secret_class.from_json(data)
+
+
+class OpenStackAdminSecret(MultiSecret):
+    secret_base_name = constants.ADMIN_SECRET_NAME
     secret_class = OpenStackAdminCredentials
 
     def create(self) -> OpenStackAdminCredentials:
@@ -373,9 +513,9 @@ class OpenStackServiceSecret(Secret):
         srv = constants.OS_SERVICES_MAP.get(self.service)
         if srv:
             for service_type in ["database", "messaging", "notifications"]:
-                getattr(os_creds, service_type)[
-                    "user"
-                ] = self._generate_credentials(srv)
+                getattr(os_creds, service_type)["user"] = generate_credentials(
+                    srv
+                )
             os_creds.memcached = generate_password(length=16)
             return os_creds
         return
@@ -418,10 +558,10 @@ class GaleraSecret(Secret):
 
     def create(self) -> GaleraCredentials:
         return GaleraCredentials(
-            sst=self._generate_credentials("sst", 3),
-            exporter=self._generate_credentials("exporter", 8),
-            audit=self._generate_credentials("audit", 8),
-            backup=self._generate_credentials("backup", 8),
+            sst=generate_credentials("sst", 3),
+            exporter=generate_credentials("exporter", 8),
+            audit=generate_credentials("audit", 8),
+            backup=generate_credentials("backup", 8),
         )
 
 
@@ -465,7 +605,7 @@ class PowerDNSSecret(Secret):
 
     def create(self):
         return PowerDnsCredentials(
-            database=self._generate_credentials("powerdns"),
+            database=generate_credentials("powerdns"),
             api_key=generate_password(length=16),
         )
 
