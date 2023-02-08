@@ -198,14 +198,6 @@ cat <<EOF >> $RUN_DIR/cluster/migration/init.yml
       ca_certificates:
         mcp2_public_ca: \${_param:mcp2_public_ca}
 EOF
-
-  # allow salt-master receive files from minions
-cat <<EOF >> $RUN_DIR/cluster/migration/init.yml
-  salt:
-    master:
-      file_recv: True
-EOF
-
 }
 
 generate_globals
