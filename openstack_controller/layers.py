@@ -105,15 +105,7 @@ def services(mspec, logger, **kwargs):
 
 def _get_default_policy(spec, chart):
     openstack_version = spec["openstack_version"]
-    policy_in_code = (
-        spec.get("features", {}).get("policies", {}).get("policy_in_code", {})
-    )
     template_path = f"{openstack_version}/policies/{chart}.yaml"
-    if (
-        policy_in_code.get("enabled")
-        and chart in constants.POLICY_IN_CODE_SERVICES
-    ):
-        return {}
     return (
         yaml.safe_load(
             ENV.get_template(template_path).render(

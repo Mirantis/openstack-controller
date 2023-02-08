@@ -158,24 +158,6 @@ class NodeRole(enum.Enum):
     controller = "controller"
 
 
-POLICY_IN_CODE_SERVICES = [
-    "keystone",
-    "glance",
-    "cinder",
-    "nova",
-    "designate",
-    "neutron",
-    "heat",
-    "octavia",
-    "barbican",
-    "placement",
-    "ironic",
-    "aodh",
-    "gnocchi",
-    "masakari",
-    "manila",
-]
-
 OSCTL_SECRET_LABEL = ("openstack.lcm.mirantis.com/osdpl_secret", "true")
 
 KINDS_FOR_MANUAL_UPDATE = [

@@ -40,7 +40,6 @@ class OpenStackValidator(base.BaseValidator):
         self._check_panko_allowed(new_obj)
         self._check_manila_allowed(new_obj)
         self._deny_encrypted_api_key(new_obj)
-        self._deny_policy_in_code(new_obj)
         self._check_schedules(new_obj)
 
     def validate_delete(self, review_request):
@@ -170,24 +169,6 @@ class OpenStackValidator(base.BaseValidator):
                 "Encrypted SSL key is not allowed yet. To use SSL "
                 "the key must be not encrypted."
             )
-
-    def _deny_policy_in_code(self, new_obj):
-        policy_in_code = (
-            new_obj["spec"]
-            .get("features", {})
-            .get("policies", {})
-            .get("policy_in_code", {})
-        )
-        if policy_in_code.get("enabled"):
-            if (
-                constants.OpenStackVersion[
-                    new_obj["spec"]["openstack_version"]
-                ]
-                < constants.OpenStackVersion.victoria
-            ):
-                raise exception.OsDplValidationFailed(
-                    "Using policy in code is allowed only from Victoria release."
-                )
 
     def _check_schedules(self, new_obj):
         cleaners = (
