@@ -932,8 +932,9 @@ spec:
         bagpipe_bgp:
           bgp:
             local_address: {{ bgpvpn.get('control_interface', spec.features.neutron.tunnel_interface) }}
-            {%- if bgpvpn.get("peers") %}
-            peers: {{ bgpvpn.peers | join(',') }}
+            {%- set bgpvpn_peers = bgpvpn.get("peers", bgpvpn_reflector_peers) %}
+            {%- if bgpvpn_peers %}
+            peers: {{ bgpvpn_peers | join(',') }}
             {%- endif %}
             my_as: {{ bgpvpn.as_number }}
           common:
