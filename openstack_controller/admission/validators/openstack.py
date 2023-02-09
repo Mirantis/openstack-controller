@@ -40,6 +40,7 @@ class OpenStackValidator(base.BaseValidator):
         self._check_panko_allowed(new_obj)
         self._check_manila_allowed(new_obj)
         self._deny_encrypted_api_key(new_obj)
+        self._deny_strict_admin_policy(new_obj)
         self._check_schedules(new_obj)
 
     def validate_delete(self, review_request):
@@ -168,6 +169,24 @@ class OpenStackValidator(base.BaseValidator):
             raise exception.OsDplValidationFailed(
                 "Encrypted SSL key is not allowed yet. To use SSL "
                 "the key must be not encrypted."
+            )
+
+    def _deny_strict_admin_policy(self, new_obj):
+        strict_admin_policy = (
+            new_obj["spec"]
+            .get("features", {})
+            .get("policies", {})
+            .get("strict_admin", {})
+        )
+        os_version = constants.OpenStackVersion[
+            new_obj["spec"]["openstack_version"]
+        ]
+        if (
+            strict_admin_policy.get("enabled")
+            and os_version < constants.OpenStackVersion.yoga
+        ):
+            raise exception.OsDplValidationFailed(
+                "Strict admin policy is allowed only from Yoga release."
             )
 
     def _check_schedules(self, new_obj):
