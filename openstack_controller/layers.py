@@ -29,7 +29,7 @@ ENV = jinja2.Environment(
     loader=jinja2.PackageLoader(__name__.split(".")[0]),
     extensions=["jinja2.ext.do", "jinja2.ext.loopcontrols"],
 )
-LOG.info(f"found templates {ENV.list_templates()}")
+LOG.debug(f"found templates {ENV.list_templates()}")
 
 ENV.filters["generate_tempest_config"] = generate_tempest_config
 ENV.filters[
