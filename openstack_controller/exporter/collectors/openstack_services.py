@@ -22,6 +22,15 @@ from openstack_controller import openstack_utils
 
 LOG = utils.get_logger(__name__)
 
+OPENSTACK_CLIENT = None
+
+
+def get_os_client():
+    global OPENSTACK_CLIENT
+    if OPENSTACK_CLIENT is None:
+        OPENSTACK_CLIENT = openstack_utils.OpenStackClientManager()
+    return OPENSTACK_CLIENT
+
 
 class OpenStackBaseMetricCollector(base.BaseMetricsCollector):
     # Service type to check for presence is catalog
@@ -29,10 +38,14 @@ class OpenStackBaseMetricCollector(base.BaseMetricsCollector):
 
     def __init__(self):
         super().__init__()
+
+    @property
+    def oc(self):
         try:
-            self.oc = openstack_utils.OpenStackClientManager()
-        except Exception:
-            self.oc = None
+            return get_os_client()
+        except Exception as e:
+            LOG.warning("Failed to initialize openstack client manager")
+            LOG.exception(e)
 
     @property
     def is_service_available(self):
@@ -45,9 +58,9 @@ class OpenStackBaseMetricCollector(base.BaseMetricsCollector):
 
     @property
     def can_collect_data(self):
-        if not self.is_service_available:
-            return False
         if self.oc is None:
+            return False
+        if not self.is_service_available:
             return False
         return True
 
