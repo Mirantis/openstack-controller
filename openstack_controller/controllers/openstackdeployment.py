@@ -152,17 +152,13 @@ def cleanup_helm_cache():
 
 
 def rotate_credentials(old, new, namespace):
-    new_credentials = utils.get_in(
-        new, ["spec", "features", "credentials"], {}
-    )
+    new_credentials = utils.get_in(new, ["status", "credentials"], {})
     new_rotation_id = utils.get_in(
         new_credentials, ["admin", "identity", "rotation_id"], 0
     )
 
     if new_rotation_id:
-        old_credentials = utils.get_in(
-            old, ["spec", "features", "credentials"], {}
-        )
+        old_credentials = utils.get_in(old, ["status", "credentials"], {})
         old_rotation_id = utils.get_in(
             old_credentials, ["admin", "identity", "rotation_id"], 0
         )
@@ -173,6 +169,9 @@ def rotate_credentials(old, new, namespace):
 
 # on.field to force storing that field to be reacting on its changes
 @kopf.on.field(*kube.OpenStackDeployment.kopf_on_args, field="status.watched")
+@kopf.on.field(
+    *kube.OpenStackDeployment.kopf_on_args, field="status.credentials"
+)
 @kopf.on.resume(*kube.OpenStackDeployment.kopf_on_args)
 @kopf.on.update(*kube.OpenStackDeployment.kopf_on_args)
 @kopf.on.create(*kube.OpenStackDeployment.kopf_on_args)

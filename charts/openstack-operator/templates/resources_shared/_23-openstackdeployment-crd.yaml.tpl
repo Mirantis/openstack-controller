@@ -32,6 +32,21 @@ spec:
               type: object
               description: this is arbitrary JSON
               properties:
+                credentials:
+                  type: object
+                  properties:
+                    admin:
+                      type: object
+                      properties:
+                        identity:
+                          type: object
+                          properties:
+                            rotation_id:
+                              type: integer
+                              description: |
+                                Integer incremental field for trigerring keystone admin user credentials rotation.
+                                Should be greater than 0. Increase only by one is allowed. Once added, removing
+                                this field is not allowed.
                 watched:
                   type: object
                   description: |

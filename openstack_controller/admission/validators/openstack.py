@@ -159,20 +159,15 @@ class OpenStackValidator(base.BaseValidator):
     def _validate_credentials_on_update(
         self, old_obj, new_obj, review_request
     ):
-        _old_spec = copy.deepcopy(old_obj["spec"], {})
-        _old_credentials = _old_spec.get("features", {}).get("credentials", {})
-        _new_spec = copy.deepcopy(new_obj["spec"])
-        _new_credentials = _new_spec.get("features", {}).get("credentials", {})
+        _old_status = copy.deepcopy(old_obj.get("status", {}))
+        _old_credentials = _old_status.get("credentials", {})
+        _new_status = copy.deepcopy(new_obj.get("status", {}))
+        _new_credentials = _new_status.get("credentials", {})
 
         if _new_credentials != _old_credentials:
-            if "credentials" in _old_spec.get("features", {}).keys():
-                _old_spec["features"].pop("credentials")
-            if "credentials" in _new_spec.get("features", {}).keys():
-                _new_spec["features"].pop("credentials")
-
-            if _new_spec != _old_spec:
+            if new_obj["spec"] != old_obj["spec"]:
                 raise exception.OsDplValidationFailed(
-                    "If spec.credentials is changed, "
+                    "If status.credentials is changed, "
                     "changing other values in the spec is not permitted."
                 )
 
@@ -223,9 +218,7 @@ class OpenStackValidator(base.BaseValidator):
                         )
 
     def _check_credentials_on_create(self, new_obj):
-        _new_credentials = (
-            new_obj["spec"].get("features", {}).get("credentials", {})
-        )
+        _new_credentials = new_obj.get("status", {}).get("credentials", {})
         for group_name, group in _new_credentials.items():
             for creds_name, creds_config in group.items():
                 if "rotation_id" in creds_config.keys():
