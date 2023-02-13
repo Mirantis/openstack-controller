@@ -106,6 +106,9 @@ class ValidationResource(object):
                 try:
                     if review_request["operation"] == "DELETE":
                         validate_func_name = "validate_delete"
+                    elif review_request.get("subResource") == "status":
+                        validators = ["openstack"]
+                        validate_func_name = "validate_status"
                     else:
                         spec = review_request.get("object", {}).get("spec", {})
                         validators_base.validate_schema("osdpl.yaml", spec)

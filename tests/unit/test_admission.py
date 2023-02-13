@@ -95,6 +95,16 @@ ADMISSION_REQ_JSON = """
 
 ADMISSION_REQ = json.loads(ADMISSION_REQ_JSON)
 
+ADMISSION_REQ_STATUS = copy.deepcopy(ADMISSION_REQ)
+# status change request has always requestSubResource and subResource set
+ADMISSION_REQ_STATUS["request"].update(
+    {
+        "operation": "UPDATE",
+        "requestSubResource": "status",
+        "subResource": "status",
+    }
+)
+
 NGS_DEVICE = {
     "device_type": "netmiko_ssh",
     "ip": "1.2.3.4",
@@ -291,7 +301,7 @@ def test_upgrade_with_extra_changes_fail(client):
 
 
 def test_credentials_rotation_ok(client, osdplst):
-    req = copy.deepcopy(ADMISSION_REQ)
+    req = copy.deepcopy(ADMISSION_REQ_STATUS)
     osdplst.return_value.obj = {
         "status": {"openstack_version": "train", "osdpl": {"state": "APPLIED"}}
     }
@@ -301,7 +311,6 @@ def test_credentials_rotation_ok(client, osdplst):
 
     rotation_group = "admin"
     rotation_creds = "identity"
-    req["request"]["operation"] = "UPDATE"
     req["request"]["oldObject"] = copy.deepcopy(req["request"]["object"])
     req["request"]["object"]["status"] = {
         "credentials": {rotation_group: {rotation_creds: {"rotation_id": 1}}}
@@ -311,35 +320,8 @@ def test_credentials_rotation_ok(client, osdplst):
     assert response.json["response"]["allowed"] is True
 
 
-def test_credentials_rotation_with_extra_changes_fail(client, osdplst):
-    req = copy.deepcopy(ADMISSION_REQ)
-    osdplst.return_value.obj = {
-        "status": {"openstack_version": "train", "osdpl": {"state": "APPLIED"}}
-    }
-    get_osdpl_status_mock = mock.Mock()
-    get_osdpl_status_mock.return_value = "APPLIED"
-    osdplst.return_value.get_osdpl_status = get_osdpl_status_mock
-
-    rotation_group = "admin"
-    rotation_creds = "identity"
-    req["request"]["operation"] = "UPDATE"
-    req["request"]["oldObject"] = copy.deepcopy(req["request"]["object"])
-    req["request"]["object"]["status"]["credentials"] = {
-        rotation_group: {rotation_creds: {"rotation_id": 1}}
-    }
-    req["request"]["object"]["spec"]["size"] = "small"
-    response = client.simulate_post("/validate", json=req)
-    assert response.status == falcon.HTTP_OK
-    assert response.json["response"]["allowed"] is False
-    assert response.json["response"]["status"]["code"] == 400
-    assert (
-        "changing other values in the spec is not permitted"
-        in response.json["response"]["status"]["message"]
-    )
-
-
 def test_credentials_rotation_decrease_fail(client, osdplst):
-    req = copy.deepcopy(ADMISSION_REQ)
+    req = copy.deepcopy(ADMISSION_REQ_STATUS)
     osdplst.return_value.obj = {
         "status": {"openstack_version": "train", "osdpl": {"state": "APPLIED"}}
     }
@@ -349,7 +331,6 @@ def test_credentials_rotation_decrease_fail(client, osdplst):
 
     rotation_group = "admin"
     rotation_creds = "identity"
-    req["request"]["operation"] = "UPDATE"
     req["request"]["oldObject"] = copy.deepcopy(req["request"]["object"])
     req["request"]["oldObject"]["status"]["credentials"] = {
         rotation_group: {rotation_creds: {"rotation_id": 2}}
@@ -368,7 +349,7 @@ def test_credentials_rotation_decrease_fail(client, osdplst):
 
 
 def test_credentials_rotation_float_fail(client, osdplst):
-    req = copy.deepcopy(ADMISSION_REQ)
+    req = copy.deepcopy(ADMISSION_REQ_STATUS)
     osdplst.return_value.obj = {
         "status": {"openstack_version": "train", "osdpl": {"state": "APPLIED"}}
     }
@@ -378,7 +359,6 @@ def test_credentials_rotation_float_fail(client, osdplst):
 
     rotation_group = "admin"
     rotation_creds = "identity"
-    req["request"]["operation"] = "UPDATE"
     req["request"]["oldObject"] = copy.deepcopy(req["request"]["object"])
     req["request"]["object"]["status"]["credentials"] = {
         rotation_group: {rotation_creds: {"rotation_id": 1.1}}
@@ -390,7 +370,7 @@ def test_credentials_rotation_float_fail(client, osdplst):
 
 
 def test_credentials_rotation_zero_fail(client, osdplst):
-    req = copy.deepcopy(ADMISSION_REQ)
+    req = copy.deepcopy(ADMISSION_REQ_STATUS)
     osdplst.return_value.obj = {
         "status": {"openstack_version": "train", "osdpl": {"state": "APPLIED"}}
     }
@@ -400,7 +380,6 @@ def test_credentials_rotation_zero_fail(client, osdplst):
 
     rotation_group = "admin"
     rotation_creds = "identity"
-    req["request"]["operation"] = "UPDATE"
     req["request"]["oldObject"] = copy.deepcopy(req["request"]["object"])
     req["request"]["object"]["status"]["credentials"] = {
         rotation_group: {rotation_creds: {"rotation_id": 0}}
@@ -412,7 +391,7 @@ def test_credentials_rotation_zero_fail(client, osdplst):
 
 
 def test_credentials_rotation_subzero_fail(client, osdplst):
-    req = copy.deepcopy(ADMISSION_REQ)
+    req = copy.deepcopy(ADMISSION_REQ_STATUS)
     osdplst.return_value.obj = {
         "status": {"openstack_version": "train", "osdpl": {"state": "APPLIED"}}
     }
@@ -422,7 +401,6 @@ def test_credentials_rotation_subzero_fail(client, osdplst):
 
     rotation_group = "admin"
     rotation_creds = "identity"
-    req["request"]["operation"] = "UPDATE"
     req["request"]["oldObject"] = copy.deepcopy(req["request"]["object"])
     req["request"]["object"]["status"]["credentials"] = {
         rotation_group: {rotation_creds: {"rotation_id": -1}}
@@ -434,7 +412,7 @@ def test_credentials_rotation_subzero_fail(client, osdplst):
 
 
 def test_credentials_rotation_remove_fail(client, osdplst):
-    req = copy.deepcopy(ADMISSION_REQ)
+    req = copy.deepcopy(ADMISSION_REQ_STATUS)
     osdplst.return_value.obj = {
         "status": {"openstack_version": "train", "osdpl": {"state": "APPLIED"}}
     }
@@ -444,7 +422,6 @@ def test_credentials_rotation_remove_fail(client, osdplst):
 
     rotation_group = "admin"
     rotation_creds = "identity"
-    req["request"]["operation"] = "UPDATE"
     req["request"]["oldObject"] = copy.deepcopy(req["request"]["object"])
     req["request"]["oldObject"]["status"]["credentials"] = {
         rotation_group: {rotation_creds: {"rotation_id": 2}}
@@ -462,7 +439,7 @@ def test_credentials_rotation_remove_fail(client, osdplst):
 
 
 def test_credentials_rotation_increase_fail(client, osdplst):
-    req = copy.deepcopy(ADMISSION_REQ)
+    req = copy.deepcopy(ADMISSION_REQ_STATUS)
     osdplst.return_value.obj = {
         "status": {"openstack_version": "train", "osdpl": {"state": "APPLIED"}}
     }
@@ -472,7 +449,6 @@ def test_credentials_rotation_increase_fail(client, osdplst):
 
     rotation_group = "admin"
     rotation_creds = "identity"
-    req["request"]["operation"] = "UPDATE"
     req["request"]["oldObject"] = copy.deepcopy(req["request"]["object"])
     req["request"]["oldObject"]["status"]["credentials"] = {
         rotation_group: {rotation_creds: {"rotation_id": 2}}
@@ -487,26 +463,6 @@ def test_credentials_rotation_increase_fail(client, osdplst):
     assert response.json["response"]["status"]["code"] == 400
     assert (
         f"Increasing {rotation_group} {rotation_creds} rotation_id more than by 1 is not allowed"
-        in response.json["response"]["status"]["message"]
-    )
-
-
-def test_credentials_rotation_on_create_fail(client):
-    req = copy.deepcopy(ADMISSION_REQ)
-
-    rotation_group = "admin"
-    rotation_creds = "identity"
-    req["request"]["operation"] = "CREATE"
-    req["request"]["object"]["status"]["credentials"] = {
-        rotation_group: {rotation_creds: {"rotation_id": 2}}
-    }
-
-    response = client.simulate_post("/validate", json=req)
-    assert response.status == falcon.HTTP_OK
-    assert response.json["response"]["allowed"] is False
-    assert response.json["response"]["status"]["code"] == 400
-    assert (
-        f"Confguring {rotation_group} {rotation_creds} rotation is not allowed on CREATE"
         in response.json["response"]["status"]["message"]
     )
 

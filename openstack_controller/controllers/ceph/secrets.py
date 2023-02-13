@@ -39,5 +39,6 @@ async def handle_ceph_shared_secret(
     secret_hash = hasher.hexdigest()
 
     osdpl.patch(
-        {"status": {"watched": {"ceph": {"secret": {"hash": secret_hash}}}}}
+        {"status": {"watched": {"ceph": {"secret": {"hash": secret_hash}}}}},
+        subresource="status",
     )

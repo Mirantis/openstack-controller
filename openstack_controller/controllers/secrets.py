@@ -157,7 +157,8 @@ async def handle_bgpvpnsecret(
                     }
                 }
             }
-        }
+        },
+        subresource="status",
     )
 
 
@@ -390,5 +391,6 @@ async def handle_substitution_secrets(
                     "value_from": {"secret": {name: {"hash": secret_hash}}}
                 }
             }
-        }
+        },
+        subresource="status",
     )
