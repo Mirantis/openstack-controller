@@ -17,7 +17,7 @@ from openstack_controller.admission.validators import base
 from openstack_controller import constants
 from openstack_controller import exception
 from openstack_controller import osdplstatus
-from openstack_controller.utils import CronValidator
+from openstack_controller.utils import CronValidator, get_in
 
 
 class OpenStackValidator(base.BaseValidator):
@@ -29,12 +29,15 @@ class OpenStackValidator(base.BaseValidator):
         old_obj = review_request.get("oldObject", {})
         new_obj = review_request.get("object", {})
         self._deny_master(new_obj)
-        if review_request[
-            "operation"
-        ] == "UPDATE" and self._openstack_version_changed(old_obj, new_obj):
-            # on update we deffinitely have both old and new as not empty
-            self._validate_openstack_upgrade(old_obj, new_obj)
-            self._validate_for_another_upgrade(review_request)
+        if review_request["operation"] == "UPDATE":
+            self._validate_credentials_on_update(
+                old_obj, new_obj, review_request
+            )
+
+            if self._openstack_version_changed(old_obj, new_obj):
+                # on update we deffinitely have both old and new as not empty
+                self._validate_openstack_upgrade(old_obj, new_obj)
+                self._validate_for_another_upgrade(review_request)
         self._check_masakari_allowed(new_obj)
         self._check_baremetal_allowed(new_obj)
         self._check_panko_allowed(new_obj)
@@ -42,6 +45,8 @@ class OpenStackValidator(base.BaseValidator):
         self._deny_encrypted_api_key(new_obj)
         self._deny_strict_admin_policy(new_obj)
         self._check_schedules(new_obj)
+        if review_request["operation"] == "CREATE":
+            self._check_credentials_on_create(new_obj)
 
     def validate_delete(self, review_request):
         self._check_delete_allowed(review_request)
@@ -150,6 +155,83 @@ class OpenStackValidator(base.BaseValidator):
                 "If spec.openstack_version is changed, "
                 "changing other values in the spec is not permitted."
             )
+
+    def _validate_credentials_on_update(
+        self, old_obj, new_obj, review_request
+    ):
+        _old_spec = copy.deepcopy(old_obj["spec"], {})
+        _old_credentials = _old_spec.get("features", {}).get("credentials", {})
+        _new_spec = copy.deepcopy(new_obj["spec"])
+        _new_credentials = _new_spec.get("features", {}).get("credentials", {})
+
+        if _new_credentials != _old_credentials:
+            if "credentials" in _old_spec.get("features", {}).keys():
+                _old_spec["features"].pop("credentials")
+            if "credentials" in _new_spec.get("features", {}).keys():
+                _new_spec["features"].pop("credentials")
+
+            if _new_spec != _old_spec:
+                raise exception.OsDplValidationFailed(
+                    "If spec.credentials is changed, "
+                    "changing other values in the spec is not permitted."
+                )
+
+            if self._is_osdpl_locked(review_request):
+                raise exception.OsDplValidationFailed(
+                    "OpenStack credentials update is not possible while another operation is in progress."
+                )
+
+            for group_name, group in _old_credentials.items():
+                for creds_name, creds_config in group.items():
+                    if "rotation_id" not in creds_config.keys():
+                        return
+
+                    new_rotation_id = get_in(
+                        _new_credentials,
+                        [group_name, creds_name, "rotation_id"],
+                        0,
+                    )
+                    if not new_rotation_id:
+                        raise exception.OsDplValidationFailed(
+                            f"Removing {group_name} {creds_name} rotation config is not allowed"
+                        )
+
+            for group_name, group in _new_credentials.items():
+                for creds_name, creds_config in group.items():
+                    # in future it is possible there can be other options except rotation_id
+                    if "rotation_id" not in creds_config.keys():
+                        return
+
+                    old_rotation_id = get_in(
+                        _old_credentials,
+                        [group_name, creds_name, "rotation_id"],
+                        0,
+                    )
+                    new_rotation_id = creds_config["rotation_id"]
+
+                    if new_rotation_id <= 0:
+                        raise exception.OsDplValidationFailed(
+                            f"{group_name} {creds_name} rotation_id should be greater than 0"
+                        )
+                    elif old_rotation_id > new_rotation_id:
+                        raise exception.OsDplValidationFailed(
+                            f"Decreasing {group_name} {creds_name} rotation_id is not allowed"
+                        )
+                    elif new_rotation_id - old_rotation_id > 1:
+                        raise exception.OsDplValidationFailed(
+                            f"Increasing {group_name} {creds_name} rotation_id more than by 1 is not allowed"
+                        )
+
+    def _check_credentials_on_create(self, new_obj):
+        _new_credentials = (
+            new_obj["spec"].get("features", {}).get("credentials", {})
+        )
+        for group_name, group in _new_credentials.items():
+            for creds_name, creds_config in group.items():
+                if "rotation_id" in creds_config.keys():
+                    raise exception.OsDplValidationFailed(
+                        f"Confguring {group_name} {creds_name} rotation is not allowed on CREATE"
+                    )
 
     def _check_delete_allowed(self, review_request):
         if self._is_osdpl_locked(review_request):
