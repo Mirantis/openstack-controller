@@ -68,7 +68,7 @@ spec:
             meter_definitions_file: "snmp.yaml"
           keystone_authtoken:
             memcache_security_strategy: ENCRYPT
-            memcache_secret_key: {{ credentials.memcached }}
+            memcache_secret_key: {{ credentials[0].memcached }}
           oslo_messaging_notifications:
             topics: {{ notification_topics|join(',') }}
           cache:
@@ -116,14 +116,14 @@ spec:
               username: {{ admin_creds.database.username }}
               password: {{ admin_creds.database.password }}
             ceilometer:
-              username: {{ credentials.database.user.username }}
-              password: {{ credentials.database.user.password }}
+              username: {{ credentials[0].database.user.username }}
+              password: {{ credentials[0].database.user.password }}
   {%- if 'event' in spec.features.services %}
         oslo_db_panko:
           auth:
             panko:
-              username:   {{ event_credentials.database.user.username }}
-              password:   {{ event_credentials.database.user.password }}
+              username:   {{ event_credentials[0].database.user.username }}
+              password:   {{ event_credentials[0].database.user.password }}
   {%- endif %}
 {%- if 'metering' in components_with_dedicated_messaging %}
 {% include 'base/_messaging_dedicated.yaml' %}

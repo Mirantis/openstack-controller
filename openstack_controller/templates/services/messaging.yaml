@@ -1,6 +1,7 @@
 #apiVersion: lcm.mirantis.com/v1alpha1
 #kind: HelmBundle
 
+{%- from 'macros/messaging_service_creds.j2' import messaging_service_creds %}
 {%- set latest_openstack_versions = openstack_versions[openstack_versions.index(spec.openstack_version):openstack_versions.index(spec.openstack_version)+2] %}
 {%- set stacklight_enabled = spec.get('features', {}).get('stacklight', {}).get('enabled', False) %}
 {%- set enabled_vhosts = [] %}
@@ -46,140 +47,42 @@ spec:
         users:
           {%- if 'identity' in services %}
           {%- do enabled_vhosts.append('keystone') %}
-          keystone_service:
-            auth:
-              keystone_username:
-                username: {{ credentials['identity'].messaging.user.username }}
-                password: {{ credentials['identity'].messaging.user.password }}
-            path: /keystone
-          keystone_service_notifications:
-            auth:
-              keystone_username:
-                username: {{ credentials['identity'].notifications.user.username }}
-                password: {{ credentials['identity'].notifications.user.password }}
-            path: /openstack
+          {{ messaging_service_creds(credentials["identity"], "keystone", ["/keystone"]) }}
           {%- endif %}
           {%- if 'image' in services %}
           {%- do enabled_vhosts.append('glance') %}
-          glance_service:
-            auth:
-              glance_username:
-                username: {{ credentials['image'].messaging.user.username }}
-                password: {{ credentials['image'].messaging.user.password }}
-            path: /glance
-          glance_service_notifications:
-            auth:
-              glance_username:
-                username: {{ credentials['image'].notifications.user.username }}
-                password: {{ credentials['image'].notifications.user.password }}
-            path: /openstack
+          {{ messaging_service_creds(credentials["image"], "glance", ["/glance"]) }}
           {%- endif %}
           {%- if 'block-storage' in services %}
           {%- do enabled_vhosts.append('cinder') %}
-          cinder_service:
-            auth:
-              cinder:
-                username: {{ credentials['block-storage'].messaging.user.username }}
-                password: {{ credentials['block-storage'].messaging.user.password }}
-            path: /cinder
-          cinder_service_notifications:
-            auth:
-              cinder:
-                username: {{ credentials['block-storage'].notifications.user.username }}
-                password: {{ credentials['block-storage'].notifications.user.password }}
-            path: /openstack
+          {{ messaging_service_creds(credentials["block-storage"], "cinder", ["/cinder"]) }}
           {%- endif %}
           {%- if 'orchestration' in services %}
-          heat_service:
-            auth:
-              heat:
-                username: {{ credentials['orchestration'].messaging.user.username }}
-                password: {{ credentials['orchestration'].messaging.user.password }}
-            path:
-            {%- for version in latest_openstack_versions %}
-            - /heat_{{ version }}
-            {%- endfor %}
-          heat_service_notifications:
-            auth:
-              heat:
-                username: {{ credentials['orchestration'].notifications.user.username }}
-                password: {{ credentials['orchestration'].notifications.user.password }}
-            path: /openstack
+          {%- set heat_vhosts = [] %}
+          {%- for version in latest_openstack_versions %}
+            {%- do heat_vhosts.append("/heat_" + version) %}
+          {%- endfor %}
+          {{ messaging_service_creds(credentials["orchestration"], "heat", heat_vhosts) }}
           {%- endif %}
           {%- if 'networking' in services %}
           {%- do enabled_vhosts.append('neutron') %}
-          neutron_service:
-            auth:
-              neutron:
-                username: {{ credentials['networking'].messaging.user.username }}
-                password: {{ credentials['networking'].messaging.user.password }}
-            path: /neutron
-          neutron_service_notifications:
-            auth:
-              neutron:
-                username: {{ credentials['networking'].notifications.user.username }}
-                password: {{ credentials['networking'].notifications.user.password }}
-            path: /openstack
+          {{ messaging_service_creds(credentials["networking"], "neutron", ["/neutron"]) }}
           {%- endif %}
           {%- if 'compute' in services %}
           {%- do enabled_vhosts.append('nova') %}
-          nova_service:
-            auth:
-              nova:
-                username: {{ credentials['compute'].messaging.user.username }}
-                password: {{ credentials['compute'].messaging.user.password }}
-            path: /nova
-          nova_service_notifications:
-            auth:
-              nova:
-                username: {{ credentials['compute'].notifications.user.username }}
-                password: {{ credentials['compute'].notifications.user.password }}
-            path: /openstack
+          {{ messaging_service_creds(credentials["compute"], "nova", ["/nova"]) }}
           {%- endif %}
           {%- if 'load-balancer' in services %}
           {%- do enabled_vhosts.append('octavia') %}
-          octavia_service:
-            auth:
-              octavia:
-                username: {{ credentials['load-balancer'].messaging.user.username }}
-                password: {{ credentials['load-balancer'].messaging.user.password }}
-            path: /octavia
-          octavia_service_notifications:
-            auth:
-              octavia:
-                username: {{ credentials['load-balancer'].notifications.user.username }}
-                password: {{ credentials['load-balancer'].notifications.user.password }}
-            path: /openstack
+          {{ messaging_service_creds(credentials["load-balancer"], "octavia", ["/octavia"]) }}
           {%- endif %}
           {%- if 'dns' in services %}
           {%- do enabled_vhosts.append('designate') %}
-          designate_service:
-            auth:
-              designate:
-                username: {{ credentials['dns'].messaging.user.username }}
-                password: {{ credentials['dns'].messaging.user.password }}
-            path: /designate
-          designate_service_notifications:
-            auth:
-              designate:
-                username: {{ credentials['dns'].notifications.user.username }}
-                password: {{ credentials['dns'].notifications.user.password }}
-            path: /openstack
+          {{ messaging_service_creds(credentials["dns"], "designate", ["/designate"]) }}
           {%- endif %}
           {%- if 'key-manager' in services %}
           {%- do enabled_vhosts.append('barbican') %}
-          barbican_service:
-            auth:
-              barbican:
-                username: {{ credentials['key-manager'].messaging.user.username }}
-                password: {{ credentials['key-manager'].messaging.user.password }}
-            path: /barbican
-          barbican_service_notifications:
-            auth:
-              barbican:
-                username: {{ credentials['key-manager'].notifications.user.username }}
-                password: {{ credentials['key-manager'].notifications.user.password }}
-            path: /openstack
+          {{ messaging_service_creds(credentials["key-manager"], "barbican", ["/barbican"]) }}
           {%- endif %}
           {%- if stacklight_enabled %}
           stacklight_service_notifications:
@@ -191,78 +94,23 @@ spec:
           {%- endif %}
           {%- if 'baremetal' in services %}
           {%- do enabled_vhosts.append('ironic') %}
-          ironic_service:
-            auth:
-              ironic:
-                username: {{ credentials['baremetal'].messaging.user.username }}
-                password: {{ credentials['baremetal'].messaging.user.password }}
-            path: /ironic
-          ironic_service_notifications:
-            auth:
-              ironic:
-                username: {{ credentials['baremetal'].notifications.user.username }}
-                password: {{ credentials['baremetal'].notifications.user.password }}
-            path: /openstack
+          {{ messaging_service_creds(credentials["baremetal"], "ironic", ["/ironic"]) }}
           {%- endif %}
           {%- if 'alarming' in services %}
           {%- do enabled_vhosts.append('aodh') %}
-          alarming_service:
-            auth:
-              alarming:
-                username: {{ credentials['alarming'].messaging.user.username }}
-                password: {{ credentials['alarming'].messaging.user.password }}
-            path: /aodh
-          alarming_service_notifications:
-            auth:
-              alarming:
-                username: {{ credentials['alarming'].notifications.user.username }}
-                password: {{ credentials['alarming'].notifications.user.password }}
-            path: /openstack
+          {{ messaging_service_creds(credentials["alarming"], "aodh", ["/aodh"]) }}
           {%- endif %}
           {%- if 'metering' in services %}
           {%- do enabled_vhosts.append('ceilometer') %}
-          metering_service:
-            auth:
-              metering:
-                username: {{ credentials['metering'].messaging.user.username }}
-                password: {{ credentials['metering'].messaging.user.password }}
-            path: /ceilometer
-          metering_service_notifications:
-            auth:
-              metering:
-                username: {{ credentials['metering'].notifications.user.username }}
-                password: {{ credentials['metering'].notifications.user.password }}
-            path: /openstack
+          {{ messaging_service_creds(credentials["metering"], "ceilometer", ["/ceilometer"]) }}
           {%- endif %}
           {%- if 'instance-ha' in services %}
           {%- do enabled_vhosts.append('masakari') %}
-          masakari_service:
-            auth:
-              masakari:
-                username: {{ credentials['instance-ha'].messaging.user.username }}
-                password: {{ credentials['instance-ha'].messaging.user.password }}
-            path: /masakari
-          masakari_service_notifications:
-            auth:
-              masakari:
-                username: {{ credentials['instance-ha'].notifications.user.username }}
-                password: {{ credentials['instance-ha'].notifications.user.password }}
-            path: /openstack
+          {{ messaging_service_creds(credentials["instance-ha"], "masakari", ["/masakari"]) }}
           {%- endif %}
           {%- if 'shared-file-system' in services %}
           {%- do enabled_vhosts.append('manila') %}
-          manila_service:
-            auth:
-              manila:
-                username: {{ credentials['shared-file-system'].messaging.user.username }}
-                password: {{ credentials['shared-file-system'].messaging.user.password }}
-            path: /manila
-          manila_service_notifications:
-            auth:
-              manila:
-                username: {{ credentials['shared-file-system'].notifications.user.username }}
-                password: {{ credentials['shared-file-system'].notifications.user.password }}
-            path: /openstack
+          {{ messaging_service_creds(credentials["shared-file-system"], "manila", ["/manila"]) }}
           {%- endif %}
           {%- if external_notifications_enabled %}
           {%- for topic in external_notifications_topics %}

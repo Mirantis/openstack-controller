@@ -1,6 +1,7 @@
 #apiVersion: lcm.mirantis.com/v1alpha1
 #kind: HelmBundle
 
+{%- from 'macros/messaging_service_creds.j2' import messaging_service_creds %}
 {%- set service = 'octavia' %}
 {%- set core_plugin = spec.features.neutron.get('backend', 'ml2') %}
 {%- set ovn_enabled = core_plugin == 'ml2/ovn'%}
@@ -53,12 +54,7 @@ spec:
 {% include 'base/_messaging_dedicated.yaml' %}
       conf:
         users:
-          octavia:
-            auth:
-              service_user:
-                username: {{ credentials.messaging.user.username }}
-                password: {{ credentials.messaging.user.password }}
-            path: /octavia
+          {{ messaging_service_creds(credentials, "octavia", ["/octavia"], enable_notifications=False)  }}
         aux_conf:
           policies:
           - vhost: octavia
@@ -322,13 +318,13 @@ spec:
 {%- endif %}
           keystone_authtoken:
             memcache_security_strategy: ENCRYPT
-            memcache_secret_key: {{ credentials.memcached }}
+            memcache_secret_key: {{ credentials[0].memcached }}
             {%- if spec.openstack_version not in ("queens", "rocky", "stein") %}
             service_type: load-balancer
             {%- endif %}
           service_auth:
             memcache_security_strategy: ENCRYPT
-            memcache_secret_key: {{ credentials.memcached }}
+            memcache_secret_key: {{ credentials[0].memcached }}
           certificates:
             endpoint_type: internalURL
           haproxy_amphora:
@@ -366,16 +362,16 @@ spec:
               username: {{ admin_creds.database.username }}
               password: {{ admin_creds.database.password }}
             octavia:
-              username: {{ credentials.database.user.username }}
-              password: {{ credentials.database.user.password }}
+              username: {{ credentials[0].database.user.username }}
+              password: {{ credentials[0].database.user.password }}
         oslo_db_persistence:
           auth:
             admin:
               username: {{ admin_creds.database.username }}
               password: {{ admin_creds.database.password }}
             octavia:
-              username: {{ credentials.database.user.username }}
-              password: {{ credentials.database.user.password }}
+              username: {{ credentials[0].database.user.username }}
+              password: {{ credentials[0].database.user.password }}
 {%- if 'load-balancer' in components_with_dedicated_messaging %}
 {% include 'base/_messaging_dedicated.yaml' %}
 {%- else %}

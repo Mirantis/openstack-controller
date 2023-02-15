@@ -1192,7 +1192,6 @@ properties:
                 - block-storage
                 - orchestration
                 - compute
-                - image
                 - baremetal
           notifications:
             type: object

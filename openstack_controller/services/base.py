@@ -116,6 +116,12 @@ class Service:
     _secret_class = None
 
     @property
+    def service_secret(self):
+        """Returns instance of service _secret_class"""
+        if self._secret_class is not None:
+            return self._secret_class(self.namespace, self.service)
+
+    @property
     def maintenance_api(self):
         return isinstance(self, MaintenanceApiMixin)
 
@@ -585,10 +591,9 @@ class Service:
 
     def template_args(self):
         template_args = {}
-        if self._secret_class is not None:
-            secret = self._secret_class(self.namespace, self.service)
-            secret.ensure()
-            credentials = secret.get()
+        if self.service_secret is not None:
+            self.service_secret.ensure()
+            credentials = self.service_secret.get_all()
             template_args["credentials"] = credentials
 
         if settings.OSCTL_PROXY_DATA["enabled"]:
@@ -721,6 +726,7 @@ class OpenStackService(Service):
 
     def template_args(self):
         template_args = super().template_args()
+
         admin_creds = self._get_admin_creds()
         guest_creds = self._get_guest_creds()
         service_secrets = secrets.ServiceAccountsSecrets(

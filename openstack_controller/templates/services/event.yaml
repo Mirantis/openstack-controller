@@ -60,7 +60,7 @@ spec:
         panko:
           keystone_authtoken:
             memcache_security_strategy: ENCRYPT
-            memcache_secret_key: {{ credentials.memcached }}
+            memcache_secret_key: {{ credentials[0].memcached }}
             {%- if spec.openstack_version not in ("queens", "rocky", "stein") %}
             service_type: event
             {%- endif %}
@@ -86,8 +86,8 @@ spec:
               username: {{ admin_creds.database.username }}
               password: {{ admin_creds.database.password }}
             panko:
-              username: {{ credentials.database.user.username }}
-              password: {{ credentials.database.user.password }}
+              username: {{ credentials[0].database.user.username }}
+              password: {{ credentials[0].database.user.password }}
 {% include 'base/_notifications.yaml' %}
         event:
           host_fqdn_override:

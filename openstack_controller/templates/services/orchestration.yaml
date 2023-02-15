@@ -1,6 +1,7 @@
 #apiVersion: lcm.mirantis.com/v1alpha1
 #kind: HelmBundle
 
+{%- from 'macros/messaging_service_creds.j2' import messaging_service_creds %}
 {%- set service = 'heat' %}
 {%- set components_with_dedicated_messaging = spec.get('features', {}).get('messaging', {}).get('components_with_dedicated_messaging', []) %}
 {%- set latest_openstack_versions = openstack_versions[openstack_versions.index(spec.openstack_version):] %}
@@ -44,15 +45,11 @@ spec:
 {% include 'base/_messaging_dedicated.yaml' %}
       conf:
         users:
-          heat:
-            auth:
-              service_user:
-                username: {{ credentials.messaging.user.username }}
-                password: {{ credentials.messaging.user.password }}
-            path:
-            {%- for version in latest_openstack_versions %}
-            - /heat_{{ version }}
-            {%- endfor %}
+          {%- set heat_vhosts = [] %}
+          {%- for version in latest_openstack_versions %}
+            {%- do heat_vhosts.append("/heat_" + version) %}
+          {%- endfor %}
+          {{ messaging_service_creds(credentials, "heat", heat_vhosts)  }}
         aux_conf:
           policies:
   {%- for version in latest_openstack_versions %}
@@ -141,7 +138,7 @@ spec:
             server_keystone_endpoint_type: public
           keystone_authtoken:
             memcache_security_strategy: ENCRYPT
-            memcache_secret_key: {{ credentials.memcached }}
+            memcache_secret_key: {{ credentials[0].memcached }}
             {%- if spec.openstack_version not in ("queens", "rocky", "stein") %}
             service_type: orchestration
             {%- endif %}
@@ -187,8 +184,8 @@ spec:
               username: {{ admin_creds.database.username }}
               password: {{ admin_creds.database.password }}
             heat:
-              username: {{ credentials.database.user.username }}
-              password: {{ credentials.database.user.password }}
+              username: {{ credentials[0].database.user.username }}
+              password: {{ credentials[0].database.user.password }}
 {%- if 'orchestration' in components_with_dedicated_messaging %}
 {% include 'base/_messaging_dedicated.yaml' %}
 {%- else %}

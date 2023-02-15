@@ -302,8 +302,8 @@ spec:
               username: {{ admin_creds.database.username }}
               password: {{ admin_creds.database.password }}
             keystone:
-              username: {{ credentials.database.user.username }}
-              password: {{ credentials.database.user.password }}
+              username: {{ credentials[0].database.user.username }}
+              password: {{ credentials[0].database.user.password }}
 {% include 'base/_notifications.yaml' %}
 {%- if keystone_keycloak.get('enabled', False) and ssl_validate_server %}
         oidc:

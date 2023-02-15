@@ -1,6 +1,7 @@
 #apiVersion: lcm.mirantis.com/v1alpha1
 #kind: HelmBundle
 
+{%- from 'macros/messaging_service_creds.j2' import messaging_service_creds %}
 {%- set service = 'barbican' %}
 {%- set components_with_dedicated_messaging = spec.get('features', {}).get('messaging', {}).get('components_with_dedicated_messaging', []) %}
 {%- set stacklight_enabled = spec.get('features', {}).get('stacklight', {}).get('enabled', False) %}
@@ -41,12 +42,7 @@ spec:
 {% include 'base/_messaging_dedicated.yaml' %}
       conf:
         users:
-          barbican:
-            auth:
-              service_user:
-                username: {{ credentials.messaging.user.username }}
-                password: {{ credentials.messaging.user.password }}
-            path: /barbican
+          {{ messaging_service_creds(credentials, "barbican", ["/barbican"], enable_notifications=False)  }}
         aux_conf:
           policies:
           - vhost: barbican
@@ -111,7 +107,7 @@ spec:
         barbican:
           keystone_authtoken:
             memcache_security_strategy: ENCRYPT
-            memcache_secret_key: {{ credentials.memcached }}
+            memcache_secret_key: {{ credentials[0].memcached }}
             {%- if spec.openstack_version not in ("queens", "rocky", "stein") %}
             service_type: key-manager
             {%- endif %}
@@ -141,7 +137,7 @@ spec:
             secret_store_plugin: vault_plugin
             global_default: True
           simple_crypto_plugin:
-            kek: {{ credentials.kek }}
+            kek: {{ credentials[0].kek }}
           vault_plugin:
             approle_role_id: {{ spec.features.barbican.backends.vault.approle_role_id }}
             approle_secret_id: {{ spec.features.barbican.backends.vault.approle_secret_id }}
@@ -163,7 +159,7 @@ spec:
           crypto:
             enabled_crypto_plugins: simple_crypto
           simple_crypto_plugin:
-            kek: {{ credentials.kek }}
+            kek: {{ credentials[0].kek }}
 {%- endif %}
         logging:
           logger_barbican:
@@ -183,8 +179,8 @@ spec:
               username: {{ admin_creds.database.username }}
               password: {{ admin_creds.database.password }}
             barbican:
-              username: {{ credentials.database.user.username }}
-              password: {{ credentials.database.user.password }}
+              username: {{ credentials[0].database.user.username }}
+              password: {{ credentials[0].database.user.password }}
 {%- if 'key-manager' in components_with_dedicated_messaging %}
 {% include 'base/_messaging_dedicated.yaml' %}
 {%- else %}

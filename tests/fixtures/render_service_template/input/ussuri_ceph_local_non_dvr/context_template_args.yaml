@@ -18,7 +18,7 @@ block-storage:
       - "10.10.10.2:6789"
       - "10.10.10.3:6789"
   credentials: &credentials_block-storage
-    database:
+  - database:
       user:
         password: 8xckAGB149FBiBsPfawjSqRNNF7lvXmM
         username: cinder1rKIan
@@ -55,7 +55,7 @@ compute:
       - "10.10.10.2:6789"
       - "10.10.10.3:6789"
   credentials: &credentials_compute
-    database:
+  - database:
       user:
         password: sZ43nXhtf9PEV0UaNBk5VITz0FTwDAM8
         username: novaQvW6
@@ -92,7 +92,7 @@ dashboard:
   os_policy_services: ['cinder', 'nova', 'designate', 'keystone', 'glance', 'neutron', 'heat', 'octavia', 'barbican', 'placement', 'ironic', 'aodh', 'panko', 'gnocchi', 'masakari']
   rgw_internal_cacert: "RGW CRT"
   credentials: &credentials_dashboard
-    database:
+  - database:
       user:
         password: rBJDRdVaBH92I8zKHuBeKvtYSq8661ZE
         username: horizonf2AZh0J
@@ -129,7 +129,7 @@ database:
       username: sstybw
 dns:
   credentials: &credentials_dns
-    database:
+  - database:
       user:
         password: UYBLfmPtWfLqWw3rgcR0Jf4NTqzWtTIG
         username: designate9fbxYXW1E
@@ -157,7 +157,7 @@ dns:
 identity:
   rgw_internal_cacert: "RGW CRT"
   credentials: &credentials_identity
-    database:
+  - database:
       user:
         password: GW4MBjKLshsGdLI38kKUpR2gm3SQiHFp
         username: keystonemzhwDmzj
@@ -196,7 +196,7 @@ image:
       - "10.10.10.2:6789"
       - "10.10.10.3:6789"
   credentials: &credentials_image
-    database:
+  - database:
       user:
         password: vwAUndcvyeKBi455lrWGkB8NAUXEeWVn
         username: glanceFEVFCm
@@ -221,7 +221,7 @@ ingress:
   service_creds: []
 key-manager:
   credentials: &credentials_key-manager
-    database:
+  - database:
       user:
         password: R441HIJxfNF8iAfAfwxASnndFXqSBfVn
         username: barbicanteW3kGBC
@@ -244,7 +244,7 @@ key-manager:
     username: testC7BY
 load-balancer:
   credentials: &credentials_load-balancer
-    database:
+  - database:
       user:
         password: jBxCDfusABmmmeBcY7ZUb6pVtTX2ip9s
         username: octaviaFEzC0Qa
@@ -274,7 +274,7 @@ memcached:
   service_creds: []
 networking:
   credentials: &credentials_networking
-    database:
+  - database:
       user:
         password: knwFGHdZ6KCqcKqBidXXEqiEpZhBD7h4
         username: neutrondrGjrFm
@@ -303,7 +303,7 @@ networking:
     username: designateLeRjiDsyT
 orchestration:
   credentials: &credentials_orchestration
-    database:
+  - database:
       user:
         password: nCaJwL99CRHY0gPNfEmihxtVAbrNGgCD
         username: heatuQjt
@@ -331,7 +331,7 @@ orchestration:
     username: testyRGH
 placement:
   credentials: &credentials_placement
-    database:
+  - database:
       user:
         password: FdmszFTEuCvADMYGShqdBqLzuczyZf4c
         username: placementEqEMt8aUc
@@ -357,7 +357,7 @@ redis:
       Y2ZMRFlTc05idUN5d2E2Vm1Cdlo4aDJzSlh1Wm52cVc=
 instance-ha:
   credentials: &credentials_instance-ha
-    database:
+  - database:
       user:
         password: R441HIJxfNF8iAfAfwxASnndFXqSBfVn
         username: masakariteW3kGBC
@@ -379,7 +379,7 @@ instance-ha:
     username: testC7BY
 baremetal:
   credentials: &credentials_baremetal
-    database:
+  - database:
       user:
         password: knwFGHdZ6KCqcKqBidXXEqiEpZhBD7h4
         username: ironicdrGjrFm

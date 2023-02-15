@@ -1,6 +1,7 @@
 #apiVersion: lcm.mirantis.com/v1alpha1
 #kind: HelmBundle
 
+{%- from 'macros/messaging_service_creds.j2' import messaging_service_creds %}
 {%- set service = 'masakari' %}
 {%- set messaging = spec.get('features', {}).get('messaging', {}) %}
 {%- set stacklight_enabled = spec.get('features', {}).get('stacklight', {}).get('enabled', False) %}
@@ -41,12 +42,7 @@ spec:
 {% include 'base/_messaging_dedicated.yaml' %}
       conf:
         users:
-          masakari:
-            auth:
-              service_user:
-                username: {{ credentials.messaging.user.username }}
-                password: {{ credentials.messaging.user.password }}
-            path: /masakari
+          {{ messaging_service_creds(credentials, "masakari", ["/masakari"], enable_notifications=False)  }}
         aux_conf:
           policies:
           - vhost: masakari
@@ -109,7 +105,7 @@ spec:
             backend_url: {{ get_etcd3_endpoint(spec.openstack_version, 'etcd3gw') }}
           keystone_authtoken:
             memcache_security_strategy: ENCRYPT
-            memcache_secret_key: {{ credentials.memcached }}
+            memcache_secret_key: {{ credentials[0].memcached }}
             {%- if spec.openstack_version not in ("queens", "rocky", "stein") %}
             service_type: instance-ha
             {%- endif %}
@@ -138,8 +134,8 @@ spec:
               username: {{ admin_creds.database.username }}
               password: {{ admin_creds.database.password }}
             masakari:
-              username: {{ credentials.database.user.username }}
-              password: {{ credentials.database.user.password }}
+              username: {{ credentials[0].database.user.username }}
+              password: {{ credentials[0].database.user.password }}
 {%- if 'instance-ha' in components_with_dedicated_messaging %}
 {% include 'base/_messaging_dedicated.yaml' %}
 {%- else %}

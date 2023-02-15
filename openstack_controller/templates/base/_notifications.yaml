@@ -1,8 +1,8 @@
         oslo_messaging_notifications:
           auth:
             {{ service }}:
-              password: {{ credentials.notifications.user.password }}
-              username: {{ credentials.notifications.user.username }}
+              password: {{ credentials[0].notifications.user.password }}
+              username: {{ credentials[0].notifications.user.username }}
           host_fqdn_override: {}
           hosts:
             default: rabbitmq

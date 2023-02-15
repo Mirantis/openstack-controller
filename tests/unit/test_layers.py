@@ -11,12 +11,14 @@ from openstack_controller import layers
 
 CREDS_KWARGS = {
     "ssh_credentials": {"private": "", "public": ""},
-    "credentials": {
-        "memcached": "",
-        "database": {"user": {"username": "", "password": ""}},
-        "messaging": {"user": {"username": "", "password": ""}},
-        "notifications": {"user": {"username": "", "password": ""}},
-    },
+    "credentials": [
+        {
+            "memcached": "",
+            "database": {"user": {"username": "", "password": ""}},
+            "messaging": {"user": {"username": "", "password": ""}},
+            "notifications": {"user": {"username": "", "password": ""}},
+        }
+    ],
     "admin_creds": {
         "database": {"username": "", "password": ""},
         "identity": {"password": "", "username": ""},
@@ -140,7 +142,7 @@ def test_render_template(openstackdeployment_mspec):
         "compute",
         openstackdeployment_mspec,
         logging,
-        credentials=mock.Mock(),
+        credentials=[mock.Mock()],
         admin_creds=mock.Mock(),
         guest_creds=mock.Mock(),
         images=images_mock,

@@ -27,12 +27,13 @@ spec:
         prometheus_exporter:
           rabbit_exporters: overview,exchange,node
         users:
-          nova:
+          nova_service:
             auth:
-              service_user:
+              nova_1:
                 password: tuzgvismPceyDLXGeq1cpQcDIQDwIyhr
                 username: nova27zb
-            path: /nova
+            path:
+            - /nova
       endpoints:
         cluster_domain_suffix: cluster.local
         oslo_messaging:

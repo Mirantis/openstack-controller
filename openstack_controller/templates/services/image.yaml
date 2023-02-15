@@ -2,7 +2,6 @@
 #kind: HelmBundle
 
 {%- set service = 'glance' %}
-{%- set components_with_dedicated_messaging = spec.get('features', {}).get('messaging', {}).get('components_with_dedicated_messaging', []) %}
 {%- set stacklight_enabled = spec.get('features', {}).get('stacklight', {}).get('enabled', False) %}
 {%- set notification_topics = ['notifications'] %}
 {%- do notification_topics.append('stacklight_notifications') if stacklight_enabled %}
@@ -22,60 +21,6 @@
 
 spec:
   releases:
-{%- if 'image' in components_with_dedicated_messaging %}
-  - name: openstack-glance-rabbitmq
-    chart: {{spec.common.infra.repo}}/rabbitmq
-    values:
-{% include 'base/_rabbitmq_images.yaml' %}
-  {%- if stacklight_enabled %}
-      monitoring:
-        prometheus:
-          enabled: true
-  {%- endif %}
-      pod:
-        replicas:
-          server: 1
-      manifests:
-        network_policy: false
-        job_users_create: true
-      volume:
-        enabled: false
-      endpoints:
-        cluster_domain_suffix: {{ spec.internal_domain_name }}
-{% include 'base/_messaging_dedicated.yaml' %}
-      conf:
-        users:
-          glance:
-            auth:
-              service_user:
-                username: {{ credentials.messaging.user.username }}
-                password: {{ credentials.messaging.user.password }}
-            path: /glance
-        aux_conf:
-          policies:
-          - vhost: glance
-            name: default-policy
-            pattern: '^(?!amq\.).*'
-            definition:
-              message-ttl: 120000
-              expires: 600000
-          - vhost: glance
-            name: results_expire
-            pattern: '^results\.'
-            definition:
-              expires: 600000
-            priority: 1
-          - vhost: glance
-            name: tasks_expire
-            pattern: '^tasks\.'
-            definition:
-              expires: 600000
-            priority: 1
-  {%- if stacklight_enabled %}
-        prometheus_exporter:
-          rabbit_exporters: "overview,exchange,node"
-  {%- endif %}
-{%- endif %}
 {%- if spec.get('migration', {}).get('glance', {}).get('deploy_main_service', True) %}
   - name: openstack-glance
     chart: {{spec.common.openstack.repo}}/glance
@@ -293,7 +238,7 @@ spec:
             allow_headers: Content-Type,Cache-Control,Content-Language,Expires,Last-Modified,Pragma,X-Custom-Header,X-Auth-Token
           keystone_authtoken:
             memcache_security_strategy: ENCRYPT
-            memcache_secret_key: {{ credentials.memcached }}
+            memcache_secret_key: {{ credentials[0].memcached }}
             {%- if spec.openstack_version not in ("queens", "rocky", "stein") %}
             service_type: image
             {%- endif %}
@@ -349,7 +294,7 @@ spec:
         glance_registry:
           keystone_authtoken:
             memcache_security_strategy: ENCRYPT
-            memcache_secret_key: {{ credentials.memcached }}
+            memcache_secret_key: {{ credentials[0].memcached }}
             {%- if spec.openstack_version not in ("queens", "rocky", "stein") %}
             service_type: image
             {%- endif %}
@@ -391,13 +336,9 @@ spec:
               username: {{ admin_creds.database.username }}
               password: {{ admin_creds.database.password }}
             glance:
-              username: {{ credentials.database.user.username }}
-              password: {{ credentials.database.user.password }}
-{%- if 'image' in components_with_dedicated_messaging %}
-{% include 'base/_messaging_dedicated.yaml' %}
-{%- else %}
+              username: {{ credentials[0].database.user.username }}
+              password: {{ credentials[0].database.user.password }}
 {% include 'base/_messaging_shared.yaml' %}
-{%- endif %}
 {% include 'base/_notifications.yaml' %}
         image:
           host_fqdn_override:

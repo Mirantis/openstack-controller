@@ -27,12 +27,13 @@ spec:
         prometheus_exporter:
           rabbit_exporters: overview,exchange,node
         users:
-          neutron:
+          neutron_service:
             auth:
-              service_user:
+              neutron_1:
                 password: TRRhbnUMsepnqSzyJngJtgZD9gRu0Fwy
                 username: neutronx7uHpit
-            path: /neutron
+            path:
+             - /neutron
       endpoints:
         cluster_domain_suffix: cluster.local
         oslo_messaging:

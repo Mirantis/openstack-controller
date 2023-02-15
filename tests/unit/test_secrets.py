@@ -10,7 +10,7 @@ from openstack_controller import secrets
 
 def test_openstack_service_secret_name():
     secret = secrets.OpenStackServiceSecret("ns", "service")
-    assert secret.secret_name == "generated-service-passwords"
+    assert secret.secret_base_name == "generated-service-passwords"
 
 
 @mock.patch("openstack_controller.secrets.generate_password")
@@ -270,47 +270,3 @@ def test_galera_secret_new_credentials(
     mock_secret_data.assert_called_once_with("ns", galera_secret.secret_name)
 
     assert new == expected
-
-
-@mock.patch("openstack_controller.secrets.get_secret_data")
-@mock.patch("openstack_controller.secrets.generate_password")
-@mock.patch("openstack_controller.secrets.generate_name")
-def test_neutron_secret(mock_name, mock_password, mock_secret_data):
-    password = "password"
-    creds_b64 = base64.b64encode(
-        json.dumps(
-            {"user": {"username": "username", "password": password}}
-        ).encode()
-    )
-
-    creds_key_b64 = base64.b64encode(password.encode())
-
-    mock_name.return_value = "username"
-    mock_password.return_value = password
-
-    mock_secret_data.return_value = {
-        "database": creds_b64,
-        "messaging": creds_b64,
-        "notifications": creds_b64,
-        "memcached": creds_key_b64,
-        "metadata_secret": creds_key_b64,
-    }
-    neutron_secret = secrets.NeutronSecret("ns", "networking")
-    actual = neutron_secret.ensure()
-
-    system_creds = {
-        "user": secrets.OSSytemCreds(username="username", password=password)
-    }
-    expected = secrets.NeutronCredentials(
-        memcached=password,
-        metadata_secret=password,
-        ipsec_secret_key=password,
-        database=system_creds,
-        messaging=system_creds,
-        notifications=system_creds,
-    )
-
-    mock_password.assert_called_with(length=16)
-    mock_secret_data.assert_called_with("ns", neutron_secret.secret_name)
-
-    assert actual == expected

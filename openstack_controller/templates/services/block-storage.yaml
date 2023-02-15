@@ -1,6 +1,7 @@
 #apiVersion: lcm.mirantis.com/v1alpha1
 #kind: HelmBundle
 
+{%- from 'macros/messaging_service_creds.j2' import messaging_service_creds %}
 {%- set service = 'cinder' %}
 {%- set components_with_dedicated_messaging = spec.get('features', {}).get('messaging', {}).get('components_with_dedicated_messaging', []) %}
 {%- set stacklight_enabled = spec.get('features', {}).get('stacklight', {}).get('enabled', False) %}
@@ -54,12 +55,7 @@ spec:
 {% include 'base/_messaging_dedicated.yaml' %}
       conf:
         users:
-          cinder:
-            auth:
-              service_user:
-                username: {{ credentials.messaging.user.username }}
-                password: {{ credentials.messaging.user.password }}
-            path: /cinder
+          {{ messaging_service_creds(credentials, "cinder", ["/cinder"], enable_notifications=False)  }}
         aux_conf:
           policies:
           - vhost: cinder
@@ -211,7 +207,7 @@ spec:
         cinder:
           keystone_authtoken:
             memcache_security_strategy: ENCRYPT
-            memcache_secret_key: {{ credentials.memcached }}
+            memcache_secret_key: {{ credentials[0].memcached }}
             {%- if spec.openstack_version not in ("queens", "rocky", "stein") %}
             # TODO(pas-ha) register block-storage service type and catalog entry as well
             service_type: volumev3
@@ -378,8 +374,8 @@ spec:
               username: {{ admin_creds.database.username }}
               password: {{ admin_creds.database.password }}
             cinder:
-              username: {{ credentials.database.user.username }}
-              password: {{ credentials.database.user.password }}
+              username: {{ credentials[0].database.user.username }}
+              password: {{ credentials[0].database.user.password }}
 {%- if 'block-storage' in components_with_dedicated_messaging %}
 {% include 'base/_messaging_dedicated.yaml' %}
 {%- else %}

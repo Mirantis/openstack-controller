@@ -225,7 +225,8 @@ class RabbitMQ(Service):
             # NOTE(vsaienko): use secret_class from exact service as additional
             # passwords might be added like metadata password.
             secret = Service.registry[s]._secret_class(self.namespace, s)
-            credentials[s] = secret.ensure()
+            secret.ensure()
+            credentials[s] = secret.get_all()
 
         credentials["stacklight"] = secrets.StackLightPasswordSecret(
             self.namespace
@@ -1508,7 +1509,7 @@ class Nova(OpenStackServiceWithCeph, MaintenanceApiMixin):
         t_args["ssh_credentials"] = ssh_secret.ensure()
 
         neutron_secret = secrets.NeutronSecret(self.namespace, "networking")
-        kube.wait_for_secret(self.namespace, neutron_secret.secret_name)
+        neutron_secret.wait()
         neutron_creds = neutron_secret.get()
 
         t_args["metadata_secret"] = neutron_creds.metadata_secret
