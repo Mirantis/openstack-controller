@@ -113,7 +113,7 @@ class Service:
 
     _service_accounts = []
     _required_accounts = {}
-    _secret_class = secrets.OpenStackServiceSecret
+    _secret_class = None
 
     @property
     def maintenance_api(self):
@@ -584,25 +584,12 @@ class Service:
         LOG.info(f"Upgrading {self.service} done")
 
     def template_args(self):
-        secret = self._secret_class(self.namespace, self.service)
-        credentials = secret.ensure()
-
-        admin_creds = self._get_admin_creds()
-        guest_creds = self._get_guest_creds()
-        service_secrets = secrets.ServiceAccountsSecrets(
-            self.namespace,
-            self.service,
-            self.service_accounts,
-            self._required_accounts,
-        )
-        service_creds = service_secrets.ensure()
-
-        template_args = {
-            "credentials": credentials,
-            "admin_creds": admin_creds,
-            "guest_creds": guest_creds,
-            "service_creds": service_creds,
-        }
+        template_args = {}
+        if self._secret_class is not None:
+            secret = self._secret_class(self.namespace, self.service)
+            secret.ensure()
+            credentials = secret.get()
+            template_args["credentials"] = credentials
 
         if settings.OSCTL_PROXY_DATA["enabled"]:
             proxy_secret = secrets.ProxySecret()
@@ -712,6 +699,7 @@ class MaintenanceApiMixin:
 
 class OpenStackService(Service):
     openstack_chart = None
+    _secret_class = secrets.OpenStackServiceSecret
 
     @property
     def health_groups(self):
@@ -730,6 +718,27 @@ class OpenStackService(Service):
                 "job_bootstrap",
             }
         }
+
+    def template_args(self):
+        template_args = super().template_args()
+        admin_creds = self._get_admin_creds()
+        guest_creds = self._get_guest_creds()
+        service_secrets = secrets.ServiceAccountsSecrets(
+            self.namespace,
+            self.service,
+            self.service_accounts,
+            self._required_accounts,
+        )
+        service_creds = service_secrets.ensure()
+
+        template_args.update(
+            {
+                "admin_creds": admin_creds,
+                "guest_creds": guest_creds,
+                "service_creds": service_creds,
+            }
+        )
+        return template_args
 
 
 class OpenStackServiceWithCeph(OpenStackService):

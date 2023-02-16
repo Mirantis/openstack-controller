@@ -146,7 +146,7 @@ def test_service_keystone_render(
 @mock.patch.object(secrets.NeutronSecret, "get")
 @mock.patch.object(services.base.OpenStackServiceWithCeph, "ceph_config")
 @mock.patch.object(secrets.SSHSecret, "ensure")
-@mock.patch.object(services.base.Service, "template_args")
+@mock.patch.object(services.base.OpenStackService, "template_args")
 def test_service_nova_with_ceph_render(
     mock_template_args,
     mock_ssh,
