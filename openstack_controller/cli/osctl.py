@@ -79,7 +79,8 @@ def main():
                     creds_group: {creds_name: {"rotation_id": new_rotation_id}}
                 }
             }
-        }
+        },
+        subresource="status",
     )
     LOG.info(
         f"{creds_group} {creds_name} rotation has started, please wait for OpenstackDeployment status becoming applied"

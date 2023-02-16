@@ -28,6 +28,9 @@ async def handle(body, meta, spec, logger, reason, **kwargs):
         raise kopf.TemporaryError(
             "The OpenStackDeploument object not found. Waiting for it."
         )
-    osdpl.patch({"status": {"watched": {"osdplsecret": {"hash": spec_hash}}}})
+    osdpl.patch(
+        {"status": {"watched": {"osdplsecret": {"hash": spec_hash}}}},
+        subresource="status",
+    )
 
     return {"lastStatus": f"{reason}"}

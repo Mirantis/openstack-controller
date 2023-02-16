@@ -30,10 +30,6 @@ class OpenStackValidator(base.BaseValidator):
         new_obj = review_request.get("object", {})
         self._deny_master(new_obj)
         if review_request["operation"] == "UPDATE":
-            self._validate_credentials_on_update(
-                old_obj, new_obj, review_request
-            )
-
             if self._openstack_version_changed(old_obj, new_obj):
                 # on update we deffinitely have both old and new as not empty
                 self._validate_openstack_upgrade(old_obj, new_obj)
@@ -45,8 +41,11 @@ class OpenStackValidator(base.BaseValidator):
         self._deny_encrypted_api_key(new_obj)
         self._deny_strict_admin_policy(new_obj)
         self._check_schedules(new_obj)
-        if review_request["operation"] == "CREATE":
-            self._check_credentials_on_create(new_obj)
+
+    def validate_status(self, review_request):
+        old_obj = review_request.get("oldObject", {})
+        new_obj = review_request.get("object", {})
+        self._validate_credentials(old_obj, new_obj, review_request)
 
     def validate_delete(self, review_request):
         self._check_delete_allowed(review_request)
@@ -156,21 +155,13 @@ class OpenStackValidator(base.BaseValidator):
                 "changing other values in the spec is not permitted."
             )
 
-    def _validate_credentials_on_update(
-        self, old_obj, new_obj, review_request
-    ):
+    def _validate_credentials(self, old_obj, new_obj, review_request):
         _old_status = copy.deepcopy(old_obj.get("status", {}))
         _old_credentials = _old_status.get("credentials", {})
         _new_status = copy.deepcopy(new_obj.get("status", {}))
         _new_credentials = _new_status.get("credentials", {})
 
         if _new_credentials != _old_credentials:
-            if new_obj["spec"] != old_obj["spec"]:
-                raise exception.OsDplValidationFailed(
-                    "If status.credentials is changed, "
-                    "changing other values in the spec is not permitted."
-                )
-
             if self._is_osdpl_locked(review_request):
                 raise exception.OsDplValidationFailed(
                     "OpenStack credentials update is not possible while another operation is in progress."
@@ -216,15 +207,6 @@ class OpenStackValidator(base.BaseValidator):
                         raise exception.OsDplValidationFailed(
                             f"Increasing {group_name} {creds_name} rotation_id more than by 1 is not allowed"
                         )
-
-    def _check_credentials_on_create(self, new_obj):
-        _new_credentials = new_obj.get("status", {}).get("credentials", {})
-        for group_name, group in _new_credentials.items():
-            for creds_name, creds_config in group.items():
-                if "rotation_id" in creds_config.keys():
-                    raise exception.OsDplValidationFailed(
-                        f"Confguring {group_name} {creds_name} rotation is not allowed on CREATE"
-                    )
 
     def _check_delete_allowed(self, review_request):
         if self._is_osdpl_locked(review_request):

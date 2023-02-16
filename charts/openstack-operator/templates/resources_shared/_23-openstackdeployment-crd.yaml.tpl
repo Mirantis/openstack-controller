@@ -89,6 +89,9 @@ spec:
                               type: string
                           type: object
                       type: object
+      subresources:
+        # status enables the status subresource.
+        status: {}
       additionalPrinterColumns:
       - name: OpenStack
         type: string
