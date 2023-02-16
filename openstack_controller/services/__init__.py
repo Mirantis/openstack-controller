@@ -1882,7 +1882,7 @@ class Octavia(OpenStackService):
         return t_args
 
 
-class RadosGateWay(Service):
+class RadosGateWay(OpenStackService):
     service = "object-storage"
     available_releases = ["openstack-ceph-rgw"]
 
@@ -1905,6 +1905,10 @@ class RadosGateWay(Service):
             }
         }
     }
+
+    @property
+    def _child_generic_objects(self):
+        return {}
 
     # override health groups to skip wait for healthy service check
     # as ceph rgw contain only jobs
@@ -2017,7 +2021,10 @@ class Tempest(Service):
 
     def template_args(self):
         template_args = super().template_args()
-
+        admin_creds = self._get_admin_creds()
+        guest_creds = self._get_guest_creds()
+        template_args["admin_creds"] = admin_creds
+        template_args["guest_creds"] = guest_creds
         helmbundles_body = {}
         for s in set(self.mspec["features"]["services"]) - {
             "tempest",

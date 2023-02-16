@@ -556,15 +556,11 @@ class OpenStackServiceSecret(Secret):
 
     def create(self) -> Optional[OpenStackCredentials]:
         os_creds = self.secret_class()
-        srv = constants.OS_SERVICES_MAP.get(self.service)
-        if srv:
-            for service_type in ["database", "messaging", "notifications"]:
-                getattr(os_creds, service_type)["user"] = generate_credentials(
-                    srv
-                )
-            os_creds.memcached = generate_password(length=16)
-            return os_creds
-        return
+        srv = constants.OS_SERVICES_MAP[self.service]
+        for service_type in ["database", "messaging", "notifications"]:
+            getattr(os_creds, service_type)["user"] = generate_credentials(srv)
+        os_creds.memcached = generate_password(length=16)
+        return os_creds
 
 
 class BarbicanSecret(OpenStackServiceSecret):
