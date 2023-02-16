@@ -115,6 +115,7 @@ UNKNOWN, OK, PROGRESS, BAD = "Unknown", "Ready", "Progressing", "Unhealthy"
 
 NEUTRON_KEYSTONE_SECRET = "neutron-keystone-admin"
 KEYSTONE_CONFIG_SECRET = "keystone-etc"
+KEYSTONE_OSCLOUDS_SECRET = "keystone-os-clouds"
 RABBITMQ_USERS_CREDENTIALS_SECRET = "openstack-rabbitmq-users-credentials"
 OPENSTACK_TF_SHARED_NAMESPACE = "openstack-tf-shared"
 OPENSTACK_TF_SECRET = "tf-data"
