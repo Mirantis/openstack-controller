@@ -1,5 +1,6 @@
 import abc
 import base64
+import copy
 from dataclasses import asdict, dataclass, fields
 import datetime
 import json
@@ -409,17 +410,25 @@ class MultiSecret(abc.ABC):
         Returns object of self.secret_class - e.g. OpenStackAdminCredentials
 
         :param secret: Dict
-        :param to_update: Dict of next format {"creds_name":["field1", "field2"]}
-                          TODO(mkarpin): add ability to work with nested fields
+        :param to_update: Dict of next format {"creds_name": ["field1", "field2"]}
         :returns cls.secret_class instance
         """
+
+        def _fill(src, dst, to_update):
+            """Returns modified copy of dst dictionary according to to_update rules"""
+            dst = copy.deepcopy(dst)
+            if isinstance(to_update, dict):
+                for k, v in to_update.items():
+                    dst[k] = _fill(src[k], dst[k], v)
+            elif isinstance(to_update, list):
+                if not to_update:
+                    dst = src
+                for field in to_update:
+                    dst[field] = src[field]
+            return dst
+
         new_dict = self.secret_class.to_json(self.create())
-        for creds_name, creds_fields in to_update.items():
-            if not creds_fields or creds_name not in secret.keys():
-                secret[creds_name] = new_dict[creds_name]
-            else:
-                for field in creds_fields:
-                    secret[creds_name][field] = new_dict[creds_name][field]
+        secret = _fill(new_dict, secret, to_update)
         return self.secret_class.from_json(secret)
 
     @abc.abstractmethod
@@ -427,10 +436,45 @@ class MultiSecret(abc.ABC):
         """Initialize secret in cls.secret_class format"""
         pass
 
-    @abc.abstractmethod
+    @property
+    def rotation_fields(self):
+        """Fields that describes rotation.
+
+        :returns: tuple where first element is fields to rotate, second element describes immutable fields.
+        """
+        return ({}, [])
+
     def rotate(self, rotation_id):
         """Rotate/change credentials in secret"""
-        pass
+        active, backup = self.k8s_secrets
+
+        secret_rotation_id = get_secret_priority(active)
+        if secret_rotation_id == rotation_id:
+            LOG.info(f"Secret {active.name} already is rotated")
+            return
+        # for case when osdpl object was recreated on environment
+        # where rotation has been performed and existing secrets may have
+        # rotation_id set to some value
+        elif secret_rotation_id > rotation_id:
+            raise kopf.TemporaryError(
+                f"Cannot rotate, secret {active.name} has greater rotation_id, than requested"
+            )
+
+        LOG.info(f"Starting rotation of active secret {active.name}")
+        LOG.info(f"Backup secret {backup.name} will be promoted to active")
+
+        active, backup = self.k8s_secrets
+        active_data = self.get_data(active.name)
+        backup_data = self.get_data(backup.name)
+
+        # currently only identity rotation is supported
+        # other fields should be copied
+        for field in active_data.keys():
+            if field in self.rotation_fields[1]:
+                backup_data[field] = active_data[field]
+        secret = self._fill_new_fields(backup_data, self.rotation_fields[0])
+        self.save(secret, backup.name)
+        set_secret_priority(backup, rotation_id)
 
     def _update_format(self, data):
         all_fields = [f.name for f in fields(self.secret_class)]
@@ -523,34 +567,9 @@ class OpenStackAdminSecret(MultiSecret):
         )
         return admin_creds
 
-    def rotate(self, rotation_id):
-        active, backup = self.k8s_secrets
-
-        secret_rotation_id = get_secret_priority(active)
-        if secret_rotation_id == rotation_id:
-            LOG.info(f"Secret {active.name} already is rotated")
-            return
-        # for case when osdpl object was recreated on environment
-        # where rotation has been performed and existing secrets may have
-        # rotation_id set to some value
-        elif secret_rotation_id > rotation_id:
-            raise kopf.TemporaryError(
-                f"Cannot rotate, secret {active.name} has greater rotation_id, than requested"
-            )
-
-        LOG.info(f"Starting rotation of active secret {active.name}")
-        LOG.info(f"Backup secret {backup.name} will be promoted to active")
-
-        active_data = self.get_data(active.name)
-        backup_data = self.get_data(backup.name)
-        # currently only identity rotation is supported
-        # other fields should be copied
-        for field in active_data.keys():
-            if field != "identity":
-                backup_data[field] = active_data[field]
-        secret = self._fill_new_fields(backup_data, {"identity": ["password"]})
-        self.save(secret, backup.name)
-        set_secret_priority(backup, rotation_id)
+    @property
+    def rotation_fields(self):
+        return ({"identity": ["password"]}, ["database", "messaging"])
 
 
 class RabbitmqGuestSecret(Secret):
@@ -577,12 +596,26 @@ class OpenStackServiceSecret(MultiSecret):
         os_creds.memcached = generate_password(length=16)
         return os_creds
 
-    def rotate(self, rotation_id):
-        pass
+    @property
+    def rotation_fields(self):
+        return (
+            {
+                "database": {"user": ["password"]},
+                "messaging": {"user": ["password"]},
+                "notifications": {"user": ["password"]},
+            },
+            [],
+        )
 
 
 class BarbicanSecret(OpenStackServiceSecret):
     secret_class = BarbicanCredentials
+
+    @property
+    def rotation_fields(self):
+        rotation_fields = super().rotation_fields
+        rotation_fields[1].append("kek")
+        return rotation_fields
 
     def create(self):
         os_creds = super().create()
@@ -604,6 +637,12 @@ class HorizonSecret(OpenStackServiceSecret):
 
 class NeutronSecret(OpenStackServiceSecret):
     secret_class = NeutronCredentials
+
+    @property
+    def rotation_fields(self):
+        rotation_fields = super().rotation_fields
+        rotation_fields[1].extend(["ipsec_secret_key", "metadata_secret"])
+        return rotation_fields
 
     def create(self):
         os_creds = super().create()

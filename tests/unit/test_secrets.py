@@ -1,4 +1,5 @@
 import base64
+import copy
 import json
 from unittest import mock
 
@@ -77,6 +78,50 @@ def test_openstack_admin_secret_new_identity(mock_name, mock_password):
     assert new.identity.password == new_password
     assert new.messaging.username == "rabbitmq"
     assert new.messaging.password == password
+
+
+@mock.patch("openstack_controller.secrets.OpenStackServiceSecret.create")
+def test_openstack_service_secret_fill_fields(mock_secret_create):
+    secret = secrets.OpenStackServiceSecret("openstack", "myservice")
+    old = {
+        "notifications": {
+            "user": {"username": "olduser", "password": "oldpw"}
+        },
+        "messaging": {"user": {"username": "olduser", "password": "oldpw"}},
+        "database": {"user": {"username": "olduser", "password": "oldpw"}},
+        "memcached": "oldpw",
+    }
+    new = {
+        "notifications": {
+            "user": {"username": "newuser", "password": "newpw"}
+        },
+        "messaging": {"user": {"username": "newuser", "password": "newpw"}},
+        "database": {"user": {"username": "newuser", "password": "newpw"}},
+        "memcached": "newpw",
+    }
+
+    mock_secret_create.return_value = secrets.OpenStackCredentials(**new)
+    old_copy = copy.deepcopy(old)
+    res = secret._fill_new_fields(
+        old,
+        {
+            "notifications": [],
+            "database": {"user": ["password"]},
+            "messaging": {"user": []},
+        },
+    )
+    res = secrets.OpenStackCredentials.to_json(res)
+    # Make sure original object is not changed
+    assert old_copy == old
+
+    assert res["notifications"] == new["notifications"]
+    assert res["messaging"] == {
+        "user": {"username": "newuser", "password": "newpw"}
+    }
+    assert res["memcached"] == old["memcached"]
+    assert res["database"] == {
+        "user": {"username": "olduser", "password": "newpw"}
+    }
 
 
 @mock.patch("openstack_controller.secrets.get_secret_data")

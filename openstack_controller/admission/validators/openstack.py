@@ -168,45 +168,43 @@ class OpenStackValidator(base.BaseValidator):
                 )
 
             for group_name, group in _old_credentials.items():
-                for creds_name, creds_config in group.items():
-                    if "rotation_id" not in creds_config.keys():
-                        return
+                if "rotation_id" not in group.keys():
+                    return
 
-                    new_rotation_id = get_in(
-                        _new_credentials,
-                        [group_name, creds_name, "rotation_id"],
-                        0,
+                new_rotation_id = get_in(
+                    _new_credentials,
+                    [group_name, "rotation_id"],
+                    0,
+                )
+                if not new_rotation_id:
+                    raise exception.OsDplValidationFailed(
+                        f"Removing {group_name} rotation config is not allowed"
                     )
-                    if not new_rotation_id:
-                        raise exception.OsDplValidationFailed(
-                            f"Removing {group_name} {creds_name} rotation config is not allowed"
-                        )
 
             for group_name, group in _new_credentials.items():
-                for creds_name, creds_config in group.items():
-                    # in future it is possible there can be other options except rotation_id
-                    if "rotation_id" not in creds_config.keys():
-                        return
+                # in future it is possible there can be other options except rotation_id
+                if "rotation_id" not in group.keys():
+                    return
 
-                    old_rotation_id = get_in(
-                        _old_credentials,
-                        [group_name, creds_name, "rotation_id"],
-                        0,
+                old_rotation_id = get_in(
+                    _old_credentials,
+                    [group_name, "rotation_id"],
+                    0,
+                )
+                new_rotation_id = group["rotation_id"]
+
+                if new_rotation_id <= 0:
+                    raise exception.OsDplValidationFailed(
+                        f"{group_name} rotation_id should be greater than 0"
                     )
-                    new_rotation_id = creds_config["rotation_id"]
-
-                    if new_rotation_id <= 0:
-                        raise exception.OsDplValidationFailed(
-                            f"{group_name} {creds_name} rotation_id should be greater than 0"
-                        )
-                    elif old_rotation_id > new_rotation_id:
-                        raise exception.OsDplValidationFailed(
-                            f"Decreasing {group_name} {creds_name} rotation_id is not allowed"
-                        )
-                    elif new_rotation_id - old_rotation_id > 1:
-                        raise exception.OsDplValidationFailed(
-                            f"Increasing {group_name} {creds_name} rotation_id more than by 1 is not allowed"
-                        )
+                elif old_rotation_id > new_rotation_id:
+                    raise exception.OsDplValidationFailed(
+                        f"Decreasing {group_name} rotation_id is not allowed"
+                    )
+                elif new_rotation_id - old_rotation_id > 1:
+                    raise exception.OsDplValidationFailed(
+                        f"Increasing {group_name} rotation_id more than by 1 is not allowed"
+                    )
 
     def _check_delete_allowed(self, review_request):
         if self._is_osdpl_locked(review_request):
