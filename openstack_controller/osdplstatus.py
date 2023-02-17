@@ -91,3 +91,7 @@ class OpenStackDeploymentStatus(pykube.objects.NamespacedAPIObject):
 
     def remove_osdpl_service_health(self, application, component):
         self.patch({"status": {"health": {application: {component: None}}}})
+
+    def get_osdpl_fingerprint(self):
+        self.reload()
+        return self.obj["status"]["osdpl"]["fingerprint"]
