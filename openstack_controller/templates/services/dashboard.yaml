@@ -68,8 +68,8 @@ spec:
               username: {{ admin_creds.database.username }}
               password: {{ admin_creds.database.password }}
             horizon:
-              username: {{ credentials.database.user.username }}
-              password: {{ credentials.database.user.password }}
+              username: {{ credentials[0].database.user.username }}
+              password: {{ credentials[0].database.user.password }}
         dashboard:
           host_fqdn_override:
             public:
@@ -279,7 +279,7 @@ spec:
                 WEBSSO_DEFAULT_REDIRECT_LOGOUT: {{ sso_logout_url }}
                 WEBSSO_DEFAULT_REDIRECT_PROTOCOL: mapped
 {%- endif %}
-              horizon_secret_key: {{ credentials.secret_key }}
+              horizon_secret_key: {{ credentials[0].secret_key }}
 
               csrf_cookie_secure: "True"
               session_cookie_secure: "True"

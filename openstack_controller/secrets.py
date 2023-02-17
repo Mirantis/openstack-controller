@@ -388,6 +388,11 @@ class MultiSecret(abc.ABC):
     def k8s_secrets(self):
         return get_secrets_sorted(self.namespace, self._secret_names)
 
+    @final
+    def wait(self):
+        for secret_name in self._secret_names:
+            kube.wait_for_secret(self.namespace, secret_name)
+
     def k8s_get_data(self, name):
         for secret in self.k8s_secrets:
             if secret.name == name:
@@ -423,7 +428,7 @@ class MultiSecret(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def rotate(self):
+    def rotate(self, rotation_id):
         """Rotate/change credentials in secret"""
         pass
 
@@ -445,17 +450,13 @@ class MultiSecret(abc.ABC):
                 secret = self.get(name=name)
             except pykube.exceptions.ObjectDoesNotExist:
                 secret = self.create()
-                if secret:
-                    self.save(secret, name)
+                self.save(secret, name)
             except marshmallow.exceptions.ValidationError:
                 LOG.info(f"Secret {name} has incorrect format. Updating it...")
                 data = self.get_data(name)
                 secret = self._update_format(data)
                 self.save(secret, name)
-        # there are some OpenstackServiceSecret secrets which
-        # return None on self.create() e.g memcached
-        if secret:
-            return self.get()
+        return self.get()
 
     @final
     def save(self, secret, name) -> None:
@@ -489,6 +490,20 @@ class MultiSecret(abc.ABC):
             name = self.k8s_secrets[seq].name
         data = self.get_data(name)
         return self.secret_class.from_json(data)
+
+    @final
+    def get_active(self):
+        """Get data from k8s active secret and return instance of cls.secret_class"""
+        return self.get(seq=0)
+
+    @final
+    def get_backup(self):
+        """Get data from k8s backup secret and return instance of cls.secret_class"""
+        return self.get(seq=1)
+
+    @final
+    def get_all(self):
+        return [self.get_active(), self.get_backup()]
 
 
 class OpenStackAdminSecret(MultiSecret):
@@ -546,13 +561,13 @@ class RabbitmqGuestSecret(Secret):
         return RabbitmqGuestCredentials(password=generate_password())
 
 
-class OpenStackServiceSecret(Secret):
+class OpenStackServiceSecret(MultiSecret):
     secret_class = OpenStackCredentials
 
     def __init__(self, namespace: str, service: str):
-        super().__init__(namespace)
-        self.secret_name = f"generated-{service}-passwords"
+        self.secret_base_name = f"generated-{service}-passwords"
         self.service = service
+        super().__init__(namespace)
 
     def create(self) -> Optional[OpenStackCredentials]:
         os_creds = self.secret_class()
@@ -561,6 +576,9 @@ class OpenStackServiceSecret(Secret):
             getattr(os_creds, service_type)["user"] = generate_credentials(srv)
         os_creds.memcached = generate_password(length=16)
         return os_creds
+
+    def rotate(self, rotation_id):
+        pass
 
 
 class BarbicanSecret(OpenStackServiceSecret):

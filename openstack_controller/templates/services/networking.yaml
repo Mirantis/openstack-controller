@@ -1,6 +1,6 @@
 #apiVersion: lcm.mirantis.com/v1alpha1
 #kind: HelmBundle
-
+{%- from 'macros/messaging_service_creds.j2' import messaging_service_creds %}
 {%- set service = 'neutron' %}
 {%- set components_with_dedicated_messaging = spec.get('features', {}).get('messaging', {}).get('components_with_dedicated_messaging', []) %}
 {%- set stacklight_enabled = spec.get('features', {}).get('stacklight', {}).get('enabled', False) %}
@@ -142,12 +142,7 @@ spec:
 {% include 'base/_messaging_dedicated.yaml' %}
       conf:
         users:
-          neutron:
-            auth:
-              service_user:
-                username: {{ credentials.messaging.user.username }}
-                password: {{ credentials.messaging.user.password }}
-            path: /neutron
+         {{ messaging_service_creds(credentials, "neutron", ["/neutron"], enable_notifications=False)  }}
         aux_conf:
           policies:
           - vhost: neutron
@@ -415,7 +410,7 @@ spec:
         ipsec_secrets:
           config:
             type: psk
-            key: {{ credentials.ipsec_secret_key }}
+            key: {{ credentials[0].ipsec_secret_key }}
         strongswan:
           charon:
             plugins:
@@ -578,8 +573,8 @@ spec:
               username: {{ admin_creds.database.username }}
               password: {{ admin_creds.database.password }}
             neutron:
-              username: {{ credentials.database.user.username }}
-              password: {{ credentials.database.user.password }}
+              username: {{ credentials[0].database.user.username }}
+              password: {{ credentials[0].database.user.password }}
 {%- if 'networking' in components_with_dedicated_messaging %}
 {% include 'base/_messaging_dedicated_proxy.yaml' %}
 {%- else %}
@@ -744,7 +739,7 @@ spec:
             backend: oslo_cache.memcache_pool
           keystone_authtoken:
             memcache_security_strategy: ENCRYPT
-            memcache_secret_key: {{ credentials.memcached }}
+            memcache_secret_key: {{ credentials[0].memcached }}
             {%- if spec.openstack_version not in ("queens", "rocky", "stein") %}
             service_type: network
             {%- endif %}
@@ -835,7 +830,7 @@ spec:
           {%- endif %}
         metadata_agent:
           DEFAULT:
-            metadata_proxy_shared_secret: {{ credentials.metadata_secret }}
+            metadata_proxy_shared_secret: {{ credentials[0].metadata_secret }}
             nova_metadata_port: 8775
             nova_metadata_protocol: http
           {%- if ovn_enabled %}

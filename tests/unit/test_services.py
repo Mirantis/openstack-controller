@@ -114,7 +114,7 @@ def test_service_keystone_render(
     service_creds = [secrets.OSServiceCreds("test", "test", "test")]
 
     mock_template_args.return_value = {
-        "credentials": credentials,
+        "credentials": [credentials],
         "admin_creds": admin_creds,
         "guest_creds": guest_creds,
         "service_creds": service_creds,
@@ -190,7 +190,7 @@ def test_service_nova_with_ceph_render(
 
     osdplstmock = mock.MagicMock()
     mock_template_args.return_value = {
-        "credentials": credentials,
+        "credentials": [credentials],
         "admin_creds": admin_creds,
         "guest_creds": guest_creds,
         "service_creds": service_creds,

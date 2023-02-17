@@ -272,55 +272,61 @@ spec:
         users:
           barbican_service:
             auth:
-              barbican:
+              barbican_1:
                 password: iHMN1WsAMxAi8G4d0r64iggSdedSRR1p
                 username: barbicanVuqCvFid
-            path: /barbican
+            path: ["/barbican"]
           barbican_service_notifications:
             auth:
-              barbican:
+              barbican_1:
                 password: acH2p6deh90bDJWlRDzFE7wptqgQgVc7
                 username: barbicanyfHtXhiq
             path: /openstack
           cinder_service:
             auth:
-              cinder:
+              cinder_1:
                 password: KgjY6ghlVbGSKJL6DH2jQXH50EtBVsiC
                 username: cinder0Jhxmf
-            path: /cinder
+              cinder_2:
+                password: backupPassword
+                username: backupUser
+            path: ["/cinder"]
           cinder_service_notifications:
             auth:
-              cinder:
+              cinder_1:
                 password: ptehSf4lZxF0TAs16INhV9XmuVXHbL6R
                 username: cinderU5dqXt
+              cinder_2:
+                password: backupNotificationPassword
+                username: backupNotificationUser
             path: /openstack
           designate_service:
             auth:
-              designate:
+              designate_1:
                 password: tBFq4j3X2PdA5Jh9x2kkR0Hgs7FZhdFE
                 username: designatePLbJrH4JP
-            path: /designate
+            path: ["/designate"]
           designate_service_notifications:
             auth:
-              designate:
+              designate_1:
                 password: nzsKJHIGHIwsildBgpfmZQDan7Cexzc1
                 username: designateUMq5w6Q7G
             path: /openstack
           glance_service:
             auth:
-              glance_username:
+              glance_1:
                 password: a1tgZk2bR7f5WyweUt2a4PuFYEty6Igv
                 username: glanceFjTBUv
-            path: /glance
+            path: ["/glance"]
           glance_service_notifications:
             auth:
-              glance_username:
+              glance_1:
                 password: uYRL35JdXg39DumFdDG8xdJeqvL0cswM
                 username: glancejdih0V
             path: /openstack
           heat_service:
             auth:
-              heat:
+              heat_1:
                 password: BY5CvE9aGG3jUkQghTCACvcDZbp6VcUI
                 username: heatekEb
             path:
@@ -328,55 +334,55 @@ spec:
             - /heat_victoria
           heat_service_notifications:
             auth:
-              heat:
+              heat_1:
                 password: GPQzkiL39fEDGEWn6DIZGBxkjXBuDpQe
                 username: heatKQF7
             path: /openstack
           keystone_service:
             auth:
-              keystone_username:
+              keystone_1:
                 password: i1LUJuYCIEeUdpKbztpemVvIQhmJ56cn
                 username: keystoneeYwYK03G
-            path: /keystone
+            path: ["/keystone"]
           keystone_service_notifications:
             auth:
-              keystone_username:
+              keystone_1:
                 password: TzLbvAXVJKzX4klDdVWEuYnWf35hVBTf
                 username: keystonefz7wkYYH
             path: /openstack
           neutron_service:
             auth:
-              neutron:
+              neutron_1:
                 password: TRRhbnUMsepnqSzyJngJtgZD9gRu0Fwy
                 username: neutronx7uHpit
-            path: /neutron
+            path: ["/neutron"]
           neutron_service_notifications:
             auth:
-              neutron:
+              neutron_1:
                 password: hL3STFyPBLCdR2qUCdaGEUeRB5jRIFPf
                 username: neutrontvAcFA3
             path: /openstack
           nova_service:
             auth:
-              nova:
+              nova_1:
                 password: tuzgvismPceyDLXGeq1cpQcDIQDwIyhr
                 username: nova27zb
-            path: /nova
+            path: ["/nova"]
           nova_service_notifications:
             auth:
-              nova:
+              nova_1:
                 password: 55HghKuwQUTPlVFt8UKM6JhIGQ8egSLP
                 username: novauvhH
             path: /openstack
           octavia_service:
             auth:
-              octavia:
+              octavia_1:
                 password: P4tAIFt2fRzEddPyPmfCmBcInbNdCI9S
                 username: octaviaGrHbrrp
-            path: /octavia
+            path: ["/octavia"]
           octavia_service_notifications:
             auth:
-              octavia:
+              octavia_1:
                 password: xcKEJVAYZflpAmEWcyzTKpvNlJycCLvc
                 username: octaviadRDTSj1
             path: /openstack
@@ -386,39 +392,39 @@ spec:
                 password: ptehSf4lZxF0TAs16INhV9XmuVXHbL6R
                 username: stacklight123456
             path: /openstack
-          alarming_service:
+          aodh_service:
             auth:
-              alarming:
+              aodh_1:
                 username: aodhfe3v
                 password: D3R9K371zxx2bygGZRXgz2Mrp2XsL1P6
-            path: /aodh
-          alarming_service_notifications:
+            path: ["/aodh"]
+          aodh_service_notifications:
             auth:
-              alarming:
+              aodh_1:
                 username: aodh3FeH
                 password: dxDZQgkkcVjGQAQw5dfZKSlpbHlMpxlA
             path: /openstack
-          metering_service:
+          ceilometer_service:
             auth:
-              metering:
+              ceilometer_1:
                 username: ceilometerdNwnaAFUJC
                 password: VCBEs3bsRHNqXjDFRBEABAqqhsAgcK1E
-            path: /ceilometer
-          metering_service_notifications:
+            path: ["/ceilometer"]
+          ceilometer_service_notifications:
             auth:
-              metering:
+              ceilometer_1:
                 username: ceilometerxkaMcrLDm7
                 password: PYVPcRruzubVN2sguGarI6rbgFTb7FSd
             path: /openstack
           masakari_service:
             auth:
-              masakari:
+              masakari_1:
                 password: iHMN1WsAMxAi8G4d0r64iggSdedSRR1p
                 username: masakariVuqCvFid
-            path: /masakari
+            path: ["/masakari"]
           masakari_service_notifications:
             auth:
-              masakari:
+              masakari_1:
                 password: acH2p6deh90bDJWlRDzFE7wptqgQgVc7
                 username: masakariyfHtXhiq
             path: /openstack
