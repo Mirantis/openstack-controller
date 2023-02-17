@@ -1044,12 +1044,10 @@ class ServiceAccountsSecrets:
         namespace: str,
         service: str,
         service_accounts: List[str],
-        required_accounts: Dict[str, List[str]],
     ):
         self.namespace = namespace
         self.service = service
         self.service_accounts = service_accounts
-        self.required_accounts = required_accounts
 
     def ensure(self):
         try:
@@ -1067,15 +1065,6 @@ class ServiceAccountsSecrets:
                     )
                 )
             self.save_service_secrets(service_creds)
-
-        for service_dep, accounts in self.required_accounts.items():
-            secret_name = f"{service_dep}-service-accounts"
-            kube.wait_for_secret(self.namespace, secret_name)
-            ra_creds = self.get_service_secrets(service_dep)
-
-            for creds in ra_creds:
-                if creds.account in accounts:
-                    service_creds.append(creds)
         return service_creds
 
     def get_service_secrets(self, service) -> List[OSServiceCreds]:

@@ -724,18 +724,26 @@ class OpenStackService(Service):
             }
         }
 
+    def _get_service_creds(self):
+        result = secrets.ServiceAccountsSecrets(
+            self.namespace, self.service, self.service_accounts
+        ).ensure()
+        for svc, accs in self._required_accounts.items():
+            kube.wait_for_secret(self.namespace, f"{svc}-service-accounts")
+            svc_creds = secrets.ServiceAccountsSecrets(
+                self.namespace, svc, []
+            ).ensure()
+            for cred in svc_creds:
+                if cred.account in accs:
+                    result.append(cred)
+        return result
+
     def template_args(self):
         template_args = super().template_args()
 
         admin_creds = self._get_admin_creds()
         guest_creds = self._get_guest_creds()
-        service_secrets = secrets.ServiceAccountsSecrets(
-            self.namespace,
-            self.service,
-            self.service_accounts,
-            self._required_accounts,
-        )
-        service_creds = service_secrets.ensure()
+        service_creds = self._get_service_creds()
 
         template_args.update(
             {
