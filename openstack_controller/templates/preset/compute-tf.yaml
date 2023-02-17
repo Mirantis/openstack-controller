@@ -1,7 +1,8 @@
 # IMPORTANT: list items specified here is not possible to override as they
 # appended during merging
 {%- set nginx_ingress_namespace_class = "openstack-ingress-nginx" %}
-{%- if openstack_version not in ("queens", "rocky", "stein", "train", "ussuri", "victoria", "wallaby", "xena") %}
+{%- set openstack_yoga_plus = openstack_version not in ("queens", "rocky", "stein", "train", "ussuri", "victoria", "wallaby", "xena") %}
+{%- if openstack_yoga_plus %}
   {%- set cirros_image_name = "Cirros-6.0" %}
   {%- set dhcp_client = "dhcpcd" %}
 {%- else %}
@@ -313,6 +314,9 @@ services:
             # can be unskipped when both accounts will be provided from the same project
             - (?:tempest.api.compute.admin.test_live_migration.LiveAutoBlockMigrationV225Test.test_volume_backed_live_migration)
             - (?:tempest.api.compute.admin.test_live_migration.LiveMigrationTest.test_volume_backed_live_migration)
+          {%- endif %}
+          {%- if not openstack_yoga_plus %}
+            - (?:tempest.api.image.v2.test_images.ImportImagesTest.test_image_glance_direct_import)
           {%- endif %}
             # Tests NOT supported by product
 {% include 'base/_tempest_blacklist_no_supported.yaml' %}
