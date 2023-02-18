@@ -1,9 +1,13 @@
 #!/usr/bin/env python3
+import asyncio
 import argparse
 import sys
+import time
 
 from openstack_controller import kube
 from openstack_controller import utils
+from openstack_controller import osdplstatus
+from openstack_controller import health
 
 LOG = utils.get_logger(__name__)
 
@@ -47,6 +51,9 @@ def parse_args():
                 Use `admin` to rotate admin credentials for keystone.
                 Use `service` to rotate  mysql/rabbitmq/keystone credentials. Can be specified multiple time.""",
     )
+    rotation_parser.add_argument(
+        "--wait", required=False, default=False, action="store_true"
+    )
 
     return parser.parse_args()
 
@@ -85,10 +92,31 @@ def main():
             }
         }
     }
+    osdplst = osdplstatus.OpenStackDeploymentStatus(args.osdpl, args.namespace)
+
     osdpl.patch(patch, subresource="status")
     LOG.info(
         f"Started credential rotation for {creds_groups}, please wait for OpenstackDeployment status becoming APPLIED."
     )
+
+    if args.wait is True:
+        LOG.info(f"Waiting rotation changes are applied")
+        osdplst = osdplstatus.OpenStackDeploymentStatus(
+            args.osdpl, args.namespace
+        )
+        loop = asyncio.get_event_loop()
+        while True:
+            if osdplst.get_osdpl_status() == osdplstatus.APPLYING:
+                break
+            time.sleep(10)
+        while True:
+            if osdplst.get_osdpl_status() == osdplstatus.APPLIED:
+                LOG.info(f"Waiting openstack services are healty.")
+                if loop.run_until_complete(
+                    health.wait_services_healthy(osdpl.mspec, osdplst)
+                ):
+                    break
+            time.sleep(10)
 
 
 if __name__ == "__main__":

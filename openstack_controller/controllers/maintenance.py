@@ -199,7 +199,7 @@ async def cluster_maintenance_request_change_handler(body, **kwargs):
         # not wait for health
         return
     cwl.set_error_message("Waiting for all OpenStack services are healthy.")
-    await health.wait_services_healthy(mspec)
+    await health.wait_services_healthy(mspec, osdplst)
 
     cwl.set_state_inactive()
     cwl.unset_error_message()
