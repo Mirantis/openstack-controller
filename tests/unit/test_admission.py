@@ -310,10 +310,9 @@ def test_credentials_rotation_ok(client, osdplst):
     osdplst.return_value.get_osdpl_status = get_osdpl_status_mock
 
     rotation_group = "admin"
-    rotation_creds = "identity"
     req["request"]["oldObject"] = copy.deepcopy(req["request"]["object"])
     req["request"]["object"]["status"] = {
-        "credentials": {rotation_group: {rotation_creds: {"rotation_id": 1}}}
+        "credentials": {rotation_group: {"rotation_id": 1}}
     }
     response = client.simulate_post("/validate", json=req)
     assert response.status == falcon.HTTP_OK
@@ -330,20 +329,19 @@ def test_credentials_rotation_decrease_fail(client, osdplst):
     osdplst.return_value.get_osdpl_status = get_osdpl_status_mock
 
     rotation_group = "admin"
-    rotation_creds = "identity"
     req["request"]["oldObject"] = copy.deepcopy(req["request"]["object"])
     req["request"]["oldObject"]["status"]["credentials"] = {
-        rotation_group: {rotation_creds: {"rotation_id": 2}}
+        rotation_group: {"rotation_id": 2}
     }
     req["request"]["object"]["status"]["credentials"] = {
-        rotation_group: {rotation_creds: {"rotation_id": 1}}
+        rotation_group: {"rotation_id": 1}
     }
     response = client.simulate_post("/validate", json=req)
     assert response.status == falcon.HTTP_OK
     assert response.json["response"]["allowed"] is False
     assert response.json["response"]["status"]["code"] == 400
     assert (
-        f"Decreasing {rotation_group} {rotation_creds} rotation_id is not allowed"
+        f"Decreasing {rotation_group} rotation_id is not allowed"
         in response.json["response"]["status"]["message"]
     )
 
@@ -358,10 +356,9 @@ def test_credentials_rotation_float_fail(client, osdplst):
     osdplst.return_value.get_osdpl_status = get_osdpl_status_mock
 
     rotation_group = "admin"
-    rotation_creds = "identity"
     req["request"]["oldObject"] = copy.deepcopy(req["request"]["object"])
     req["request"]["object"]["status"]["credentials"] = {
-        rotation_group: {rotation_creds: {"rotation_id": 1.1}}
+        rotation_group: {"rotation_id": 1.1}
     }
     response = client.simulate_post("/validate", json=req)
     assert response.status == falcon.HTTP_OK
@@ -379,10 +376,9 @@ def test_credentials_rotation_zero_fail(client, osdplst):
     osdplst.return_value.get_osdpl_status = get_osdpl_status_mock
 
     rotation_group = "admin"
-    rotation_creds = "identity"
     req["request"]["oldObject"] = copy.deepcopy(req["request"]["object"])
     req["request"]["object"]["status"]["credentials"] = {
-        rotation_group: {rotation_creds: {"rotation_id": 0}}
+        rotation_group: {"rotation_id": 0}
     }
     response = client.simulate_post("/validate", json=req)
     assert response.status == falcon.HTTP_OK
@@ -400,10 +396,9 @@ def test_credentials_rotation_subzero_fail(client, osdplst):
     osdplst.return_value.get_osdpl_status = get_osdpl_status_mock
 
     rotation_group = "admin"
-    rotation_creds = "identity"
     req["request"]["oldObject"] = copy.deepcopy(req["request"]["object"])
     req["request"]["object"]["status"]["credentials"] = {
-        rotation_group: {rotation_creds: {"rotation_id": -1}}
+        rotation_group: {"rotation_id": -1}
     }
     response = client.simulate_post("/validate", json=req)
     assert response.status == falcon.HTTP_OK
@@ -421,10 +416,9 @@ def test_credentials_rotation_remove_fail(client, osdplst):
     osdplst.return_value.get_osdpl_status = get_osdpl_status_mock
 
     rotation_group = "admin"
-    rotation_creds = "identity"
     req["request"]["oldObject"] = copy.deepcopy(req["request"]["object"])
     req["request"]["oldObject"]["status"]["credentials"] = {
-        rotation_group: {rotation_creds: {"rotation_id": 2}}
+        rotation_group: {"rotation_id": 2}
     }
     req["request"]["object"]["status"]["credentials"] = {}
 
@@ -433,7 +427,7 @@ def test_credentials_rotation_remove_fail(client, osdplst):
     assert response.json["response"]["allowed"] is False
     assert response.json["response"]["status"]["code"] == 400
     assert (
-        f"Removing {rotation_group} {rotation_creds} rotation config is not allowed"
+        f"Removing {rotation_group} rotation config is not allowed"
         in response.json["response"]["status"]["message"]
     )
 
@@ -448,13 +442,12 @@ def test_credentials_rotation_increase_fail(client, osdplst):
     osdplst.return_value.get_osdpl_status = get_osdpl_status_mock
 
     rotation_group = "admin"
-    rotation_creds = "identity"
     req["request"]["oldObject"] = copy.deepcopy(req["request"]["object"])
     req["request"]["oldObject"]["status"]["credentials"] = {
-        rotation_group: {rotation_creds: {"rotation_id": 2}}
+        rotation_group: {"rotation_id": 2}
     }
     req["request"]["object"]["status"]["credentials"] = {
-        rotation_group: {rotation_creds: {"rotation_id": 4}}
+        rotation_group: {"rotation_id": 4}
     }
 
     response = client.simulate_post("/validate", json=req)
@@ -462,7 +455,7 @@ def test_credentials_rotation_increase_fail(client, osdplst):
     assert response.json["response"]["allowed"] is False
     assert response.json["response"]["status"]["code"] == 400
     assert (
-        f"Increasing {rotation_group} {rotation_creds} rotation_id more than by 1 is not allowed"
+        f"Increasing {rotation_group} rotation_id more than by 1 is not allowed"
         in response.json["response"]["status"]["message"]
     )
 

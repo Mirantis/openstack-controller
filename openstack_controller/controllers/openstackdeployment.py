@@ -151,20 +151,47 @@ def cleanup_helm_cache():
             os.remove(os.path.join(root, file))
 
 
-def rotate_credentials(old, new, namespace):
-    new_credentials = utils.get_in(new, ["status", "credentials"], {})
-    new_rotation_id = utils.get_in(
-        new_credentials, ["admin", "identity", "rotation_id"], 0
-    )
+def _rotate_creds(
+    group_name, rotation_id, enabled_services, mspec, logger, osdplst
+):
+    if group_name == "admin":
+        secrets.OpenStackAdminSecret(osdplst.namespace).rotate(rotation_id)
+        # TODO(vsaienko): we need to wait for mariadb/rabbitmq password is
+        # applied before restarting other services.
+    elif group_name == "service":
+        for service in enabled_services:
+            service_instance = services.registry[service](
+                mspec, logger, osdplst
+            )
+            service_secret = service_instance.service_secret
+            if service_secret:
+                LOG.info(f"Starting rotation service users for {service}")
+                service_secret.rotate(rotation_id)
 
-    if new_rotation_id:
-        old_credentials = utils.get_in(old, ["status", "credentials"], {})
-        old_rotation_id = utils.get_in(
-            old_credentials, ["admin", "identity", "rotation_id"], 0
+
+def rotate_credentials(old, new, enabled_services, mspec, logger, osdplst):
+    new_credentials = utils.get_in(new, ["status", "credentials"], {})
+    for group_name in ["admin", "service"]:
+        new_rotation_id = utils.get_in(
+            new_credentials, [group_name, "rotation_id"], 0
         )
 
-        if new_rotation_id != old_rotation_id:
-            secrets.OpenStackAdminSecret(namespace).rotate(new_rotation_id)
+        if new_rotation_id:
+            old_credentials = utils.get_in(old, ["status", "credentials"], {})
+            old_rotation_id = utils.get_in(
+                old_credentials, [group_name, "rotation_id"], 0
+            )
+            if new_rotation_id != old_rotation_id:
+                LOG.info(f"Starting rotation for {group_name}")
+                _rotate_creds(
+                    group_name,
+                    new_rotation_id,
+                    enabled_services,
+                    mspec,
+                    logger,
+                    osdplst,
+                )
+                LOG.info(f"Finished rotation for {group_name}")
 
 
 # on.field to force storing that field to be reacting on its changes
@@ -208,7 +235,6 @@ async def handle(body, meta, spec, logger, reason, **kwargs):
     check_handling_allowed(kwargs["old"], kwargs["new"], reason)
 
     secrets.OpenStackAdminSecret(namespace).ensure()
-    rotate_credentials(kwargs["old"], kwargs["new"], namespace)
 
     osdpl = kube.get_osdpl()
     mspec = osdpl.mspec
@@ -221,6 +247,10 @@ async def handle(body, meta, spec, logger, reason, **kwargs):
     await cache.wait_ready(meta["namespace"])
 
     update, delete = layers.services(mspec, logger, **kwargs)
+
+    rotate_credentials(
+        kwargs["old"], kwargs["new"], update, mspec, logger, osdplst
+    )
 
     if is_openstack_version_changed(kwargs["diff"]):
         # Suspend descheduler cronjob during the upgrade services

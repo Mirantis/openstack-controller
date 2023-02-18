@@ -41,9 +41,11 @@ def parse_args():
     rotation_parser.add_argument(
         "--type",
         required=True,
-        choices=["admin/identity"],
-        help="""Type of credentials to rotate in format <creds_group>/<creds_name>.
-                Currently only openstack administrator keystone account rotation is supported.""",
+        action="append",
+        choices=["admin", "service"],
+        help="""Type of credentials to rotate.
+                Use `admin` to rotate admin credentials for keystone.
+                Use `service` to rotate  mysql/rabbitmq/keystone credentials. Can be specified multiple time.""",
     )
 
     return parser.parse_args()
@@ -51,8 +53,7 @@ def parse_args():
 
 def main():
     args = parse_args()
-
-    creds_group, creds_name = args.type.split("/")
+    creds_groups = set(args.type)
 
     osdpl = kube.find(
         kube.OpenStackDeployment, args.osdpl, args.namespace, silent=True
@@ -64,26 +65,29 @@ def main():
         sys.exit(1)
     osdpl.reload()
 
-    current_rotation_id = utils.get_in(
-        osdpl.obj,
-        ["status", "credentials", creds_group, creds_name, "rotation_id"],
-        0,
-    )
-    new_rotation_id = current_rotation_id + 1
+    rotation_id = {}
+    for creds_group in creds_groups:
+        rotation_id[creds_group] = (
+            utils.get_in(
+                osdpl.obj,
+                ["status", "credentials", creds_group, "rotation_id"],
+                0,
+            )
+            + 1
+        )
 
-    LOG.info(f"Starting rotation for {creds_group} {creds_name}")
-    osdpl.patch(
-        {
-            "status": {
-                "credentials": {
-                    creds_group: {creds_name: {"rotation_id": new_rotation_id}}
-                }
+    LOG.info(f"Starting rotation for {creds_groups}")
+    patch = {
+        "status": {
+            "credentials": {
+                creds_group: {"rotation_id": rotation_id[creds_group]}
+                for creds_group in creds_groups
             }
-        },
-        subresource="status",
-    )
+        }
+    }
+    osdpl.patch(patch, subresource="status")
     LOG.info(
-        f"{creds_group} {creds_name} rotation has started, please wait for OpenstackDeployment status becoming applied"
+        f"Started credential rotation for {creds_groups}, please wait for OpenstackDeployment status becoming APPLIED."
     )
 
 
