@@ -90,6 +90,7 @@ def test_openstack_service_secret_fill_fields(mock_secret_create):
         "messaging": {"user": {"username": "olduser", "password": "oldpw"}},
         "database": {"user": {"username": "olduser", "password": "oldpw"}},
         "memcached": "oldpw",
+        "identity": {"myuser": {"username": "olduser", "password": "oldpw"}},
     }
     new = {
         "notifications": {
@@ -98,6 +99,7 @@ def test_openstack_service_secret_fill_fields(mock_secret_create):
         "messaging": {"user": {"username": "newuser", "password": "newpw"}},
         "database": {"user": {"username": "newuser", "password": "newpw"}},
         "memcached": "newpw",
+        "identity": {"myuser": {"username": "newuser", "password": "newpw"}},
     }
 
     mock_secret_create.return_value = secrets.OpenStackCredentials(**new)
@@ -108,6 +110,7 @@ def test_openstack_service_secret_fill_fields(mock_secret_create):
             "notifications": [],
             "database": {"user": ["password"]},
             "messaging": {"user": []},
+            "identity": {"myuser": ["password"]},
         },
     )
     res = secrets.OpenStackCredentials.to_json(res)
@@ -121,6 +124,9 @@ def test_openstack_service_secret_fill_fields(mock_secret_create):
     assert res["memcached"] == old["memcached"]
     assert res["database"] == {
         "user": {"username": "olduser", "password": "newpw"}
+    }
+    assert res["identity"] == {
+        "myuser": {"username": "olduser", "password": "newpw"}
     }
 
 
@@ -145,8 +151,7 @@ def test_openstack_service_secret_fill_fields_missing(mock_secret_create):
             "user2": {"username": "newuser", "password": "newpw"},
         },
         "memcached": "newpw",
-        # TODO(vsaienko): uncomment when identity is part of ServiceSecret
-        # "identity": {"myuser": {"username": "newuser", "password": "newpw"}},
+        "identity": {"myuser": {"username": "newuser", "password": "newpw"}},
     }
 
     mock_secret_create.return_value = secrets.OpenStackCredentials(**new)
@@ -154,7 +159,7 @@ def test_openstack_service_secret_fill_fields_missing(mock_secret_create):
         old,
         {
             "database": {"user2": []},
-            # "identity": [],
+            "identity": [],
         },
     )
     res = secrets.OpenStackCredentials.to_json(res)
@@ -162,9 +167,9 @@ def test_openstack_service_secret_fill_fields_missing(mock_secret_create):
         "user1": {"username": "olduser", "password": "oldpw"},
         "user2": {"username": "newuser", "password": "newpw"},
     }
-    # assert res["identity"] == {
-    #    "myuser": {"username": "newuser", "password": "newpw"}
-    # }
+    assert res["identity"] == {
+        "myuser": {"username": "newuser", "password": "newpw"}
+    }
 
 
 @mock.patch("openstack_controller.secrets.get_secret_data")

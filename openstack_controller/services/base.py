@@ -126,7 +126,9 @@ class Service:
     def service_secret(self):
         """Returns instance of service _secret_class"""
         if self._secret_class is not None:
-            return self._secret_class(self.namespace, self.service)
+            return self._secret_class(
+                self.namespace, self.service, self.service_accounts
+            )
 
     @property
     def maintenance_api(self):
@@ -732,17 +734,29 @@ class OpenStackService(Service):
         }
 
     def _get_service_creds(self):
-        result = secrets.ServiceAccountsSecrets(
-            self.namespace, self.service, self.service_accounts
-        ).ensure()
-        for svc, accs in self._required_accounts.items():
-            kube.wait_for_secret(self.namespace, f"{svc}-service-accounts")
-            svc_creds = secrets.ServiceAccountsSecrets(
-                self.namespace, svc, []
-            ).ensure()
-            for cred in svc_creds:
-                if cred.account in accs:
-                    result.append(cred)
+        result = []
+        if self._secret_class is not None:
+            for k, v in self.service_secret.get().identity.items():
+                result.append(
+                    secrets.OSServiceCreds(
+                        account=k, username=v.username, password=v.password
+                    )
+                )
+            for svc, accs in self._required_accounts.items():
+                secret_class = Service.registry[svc](
+                    self.mspec, self.logger, self.osdplst
+                ).service_secret
+                if secret_class:
+                    secret_class.wait()
+                    for k, v in secret_class.get().identity.items():
+                        if k in accs:
+                            result.append(
+                                secrets.OSServiceCreds(
+                                    account=k,
+                                    username=v.username,
+                                    password=v.password,
+                                )
+                            )
         return result
 
     def template_args(self):
