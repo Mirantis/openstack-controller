@@ -1049,6 +1049,16 @@ class ExternalTopicSecret(SecretCopy):
         self.secret_name = f"openstack-{name}-notifications"
 
 
+class ExternalCredentialSecret(SecretCopy):
+    def __init__(
+        self,
+        name,
+        namespace=constants.OPENSTACK_EXTERNAL_NAMESPACE,
+    ):
+        super().__init__(namespace)
+        self.secret_name = f"openstack-{name}-credentials"
+
+
 @dataclass
 class OpenStackIAMData:
     clientId: str

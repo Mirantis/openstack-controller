@@ -4,6 +4,7 @@ import json
 import kopf
 import pykube
 import hashlib
+import yaml
 from urllib.parse import urlsplit
 
 from openstack_controller import constants
@@ -394,3 +395,54 @@ async def handle_substitution_secrets(
         },
         subresource="status",
     )
+
+
+@kopf.on.update(
+    "",
+    "v1",
+    "secrets",
+    labels={"application": "keystone", "component": "os-clouds"},
+)
+@kopf.on.create(
+    "",
+    "v1",
+    "secrets",
+    labels={"application": "keystone", "component": "os-clouds"},
+)
+async def handle_keystone_osclouds_secret(
+    body,
+    meta,
+    name,
+    status,
+    logger,
+    diff,
+    **kwargs,
+):
+    if name != constants.KEYSTONE_OSCLOUDS_SECRET:
+        return
+
+    LOG.debug(f"Handling secret create/update {name}")
+    osdpl = kube.get_osdpl(settings.OSCTL_OS_DEPLOYMENT_NAMESPACE)
+    public_domain_name = osdpl.obj["spec"]["public_domain_name"]
+    public_auth_url = f"https://keystone.{public_domain_name}/"
+
+    data = yaml.safe_load(
+        base64.b64decode(body["data"]["clouds.yaml"]).decode()
+    )
+
+    ext_data = {"clouds": {}}
+    for context in ["admin", "admin-system"]:
+        # keystone-os-clouds secret contains internal endpoints data,
+        # so need to convert to public
+        data["clouds"][context]["auth"]["auth_url"] = public_auth_url
+        data["clouds"][context]["interface"] = "public"
+        data["clouds"][context]["endpoint_type"] = "public"
+        ext_data["clouds"][context] = data["clouds"][context]
+
+    encoded_ext_data = {
+        "clouds.yaml": base64.b64encode(
+            yaml.safe_dump(ext_data).encode()
+        ).decode()
+    }
+
+    secrets.ExternalCredentialSecret("identity").save(encoded_ext_data)
