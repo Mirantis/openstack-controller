@@ -17,6 +17,7 @@ CREDS_KWARGS = {
             "database": {"user": {"username": "", "password": ""}},
             "messaging": {"user": {"username": "", "password": ""}},
             "notifications": {"user": {"username": "", "password": ""}},
+            "identity": {"user": {"username": "", "password": ""}},
         }
     ],
     "admin_creds": {
@@ -37,6 +38,7 @@ CREDS_KWARGS = {
         "client_cert": "",
         "client_key": "",
     },
+    "keystone_creds": {},
 }
 
 
@@ -142,10 +144,19 @@ def test_render_template(openstackdeployment_mspec):
         "compute",
         openstackdeployment_mspec,
         logging,
-        credentials=[mock.Mock()],
+        credentials=[
+            {
+                "memcached": "",
+                "database": {"user": {"username": "", "password": ""}},
+                "messaging": {"user": {"username": "", "password": ""}},
+                "notifications": {"user": {"username": "", "password": ""}},
+                "identity": {"user": {"username": "", "password": ""}},
+            },
+        ],
         admin_creds=mock.Mock(),
         guest_creds=mock.Mock(),
         images=images_mock,
+        keystone_creds={},
         ceph={
             "nova": {
                 "pools": {},
