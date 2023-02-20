@@ -357,7 +357,11 @@ services:
               build_timeout: 600
             load_balancer:
               lb_build_timeout: 1500
+            {%- if ironic_enabled %}
+              build_timeout: 900
+            {%- else %}
               build_timeout: 600
+            {%- endif %}
               listener_conn_limit: 50000
             {%- if ironic_enabled and not ironic_mt_enabled %}
               test_with_ipv6: false
