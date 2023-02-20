@@ -85,6 +85,9 @@ class OsdplMetricsCollector(object):
     def collect(self):
         osdpl = kube.get_osdpl()
 
+        if not osdpl:
+            return
+
         self.update_tasks_status()
         if osdpl:
             LOG.info(f"The osdpl {osdpl.name} found. Collecting metrics")
