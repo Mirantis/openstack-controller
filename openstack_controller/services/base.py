@@ -733,30 +733,17 @@ class OpenStackService(Service):
             }
         }
 
-    def _get_service_creds(self):
-        result = []
-        if self._secret_class is not None:
-            for k, v in self.service_secret.get().identity.items():
-                result.append(
-                    secrets.OSServiceCreds(
-                        account=k, username=v.username, password=v.password
-                    )
-                )
-            for svc, accs in self._required_accounts.items():
-                secret_class = Service.registry[svc](
-                    self.mspec, self.logger, self.osdplst
-                ).service_secret
-                if secret_class:
-                    secret_class.wait()
-                    for k, v in secret_class.get().identity.items():
-                        if k in accs:
-                            result.append(
-                                secrets.OSServiceCreds(
-                                    account=k,
-                                    username=v.username,
-                                    password=v.password,
-                                )
-                            )
+    def _get_keystone_creds(self):
+        result = {}
+        for svc, accs in self._required_accounts.items():
+            secret_class = Service.registry[svc](
+                self.mspec, self.logger, self.osdplst
+            ).service_secret
+            if secret_class:
+                secret_class.wait()
+                for k, v in secret_class.get().identity.items():
+                    if k in accs:
+                        result[k] = v
         return result
 
     def template_args(self):
@@ -764,13 +751,13 @@ class OpenStackService(Service):
 
         admin_creds = self._get_admin_creds()
         guest_creds = self._get_guest_creds()
-        service_creds = self._get_service_creds()
+        keystone_creds = self._get_keystone_creds()
 
         template_args.update(
             {
                 "admin_creds": admin_creds,
                 "guest_creds": guest_creds,
-                "service_creds": service_creds,
+                "keystone_creds": keystone_creds,
             }
         )
         return template_args

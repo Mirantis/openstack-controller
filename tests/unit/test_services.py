@@ -111,13 +111,13 @@ def test_service_keystone_render(
         notifications=creds_dict,
         memcached="secret",
     )
-    service_creds = [secrets.OSServiceCreds("test", "test", "test")]
+    keystone_creds = {"test": secrets.OSSytemCreds("test", "test")}
 
     mock_template_args.return_value = {
         "credentials": [credentials],
         "admin_creds": admin_creds,
         "guest_creds": guest_creds,
-        "service_creds": service_creds,
+        "keystone_creds": keystone_creds,
     }
     openstackdeployment_mspec["services"]["identity"]["keystone"]["values"] = {
         "pod": {"replicas": {"api": 333}}
@@ -169,7 +169,7 @@ def test_service_nova_with_ceph_render(
         notifications=creds_dict,
         memcached="secret",
     )
-    service_creds = [secrets.OSServiceCreds("test", "test", "test")]
+    keystone_creds = {"test": secrets.OSSytemCreds("test", "test")}
 
     mock_ssh.return_value = secrets.SshKey("public", "private")
     mock_vnc.return_value = secrets.VncSignedCertificate(
@@ -193,7 +193,7 @@ def test_service_nova_with_ceph_render(
         "credentials": [credentials],
         "admin_creds": admin_creds,
         "guest_creds": guest_creds,
-        "service_creds": service_creds,
+        "keystone_creds": keystone_creds,
     }
 
     mock_ceph_template_args.return_value = {

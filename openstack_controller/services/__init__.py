@@ -1941,42 +1941,39 @@ class RadosGateWay(OpenStackService):
         ]
         # NOTE(vsaienko): share date with ceph first so it can construct correct
         # public endpoint
-        for service_cred in t_args["service_creds"]:
-            if service_cred.account == "ceph-rgw":
-                rgw_creds = {
-                    "auth_url": auth_url,
-                    "default_domain": "service",
-                    "interface": "public",
-                    "password": service_cred.password,
-                    "project_domain_name": "service",
-                    "project_name": "service",
-                    "region_name": self.mspec.get("region_name", "RegionOne"),
-                    "user_domain_name": "service",
-                    "username": service_cred.username,
-                    "public_domain": self.mspec["public_domain_name"],
-                    "ca_cert": ssl_public_endpoints["ca_cert"],
-                    "tls_crt": ssl_public_endpoints["api_cert"],
-                    "tls_key": ssl_public_endpoints["api_key"],
-                    "barbican_url": "https://barbican."
-                    + self.mspec["public_domain_name"],
-                }
+        if "ceph-rgw" in t_args["credentials"][0].identity.keys():
+            service_cred = t_args["credentials"][0].identity["ceph-rgw"]
+            rgw_creds = {
+                "auth_url": auth_url,
+                "default_domain": "service",
+                "interface": "public",
+                "password": service_cred.password,
+                "project_domain_name": "service",
+                "project_name": "service",
+                "region_name": self.mspec.get("region_name", "RegionOne"),
+                "user_domain_name": "service",
+                "username": service_cred.username,
+                "public_domain": self.mspec["public_domain_name"],
+                "ca_cert": ssl_public_endpoints["ca_cert"],
+                "tls_crt": ssl_public_endpoints["api_cert"],
+                "tls_key": ssl_public_endpoints["api_key"],
+                "barbican_url": "https://barbican."
+                + self.mspec["public_domain_name"],
+            }
 
-                # encode values from rgw_creds
-                for key in rgw_creds.keys():
-                    rgw_creds[key] = base64.b64encode(
-                        rgw_creds[key].encode()
-                    ).decode()
+            # encode values from rgw_creds
+            for key in rgw_creds.keys():
+                rgw_creds[key] = base64.b64encode(
+                    rgw_creds[key].encode()
+                ).decode()
 
-                os_rgw_creds = ceph_api.OSRGWCreds(**rgw_creds)
+            os_rgw_creds = ceph_api.OSRGWCreds(**rgw_creds)
 
-                ceph_api.set_os_rgw_creds(
-                    os_rgw_creds=os_rgw_creds,
-                    save_secret=kube.save_secret_data,
-                )
-                LOG.info(
-                    "Secret with RGW creds has been created successfully."
-                )
-                break
+            ceph_api.set_os_rgw_creds(
+                os_rgw_creds=os_rgw_creds,
+                save_secret=kube.save_secret_data,
+            )
+            LOG.info("Secret with RGW creds has been created successfully.")
 
         kube.wait_for_secret(
             settings.OSCTL_CEPH_SHARED_NAMESPACE,
