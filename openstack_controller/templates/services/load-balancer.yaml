@@ -4,6 +4,7 @@
 {%- from 'macros/messaging_service_creds.j2' import messaging_service_creds %}
 {%- set service = 'octavia' %}
 {%- set core_plugin = spec.features.neutron.get('backend', 'ml2') %}
+{%- set tungstenfabric_enabled = spec.features.neutron.get('backend', 'ml2') == 'tungstenfabric' %}
 {%- set ovn_enabled = core_plugin == 'ml2/ovn'%}
 {%- set provider_map = {'amphora': 'amphora:The Octavia Amphora driver.',
                         'octavia': 'octavia:Deprecated alias of the Octavia Amphora driver.'} %}
@@ -14,9 +15,11 @@
 {%- if ovn_enabled %}
   {%- do provider_map.update({'ovn': 'ovn:OVN provider driver'}) %}
 {%- endif %}
+{%- if tungstenfabric_enabled %}
+  {%- do provider_map.update({'tungstenfabric': 'tungstenfabric:Tungsten Fabric driver.'}) %}
+{%- endif %}
 {%- set components_with_dedicated_messaging = spec.get('features', {}).get('messaging', {}).get('components_with_dedicated_messaging', []) %}
 {%- set stacklight_enabled = spec.get('features', {}).get('stacklight', {}).get('enabled', False) %}
-{%- set tungstenfabric_enabled = spec.features.neutron.get('backend', 'ml2') == 'tungstenfabric' %}
 {%- set ovn_enabled = spec.features.neutron.get('backend', 'ml2') == 'ml2/ovn'%}
 {%- set notification_topics = ['notifications'] %}
 {%- do notification_topics.append('stacklight_notifications') if stacklight_enabled %}
@@ -28,6 +31,7 @@
 {%- endif  %}
 {%- set cadf_audit = spec.get('features', {}).get('logging', {}).get('cadf', {'enabled': false}) %}
 {%- set cadf_audit_driver = spec.get('features', {}).get('logging', {}).get('cadf', {}).get('driver', 'messagingv2') %}
+{% set health_manager_bind_port = 5555 %}
 
 spec:
   releases:
@@ -84,7 +88,6 @@ spec:
   - name: openstack-octavia
     chart: {{spec.common.openstack.get('repo', spec.common.charts.repo)}}/octavia
     values:
-  {%- if not tungstenfabric_enabled %}
       octavia:
         settings:
   {%- set lb_network = spec.features.get('octavia', {}).get('lb_network', {}) %}
@@ -105,7 +108,6 @@ spec:
   {%- endfor %}
 {%- if 'amphorav2' in provider_map.keys() %}
           enable_amphorav2: true
-{%- endif %}
 {%- endif %}
       images:
         tags:
@@ -276,6 +278,9 @@ spec:
         backend:
           - ovn
       {%- endif %}
+      {%- if tungstenfabric_enabled %}
+        core_plugin: tungstenfabric
+      {%- endif %}
         proxy:
 {% include 'base/_proxy_vars.yaml' %}
       conf:
@@ -283,28 +288,42 @@ spec:
           01-controller-default.yaml: {{ service_policy }}
           02-custom.yaml: {{ spec.get("features", {}).get("policies", {}).get("octavia", {}) }}
         octavia:
-{%- if ovn_enabled %}
+{% set _default_provider_driver = 'amphorav2' %}
+{%- if spec.openstack_version in ['queens'] %}
+  {% set _default_provider_driver = 'octavia' %}
+{%- elif spec.openstack_version in ['rocky', 'stein', 'train', 'ussuri'] %}
+  {% set _default_provider_driver = 'amphora' %}
+{%- elif tungstenfabric_enabled %}
+  {% set _default_provider_driver = 'tungstenfabric' %}
+{%- endif %}
+        {%- if ovn_enabled %}
+          {% set _default_provider_driver = 'ovn' %}
           driver_agent:
-            enabled_provider_agents: ovn
+                    enabled_provider_agents: ovn
+        {%- endif %}
+{% set default_provider_driver = spec.features.get('octavia', {}).get('default_provider', _default_provider_driver) %}
+{%- if tungstenfabric_enabled %}
+          apiserver:
+            api_server_ip: tf-config-api.tf.svc.cluster.local
+            api_server_port: 8082
+  {%- if default_provider_driver == 'tungstenfabric' %}
+          driver_agent:
+              enabled_provider_agents: tungstenfabric-agent
+              max_process_warning_percent: 0.75
+              provider_agent_shutdown_timeout: 60
+              stats_max_processes: 50
+              stats_request_timeout: 5
+              status_max_processes: 50
+              status_request_timeout: 5
+  {%- endif %}
+          health_manager:
+            controller_ip_port_list: "{% for ip in octavia_hm_list %}{{ ip }}:{{ health_manager_bind_port }}{% if not loop.last %}, {% endif %}{% endfor %}"
 {%- endif %}
           audit:
             enabled: true
             # TODO: remove GET when issue with probes PRODX-25190 is fixed
             ignore_req_list: GET, HEAD
           api_settings:
-{% set _default_provider_driver = 'amphorav2' %}
-{%- if spec.openstack_version in ['queens'] %}
-  {% set _default_provider_driver = 'octavia' %}
-{%- elif spec.openstack_version in ['rocky', 'stein', 'train', 'ussuri'] %}
-  {% set _default_provider_driver = 'amphora' %}
-{%- endif %}
-{%- if tungstenfabric_enabled %}
-  {% set _default_provider_driver = 'tungstenfabric' %}
-  {%- set provider_map = {'tungstenfabric': 'tungstenfabric:TungstenFabricProviderDriver'} %}
-{%- endif %}
-{%- if ovn_enabled %}
-  {% set _default_provider_driver = 'ovn' %}
-{%- endif %}
             default_provider_driver: {{ spec.features.get('octavia', {}).get('default_provider', _default_provider_driver) }}
             enabled_provider_drivers: {{ ','.join(provider_map.values()) }}
 {%- if 'amphorav2' in provider_map.keys() %}
