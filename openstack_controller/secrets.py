@@ -58,14 +58,21 @@ class OpenStackCredentials(Serializer):
     database: Dict[str, OSSytemCreds]
     messaging: Dict[str, OSSytemCreds]
     notifications: Dict[str, OSSytemCreds]
+    identity: Dict[str, OSSytemCreds]
     memcached: str
 
     def __init__(
-        self, database=None, messaging=None, notifications=None, memcached=""
+        self,
+        database=None,
+        messaging=None,
+        notifications=None,
+        identity=None,
+        memcached="",
     ):
         self.database = database or {}
         self.messaging = messaging or {}
         self.notifications = notifications or {}
+        self.identity = identity or {}
         self.memcached = memcached
 
 
@@ -78,10 +85,13 @@ class BarbicanCredentials(OpenStackCredentials):
         database=None,
         messaging=None,
         notifications=None,
+        identity=None,
         memcached="",
         kek="",
     ):
-        super().__init__(database, messaging, notifications, memcached)
+        super().__init__(
+            database, messaging, notifications, identity, memcached
+        )
         self.kek = kek
 
 
@@ -94,10 +104,13 @@ class HorizonCredentials(OpenStackCredentials):
         database=None,
         messaging=None,
         notifications=None,
+        identity=None,
         memcached="",
         secret_key="",
     ):
-        super().__init__(database, messaging, notifications, memcached)
+        super().__init__(
+            database, messaging, notifications, identity, memcached
+        )
         self.secret_key = secret_key
 
 
@@ -111,11 +124,14 @@ class NeutronCredentials(OpenStackCredentials):
         database=None,
         messaging=None,
         notifications=None,
+        identity=None,
         memcached="",
         metadata_secret="",
         ipsec_secret_key="",
     ):
-        super().__init__(database, messaging, notifications, memcached)
+        super().__init__(
+            database, messaging, notifications, identity, memcached
+        )
         self.metadata_secret = metadata_secret
         self.ipsec_secret_key = ipsec_secret_key
 
@@ -586,16 +602,30 @@ class RabbitmqGuestSecret(Secret):
 class OpenStackServiceSecret(MultiSecret):
     secret_class = OpenStackCredentials
 
-    def __init__(self, namespace: str, service: str):
+    def __init__(
+        self, namespace: str, service: str, service_accounts: List[str] = None
+    ):
         self.secret_base_name = f"generated-{service}-passwords"
         self.service = service
+        if service_accounts is None:
+            self.service_accounts = []
+        else:
+            self.service_accounts = service_accounts
         super().__init__(namespace)
 
     def create(self) -> Optional[OpenStackCredentials]:
         os_creds = self.secret_class()
         srv = constants.OS_SERVICES_MAP[self.service]
-        for service_type in ["database", "messaging", "notifications"]:
+        for service_type in [
+            "database",
+            "messaging",
+            "notifications",
+        ]:
             getattr(os_creds, service_type)["user"] = generate_credentials(srv)
+        for account in self.service_accounts:
+            getattr(os_creds, "identity")[account] = generate_credentials(
+                account
+            )
         os_creds.memcached = generate_password(length=16)
         return os_creds
 
@@ -606,9 +636,25 @@ class OpenStackServiceSecret(MultiSecret):
                 "database": {"user": ["password"]},
                 "messaging": {"user": ["password"]},
                 "notifications": {"user": ["password"]},
+                "identity": {x: ["password"] for x in self.service_accounts},
             },
             [],
         )
+
+    def ensure(self):
+        super().ensure()
+        for name in self._secret_names:
+            exists_secret = self.get(name=name)
+            to_update = {"identity": {}}
+            for account in self.service_accounts:
+                if account not in exists_secret.identity.keys():
+                    to_update["identity"].update({account: []})
+            if to_update["identity"]:
+                exists_secret = self._fill_new_fields(
+                    exists_secret.to_json(), to_update
+                )
+                self.save(exists_secret, name)
+        return self.get()
 
 
 class BarbicanSecret(OpenStackServiceSecret):
@@ -1085,62 +1131,6 @@ class IAMSecret:
 
         kube.save_secret_data(
             self.namespace, self.secret_name, data, labels=self.labels
-        )
-
-
-# NOTE(e0ne): Service accounts is a special case so we don't inherit it from
-# Secret class now.
-class ServiceAccountsSecrets:
-    def __init__(
-        self,
-        namespace: str,
-        service: str,
-        service_accounts: List[str],
-    ):
-        self.namespace = namespace
-        self.service = service
-        self.service_accounts = service_accounts
-
-    def ensure(self):
-        try:
-            service_creds = self.get_service_secrets(self.service)
-        except pykube.exceptions.ObjectDoesNotExist:
-            service_creds = []
-        existing_accounts = [x.account for x in service_creds]
-        for account in self.service_accounts:
-            if account not in existing_accounts:
-                service_creds.append(
-                    OSServiceCreds(
-                        account=account,
-                        username=generate_name(account),
-                        password=generate_password(),
-                    )
-                )
-            self.save_service_secrets(service_creds)
-        return service_creds
-
-    def get_service_secrets(self, service) -> List[OSServiceCreds]:
-        service_creds = []
-        data = get_secret_data(self.namespace, f"{service}-service-accounts")
-        dict_list = json.loads(base64.b64decode(data[service]))
-
-        for creds in dict_list:
-            service_creds.append(OSServiceCreds(**creds))
-
-        return service_creds
-
-    def save_service_secrets(self, credentials: List[OSServiceCreds]) -> None:
-        data = []
-        for creds in credentials:
-            data.append(asdict(creds))
-        kube.save_secret_data(
-            self.namespace,
-            f"{self.service}-service-accounts",
-            {
-                self.service: base64.b64encode(
-                    json.dumps(data).encode()
-                ).decode()
-            },
         )
 
 

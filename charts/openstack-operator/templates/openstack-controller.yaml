@@ -271,6 +271,13 @@ spec:
 {{ tuple . | include "openstack-controller.common_env" | indent 12 }}
           image: {{ tuple . .Values.image | include "getImageUrl" }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+        - name: convert-credential-secrets
+          command:
+          - osctl-convert-credential-secrets
+          env:
+{{ tuple . | include "openstack-controller.common_env" | indent 12 }}
+          image: {{ tuple . .Values.image | include "getImageUrl" }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
       containers:
         - name: osdpl
           image: {{ tuple . .Values.image | include "getImageUrl" }}
