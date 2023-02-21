@@ -189,7 +189,7 @@ iscsi_iscsi: '{{ images_base_url }}/openstack/cinder:queens-bionic-2023011219021
 iscsi_tgt: '{{ images_base_url }}/general/tgt:1.0.x-bionic-20230119094824'
 strongswan: '{{ images_base_url }}/openstack/extra/strongswan:alpine-5.9.5-20221028090933'
 keystone_init_secrets: '{{ images_base_url }}/openstack/extra/ceph-config-helper:pacific-focal-20230211095312'
-rsyslog: '{{ images_base_url }}/openstack/extra/rsyslog:v8.2001.0-20230211095312'
+rsyslog: '{{ images_base_url }}/openstack/extra/rsyslog:v8.2001.0-20230221134901'
 glance_bootstrap: '{{ images_base_url }}/openstack/openstack-tools:yoga-focal-20230216161533'
 glance_barbican_cert_init: '{{ images_base_url }}/openstack/openstack-tools:yoga-focal-20230216161533'
 tempest_static_accounts: '{{ images_base_url }}/openstack/heat:queens-bionic-20230112190210'
