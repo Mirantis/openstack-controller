@@ -124,6 +124,49 @@ def test_openstack_service_secret_fill_fields(mock_secret_create):
     }
 
 
+@mock.patch("openstack_controller.secrets.OpenStackServiceSecret.create")
+def test_openstack_service_secret_fill_fields_missing(mock_secret_create):
+    secret = secrets.OpenStackServiceSecret("openstack", "myservice")
+    old = {
+        "notifications": {
+            "user": {"username": "olduser", "password": "oldpw"}
+        },
+        "messaging": {"user": {"username": "olduser", "password": "oldpw"}},
+        "database": {"user1": {"username": "olduser", "password": "oldpw"}},
+        "memcached": "oldpw",
+    }
+    new = {
+        "notifications": {
+            "user": {"username": "newuser", "password": "newpw"}
+        },
+        "messaging": {"user": {"username": "newuser", "password": "newpw"}},
+        "database": {
+            "user1": {"username": "newuser", "password": "newpw"},
+            "user2": {"username": "newuser", "password": "newpw"},
+        },
+        "memcached": "newpw",
+        # TODO(vsaienko): uncomment when identity is part of ServiceSecret
+        # "identity": {"myuser": {"username": "newuser", "password": "newpw"}},
+    }
+
+    mock_secret_create.return_value = secrets.OpenStackCredentials(**new)
+    res = secret._fill_new_fields(
+        old,
+        {
+            "database": {"user2": []},
+            # "identity": [],
+        },
+    )
+    res = secrets.OpenStackCredentials.to_json(res)
+    assert res["database"] == {
+        "user1": {"username": "olduser", "password": "oldpw"},
+        "user2": {"username": "newuser", "password": "newpw"},
+    }
+    # assert res["identity"] == {
+    #    "myuser": {"username": "newuser", "password": "newpw"}
+    # }
+
+
 @mock.patch("openstack_controller.secrets.get_secret_data")
 @mock.patch("openstack_controller.secrets.generate_password")
 def test_keycloak_secret_serialization(mock_password, mock_data):
