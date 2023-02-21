@@ -419,7 +419,10 @@ class MultiSecret(abc.ABC):
             dst = copy.deepcopy(dst)
             if isinstance(to_update, dict):
                 for k, v in to_update.items():
-                    dst[k] = _fill(src[k], dst[k], v)
+                    if not v:
+                        dst[k] = src[k]
+                    else:
+                        dst[k] = _fill(src[k], dst[k], v)
             elif isinstance(to_update, list):
                 if not to_update:
                     dst = src
