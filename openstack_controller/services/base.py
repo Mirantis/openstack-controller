@@ -74,7 +74,9 @@ class GenericChildObject:
         )
 
     def job_ks_user(self):
-        return self._get_job_object("ks-user", "job_ks_user", ["ks_user"])
+        return self._get_job_object(
+            "ks-user", "job_ks_user", ["ks_user"], hash_fields=["endpoints.*"]
+        )
 
     def job_bootstrap(self):
         return self._get_job_object(
