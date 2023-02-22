@@ -75,8 +75,8 @@ class Redis(Service):
 
     def template_args(self):
         redis_secret = secrets.RedisSecret(self.namespace)
-        redis_creds = redis_secret.ensure()
-        return {"redis_creds": redis_creds}
+        redis_secret.ensure()
+        return {"redis_creds": redis_secret.get()}
 
     def render(self, openstack_version=""):
         template_args = self.template_args()
@@ -175,10 +175,10 @@ class MariaDB(Service):
     def template_args(self):
         admin_creds = self._get_admin_creds()
         galera_secret = secrets.GaleraSecret(self.namespace)
-        galera_creds = galera_secret.ensure()
+        galera_secret.ensure()
         return {
             "admin_creds": admin_creds,
-            "galera_creds": galera_creds,
+            "galera_creds": galera_secret.get(),
         }
 
 
@@ -228,9 +228,9 @@ class RabbitMQ(Service):
             secret.ensure()
             credentials[s] = secret.get_all()
 
-        credentials["stacklight"] = secrets.StackLightPasswordSecret(
-            self.namespace
-        ).ensure()
+        sl_secret = secrets.StackLightPasswordSecret(self.namespace)
+        sl_secret.ensure()
+        credentials["stacklight"] = sl_secret.get()
 
         external_topics_enabled = (
             self.mspec.get("features", {})
@@ -248,11 +248,11 @@ class RabbitMQ(Service):
             # when the topic is removed
             for topic in external_topics:
                 name = utils.get_topic_normalized_name(topic)
-                notifications_creds[
-                    topic
-                ] = secrets.ExternalTopicPasswordSecret(
+                topic_secret = secrets.ExternalTopicPasswordSecret(
                     self.namespace, topic, name
-                ).ensure()
+                )
+                topic_secret.ensure()
+                notifications_creds[topic] = topic_secret.get()
 
         return {
             "services": services,
@@ -517,8 +517,8 @@ class Designate(OpenStackService):
     def template_args(self):
         t_args = super().template_args()
         power_dns_secret = secrets.PowerDNSSecret(self.namespace)
-        credentials = power_dns_secret.ensure()
-        t_args[self.backend_service] = credentials
+        power_dns_secret.ensure()
+        t_args[self.backend_service] = power_dns_secret.get()
 
         return t_args
 
@@ -852,7 +852,8 @@ class Keystone(OpenStackService):
     def _get_keycloak_args(self):
         args = {}
         keycloak_salt = secrets.KeycloakSecret(self.namespace)
-        args["oidc_crypto_passphrase"] = keycloak_salt.ensure().passphrase
+        keycloak_salt.ensure()
+        args["oidc_crypto_passphrase"] = keycloak_salt.get().passphrase
 
         # Create openstack IAM shared secret
         oidc_settings = (
@@ -1506,7 +1507,8 @@ class Nova(OpenStackServiceWithCeph, MaintenanceApiMixin):
         t_args = super().template_args()
 
         ssh_secret = secrets.SSHSecret(self.namespace, "nova")
-        t_args["ssh_credentials"] = ssh_secret.ensure()
+        ssh_secret.ensure()
+        t_args["ssh_credentials"] = ssh_secret.get()
 
         neutron_secret = secrets.NeutronSecret(self.namespace, "networking")
         neutron_secret.wait()
@@ -1869,7 +1871,8 @@ class Octavia(OpenStackService):
         )
         cert_secret.ensure()
         ssh_secret = secrets.SSHSecret(self.namespace, self.service)
-        t_args["ssh_credentials"] = ssh_secret.ensure()
+        ssh_secret.ensure()
+        t_args["ssh_credentials"] = ssh_secret.get()
 
         neutron_features = self.mspec["features"].get("neutron", {})
         if neutron_features.get("backend", "") == "tungstenfabric":
@@ -2080,7 +2083,8 @@ class Manila(OpenStackService):
     def template_args(self):
         template_args = super().template_args()
         ssh_secret = secrets.SSHSecret(self.namespace, self.service)
-        template_args["ssh_credentials"] = ssh_secret.ensure()
+        ssh_secret.ensure()
+        template_args["ssh_credentials"] = ssh_secret.get()
         return template_args
 
     @property

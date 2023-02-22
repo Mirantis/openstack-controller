@@ -186,13 +186,10 @@ def test_keycloak_secret_serialization(mock_password, mock_data):
 
     secret = secrets.KeycloakSecret("ns")
 
-    # NOTE(e0ne): ensure will create a secret if it's not found in K8S, so the
-    # second call should just read the secret from the K8S.
-    created = secret.ensure().passphrase
-    from_secret = secret.ensure().passphrase
+    secret.ensure()
+    from_secret = secret.get().passphrase
 
-    assert created == passphrase
-    assert created == from_secret
+    assert from_secret == passphrase
 
 
 @mock.patch("openstack_controller.secrets.get_secret_data")
@@ -238,10 +235,11 @@ def test_get_proxy_vars_from_secret(mock_data, override_setting):
     assert expected_settings == proxy_settings
 
 
+@mock.patch("openstack_controller.secrets.Secret.save")
 @mock.patch("openstack_controller.secrets.get_secret_data")
 @mock.patch("openstack_controller.secrets.generate_password")
 @mock.patch("openstack_controller.secrets.generate_name")
-def test_galera_secret(mock_name, mock_password, mock_secret_data):
+def test_galera_secret(mock_name, mock_password, mock_secret_data, mock_save):
     creds_b64 = base64.b64encode(
         json.dumps({"username": "username", "password": "password"}).encode()
     )
@@ -255,7 +253,7 @@ def test_galera_secret(mock_name, mock_password, mock_secret_data):
         "audit": creds_b64,
     }
     galera_secret = secrets.GaleraSecret("ns")
-    actual = galera_secret.ensure()
+    galera_secret.ensure()
 
     system_creds = secrets.OSSytemCreds(
         username="username", password="password"
@@ -271,7 +269,7 @@ def test_galera_secret(mock_name, mock_password, mock_secret_data):
     mock_password.assert_called_with(length=32)
     mock_secret_data.assert_called_with("ns", galera_secret.secret_name)
 
-    assert actual == expected
+    assert mock_save.call_args[0][0] == expected
 
 
 @mock.patch("openstack_controller.secrets.get_secret_data")

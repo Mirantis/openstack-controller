@@ -164,11 +164,12 @@ class Service:
 
     def _get_admin_creds(self) -> secrets.OpenStackAdminCredentials:
         admin_secret = secrets.OpenStackAdminSecret(self.namespace)
-        return admin_secret.ensure()
+        return admin_secret.get()
 
     def _get_guest_creds(self) -> secrets.RabbitmqGuestCredentials:
         guest_secret = secrets.RabbitmqGuestSecret(self.namespace)
-        return guest_secret.ensure()
+        guest_secret.ensure()
+        return guest_secret.get()
 
     @property
     def resource_name(self):

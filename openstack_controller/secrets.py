@@ -340,7 +340,6 @@ class Secret(abc.ABC):
         Make sure k8s representation of cls.secret_class:
           * Exists
           * Is in correct format
-        :returns : TODO(vsaienko) should not return anything.
         """
         try:
             secret = self.get()
@@ -355,8 +354,6 @@ class Secret(abc.ABC):
             data = self.get_data()
             secret = self._update_format(data)
             self.save(secret)
-
-        return secret
 
     @final
     def save(self, secret) -> None:
@@ -506,7 +503,6 @@ class MultiSecret(abc.ABC):
         Make sure k8s representation of each secret of cls.secret_class:
           * Exist
           * Is in correct format
-        :returns : TODO(vsaienko) should not return anything.
         """
         for name in self._secret_names:
             try:
@@ -519,7 +515,6 @@ class MultiSecret(abc.ABC):
                 data = self.get_data(name)
                 secret = self._update_format(data)
                 self.save(secret, name)
-        return self.get()
 
     @final
     def save(self, secret, name) -> None:
@@ -654,7 +649,6 @@ class OpenStackServiceSecret(MultiSecret):
                     exists_secret.to_json(), to_update
                 )
                 self.save(exists_secret, name)
-        return self.get()
 
 
 class BarbicanSecret(OpenStackServiceSecret):
