@@ -612,6 +612,9 @@ services:
 
 timeouts:
   application_readiness:
+    mariadb:
+      timeout: 2400
+      delay: 15
     nova:
       timeout: 600
       delay: 10

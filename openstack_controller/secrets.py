@@ -588,7 +588,14 @@ class OpenStackAdminSecret(MultiSecret):
 
     @property
     def rotation_fields(self):
-        return ({"identity": ["password"]}, ["database", "messaging"])
+        return (
+            {
+                "identity": ["password"],
+                "database": ["password"],
+                "messaging": ["password"],
+            },
+            [],
+        )
 
 
 class RabbitmqGuestSecret(Secret):

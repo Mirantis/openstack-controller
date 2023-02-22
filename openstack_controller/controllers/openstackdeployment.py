@@ -151,13 +151,40 @@ def cleanup_helm_cache():
             os.remove(os.path.join(root, file))
 
 
-def _rotate_creds(
-    group_name, rotation_id, enabled_services, mspec, logger, osdplst
+async def _rotate_creds(
+    group_name,
+    rotation_id,
+    enabled_services,
+    mspec,
+    logger,
+    osdplst,
+    reason,
+    body,
+    meta,
+    spec,
+    **kwargs,
 ):
     if group_name == "admin":
         secrets.OpenStackAdminSecret(osdplst.namespace).rotate(rotation_id)
-        # TODO(vsaienko): we need to wait for mariadb/rabbitmq password is
-        # applied before restarting other services.
+        mariadb_instance = services.registry["database"](
+            mspec, logger, osdplst
+        )
+        task_def = {}
+        task_def[
+            asyncio.create_task(
+                mariadb_instance.apply(
+                    event=reason,
+                    body=body,
+                    meta=meta,
+                    spec=spec,
+                    logger=logger,
+                    **kwargs,
+                )
+            )
+        ] = (mariadb_instance.apply, reason, body, meta, spec, logger, kwargs)
+        await run_task(task_def)
+        await asyncio.sleep(60)
+        await mariadb_instance.wait_service_healthy()
     elif group_name == "service":
         for service in enabled_services:
             service_instance = services.registry[service](
@@ -169,27 +196,46 @@ def _rotate_creds(
                 service_secret.rotate(rotation_id)
 
 
-def rotate_credentials(old, new, enabled_services, mspec, logger, osdplst):
-    new_credentials = utils.get_in(new, ["status", "credentials"], {})
+async def rotate_credentials(
+    enabled_services,
+    mspec,
+    logger,
+    osdplst,
+    reason,
+    body,
+    meta,
+    spec,
+    **kwargs,
+):
+    new_credentials = utils.get_in(
+        kwargs["new"], ["status", "credentials"], {}
+    )
     for group_name in ["admin", "service"]:
         new_rotation_id = utils.get_in(
             new_credentials, [group_name, "rotation_id"], 0
         )
 
         if new_rotation_id:
-            old_credentials = utils.get_in(old, ["status", "credentials"], {})
+            old_credentials = utils.get_in(
+                kwargs["old"], ["status", "credentials"], {}
+            )
             old_rotation_id = utils.get_in(
                 old_credentials, [group_name, "rotation_id"], 0
             )
             if new_rotation_id != old_rotation_id:
                 LOG.info(f"Starting rotation for {group_name}")
-                _rotate_creds(
+                await _rotate_creds(
                     group_name,
                     new_rotation_id,
                     enabled_services,
                     mspec,
                     logger,
                     osdplst,
+                    reason,
+                    body,
+                    meta,
+                    spec,
+                    **kwargs,
                 )
                 LOG.info(f"Finished rotation for {group_name}")
 
@@ -248,8 +294,16 @@ async def handle(body, meta, spec, logger, reason, **kwargs):
 
     update, delete = layers.services(mspec, logger, **kwargs)
 
-    rotate_credentials(
-        kwargs["old"], kwargs["new"], update, mspec, logger, osdplst
+    await rotate_credentials(
+        update,
+        mspec,
+        logger,
+        osdplst,
+        reason,
+        body,
+        meta,
+        spec,
+        **kwargs,
     )
 
     if is_openstack_version_changed(kwargs["diff"]):
