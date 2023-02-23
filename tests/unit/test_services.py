@@ -145,7 +145,7 @@ def test_service_keystone_render(
 @mock.patch.object(secrets.VncSignedCertificateSecret, "get")
 @mock.patch.object(secrets.NeutronSecret, "get")
 @mock.patch.object(services.base.OpenStackServiceWithCeph, "ceph_config")
-@mock.patch.object(secrets.SSHSecret, "ensure")
+@mock.patch.object(secrets.SSHSecret, "get")
 @mock.patch.object(services.base.OpenStackService, "template_args")
 def test_service_nova_with_ceph_render(
     mock_template_args,
@@ -218,7 +218,7 @@ def test_service_nova_with_ceph_render(
         "tags"
     ]
 
-    mock_ssh.assert_called_once()
+    mock_ssh.assert_called()
     mock_vnc.assert_called()
     mock_ceph_template_args.assert_called_once()
 
