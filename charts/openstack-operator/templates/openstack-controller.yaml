@@ -124,8 +124,8 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
-  namespace: {{ .Values.osdpl.tfSharedNamespace }}
-  name: "openstack-controller-role-{{ .Values.osdpl.tfSharedNamespace }}"
+  namespace: {{ .Values.tf.sharedNamespace }}
+  name: "openstack-controller-role-{{ .Values.tf.sharedNamespace }}"
 rules:
 
   # Application: read Tungsten Fabric access data from shared namespace.
@@ -217,12 +217,12 @@ subjects:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
-  namespace: {{ .Values.osdpl.tfSharedNamespace }}
-  name: "openstack-controller-rolebinding-{{ .Values.osdpl.tfSharedNamespace }}"
+  namespace: {{ .Values.tf.sharedNamespace }}
+  name: "openstack-controller-rolebinding-{{ .Values.tf.sharedNamespace }}"
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
-  name: "openstack-controller-role-{{ .Values.osdpl.tfSharedNamespace }}"
+  name: "openstack-controller-role-{{ .Values.tf.sharedNamespace }}"
 subjects:
   - kind: ServiceAccount
     name: openstack-controller-account
@@ -505,7 +505,7 @@ spec:
               command:
                 - curl
                 - http://127.0.0.1:32774/healthz
-            {{- toYaml .Values.osdpl.pod.controller.node_maintenance_request.liveness.params | nindent 12}}
+            {{- toYaml .Values.osdpl.pod.controller.ceph_secrets.liveness.params | nindent 12}}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           volumeMounts:
@@ -582,6 +582,40 @@ spec:
                 - curl
                 - http://127.0.0.1:32776/healthz
             {{- toYaml .Values.osdpl.pod.controller.secrets.liveness.params | nindent 12}}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+            - name: os-clouds
+              mountPath: /etc/openstack/
+        - name: tf-secrets
+          image: {{ tuple . .Values.image | include "getImageUrl" }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command:
+            - kopf
+            - run
+            - '-n'
+            - {{ .Values.tf.sharedNamespace }}
+            - '--standalone'
+            - '-m'
+            - openstack_controller.controllers.tf.secrets
+            - '-m'
+            - openstack_controller.controllers.probe
+            - '-L'
+            - 'http://0.0.0.0:32777/healthz'
+          env:
+            - name: OSCTL_HEARTBEAT_PEERING_OBJECT_NAME
+              value: openstack-controller.tf.secrets
+            {{- range $optionName, $optionValue := .Values.osdpl.settings.raw }}
+            - name: {{ $optionName }}
+              value: "{{ $optionValue }}"
+            {{- end }}
+{{ tuple . | include "openstack-controller.common_env" | indent 12 }}
+          livenessProbe:
+            exec:
+              command:
+                - curl
+                - http://127.0.0.1:32777/healthz
+            {{- toYaml .Values.osdpl.pod.controller.tf_secrets.liveness.params | nindent 12}}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           volumeMounts:
