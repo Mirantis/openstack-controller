@@ -1842,6 +1842,7 @@ class Octavia(OpenStackService):
                         "hash_fields": [
                             "octavia.settings.amphora_image_url",
                             "network.proxy.*",
+                            "endpoints.*",
                         ],
                     }
                 }
