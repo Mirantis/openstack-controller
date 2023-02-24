@@ -292,6 +292,7 @@ class Aodh(OpenStackService):
     service = "alarming"
     openstack_chart = "aodh"
     available_releases = ["openstack-aodh"]
+    _protected_accounts = ["aodh"]
 
 
 class Panko(OpenStackService):
@@ -589,6 +590,7 @@ class Heat(OpenStackService):
     openstack_chart = "heat"
     available_releases = ["openstack-heat-rabbitmq", "openstack-heat"]
     _service_accounts = ["heat_trustee", "heat_stack_user"]
+    _protected_accounts = ["heat_trustee"]
     _child_objects = {
         "heat": {
             "Job": {

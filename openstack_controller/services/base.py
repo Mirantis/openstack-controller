@@ -123,13 +123,17 @@ class Service:
     _service_accounts = []
     _required_accounts = {}
     _secret_class = None
+    _protected_accounts = []
 
     @property
     def service_secret(self):
         """Returns instance of service _secret_class"""
         if self._secret_class is not None:
             return self._secret_class(
-                self.namespace, self.service, self.service_accounts
+                self.namespace,
+                self.service,
+                self.service_accounts,
+                self._protected_accounts,
             )
 
     @property

@@ -172,6 +172,54 @@ def test_openstack_service_secret_fill_fields_missing(mock_secret_create):
     }
 
 
+@mock.patch("openstack_controller.secrets.OpenStackServiceSecret.create")
+def test_openstack_service_secret_protect_username(mock_secret_create):
+    secret = secrets.OpenStackServiceSecret("openstack", "myservice")
+    old = {
+        "notifications": {
+            "user": {"username": "olduser", "password": "oldpw"}
+        },
+        "messaging": {"user": {"username": "olduser", "password": "oldpw"}},
+        "database": {"user": {"username": "olduser", "password": "oldpw"}},
+        "memcached": "oldhash",
+        "identity": {
+            "user1": {"username": "olduser1", "password": "oldpw1"},
+            "user2": {"username": "olduser2", "password": "oldpw2"},
+        },
+    }
+    new = {
+        "notifications": {
+            "user": {"username": "newuser", "password": "newpw"}
+        },
+        "messaging": {"user": {"username": "newuser", "password": "newpw"}},
+        "database": {"user": {"username": "newuser", "password": "newpw"}},
+        "memcached": "newhash",
+        "identity": {
+            "user1": {"username": "newuser1", "password": "newpw1"},
+            "user2": {"username": "newuser2", "password": "newpw2"},
+        },
+    }
+
+    mock_secret_create.return_value = secrets.OpenStackCredentials(**new)
+    res = secret._fill(
+        old,
+        new,
+        {
+            "identity": {"user1": ["username"]},
+            "messaging": {"user": []},
+            "memcached": [],
+        },
+    )
+    assert res["identity"] == {
+        "user1": {"username": "olduser1", "password": "newpw1"},
+        "user2": {"username": "newuser2", "password": "newpw2"},
+    }
+    assert res["messaging"] == {
+        "user": {"username": "olduser", "password": "oldpw"}
+    }
+    assert res["memcached"] == "oldhash"
+
+
 @mock.patch("openstack_controller.secrets.get_secret_data")
 @mock.patch("openstack_controller.secrets.generate_password")
 def test_keycloak_secret_serialization(mock_password, mock_data):

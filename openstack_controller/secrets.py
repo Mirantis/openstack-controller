@@ -414,6 +414,22 @@ class MultiSecret(abc.ABC):
                 return secret.obj["data"]
         raise pykube.exceptions.ObjectDoesNotExist()
 
+    def _fill(self, src, dst, to_update):
+        """Returns modified copy of dst dictionary according to to_update rules"""
+        dst = copy.deepcopy(dst)
+        if isinstance(to_update, dict):
+            for k, v in to_update.items():
+                if not v:
+                    dst[k] = src[k]
+                else:
+                    dst[k] = self._fill(src[k], dst[k], v)
+        elif isinstance(to_update, list):
+            if not to_update:
+                dst = src
+            for field in to_update:
+                dst[field] = src[field]
+        return dst
+
     def _fill_new_fields(self, secret, to_update: dict):
         """
         Create/add/modify fields according to secret format
@@ -427,24 +443,8 @@ class MultiSecret(abc.ABC):
         :returns cls.secret_class instance
         """
 
-        def _fill(src, dst, to_update):
-            """Returns modified copy of dst dictionary according to to_update rules"""
-            dst = copy.deepcopy(dst)
-            if isinstance(to_update, dict):
-                for k, v in to_update.items():
-                    if not v:
-                        dst[k] = src[k]
-                    else:
-                        dst[k] = _fill(src[k], dst[k], v)
-            elif isinstance(to_update, list):
-                if not to_update:
-                    dst = src
-                for field in to_update:
-                    dst[field] = src[field]
-            return dst
-
         new_dict = self.secret_class.to_json(self.create())
-        secret = _fill(new_dict, secret, to_update)
+        secret = self._fill(new_dict, secret, to_update)
         return self.secret_class.from_json(secret)
 
     @abc.abstractmethod
@@ -458,7 +458,7 @@ class MultiSecret(abc.ABC):
 
         :returns: tuple where first element is fields to rotate, second element describes immutable fields.
         """
-        return ({}, [])
+        return ({}, {})
 
     def rotate(self, rotation_id):
         """Rotate/change credentials in secret"""
@@ -483,11 +483,10 @@ class MultiSecret(abc.ABC):
         active_data = self.get_data(active.name)
         backup_data = self.get_data(backup.name)
 
-        # currently only identity rotation is supported
-        # other fields should be copied
-        for field in active_data.keys():
-            if field in self.rotation_fields[1]:
-                backup_data[field] = active_data[field]
+        if self.rotation_fields[1]:
+            backup_data = self._fill(
+                active_data, backup_data, self.rotation_fields[1]
+            )
         secret = self._fill_new_fields(backup_data, self.rotation_fields[0])
         self.save(secret, backup.name)
         set_secret_priority(backup, rotation_id)
@@ -589,7 +588,7 @@ class OpenStackAdminSecret(MultiSecret):
                 "database": ["password"],
                 "messaging": ["password"],
             },
-            [],
+            {},
         )
 
 
@@ -605,14 +604,16 @@ class OpenStackServiceSecret(MultiSecret):
     secret_class = OpenStackCredentials
 
     def __init__(
-        self, namespace: str, service: str, service_accounts: List[str] = None
+        self,
+        namespace: str,
+        service: str,
+        service_accounts: List[str] = None,
+        protected_accounts: List[str] = None,
     ):
         self.secret_base_name = f"generated-{service}-passwords"
         self.service = service
-        if service_accounts is None:
-            self.service_accounts = []
-        else:
-            self.service_accounts = service_accounts
+        self.service_accounts = service_accounts or []
+        self.protected_accounts = protected_accounts or []
         super().__init__(namespace)
 
     def create(self) -> Optional[OpenStackCredentials]:
@@ -633,6 +634,11 @@ class OpenStackServiceSecret(MultiSecret):
 
     @property
     def rotation_fields(self):
+        to_save = {}
+        if self.protected_accounts:
+            to_save = {
+                "identity": {x: ["username"] for x in self.protected_accounts}
+            }
         return (
             {
                 "database": {"user": ["password"]},
@@ -640,7 +646,7 @@ class OpenStackServiceSecret(MultiSecret):
                 "notifications": {"user": ["password"]},
                 "identity": {x: ["password"] for x in self.service_accounts},
             },
-            [],
+            to_save,
         )
 
     def ensure(self):
@@ -664,7 +670,7 @@ class BarbicanSecret(OpenStackServiceSecret):
     @property
     def rotation_fields(self):
         rotation_fields = super().rotation_fields
-        rotation_fields[1].append("kek")
+        rotation_fields[1]["kek"] = []
         return rotation_fields
 
     def create(self):
@@ -691,7 +697,8 @@ class NeutronSecret(OpenStackServiceSecret):
     @property
     def rotation_fields(self):
         rotation_fields = super().rotation_fields
-        rotation_fields[1].extend(["ipsec_secret_key", "metadata_secret"])
+        rotation_fields[1]["ipsec_secret_key"] = []
+        rotation_fields[1]["metadata_secret"] = []
         return rotation_fields
 
     def create(self):
