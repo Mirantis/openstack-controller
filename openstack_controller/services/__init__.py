@@ -407,6 +407,7 @@ class Cinder(OpenStackServiceWithCeph):
                 "cinder-db-sync": {
                     "images": ["cinder_db_sync"],
                     "manifest": "job_db_sync",
+                    "hash_fields": ["endpoints.*"],
                 },
                 "cinder-drop-default-volume-type": {
                     "images": ["cinder_drop_default_volume_type"],
@@ -498,10 +499,12 @@ class Designate(OpenStackService):
                 "designate-powerdns-db-init": {
                     "images": ["db_init"],
                     "manifest": "job_powerdns_db_init",
+                    "hash_fields": ["endpoints.*"],
                 },
                 "designate-powerdns-db-sync": {
                     "images": ["powerdns_db_sync"],
                     "manifest": "job_powerdns_db_sync",
+                    "hash_fields": ["endpoints.*"],
                 },
             },
         },
@@ -612,6 +615,7 @@ class Heat(OpenStackService):
                 "heat-db-sync": {
                     "images": ["heat_db_sync"],
                     "manifest": "job_db_sync",
+                    "hash_fields": ["endpoints.*"],
                 },
             },
             "Deployment": {
@@ -1119,6 +1123,7 @@ class Neutron(OpenStackService, MaintenanceApiMixin):
             "neutron-db-sync": {
                 "images": ["neutron_db_sync"],
                 "manifest": "job_db_sync",
+                "hash_fields": ["endpoints.*"],
             },
         }
         if (
@@ -1409,10 +1414,12 @@ class Nova(OpenStackServiceWithCeph, MaintenanceApiMixin):
             "nova-db-sync-api": {
                 "images": ["nova_db_sync_api"],
                 "manifest": "job_db_sync_api",
+                "hash_fields": ["endpoints.*"],
             },
             "nova-db-sync-db": {
                 "images": ["nova_db_sync_db"],
                 "manifest": "job_db_sync_db",
+                "hash_fields": ["endpoints.*"],
             },
             "nova-db-sync-online": {
                 "images": ["nova_db_sync_online"],
@@ -1421,10 +1428,7 @@ class Nova(OpenStackServiceWithCeph, MaintenanceApiMixin):
             "nova-db-sync": {
                 "images": ["nova_db_sync"],
                 "manifest": "job_db_sync",
-                "hash_fields": [
-                    "endpoints.oslo_messaging.*",
-                    "endpoints.oslo_db.*",
-                ],
+                "hash_fields": ["endpoints.*"],
             },
         }
         nova_deployments = {}
