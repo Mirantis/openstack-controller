@@ -479,6 +479,7 @@ class Stepler(OpenStackService):
                 "stepler-ks-user": {
                     "images": ["ks_user"],
                     "manifest": "job_ks_user",
+                    "hash_fields": ["endpoints.*"],
                 },
             }
         },
@@ -594,11 +595,12 @@ class Heat(OpenStackService):
                 "heat-domain-ks-user": {
                     "images": ["ks_user"],
                     "manifest": "job_ks_user_domain",
-                    "hash_fields": ["conf.*"],
+                    "hash_fields": ["conf.*", "endpoints.*"],
                 },
                 "heat-trustee-ks-user": {
                     "images": ["ks_user"],
                     "manifest": "job_ks_user_trustee",
+                    "hash_fields": ["endpoints.*"],
                 },
                 "heat-trusts": {
                     "images": ["ks_trusts"],
@@ -829,6 +831,7 @@ class Keystone(OpenStackService):
                 "osctl-ks-user": {
                     "images": ["ks_user"],
                     "manifest": "job_ks_user",
+                    "hash_fields": ["endpoints.*"],
                 },
             },
             "Deployment": {
@@ -1442,6 +1445,7 @@ class Nova(OpenStackServiceWithCeph, MaintenanceApiMixin):
                 "placement-ks-user": {
                     "images": ["ks_user"],
                     "manifest": "job_ks_placement_user",
+                    "hash_fields": ["endpoints.*"],
                 },
                 "placement-ks-service": {
                     "images": ["ks_service"],
@@ -1921,6 +1925,7 @@ class RadosGateWay(OpenStackService):
                 "ceph-rgw-ks-user": {
                     "images": ["ks_user"],
                     "manifest": "job_ks_user",
+                    "hash_fields": ["endpoints.*"],
                 },
             }
         }
@@ -2031,6 +2036,7 @@ class Tempest(OpenStackService):
                 "tempest-ks-user": {
                     "images": ["ks_user"],
                     "manifest": "job_ks_user",
+                    "hash_fields": ["endpoints.*"],
                 },
             }
         },
