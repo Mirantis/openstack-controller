@@ -160,6 +160,7 @@ class NodeRole(enum.Enum):
 
 
 OSCTL_SECRET_LABEL = ("openstack.lcm.mirantis.com/osdpl_secret", "true")
+TF_OST_DATA_LABEL = ("operator.tf.mirantis.com/ost_data_secret", "true")
 
 KINDS_FOR_MANUAL_UPDATE = [
     "PersistentVolume",

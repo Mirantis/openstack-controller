@@ -51,3 +51,9 @@ kind: KopfPeering
 metadata:
   namespace: "{{ .Values.osdpl.namespace }}"
   name: openstack-controller.osdplsecret
+---
+apiVersion: zalando.org/v1
+kind: KopfPeering
+metadata:
+  namespace: "{{ .Values.tf.sharedNamespace }}"
+  name: openstack-controller.tf.secrets

@@ -50,6 +50,8 @@ osdpl:
     node_maintenance_request:
       OSCTL_LOGGING_CONF: {}
       raw: {}
+    tf_secrets: {}
+    ceph_secrets: {}
   pod:
     controller:
       osdpl:
@@ -89,6 +91,18 @@ osdpl:
             periodSeconds: 60
             timeoutSeconds: 5
       node_maintenance_request:
+        liveness:
+          params:
+            initialDelaySeconds: 120
+            periodSeconds: 60
+            timeoutSeconds: 5
+      ceph_secrets:
+        liveness:
+          params:
+            initialDelaySeconds: 120
+            periodSeconds: 60
+            timeoutSeconds: 5
+      tf_secrets:
         liveness:
           params:
             initialDelaySeconds: 120

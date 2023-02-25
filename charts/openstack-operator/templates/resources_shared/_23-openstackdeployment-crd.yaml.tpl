@@ -96,6 +96,16 @@ spec:
                               type: string
                           type: object
                       type: object
+                    tf:
+                      properties:
+                        secret:
+                          properties:
+                            hash:
+                              description: |
+                                The hash value for secret, is a trigger to reload octavia
+                              type: string
+                          type: object
+                      type: object
       subresources:
         # status enables the status subresource.
         status: {}
