@@ -404,7 +404,6 @@ spec:
 {{ spec.features.ssl.public_endpoints.api_key | indent( width=18, first=True) }}
       jobs:
 {% include 'base/_ks_jobs.yaml' %}
-{%- if glance_db_cleanup.enabled %}
         db_purge:
           enabled: {{ glance_db_cleanup.enabled }}
           cron: {{ glance_db_cleanup.get("schedule", "1 2 * * 1") }}
@@ -412,5 +411,4 @@ spec:
             config:
               age: {{ glance_db_cleanup.get("age", 30) }}
               max_rows: {{ glance_db_cleanup.get("batch", -1) }}
-{%- endif %}
 {%- endif %}

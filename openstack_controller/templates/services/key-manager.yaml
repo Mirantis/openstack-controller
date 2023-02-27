@@ -228,12 +228,10 @@ spec:
             public: https
       jobs:
 {% include 'base/_ks_jobs.yaml' %}
-{%- if barbican_db_cleanup.enabled %}
         db_purge:
           enabled: {{ barbican_db_cleanup.enabled }}
           cron: {{ barbican_db_cleanup.get("schedule", "1 4 * * 1") }}
           script:
             config:
               age: {{ barbican_db_cleanup.get("age", 30) }}
-{%- endif %}
 {%- endif %}

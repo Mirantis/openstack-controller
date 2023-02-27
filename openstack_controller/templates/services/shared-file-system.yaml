@@ -227,14 +227,12 @@ spec:
             level: {{ spec.get('features', {}).get('logging', {}).get('manila', {}).get('level', 'INFO') }}
       jobs:
 {% include 'base/_ks_jobs.yaml' %}
-{%- if manila_db_cleanup.enabled %}
         db_purge:
           enabled: {{ manila_db_cleanup.enabled }}
           cron: {{ manila_db_cleanup.get("schedule", "1 7 * * 1") }}
           script:
             config:
               age: {{ manila_db_cleanup.get("age", 30) }}
-{%- endif %}
       dependencies:
         static:
           db_init:
