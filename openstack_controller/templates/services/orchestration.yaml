@@ -298,7 +298,6 @@ spec:
       {%- endif %}
       jobs:
 {% include 'base/_ks_jobs.yaml' %}
-{%- if heat_db_cleanup.enabled %}
         db_purge:
           enabled: {{ heat_db_cleanup.enabled }}
           cron: {{ heat_db_cleanup.get("schedule", "1 5 * * 1") }}
@@ -306,5 +305,4 @@ spec:
             config:
               age: {{ heat_db_cleanup.get("age", 30) }}
               batch_size: {{ heat_db_cleanup.get("batch", 10) }}
-{%- endif %}
 {%- endif %}

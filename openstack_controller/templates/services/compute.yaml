@@ -830,7 +830,6 @@ spec:
               nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
       jobs:
 {% include 'base/_ks_jobs.yaml' %}
-{%- if nova_db_cleanup.enabled %}
         db_purge:
           enabled: {{ nova_db_cleanup.enabled }}
           cron: {{ nova_db_cleanup.get("schedule", "1 1 * * 1") }}
@@ -838,5 +837,4 @@ spec:
             config:
               age: {{ nova_db_cleanup.get("age", 30) }}
               max_rows: {{ nova_db_cleanup.get("batch", 1000) }}
-{%- endif %}
 {%- endif %}
