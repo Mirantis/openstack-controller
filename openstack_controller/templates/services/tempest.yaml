@@ -155,6 +155,16 @@ spec:
             --gateway 10.20.40.1 \
             --network tempest-fixed-net
 {%- endif %}
+{%- raw %}
+          {{- if not .Values.conf.tempest.DEFAULT.production }}
+          function ensure_tld_present {
+            openstack tld show $i || openstack tld create --name $i --description tempest-tests
+          }
+          for i in {{ .Values.conf.tempest.dns.tld_suffix }} "arpa" "in-addr.arpa"; do
+            ensure_tld_present $i
+          done
+          {{- end }}
+{%- endraw %}
       conf:
         static_accounts:
           project_count: 25

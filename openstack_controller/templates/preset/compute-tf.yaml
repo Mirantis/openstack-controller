@@ -321,6 +321,10 @@ services:
           script: |
             tempest run --config-file /etc/tempest/tempest.conf -w 4 --smoke --blacklist-file  /etc/tempest/test-blacklist
           tempest:
+            DEFAULT:
+              production: true
+            dns:
+              tld_suffix: test
             patrole:
               custom_policy_files: /etc/tempest/policies/%s.json
             sdn:
