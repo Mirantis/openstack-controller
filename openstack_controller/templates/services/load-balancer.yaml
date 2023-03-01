@@ -8,15 +8,16 @@
 {%- set ovn_enabled = core_plugin == 'ml2/ovn'%}
 {%- set provider_map = {'amphora': 'amphora:The Octavia Amphora driver.',
                         'octavia': 'octavia:Deprecated alias of the Octavia Amphora driver.'} %}
+{%- if tungstenfabric_enabled %}
+  {%- set provider_map = {'tungstenfabric': 'tungstenfabric:Tungsten Fabric driver.'} %}
+{%- endif %}
+{%- set amphora_enabled = (not tungstenfabric_enabled) or (tungstenfabric_enabled and octavia_hm_list|length != 0) %}
 # NOTE: amphorav2 is supported only from Ussuri
-{%- if spec.openstack_version not in ['queens', 'rocky', 'stein', 'train'] %}
-{%- do provider_map.update({'amphorav2': 'amphorav2:Extented Octavia Amphora driver with jobboard support.'})%}
+{%- if spec.openstack_version not in ['queens', 'rocky', 'stein', 'train'] and amphora_enabled %}
+  {%- do provider_map.update({'amphorav2': 'amphorav2:Extented Octavia Amphora driver with jobboard support.'})%}
 {%- endif %}
 {%- if ovn_enabled %}
   {%- do provider_map.update({'ovn': 'ovn:OVN provider driver'}) %}
-{%- endif %}
-{%- if tungstenfabric_enabled %}
-  {%- do provider_map.update({'tungstenfabric': 'tungstenfabric:Tungsten Fabric driver.'}) %}
 {%- endif %}
 {%- set components_with_dedicated_messaging = spec.get('features', {}).get('messaging', {}).get('components_with_dedicated_messaging', []) %}
 {%- set stacklight_enabled = spec.get('features', {}).get('stacklight', {}).get('enabled', False) %}
@@ -259,6 +260,13 @@ spec:
           node_selector_key: openstack-gateway
           node_selector_value: enabled
       manifests:
+{%- if tungstenfabric_enabled and not amphora_enabled %}
+        daemonset_health_manager: false
+        deployment_worker: false
+        deployment_housekeeping: false
+        job_create_resources: false
+        secret_octavia_certs: false
+{%- endif %}
         network_policy: false
         job_rabbit_init: false
         secret_amphora_ssh_key: true

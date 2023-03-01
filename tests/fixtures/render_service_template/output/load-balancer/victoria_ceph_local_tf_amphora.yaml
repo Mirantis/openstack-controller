@@ -25,9 +25,7 @@ spec:
             controller_ip_port_list: ''
           api_settings:
             default_provider_driver: amphorav2
-            enabled_provider_drivers: amphora:The Octavia Amphora driver.,octavia:Deprecated
-              alias of the Octavia Amphora driver.,amphorav2:Extented Octavia Amphora
-              driver with jobboard support.,tungstenfabric:Tungsten Fabric driver.
+            enabled_provider_drivers: tungstenfabric:Tungsten Fabric driver.
           audit:
             enabled: true
             ignore_req_list: GET, HEAD
@@ -53,13 +51,6 @@ spec:
           service_auth:
             memcache_secret_key: cAZLeChP79lxHJ1Z
             memcache_security_strategy: ENCRYPT
-          task_flow:
-            jobboard_enabled: true
-            jobboard_backend_hosts: rfs-openstack-redis.openstack-redis
-            jobboard_backend_password: cfLDYSsNbuCywa6VmBvZ8h2sJXuZnvqW
-            jobboard_backend_port: 26379
-            jobboard_expiration_time: 90
-            jobboard_redis_sentinel: mymaster
       dependencies:
         static:
           db_init:
@@ -220,7 +211,10 @@ spec:
           node_selector_key: openstack-gateway
           node_selector_value: enabled
       manifests:
-        job_db_sync_persistence: true
+        daemonset_health_manager: False
+        deployment_housekeeping: False
+        deployment_worker: False
+        job_create_resources: False
         job_rabbit_init: false
         network_policy: false
         secret_amphora_ssh_key: true
@@ -229,7 +223,6 @@ spec:
         octavia_driver_agent: true
       octavia:
         settings:
-          enable_amphorav2: true
           lbmgmt_network_name: lb-mgmt-net
           lbmgmt_subnets:
             - pool_end: 192.168.0.254
