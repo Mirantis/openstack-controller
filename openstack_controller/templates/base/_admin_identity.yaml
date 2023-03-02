@@ -15,8 +15,6 @@
               region_name: {{ spec.get('region_name', 'RegionOne') }}
               {%- if account.account == 'tempest' %}
               role: admin,key-manager:service-admin,creator
-              {%- elif account.account == 'heat_stack_user' %}
-              role: admin,service
               {%- endif %}
 {%- endfor %}
 
