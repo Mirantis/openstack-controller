@@ -426,6 +426,9 @@ services:
   memcached:
     memcached:
       values:
+        conf:
+          memcached:
+            max_connections: 8192
         pod:
           replicas:
             server: 1
@@ -436,12 +439,6 @@ services:
           tempest:
             compute:
               min_compute_nodes: 1
-  memcached:
-    memcached:
-      values:
-        conf:
-          memcached:
-            max_connections: 8192
   instance-ha:
     masakari:
       values:
