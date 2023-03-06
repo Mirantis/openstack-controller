@@ -17,5 +17,5 @@ public_key=$(ssh-keygen -f "${CACHE_DIR}"/.ssh/octavia_ssh_key -y)
 kubectl delete secret octavia-certs -n openstack
 kubectl create secret generic octavia-certs -n openstack --from-file=cert="${CACHE_DIR}"/certs/ca_01.pem --from-file=cert_all="${CACHE_DIR}"/certs/client_all.pem --from-file=key="${CACHE_DIR}"/certs/ca.key
 
-kubectl delete secret amphora-ssh-key -n openstack
-kubectl create secret generic amphora-ssh-key -n openstack --from-file=octavia_ssh_key="${CACHE_DIR}"/.ssh/octavia_ssh_key --from-literal=octavia_ssh_key_pub="${public_key}"
+kubectl delete secret generated-load-balancer-ssh-creds -n openstack
+kubectl create secret generic generated-load-balancer-ssh-creds -n openstack --from-file=octavia_ssh_key="${CACHE_DIR}"/.ssh/octavia_ssh_key --from-literal=octavia_ssh_key_pub="${public_key}"
