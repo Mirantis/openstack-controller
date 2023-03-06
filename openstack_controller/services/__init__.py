@@ -407,7 +407,7 @@ class Cinder(OpenStackServiceWithCeph):
                 "cinder-db-sync": {
                     "images": ["cinder_db_sync"],
                     "manifest": "job_db_sync",
-                    "hash_fields": ["endpoints.*"],
+                    "hash_fields": ["endpoints.oslo_db.*"],
                 },
                 "cinder-drop-default-volume-type": {
                     "images": ["cinder_drop_default_volume_type"],
@@ -499,12 +499,12 @@ class Designate(OpenStackService):
                 "designate-powerdns-db-init": {
                     "images": ["db_init"],
                     "manifest": "job_powerdns_db_init",
-                    "hash_fields": ["endpoints.*"],
+                    "hash_fields": ["endpoints.oslo_db_powerdns.*"],
                 },
                 "designate-powerdns-db-sync": {
                     "images": ["powerdns_db_sync"],
                     "manifest": "job_powerdns_db_sync",
-                    "hash_fields": ["endpoints.*"],
+                    "hash_fields": ["endpoints.oslo_db_powerdns.*"],
                 },
             },
         },
@@ -615,7 +615,7 @@ class Heat(OpenStackService):
                 "heat-db-sync": {
                     "images": ["heat_db_sync"],
                     "manifest": "job_db_sync",
-                    "hash_fields": ["endpoints.*"],
+                    "hash_fields": ["endpoints.oslo_db.*"],
                 },
             },
             "Deployment": {
@@ -816,7 +816,10 @@ class Keystone(OpenStackService):
                 "keystone-db-sync": {
                     "images": ["keystone_db_sync"],
                     "manifest": "job_db_sync",
-                    "hash_fields": ["endpoints.*"],
+                    "hash_fields": [
+                        "endpoints.oslo_db.*",
+                        "endpoints.identity.auth.*",
+                    ],
                 },
                 "keystone-db-sync-expand": {
                     "images": ["keystone_db_sync_expand"],
@@ -1123,7 +1126,7 @@ class Neutron(OpenStackService, MaintenanceApiMixin):
             "neutron-db-sync": {
                 "images": ["neutron_db_sync"],
                 "manifest": "job_db_sync",
-                "hash_fields": ["endpoints.*"],
+                "hash_fields": ["endpoints.oslo_db.*"],
             },
         }
         if (
@@ -1414,12 +1417,12 @@ class Nova(OpenStackServiceWithCeph, MaintenanceApiMixin):
             "nova-db-sync-api": {
                 "images": ["nova_db_sync_api"],
                 "manifest": "job_db_sync_api",
-                "hash_fields": ["endpoints.*"],
+                "hash_fields": ["endpoints.oslo_db.*"],
             },
             "nova-db-sync-db": {
                 "images": ["nova_db_sync_db"],
                 "manifest": "job_db_sync_db",
-                "hash_fields": ["endpoints.*"],
+                "hash_fields": ["endpoints.oslo_db.*"],
             },
             "nova-db-sync-online": {
                 "images": ["nova_db_sync_online"],
@@ -1428,7 +1431,10 @@ class Nova(OpenStackServiceWithCeph, MaintenanceApiMixin):
             "nova-db-sync": {
                 "images": ["nova_db_sync"],
                 "manifest": "job_db_sync",
-                "hash_fields": ["endpoints.*"],
+                "hash_fields": [
+                    "endpoints.oslo_db.*",
+                    "endpoints.oslo_messaging.*",
+                ],
             },
         }
         nova_deployments = {}
@@ -1872,6 +1878,7 @@ class Octavia(OpenStackService):
             ch_objects["octavia"]["Job"]["octavia-db-sync-persistence"] = {
                 "images": ["octavia_db_sync_persistence"],
                 "manifest": "job_db_sync_persistence",
+                "hash_fields": ["endpoints.oslo_db.*"],
             }
         return ch_objects
 

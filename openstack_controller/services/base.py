@@ -47,7 +47,10 @@ class GenericChildObject:
 
     def job_db_init(self):
         return self._get_job_object(
-            "db-init", "job_db_init", ["db_init"], hash_fields=["endpoints.*"]
+            "db-init",
+            "job_db_init",
+            ["db_init"],
+            hash_fields=["endpoints.oslo_db.*"],
         )
 
     def job_db_sync(self):
@@ -55,12 +58,15 @@ class GenericChildObject:
             "db-sync",
             "job_db_sync",
             [f"{self.chart}_db_sync"],
-            hash_fields=["endpoints.*"],
+            hash_fields=["endpoints.oslo_db.*"],
         )
 
     def job_db_drop(self):
         return self._get_job_object(
-            "db-drop", "job_db_drop", ["db_drop"], hash_fields=["endpoints.*"]
+            "db-drop",
+            "job_db_drop",
+            ["db_drop"],
+            hash_fields=["endpoints.oslo_db.*"],
         )
 
     def job_ks_endpoints(self):
