@@ -214,3 +214,4 @@ ubuntu_checksum: 30d459e0dc0562e629d3683970e55efa
 rabbitmq_amqproxy: '{{ images_base_url }}/general/amqproxy:v0.8.3'
 manila_service_image: '{{ binary_base_url }}/openstack/bin/manila/manila-service-image-20221228132450.qcow2'
 manila-uuids-init: '{{ images_base_url }}/openstack/openstack-tools:yoga-focal-20230227093206'
+requirements: '{{ images_base_url }}/openstack/requirements:queens-bionic-20230227093206'
