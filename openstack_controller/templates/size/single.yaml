@@ -292,14 +292,14 @@ services:
         pod:
           replicas:
             api: 1
-            worker: 1
-            housekeeping: 1
   load-balancer:
     octavia:
       values:
         pod:
           replicas:
             api: 1
+            worker: 1
+            housekeeping: 1
           lifecycle:
             upgrades:
               daemonsets:
