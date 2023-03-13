@@ -222,10 +222,11 @@ class RabbitMQ(Service):
         for s in services:
             if s not in constants.OS_SERVICES_MAP:
                 continue
-            # NOTE(vsaienko): use secret_class from exact service as additional
-            # passwords might be added like metadata password.
-            secret = Service.registry[s]._secret_class(self.namespace, s)
-            secret.ensure()
+            # NOTE(vsaienko): we need service passwords here.
+            secret = Service.registry[s](
+                self.mspec, self.logger, self.osdplst
+            ).service_secret
+            secret.wait()
             credentials[s] = secret.get_all()
 
         sl_secret = secrets.StackLightPasswordSecret(self.namespace)

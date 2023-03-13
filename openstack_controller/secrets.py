@@ -617,19 +617,20 @@ class OpenStackServiceSecret(MultiSecret):
         super().__init__(namespace)
 
     def create(self) -> Optional[OpenStackCredentials]:
-        os_creds = self.secret_class()
+        secret_data = {"identity": {}}
         srv = constants.OS_SERVICES_MAP[self.service]
         for service_type in [
             "database",
             "messaging",
             "notifications",
         ]:
-            getattr(os_creds, service_type)["user"] = generate_credentials(srv)
+            secret_data[service_type] = {"user": generate_credentials(srv)}
         for account in self.service_accounts:
-            getattr(os_creds, "identity")[account] = generate_credentials(
-                account
+            secret_data["identity"].update(
+                {account: generate_credentials(account)}
             )
-        os_creds.memcached = generate_password(length=16)
+        secret_data["memcached"] = generate_password(length=16)
+        os_creds = self.secret_class(**secret_data)
         return os_creds
 
     @property
