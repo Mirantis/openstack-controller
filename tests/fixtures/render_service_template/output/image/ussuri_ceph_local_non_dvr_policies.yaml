@@ -119,6 +119,8 @@ spec:
         logging:
           logger_glance:
             level: INFO
+          logger_os.brick:
+            level: INFO
       dependencies:
         static:
           db_init:

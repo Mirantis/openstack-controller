@@ -75,6 +75,8 @@ spec:
         logging:
           logger_nova:
             level: INFO
+          logger_os.brick:
+            level: INFO
         nova:
           DEFAULT:
             initial_cpu_allocation_ratio: 8.0

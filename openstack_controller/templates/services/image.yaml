@@ -299,6 +299,8 @@ spec:
             service_type: image
             {%- endif %}
         logging:
+          logger_os.brick:
+            level: {{ spec.get('features', {}).get('logging', {}).get('glance', {}).get('level', 'INFO') }}
           logger_glance:
             level: {{ spec.get('features', {}).get('logging', {}).get('glance', {}).get('level', 'INFO') }}
       volume:

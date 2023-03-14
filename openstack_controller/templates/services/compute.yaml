@@ -792,6 +792,8 @@ spec:
         logging:
           logger_nova:
             level: {{ spec.get('features', {}).get('logging', {}).get('nova', {}).get('level', 'INFO') }}
+          logger_os.brick:
+            level: {{ spec.get('features', {}).get('logging', {}).get('nova', {}).get('level', 'INFO') }}
         ssh_private: |
           {{ ssh_credentials.private|indent(10)|trim }}
         ssh_public: |
