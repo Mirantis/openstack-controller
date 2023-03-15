@@ -1958,7 +1958,11 @@ class RadosGateWay(OpenStackService):
     def template_args(self):
         t_args = super().template_args()
 
-        auth_url = "https://keystone." + self.mspec["public_domain_name"]
+        auth_url = (
+            "http://keystone-api.openstack.svc."
+            + self.mspec["internal_domain_name"]
+            + ":5000"
+        )
         ssl_public_endpoints = self.mspec["features"]["ssl"][
             "public_endpoints"
         ]
@@ -1980,8 +1984,9 @@ class RadosGateWay(OpenStackService):
                 "ca_cert": ssl_public_endpoints["ca_cert"],
                 "tls_crt": ssl_public_endpoints["api_cert"],
                 "tls_key": ssl_public_endpoints["api_key"],
-                "barbican_url": "https://barbican."
-                + self.mspec["public_domain_name"],
+                "barbican_url": "http://barbican-api.openstack.svc."
+                + self.mspec["internal_domain_name"]
+                + ":9311",
             }
 
             # encode values from rgw_creds
