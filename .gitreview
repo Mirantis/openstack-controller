@@ -3,4 +3,4 @@ host=gerrit.mcp.mirantis.com
 port=29418
 project=mcp/openstack-controller.git
 defaultremote=origin
-defaultbranch=master
+defaultbranch=mosk-23.1

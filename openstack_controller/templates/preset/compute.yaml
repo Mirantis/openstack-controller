@@ -453,3 +453,12 @@ services:
                 rule:secret_decrypt_non_private_read or rule:secret_project_creator or
                 rule:secret_project_admin or rule:secret_acl_read or
                 role:global-secret-decoder
+            {%- if openstack_version in ['queens', 'rocky', 'stein'] %}
+              'order:delete': rule:admin_or_creator
+            {%- elif openstack_version in ['train', 'ussuri', 'victoria'] %}
+              'order:delete': rule:admin_or_creator and project_id:%(target.order.project_id)s
+            {%- else %} # wallaby, xena, yoga. 2023.1 - ?
+              'order:delete': >-
+                rule:admin_or_creator and rule:order_project_match or
+                True:%(enforce_new_defaults)s and rule:order_project_member
+            {%- endif %}
