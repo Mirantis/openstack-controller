@@ -1193,6 +1193,7 @@ properties:
                 - orchestration
                 - compute
                 - baremetal
+                - networking
           notifications:
             type: object
             additionalProperties: false
