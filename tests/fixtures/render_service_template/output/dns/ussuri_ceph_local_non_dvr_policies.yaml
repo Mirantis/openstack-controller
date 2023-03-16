@@ -13,6 +13,8 @@ spec:
             memcache_secret_key: zdLlg6VAsGH6E7tX
             memcache_security_strategy: ENCRYPT
             service_type: dns
+          coordination:
+            backend_url: etcd3+http://etcd:2379
           audit_middleware_notifications:
             driver: noop
           oslo_messaging_notifications:
