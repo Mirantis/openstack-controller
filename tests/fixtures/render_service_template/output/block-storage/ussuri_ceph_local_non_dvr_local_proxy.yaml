@@ -72,6 +72,8 @@ spec:
         logging:
           logger_cinder:
             level: INFO
+          logger_os.brick:
+            level: INFO
       dependencies:
         static:
           db_init:
