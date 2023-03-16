@@ -13,6 +13,7 @@
     {%- do notification_topics.append(topic) %}
   {%- endfor %}
 {%- endif  %}
+{%- set designate_log_level = spec.get('features', {}).get('logging', {}).get('designate', {}).get('level', 'INFO') %}
 {%- set designate_backend = spec.get('features', {}).get('designate', {}).get('backend', {}).get('type', 'powerdns') %}
 {%- if designate_backend == 'powerdns' %}
   {%- set powerdns_protocol = spec.get('features', {}).get('designate', {}).get('backend', {}).get('protocol', 'udp') %}
@@ -130,11 +131,16 @@ spec:
             topics: {{ notification_topics|join(',') }}
         logging:
           logger_designate:
-            level: {{ spec.get('features', {}).get('logging', {}).get('designate', {}).get('level', 'INFO') }}
+            level: {{ designate_log_level }}
       {%- if spec.openstack_version not in ["queens", "rocky", "stein", "train", "ussuri"] %}
         software:
           apache2:
             enabled: true
+      {%- endif %}
+      {%- if designate_log_level == 'DEBUG' %}
+        powerdns:
+          loglevel: 5
+          webserver-loglevel: 'detailed'
       {%- endif %}
       manifests:
         network_policy: false
