@@ -33,6 +33,9 @@ RUN set -ex; \
     if [[ -n "${EXTRA_DEPS}" ]]; then \
         pip wheel --wheel-dir /opt/wheels --find-links /opt/wheels $EXTRA_DEPS; \
     fi; \
+    IMAGE_TAG=$(/opt/operator/tools/get_version.sh); \
+    echo "${IMAGE_TAG}" > /opt/operator/image_tag.txt; \
+
     rm -rf /opt/operator/source_requirements
 
 RUN pip wheel --wheel-dir /opt/wheels --find-links /opt/wheels /opt/operator
@@ -44,6 +47,7 @@ COPY --from=builder /tmp/get-pip.py /tmp/get-pip.py
 COPY --from=builder /opt/wheels /opt/wheels
 COPY --from=builder /opt/operator/uwsgi.ini /opt/operator/uwsgi.ini
 COPY --from=builder /opt/operator/source-requirements.txt /opt/operator/source-requirements.txt
+COPY --from=builder /opt/operator/image_tag.txt /opt/operator/image_tag.txt
 ADD kopf-patches /tmp/kopf-patches
 RUN apt-get update; \
     apt-get -y upgrade
@@ -81,4 +85,5 @@ RUN rm -rvf /tmp/kopf-patches
 RUN rm -rvf /opt/wheels; \
     apt-get -q clean; \
     rm -rvf /var/lib/apt/lists/*; \
-    sh -c "echo \"LABELS:\n  IMAGE_TAG: $(pip freeze | awk -F '==' '/^openstack-controller=/ {print $2}')\" > /dockerimage_metadata"
+    IMAGE_TAG=$(cat /opt/operator/image_tag.txt); \
+    sh -c "echo \"LABELS:\n  IMAGE_TAG: ${IMAGE_TAG}\" > /dockerimage_metadata"

@@ -49,6 +49,8 @@ lint-%: init-%
 build-%: lint-%
 	if [ -d $* ]; then helm package $* $(ARGS); fi
 
+get-version:
+	@bash ./tools/get_version.sh
 clean:
 	@echo "Clean all build artifacts"
 	rm -f *tgz */charts/*tgz
