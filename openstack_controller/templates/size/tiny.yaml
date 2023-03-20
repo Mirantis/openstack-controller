@@ -104,7 +104,7 @@ services:
         conf:
           glance:
             DEFAULT:
-              workers: 1
+              workers: 4
             database:
               max_pool_size: 10
               max_retries: -1
