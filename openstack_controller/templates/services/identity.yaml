@@ -207,6 +207,7 @@ spec:
               OIDCCryptoPassphrase {{ oidc_crypto_passphrase }}
               OIDCSSLValidateServer {% if keystone_keycloak.get('oidc',{}).get('OIDCSSLValidateServer', true) %}On{%- else %}Off{%- endif %}
               OIDCOAuthSSLValidateServer {% if keystone_keycloak.get('oidc',{}).get('OIDCOAuthSSLValidateServer', true) %}On{%- else %}Off{%- endif %}
+              OIDCSessionInactivityTimeout "{{ keystone_keycloak.get('oidc', {}).get('OIDCSessionInactivityTimeout', 1800) }}"
               {%- if ssl_validate_server %}
               OIDCCABundlePath /usr/local/share/ca-certificates/openstack-iam-api.crt
               {%- endif %}
