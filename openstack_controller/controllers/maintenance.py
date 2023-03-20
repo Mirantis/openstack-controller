@@ -60,13 +60,13 @@ async def node_maintenance_request_change_handler(body, **kwargs):
         raise kopf.TemporaryError(msg)
 
     osdpl = kube.get_osdpl()
-    mspec = osdpl.mspec
     if not osdpl or not osdpl.exists():
         LOG.info("Can't find OpenStackDeployment object")
         nwl.set_state_inactive()
         nwl.unset_error_message()
         return
 
+    mspec = osdpl.mspec
     osdplst = osdplstatus.OpenStackDeploymentStatus(
         osdpl.name, osdpl.namespace
     )
@@ -108,6 +108,7 @@ async def node_maintenance_request_delete_handler(body, **kwargs):
         nwl.set_state_active()
         nwl.unset_error_message()
         return
+
     mspec = osdpl.mspec
     osdplst = osdplstatus.OpenStackDeploymentStatus(
         osdpl.name, osdpl.namespace
