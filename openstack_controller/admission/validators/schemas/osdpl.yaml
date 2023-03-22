@@ -875,6 +875,11 @@ properties:
                     description: |
                       The delimiter to use when setting multi-valued claims (openid-connect or oauth20) in the HTTP
                       headers/environment variables.
+                  OIDCSessionInactivityTimeout:
+                    type: integer
+                    description: |
+                      Interval in seconds after which the session will be invalidated when no interaction has occurred.
+                      default: 1800
           domain_specific_configuration:
             type: object
             additionalProperties: false
