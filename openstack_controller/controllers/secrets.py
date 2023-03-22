@@ -325,10 +325,23 @@ async def handle_rabbitmq_external_secret(
     for port in rabbitmq_external_ports:
         external_secret_data[f'port_{port["name"]}'] = str(port["port"])
 
-    external_sercret_data_enc = {
+    external_secret_data_enc = {
         key: base64.b64encode(value.encode()).decode()
         for key, value in external_secret_data.items()
     }
+
+    # share client-side TLS certificates
+    external_certificates_secret = kube.find(
+        pykube.Secret,
+        constants.RABBITMQ_EXTERNAL_CERTIFICATES_SECRET,
+        meta["namespace"],
+    )
+    external_secret_data_enc.update(
+        {
+            key: external_certificates_secret.obj["data"][key]
+            for key in ("ca_cert", "client_cert", "client_key")
+        }
+    )
 
     external_topics = (
         osdpl.obj.get("spec", {})
@@ -352,7 +365,7 @@ async def handle_rabbitmq_external_secret(
 
         name = utils.get_topic_normalized_name(topic)
         ets = secrets.ExternalTopicSecret(name)
-        ets.save({**credentials, **external_sercret_data_enc})
+        ets.save({**credentials, **external_secret_data_enc})
 
 
 @kopf.on.update(

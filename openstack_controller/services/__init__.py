@@ -215,6 +215,7 @@ class RabbitMQ(Service):
     def template_args(self):
         credentials = {}
         notifications_creds = {}
+        tls_external_certs = {}
         admin_creds = self._get_admin_creds()
         guest_creds = self._get_guest_creds()
         services = set(self.mspec["features"].get("services", [])) - set(
@@ -256,12 +257,25 @@ class RabbitMQ(Service):
                 topic_secret.ensure()
                 notifications_creds[topic] = topic_secret.get()
 
+            # generate and store certificates for TLS connections
+            # NOTE: server hostname checks are optional and generally has no
+            # effect on certificate chain verification performed by the client.
+            tls_external_certs_secret = secrets.SignedCertificatePackSecret(
+                self.namespace,
+                "rabbitmq-external",
+                f"openstack-rabbitmq-rabbitmq-0.rabbitmq.{self.namespace}.svc.{self.mspec['internal_domain_name']}",
+                f"*.{self.mspec['public_domain_name']}",
+            )
+            tls_external_certs_secret.ensure()
+            tls_external_certs = tls_external_certs_secret.get()
+
         return {
             "services": services,
             "credentials": credentials,
             "admin_creds": admin_creds,
             "guest_creds": guest_creds,
             "notifications_creds": notifications_creds,
+            "tls_external_certs": tls_external_certs,
         }
 
 
@@ -1597,7 +1611,7 @@ class Nova(OpenStackServiceWithCeph, MaintenanceApiMixin):
             t_args["libvirt_certs"] = libvirt_certs
 
         # Generare server-side certs for VNC TLS
-        vnc_cert_secret = secrets.VncSignedCertificateSecret(
+        vnc_cert_secret = secrets.SignedCertificatePackSecret(
             self.namespace,
             "libvirt-vnc-tls",
             f"*.{self.mspec['internal_domain_name']}",

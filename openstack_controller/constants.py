@@ -130,6 +130,7 @@ OPENSTACK_STACKLIGHT_SECRET = "rabbitmq-creds"
 OPENSTACK_IAM_SECRET = "openstack-iam-shared"
 OPENSTACK_EXTERNAL_NAMESPACE = "openstack-external"
 RABBITMQ_EXTERNAL_SERVICE = "rabbitmq-external"
+RABBITMQ_EXTERNAL_CERTIFICATES_SECRET = "rabbitmq-external-certs"
 PROXY_VARS_NAMES = {
     "http_proxy",
     "https_proxy",

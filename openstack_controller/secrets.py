@@ -181,7 +181,7 @@ class SignedCertificate(Serializer):
 
 
 @dataclass
-class VncSignedCertificate(Serializer):
+class SignedCertificatePack(Serializer):
     ca_cert: str
     ca_key: str
     server_cert: str
@@ -894,8 +894,8 @@ class SignedCertificateSecret(Secret):
         return SignedCertificate(**data)
 
 
-class VncSignedCertificateSecret(Secret):
-    secret_class = VncSignedCertificate
+class SignedCertificatePackSecret(Secret):
+    secret_class = SignedCertificatePack
 
     def __init__(self, namespace, service, san_name, cn_name):
         super().__init__(namespace)
@@ -1055,7 +1055,7 @@ class VncSignedCertificateSecret(Secret):
             "client_key": client_cert["cert_key_pem"],
         }
         data = {k: v.decode() for k, v in data.items()}
-        return VncSignedCertificate(**data)
+        return SignedCertificatePack(**data)
 
 
 class KeycloakSecret(Secret):
