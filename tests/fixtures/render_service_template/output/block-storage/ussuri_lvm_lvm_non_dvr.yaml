@@ -41,8 +41,6 @@ spec:
       bootstrap:
         bootstrap_conf_backends: false
         volume_types:
-          volumes-hdd:
-            volume_backend_name: volumes-hdd
           lvm_fast:
             volume_backend_name: lvm_fast
           lvm_fast_multiattach:
@@ -50,9 +48,6 @@ spec:
             volume_backend_name: lvm_fast
           lvm_slow:
             volume_backend_name: lvm_slow
-      ceph_client:
-        configmap: rook-ceph-config
-        user_secret_name: cinder-rbd-keyring
       conf:
         policy.d:
           01-controller-default.yaml: {'block-storage_rule1': 'block-storage_value1'}
@@ -62,38 +57,10 @@ spec:
             conf:
               DEFAULT:
                 cluster: ""
-        backends:
-          volumes-hdd:
-            rbd_ceph_conf: /etc/ceph/ceph.conf
-            rbd_pool: volumes-hdd
-            rbd_user: cinder
-            volume_backend_name: volumes-hdd
-            volume_driver: cinder.volume.drivers.rbd.RBDDriver
-        ceph:
-          pools:
-            backup:
-              chunk_size: 8
-              crush_rule: replicated_ruleset
-              replication: 1
-            cinder.volumes:
-              chunk_size: 8
-              crush_rule: replicated_ruleset
-              replication: 1
-          config:
-            global:
-              mon_host:
-                - "10.10.10.1:6789"
-                - "10.10.10.2:6789"
-                - "10.10.10.3:6789"
+        backends: null
         cinder:
           DEFAULT:
-            backup_ceph_pool: backup-hdd
-            backup_ceph_user: cinder
-            backup_driver: cinder.backup.drivers.ceph.CephBackupDriver
-            cluster: cinder-ceph-cluster
             control_exchange: cinder
-            default_volume_type: volumes-hdd
-            enabled_backends: volumes-hdd
             host: <None>
             scheduler_default_filters: AvailabilityZoneFilter,CapacityFilter,CapabilitiesFilter,InstanceLocalityFilter
           coordination:
@@ -125,6 +92,18 @@ spec:
           db_init:
             jobs:
             - openstack-mariadb-cluster-wait
+          bootstrap:
+            pod:
+              - requireSameNode: false
+                labels:
+                  application: cinder
+                  component: volume_daemonset
+          drop_default_volume_type:
+            pod:
+              - requireSameNode: false
+                labels:
+                  application: cinder
+                  component: volume_daemonset
       network:
         api:
           ingress:
@@ -316,8 +295,10 @@ spec:
         cron_service_cleaner: true
         job_drop_default_volume_type: true
         cron_volume_usage_audit: false
-        ceph_conf: true
-        statefulset_backup: true
+        statefulset_backup: false
+        statefulset_volume: false
+        ceph_conf: false
+        job_clean: false
       pod:
         affinity:
           anti:
@@ -328,8 +309,3 @@ spec:
           registry: 1
         useHostNetwork:
           volume: true
-      secrets:
-        rbd:
-          backup: cinder-rbd-keyring
-          volume: cinder-rbd-keyring
-      storage: ceph

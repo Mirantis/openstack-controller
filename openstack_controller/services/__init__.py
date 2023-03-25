@@ -317,22 +317,23 @@ class Ceilometer(OpenStackService):
             panko_creds = panko_secret.get()
             t_args["event_credentials"] = panko_creds
 
-        kube.wait_for_secret(
-            settings.OSCTL_CEPH_SHARED_NAMESPACE,
-            ceph_api.OPENSTACK_KEYS_SECRET,
-        )
-        for rgw_key in [
-            "rgw_internal_cacert",
-            "rgw_metrics_user_secret_key",
-            "rgw_metrics_user_access_key",
-        ]:
-            rgw_value = secrets.get_secret_data(
+        if "object-storage" in self.mspec["features"].get("services", []):
+            kube.wait_for_secret(
                 settings.OSCTL_CEPH_SHARED_NAMESPACE,
                 ceph_api.OPENSTACK_KEYS_SECRET,
-            ).get(rgw_key)
-            if rgw_value:
-                rgw_decoded = base64.b64decode(rgw_value).decode()
-                t_args[rgw_key] = rgw_decoded
+            )
+            for rgw_key in [
+                "rgw_internal_cacert",
+                "rgw_metrics_user_secret_key",
+                "rgw_metrics_user_access_key",
+            ]:
+                rgw_value = secrets.get_secret_data(
+                    settings.OSCTL_CEPH_SHARED_NAMESPACE,
+                    ceph_api.OPENSTACK_KEYS_SECRET,
+                ).get(rgw_key)
+                if rgw_value:
+                    rgw_decoded = base64.b64decode(rgw_value).decode()
+                    t_args[rgw_key] = rgw_decoded
 
         return t_args
 
@@ -447,16 +448,31 @@ class Cinder(OpenStackServiceWithCeph):
         },
     }
 
+    @property
+    def is_ceph_enabled(self):
+        # NOTE(vsaienko): it is not allowed to configure ceph via node overrides.
+        return utils.get_in(
+            self.mspec, ["features", "cinder", "volume", "enabled"], True
+        )
+
     @layers.kopf_exception
     async def _upgrade(self, event, **kwargs):
         upgrade_map = [
             ("Job", "cinder-db-sync"),
             ("StatefulSet", "cinder-scheduler"),
-            ("StatefulSet", "cinder-volume"),
-            ("StatefulSet", "cinder-backup"),
-            ("Deployment", "cinder-api"),
-            ("Job", "cinder-db-sync-online"),
         ]
+
+        if utils.get_in(
+            self.mspec, ["features", "cinder", "volume", "enabled"], True
+        ):
+            upgrade_map.append(("StatefulSet", "cinder-volume"))
+        if utils.get_in(
+            self.mspec, ["features", "cinder", "backup", "enabled"], True
+        ):
+            upgrade_map.append(("StatefulSet", "cinder-backup"))
+        upgrade_map.extend(
+            [("Deployment", "cinder-api"), ("Job", "cinder-db-sync-online")]
+        )
         for kind, obj_name in upgrade_map:
             child_obj = self.get_child_object(kind, obj_name)
             if kind == "Job":
@@ -575,6 +591,12 @@ class Glance(OpenStackServiceWithCeph):
             }
         },
     }
+
+    @property
+    def is_ceph_enabled(self):
+        return "rbd" in utils.get_in(
+            self.mspec, ["features", "glance", "backends"], {"rbd": {}}
+        )
 
     @layers.kopf_exception
     async def _upgrade(self, event, **kwargs):
@@ -720,19 +742,20 @@ class Horizon(OpenStackService):
     def template_args(self):
         t_args = super().template_args()
 
-        kube.wait_for_secret(
-            settings.OSCTL_CEPH_SHARED_NAMESPACE,
-            ceph_api.OPENSTACK_KEYS_SECRET,
-        )
-        rgw_internal_cacert = secrets.get_secret_data(
-            settings.OSCTL_CEPH_SHARED_NAMESPACE,
-            ceph_api.OPENSTACK_KEYS_SECRET,
-        ).get("rgw_internal_cacert")
-        if rgw_internal_cacert:
-            rgw_internal_cacert = base64.b64decode(
-                rgw_internal_cacert
-            ).decode()
-            t_args["rgw_internal_cacert"] = rgw_internal_cacert
+        if "object-storage" in self.mspec["features"].get("services", []):
+            kube.wait_for_secret(
+                settings.OSCTL_CEPH_SHARED_NAMESPACE,
+                ceph_api.OPENSTACK_KEYS_SECRET,
+            )
+            rgw_internal_cacert = secrets.get_secret_data(
+                settings.OSCTL_CEPH_SHARED_NAMESPACE,
+                ceph_api.OPENSTACK_KEYS_SECRET,
+            ).get("rgw_internal_cacert")
+            if rgw_internal_cacert:
+                rgw_internal_cacert = base64.b64decode(
+                    rgw_internal_cacert
+                ).decode()
+                t_args["rgw_internal_cacert"] = rgw_internal_cacert
         t_args["os_policy_services"] = constants.OS_POLICY_SERVICES.values()
 
         return t_args
@@ -1564,6 +1587,27 @@ class Nova(OpenStackServiceWithCeph, MaintenanceApiMixin):
 
         return t_args
 
+    @property
+    def is_ceph_enabled(self):
+        if utils.get_in(
+            self.mspec, ["features", "cinder", "volume", "enabled"], True
+        ):
+            return True
+        if (
+            utils.get_in(self.mspec, ["features", "nova", "images", "backend"])
+            == "ceph"
+        ):
+            return True
+        for label, options in self.mspec.get("nodes", {}).items():
+            if (
+                utils.get_in(
+                    options, ["features", "nova", "images", "backend"]
+                )
+                == "ceph"
+            ):
+                return True
+        return False
+
     @layers.kopf_exception
     async def _upgrade(self, event, **kwargs):
         upgrade_map = [
@@ -2063,6 +2107,12 @@ class Tempest(OpenStackService):
     @property
     def _child_generic_objects(self):
         return {}
+
+    @property
+    def is_ceph_enabled(self):
+        return utils.get_in(
+            self.mspec, ["features", "cinder", "volume", "enabled"], True
+        )
 
     def template_args(self):
         template_args = super().template_args()

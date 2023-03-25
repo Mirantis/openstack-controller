@@ -8,11 +8,6 @@ features:
         enabled: true
         use_ssl: false
         vault_url: http://vault.openstack-vault.svc:8200
-  cinder:
-    backup:
-      backend: ceph
-    volume:
-      backend: ceph
   database:
     local_volumes:
       enabled: true
@@ -30,8 +25,6 @@ features:
               endpoint: https://rgw.endpoint.tst
               access_key_id: "ceph12345678"
               secret_access_key: "ceph10111213"
-  glance:
-    backend: ceph
   messaging:
     components_with_dedicated_messaging:
     - networking

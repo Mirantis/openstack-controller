@@ -1,4 +1,5 @@
 block-storage:
+  is_ceph_enabled: true
   ceph:
     cinder:
       keyring: 'AQDLZLJfNPtTOxAAQm248Q9AyoirvELaSyPz5w==
@@ -40,6 +41,7 @@ block-storage:
         username: testtFQE
   keystone_creds: {}
 compute:
+  is_ceph_enabled: true
   ceph:
     nova:
       keyring: 'AQDNZLJf8S+fORAA6hg50Jo+vBq07kxtBXB9PQ==
@@ -181,6 +183,7 @@ identity:
         username: testQALi
   keystone_creds: {}
 image:
+  is_ceph_enabled: true
   ceph:
     glance:
       keyring: 'AQDKZLJfoTtgAhAA7f9e8GriyIpFbj8Ez88l2A==

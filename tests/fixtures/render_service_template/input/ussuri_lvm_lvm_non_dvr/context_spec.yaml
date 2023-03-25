@@ -20,21 +20,20 @@ features:
         enabled: true
         use_ssl: false
         vault_url: http://vault.openstack-vault.svc:8200
-  cinder:
-    backup:
-      backend: ceph
-    volume:
-      backend: ceph
   database:
     local_volumes:
       enabled: true
   glance:
-    backend: ceph
     backends:
       cinder:
         blockstore:
           default: true
           backend_name: lvm:lvm_fast
+  cinder:
+    backup:
+      enabled: false
+    volume:
+      enabled: false
   messaging:
     components_with_dedicated_messaging:
     - networking

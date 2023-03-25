@@ -76,7 +76,9 @@ spec:
         replicas:
           api: 1
           registry: 1
+{%- if is_ceph_enabled %}
       storage: rbd
+{%- endif %}
       bootstrap:
         enabled: true
         ks_user: glance
@@ -230,9 +232,13 @@ spec:
           01-controller-default.yaml: {{ service_policy }}
           02-custom.yaml: {{ spec.get("features", {}).get("policies", {}).get("glance", {}) }}
         ceph:
+{%- if is_ceph_enabled %}
           config:
             global:
               mon_host: {{ ceph.mon_host }}
+{%- else %}
+          enabled: false
+{%- endif %}
         glance:
           cors:
             allow_headers: Content-Type,Cache-Control,Content-Language,Expires,Last-Modified,Pragma,X-Custom-Header,X-Auth-Token
@@ -274,6 +280,8 @@ spec:
           glance_store:
           {%- if multi_backends %}
             default_backend: {{ default_backend.name }}
+          {%- else %}
+            stores: "rbd"
           {%- endif %}
 {%- if not multi_backends %}
 {% include 'base/_rbd_store_opts.yaml' %}
@@ -303,6 +311,7 @@ spec:
             level: {{ spec.get('features', {}).get('logging', {}).get('glance', {}).get('level', 'INFO') }}
           logger_glance:
             level: {{ spec.get('features', {}).get('logging', {}).get('glance', {}).get('level', 'INFO') }}
+{%- if is_ceph_enabled %}
       volume:
         class_name: rook-ceph-block
         size: 2Gi
@@ -311,6 +320,7 @@ spec:
         user_secret_name: {{ ceph.glance.secrets }}
       secrets:
         rbd: {{ ceph.glance.secrets }}
+{%- endif %}
       manifests:
         cron_job_db_purge: true
         network_policy: false

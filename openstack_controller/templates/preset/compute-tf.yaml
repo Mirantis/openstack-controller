@@ -55,13 +55,6 @@ features:
     - load-balancer
     - redis
     - descheduler
-  glance:
-    backend: ceph
-  cinder:
-    volume:
-      backend: ceph
-    backup:
-      backend: ceph
   neutron:
     backend: tungstenfabric
   database:

@@ -140,6 +140,20 @@ spec:
           db_init:
             jobs:
               - openstack-mariadb-cluster-wait
+{%- if not is_ceph_enabled %}
+          bootstrap:
+            pod:
+              - requireSameNode: false
+                labels:
+                  application: cinder
+                  component: volume_daemonset
+          drop_default_volume_type:
+            pod:
+              - requireSameNode: false
+                labels:
+                  application: cinder
+                  component: volume_daemonset
+{%- endif %}
       pod:
         replicas:
           api: 1
@@ -155,10 +169,12 @@ spec:
         useHostNetwork:
           volume: true
 {%- endif %}
+{%- if is_ceph_enabled %}
       storage: ceph
       ceph_client:
         configmap: rook-ceph-config
         user_secret_name: {{ ceph.cinder.secrets }}
+{%- endif %}
       conf:
         policy.d:
           01-controller-default.yaml: {{ service_policy }}
@@ -172,26 +188,27 @@ spec:
         {%- endif %}
         backends:
 {%- set enabled_backends=[] %}
-{%- for backend, backend_config in ceph.cinder.pools.items() %}
-  {%- if backend_config.role == 'volumes' %}
-    {%- do enabled_backends.append(backend) %}
+{%- if is_ceph_enabled %}
+  {%- for backend, backend_config in ceph.cinder.pools.items() %}
+    {%- if backend_config.role == 'volumes' %}
+      {%- do enabled_backends.append(backend) %}
           {{ backend }}:
-    {%- for g_backend_name, g_backend_opts in glance_cinder_backends.items() %}
-      {%- if g_backend_opts.get('backend_name') %}
-        {%- set glance_cinder_volume_type, glance_cinder_backend_name =  g_backend_opts['backend_name'].split(':') %}
-      {%- endif %}
-      {%- if glance_cinder_volume_type == 'rbd' and glance_cinder_backend_name == backend %}
+      {%- for g_backend_name, g_backend_opts in glance_cinder_backends.items() %}
+        {%- if g_backend_opts.get('backend_name') %}
+          {%- set glance_cinder_volume_type, glance_cinder_backend_name =  g_backend_opts['backend_name'].split(':') %}
+        {%- endif %}
+        {%- if glance_cinder_volume_type == 'rbd' and glance_cinder_backend_name == backend %}
             image_upload_use_cinder_backend: True
             image_upload_use_internal_tenant: True
-      {%- endif %}
-    {%- endfor %}
+        {%- endif %}
+      {%- endfor %}
             volume_driver: cinder.volume.drivers.rbd.RBDDriver
             volume_backend_name: {{ backend }}
             rbd_pool: {{ backend_config.name }}
             rbd_user: {{ ceph.cinder.username }}
             rbd_ceph_conf: "/etc/ceph/ceph.conf"
-  {%- endif %}
-{%- endfor %}
+    {%- endif %}
+  {%- endfor %}
         ceph:
           pools:
             backup:
@@ -205,6 +222,7 @@ spec:
           config:
             global:
               mon_host: {{ ceph.mon_host }}
+{%- endif %}
         cinder:
           keystone_authtoken:
             memcache_security_strategy: ENCRYPT
@@ -220,11 +238,12 @@ spec:
             host: "<None>"
 # NOTE(vsaienko): active/active mode is supported by rbd starting from Rocky
 # but in rocky it is not stable, so apply only from stein
-{%- if spec.openstack_version not in ['queens', 'rocky'] %}
+{%- if is_ceph_enabled %}
+  {%- if spec.openstack_version not in ['queens', 'rocky'] %}
             cluster: "cinder-ceph-cluster"
+  {%- endif %}
 {%- endif %}
 {%- if is_backup_enabled %}
-  {%- if spec.get('features', {}).get('cinder', {}).get('backup', {}).get('backend') == 'ceph' %}
             backup_driver: cinder.backup.drivers.ceph.CephBackupDriver
     {%- for backend, backend_config in ceph.cinder.pools.items() %}
       {%- if backend_config.role == 'backup' %}
@@ -232,11 +251,12 @@ spec:
             backup_ceph_pool: {{ backend_config.name }}
       {%- endif %}
     {%- endfor %}
-  {%- endif %}
 {%- endif %}
             control_exchange: cinder
+{%- if is_ceph_enabled %}
             enabled_backends: {{ enabled_backends|join(',') }}
             default_volume_type: {{ enabled_backends[0] }}
+{%- endif %}
             scheduler_default_filters: AvailabilityZoneFilter,CapacityFilter,CapabilitiesFilter,InstanceLocalityFilter
 {%- if cadf_audit.enabled %}
           audit_middleware_notifications:
@@ -299,11 +319,13 @@ spec:
       {%- endfor %}
     {%- endif %}
 {%- endfor %}
+{%- if is_ceph_enabled %}
       secrets:
         rbd:
           volume: {{ ceph.cinder.secrets }}
-{%- if is_backup_enabled %}
+  {%- if is_backup_enabled %}
           backup: {{ ceph.cinder.secrets }}
+  {%- endif %}
 {%- endif %}
       manifests:
         cron_job_db_purge: true
@@ -315,8 +337,10 @@ spec:
         secret_ca_bundle: true
         cron_service_cleaner: true
         cron_volume_usage_audit: false
-        ceph_conf: true
         statefulset_backup: {{ is_backup_enabled }}
+        statefulset_volume: {{ spec.features.get("cinder", {}).get("volume", {}).get("enabled", True) }}
+        ceph_conf: {{ is_ceph_enabled }}
+        job_clean: {{ is_ceph_enabled }}
       network:
         api:
           ingress:

@@ -749,6 +749,10 @@ class OpenStackService(Service):
             }
         }
 
+    @property
+    def is_ceph_enabled(self):
+        return False
+
     def _get_keystone_creds(self):
         result = {}
         for svc, accs in self.required_accounts.items():
@@ -774,12 +778,17 @@ class OpenStackService(Service):
                 "admin_creds": admin_creds,
                 "guest_creds": guest_creds,
                 "keystone_creds": keystone_creds,
+                "is_ceph_enabled": self.is_ceph_enabled,
             }
         )
         return template_args
 
 
 class OpenStackServiceWithCeph(OpenStackService):
+    @property
+    def is_ceph_enabled(self):
+        return True
+
     def ensure_ceph_secrets(self):
         self.create_ceph_secrets()
 
@@ -846,10 +855,12 @@ class OpenStackServiceWithCeph(OpenStackService):
 
     async def apply(self, event, **kwargs):
         # ensure child ref exists in the status
-        self.ensure_ceph_secrets()
+        if self.is_ceph_enabled:
+            self.ensure_ceph_secrets()
         await super().apply(event, **kwargs)
 
     def template_args(self):
         template_args = super().template_args()
-        template_args.update(self.ceph_config())
+        if self.is_ceph_enabled:
+            template_args.update(self.ceph_config())
         return template_args

@@ -55,13 +55,6 @@ features:
     - key-manager
     - redis
     - descheduler
-  glance:
-    backend: ceph
-  cinder:
-    volume:
-      backend: ceph
-    backup:
-      backend: ceph
   neutron:
     backend: ml2
   database:
