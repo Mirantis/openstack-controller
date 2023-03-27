@@ -83,7 +83,6 @@ class NetworkFeatureEnabled(base_section.BaseSection):
                     "qos-default",
                     "qos-fip",
                     "qos-gateway-ip",
-                    "qos-port-network-policy",
                     "qos-rule-type-details",
                     "qos-rules-alias",
                     "subnetpool-prefix-ops",
@@ -101,6 +100,7 @@ class NetworkFeatureEnabled(base_section.BaseSection):
                         "stateful-security-group",
                         "fip-port-details",
                         "port-mac-address-regenerate",
+                        "qos-port-network-policy",
                     ],
                 )
             if self.os_version_compare("victoria", "ge"):
@@ -114,12 +114,11 @@ class NetworkFeatureEnabled(base_section.BaseSection):
                     ],
                 )
             if self.os_version_compare("xena", "ge"):
-                api_extensions_default.extend(
-                    ["port-resource-request", "port-resource-request-groups"],
-                )
+                api_extensions_default.extend(["port-resource-request"])
             if self.os_version_compare("yoga", "ge"):
                 api_extensions_default.extend(
                     [
+                        "port-resource-request-groups",
                         "qos-pps-minimum",
                         "qos-pps-minimum-rule-alias",
                         "qos-pps",
