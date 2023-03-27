@@ -248,8 +248,6 @@ services:
           cleanup:
             enabled: False
           convert_to_uuid:
-            network:
-              public_network_id: public
             compute:
               image_ref: {{ cirros_image_name }}
               image_ref_alt: {{ cirros_image_name ~ '.alt' }}

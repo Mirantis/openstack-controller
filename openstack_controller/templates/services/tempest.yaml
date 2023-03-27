@@ -113,6 +113,19 @@ spec:
       bootstrap:
         enabled: true
         script: |
+          {%- if spec.features.neutron.get('floating_network', {}).get('enabled', true) %}
+          public_network_name={{ spec.features.neutron.get('floating_network', {}).get('name', 'public') }}
+          {%- else %}
+          {%-   if spec.services.get('tempest', {}).get('tempest', {}).get('values', {}).get('conf', {}).get('convert_to_uuid', {}).get('network', {}).get('public_network_id') %}
+          public_network_name={{ spec.services.get('tempest', {}).get('tempest', {}).get('values', {}).get('conf', {}).get('convert_to_uuid', {}).get('network', {}).get('public_network_id') }}
+          {%-   else %}
+          public_network_name=$(openstack network list --external  --no-share -f value -c Name | head -1)
+          {%-   endif%}
+          {%- endif %}
+          if [[ -z "${public_network_name}" ]]; then
+              echo "Failed to detect public_network name."
+              exit 1
+          fi
           openstack network show heat-net || openstack network create heat-net
           openstack subnet show heat-subnet || openstack subnet create heat-subnet \
             --dhcp --subnet-range 10.20.30.0/24 \
@@ -125,7 +138,7 @@ spec:
             echo "$subnet_id is in the list"
           else
             openstack router add subnet heat-router heat-subnet
-            openstack router set --external-gateway {{ spec.features.neutron.get('floating_network', {}).get('name', 'public') }} heat-router
+            openstack router set --external-gateway ${public_network_name} heat-router
           fi
 {%- if spec.features.neutron.get('backend') != 'tungstenfabric' %}
           openstack subnet pool show default_pool || \
@@ -152,6 +165,10 @@ spec:
           {%- endif %}
           user_count: 3
         convert_to_uuid:
+{%- if spec.features.neutron.get('floating_network', {}).get('enabled', true) %}
+          network:
+            public_network_id: {{ spec.features.neutron.get('floating_network', {}).get('name', 'public') }}
+{%- endif %}
           identity:
 {%- if signature.enabled %}
             default_domain_id: tempest
