@@ -117,6 +117,8 @@ spec:
             topics: notifications,stacklight_notifications
           service_user:
             send_service_user_token: true
+          coordination:
+            backend_url: 'etcd3+http://etcd:2379'
         ssh_private: 'COMPUTE TEST SSH PRIVATE KEY
 
           '

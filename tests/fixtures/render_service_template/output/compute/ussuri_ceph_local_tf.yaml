@@ -118,6 +118,8 @@ spec:
             skip_migration_revert_events: true
           os_vif_contrail_vrouter:
             vrouter_port: vrouter_port0
+          coordination:
+            backend_url: 'etcd3+http://etcd:2379'
         ssh_private: 'COMPUTE TEST SSH PRIVATE KEY
 
           '

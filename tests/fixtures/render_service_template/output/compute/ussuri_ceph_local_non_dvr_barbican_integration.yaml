@@ -115,6 +115,8 @@ spec:
           glance:
             verify_glance_signatures: true
             enable_certificate_validation: true
+          coordination:
+            backend_url: 'etcd3+http://etcd:2379'
         nova_ironic:
           DEFAULT:
             compute_driver: ironic.IronicDriver

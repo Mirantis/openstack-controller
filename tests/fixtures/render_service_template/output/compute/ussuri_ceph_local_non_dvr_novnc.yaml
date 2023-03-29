@@ -134,6 +134,8 @@ spec:
             send_service_user_token: true
           vnc:
             auth_schemes: vencrypt,none
+          coordination:
+            backend_url: 'etcd3+http://etcd:2379'
         ssh_private: 'COMPUTE TEST SSH PRIVATE KEY
 
           '
