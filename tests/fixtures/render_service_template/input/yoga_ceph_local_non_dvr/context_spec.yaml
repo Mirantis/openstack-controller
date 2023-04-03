@@ -8,6 +8,9 @@ features:
         enabled: true
         use_ssl: false
         vault_url: http://vault.openstack-vault.svc:8200
+  cloudprober:
+    discovery:
+      interval: 900
   database:
     local_volumes:
       enabled: true
@@ -79,6 +82,7 @@ features:
     live_migration_interface: ens3
   services:
   - block-storage
+  - cloudprober
   - compute
   - dns
   - identity

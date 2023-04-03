@@ -480,6 +480,29 @@ class Cinder(OpenStackServiceWithCeph):
             await child_obj.enable(self.openstack_version, True)
 
 
+class Cloudprober(Service):
+    service = "cloudprober"
+    available_releases = ["openstack-cloudprober"]
+
+    @property
+    def health_groups(self):
+        return [self.service]
+
+    def _get_keystone_creds(self):
+        # TODO: use read-only admin account when it will be implemented
+        account = "osctl"
+        secret_class = Service.registry["identity"](
+            self.mspec, self.logger, self.osdplst
+        ).service_secret
+        secret_class.wait()
+        return {"cloudprober": secret_class.get().identity[account]}
+
+    def template_args(self):
+        t_args = super().template_args()
+        t_args["keystone_creds"] = self._get_keystone_creds()
+        return t_args
+
+
 class Stepler(OpenStackService):
     service = "stepler"
     available_releases = ["openstack-stepler"]

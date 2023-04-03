@@ -9,6 +9,8 @@ cinder_scheduler: '{{ images_base_url }}/openstack/cinder:yoga-focal-20230417060
 cinder_volume: '{{ images_base_url }}/openstack/cinder:yoga-focal-20230417060018'
 cinder_volume_daemonset: '{{ images_base_url }}/openstack/cinder:yoga-focal-20230417060018'
 cinder_volume_usage_audit: '{{ images_base_url }}/openstack/cinder:yoga-focal-20230417060018'
+cloudprober: '{{ images_base_url }}/openstack/extra/cloudprober:v0.12.6'
+cloudprober_openstack_discovery: '{{ images_base_url }}/openstack/openstack-tools:yoga-focal-20230417060018'
 stepler_run_tests: '{{ images_base_url }}/openstack/stepler:yoga-focal-20230329122808'
 db_drop: '{{ images_base_url }}/openstack/heat:yoga-focal-20230417060018'
 db_init: '{{ images_base_url }}/openstack/heat:yoga-focal-20230417060018'

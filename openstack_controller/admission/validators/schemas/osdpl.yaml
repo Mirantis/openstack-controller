@@ -649,6 +649,7 @@ properties:
           type: string
           enum:
             - block-storage
+            - cloudprober
             - compute
             - identity
             - dashboard
@@ -675,6 +676,22 @@ properties:
             - metric
             - instance-ha
             - shared-file-system
+      cloudprober:
+        type: object
+        additionalProperties: false
+        properties:
+          discovery:
+            type: object
+            additionalProperties: false
+            description: >
+              Defines parameters of openstack resources discovery
+              and targets generation for cloudprober.
+            properties:
+              interval:
+                type: number
+                description: >
+                  Default interval in seconds between runs of openstack resources discovery.
+                  default: 600.
       nova:
         type: object
         additionalProperties: false
