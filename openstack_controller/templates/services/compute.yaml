@@ -45,6 +45,7 @@
 {%- set cadf_audit = spec.get('features', {}).get('logging', {}).get('cadf', {'enabled': false}) %}
 {%- set cadf_audit_driver = spec.get('features', {}).get('logging', {}).get('cadf', {}).get('driver', 'messagingv2') %}
 
+{%- set libvirt_server_tls_enabled = spec.get('features', {}).get('nova', {}).get('libvirt', {}).get('tls', {}).get('enabled', false) %}
 {%- set vnc_tls_enabled = spec.get('features', {}).get('nova', {}).get('console', {}).get('novnc', {}).get('tls', {}).get('enabled', false) %}
 # COMPUTE OVERCOMMITS
 {%- set compute_overcommits = {"cpu": 8.0, "disk": 1.6, "ram": 1.0} %}  # INTERNAL DEFAULTS
@@ -167,6 +168,9 @@ spec:
         secret_libvirt_vnc_server_tls: true
         secret_ca_bundle: true
 {%- endif %}
+{%- if libvirt_server_tls_enabled %}
+        secret_libvirt_server_tls: true
+{%- endif %}
 {%- if is_ceph_enabled %}
       ceph_client:
         configmap: rook-ceph-config
@@ -185,8 +189,25 @@ spec:
 {%- else %}
           enabled: false
 {%- endif %}
+        {%- if libvirt_server_tls_enabled %}
+        libvirt:
+          listen_tcp: "0"
+          listen_tls: "1"
+        tls:
+          libvirt:
+            server:
+              ca:
+                cert: |
+{{ libvirt_certs.cert | indent( width=18, first=True) }}
+                key: |
+{{ libvirt_certs.key | indent( width=18, first=True) }}
+        {%- endif %}
         qemu:
           security_driver: apparmor
+        {%- if libvirt_server_tls_enabled %}
+          default_tls_x509_cert_dir: "/etc/pki/qemu"
+          default_tls_x509_verify: "1"
+        {%- endif %}
         {%- if vnc_tls_enabled %}
           vnc_tls: "1"
           vnc_tls_x509_verify: "1"
@@ -762,6 +783,10 @@ spec:
 {%- else %}
             cpu_mode: custom
             cpu_models: {{ vcpu_type }}
+{%- endif %}
+{%- if libvirt_server_tls_enabled %}
+            live_migration_scheme: tls
+            live_migration_with_native_tls: true
 {%- endif %}
             virt_type: kvm
 {%- if is_ceph_enabled %}

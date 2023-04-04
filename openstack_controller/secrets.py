@@ -804,9 +804,10 @@ class NgsSSHSecret:
 class SignedCertificateSecret(Secret):
     secret_class = SignedCertificate
 
-    def __init__(self, namespace, service):
+    def __init__(self, namespace, service, common_name):
         super().__init__(namespace)
         self.secret_name = f"{service}-certs"
+        self.common_name = common_name
 
     def create(self):
         key = rsa.generate_private_key(
@@ -829,7 +830,7 @@ class SignedCertificateSecret(Secret):
                     x509.oid.NameOID.ORGANIZATION_NAME, "Mirantis Inc"
                 ),
                 x509.NameAttribute(
-                    x509.oid.NameOID.COMMON_NAME, "octavia-amphora-ca"
+                    x509.oid.NameOID.COMMON_NAME, self.common_name
                 ),
             ]
         )
