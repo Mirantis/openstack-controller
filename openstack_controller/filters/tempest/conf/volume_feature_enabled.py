@@ -67,7 +67,7 @@ class VolumeFeatureEnabled(base_section.BaseSection):
     def volume_locked_by_snapshot(self):
         rbd_flatten_volume_from_snapshot = []
         for backend in self.get_values_item(
-            "cinder", "conf.cinder.DEFAULT.enabled_backends"
+            "cinder", "conf.cinder.DEFAULT.enabled_backends", ""
         ).split(","):
             rbd_flatten_volume_from_snapshot.append(
                 self.get_values_item(
