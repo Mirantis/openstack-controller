@@ -189,7 +189,7 @@ masakari_monitors: '{{ images_base_url }}/openstack/masakari-monitors:victoria-f
 ironic_inspector: '{{ images_base_url }}/openstack/ironic-inspector:victoria-focal-20230403060017'
 frr_init: '{{ images_base_url }}/openstack/openstack-tools:yoga-focal-20230403060017'
 frr_info: '{{ images_base_url }}/openstack/openstack-tools:yoga-focal-20230403060017'
-frr: '{{ images_base_url }}/general/external/docker.io/frrouting/frr:v8.3.1'
+frr: '{{ images_base_url }}/general/external/docker.io/frrouting/frr:v8.5.0'
 cinder_service_cleaner: '{{ images_base_url }}/openstack/cinder:victoria-focal-20230403060017'
 iscsi_iscsi: '{{ images_base_url }}/openstack/cinder:victoria-focal-20230403060017'
 iscsi_tgt: '{{ images_base_url }}/general/tgt:1.0.x-focal-20230323105551'
