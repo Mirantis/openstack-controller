@@ -270,6 +270,7 @@ spec:
         cron_job_db_purge: true
         cron_volume_usage_audit: false
         ceph_conf: true
+        statefulset_backup: true
       pod:
         affinity:
           anti:

@@ -29,6 +29,7 @@
 {%- from 'macros/etcd3.j2' import get_etcd3_endpoint %}
 {%- set cadf_audit = spec.get('features', {}).get('logging', {}).get('cadf', {'enabled': false}) %}
 {%- set cadf_audit_driver = spec.get('features', {}).get('logging', {}).get('cadf', {}).get('driver', 'messagingv2') %}
+{%- set is_backup_enabled = spec.get('features', {}).get('cinder', {}).get('backup', {}).get('enabled', True) %}
 
 spec:
   releases:
@@ -222,14 +223,16 @@ spec:
 {%- if spec.openstack_version not in ['queens', 'rocky'] %}
             cluster: "cinder-ceph-cluster"
 {%- endif %}
-{%- if spec.get('features', {}).get('cinder', {}).get('backup', {}).get('backend') == 'ceph' %}
+{%- if is_backup_enabled %}
+  {%- if spec.get('features', {}).get('cinder', {}).get('backup', {}).get('backend') == 'ceph' %}
             backup_driver: cinder.backup.drivers.ceph.CephBackupDriver
-{%- for backend, backend_config in ceph.cinder.pools.items() %}
-  {%- if backend_config.role == 'backup' %}
+    {%- for backend, backend_config in ceph.cinder.pools.items() %}
+      {%- if backend_config.role == 'backup' %}
             backup_ceph_user: {{ ceph.cinder.username }}
             backup_ceph_pool: {{ backend_config.name }}
+      {%- endif %}
+    {%- endfor %}
   {%- endif %}
-{%- endfor %}
 {%- endif %}
             control_exchange: cinder
             enabled_backends: {{ enabled_backends|join(',') }}
@@ -299,7 +302,9 @@ spec:
       secrets:
         rbd:
           volume: {{ ceph.cinder.secrets }}
+{%- if is_backup_enabled %}
           backup: {{ ceph.cinder.secrets }}
+{%- endif %}
       manifests:
         cron_job_db_purge: true
         job_drop_default_volume_type: true
@@ -311,6 +316,7 @@ spec:
         cron_service_cleaner: true
         cron_volume_usage_audit: false
         ceph_conf: true
+        statefulset_backup: {{ is_backup_enabled }}
       network:
         api:
           ingress:
