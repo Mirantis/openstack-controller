@@ -127,9 +127,13 @@ class Service:
     }
 
     _service_accounts = []
-    _required_accounts = {}
+
     _secret_class = None
     _protected_accounts = []
+
+    @property
+    def required_accounts(self):
+        return {}
 
     @property
     def service_secret(self):
@@ -748,7 +752,7 @@ class OpenStackService(Service):
 
     def _get_keystone_creds(self):
         result = {}
-        for svc, accs in self._required_accounts.items():
+        for svc, accs in self.required_accounts.items():
             secret_class = Service.registry[svc](
                 self.mspec, self.logger, self.osdplst
             ).service_secret
