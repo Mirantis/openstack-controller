@@ -270,6 +270,7 @@ spec:
         job_drop_default_volume_type: true
         cron_volume_usage_audit: false
         ceph_conf: true
+        statefulset_backup: true
       pod:
         affinity:
           anti:
