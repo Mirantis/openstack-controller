@@ -744,9 +744,8 @@ class Ironic(OpenStackService):
     available_releases = ["openstack-ironic-rabbitmq", "openstack-ironic"]
 
     @property
-    def _required_accounts(self):
-        r_accounts = {"networking": ["neutron"], "image": ["glance"]}
-        return r_accounts
+    def required_accounts(self):
+        return {"networking": ["neutron"], "image": ["glance"]}
 
     _child_objects = {
         "ironic": {
@@ -1018,7 +1017,7 @@ class Neutron(OpenStackService, MaintenanceApiMixin):
     _secret_class = secrets.NeutronSecret
 
     @property
-    def _required_accounts(self):
+    def required_accounts(self):
         r_accounts = {"dns": ["designate"]}
         compute_accounts = ["nova"]
         if self.openstack_version in [
@@ -1396,7 +1395,7 @@ class Nova(OpenStackServiceWithCeph, MaintenanceApiMixin):
         return s_accounts
 
     @property
-    def _required_accounts(self):
+    def required_accounts(self):
         r_accounts = {"networking": ["neutron"], "block-storage": ["cinder"]}
         if self.openstack_version not in [
             "queens",
@@ -2114,14 +2113,13 @@ class Manila(OpenStackService):
         return template_args
 
     @property
-    def _required_accounts(self):
-        r_accounts = {
+    def required_accounts(self):
+        return {
             "networking": ["neutron"],
             "block-storage": ["cinder"],
             "image": ["glance"],
             "compute": ["nova"],
         }
-        return r_accounts
 
 
 registry = Service.registry
