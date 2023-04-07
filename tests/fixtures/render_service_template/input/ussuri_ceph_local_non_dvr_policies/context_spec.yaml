@@ -1,6 +1,8 @@
 openstack_version: ussuri
 features:
   policies:
+    strict_admin:
+      enabled: true
     aodh:
       aodh_custom: value
     barbican:
