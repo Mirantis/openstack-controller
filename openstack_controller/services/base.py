@@ -127,7 +127,6 @@ class Service:
     }
 
     _service_accounts = []
-
     _secret_class = None
     _protected_accounts = []
 
