@@ -28,6 +28,9 @@ spec:
             backend: oslo_cache.memcache_pool
           oslo_messaging_notifications:
             topics: notifications,stacklight_notifications
+          resource:
+            admin_project_name: admin
+            admin_project_domain_name: Default
         logging:
           logger_keystone:
             level: INFO
