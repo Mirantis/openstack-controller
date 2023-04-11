@@ -12,6 +12,7 @@ from openstack_controller.filters.tempest.conf import dns_feature_enabled
 from openstack_controller.filters.tempest.conf import (
     ephemeral_storage_encryption,
 )
+from openstack_controller.filters.tempest.conf import dynamic_routing
 from openstack_controller.filters.tempest.conf import heat_plugin
 from openstack_controller.filters.tempest.conf import identity
 from openstack_controller.filters.tempest.conf import identity_feature_enabled
@@ -56,6 +57,7 @@ SECTIONS = [
     default.Default,
     dns.Dns,
     dns_feature_enabled.DnsFeatureEnabled,
+    dynamic_routing.NeutronDynamicRoutingOptions,
     ephemeral_storage_encryption.EphemeralStorageEncryption,
     heat_plugin.HeatPlugin,
     identity.Identity,
