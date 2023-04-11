@@ -28,6 +28,9 @@ spec:
           logger_manila:
             level: INFO
         manila:
+          keystone_authtoken:
+            memcache_security_strategy: ENCRYPT
+            memcache_secret_key: JinzIdQzLdIslgxu
           coordination:
             backend_url: etcd3+http://etcd:2379?api_version=auto
           audit_middleware_notifications:

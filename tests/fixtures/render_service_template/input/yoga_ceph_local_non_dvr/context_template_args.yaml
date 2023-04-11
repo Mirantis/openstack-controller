@@ -428,6 +428,7 @@ shared-file-system:
       test:
         password: FfYMQLEZJ5fLRz32VzawQ9I7ezMJGVw6
         username: testFrbP
+    memcached: JinzIdQzLdIslgxu
   keystone_creds:
     cinder:
       password: Heh1rJglWv6gZ7DbbemCQEEZedy9eEYa
