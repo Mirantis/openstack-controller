@@ -12,6 +12,10 @@ spec:
           logger_placement:
             level: INFO
         placement:
+          audit_middleware_notifications:
+            driver: noop
+          oslo_messaging_notifications:
+            topics: notifications,stacklight_notifications
           keystone_authtoken:
             memcache_secret_key: 0NZmrV1NcBFwzDmv
             memcache_security_strategy: ENCRYPT
@@ -53,6 +57,24 @@ spec:
             placement:
               password: FdmszFTEuCvADMYGShqdBqLzuczyZf4c
               username: placementEqEMt8aUc
+        oslo_messaging_notifications:
+          auth:
+            placement:
+              password: UBrmnWdChvZA5gEFum07AM7Ba6nExCc2
+              username: placement9lrJ9dNfe
+          host_fqdn_override: { }
+          hosts:
+            default: rabbitmq
+          path: /openstack
+          port:
+            amqp:
+              default: 5673
+            http:
+              default: 15672
+          scheme: rabbit
+          statefulset:
+            name: openstack-rabbitmq-rabbitmq
+            replicas: 1
         placement:
           host_fqdn_override:
             public:

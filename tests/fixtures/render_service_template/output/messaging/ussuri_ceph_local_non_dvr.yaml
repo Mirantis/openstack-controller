@@ -162,6 +162,24 @@ spec:
           - definition:
               message-ttl: 120000
               expires: 600000
+            name: default-policy-placement
+            pattern: ^(?!amq\.).*
+            vhost: placement
+          - definition:
+              expires: 600000
+            name: results_expire_placement
+            pattern: ^results\.
+            priority: 1
+            vhost: placement
+          - definition:
+              expires: 600000
+            name: tasks_expire_placement
+            pattern: ^tasks\.
+            priority: 1
+            vhost: placement
+          - definition:
+              message-ttl: 120000
+              expires: 600000
             name: default-policy-octavia
             pattern: ^(?!amq\.).*
             vhost: octavia
@@ -343,6 +361,18 @@ spec:
               octavia_1:
                 password: xcKEJVAYZflpAmEWcyzTKpvNlJycCLvc
                 username: octaviadRDTSj1
+            path: /openstack
+          placement_service:
+            auth:
+              placement_1:
+                password: fHqGcwsr7qzdy0taDQliyRMzA7S6xgYg
+                username: placementwB77qXfl0
+            path: ["/placement"]
+          placement_service_notifications:
+            auth:
+              placement_1:
+                password: UBrmnWdChvZA5gEFum07AM7Ba6nExCc2
+                username: placement9lrJ9dNfe
             path: /openstack
           stacklight_service_notifications:
             auth:
