@@ -1385,8 +1385,8 @@ class Nova(OpenStackServiceWithCeph, MaintenanceApiMixin):
     ]
 
     @property
-    def _service_accounts(self):
-        s_accounts = []
+    def service_accounts(self):
+        s_accounts = super().service_accounts
         if self.openstack_version in [
             "queens",
             "rocky",
