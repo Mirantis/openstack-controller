@@ -44,15 +44,21 @@ compute:
   is_ceph_enabled: true
   ceph:
     nova:
-      keyring: 'AQDNZLJf8S+fORAA6hg50Jo+vBq07kxtBXB9PQ==
-
-        '
+      keyring: AQDNZLJf8S+fORAA6hg50Jo+vBq07kxtBXB9PQ==
       pools:
         vms-hdd:
           name: vms-hdd
           role: vms
       secrets: nova-rbd-keyring
       username: nova
+    cinder:
+      keyring: AQDLZLJfNPtTOxAAQm248Q9AyoirvELaSyPz5w==
+      pools:
+        volumes-hdd:
+          name: volumes-hdd
+          role: volumes
+      secrets: cinder-rbd-keyring
+      username: cinder
     mon_host:
       - "10.10.10.1:6789"
       - "10.10.10.2:6789"
