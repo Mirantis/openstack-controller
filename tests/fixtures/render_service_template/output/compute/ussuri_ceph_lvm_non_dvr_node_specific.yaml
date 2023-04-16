@@ -18,10 +18,11 @@ spec:
                 - "10.10.10.1:6789"
                 - "10.10.10.2:6789"
                 - "10.10.10.3:6789"
-        libvirt:
-          listen_addr: 0.0.0.0
         qemu:
           security_driver: apparmor
+        dynamic_options:
+          libvirt:
+            listen_interface: ens3
       pod:
         probes:
           libvirt:
@@ -45,6 +46,51 @@ spec:
       manifests:
         network_policy: false
         ceph_conf: true
+      overrides:
+        libvirt:
+          labels:
+            compute::migration_interface:
+              values:
+                conf:
+                  dynamic_options:
+                    libvirt:
+                      listen_interface: 'live01'
+            compute::local_migration_interface:
+              values:
+                conf:
+                  dynamic_options:
+                    libvirt:
+                      listen_interface: 'live01'
+            compute::local_sriov_disabled:
+              values:
+                conf:
+                  dynamic_options:
+                    libvirt:
+                      listen_interface: 'ens3'
+            compute::local_sriov_enabled:
+              values:
+                conf:
+                  dynamic_options:
+                    libvirt:
+                      listen_interface: 'ens3'
+            compute::local:
+              values:
+                conf:
+                  dynamic_options:
+                    libvirt:
+                      listen_interface: 'ens3'
+            compute::lvm_custom:
+              values:
+                conf:
+                  dynamic_options:
+                    libvirt:
+                      listen_interface: 'ens3'
+            compute::lvm_custom_encryption:
+              values:
+                conf:
+                  dynamic_options:
+                    libvirt:
+                      listen_interface: 'ens3'
   - chart: osh/nova
     name: openstack-nova
     values:

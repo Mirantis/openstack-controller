@@ -127,6 +127,22 @@ spec:
           {{ image }}: {{ images[image] }}
         {%- endif %}
 {%- endfor %}
+# NODE SPECIFIC START
+{%- if overrides.enabled %}
+      overrides:
+        libvirt:
+          labels:
+  {%- for label, override in node_specific.items() %}
+    {%- set nova_override = override.get("nova", {}) %}
+            {{ label }}:
+              values:
+                conf:
+                  dynamic_options:
+                    libvirt:
+                      listen_interface: {{ nova_override.get("live_migration_interface", spec.features.nova.live_migration_interface) }}
+  {%- endfor %}
+{%- endif %}
+# NODE SPECIFIC END
 {%- if vnc_tls_enabled %}
       secrets:
         tls:
@@ -170,14 +186,15 @@ spec:
 {%- else %}
           enabled: false
 {%- endif %}
-        libvirt:
-          listen_addr: 0.0.0.0
         qemu:
           security_driver: apparmor
         {%- if vnc_tls_enabled %}
           vnc_tls: "1"
           vnc_tls_x509_verify: "1"
         {%- endif %}
+        dynamic_options:
+          libvirt:
+            listen_interface: {{ spec.features.nova.live_migration_interface }}
       {%- if dpdk.enabled %}
         apparmor:
           templates:
