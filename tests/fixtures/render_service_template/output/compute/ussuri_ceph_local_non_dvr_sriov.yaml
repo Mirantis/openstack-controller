@@ -18,10 +18,11 @@ spec:
                 - "10.10.10.1:6789"
                 - "10.10.10.2:6789"
                 - "10.10.10.3:6789"
-        libvirt:
-          listen_addr: 0.0.0.0
         qemu:
           security_driver: apparmor
+        dynamic_options:
+          libvirt:
+            listen_interface: ens3
       pod:
         probes:
           libvirt:
@@ -45,6 +46,15 @@ spec:
       manifests:
         network_policy: false
         ceph_conf: true
+      overrides:
+        libvirt:
+          labels:
+            kubernetes.io/hostname::kaas-node-99ea7b55-0555-45f7-bdc5-f75da9f17c1a:
+              values:
+                conf:
+                  dynamic_options:
+                    libvirt:
+                      listen_interface: ens3
   - chart: osh/nova
     name: openstack-nova
     values:

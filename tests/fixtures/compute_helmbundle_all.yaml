@@ -133,8 +133,6 @@ spec:
       conf:
         ceph:
           enabled: true
-        libvirt:
-          listen_addr: 0.0.0.0
         nova:
           cinder:
             catalog_info: volumev3:cinderv3:internalURL
