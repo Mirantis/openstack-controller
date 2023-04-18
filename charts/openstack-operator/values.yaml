@@ -49,7 +49,8 @@ osdpl:
         KOPF_RUN_DEBUG: 1
     node_maintenance_request:
       OSCTL_LOGGING_CONF: {}
-      raw: {}
+      raw:
+        OSCTL_MAINTENANCE_PARALLEL_MAX_COMPUTE: 30
     tf_secrets: {}
     ceph_secrets: {}
   pod:

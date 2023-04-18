@@ -326,3 +326,11 @@ HELM_REPOSITORY_CACHE = os.environ.get(
     "HELM_REPOSITORY_CACHE", os.path.join(HOME, ".cache/helm/repository")
 )
 # END HELM SETTINGS
+
+# Max number of nodes we allow to update in parallel
+OSCTL_MAINTENANCE_PARALLEL_MAX_COMPUTE = int(
+    os.environ.get("OSCTL_MAINTENANCE_PARALLEL_MAX_COMPUTE", 30)
+)
+OSCTL_MAINTENANCE_PARALLEL_MAX_GATEWAY = int(
+    os.environ.get("OSCTL_MAINTENANCE_PARALLEL_MAX_GATEWAY", 1)
+)

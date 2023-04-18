@@ -23,6 +23,13 @@ MAINTENANCE_DEFAULT_NODE_CONFIG = {
     "instance_migration_attempts": {"default": "3", "type": "int"},
 }
 
+# Maximum number of nodes upgraded in parallel.
+MAINTENANCE_MAX_PARALLEL_BY_ROLE = {
+    const.NodeRole.controller.value: 1,
+    const.NodeRole.gateway.value: settings.OSCTL_MAINTENANCE_PARALLEL_MAX_GATEWAY,
+    const.NodeRole.compute.value: settings.OSCTL_MAINTENANCE_PARALLEL_MAX_COMPUTE,
+}
+
 
 class NodeMaintenanceConfig:
     opts_prefix = "openstack.lcm.mirantis.com"
@@ -185,9 +192,34 @@ class NodeWorkloadLock(LockBase):
             if o.obj["spec"]["controllerName"] == cls.workload
         ]
 
-    @classmethod
-    def maintenance_locks(cls):
-        return [nwl for nwl in cls.get_all() if nwl.is_maintenance()]
+    def maintenance_locks(self):
+        locks = {role.value: [] for role in const.NodeRole}
+        for nwl in self.get_all():
+            if nwl.is_maintenance():
+                node = kube.find(kube.Node, nwl.obj["spec"]["nodeName"])
+                for role in const.NodeRole:
+                    if node.has_role(role):
+                        locks[role.value].append(nwl)
+        return locks
+
+    def can_handle_nmr(self):
+        """Check if we can handle more NodeMaintenanceRequests
+
+        Compare current number of active NodeMaintenanceRequests with
+        maximum allowed number of parallel nodes specified in MAINTENANCE_MAX_PARALLEL_BY_ROLE
+
+        return: False if can't handle additional request. True othervise.
+        """
+        active_locks = self.maintenance_locks()
+        for role, locks in active_locks.items():
+            len_locks = len(locks)
+            if len_locks >= MAINTENANCE_MAX_PARALLEL_BY_ROLE[role]:
+                node_name = self.obj["spec"]["nodeName"]
+                LOG.info(
+                    f"Handling Nodemaintenancerequest for node {node_name} is not allowed. Already handling {locks} for role: {role}"
+                )
+                return False
+        return True
 
 
 class MaintenanceRequestBase(pykube.objects.APIObject):

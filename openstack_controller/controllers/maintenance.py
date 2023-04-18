@@ -51,7 +51,7 @@ async def node_maintenance_request_change_handler(body, **kwargs):
 
     # NOTE(vsaienko): check if current node is in maintenance to let
     # retry on Exception here.
-    if not nwl.is_maintenance() and len(nwl.maintenance_locks()) >= 1:
+    if not nwl.is_maintenance() and not nwl.can_handle_nmr():
         msg = (
             f"Inactive NodeWorkloadLocks for openstack detected, "
             f"deferring processing for node {node.name}"

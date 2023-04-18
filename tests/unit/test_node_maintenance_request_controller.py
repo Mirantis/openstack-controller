@@ -70,6 +70,14 @@ def node(mocker):
     mocker.stopall()
 
 
+def get_maintenance_locks(controller, gateway, compute):
+    return {
+        "controller": [0] * controller,
+        "gateway": [0] * gateway,
+        "compute": [0] * compute,
+    }
+
+
 @pytest.mark.asyncio
 async def test_nmr_change_not_required_for_node(
     mocker, nova_registry_service, node
@@ -107,7 +115,7 @@ async def test_nmr_change_required_for_node_not_maintenance_0_active_lock(
     nwl = mock.Mock()
     nwl.required_for_node.return_value = True
     nwl.is_maintenance.return_value = False
-    nwl.maintenance_locks.return_value = []
+    nwl.can_handle_nmr.return_value = True
 
     osdpl.exists.return_value = True
 
@@ -138,7 +146,7 @@ async def test_nmr_change_required_for_node_not_maintenance_1_active_lock(
     nwl = mock.Mock()
     nwl.required_for_node.return_value = True
     nwl.is_maintenance.return_value = False
-    nwl.maintenance_locks.return_value = [1]
+    nwl.can_handle_nmr.return_value = False
 
     osdpl.exists.return_value = True
 
@@ -170,7 +178,7 @@ async def test_nmr_change_required_for_node_maintenance_1_active_lock(
     nwl = mock.Mock()
     nwl.required_for_node.return_value = True
     nwl.is_maintenance.return_value = True
-    nwl.maintenance_locks.return_value = [1]
+    nwl.can_handle_nmr.return_value = False
 
     osdpl.exists.return_value = True
 
