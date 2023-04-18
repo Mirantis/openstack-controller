@@ -33,8 +33,21 @@ ensure_service_account() {
 }
 
 get_secret_name_from_service_account() {
-    echo -e "\\nGetting secret of service account ${SERVICE_ACCOUNT_NAME} on ${NAMESPACE}"
-    SECRET_NAME=$(kubectl get sa "${SERVICE_ACCOUNT_NAME}" --namespace="${NAMESPACE}" -o json | jq -r .secrets[].name)
+    SECRET_NAME=${SERVICE_ACCOUNT_NAME}-token
+    if ! kubectl --namespace="${NAMESPACE}" get secret ${SERVICE_ACCOUNT_NAME}-token; then
+        echo -e "\\nCreating secret for service account ${SERVICE_ACCOUNT_NAME} on ${NAMESPACE}"
+    kubectl apply -f - <<EOF
+apiVersion: v1
+kind: Secret
+metadata:
+  name: ${SERVICE_ACCOUNT_NAME}-token
+  namespace: ${NAMESPACE}
+  annotations:
+    kubernetes.io/service-account.name: ${SERVICE_ACCOUNT_NAME}
+type: kubernetes.io/service-account-token
+EOF
+    fi
+    SECRET_NAME=${SERVICE_ACCOUNT_NAME}-token
     echo "Secret name: ${SECRET_NAME}"
 }
 
