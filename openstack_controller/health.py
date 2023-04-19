@@ -33,6 +33,7 @@ class StatefulSetStatus:
     readyReplicas: int = 0
     updatedReplicas: int = 0
     currentReplicas: int = 0
+    availableReplicas: int = 0
 
 
 @dataclass(frozen=True)
