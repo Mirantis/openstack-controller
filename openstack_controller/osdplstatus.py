@@ -4,6 +4,7 @@ import pykube
 import datetime
 import kopf
 
+from openstack_controller import settings
 from openstack_controller import version
 from openstack_controller import layers
 from openstack_controller import kube
@@ -58,6 +59,8 @@ class OpenStackDeploymentStatus(pykube.objects.NamespacedAPIObject):
             "fingerprint": layers.spec_hash(mspec),
             "timestamp": str(timestamp),
         }
+        if settings.OSCTL_CLUSTER_RELEASE:
+            osdpl_generic["release"] = settings.OSCTL_CLUSTER_RELEASE
         return osdpl_generic
 
     def set_osdpl_status(self, state, mspec, osdpl_diff, osdpl_cause):
