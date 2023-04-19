@@ -1376,6 +1376,17 @@ properties:
         type: object
         additionalProperties: false
         properties:
+          volume:
+            type: object
+            additionalProperties: false
+            properties:
+              enabled:
+                type: boolean
+                description: |
+                  Flag to enable main cinder volume running as statefulset.
+                  When enabled openstack-controller will wait for ceph deployment
+                  provided by MOSK Ceph controller. Disable for cephless deployment.
+                  default true
           backup:
             type: object
             additionalProperties: false
@@ -1383,7 +1394,7 @@ properties:
               enabled:
                 type: boolean
                 description: |
-                  Enable cinder backup service
+                  Enable cinder backup service. Disable for cephless deployment.
                   default: true
       logging:
         type: object

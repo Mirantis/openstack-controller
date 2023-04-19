@@ -40,7 +40,6 @@
 
 {%- set signature = spec.get('features', {}).get('glance', {}).get("signature", {"enabled": false}) %}
 
-{%- set ceph_enabled = spec.get('features', {}).get('nova', {}).get('images', {}).get('backend') == 'ceph' or spec.get('features', {}).get('cinder', {}).get('volume', {}).get('backend') == 'ceph' %}
 {%- set ephemeral_encryption = spec.get('features', {}).get('nova', {}).get('images', {}).get("encryption", {}) %}
 {%- set nova_db_cleanup = spec.get('features', {}).get('database', {}).get('cleanup', {}).get('nova', {'enabled': true}) %}
 {%- set cadf_audit = spec.get('features', {}).get('logging', {}).get('cadf', {'enabled': false}) %}
@@ -168,14 +167,14 @@ spec:
         secret_libvirt_vnc_server_tls: true
         secret_ca_bundle: true
 {%- endif %}
-{%- if ceph_enabled %}
+{%- if is_ceph_enabled %}
       ceph_client:
         configmap: rook-ceph-config
         user_secret_name: {{ ceph.nova.secrets }}
 {%- endif %}
       conf:
         ceph:
-{%- if ceph_enabled %}
+{%- if is_ceph_enabled %}
           enabled: true
           cinder:
             user: {{ ceph.nova.username }}
@@ -671,7 +670,7 @@ spec:
           scheme:
             default: http
             public: https
-{%- if ceph_enabled %}
+{%- if is_ceph_enabled %}
       ceph_client:
         configmap: rook-ceph-config
         user_secret_name: {{ ceph.nova.secrets }}
@@ -681,7 +680,7 @@ spec:
           01-controller-default.yaml: {{ service_policy }}
           02-custom.yaml: {{ spec.get("features", {}).get("policies", {}).get("nova", {}) }}
         ceph:
-{%- if ceph_enabled %}
+{%- if is_ceph_enabled %}
           enabled: true
           cinder:
             user: {{ ceph.nova.username }}
@@ -765,7 +764,9 @@ spec:
             cpu_models: {{ vcpu_type }}
 {%- endif %}
             virt_type: kvm
+{%- if is_ceph_enabled %}
             rbd_user: {{ ceph.nova.username }}
+{%- endif %}
 {%- if spec.get('features', {}).get('nova', {}).get('images', {}).get('backend') == 'ceph' %}
             images_type: rbd
 {%- elif spec.get('features', {}).get('nova', {}).get('images', {}).get('backend') == 'local' %}
@@ -774,9 +775,12 @@ spec:
             images_type: lvm
             images_volume_group: {{ spec.get('features', {}).get('nova', {}).get('images', {}).get('lvm', {}).get("volume_group", "nova-vol") }}
 {%- endif %}
-{%- for pools, pools_config in ceph.nova.pools.items() %}
+
+{%- if is_ceph_enabled %}
+  {%- for pools, pools_config in ceph.nova.pools.items() %}
             images_rbd_pool: {{ pools_config.name }}
-{%- endfor %}
+  {%- endfor %}
+{%- endif %}
 {%- if cadf_audit.enabled %}
           audit_middleware_notifications:
             driver: {{ cadf_audit_driver }}
