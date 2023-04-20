@@ -110,8 +110,12 @@ OPENSTACK_SERVICES_UPGRADE_ORDER = [
 
 RGW_KEYSTONE_SECRET = "ceph-keystone-user"
 
+
 # Health
-UNKNOWN, OK, PROGRESS, BAD = "Unknown", "Ready", "Progressing", "Unhealthy"
+class K8sObjHealth(enum.Enum):
+    OK = "Ready"
+    BAD = "Unhealthy"
+
 
 NEUTRON_KEYSTONE_SECRET = "neutron-keystone-admin"
 KEYSTONE_CONFIG_SECRET = "keystone-etc"
