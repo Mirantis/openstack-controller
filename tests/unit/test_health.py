@@ -28,7 +28,11 @@ async def test_hook_called():
             "artifacts": {"images_base_url": "", "binary_base_url": ""},
         },
     }
-    osdplst_health = {"nova": {"compute-default": {"status": constants.BAD}}}
+    osdplst_health = {
+        "nova": {
+            "compute-default": {"status": constants.K8sObjHealth.BAD.value}
+        }
+    }
     cronjob = {
         "metadata": {"annotations": ""},
         "spec": {
@@ -59,7 +63,9 @@ async def test_hook_called():
         o.return_value.obj = osdpl
         osdplst.return_value.get_osdpl_health.return_value = osdplst_health
         osdplst.return_value.exists.return_value = True
-        ds_hooks = health.DAEMONSET_HOOKS[(constants.BAD, constants.OK)]
+        ds_hooks = health.DAEMONSET_HOOKS[
+            (constants.K8sObjHealth.BAD.value, constants.K8sObjHealth.OK.value)
+        ]
         # make sure mapping is correct
         assert compute_ds_name in ds_hooks
         ds_hooks[compute_ds_name] = fake_hook

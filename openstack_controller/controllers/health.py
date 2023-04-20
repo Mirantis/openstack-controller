@@ -22,10 +22,10 @@ LOG = utils.get_logger(__name__)
 # 1. from Ready to Progressing
 # 2. from Progressing to Ready
 DAEMONSET_HOOKS = {
-    (constants.BAD, constants.OK): {
+    (constants.K8sObjHealth.BAD.value, constants.K8sObjHealth.OK.value): {
         "nova-compute-default": hooks.run_nova_cell_setup
     },
-    (constants.OK, constants.BAD): {
+    (constants.K8sObjHealth.OK.value, constants.K8sObjHealth.BAD.value): {
         "octavia-health-manager-default": hooks.run_octavia_create_resources
     },
 }
@@ -74,7 +74,7 @@ async def daemonsets(name, namespace, meta, status, reason, **kwargs):
     if reason == "delete":
         osdplst.remove_osdpl_service_health(application, component)
         return
-    res_health = health.daemonset_health_status(kwargs["body"])
+    res_health = health.health_status(kube.resource(kwargs["body"]))
     prev_res_health = utils.get_in(
         osdplst.get_osdpl_health(),
         [application, component],
