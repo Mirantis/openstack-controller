@@ -838,16 +838,15 @@ class OpenStackServiceWithCeph(OpenStackService):
         ceph_config = {}
         oscp = ceph_api.get_os_ceph_params(secrets.get_secret_data)
         for oscp_service in oscp.services:
-            srv_username = constants.OS_SERVICES_MAP.get(self.service)
-            if oscp_service.user.name == srv_username:
-                ceph_config[srv_username] = {
-                    "username": srv_username,
-                    "keyring": oscp_service.key,
-                    "secrets": ceph_api.get_os_user_keyring_name(
-                        oscp_service.user
-                    ),
-                    "pools": self.get_ceph_role_pools(oscp_service),
-                }
+            srv_username = oscp_service.user.name
+            ceph_config[srv_username] = {
+                "username": srv_username,
+                "keyring": oscp_service.key,
+                "secrets": ceph_api.get_os_user_keyring_name(
+                    oscp_service.user
+                ),
+                "pools": self.get_ceph_role_pools(oscp_service),
+            }
         ceph_config["mon_host"] = [
             f"{ip}:{port}" for ip, port in oscp.mon_endpoints
         ]
