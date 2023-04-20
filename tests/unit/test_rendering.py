@@ -20,6 +20,7 @@ excluded_services = {
     "stepler",
 }
 infra_services = {
+    "cloudprober",
     "messaging",
     "database",
     "memcached",

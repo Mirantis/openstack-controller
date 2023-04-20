@@ -78,6 +78,7 @@ spec:
                                 description: The start time of the task
                     baremetal: *component_status
                     block-storage: *component_status
+                    cloudprober: *component_status
                     compute: *component_status
                     coordination: *component_status
                     dashboard: *component_status

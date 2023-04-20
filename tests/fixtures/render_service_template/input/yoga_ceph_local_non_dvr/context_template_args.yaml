@@ -35,6 +35,11 @@ block-storage:
         password: 55Y1R3QdGFvuntBCtD2iNZQcZiQUnsTJ
         username: testtFQE
   keystone_creds: {}
+cloudprober:
+  keystone_creds:
+    cloudprober:
+      password: QXH50EtBVsiCptehSf4l55Y1R3QdGFv8xc
+      username: osctlQECh8
 compute:
   ceph:
     nova:
