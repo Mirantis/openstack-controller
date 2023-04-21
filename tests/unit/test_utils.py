@@ -227,3 +227,24 @@ def test_find_and_substitute_key_not_found():
     with pytest.raises(exception.OsdplSubstitutionFailed) as e:
         utils.find_and_substitute(in_data, secrets)
         assert "Specified key opt3 not found in mysecret2" in e.message
+
+
+def test_merge_lists_appends_new():
+    """When merging lists, we append new uniq elements"""
+    d1 = {"list": [1, 2, 3]}
+    d2 = {"list": [4, 3, 2]}
+    assert utils.merger.merge(d1, d2) == {"list": [1, 2, 3, 4]}
+
+
+def test_merge_allows_float_over_int():
+    """We allow overwriting ints with floats"""
+    d1 = {"value": 1}
+    d2 = {"value": 1.1}
+    assert utils.merger.merge(d1, d2) == {"value": 1.1}
+
+
+def test_merge_allows_int_over_float():
+    """We allow overwriting floats with ints"""
+    d1 = {"value": 1.1}
+    d2 = {"value": 1}
+    assert utils.merger.merge(d1, d2) == {"value": 1}
