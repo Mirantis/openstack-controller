@@ -278,13 +278,9 @@ def generate_name(prefix="", length=16):
         ------
         novaS4LRMYrkh7Nl
     """
-    res = [prefix]
-    res.append(
-        generate_password(
-            len(prefix) if length >= len(prefix) else len(prefix) - length
-        )
-    )
-    return "".join(res)
+    res = prefix
+    res += generate_password(length)
+    return res[:length]
 
 
 def generate_credentials(

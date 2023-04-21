@@ -14,6 +14,11 @@ def test_openstack_service_secret_name():
     assert secret.secret_base_name == "generated-service-passwords"
 
 
+def test_generate_name():
+    assert len(secrets.generate_name("admin", 16)) == 16
+    assert len(secrets.generate_name("123456789112345678", 16)) == 16
+
+
 @mock.patch("openstack_controller.secrets.generate_password")
 @mock.patch("openstack_controller.secrets.generate_name")
 def test_openstack_admin_secret_create(mock_name, mock_password):
