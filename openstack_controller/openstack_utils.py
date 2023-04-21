@@ -134,6 +134,9 @@ class OpenStackClientManager:
     def compute_get_servers_in_migrating_state(self, host=None):
         return self.compute_get_all_servers(host=host, status="MIGRATING")
 
+    def compute_get_availability_zones(self, details=False):
+        return list(self.oc.compute.availability_zones(details=details))
+
     def baremetal_get_nodes(self):
         return self.oc.baremetal.nodes()
 

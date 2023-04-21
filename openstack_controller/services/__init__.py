@@ -1620,6 +1620,37 @@ class Nova(OpenStackServiceWithCeph, MaintenanceApiMixin):
             await child_obj.purge()
             await child_obj.enable(self.openstack_version, True)
 
+    async def can_handle_nmr(self, node, locks):
+        if not node.has_role(constants.NodeRole.compute):
+            return True
+        # TODO(vsaienko): honor configoption for this.
+        os_client = openstack_utils.OpenStackClientManager()
+        hosts_by_az = {}
+        for az in os_client.compute_get_availability_zones(details=True):
+            for host in az.hosts or []:
+                hosts_by_az[host] = az.name
+        node_az = hosts_by_az.get(node.name)
+
+        if len(locks) == 0:
+            return True
+
+        # NOTE(vsaienko): assume we do maintenance for host in same AZ
+        nwl = locks[constants.NodeRole.compute.value][0]
+        hostname = nwl.obj["spec"]["nodeName"]
+
+        if node_az is None or hostname not in hosts_by_az:
+            LOG.info(
+                f"Can't find AZ for one of nodes {hostname}, {node.name} in {hosts_by_az}"
+            )
+            return True
+
+        if node_az != hosts_by_az[hostname]:
+            LOG.info(
+                f"Do not allow handline nmr for node: {node.name}. Node az {node_az} does not match hosts that currently in maintenance {hosts_by_az[hostname]}"
+            )
+            return False
+        return True
+
     async def remove_node_from_scheduling(self, node):
         nwl = maintenance.NodeWorkloadLock.get_resource(node.name)
         if not node.has_role(constants.NodeRole.compute):

@@ -726,6 +726,17 @@ class MaintenanceApiMixin:
         await self.prepare_node_after_reboot(node)
         await self.add_node_to_scheduling(node)
 
+    async def can_handle_nmr(self, node, locks):
+        """Check if it is possible to handle nmr for node
+
+        :param node: the node we want to handle nmr for
+        :param locks: currently active locks
+
+        :returns True: when can handle nmr of node.
+        :returns False: When not possible to handle nmr for node.
+        """
+        return True
+
 
 class OpenStackService(Service):
     openstack_chart = None

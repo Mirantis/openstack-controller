@@ -53,8 +53,8 @@ async def node_maintenance_request_change_handler(body, **kwargs):
     # retry on Exception here.
     if not nwl.is_maintenance() and not nwl.can_handle_nmr():
         msg = (
-            f"Inactive NodeWorkloadLocks for openstack detected, "
-            f"deferring processing for node {node.name}"
+            f"Number of inactive NodeWorkloadLocks exceeds allowed concurrency. "
+            f"Deferring processing for node {node.name}"
         )
         nwl.set_error_message(msg)
         raise kopf.TemporaryError(msg)
@@ -72,6 +72,20 @@ async def node_maintenance_request_change_handler(body, **kwargs):
     )
 
     if nwl.is_active():
+        # Verify if we can handle nmr by specific services.
+        active_locks = nwl.maintenance_locks()
+        services_can_handle_nmr = {}
+        for service_name, service_class in ORDERED_SERVICES:
+            service = service_class(mspec, LOG, osdplst)
+            if service.maintenance_api:
+                services_can_handle_nmr[
+                    service_name
+                ] = await service.can_handle_nmr(node, active_locks)
+        if not all(services_can_handle_nmr.values()):
+            msg = f"Some services blocks nmr handling {services_can_handle_nmr}. Deferring processing for node {node.name}"
+            nwl.set_error_message(msg)
+            raise kopf.TemporaryError(msg)
+
         nwl.set_inner_state_active()
         for service, service_class in ORDERED_SERVICES:
             service = service_class(mspec, LOG, osdplst)
