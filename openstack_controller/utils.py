@@ -104,7 +104,7 @@ class TypeConflictFail(
 ):
     @staticmethod
     def strategy_fail(config, path, base, nxt):
-        if (type(base), type(nxt)) == (float, int):
+        if type(base) in (float, int) and type(nxt) in (float, int):
             return nxt
         raise deepmerge.exception.InvalidMerge(
             f"Trying to merge different types of objects, {type(base)} and "
