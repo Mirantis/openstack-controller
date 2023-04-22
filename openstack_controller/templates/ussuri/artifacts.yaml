@@ -172,7 +172,7 @@ gnocchi_api: '{{ images_base_url }}/openstack/gnocchi:ussuri-bionic-202302270932
 gnocchi_statsd: '{{ images_base_url }}/openstack/gnocchi:ussuri-bionic-20230227093206'
 gnocchi_metricd: '{{ images_base_url }}/openstack/gnocchi:ussuri-bionic-20230227093206'
 gnocchi_resources_cleaner: '{{ images_base_url }}/openstack/heat:ussuri-bionic-20230227093206'
-redis-failover: '{{ images_base_url }}/openstack/extra/redis:7.0.10-alpine3.17'
+redis-failover: '{{ images_base_url }}/openstack/extra/redis:7.0.11-alpine3.17'
 horizon_clean_cache: '{{ images_base_url }}/openstack/horizon:ussuri-bionic-20230227093206'
 octavia_driver_agent: '{{ images_base_url }}/openstack/octavia:ussuri-bionic-20230227093206'
 octavia_db_sync_persistence: '{{ images_base_url }}/openstack/octavia:ussuri-bionic-20230227093206'
