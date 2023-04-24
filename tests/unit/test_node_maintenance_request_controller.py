@@ -122,6 +122,14 @@ async def test_nmr_change_required_for_node_not_maintenance_0_active_lock(
     mocker.patch.object(
         maintenance.NodeWorkloadLock, "get_resource", return_value=nwl
     )
+    nova_registry_service.return_value.maintenance_api.return_value = True
+    nova_registry_service.return_value.can_handle_nmr.return_value = True
+
+    mocker.patch.object(
+        maintenance_controller,
+        "ORDERED_SERVICES",
+        [("compute", nova_registry_service)],
+    )
 
     node.return_value.ready = True
     mocker.patch.object(kube, "find", side_effect=(node,))
@@ -133,6 +141,54 @@ async def test_nmr_change_required_for_node_not_maintenance_0_active_lock(
     nwl.is_maintenance.assert_called_once()
     nwl.is_active.assert_called_once()
     nwl.set_state_inactive.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_nmr_change_required_for_node_not_maintenance_0_active_lock_service_rejected(
+    mocker, nova_registry_service, osdpl, node
+):
+    nmr = {
+        "metadata": {"name": "fake-nmr"},
+        "spec": {"nodeName": "fake-node"},
+    }
+    nwl = mock.Mock()
+    nwl.required_for_node.return_value = True
+    nwl.is_maintenance.return_value = False
+    nwl.can_handle_nmr.return_value = True
+
+    osdpl.exists.return_value = True
+
+    mocker.patch.object(
+        maintenance.NodeWorkloadLock, "get_resource", return_value=nwl
+    )
+    nova_registry_service.return_value.maintenance_api.return_value = True
+    nova_registry_service.return_value.can_handle_nmr.return_value = True
+
+    neutron_registry_service = mock.Mock()
+    neutron_registry_service.return_value = mock.AsyncMock()
+    neutron_registry_service.return_value.maintenance_api.return_value = True
+    neutron_registry_service.return_value.can_handle_nmr.return_value = False
+
+    mocker.patch.object(
+        maintenance_controller,
+        "ORDERED_SERVICES",
+        [
+            ("compute", nova_registry_service),
+            ("network", neutron_registry_service),
+        ],
+    )
+
+    node.return_value.ready = True
+    mocker.patch.object(kube, "find", side_effect=(node,))
+    with pytest.raises(kopf.TemporaryError):
+        await maintenance_controller.node_maintenance_request_change_handler(
+            nmr, diff=()
+        )
+    nwl.required_for_node.assert_called_once()
+    nwl.present.assert_called_once()
+    nwl.is_maintenance.assert_called_once()
+    nwl.is_active.assert_called_once()
+    nwl.set_state_inactive.assert_not_called()
 
 
 @pytest.mark.asyncio
