@@ -9,6 +9,7 @@ from openstack_controller import kube
 from openstack_controller import settings
 
 LOG = logging.getLogger(__name__)
+CONF = settings.CONF
 
 MAINTENANCE_DEFAULT_NODE_CONFIG = {
     # The migration mode for instances present on the host either
@@ -23,12 +24,18 @@ MAINTENANCE_DEFAULT_NODE_CONFIG = {
     "instance_migration_attempts": {"default": "3", "type": "int"},
 }
 
+
 # Maximum number of nodes upgraded in parallel.
-MAINTENANCE_MAX_PARALLEL_BY_ROLE = {
-    const.NodeRole.controller.value: 1,
-    const.NodeRole.gateway.value: settings.OSCTL_MAINTENANCE_PARALLEL_MAX_GATEWAY,
-    const.NodeRole.compute.value: settings.OSCTL_MAINTENANCE_PARALLEL_MAX_COMPUTE,
-}
+def get_max_parallel_by_role(role):
+    return {
+        const.NodeRole.controller.value: 1,
+        const.NodeRole.gateway.value: CONF["maintenance"][
+            "nwl_parallel_max_gateway"
+        ],
+        const.NodeRole.compute.value: CONF["maintenance"][
+            "nwl_parallel_max_compute"
+        ],
+    }[role]
 
 
 class NodeMaintenanceConfig:
@@ -206,14 +213,14 @@ class NodeWorkloadLock(LockBase):
         """Check if we can handle more NodeMaintenanceRequests
 
         Compare current number of active NodeMaintenanceRequests with
-        maximum allowed number of parallel nodes specified in MAINTENANCE_MAX_PARALLEL_BY_ROLE
+        maximum allowed number of parallel nodes.
 
         return: False if can't handle additional request. True othervise.
         """
         active_locks = self.maintenance_locks()
         for role, locks in active_locks.items():
             len_locks = len(locks)
-            if len_locks >= MAINTENANCE_MAX_PARALLEL_BY_ROLE[role]:
+            if len_locks >= get_max_parallel_by_role(role):
                 node_name = self.obj["spec"]["nodeName"]
                 LOG.info(
                     f"Handling Nodemaintenancerequest for node {node_name} is not allowed. Already handling {locks} for role: {role}"

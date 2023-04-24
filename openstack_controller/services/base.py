@@ -23,6 +23,7 @@ from openstack_controller.osdplstatus import APPLYING, APPLIED, DELETING
 
 
 LOG = utils.get_logger(__name__)
+CONF = settings.CONF
 
 
 class GenericChildObject:
@@ -579,10 +580,10 @@ class Service:
                 .get(health_group, {})
             )
             delay = readiness_timeouts.get(
-                "delay", settings.OSCTL_WAIT_APPLICATION_READY_DELAY
+                "delay", CONF["osctl"]["wait_application_ready_delay"]
             )
             timeout = readiness_timeouts.get(
-                "timeout", settings.OSCTL_WAIT_APPLICATION_READY_TIMEOUT
+                "timeout", CONF["osctl"]["wait_application_ready_timeout"]
             )
             await health.wait_application_ready(
                 health_group, self.osdplst, delay=delay, timeout=timeout
@@ -602,7 +603,7 @@ class Service:
             # TODO(vsaienko): implement logic that will check that changes made in helmbundle
             # object were handled by tiller/helmcontroller
             # can be done only once https://mirantis.jira.com/browse/PRODX-2283 is implemented.
-            await asyncio.sleep(settings.OSCTL_HELMBUNDLE_APPLY_DELAY)
+            await asyncio.sleep(CONF["helmbundle"]["manifest_apply_delay"])
 
             await self.wait_service_healthy()
         except Exception as e:

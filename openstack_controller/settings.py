@@ -11,8 +11,11 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
+import configparser
 import os
+import glob
 import random
+import sys
 import time
 import logging.config
 
@@ -71,20 +74,44 @@ def json_from_env(env_name, default):
     return json.loads(data)
 
 
-# The number of seconds to wait for all component from application becomes ready
-OSCTL_WAIT_APPLICATION_READY_TIMEOUT = int(
-    os.environ.get("OSCTL_WAIT_APPLICATION_READY_TIMEOUT", 1200)
-)
+class Config(configparser.ConfigParser):
+    def __init__(self, *args, **kwargs):
+        self.file_cache = {}
+        self.conf_dir = "/etc/openstack-controller"
+        self.filenames = self.get_config_files()
+        super().__init__(self, *args, **kwargs)
 
-# The number of seconds to sleep between checking application ready attempts
-OSCTL_WAIT_APPLICATION_READY_DELAY = int(
-    os.environ.get("OSCTL_WAIT_APPLICATION_READY_DELAY", 10)
-)
+    def __getitem__(self, item):
+        self.read_config()
+        return super().__getitem__(item)
 
-# The number of seconds to wait for values set in manifest are propagated to child objects.
-OSCTL_HELMBUNLE_MANIFEST_ENABLE_TIMEOUT = int(
-    os.environ.get("OSCTL_HELMBUNLE_MANIFEST_ENABLE_TIMEOUT", 600)
-)
+    def get_config_files(self):
+        res = []
+        for path in [
+            os.path.join(
+                sys.prefix,
+                "etc/openstack-controller",
+            ),
+            self.conf_dir,
+            f"{self.conf_dir}/conf.d",
+        ]:
+            if os.path.isdir(path):
+                for cfg in glob.glob(f"{path}/*.ini"):
+                    res.append(cfg)
+        return res
+
+    def read_config(self):
+        reloaded = True
+        for conf_file in self.filenames:
+            mtime = os.path.getmtime(conf_file)
+            if mtime > self.file_cache.get("mtime", 0):
+                reloaded = False
+                self.file_cache["mtime"] = mtime
+                break
+        if not reloaded:
+            logger.info("Reloading configuration.")
+            self.read(self.filenames)
+
 
 # The number of seconds between attempts to check that values were applied.
 OSCTL_HELMBUNLE_MANIFEST_ENABLE_DELAY = int(
@@ -205,9 +232,6 @@ if OSCTL_HEARTBEAT_INTERVAL:
 # The interval for periodic check of helm releases
 OSCTL_HEALTH_INTERVAL = int(os.environ.get("OSCTL_HEALTH_INTERVAL", 60))
 
-# Number of instances to migrate off node concurrently
-OSCTL_MIGRATE_CONCURRENCY = int(os.environ.get("OSCTL_MIGRATE_CONCURRENCY", 1))
-
 # Whether node maintenance controller is enabled or not
 OSCTL_NODE_MAINTENANCE_ENABLED = bool_from_env(
     "OSCTL_NODE_MAINTENANCE_ENABLED", False
@@ -292,6 +316,7 @@ OSCTL_LOGGING_CONF = json_from_env("OSCTL_LOGGING_CONF", {})
 merger.merge(LOGGING_CONFIG, OSCTL_LOGGING_CONF)
 
 logging.config.dictConfig(LOGGING_CONFIG)
+logger = logging.getLogger(__name__)
 
 
 class InfiniteBackoffsWithJitter:
@@ -327,10 +352,4 @@ HELM_REPOSITORY_CACHE = os.environ.get(
 )
 # END HELM SETTINGS
 
-# Max number of nodes we allow to update in parallel
-OSCTL_MAINTENANCE_PARALLEL_MAX_COMPUTE = int(
-    os.environ.get("OSCTL_MAINTENANCE_PARALLEL_MAX_COMPUTE", 30)
-)
-OSCTL_MAINTENANCE_PARALLEL_MAX_GATEWAY = int(
-    os.environ.get("OSCTL_MAINTENANCE_PARALLEL_MAX_GATEWAY", 1)
-)
+CONF = Config()

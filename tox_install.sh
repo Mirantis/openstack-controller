@@ -3,11 +3,13 @@
 set -ex
 
 WORKDIR=$(dirname $0)
-install_cmd="pip install"
+install_cmd="pip3 install"
 
-echo "$(date)" >> /tmp/env
+SYS_PREFIX=$(python3 -c 'import sys; print(sys.prefix)')
 
 $install_cmd $@
+
+cp -R $WORKDIR/etc $SYS_PREFIX/
 
 # Apply kopf patches
 pushd $VIRTUAL_ENV/lib/python3.$(python3 -c 'import sys; print(sys.version_info.minor)')/site-packages

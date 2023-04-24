@@ -321,6 +321,8 @@ spec:
           volumeMounts:
             - name: os-clouds
               mountPath: /etc/openstack/
+            - name: openstack-controller-config
+              mountPath: /etc/openstack-controller/conf.d/
         - name: secrets
           image: {{ tuple . .Values.image | include "getImageUrl" }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
@@ -359,6 +361,8 @@ spec:
           volumeMounts:
             - name: os-clouds
               mountPath: /etc/openstack/
+            - name: openstack-controller-config
+              mountPath: /etc/openstack-controller/conf.d/
         - name: health
           image: {{ tuple . .Values.image | include "getImageUrl" }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
@@ -397,6 +401,8 @@ spec:
           volumeMounts:
             - name: os-clouds
               mountPath: /etc/openstack/
+            - name: openstack-controller-config
+              mountPath: /etc/openstack-controller/conf.d/
         - name: node
           image: {{ tuple . .Values.image | include "getImageUrl" }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
@@ -435,6 +441,8 @@ spec:
           volumeMounts:
             - name: os-clouds
               mountPath: /etc/openstack/
+            - name: openstack-controller-config
+              mountPath: /etc/openstack-controller/conf.d/
 {{ if .Values.node_maintenance.enabled }}
         - name: nodemaintenancerequest
           image: {{ tuple . .Values.image | include "getImageUrl" }}
@@ -476,6 +484,8 @@ spec:
           volumeMounts:
             - name: os-clouds
               mountPath: /etc/openstack/
+            - name: openstack-controller-config
+              mountPath: /etc/openstack-controller/conf.d/
 {{ end }}
         - name: ceph-secrets
           image: {{ tuple . .Values.image | include "getImageUrl" }}
@@ -511,6 +521,8 @@ spec:
           volumeMounts:
             - name: os-clouds
               mountPath: /etc/openstack/
+            - name: openstack-controller-config
+              mountPath: /etc/openstack-controller/conf.d/
         - name: osdplstatus
           image: {{ tuple . .Values.image | include "getImageUrl" }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
@@ -549,6 +561,8 @@ spec:
           volumeMounts:
             - name: os-clouds
               mountPath: /etc/openstack/
+            - name: openstack-controller-config
+              mountPath: /etc/openstack-controller/conf.d/
         - name: osdplsecret
           image: {{ tuple . .Values.image | include "getImageUrl" }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
@@ -587,6 +601,8 @@ spec:
           volumeMounts:
             - name: os-clouds
               mountPath: /etc/openstack/
+            - name: openstack-controller-config
+              mountPath: /etc/openstack-controller/conf.d/
         - name: tf-secrets
           image: {{ tuple . .Values.image | include "getImageUrl" }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
@@ -621,9 +637,15 @@ spec:
           volumeMounts:
             - name: os-clouds
               mountPath: /etc/openstack/
+            - name: openstack-controller-config
+              mountPath: /etc/openstack-controller/conf.d/
       volumes:
         - name: os-clouds
           emptyDir: {}
+        - name: openstack-controller-config
+          configMap:
+            name: openstack-controller-config
+            defaultMode: 0555
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

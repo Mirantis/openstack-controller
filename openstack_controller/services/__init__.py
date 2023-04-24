@@ -41,6 +41,7 @@ from urllib.parse import urlsplit
 
 
 LOG = utils.get_logger(__name__)
+CONF = settings.CONF
 
 # INFRA SERVICES
 
@@ -1789,7 +1790,9 @@ class Nova(OpenStackServiceWithCeph, MaintenanceApiMixin):
                 host=node.name,
                 cfg=maintenance_cfg,
                 nwl=nwl,
-                concurrency=settings.OSCTL_MIGRATE_CONCURRENCY,
+                concurrency=CONF["maintenance"][
+                    "instance_migrate_concurrency"
+                ],
             )
         except exceptions.SDKException as e:
             msg = f"Retrying migrate instances from host. Cannot execute openstack commands, error: {e}"
@@ -1914,7 +1917,7 @@ class Placement(OpenStackService):
                 # TODO(vsaienko): implement logic that will check that changes made in helmbundle
                 # object were handled by tiller/helmcontroller
                 # can be done only once https://mirantis.jira.com/browse/PRODX-2283 is implemented.
-                await asyncio.sleep(settings.OSCTL_HELMBUNDLE_APPLY_DELAY)
+                await asyncio.sleep(CONF["helmbundle"]["manifest_apply_delay"])
                 await self.wait_service_healthy()
                 # NOTE(mkarpin): db sync job should be cleaned up after upgrade and before apply
                 # because placement_db_nova_migrate_placement job is in dynamic dependencies

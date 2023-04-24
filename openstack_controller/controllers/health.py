@@ -11,6 +11,7 @@ from openstack_controller import osdplstatus
 
 
 LOG = utils.get_logger(__name__)
+CONF = settings.CONF
 
 # DAEMONSET_HOOKS format
 # {(transition state from, transition state to):

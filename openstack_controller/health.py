@@ -9,6 +9,7 @@ from openstack_controller import settings
 from openstack_controller import layers
 
 LOG = logging.getLogger(__name__)
+CONF = settings.CONF
 
 
 def ident(meta):
@@ -82,9 +83,8 @@ def is_application_ready(application, osdplst):
     return False
 
 
-async def _wait_application_ready(
-    application, osdplst, delay=settings.OSCTL_WAIT_APPLICATION_READY_DELAY
-):
+async def _wait_application_ready(application, osdplst, delay=None):
+    delay = delay or CONF["osctl"]["wait_application_ready_delay"]
     i = 1
     while not is_application_ready(application, osdplst):
         LOG.info(f"Checking application {application} health, attempt: {i}")
@@ -95,9 +95,11 @@ async def _wait_application_ready(
 async def wait_application_ready(
     application,
     osdplst,
-    timeout=settings.OSCTL_WAIT_APPLICATION_READY_TIMEOUT,
-    delay=settings.OSCTL_WAIT_APPLICATION_READY_DELAY,
+    timeout=None,
+    delay=None,
 ):
+    timeout = timeout or CONF["osctl"]["wait_application_ready_timeout"]
+    delay = delay or CONF["osctl"]["wait_application_ready_delay"]
     LOG.info(f"Waiting for application becomes ready for {timeout}s")
     await asyncio.wait_for(
         _wait_application_ready(application, osdplst, delay=delay),

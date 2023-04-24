@@ -48,6 +48,7 @@ COPY --from=builder /opt/wheels /opt/wheels
 COPY --from=builder /opt/operator/uwsgi.ini /opt/operator/uwsgi.ini
 COPY --from=builder /opt/operator/source-requirements.txt /opt/operator/source-requirements.txt
 COPY --from=builder /opt/operator/image_tag.txt /opt/operator/image_tag.txt
+COPY --from=builder /opt/operator/etc/openstack-controller/ /etc/openstack-controller/
 ADD kopf-patches /tmp/kopf-patches
 RUN apt-get update; \
     apt-get -y upgrade

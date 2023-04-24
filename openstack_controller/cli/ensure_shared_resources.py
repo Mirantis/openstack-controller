@@ -45,10 +45,19 @@ def main():
 
                 if action == "create":
                     if obj.exists():
-                        LOG.info(f"Updating {obj.kind}:{obj.name}")
-                        obj.reload()
-                        obj.set_obj(document)
-                        obj.update()
+                        if (
+                            document["metadata"]
+                            .get("annotations", {})
+                            .get(
+                                "openstackdeployments.lcm.mirantis.com/skip_update",
+                                "false",
+                            )
+                            == "false"
+                        ):
+                            LOG.info(f"Updating {obj.kind}:{obj.name}")
+                            obj.reload()
+                            obj.set_obj(document)
+                            obj.update()
                     else:
                         LOG.info(f"Creating {obj.kind}:{obj.name}")
                         obj.create()
