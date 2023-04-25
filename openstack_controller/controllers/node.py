@@ -24,6 +24,7 @@ from openstack_controller import settings
 from openstack_controller import utils
 
 LOG = utils.get_logger(__name__)
+CONF = settings.CONF
 
 
 @kopf.on.field("", "v1", "nodes", field="status.conditions")
@@ -44,7 +45,7 @@ async def node_status_update_handler(name, body, old, new, reason, **kwargs):
         return True
 
     not_ready_delta = datetime.timedelta(
-        seconds=settings.OSCTL_NODE_NOT_READY_FLAPPING_TIMEOUT
+        seconds=CONF["settings"]["node_not_ready_flapping_timeout"]
     )
 
     now = last_transition_time = datetime.datetime.utcnow()

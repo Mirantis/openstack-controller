@@ -113,41 +113,6 @@ class Config(configparser.ConfigParser):
             self.read(self.filenames)
 
 
-# The number of seconds between attempts to check that values were applied.
-OSCTL_HELMBUNLE_MANIFEST_ENABLE_DELAY = int(
-    os.environ.get("OSCTL_HELMBUNLE_MANIFEST_ENABLE_DELAY", 10)
-)
-
-# The number of seconds to wait for values are removed from manifest and propagated to child objects.
-OSCTL_HELMBUNLE_MANIFEST_DISABLE_TIMEOUT = int(
-    os.environ.get("OSCTL_HELMBUNLE_MANIFEST_DISABLE_TIMEOUT", 600)
-)
-
-# The number of seconds between attempts to check that values were removed from release.
-OSCTL_HELMBUNLE_MANIFEST_DISABLE_DELAY = int(
-    os.environ.get("OSCTL_HELMBUNLE_MANIFEST_DISABLE_DELAY", 10)
-)
-
-# The number of seconds to wait for kubernetes object removal
-OSCTL_HELMBUNLE_MANIFEST_PURGE_TIMEOUT = int(
-    os.environ.get("OSCTL_HELMBUNLE_MANIFEST_PURGE_TIMEOUT", 600)
-)
-
-# The number of seconds between attempts to check that kubernetes object is removed
-OSCTL_HELMBUNLE_MANIFEST_PURGE_DELAY = int(
-    os.environ.get("OSCTL_HELMBUNLE_MANIFEST_PURGE_DELAY", 10)
-)
-
-# The number of seconds to pause for helmbundle changes
-OSCTL_HELMBUNDLE_APPLY_DELAY = int(
-    os.environ.get("OSCTL_HELMBUNDLE_APPLY_DELAY", 10)
-)
-
-# The amount of time to wit for flapping node
-OSCTL_NODE_NOT_READY_FLAPPING_TIMEOUT = int(
-    os.environ.get("OSCTL_NODE_NOT_READY_FLAPPING_TIMEOUT", 120)
-)
-
 # The name of openstack deployment namespace
 OSCTL_OS_DEPLOYMENT_NAMESPACE = os.environ.get(
     "OSCTL_OS_DEPLOYMENT_NAMESPACE", "openstack"
@@ -228,9 +193,6 @@ if OSCTL_HEARTBEAT_INTERVAL:
         HEARTBEAT = time.time()
         CURRENT_NUMBER_OF_TASKS = event_queue_var.get().qsize()
 
-
-# The interval for periodic check of helm releases
-OSCTL_HEALTH_INTERVAL = int(os.environ.get("OSCTL_HEALTH_INTERVAL", 60))
 
 # Whether node maintenance controller is enabled or not
 OSCTL_NODE_MAINTENANCE_ENABLED = bool_from_env(
