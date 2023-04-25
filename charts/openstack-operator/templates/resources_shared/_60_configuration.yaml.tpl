@@ -1,6 +1,10 @@
 apiVersion: v1
 data:
 kind: ConfigMap
+data:
+  extra_conf.ini: |
+    [maintenance]
+    respect_nova_az = false
 metadata:
   name: openstack-controller-config
   namespace: {{ .Release.Namespace }}
