@@ -258,6 +258,8 @@ services:
               ml2_type_vxlan:
                 vni_ranges: 1:65535
             openvswitch_agent:
+              oslo_messaging_rabbit:
+                rpc_conn_pool_size: 30
               ovs:
                 of_connect_timeout: 300
                 of_inactivity_probe: 30
@@ -274,6 +276,11 @@ services:
                   max_unavailable: 1
                 ovs_vswitchd:
                   max_unavailable: 1
+    rabbitmq:
+      values:
+        pod:
+          env:
+            server: RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS: "+S 8:8"
   block-storage:
     cinder:
       values:
