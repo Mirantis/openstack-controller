@@ -1647,7 +1647,11 @@ class Nova(OpenStackServiceWithCeph, MaintenanceApiMixin):
     async def can_handle_nmr(self, node, locks):
         if not node.has_role(constants.NodeRole.compute):
             return True
-        # TODO(vsaienko): honor configoption for this.
+        if not CONF["maintenance"].getboolean("respect_nova_az"):
+            LOG.info(
+                "The maintenance:respect_nova_az is set to False. Skip availability zones."
+            )
+            return True
         os_client = openstack_utils.OpenStackClientManager()
         hosts_by_az = {}
         for az in os_client.compute_get_availability_zones(details=True):

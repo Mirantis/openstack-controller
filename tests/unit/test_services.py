@@ -25,6 +25,7 @@ from openstack_controller import constants
 from openstack_controller import kube
 from openstack_controller import secrets
 from openstack_controller import services
+from openstack_controller import settings
 from openstack_controller import maintenance
 
 
@@ -831,6 +832,35 @@ async def test_nova_can_handle_nmr_1az_3hosts_1locks_not_in_AZ(
     assert res == True
     mock_log.info.assert_called_with(
         "Can't find AZ for one of nodes host1, host3 in {'host2': 'nova', 'host3': 'nova'}"
+    )
+
+
+@pytest.mark.asyncio
+@mock.patch("openstack_controller.services.LOG")
+async def test_nova_can_handle_nmr_1az_3hosts_1locks_skip(
+    mock_log,
+    mocker,
+    openstack_client,
+    node_maintenance_config,
+    openstackdeployment_mspec,
+    mock_osdpl,
+):
+    osdplstmock = mock.Mock()
+    node3 = kube.Node(
+        mock.Mock, copy.deepcopy(_get_node(host="host3", role="compute"))
+    )
+    nwl = mock.Mock()
+    nwl.obj = {"spec": {"nodeName": "host1"}}
+    openstack_client.return_value.compute_get_availability_zones.return_value = [
+        _get_az_obj({"name": "nova", "hosts": ["host2", "host3"]}),
+    ]
+    settings.CONF["maintenance"]["respect_nova_az"] = "False"
+    res = await services.Nova(
+        openstackdeployment_mspec, logging, osdplstmock
+    ).can_handle_nmr(node3, {"compute": [nwl], "control": [], "gateway": []})
+    assert res == True
+    mock_log.info.assert_called_with(
+        "The maintenance:respect_nova_az is set to False. Skip availability zones."
     )
 
 
