@@ -45,7 +45,7 @@ async def node_status_update_handler(name, body, old, new, reason, **kwargs):
         return True
 
     not_ready_delta = datetime.timedelta(
-        seconds=CONF["settings"]["node_not_ready_flapping_timeout"]
+        seconds=CONF.getint("osctl", "node_not_ready_flapping_timeout")
     )
 
     now = last_transition_time = datetime.datetime.utcnow()

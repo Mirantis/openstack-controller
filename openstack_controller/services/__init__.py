@@ -1647,7 +1647,7 @@ class Nova(OpenStackServiceWithCeph, MaintenanceApiMixin):
     async def can_handle_nmr(self, node, locks):
         if not node.has_role(constants.NodeRole.compute):
             return True
-        if not CONF["maintenance"].getboolean("respect_nova_az"):
+        if not CONF.getboolean("maintenance", "respect_nova_az"):
             LOG.info(
                 "The maintenance:respect_nova_az is set to False. Skip availability zones."
             )
@@ -1794,9 +1794,9 @@ class Nova(OpenStackServiceWithCeph, MaintenanceApiMixin):
                 host=node.name,
                 cfg=maintenance_cfg,
                 nwl=nwl,
-                concurrency=CONF["maintenance"][
-                    "instance_migrate_concurrency"
-                ],
+                concurrency=CONF.getint(
+                    "maintenance", "instance_migrate_concurrency"
+                ),
             )
         except exceptions.SDKException as e:
             msg = f"Retrying migrate instances from host. Cannot execute openstack commands, error: {e}"
@@ -1921,7 +1921,9 @@ class Placement(OpenStackService):
                 # TODO(vsaienko): implement logic that will check that changes made in helmbundle
                 # object were handled by tiller/helmcontroller
                 # can be done only once https://mirantis.jira.com/browse/PRODX-2283 is implemented.
-                await asyncio.sleep(CONF["helmbundle"]["manifest_apply_delay"])
+                await asyncio.sleep(
+                    CONF.getint("helmbundle", "manifest_apply_delay")
+                )
                 await self.wait_service_healthy()
                 # NOTE(mkarpin): db sync job should be cleaned up after upgrade and before apply
                 # because placement_db_nova_migrate_placement job is in dynamic dependencies

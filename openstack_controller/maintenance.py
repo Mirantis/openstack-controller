@@ -29,12 +29,12 @@ MAINTENANCE_DEFAULT_NODE_CONFIG = {
 def get_max_parallel_by_role(role):
     return {
         const.NodeRole.controller.value: 1,
-        const.NodeRole.gateway.value: CONF["maintenance"][
-            "nwl_parallel_max_gateway"
-        ],
-        const.NodeRole.compute.value: CONF["maintenance"][
-            "nwl_parallel_max_compute"
-        ],
+        const.NodeRole.gateway.value: CONF.getint(
+            "maintenance", "nwl_parallel_max_gateway"
+        ),
+        const.NodeRole.compute.value: CONF.getint(
+            "maintenance", "nwl_parallel_max_compute"
+        ),
     }[role]
 
 

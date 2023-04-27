@@ -84,7 +84,7 @@ def is_application_ready(application, osdplst):
 
 
 async def _wait_application_ready(application, osdplst, delay=None):
-    delay = delay or CONF["osctl"]["wait_application_ready_delay"]
+    delay = delay or CONF.getint("osctl", "wait_application_ready_delay")
     i = 1
     while not is_application_ready(application, osdplst):
         LOG.info(f"Checking application {application} health, attempt: {i}")
@@ -98,8 +98,8 @@ async def wait_application_ready(
     timeout=None,
     delay=None,
 ):
-    timeout = timeout or CONF["osctl"]["wait_application_ready_timeout"]
-    delay = delay or CONF["osctl"]["wait_application_ready_delay"]
+    timeout = timeout or CONF.getint("osctl", "wait_application_ready_timeout")
+    delay = delay or CONF.getint("osctl", "wait_application_ready_delay")
     LOG.info(f"Waiting for application becomes ready for {timeout}s")
     await asyncio.wait_for(
         _wait_application_ready(application, osdplst, delay=delay),

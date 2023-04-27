@@ -580,10 +580,11 @@ class Service:
                 .get(health_group, {})
             )
             delay = readiness_timeouts.get(
-                "delay", CONF["osctl"]["wait_application_ready_delay"]
+                "delay", CONF.getint("osctl", "wait_application_ready_delay")
             )
             timeout = readiness_timeouts.get(
-                "timeout", CONF["osctl"]["wait_application_ready_timeout"]
+                "timeout",
+                CONF.getint("osctl", "wait_application_ready_timeout"),
             )
             await health.wait_application_ready(
                 health_group, self.osdplst, delay=delay, timeout=timeout
@@ -603,7 +604,9 @@ class Service:
             # TODO(vsaienko): implement logic that will check that changes made in helmbundle
             # object were handled by tiller/helmcontroller
             # can be done only once https://mirantis.jira.com/browse/PRODX-2283 is implemented.
-            await asyncio.sleep(CONF["helmbundle"]["manifest_apply_delay"])
+            await asyncio.sleep(
+                CONF.getint("helmbundle", "manifest_apply_delay")
+            )
 
             await self.wait_service_healthy()
         except Exception as e:
