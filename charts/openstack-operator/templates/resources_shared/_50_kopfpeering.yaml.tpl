@@ -43,7 +43,7 @@ metadata:
 apiVersion: zalando.org/v1
 kind: KopfPeering
 metadata:
-  namespace: "{{ .Values.osdpl.cephSharedNamespace }}"
+  namespace: "{{ .Values.ceph.cephSharedNamespace }}"
   name: openstack-controller.ceph.secrets
 ---
 apiVersion: zalando.org/v1
