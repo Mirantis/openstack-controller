@@ -93,7 +93,7 @@ spec:
             - name: os-clouds
               mountPath: /etc/openstack/
             - name: exporter-etc
-              mountPath: /etc/openstack-controller/
+              mountPath: /etc/openstack-controller/exporter
       volumes:
         - name: os-clouds
           emptyDir: {}
