@@ -713,6 +713,17 @@ properties:
                 type: number
               ram:
                 type: number
+          libvirt:
+            type: object
+            additionalProperties: false
+            properties:
+              tls:
+                type: object
+                additionalProperties: false
+                properties:
+                  enabled:
+                    type: boolean
+                    description: "Enabled libvirt to listen on tls and secure live migration with QEMU-native TLS"
           live_migration_interface:
             type: string
             description: "Physical interface used for live migration."

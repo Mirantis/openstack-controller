@@ -1581,6 +1581,21 @@ class Nova(OpenStackServiceWithCeph, MaintenanceApiMixin):
 
         neutron_features = self.mspec["features"].get("neutron", {})
 
+        # Generare CA certs for libvirt server
+        if utils.get_in(
+            self.mspec,
+            ["features", "nova", "libvirt", "tls", "enabled"],
+            False,
+        ):
+            libvirt_cert_secret = secrets.SignedCertificateSecret(
+                self.namespace,
+                constants.LIBVIRT_SERVER_TLS_SECRET_NAME,
+                "libvirt-server",
+            )
+            libvirt_cert_secret.ensure()
+            libvirt_certs = libvirt_cert_secret.get()
+            t_args["libvirt_certs"] = libvirt_certs
+
         # Generare server-side certs for VNC TLS
         vnc_cert_secret = secrets.VncSignedCertificateSecret(
             self.namespace,
@@ -1990,7 +2005,7 @@ class Octavia(OpenStackService):
     def template_args(self):
         t_args = super().template_args()
         cert_secret = secrets.SignedCertificateSecret(
-            self.namespace, "octavia"
+            self.namespace, "octavia", "octavia-amphora-ca"
         )
         cert_secret.ensure()
         ssh_secret = secrets.SSHSecret(self.namespace, self.service)
