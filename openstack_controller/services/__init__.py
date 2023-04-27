@@ -1659,7 +1659,7 @@ class Nova(OpenStackServiceWithCeph, MaintenanceApiMixin):
                 hosts_by_az[host] = az.name
         node_az = hosts_by_az.get(node.name)
 
-        if len(locks) == 0:
+        if len(locks[constants.NodeRole.compute.value]) == 0:
             return True
 
         # NOTE(vsaienko): assume we do maintenance for host in same AZ
