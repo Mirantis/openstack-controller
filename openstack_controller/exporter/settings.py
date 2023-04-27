@@ -15,7 +15,7 @@ import os
 
 OSCTL_EXPORTER_CERTIFICATES_INFO_FILE = os.getenv(
     "OSCTL_EXPORTER_CERTIFICATES_INFO_FILE",
-    "/etc/openstack-controller/certs_info.yaml",
+    "/etc/openstack-controller/exporter/certs_info.yaml",
 )
 
 # Port to start exporter
