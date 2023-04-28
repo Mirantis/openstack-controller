@@ -153,7 +153,7 @@ class HelmBundleMixin:
         version,
         wait_completion=False,
         extra_values=None,
-        delay=CONF["helmbundle"]["manifest_enable_delay"],
+        delay=CONF.getint("helmbundle", "manifest_enable_delay"),
     ):
         diff = {"images": {"tags": {}}, "manifests": {}}
         for image in self.helmbundle_ext.images:
@@ -190,8 +190,8 @@ class HelmBundleMixin:
         version,
         wait_completion=False,
         extra_values=None,
-        timeout=CONF["helmbundle"]["manifest_enable_timeout"],
-        delay=CONF["helmbundle"]["manifest_enable_delay"],
+        timeout=CONF.getint("helmbundle", "manifest_enable_timeout"),
+        delay=CONF.getint("helmbundle", "manifest_enable_delay"),
     ):
         await asyncio.wait_for(
             self._enable(
@@ -206,7 +206,7 @@ class HelmBundleMixin:
     async def _disable(
         self,
         wait_completion=False,
-        delay=CONF["helmbundle"]["manifest_disable_delay"],
+        delay=CONF.getint("helmbundle", "manifest_disable_delay"),
     ):
         diff = {"images": {"tags": {}}, "manifests": {}}
         diff["manifests"][self.helmbundle_ext.manifest] = False
@@ -228,8 +228,8 @@ class HelmBundleMixin:
     async def disable(
         self,
         wait_completion=False,
-        timeout=CONF["helmbundle"]["manifest_disable_timeout"],
-        delay=CONF["helmbundle"]["manifest_disable_delay"],
+        timeout=CONF.getint("helmbundle", "manifest_disable_timeout"),
+        delay=CONF.getint("helmbundle", "manifest_disable_delay"),
     ):
         await asyncio.wait_for(
             self._disable(wait_completion=wait_completion, delay=delay),
@@ -238,8 +238,8 @@ class HelmBundleMixin:
 
     async def _purge(
         self,
-        timeout=CONF["helmbundle"]["manifest_purge_timeout"],
-        delay=CONF["helmbundle"]["manifest_purge_delay"],
+        timeout=CONF.getint("helmbundle", "manifest_purge_timeout"),
+        delay=CONF.getint("helmbundle", "manifest_purge_delay"),
     ):
         i = 1
         while True:
@@ -255,8 +255,8 @@ class HelmBundleMixin:
 
     async def purge(
         self,
-        timeout=CONF["helmbundle"]["manifest_purge_timeout"],
-        delay=CONF["helmbundle"]["manifest_purge_delay"],
+        timeout=CONF.getint("helmbundle", "manifest_purge_timeout"),
+        delay=CONF.getint("helmbundle", "manifest_purge_delay"),
     ):
         await asyncio.wait_for(self._purge(delay=delay), timeout=timeout)
 
@@ -363,7 +363,7 @@ class CronJob(pykube.CronJob, HelmBundleMixin):
     async def _suspend(
         self,
         wait_completion=False,
-        delay=CONF["helmbundle"]["manifest_disable_delay"],
+        delay=CONF.getint("helmbundle", "manifest_disable_delay"),
     ):
         diff = {"conf": {"cronjob": {"suspend": True}}}
         i = 1
@@ -389,8 +389,10 @@ class CronJob(pykube.CronJob, HelmBundleMixin):
         timeout=None,
         delay=None,
     ):
-        timeout = timeout or CONF["helmbundle"]["manifest_disable_timeout"]
-        delay = delay or CONF["helmbundle"]["manifest_disable_delay"]
+        timeout = timeout or CONF.getint(
+            "helmbundle", "manifest_disable_timeout"
+        )
+        delay = delay or CONF.getint("helmbundle", "manifest_disable_delay")
         await asyncio.wait_for(
             self._suspend(wait_completion=wait_completion, delay=delay),
             timeout=timeout,
