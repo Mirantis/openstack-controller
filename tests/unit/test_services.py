@@ -19,6 +19,7 @@ from unittest import mock
 
 import kopf
 import openstack
+from openstack.utils import Munch
 import pytest
 
 from openstack_controller import constants
@@ -581,13 +582,29 @@ def _get_server_obj(obj=None):
     return srv
 
 
-def _get_az_obj(obj=None):
+def _get_service_obj(obj=None):
     if obj is None:
         obj = {}
-    az = openstack.compute.v2.availability_zone.AvailabilityZone()
+    az = openstack.compute.v2.service.Service()
     for k, v in obj.items():
         setattr(az, k, v)
     return az
+
+
+def compute_get_services_se(host, binary):
+    svcs = {
+        "host1": _get_service_obj(
+            {"host": "host1", "location": Munch({"zone": "nova"})}
+        ),
+        "host2": _get_service_obj(
+            {"host": "host2", "location": Munch({"zone": "nova"})}
+        ),
+        "host3": _get_service_obj(
+            {"host": "host3", "location": Munch({"zone": "nova3"})}
+        ),
+    }
+
+    return [svcs[host]]
 
 
 @pytest.mark.asyncio
@@ -751,8 +768,16 @@ async def test_nova_can_handle_nmr_1az_3hosts_0locks(
     node3 = kube.Node(
         mock.Mock, copy.deepcopy(_get_node(host="host3", role="control"))
     )
-    openstack_client.return_value.compute_get_availability_zones.return_value = [
-        _get_az_obj({"name": "nova", "hosts": ["host1", "host2", "host3"]}),
+    openstack_client.return_value.compute_get_services.return_value = [
+        _get_service_obj(
+            {"host": "host1", "location": Munch({"zone": "nova"})}
+        ),
+        _get_service_obj(
+            {"host": "host2", "location": Munch({"zone": "nova"})}
+        ),
+        _get_service_obj(
+            {"host": "host3", "location": Munch({"zone": "nova"})}
+        ),
     ]
     res = await services.Nova(
         openstackdeployment_mspec, logging, osdplstmock
@@ -774,8 +799,16 @@ async def test_nova_can_handle_nmr_1az_3hosts_1locks_same_az(
     )
     nwl = mock.Mock()
     nwl.obj = {"spec": {"nodeName": "host1"}}
-    openstack_client.return_value.compute_get_availability_zones.return_value = [
-        _get_az_obj({"name": "nova", "hosts": ["host1", "host2", "host3"]}),
+    openstack_client.return_value.compute_get_services.return_value = [
+        _get_service_obj(
+            {"host": "host1", "location": Munch({"zone": "nova"})}
+        ),
+        _get_service_obj(
+            {"host": "host2", "location": Munch({"zone": "nova"})}
+        ),
+        _get_service_obj(
+            {"host": "host3", "location": Munch({"zone": "nova"})}
+        ),
     ]
     res = await services.Nova(
         openstackdeployment_mspec, logging, osdplstmock
@@ -797,42 +830,13 @@ async def test_nova_can_handle_nmr_1az_3hosts_1locks_different_az(
     )
     nwl = mock.Mock()
     nwl.obj = {"spec": {"nodeName": "host1"}}
-    openstack_client.return_value.compute_get_availability_zones.return_value = [
-        _get_az_obj({"name": "nova", "hosts": ["host1", "host2"]}),
-        _get_az_obj({"name": "nova3", "hosts": ["host3"]}),
-    ]
+    openstack_client.return_value.compute_get_services.side_effect = (
+        compute_get_services_se
+    )
     res = await services.Nova(
         openstackdeployment_mspec, logging, osdplstmock
     ).can_handle_nmr(node3, {"compute": [nwl], "control": [], "gateway": []})
     assert res == False
-
-
-@pytest.mark.asyncio
-@mock.patch("openstack_controller.services.LOG")
-async def test_nova_can_handle_nmr_1az_3hosts_1locks_not_in_AZ(
-    mock_log,
-    mocker,
-    openstack_client,
-    node_maintenance_config,
-    openstackdeployment_mspec,
-    mock_osdpl,
-):
-    osdplstmock = mock.Mock()
-    node3 = kube.Node(
-        mock.Mock, copy.deepcopy(_get_node(host="host3", role="compute"))
-    )
-    nwl = mock.Mock()
-    nwl.obj = {"spec": {"nodeName": "host1"}}
-    openstack_client.return_value.compute_get_availability_zones.return_value = [
-        _get_az_obj({"name": "nova", "hosts": ["host2", "host3"]}),
-    ]
-    res = await services.Nova(
-        openstackdeployment_mspec, logging, osdplstmock
-    ).can_handle_nmr(node3, {"compute": [nwl], "control": [], "gateway": []})
-    assert res == True
-    mock_log.info.assert_called_with(
-        "Can't find AZ for one of nodes host1, host3 in {'host2': 'nova', 'host3': 'nova'}"
-    )
 
 
 @pytest.mark.asyncio
@@ -851,9 +855,9 @@ async def test_nova_can_handle_nmr_1az_3hosts_1locks_skip(
     )
     nwl = mock.Mock()
     nwl.obj = {"spec": {"nodeName": "host1"}}
-    openstack_client.return_value.compute_get_availability_zones.return_value = [
-        _get_az_obj({"name": "nova", "hosts": ["host2", "host3"]}),
-    ]
+    openstack_client.return_value.compute_get_availability_zones.side_effect = (
+        compute_get_services_se
+    )
     settings.CONF["maintenance"]["respect_nova_az"] = "False"
     res = await services.Nova(
         openstackdeployment_mspec, logging, osdplstmock
