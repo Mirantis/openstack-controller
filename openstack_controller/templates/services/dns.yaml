@@ -139,6 +139,15 @@ spec:
           apache2:
             enabled: true
       {%- endif %}
+        powerdns:
+          # zone-cache-refresh-interval param must be less then poller total timeout
+          # it can be calcalated as poll_delay + poll_retry_interval * poll_max_retries
+          # by default it is 155 seconds. More information in the bug PRODX-30888
+          zone-cache-refresh-interval: 120
+      {%- if designate_log_level == 'DEBUG' %}
+          loglevel: 5
+          webserver-loglevel: 'detailed'
+      {%- endif %}
       manifests:
         network_policy: false
         job_rabbit_init: false

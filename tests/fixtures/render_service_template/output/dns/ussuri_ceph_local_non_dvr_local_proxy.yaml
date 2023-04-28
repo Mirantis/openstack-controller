@@ -7,6 +7,8 @@ spec:
         policy.d:
           01-controller-default.yaml: {'dns_rule1': 'dns_value1'}
           02-custom.yaml: {}
+        powerdns:
+          zone-cache-refresh-interval: 120
         designate:
           keystone_authtoken:
             memcache_secret_key: zdLlg6VAsGH6E7tX
