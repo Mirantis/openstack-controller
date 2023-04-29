@@ -1668,11 +1668,9 @@ class Nova(OpenStackServiceWithCeph, MaintenanceApiMixin):
             )
             return True
         os_client = openstack_utils.OpenStackClientManager()
-        hosts_by_az = {}
-        for az in os_client.compute_get_availability_zones(details=True):
-            for host in az.hosts or []:
-                hosts_by_az[host] = az.name
-        node_az = hosts_by_az.get(node.name)
+        node_az = os_client.compute_get_services(
+            host=node.name, binary="nova-compute"
+        )[0].location.zone
 
         if len(locks[constants.NodeRole.compute.value]) == 0:
             return True
@@ -1680,16 +1678,17 @@ class Nova(OpenStackServiceWithCeph, MaintenanceApiMixin):
         # NOTE(vsaienko): assume we do maintenance for host in same AZ
         nwl = locks[constants.NodeRole.compute.value][0]
         hostname = nwl.obj["spec"]["nodeName"]
+        nwl_host_az = os_client.compute_get_services(
+            host=hostname, binary="nova-compute"
+        )[0].location.zone
 
-        if node_az is None or hostname not in hosts_by_az:
-            LOG.info(
-                f"Can't find AZ for one of nodes {hostname}, {node.name} in {hosts_by_az}"
-            )
+        if node_az is None:
+            LOG.info(f"Can't find AZ for one of nodes {hostname}, {node.name}")
             return True
 
-        if node_az != hosts_by_az[hostname]:
+        if node_az != nwl_host_az:
             LOG.info(
-                f"Do not allow handline nmr for node: {node.name}. Node az {node_az} does not match hosts that currently in maintenance {hosts_by_az[hostname]}"
+                f"Do not allow handline nmr for node: {node.name}. Node az {node_az} does not match hosts that currently in maintenance {nwl_host_az}"
             )
             return False
         return True

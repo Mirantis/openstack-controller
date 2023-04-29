@@ -85,6 +85,10 @@ class Config(configparser.ConfigParser):
         self.read_config()
         return super().__getitem__(item)
 
+    def _get(self, section, conv, option, **kwargs):
+        self.read_config()
+        return super()._get(section, conv, option, **kwargs)
+
     def get_config_files(self):
         res = []
         for path in [
