@@ -151,7 +151,7 @@ def test_service_keystone_render(
     ]
 
 
-@mock.patch.object(secrets.VncSignedCertificateSecret, "get")
+@mock.patch.object(secrets.SignedCertificatePackSecret, "get")
 @mock.patch.object(secrets.NeutronSecret, "get")
 @mock.patch.object(services.base.OpenStackServiceWithCeph, "ceph_config")
 @mock.patch.object(secrets.SSHSecret, "get")
@@ -181,7 +181,7 @@ def test_service_nova_with_ceph_render(
     keystone_creds = {"test": secrets.OSSytemCreds("test", "test")}
 
     mock_ssh.return_value = secrets.SshKey("public", "private")
-    mock_vnc.return_value = secrets.VncSignedCertificate(
+    mock_vnc.return_value = secrets.SignedCertificatePack(
         "ca_cert",
         "ca_key",
         "server_cert",

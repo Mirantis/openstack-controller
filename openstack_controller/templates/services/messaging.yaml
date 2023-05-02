@@ -191,6 +191,17 @@ spec:
       endpoints:
         cluster_domain_suffix: {{ spec.internal_domain_name }}
         oslo_messaging:
+  {%- if external_notifications_enabled %}
+          host_fqdn_override:
+            external:
+              tls:
+                ca: |
+{{ tls_external_certs.ca_cert | indent(width=18, first=True) }}
+                crt: |
+{{ tls_external_certs.server_cert | indent(width=18, first=True) }}
+                key: |
+{{ tls_external_certs.server_key | indent(width=18, first=True) }}
+  {%- endif %}
           auth:
             user:
               username: {{ admin_creds.messaging.username }}
