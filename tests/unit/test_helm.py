@@ -18,7 +18,6 @@ import json
 import pytest
 
 from openstack_controller import helm
-from openstack_controller import exception
 import kopf
 
 
@@ -193,21 +192,23 @@ async def test_install_remove_immutable_1_item(
 ):
     hc = helm.HelmManager()
     subprocess_shell.return_value.returncode = 1
-    subprocess_shell.return_value.communicate.return_value = (
-        b"",
-        helm_error_1_item,
-    )
+    subprocess_shell.return_value.communicate.side_effect = [
+        (b"", helm_error_1_item),
+        (b"", b""),
+    ]
+
     kube_find.return_value = mock.AsyncMock()
     kube_get_object_by_kind.return_value = mock.AsyncMock()
 
-    with pytest.raises(exception.HelmImmutableFieldChange):
-        await hc.run_cmd("helm upgrade --install test-release")
+    with pytest.raises(kopf.TemporaryError):
+        await hc.run_cmd(["helm", "upgrade", "--install", "test-release"])
     kube_find.assert_called_with(
         mock.ANY, "cinder-create-internal-tenant", "openstack", silent=True
     )
     kube_get_object_by_kind.assert_called_with("Job")
     kube_find.return_value.exists.assert_called_once()
     kube_find.return_value.delete.assert_called_once()
+    assert 2 == subprocess_shell.call_count
 
 
 @pytest.mark.asyncio
@@ -220,15 +221,16 @@ async def test_install_remove_immutable_5_item(
 ):
     hc = helm.HelmManager()
     subprocess_shell.return_value.returncode = 1
-    subprocess_shell.return_value.communicate.return_value = (
-        b"",
-        helm_error_5_item,
-    )
+    subprocess_shell.return_value.communicate.side_effect = [
+        (b"", helm_error_5_item),
+        (b"", b""),
+    ]
+
     kube_find.return_value = mock.AsyncMock()
     kube_get_object_by_kind.return_value = mock.AsyncMock()
 
-    with pytest.raises(exception.HelmImmutableFieldChange):
-        await hc.run_cmd("helm upgrade --install test-release")
+    with pytest.raises(kopf.TemporaryError):
+        await hc.run_cmd(["helm", "upgrade", "--install", "test-release"])
     assert 5 == kube_find.call_count
     expected_get_object_by_kind = [
         mock.call("Job"),
@@ -258,14 +260,17 @@ async def test_install_remove_immutable_5_item(
 async def test_install_rollback(subprocess_shell, helm_error_rollout_restart):
     hc = helm.HelmManager()
     subprocess_shell.return_value.returncode = 1
-    subprocess_shell.return_value.communicate.return_value = (
-        b"",
-        helm_error_rollout_restart,
-    )
+    subprocess_shell.return_value.communicate.side_effect = [
+        (b"", helm_error_rollout_restart),
+        (b"", b""),
+        (b"", b""),
+        (b"", b""),
+    ]
 
-    with pytest.raises(exception.HelmRollback):
+    with pytest.raises(kopf.TemporaryError):
         await hc.run_cmd(
-            "helm3 upgrade --install test-release", release_name="test-release"
+            ["helm3", "upgrade", "--install", "test-release"],
+            release_name="test-release",
         )
     subprocess_shell.assert_has_calls(
         [
@@ -291,15 +296,15 @@ async def test_install_remove_forbidden_item(
 ):
     hc = helm.HelmManager()
     subprocess_shell.return_value.returncode = 1
-    subprocess_shell.return_value.communicate.return_value = (
-        b"",
-        helm_error_forbidden_item,
-    )
+    subprocess_shell.return_value.communicate.side_effect = [
+        (b"", helm_error_forbidden_item),
+        (b"", b""),
+    ]
     kube_find.return_value = mock.AsyncMock()
     kube_get_object_by_kind.return_value = mock.AsyncMock()
 
-    with pytest.raises(exception.HelmImmutableFieldChange):
-        await hc.run_cmd("helm upgrade --install test-release")
+    with pytest.raises(kopf.TemporaryError):
+        await hc.run_cmd(["helm", "upgrade", "--install", "test-release"])
     kube_find.assert_called_with(
         mock.ANY, "etcd-etcd", "openstack", silent=True
     )
