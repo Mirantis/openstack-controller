@@ -138,7 +138,7 @@ prometheus_memcached_exporter: '{{ images_base_url }}/stacklight/memcached-expor
 cinder_backup_storage_init: '{{ images_base_url }}/openstack/openstack-tools:yoga-focal-20230427113635'
 cinder_storage_init: '{{ images_base_url }}/openstack/openstack-tools:yoga-focal-20230427113635'
 glance_storage_init: '{{ images_base_url }}/openstack/openstack-tools:yoga-focal-20230427113635'
-test: '{{ images_base_url }}/openstack/extra/xrally-openstack:2.2.0-20230328221837'
+test: '{{ images_base_url }}/openstack/tempest:stein-bionic-20230227093206'
 keystone_client: '{{ images_base_url }}/openstack/heat:stein-bionic-20230227093206'
 pause: '{{ images_base_url }}/general/external/pause:3.1'
 neutron_rpc_server: '{{ images_base_url }}/openstack/neutron:stein-bionic-20230227093206'
