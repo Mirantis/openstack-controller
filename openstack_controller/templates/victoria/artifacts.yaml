@@ -135,7 +135,7 @@ prometheus_memcached_exporter: '{{ images_base_url }}/stacklight/memcached-expor
 cinder_backup_storage_init: '{{ images_base_url }}/openstack/openstack-tools:yoga-focal-20230423104356'
 cinder_storage_init: '{{ images_base_url }}/openstack/openstack-tools:yoga-focal-20230423104356'
 glance_storage_init: '{{ images_base_url }}/openstack/openstack-tools:yoga-focal-20230423104356'
-test: '{{ images_base_url }}/openstack/extra/xrally-openstack:2.2.0-20230328221837'
+test: '{{ images_base_url }}/openstack/tempest:victoria-focal-20230423104356'
 keystone_client: '{{ images_base_url }}/openstack/heat:victoria-focal-20230423104356'
 pause: '{{ images_base_url }}/general/external/pause:3.1'
 neutron_rpc_server: '{{ images_base_url }}/openstack/neutron:victoria-focal-20230423104356'
