@@ -459,6 +459,12 @@ class Pod(pykube.Pod):
         for owner in self.metadata.get("ownerReferences", []):
             if owner["kind"] == "Job":
                 return True
+        # NOTE(vsaienko): if job is removed but pod is still present, ownerReference is empty
+        if (
+            "job-name" in self.labels
+            or "batch.kubernetes.io/job-name" in self.labels
+        ):
+            return True
         return False
 
 
