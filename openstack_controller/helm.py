@@ -29,6 +29,24 @@ async def helm_lock(lock):
         lock.release()
 
 
+def helm_retry(func):
+    async def wrapper(*args, **kwargs):
+        attempt = 1
+        while True:
+            try:
+                return await func(*args, **kwargs)
+            except (
+                exception.HelmImmutableFieldChange,
+                exception.HelmRollback,
+            ) as e:
+                LOG.warning(
+                    f"Got retriable exception {e}, when calling {func}, retrying, attempt: {attempt}"
+                )
+                attempt += 1
+
+    return wrapper
+
+
 class HelmManager:
     def __init__(self, binary="helm3", namespace="openstack", history_max=1):
         self.binary = binary
@@ -92,6 +110,46 @@ class HelmManager:
         stderr = stderr.decode() or None
         return (stdout, stderr)
 
+    @helm_retry
+    async def _run_cmd(self, cmd, raise_on_error=True, release_name=None):
+        process = await asyncio.create_subprocess_shell(
+            cmd, env=self.env, stdin=PIPE, stdout=PIPE, stderr=PIPE
+        )
+        stdout, stderr = await process.communicate()
+        stdout = stdout.decode()
+        stderr = stderr.decode()
+
+        LOG.debug(
+            "Helm command output is: stdout: %s, stderr: %s",
+            stdout,
+            stderr,
+        )
+
+        if process.returncode and raise_on_error:
+            LOG.error(
+                "Helm command failed. stdout: %s, stderr: %s",
+                stdout,
+                stderr,
+            )
+            if stderr.rstrip().endswith(
+                ("field is immutable", "are forbidden")
+            ):
+                LOG.warning("Trying to modify object")
+                await self._guess_and_delete(stderr)
+                raise exception.HelmImmutableFieldChange()
+            if (
+                "another operation (install/upgrade/rollback) is in progress"
+                in stderr
+                and release_name
+            ):
+                LOG.warning(
+                    f"The release {release_name} stuck in install/upgrade/rollback. Rollback it."
+                )
+                await self._rollback(release_name)
+                raise exception.HelmRollback()
+            raise kopf.TemporaryError("Helm command failed")
+        return (stdout, stderr)
+
     async def run_cmd(self, cmd, raise_on_error=True, release_name=None):
         cmd = " ".join([self.binary, *cmd])
         LOG.info(
@@ -99,42 +157,7 @@ class HelmManager:
             cmd,
         )
         async with helm_lock(HELM_LOCK):
-            process = await asyncio.create_subprocess_shell(
-                cmd, env=self.env, stdin=PIPE, stdout=PIPE, stderr=PIPE
-            )
-            stdout, stderr = await process.communicate()
-            stdout = stdout.decode() or None
-            stderr = stderr.decode() or None
-
-            LOG.debug(
-                "Helm command output is: stdout: %s, stderr: %s",
-                stdout,
-                stderr,
-            )
-            if process.returncode and raise_on_error:
-                LOG.error(
-                    "Helm command failed. stdout: %s, stderr: %s",
-                    stdout,
-                    stderr,
-                )
-                if stderr.rstrip().endswith(
-                    ("field is immutable", "are forbidden")
-                ):
-                    LOG.warning("Trying to modify object")
-                    await self._guess_and_delete(stderr)
-                    raise exception.HelmImmutableFieldChange()
-                if (
-                    "another operation (install/upgrade/rollback) is in progress"
-                    in stderr
-                    and release_name
-                ):
-                    LOG.warning(
-                        f"The release {release_name} stuck in install/upgrade/rollback. Rollback it."
-                    )
-                    await self._rollback(release_name)
-                    raise exception.HelmRollback()
-                raise kopf.TemporaryError("Helm command failed")
-            return (stdout, stderr)
+            return await self._run_cmd(cmd, raise_on_error, release_name)
 
     async def exist(self, name, args=None):
         args = args or []
