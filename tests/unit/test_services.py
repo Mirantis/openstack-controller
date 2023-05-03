@@ -212,7 +212,13 @@ def test_service_nova_with_ceph_render(
                 "keyring": "key",
                 "secrets": [],
                 "pools": {},
-            }
+            },
+            "cinder": {
+                "username": "cinder",
+                "keyring": "key",
+                "secrets": [],
+                "pools": {},
+            },
         }
     }
 
