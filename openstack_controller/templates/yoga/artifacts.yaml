@@ -146,7 +146,7 @@ placement_db_sync: '{{ images_base_url }}/openstack/placement:yoga-focal-2023050
 keystone_db_sync_expand: '{{ images_base_url }}/openstack/keystone:yoga-focal-20230501060022'
 keystone_db_sync_migrate: '{{ images_base_url }}/openstack/keystone:yoga-focal-20230501060022'
 keystone_db_sync_contract: '{{ images_base_url }}/openstack/keystone:yoga-focal-20230501060022'
-octavia_amphora: '{{ binary_base_url }}/openstack/bin/octavia/amphora-x64-haproxy-yoga-20230501062633.qcow2'
+octavia_amphora: '{{ binary_base_url }}/openstack/bin/octavia/amphora-x64-haproxy-yoga-20230503123233.qcow2'
 etcd: '{{ images_base_url }}/openstack/extra/etcd:v3.5.8-alpine-20230422141943'
 etcd_db_compact: '{{ images_base_url }}/openstack/extra/etcd:v3.5.8-alpine-20230422141943'
 cinder_db_sync_online: '{{ images_base_url }}/openstack/cinder:yoga-focal-20230501060022'
@@ -183,7 +183,7 @@ mariadb_controller: '{{ images_base_url }}/general/mariadb:10.6.12-focal-2023042
 horizon_mirantis_theme_sha256summ: 3bd995aceef8d93ed76d83f667403aebbdca54bc12adc0fc4f80ebbe0e164336
 horizon_mirantis_theme_url: '{{ binary_base_url }}/openstack/bin/horizon/mirantis-xena-9f691e3-20220110111511.tar.gz'
 ceph_config_helper: '{{ images_base_url }}/openstack/openstack-tools:yoga-focal-20230501060022'
-octavia_amphora_checksum: 4398776efadb3d7ef18984c3511d4bae
+octavia_amphora_checksum: 2f9865afe21fe5ceffeb7dae663f9490
 masakari_db_sync: '{{ images_base_url }}/openstack/masakari:yoga-focal-20230501060022'
 masakari_api: '{{ images_base_url }}/openstack/masakari:yoga-focal-20230501060022'
 masakari_engine: '{{ images_base_url }}/openstack/masakari:yoga-focal-20230501060022'
