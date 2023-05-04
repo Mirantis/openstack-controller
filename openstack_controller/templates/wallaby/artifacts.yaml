@@ -130,7 +130,7 @@ entrypoint: '{{ images_base_url }}/openstack/extra/kubernetes-entrypoint:v1.0.1-
 purge_test: '{{ images_base_url }}/openstack/heat:wallaby-focal-20230223184118'
 prometheus_mysql_exporter: '{{ images_base_url }}/stacklight/mysqld-exporter:v0.11.0'
 prometheus_rabbitmq_exporter: '{{ images_base_url }}/stacklight/rabbitmq-exporter:1.0.0-RC19'
-prometheus_memcached_exporter: '{{ images_base_url }}/stacklight/memcached-exporter:v0.11.1'
+prometheus_memcached_exporter: '{{ images_base_url }}/stacklight/memcached-exporter:v0.11.3'
 cinder_backup_storage_init: '{{ images_base_url }}/openstack/openstack-tools:yoga-focal-20230423104356'
 cinder_storage_init: '{{ images_base_url }}/openstack/openstack-tools:yoga-focal-20230423104356'
 glance_storage_init: '{{ images_base_url }}/openstack/openstack-tools:yoga-focal-20230423104356'
