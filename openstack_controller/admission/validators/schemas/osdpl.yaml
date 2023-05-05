@@ -459,11 +459,12 @@ properties:
                 type: integer
               backend:
                 description: |
-                  Backend to perform backup to. Could be: pvc, pv_nfs. Default is pvc.
+                  Backend to perform backup to. Could be: pvc, pv_nfs, hostpath. Default is pvc.
                 type: string
                 enum:
                   - pvc
                   - pv_nfs
+                  - hostpath
               pv_nfs:
                 type: object
                 additionalProperties: false
