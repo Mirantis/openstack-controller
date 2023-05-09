@@ -109,6 +109,8 @@ spec:
             memcache_secret_key: JinzIdQzLdIslgxu
             memcache_security_strategy: ENCRYPT
             service_type: compute
+          filter_scheduler:
+            build_failure_weight_multiplier: 2.0
           libvirt:
             cpu_mode: host-model
             images_rbd_pool: vms-hdd

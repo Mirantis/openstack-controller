@@ -203,6 +203,8 @@ spec:
             notify_on_state_change: vm_and_task_state
           os_vif_ovs:
             isolate_vif: true
+          filter_scheduler:
+            build_failure_weight_multiplier: 2.0
           libvirt:
             cpu_mode: host-model
             images_rbd_pool: vms-hdd
