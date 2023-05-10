@@ -72,6 +72,10 @@ spec:
           {%- do enabled_vhosts.append('nova') %}
           {{ messaging_service_creds(credentials["compute"], "nova", ["/nova"]) }}
           {%- endif %}
+          {%- if 'placement' in services %}
+          {%- do enabled_vhosts.append('placement') %}
+          {{ messaging_service_creds(credentials["placement"], "placement", [ "/placement" ]) }}
+          {%- endif %}
           {%- if 'load-balancer' in services %}
           {%- do enabled_vhosts.append('octavia') %}
           {{ messaging_service_creds(credentials["load-balancer"], "octavia", ["/octavia"]) }}

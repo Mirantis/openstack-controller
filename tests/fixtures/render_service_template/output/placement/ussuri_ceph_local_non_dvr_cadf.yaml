@@ -12,7 +12,9 @@ spec:
             level: INFO
         placement:
           audit_middleware_notifications:
-            driver: noop
+            driver: messagingv2
+          audit:
+            enabled: true
           oslo_messaging_notifications:
             topics: notifications,stacklight_notifications
           keystone_authtoken:
@@ -81,7 +83,6 @@ spec:
               tls:
                 ca: |
                   TEST CA
-                  PROXY CA
                 crt: |
                   TEST CRT
                 key: |
