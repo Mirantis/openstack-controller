@@ -278,9 +278,13 @@ services:
                   max_unavailable: 1
     rabbitmq:
       values:
+        conf:
+          rabbitmq:
+            num_acceptors.tcp: 30
         pod:
           env:
-            server: RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS: "+S 8:8"
+            server:
+              RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS: "+S 8:8"
   block-storage:
     cinder:
       values:
