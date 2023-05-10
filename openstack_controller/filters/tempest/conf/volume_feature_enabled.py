@@ -37,7 +37,7 @@ class VolumeFeatureEnabled(base_section.BaseSection):
 
     @property
     def backup(self):
-        pass
+        return self.get_spec_item("features.cinder.backup.enabled", True)
 
     @property
     def clone(self):
