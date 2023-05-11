@@ -161,7 +161,11 @@ services:
               # - NumInstancesFilter
               - PciPassthroughFilter
             libvirt:
+            {%- if openstack_version in ['queens', 'rocky', 'stein', 'train', 'ussuri'] %}
               live_migration_use_ip_to_scp_configdrive: true
+            {%- else %}
+              migrations_use_ip_to_scp: true
+            {%- endif %}
           enable_iscsi: true
         network:
           api:
