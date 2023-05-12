@@ -194,8 +194,12 @@ exporter:
           namespace: openstack
           key_name: cert
         keystone_public:
-          name: keystone-tls-public 
+          name: keystone-tls-public
           namespace: openstack
           key_name: tls.crt
+        libvirt_server_ca:
+          name: libvirt-server-tls-certs
+          namespace: openstack
+          key_name: cert
     raw:
       OSCTL_EXPORTER_BIND_PORT: 9102
