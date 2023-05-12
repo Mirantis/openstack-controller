@@ -79,7 +79,8 @@ class OsdplCertsMetricCollector(base.BaseMetricsCollector):
         for identifier, data in self.certs_info.items():
             secret = kube.find(kube.Secret, data["name"], data["namespace"])
             if not secret:
-                LOG.error(f"Specified secret {data['name']} is not found.")
+                LOG.warning(f"Specified secret {data['name']} is not found.")
+                continue
             cert_content = secret.obj["data"].get(data["key_name"])
             if not cert_content:
                 LOG.error(
