@@ -20,12 +20,8 @@ image:
 nameOverride: ""
 fullnameOverride: "openstack-controller"
 
-kopf:
-  enabled: true
-
 osdpl:
   namespace: openstack
-  cephSharedNamespace: openstack-ceph-shared
   settings:
     raw:
       OSCTL_NODE_NOT_READY_FLAPPING_TIMEOUT: 120
@@ -117,6 +113,10 @@ tf:
 stacklight:
   createSharedNamespace: true
   sharedNamespace: openstack-lma-shared
+
+ceph:
+  createSharedNamespace: true
+  cephSharedNamespace: openstack-ceph-shared
 
 external_topics:
   createSharedNamespace: true

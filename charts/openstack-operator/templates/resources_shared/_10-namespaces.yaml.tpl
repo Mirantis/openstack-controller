@@ -24,9 +24,9 @@ metadata:
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: {{ .Values.osdpl.cephSharedNamespace }}
+  name: {{ .Values.ceph.cephSharedNamespace }}
   annotations:
-    "openstackdeployments.lcm.mirantis.com/shared_resource_action": {{ if .Values.kopf.enabled }}"create"{{ else }}"wait"{{ end }}
+    "openstackdeployments.lcm.mirantis.com/shared_resource_action": {{ if .Values.ceph.createSharedNamespace }}"create"{{ else }}"wait"{{ end }}
 ---
 apiVersion: v1
 kind: Namespace

@@ -3,8 +3,6 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   name: clusterkopfpeerings.zalando.org
-  annotations:
-    "openstackdeployments.lcm.mirantis.com/shared_resource_action": {{ if .Values.kopf.enabled }}"create"{{ else }}"wait"{{ end }}
 spec:
   scope: Cluster
   group: zalando.org
@@ -28,8 +26,6 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   name: kopfpeerings.zalando.org
-  annotations:
-    "openstackdeployments.lcm.mirantis.com/shared_resource_action": {{ if .Values.kopf.enabled }}"create"{{ else }}"wait"{{ end }}
 spec:
   scope: Namespaced
   group: zalando.org
