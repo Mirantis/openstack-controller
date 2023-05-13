@@ -340,6 +340,12 @@ spec:
           labels:
             openstack-compute-node::enabled:
               values:
+                pod:
+                  lifecycle:
+                    upgrades:
+                      daemonsets:
+                        l3_agent:
+                          max_unavailable: 10%
                 labels:
                   agent:
                     l3:
