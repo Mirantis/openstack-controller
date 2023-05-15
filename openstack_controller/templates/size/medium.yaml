@@ -8,6 +8,19 @@ features:
       - compute
       - networking
 services:
+  messaging:
+    rabbitmq:
+      values:
+        conf:
+          rabbitmq:
+            num_acceptors.tcp: 20
+            channel_max: 16
+            reverse_dns_lookups: false
+            vm_memory_high_watermark.relative: 0.5
+        pod:
+          env:
+            server:
+              RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS: "+S 6:6 +IOt 3 +Q 131070 +P 2000000"
   redis:
     redisfailover:
       redis:
@@ -126,6 +139,18 @@ services:
             oslo_messaging_rabbit:
               rabbit_qos_prefetch_count: 64
   compute:
+    rabbitmq:
+      values:
+        conf:
+          rabbitmq:
+            num_acceptors.tcp: 30
+            channel_max: 16
+            reverse_dns_lookups: false
+            vm_memory_high_watermark.relative: 0.5
+        pod:
+          env:
+            server:
+              RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS: "+S 6:6 +IOt 3 +Q 131070 +P 2000000"
     nova:
       values:
         pod:
@@ -276,11 +301,14 @@ services:
       values:
         conf:
           rabbitmq:
-            num_acceptors.tcp: 30
+            num_acceptors.tcp: 50
+            channel_max: 16
+            reverse_dns_lookups: false
+            vm_memory_high_watermark.relative: 0.8
         pod:
           env:
             server:
-              RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS: "+S 8:8"
+              RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS: "+S 12:12 +IOt 5 +Q 131070 +P 2000000"
   block-storage:
     cinder:
       values:
