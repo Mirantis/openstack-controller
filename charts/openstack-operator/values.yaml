@@ -201,5 +201,13 @@ exporter:
           name: libvirt-server-tls-certs
           namespace: openstack
           key_name: cert
+        rabbitmq_server:
+          name: rabbitmq-external-certs
+          namespace: openstack
+          key_name: server_cert
+        rabbitmq_client:
+          name: rabbitmq-external-certs
+          namespace: openstack
+          key_name: client_cert
     raw:
       OSCTL_EXPORTER_BIND_PORT: 9102
