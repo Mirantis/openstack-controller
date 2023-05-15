@@ -37,7 +37,6 @@ spec:
       manifests:
         network_policy: false
         job_users_create: true
-        amqproxy: true
         {%- if external_notifications_enabled %}
         service_external: true
         {%- endif %}

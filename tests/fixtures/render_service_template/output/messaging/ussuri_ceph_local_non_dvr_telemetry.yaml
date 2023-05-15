@@ -484,7 +484,6 @@ spec:
       manifests:
         job_users_create: true
         network_policy: false
-        amqproxy: true
       monitoring:
         prometheus:
           enabled: true

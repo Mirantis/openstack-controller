@@ -68,7 +68,7 @@ spec:
           path: /openstack
           port:
             amqp:
-              default: 5673
+              default: 5672
             http:
               default: 15672
           scheme: rabbit

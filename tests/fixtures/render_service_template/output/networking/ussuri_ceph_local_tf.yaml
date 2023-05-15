@@ -71,7 +71,6 @@ spec:
           rabbitmq_amqproxy: amqproxy:latest
       manifests:
         job_users_create: true
-        amqproxy: true
         network_policy: false
       monitoring:
         prometheus:
@@ -283,9 +282,6 @@ spec:
               password: knwFGHdZ6KCqcKqBidXXEqiEpZhBD7h4
               username: neutrondrGjrFm
         oslo_messaging:
-          port:
-            amqp:
-              default: 5673
           auth:
             admin:
               password: 2tnAuP0j9MsgaVHErehZkC5HCK3ZxYLr
@@ -316,7 +312,7 @@ spec:
           path: /openstack
           port:
             amqp:
-              default: 5673
+              default: 5672
             http:
               default: 15672
           scheme: rabbit
