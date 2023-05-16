@@ -293,6 +293,7 @@ spec:
         secret_ca_bundle: true
         cron_job_db_purge: true
         ceph_conf: true
+        job_clean: false
       pod:
         replicas:
           api: 1
