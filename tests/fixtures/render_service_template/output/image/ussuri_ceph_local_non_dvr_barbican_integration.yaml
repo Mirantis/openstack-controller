@@ -353,6 +353,7 @@ spec:
         secret_ca_bundle: true
         job_barbican_cert_init: true
         ceph_conf: true
+        job_clean: false
       pod:
         replicas:
           api: 1

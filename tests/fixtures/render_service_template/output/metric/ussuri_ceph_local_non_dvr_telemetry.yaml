@@ -99,6 +99,7 @@ spec:
         daemonset_statsd: false
         service_statsd: false
         pod_gnocchi_test: false
+        job_clean: false
       endpoints:
         cluster_domain_suffix: cluster.local
         identity:

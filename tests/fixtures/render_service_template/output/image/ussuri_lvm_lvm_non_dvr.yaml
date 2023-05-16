@@ -295,6 +295,7 @@ spec:
         network_policy: false
         secret_ca_bundle: true
         ceph_conf: true
+        job_clean: false
       pod:
         replicas:
           api: 1

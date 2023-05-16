@@ -340,7 +340,7 @@ spec:
         statefulset_backup: {{ is_backup_enabled }}
         statefulset_volume: {{ spec.features.get("cinder", {}).get("volume", {}).get("enabled", True) }}
         ceph_conf: {{ is_ceph_enabled }}
-        job_clean: {{ is_ceph_enabled }}
+        job_clean: false
       network:
         api:
           ingress:
