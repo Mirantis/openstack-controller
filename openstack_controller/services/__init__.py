@@ -542,6 +542,11 @@ class Stepler(OpenStackService):
         },
     }
 
+    # ovveride health_groups to skip tempest during upgrade
+    @property
+    def health_groups(self):
+        return []
+
 
 class Designate(OpenStackService):
     service = "dns"
@@ -2198,6 +2203,11 @@ class Tempest(OpenStackService):
     @property
     def _child_generic_objects(self):
         return {}
+
+    # ovveride health_groups to skip tempest during upgrade
+    @property
+    def health_groups(self):
+        return []
 
     @property
     def is_ceph_enabled(self):
