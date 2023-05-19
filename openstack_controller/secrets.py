@@ -4,6 +4,7 @@ import copy
 from dataclasses import asdict, dataclass, fields
 import datetime
 import json
+import jsonschema
 from os import urandom
 from typing import Dict, List, Optional, final
 
@@ -1143,25 +1144,80 @@ class IAMSecret:
 class JsonSecret:
     """The secret where values of keys is in json format"""
 
+    json_schema = {}
+
     def __init__(self, namespace: str, name: str):
         self.namespace = namespace
         self.name = name
         meta = {"name": self.name, "namespace": self.namespace}
         self.kube_obj = pykube.Secret(kube.api, {"metadata": meta})
 
-    def decode(self, data):
-        params = {}
-        for key, value in data.items():
-            decoded = json.loads(base64.b64decode(value))
-            params[key] = decoded
-        return params
+    def get(self) -> dict:
+        """Get k8s secret secret data and validate it"""
 
-    def get(self):
-        decoded = self.decode(get_secret_data(self.namespace, self.name))
-        return decoded
+        raw_data = get_secret_data(self.namespace, self.name)
+        data = {}
+        for key, value in raw_data.items():
+            data[key] = json.loads(base64.b64decode(value))
+        self.validate(data)
+        return data
+
+    def save(self, data) -> None:
+        """Save validated data dict as json to k8s secret"""
+
+        self.validate(data)
+        encoded = {}
+        for key, value in data.items():
+            value = json.dumps(data[key])
+            encoded[key] = base64.b64encode(value.encode()).decode()
+        LOG.info(f"Saving secret {self.name}")
+        kube.save_secret_data(self.namespace, self.name, encoded)
+
+    def validate(self, data) -> None:
+        """Validate dict data using json schema"""
+
+        if not self.json_schema:
+            return
+        try:
+            jsonschema.validate(instance=data, schema=self.json_schema)
+        except jsonschema.exceptions.ValidationError:
+            LOG.error(f"Secret {self.name} has incorrect format")
+            raise
 
     def wait(self):
         kube.wait_for_secret(self.namespace, self.name)
+
+
+class StackLightConfigSecret(JsonSecret):
+    json_schema = {
+        "type": "object",
+        "additionalProperties": False,
+        "properties": {
+            "conf.json": {
+                "type": "object",
+                "additionalProperties": False,
+                "properties": {
+                    "exporters": {
+                        "type": "object",
+                        "additionalProperties": False,
+                        "properties": {
+                            "cloudprober": {
+                                "type": "object",
+                                "additionalProperties": False,
+                                "properties": {"enabled": {"type": "boolean"}},
+                            }
+                        },
+                    }
+                },
+            }
+        },
+    }
+
+    def __init__(self):
+        super().__init__(
+            namespace=constants.OPENSTACK_STACKLIGHT_SHARED_NAMESPACE,
+            name=constants.OPENSTACK_STACKLIGHT_CONFIG_SECRET,
+        )
 
 
 class BGPVPNSecret(JsonSecret):
