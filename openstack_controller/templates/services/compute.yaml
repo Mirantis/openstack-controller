@@ -724,6 +724,8 @@ spec:
             cipher: {{ ephemeral_encryption.get("cipher", "aes-xts-plain64") }}
             key_size: {{ ephemeral_encryption.get("key_size", 256) }}
 {%- endif %}
+          filter_scheduler:
+            build_failure_weight_multiplier: 2.0
 {%- if neutron_backend == 'tungstenfabric' %}
           compute:
             live_migration_wait_for_vif_plug: false

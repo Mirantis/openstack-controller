@@ -100,6 +100,8 @@ spec:
             enabled: true
             key_size: 123
             cipher: secret
+          filter_scheduler:
+            build_failure_weight_multiplier: 2.0
           libvirt:
             cpu_mode: host-model
             images_rbd_pool: vms-hdd
