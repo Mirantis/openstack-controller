@@ -207,7 +207,7 @@ barbican_db_purge: '{{ images_base_url }}/openstack/barbican:xena-focal-20230223
 neutron_bootstrap: '{{ images_base_url }}/openstack/openstack-tools:yoga-focal-20230423104356'
 cinder_drop_default_volume_type: '{{ images_base_url }}/openstack/openstack-tools:yoga-focal-20230423104356'
 cinder_create_internal_tenant: '{{ images_base_url }}/openstack/openstack-tools:yoga-focal-20230423104356'
-descheduler: '{{ images_base_url }}/openstack/extra/descheduler:v0.26.0'
+descheduler: '{{ images_base_url }}/openstack/extra/descheduler:v0.27.0'
 ironic_agent_kernel: '{{ binary_base_url }}/openstack/bin/ironic/tinyipa/tinyipa-stable-xena-20230128005409.vmlinuz'
 ironic_agent_initramfs: '{{ binary_base_url }}/openstack/bin/ironic/tinyipa/tinyipa-stable-xena-20230128005409.gz'
 ironic_agent_kernel_checksum: ab3a8196df5a84889f16494fde188799
