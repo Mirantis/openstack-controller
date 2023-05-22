@@ -1,6 +1,24 @@
 from openstack_controller.filters.tempest import base_section
 
 
+DEFAULT_CREDENTIALS_DOMAIN_NAME = {
+    "yoga": "tempest",
+    "xena": "Default",
+    "wallaby": "Default",
+    "victoria": "Default",
+    "ussuri": "Default",
+    "train": "Default",
+    "stein": "Default",
+    "rocky": "Default",
+    "queens": "Default",
+    "pike": "Default",
+    "ocata": "Default",
+    "newton": "Default",
+    "mitaka": "Default",
+    "kilo": "Default",
+}
+
+
 class Auth(base_section.BaseSection):
     name = "auth"
     options = [
@@ -38,7 +56,8 @@ class Auth(base_section.BaseSection):
 
     @property
     def default_credentials_domain_name(self):
-        pass
+        version = self.spec["openstack_version"]
+        return DEFAULT_CREDENTIALS_DOMAIN_NAME.get(version, "tempest")
 
     @property
     def tempest_roles(self):

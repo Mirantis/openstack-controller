@@ -186,7 +186,8 @@ spec:
             public_network_id: {{ spec.features.neutron.get('floating_network', {}).get('name', 'public') }}
 {%- endif %}
           identity:
-{%- if signature.enabled %}
+# turn on option for versions starting from yoga besides master
+{%- if spec.openstack_version in openstack_versions[openstack_versions.index('yoga'):-1] %}
             default_domain_id: tempest
 {%- else %}
             default_domain_id: Default
