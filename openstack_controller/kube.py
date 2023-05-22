@@ -34,18 +34,16 @@ def get_kubernetes_objects():
     """Return all classes that are subclass of pykube.objects.APIObject.
 
     The following order is used:
-    1. openstack_controller.pykube classes
+    1. openstack_controller.kube classes
     2. pykube.objects classes
 
     """
 
     def _get_kubernetes_objects(module):
         k_objects = {}
-        for name, obj in inspect.getmembers(module):
-            if (
-                inspect.isclass(obj)
-                and issubclass(obj, pykube.objects.APIObject)
-                and getattr(obj, "kind", None)
+        for name, obj in inspect.getmembers(module, inspect.isclass):
+            if issubclass(obj, pykube.objects.APIObject) and getattr(
+                obj, "kind", None
             ):
                 k_objects[(obj.version, obj.kind)] = obj
         return k_objects
@@ -53,9 +51,6 @@ def get_kubernetes_objects():
     objects = _get_kubernetes_objects(pykube.objects)
     objects.update(_get_kubernetes_objects(sys.modules[__name__]))
     return objects
-
-
-KUBE_OBJECTS = get_kubernetes_objects()
 
 
 def get_object_by_kind(kind):
@@ -67,7 +62,7 @@ def get_object_by_kind(kind):
 def object_factory(api, api_version, kind):
     """Dynamically builds kubernetes objects python class.
 
-    1. Objects from openstack_operator.pykube.KUBE_OBJECTS
+    1. Objects from openstack_operator.kube.KUBE_OBJECTS
     2. Objects from pykube.objects
     3. Generic kubernetes object
     """
@@ -613,3 +608,5 @@ def get_osdpl(namespace=settings.OSCTL_OS_DEPLOYMENT_NAMESPACE):
 
 find_osdpl = functools.partial(find, OpenStackDeployment)
 find_secret = functools.partial(find, Secret)
+
+KUBE_OBJECTS = get_kubernetes_objects()

@@ -1,7 +1,5 @@
 import collections
 
-import pykube
-
 from openstack_controller import health
 from openstack_controller import kube
 from openstack_controller import settings
@@ -13,7 +11,7 @@ LOG = utils.get_logger(__name__)
 
 
 def get_k8s_objects(
-    namespace, types=[pykube.Deployment, pykube.DaemonSet, pykube.StatefulSet]
+    namespace, types=[kube.Deployment, kube.DaemonSet, kube.StatefulSet]
 ):
     for t in types:
         for i in kube.resource_list(t, "", namespace):
@@ -22,6 +20,7 @@ def get_k8s_objects(
 
 def calculate_status(k8s_object):
     ident = health.ident(k8s_object.metadata)
+
     health_status = health.health_status(k8s_object)
     return (
         ident,
