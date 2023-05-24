@@ -1893,6 +1893,21 @@ class Nova(OpenStackServiceWithCeph, MaintenanceApiMixin):
             nwl.set_error_message(msg)
             raise kopf.TemporaryError(msg)
 
+    async def process_ndr(self, node, nwl):
+        await self.remove_node_from_scheduling(node)
+        if not CONF.getboolean("maintenance", "ndr_skip_instance_check"):
+            os_client = openstack_utils.OpenStackClientManager()
+            all_servers = os_client.compute_get_all_servers(host=node.name)
+            servers_out = {s.id: s.status for s in all_servers}
+            if servers_out:
+                msg = f"Some servers {servers_out} are still present on host {node.name}. Blocking node removal unless they removed or migrated."
+                nwl.set_error_message(msg)
+                raise kopf.TemporaryError(msg)
+
+    async def cleanup_metadata(self, node, nwl):
+        os_client = openstack_utils.OpenStackClientManager()
+        os_client.compute_ensure_services_absent(host=node.name)
+
 
 class Placement(OpenStackService):
     service = "placement"

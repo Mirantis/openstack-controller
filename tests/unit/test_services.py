@@ -874,4 +874,119 @@ async def test_nova_can_handle_nmr_1az_3hosts_1locks_skip(
     )
 
 
+@pytest.mark.asyncio
+async def test_nova_process_ndr_controller(
+    mocker,
+    openstack_client,
+    openstackdeployment_mspec,
+):
+    osdplstmock = mock.Mock()
+    nwl = mock.Mock()
+    node3 = kube.Node(
+        mock.Mock, copy.deepcopy(_get_node(host="host3", role="control"))
+    )
+    await services.Nova(
+        openstackdeployment_mspec, logging, osdplstmock
+    ).process_ndr(node3, nwl)
+    openstack_client.return_value.compute_ensure_service_disabled.assert_not_called()
+
+
+@pytest.mark.asyncio
+async def test_nova_process_ndr_compute_1instance(
+    mocker,
+    openstack_client,
+    openstackdeployment_mspec,
+):
+    osdplstmock = mock.Mock()
+    nwl = mock.Mock()
+    node3 = kube.Node(
+        mock.Mock, copy.deepcopy(_get_node(host="host3", role="compute"))
+    )
+    openstack_client.return_value.compute_get_all_servers.return_value = [
+        _get_server_obj()
+    ]
+    with pytest.raises(kopf.TemporaryError):
+        await services.Nova(
+            openstackdeployment_mspec, logging, osdplstmock
+        ).process_ndr(node3, nwl)
+    openstack_client.return_value.compute_ensure_service_disabled.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_nova_process_ndr_compute_no_instances(
+    mocker,
+    openstack_client,
+    openstackdeployment_mspec,
+):
+    osdplstmock = mock.Mock()
+    nwl = mock.Mock()
+    node3 = kube.Node(
+        mock.Mock, copy.deepcopy(_get_node(host="host3", role="compute"))
+    )
+    openstack_client.return_value.compute_ensure_service_disabled.return_value = (
+        []
+    )
+    await services.Nova(
+        openstackdeployment_mspec, logging, osdplstmock
+    ).process_ndr(node3, nwl)
+    openstack_client.return_value.compute_get_all_servers.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_nova_process_ndr_compute_1instance_ndr_skip_instance_check(
+    mocker,
+    openstack_client,
+    openstackdeployment_mspec,
+):
+    osdplstmock = mock.Mock()
+    nwl = mock.Mock()
+    node3 = kube.Node(
+        mock.Mock, copy.deepcopy(_get_node(host="host3", role="compute"))
+    )
+    openstack_client.return_value.compute_get_all_servers.return_value = [
+        _get_server_obj()
+    ]
+
+    settings.CONF["maintenance"]["ndr_skip_instance_check"] = "True"
+    await services.Nova(
+        openstackdeployment_mspec, logging, osdplstmock
+    ).process_ndr(node3, nwl)
+    openstack_client.return_value.compute_ensure_service_disabled.assert_called_once()
+    openstack_client.return_value.compute_get_all_servers.assert_not_called()
+
+
+@pytest.mark.asyncio
+async def test_nova_cleanup_metadata_controller(
+    mocker,
+    openstack_client,
+    openstackdeployment_mspec,
+):
+    osdplstmock = mock.Mock()
+    nwl = mock.Mock()
+    node3 = kube.Node(
+        mock.Mock, copy.deepcopy(_get_node(host="host3", role="control"))
+    )
+    await services.Nova(
+        openstackdeployment_mspec, logging, osdplstmock
+    ).cleanup_metadata(node3, nwl)
+    openstack_client.return_value.compute_ensure_services_absent.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_nova_cleanup_metadata_compute(
+    mocker,
+    openstack_client,
+    openstackdeployment_mspec,
+):
+    osdplstmock = mock.Mock()
+    nwl = mock.Mock()
+    node3 = kube.Node(
+        mock.Mock, copy.deepcopy(_get_node(host="host3", role="compute"))
+    )
+    await services.Nova(
+        openstackdeployment_mspec, logging, osdplstmock
+    ).cleanup_metadata(node3, nwl)
+    openstack_client.return_value.compute_ensure_services_absent.assert_called_once()
+
+
 # vsaienko(TODO): add more tests covering logic in _do_servers_migration()

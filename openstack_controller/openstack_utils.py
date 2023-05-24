@@ -112,6 +112,10 @@ class OpenStackClientManager:
                 disabled_reason=disabled_reason,
             )
 
+    def compute_ensure_services_absent(self, host):
+        for service in self.compute_get_services(host=host, binary=None):
+            self.oc.compute.delete_service(service)
+
     def compute_get_all_servers(self, host=None, status=None):
         filters = {}
         if host:
