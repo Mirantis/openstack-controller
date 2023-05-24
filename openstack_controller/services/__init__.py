@@ -1448,6 +1448,13 @@ class Neutron(OpenStackService, MaintenanceApiMixin):
     async def add_node_to_scheduling(self, node):
         pass
 
+    async def process_ndr(self, node, nwl):
+        return await self.remove_node_from_scheduling(node)
+
+    async def cleanup_metadata(self, node, nwl):
+        os_client = openstack_utils.OpenStackClientManager()
+        os_client.network_ensure_agents_absent(host=node.name)
+
 
 class Nova(OpenStackServiceWithCeph, MaintenanceApiMixin):
     service = "compute"

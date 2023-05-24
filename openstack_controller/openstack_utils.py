@@ -188,6 +188,10 @@ class OpenStackClientManager:
             kwargs["is_admin_state_up"] = is_admin_state_up
         return list(self.oc.network.agents(**kwargs))
 
+    def network_ensure_agents_absent(self, host):
+        for agent in self.network_get_agents(host=host):
+            self.oc.network.delete_agent(agent)
+
 
 async def notify_masakari_host_down(node):
     try:

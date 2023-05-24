@@ -989,4 +989,21 @@ async def test_nova_cleanup_metadata_compute(
     openstack_client.return_value.compute_ensure_services_absent.assert_called_once()
 
 
+@pytest.mark.asyncio
+async def test_neutron_cleanup_metadata_compute(
+    mocker,
+    openstack_client,
+    openstackdeployment_mspec,
+):
+    osdplstmock = mock.Mock()
+    nwl = mock.Mock()
+    node3 = kube.Node(
+        mock.Mock, copy.deepcopy(_get_node(host="host3", role="compute"))
+    )
+    await services.Neutron(
+        openstackdeployment_mspec, logging, osdplstmock
+    ).cleanup_metadata(node3, nwl)
+    openstack_client.return_value.network_ensure_agents_absent.assert_called_once()
+
+
 # vsaienko(TODO): add more tests covering logic in _do_servers_migration()
