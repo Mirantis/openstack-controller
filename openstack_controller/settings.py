@@ -200,7 +200,7 @@ if OSCTL_HEARTBEAT_INTERVAL:
 
 # Whether node maintenance controller is enabled or not
 OSCTL_NODE_MAINTENANCE_ENABLED = bool_from_env(
-    "OSCTL_NODE_MAINTENANCE_ENABLED", False
+    "OSCTL_NODE_MAINTENANCE_ENABLED", True
 )
 
 # The version of curren cluster release, example 8.4.0-rc+22.1

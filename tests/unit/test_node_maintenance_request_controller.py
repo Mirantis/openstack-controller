@@ -36,7 +36,7 @@ def nova_registry_service(mocker):
     mock_service_class = mock.Mock()
     mock_service_class.return_value = mock.AsyncMock()
     mocker.patch(
-        "openstack_controller.controllers.maintenance.ORDERED_SERVICES",
+        "openstack_controller.maintenance.ORDERED_SERVICES",
         [("compute", mock_service_class)],
     )
     methods = [
@@ -46,6 +46,8 @@ def nova_registry_service(mocker):
         "add_node_to_scheduling",
         "remove_node_from_scheduling",
         "prepare_node_for_reboot",
+        "process_ndr",
+        "cleanup_metadata",
     ]
     for attr in methods:
         setattr(mock_service_class.return_value, attr, AsyncMock())
@@ -56,7 +58,6 @@ def nova_registry_service(mocker):
 @pytest.fixture
 def osdpl(mocker):
     osdpl = mocker.patch("openstack_controller.kube.get_osdpl")
-    osdpl.return_value = mock.AsyncMock()
     yield osdpl
     mocker.stopall()
 
@@ -126,7 +127,7 @@ async def test_nmr_change_required_for_node_not_maintenance_0_active_lock(
     nova_registry_service.return_value.can_handle_nmr.return_value = True
 
     mocker.patch.object(
-        maintenance_controller,
+        maintenance,
         "ORDERED_SERVICES",
         [("compute", nova_registry_service)],
     )
@@ -170,7 +171,7 @@ async def test_nmr_change_required_for_node_not_maintenance_0_active_lock_servic
     neutron_registry_service.return_value.can_handle_nmr.return_value = False
 
     mocker.patch.object(
-        maintenance_controller,
+        maintenance,
         "ORDERED_SERVICES",
         [
             ("compute", nova_registry_service),
@@ -335,3 +336,111 @@ async def test_nmr_delete_nwl_in_maintenance(
     nwl.is_maintenance.assert_called()
     nwl.set_inner_state_inactive.assert_called_once()
     nwl.set_state_active.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_ndr_maintenance_not_enabled(
+    mocker, nova_registry_service, osdpl, node
+):
+    ndr = {
+        "metadata": {"name": "fake-nmr"},
+        "spec": {"nodeName": "fake-node"},
+    }
+    mocker.patch(
+        "openstack_controller.settings.OSCTL_NODE_MAINTENANCE_ENABLED", False
+    )
+
+    await maintenance_controller.node_deletion_request_change_handler(ndr)
+    osdpl.exists.assert_not_called()
+
+
+@pytest.mark.asyncio
+async def test_ndr_osdpl_not_present(
+    mocker, nova_registry_service, node, osdpl
+):
+    ndr = {
+        "metadata": {"name": "fake-nmr"},
+        "spec": {"nodeName": "fake-node"},
+    }
+
+    osdpl.return_value.exists.return_value = False
+
+    mocker.patch(
+        "openstack_controller.settings.OSCTL_NODE_MAINTENANCE_ENABLED", True
+    )
+    nwl = mock.Mock()
+    nwl.required_for_node.return_value = True
+    nwl.is_maintenance.return_value = True
+    mocker.patch.object(
+        maintenance.NodeWorkloadLock, "get_resource", return_value=nwl
+    )
+
+    await maintenance_controller.node_deletion_request_change_handler(ndr)
+    node.exists.assert_not_called()
+    osdpl.return_value.exists.assert_called_once()
+    nwl.set_state_inactive.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_ndr_node_not_present(
+    mocker, nova_registry_service, node, osdpl
+):
+    ndr = {
+        "metadata": {"name": "fake-nmr"},
+        "spec": {"nodeName": "fake-node"},
+    }
+
+    osdpl.return_value.exists.return_value = True
+    node.exists.return_value = False
+    mocker.patch.object(kube, "find", side_effect=(node,))
+
+    mocker.patch(
+        "openstack_controller.settings.OSCTL_NODE_MAINTENANCE_ENABLED", True
+    )
+    nwl = mock.Mock()
+    nwl.required_for_node.return_value = True
+    nwl.is_maintenance.return_value = True
+    mocker.patch.object(
+        maintenance.NodeWorkloadLock, "get_resource", return_value=nwl
+    )
+
+    await maintenance_controller.node_deletion_request_change_handler(ndr)
+    node.exists.assert_called_once()
+    osdpl.return_value.exists.assert_called_once()
+    nwl.set_state_inactive.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_ndr_nova_service(mocker, nova_registry_service, node, osdpl):
+    ndr = {
+        "metadata": {"name": "fake-nmr"},
+        "spec": {"nodeName": "fake-node"},
+    }
+
+    osdpl.return_value.exists.return_value = True
+    node.exists.return_value = True
+    mocker.patch.object(kube, "find", side_effect=(node,))
+
+    mocker.patch(
+        "openstack_controller.settings.OSCTL_NODE_MAINTENANCE_ENABLED", True
+    )
+    nwl = mock.Mock()
+    nwl.required_for_node.return_value = True
+    nwl.is_maintenance.return_value = True
+    mocker.patch.object(
+        maintenance.NodeWorkloadLock, "get_resource", return_value=nwl
+    )
+
+    nova_registry_service.return_value.maintenance_api.return_value = True
+
+    mocker.patch.object(
+        maintenance,
+        "ORDERED_SERVICES",
+        [("compute", nova_registry_service)],
+    )
+
+    await maintenance_controller.node_deletion_request_change_handler(ndr)
+    node.exists.assert_called_once()
+    osdpl.return_value.exists.assert_called_once()
+    nwl.set_state_inactive.assert_called_once()
+    nova_registry_service.return_value.process_ndr.assert_called_once()

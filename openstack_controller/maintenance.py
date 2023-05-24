@@ -5,6 +5,7 @@ import enum
 import pykube
 
 from openstack_controller import constants as const
+from openstack_controller.services import base
 from openstack_controller import kube
 from openstack_controller import settings
 
@@ -23,6 +24,20 @@ MAINTENANCE_DEFAULT_NODE_CONFIG = {
     # The number of attempts we trying to migrate instance before give up.
     "instance_migration_attempts": {"default": "3", "type": "int"},
 }
+
+
+# Higher value means that component's prepare-usage handlers will be called
+# later and prepare-shutdown handlers - sooner
+SERVICE_ORDER = {"compute": 100, "networking": 120}
+ORDERED_SERVICES = list(
+    sorted(
+        filter(
+            lambda tup: tup[0] in SERVICE_ORDER,
+            base.Service.registry.items(),
+        ),
+        key=lambda tup: SERVICE_ORDER[tup[0]],
+    )
+)
 
 
 # Maximum number of nodes upgraded in parallel.
@@ -112,6 +127,8 @@ class LockBase(pykube.objects.APIObject):
             self.create()
             # Explicitly set state to active to do not rely on default.
             self.set_state(LockState.active.value)
+        else:
+            self.update()
         if settings.OSCTL_CLUSTER_RELEASE:
             # NOTE(vsaienko): reset cwl to active if it was set to inactive
             # by previous controller. PRODX-22757
@@ -181,6 +198,7 @@ class NodeWorkloadLock(LockBase):
     def _base_spec(cls, name):
         spec = super()._base_spec(name)
         spec["nodeName"] = name
+        spec["nodeDeletionRequestSupported"] = True
         return spec
 
     @staticmethod
@@ -254,4 +272,11 @@ class ClusterMaintenanceRequest(MaintenanceRequestBase):
     version = "lcm.mirantis.com/v1alpha1"
     endpoint = "clustermaintenancerequests"
     kind = "ClusterMaintenanceRequest"
+    kopf_on_args = *version.split("/"), endpoint
+
+
+class NodeDeletionRequest(pykube.objects.APIObject):
+    version = "lcm.mirantis.com/v1alpha1"
+    endpoint = "nodedeletionrequests"
+    kind = "NodeDeletioneRequest"
     kopf_on_args = *version.split("/"), endpoint
