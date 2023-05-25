@@ -2,7 +2,6 @@
 #kind: HelmBundle
 
 {%- from 'macros/messaging_service_creds.j2' import messaging_service_creds %}
-{%- from 'macros/etcd3.j2' import get_etcd3_endpoint %}
 {%- set service = 'designate' %}
 {%- set components_with_dedicated_messaging = spec.get('features', {}).get('messaging', {}).get('components_with_dedicated_messaging', []) %}
 {%- set stacklight_enabled = spec.get('features', {}).get('stacklight', {}).get('enabled', False) %}
@@ -129,8 +128,6 @@ spec:
 {%- endif %}
           oslo_messaging_notifications:
             topics: {{ notification_topics|join(',') }}
-          coordination:
-            backend_url: {{ get_etcd3_endpoint(spec.openstack_version, 'etcd3gw') }}
         logging:
           logger_designate:
             level: {{ spec.get('features', {}).get('logging', {}).get('designate', {}).get('level', 'INFO') }}
