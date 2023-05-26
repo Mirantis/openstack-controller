@@ -235,6 +235,14 @@ class RabbitMQ(Service):
         sl_secret.ensure()
         credentials["stacklight"] = sl_secret.get()
 
+        cloudprober_enabled = "cloudprober" in services
+        sl_config_data = {
+            "conf.json": {
+                "exporters": {"cloudprober": {"enabled": cloudprober_enabled}}
+            }
+        }
+        secrets.StackLightConfigSecret().save(sl_config_data)
+
         external_topics_enabled = (
             self.mspec.get("features", {})
             .get("messaging", {})

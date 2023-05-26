@@ -1,6 +1,7 @@
 import base64
 import copy
 import json
+import jsonschema
 from unittest import mock
 
 import pykube
@@ -175,6 +176,44 @@ def test_openstack_service_secret_fill_fields_missing(mock_secret_create):
     assert res["identity"] == {
         "myuser": {"username": "newuser", "password": "newpw"}
     }
+
+
+@mock.patch("openstack_controller.kube.save_secret_data")
+def test_stacklight_config_secret_save(mock_save_secret):
+    expected_config = {"exporters": {"cloudprober": {"enabled": False}}}
+    secret = secrets.StackLightConfigSecret()
+    secret.save({"conf.json": expected_config})
+    expected = {
+        "conf.json": base64.b64encode(
+            json.dumps(expected_config).encode()
+        ).decode()
+    }
+
+    assert mock_save_secret.call_args[0][2] == expected
+
+
+@mock.patch("openstack_controller.kube.save_secret_data")
+def test_stacklight_config_secret_save_fail(mock_save_secret):
+    incorrect_config = {"exporters": {"cloudprober": {"incorrect": "format"}}}
+    secret = secrets.StackLightConfigSecret()
+    with pytest.raises(jsonschema.exceptions.ValidationError):
+        secret.save({"conf.json": incorrect_config})
+
+
+@mock.patch("openstack_controller.secrets.get_secret_data")
+def test_bgpvpn_secret_get_peer_ips(mock_get_secret):
+    expected = ["10.15.0.1", "10.15.0.2", "10.15.0.3"]
+    encoded = {}
+    for index, ip in enumerate(expected):
+        encoded[f"node-{index}"] = base64.b64encode(
+            json.dumps({"bgp": {"source_ip": ip}}).encode()
+        ).decode()
+    mock_get_secret.return_value = encoded
+
+    secret = secrets.BGPVPNSecret()
+    result = secret.get_peer_ips()
+
+    assert set(expected) == set(result)
 
 
 @mock.patch("openstack_controller.secrets.OpenStackServiceSecret.create")
