@@ -17,6 +17,7 @@ from openstack_controller.admission.validators import base
 from openstack_controller import constants
 from openstack_controller import exception
 from openstack_controller import osdplstatus
+from openstack_controller import kube
 from openstack_controller.utils import CronValidator, get_in
 
 
@@ -29,6 +30,14 @@ class OpenStackValidator(base.BaseValidator):
         old_obj = review_request.get("oldObject", {})
         new_obj = review_request.get("object", {})
         self._deny_master(new_obj)
+        if review_request["operation"] == "CREATE":
+            osdpl = kube.get_osdpl()
+            if osdpl and osdpl.exists():
+                raise exception.OsDplValidationFailed(
+                    "OpenStackDeployment already exist in namespace "
+                    "only one resource can be created"
+                )
+
         if review_request["operation"] == "UPDATE":
             if self._openstack_version_changed(old_obj, new_obj):
                 # on update we deffinitely have both old and new as not empty

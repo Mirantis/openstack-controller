@@ -11,8 +11,12 @@ kind: ClusterRole
 metadata:
   name: openstack-controller-admission-role-cluster
 rules:
+  # Application: read-only access for watching cluster-wide.
   - apiGroups: [lcm.mirantis.com]
     resources: [openstackdeploymentstatus]
+    verbs: [list, get, watch]
+  - apiGroups: [lcm.mirantis.com]
+    resources: [openstackdeployments]
     verbs: [list, get, watch]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
