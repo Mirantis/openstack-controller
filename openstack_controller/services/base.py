@@ -741,6 +741,36 @@ class MaintenanceApiMixin:
         """
         return True
 
+    async def process_ndr(self, node, nwl):
+        """Process NodeDeletionRequest.
+
+        At this point kubernetes node is present, and all pods are
+        running. It is good time to evacuate all workloads from the
+        node.
+
+        :param node: the node object
+        :param nwl: the nodeworkloadlock object
+
+        :returns True: when node is ready for deletion
+        :raises kopf.TemporaryError on errors.
+
+        """
+        return True
+
+    async def cleanup_metadata(self, node, nwl):
+        """Cleanup metadata tied with specific node.
+
+        At this point no pods are running on the node so here
+        we can proceed with metadata cleanup.
+
+        :param node: the node object
+        :param nwl: the nodeWorkloadLock object
+
+        :returns True: when node is ready for deletion
+        :raises kopf.TemporaryError on errors.
+        """
+        return True
+
 
 class OpenStackService(Service):
     openstack_chart = None

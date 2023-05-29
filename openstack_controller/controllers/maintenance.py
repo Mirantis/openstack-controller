@@ -3,7 +3,6 @@ import asyncio
 import kopf
 
 from openstack_controller import kube
-from openstack_controller.services import base
 from openstack_controller import health
 from openstack_controller import settings
 from openstack_controller import utils
@@ -12,19 +11,6 @@ from openstack_controller import osdplstatus
 
 
 LOG = utils.get_logger(__name__)
-
-# Higher value means that component's prepare-usage handlers will be called
-# later and prepare-shutdown handlers - sooner
-SERVICE_ORDER = {"compute": 100, "networking": 120}
-ORDERED_SERVICES = list(
-    sorted(
-        filter(
-            lambda tup: tup[0] in SERVICE_ORDER,
-            base.Service.registry.items(),
-        ),
-        key=lambda tup: SERVICE_ORDER[tup[0]],
-    )
-)
 
 
 def maintenance_node_name(body):
@@ -75,7 +61,7 @@ async def node_maintenance_request_change_handler(body, **kwargs):
         # Verify if we can handle nmr by specific services.
         active_locks = nwl.maintenance_locks()
         services_can_handle_nmr = {}
-        for service_name, service_class in ORDERED_SERVICES:
+        for service_name, service_class in maintenance.ORDERED_SERVICES:
             service = service_class(mspec, LOG, osdplst)
             if service.maintenance_api:
                 services_can_handle_nmr[
@@ -87,7 +73,7 @@ async def node_maintenance_request_change_handler(body, **kwargs):
             raise kopf.TemporaryError(msg)
 
         nwl.set_inner_state_active()
-        for service, service_class in ORDERED_SERVICES:
+        for service, service_class in maintenance.ORDERED_SERVICES:
             service = service_class(mspec, LOG, osdplst)
             if service.maintenance_api:
                 LOG.info(
@@ -153,7 +139,7 @@ async def node_maintenance_request_delete_handler(body, **kwargs):
             LOG.info(f"All pods are ready on node {node.name}.")
             break
 
-        for service, service_class in reversed(ORDERED_SERVICES):
+        for service, service_class in reversed(maintenance.ORDERED_SERVICES):
             service = service_class(mspec, LOG, osdplst)
             if service.maintenance_api:
                 LOG.info(
@@ -238,3 +224,41 @@ async def cluster_maintenance_request_delete_handler(body, **kwargs):
     cwl.set_state_active()
     cwl.unset_error_message()
     LOG.info(f"Acquired ClusterWorkloadLock {name}")
+
+
+@kopf.on.create(*maintenance.NodeDeletionRequest.kopf_on_args)
+@kopf.on.update(*maintenance.NodeDeletionRequest.kopf_on_args)
+@kopf.on.resume(*maintenance.NodeDeletionRequest.kopf_on_args)
+async def node_deletion_request_change_handler(body, **kwargs):
+    name = body["metadata"]["name"]
+    node_name = maintenance_node_name(body)
+    LOG.info(f"Got node deletion request change event {name}")
+    if not settings.OSCTL_NODE_MAINTENANCE_ENABLED:
+        return
+
+    osdpl = kube.get_osdpl()
+    nwl = maintenance.NodeWorkloadLock.get_resource(node_name)
+    if osdpl and osdpl.exists():
+        mspec = osdpl.mspec
+        osdpl_name = osdpl.metadata["name"]
+        osdpl_namespace = osdpl.metadata["namespace"]
+        osdplst = osdplstatus.OpenStackDeploymentStatus(
+            osdpl_name, osdpl_namespace
+        )
+        node = kube.find(kube.Node, node_name, silent=True)
+        if node and node.exists():
+            for service, service_class in reversed(
+                maintenance.ORDERED_SERVICES
+            ):
+                service = service_class(mspec, LOG, osdplst)
+                if service.maintenance_api:
+                    LOG.info(
+                        f"Handling node deletion for {node_name} by service {service_class.service}"
+                    )
+                    await service.process_ndr(node, nwl)
+                    LOG.info(
+                        f"The node {node_name} is ready for deletion by {service_class.service}"
+                    )
+    nwl.set_state_inactive()
+    nwl.unset_error_message()
+    LOG.info(f"The node {node_name} is ready for deletion.")
