@@ -2,6 +2,7 @@ import asyncio
 from dataclasses import dataclass
 import inspect
 import json
+from os import urandom
 import sys
 from typing import List
 import functools
@@ -29,6 +30,11 @@ def login():
 
 
 api = login()
+
+
+def generate_random_name(length):
+    chars = "abcdefghijklmnpqrstuvwxyz1234567890"
+    return "".join(chars[c % len(chars)] for c in urandom(length))
 
 
 def get_kubernetes_objects():
@@ -397,6 +403,30 @@ class CronJob(pykube.CronJob, HelmBundleMixin):
             self._suspend(wait_completion=wait_completion, delay=delay),
             timeout=timeout,
         )
+
+    async def run(self, wait_completion=False, timeout=600, delay=10):
+        """Force run job from cronjob.
+
+        :returns : the job object
+        """
+        job_name = f"{self.name}-{generate_random_name(10)}"
+        job = self.obj["spec"]["jobTemplate"]
+        job["metadata"]["name"] = job_name
+        job["metadata"]["namespace"] = self.namespace
+        kopf.adopt(job, self.obj)
+        kube_job = Job(api, job)
+        kube_job.create()
+
+        async def _wait_completion(job, delay):
+            while not job.ready:
+                await asyncio.sleep(delay)
+
+        if wait_completion:
+            await asyncio.wait_for(
+                _wait_completion(kube_job, delay=delay),
+                timeout=timeout,
+            )
+        return kube_job
 
 
 class Deployment(pykube.Deployment, HelmBundleMixin):
