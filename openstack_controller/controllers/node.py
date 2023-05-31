@@ -18,6 +18,7 @@ import kopf
 
 from openstack_controller import constants as const
 from openstack_controller import kube
+from openstack_controller import services
 from openstack_controller import maintenance
 from openstack_controller import openstack_utils as ostutils
 from openstack_controller import osdplstatus
@@ -123,7 +124,7 @@ async def node_delete_handler(body, **kwargs):
             osdpl_name, osdpl_namespace
         )
 
-        for service, service_class in reversed(maintenance.ORDERED_SERVICES):
+        for service, service_class in reversed(services.ORDERED_SERVICES):
             service = service_class(mspec, LOG, osdplst)
             if service.maintenance_api:
                 LOG.info(f"Cleaning metadata for node {name}")
