@@ -159,7 +159,7 @@ services:
             osapi: 15
             conductor: 3
             consoleauth: 3
-            scheduler: 3
+            scheduler: 7
             novncproxy: 3
             placement: 4
             compute_ironic: 3
