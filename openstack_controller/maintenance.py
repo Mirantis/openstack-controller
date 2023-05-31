@@ -5,7 +5,6 @@ import enum
 import pykube
 
 from openstack_controller import constants as const
-from openstack_controller.services import base
 from openstack_controller import kube
 from openstack_controller import settings
 
@@ -24,20 +23,6 @@ MAINTENANCE_DEFAULT_NODE_CONFIG = {
     # The number of attempts we trying to migrate instance before give up.
     "instance_migration_attempts": {"default": "3", "type": "int"},
 }
-
-
-# Higher value means that component's prepare-usage handlers will be called
-# later and prepare-shutdown handlers - sooner
-SERVICE_ORDER = {"compute": 100, "networking": 120}
-ORDERED_SERVICES = list(
-    sorted(
-        filter(
-            lambda tup: tup[0] in SERVICE_ORDER,
-            base.Service.registry.items(),
-        ),
-        key=lambda tup: SERVICE_ORDER[tup[0]],
-    )
-)
 
 
 # Maximum number of nodes upgraded in parallel.

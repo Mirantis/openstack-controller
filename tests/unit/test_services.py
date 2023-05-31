@@ -46,6 +46,19 @@ NODE_OBJ = {
     },
 }
 
+VOLUME_SERVICE_OBJ = {
+    "binary": "cinder-volume",
+    "host": "host1@lvm",
+    "zone": "nova",
+    "status": "enabled",
+    "state": "up",
+    "updated_at": "2023-05-31T07:50:33.000000",
+    "disabled_reason": "test",
+    "replication_status": "disabled",
+    "active_backend_id": None,
+    "frozen": False,
+}
+
 
 def _get_node(host="host1", role="compute"):
     node_obj = copy.deepcopy(NODE_OBJ)
@@ -597,6 +610,22 @@ def _get_service_obj(obj=None):
     return az
 
 
+def _get_volume_obj(obj=None):
+    if obj is None:
+        obj = {}
+    vol = openstack.block_storage.v3.volume.Volume()
+    for k, v in obj.items():
+        setattr(vol, k, v)
+    return vol
+
+
+def _get_volume_service_obj(obj=None):
+    svc = copy.deepcopy(VOLUME_SERVICE_OBJ)
+    if obj is not None:
+        svc.update(obj)
+    return svc
+
+
 def compute_get_services_se(host, binary):
     svcs = {
         "host1": _get_service_obj(
@@ -1004,6 +1033,169 @@ async def test_neutron_cleanup_metadata_compute(
         openstackdeployment_mspec, logging, osdplstmock
     ).cleanup_metadata(node3, nwl)
     openstack_client.return_value.network_ensure_agents_absent.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_volume_remove_node_from_scheduling_no_service(
+    mocker,
+    openstack_client,
+    openstackdeployment_mspec,
+):
+    osdplstmock = mock.Mock()
+    node3 = kube.Node(
+        mock.Mock, copy.deepcopy(_get_node(host="host3", role="compute"))
+    )
+    openstack_client.return_value.volume_get_services.return_value = []
+    await services.Cinder(
+        openstackdeployment_mspec, logging, osdplstmock
+    ).remove_node_from_scheduling(node3)
+    openstack_client.return_value.volume_ensure_service_disabled.assert_not_called()
+
+
+@pytest.mark.asyncio
+async def test_volume_remove_node_from_scheduling_one_service(
+    mocker,
+    openstack_client,
+    openstackdeployment_mspec,
+):
+    osdplstmock = mock.Mock()
+    node3 = kube.Node(
+        mock.Mock, copy.deepcopy(_get_node(host="host3", role="compute"))
+    )
+    openstack_client.return_value.volume_get_services.return_value = [
+        _get_volume_service_obj({"host": "host3@lvm"})
+    ]
+    await services.Cinder(
+        openstackdeployment_mspec, logging, osdplstmock
+    ).remove_node_from_scheduling(node3)
+    openstack_client.return_value.volume_ensure_service_disabled.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_volume_remove_node_from_scheduling_one_service_exception(
+    mocker,
+    openstack_client,
+    openstackdeployment_mspec,
+):
+    osdplstmock = mock.Mock()
+    node3 = kube.Node(
+        mock.Mock, copy.deepcopy(_get_node(host="host3", role="compute"))
+    )
+    openstack_client.return_value.volume_get_services.side_effect = (
+        openstack.exceptions.SDKException("foo")
+    )
+    with pytest.raises(kopf.TemporaryError):
+        await services.Cinder(
+            openstackdeployment_mspec, logging, osdplstmock
+        ).remove_node_from_scheduling(node3)
+    openstack_client.return_value.volume_ensure_service_disabled.assert_not_called()
+
+
+@pytest.mark.asyncio
+async def test_volume_add_node_to_scheduling_one_service(
+    mocker,
+    openstack_client,
+    openstackdeployment_mspec,
+):
+    osdplstmock = mock.Mock()
+    node3 = kube.Node(
+        mock.Mock, copy.deepcopy(_get_node(host="host3", role="compute"))
+    )
+    openstack_client.return_value.volume_get_services.return_value = [
+        _get_volume_service_obj(
+            {
+                "host": "host3@lvm",
+                "disabled_reason": "OSDPL: Node is under maintenance",
+            }
+        )
+    ]
+    await services.Cinder(
+        openstackdeployment_mspec, logging, osdplstmock
+    ).add_node_to_scheduling(node3)
+    openstack_client.return_value.volume_ensure_service_enabled.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_volume_add_node_to_scheduling_no_service(
+    mocker,
+    openstack_client,
+    openstackdeployment_mspec,
+):
+    osdplstmock = mock.Mock()
+    node3 = kube.Node(
+        mock.Mock, copy.deepcopy(_get_node(host="host3", role="compute"))
+    )
+    openstack_client.return_value.volume_get_services.return_value = []
+    await services.Cinder(
+        openstackdeployment_mspec, logging, osdplstmock
+    ).add_node_to_scheduling(node3)
+    openstack_client.return_value.volume_ensure_service_enabled.assert_not_called()
+
+
+@pytest.mark.asyncio
+async def test_volume_add_node_to_scheduling_manually_disabled_service(
+    mocker,
+    openstack_client,
+    openstackdeployment_mspec,
+):
+    osdplstmock = mock.Mock()
+    node3 = kube.Node(
+        mock.Mock, copy.deepcopy(_get_node(host="host3", role="compute"))
+    )
+    openstack_client.return_value.volume_get_services.return_value = [
+        _get_volume_service_obj(
+            {"host": "host3@lvm", "disabled_reason": "disabled by user."}
+        )
+    ]
+    await services.Cinder(
+        openstackdeployment_mspec, logging, osdplstmock
+    ).add_node_to_scheduling(node3)
+    openstack_client.return_value.volume_ensure_service_enabled.assert_not_called()
+
+
+@pytest.mark.asyncio
+async def test_volume_process_ndr_compute_1volume(
+    mocker,
+    openstack_client,
+    openstackdeployment_mspec,
+):
+    osdplstmock = mock.Mock()
+    nwl = mock.Mock()
+    node3 = kube.Node(
+        mock.Mock, copy.deepcopy(_get_node(host="host3", role="compute"))
+    )
+    openstack_client.return_value.volume_get_volumes.return_value = [
+        _get_volume_obj({"os-vol-host-attr:host": "host3@lvm"})
+    ]
+    mock_rnfs = mocker.patch.object(
+        services.Cinder, "remove_node_from_scheduling"
+    )
+    with pytest.raises(kopf.TemporaryError):
+        await services.Cinder(
+            openstackdeployment_mspec, logging, osdplstmock
+        ).process_ndr(node3, nwl)
+    mock_rnfs.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_volume_process_ndr_compute_0volumes(
+    mocker,
+    openstack_client,
+    openstackdeployment_mspec,
+):
+    osdplstmock = mock.Mock()
+    nwl = mock.Mock()
+    node3 = kube.Node(
+        mock.Mock, copy.deepcopy(_get_node(host="host3", role="compute"))
+    )
+    openstack_client.return_value.volume_get_volumes.return_value = []
+    mock_rnfs = mocker.patch.object(
+        services.Cinder, "remove_node_from_scheduling"
+    )
+    await services.Cinder(
+        openstackdeployment_mspec, logging, osdplstmock
+    ).process_ndr(node3, nwl)
+    mock_rnfs.assert_called_once()
 
 
 # vsaienko(TODO): add more tests covering logic in _do_servers_migration()

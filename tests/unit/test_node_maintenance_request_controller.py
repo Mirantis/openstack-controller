@@ -20,6 +20,7 @@ import pytest
 from openstack_controller.controllers import (
     maintenance as maintenance_controller,
 )
+from openstack_controller import services
 from openstack_controller import maintenance
 from openstack_controller import kube
 
@@ -36,7 +37,7 @@ def nova_registry_service(mocker):
     mock_service_class = mock.Mock()
     mock_service_class.return_value = mock.AsyncMock()
     mocker.patch(
-        "openstack_controller.maintenance.ORDERED_SERVICES",
+        "openstack_controller.services.ORDERED_SERVICES",
         [("compute", mock_service_class)],
     )
     methods = [
@@ -127,7 +128,7 @@ async def test_nmr_change_required_for_node_not_maintenance_0_active_lock(
     nova_registry_service.return_value.can_handle_nmr.return_value = True
 
     mocker.patch.object(
-        maintenance,
+        services,
         "ORDERED_SERVICES",
         [("compute", nova_registry_service)],
     )
@@ -171,7 +172,7 @@ async def test_nmr_change_required_for_node_not_maintenance_0_active_lock_servic
     neutron_registry_service.return_value.can_handle_nmr.return_value = False
 
     mocker.patch.object(
-        maintenance,
+        services,
         "ORDERED_SERVICES",
         [
             ("compute", nova_registry_service),
@@ -434,7 +435,7 @@ async def test_ndr_nova_service(mocker, nova_registry_service, node, osdpl):
     nova_registry_service.return_value.maintenance_api.return_value = True
 
     mocker.patch.object(
-        maintenance,
+        services,
         "ORDERED_SERVICES",
         [("compute", nova_registry_service)],
     )

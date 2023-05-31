@@ -63,6 +63,7 @@ SERVER_STATES_SAFE_FOR_REBOOT = [
 
 
 COMPUTE_SERVICE_DISABLE_REASON = "OSDPL: Node is under maintenance"
+VOLUME_SERVICE_DISABLED_REASON = COMPUTE_SERVICE_DISABLE_REASON
 
 
 def init_keystone_admin_creds():
@@ -96,6 +97,39 @@ class OpenStackClientManager:
         if metrics is None:
             metrics = {"prometheus": {"enabled": False}}
         self.oc = openstack.connect(cloud=cloud, metrics=metrics)
+
+    def volume_get_services(self, **kwargs):
+        res = []
+        params = {k: v for k, v in kwargs.items() if v is not None}
+        resp = self.oc.block_storage.get("/os-services", params=params)
+        if resp.ok:
+            res = resp.json()["services"]
+        return res
+
+    def volume_get_volumes(self, host=None, all_tenants=True):
+        def match_host(volume, host=None):
+            if host is None:
+                return True
+            volume_host = volume["os-vol-host-attr:host"] or ""
+            return host == volume_host.split("@")[0]
+
+        return [
+            x
+            for x in self.oc.block_storage.volumes(all_tenants=all_tenants)
+            if match_host(x, host)
+        ]
+
+    def volume_ensure_service_disabled(
+        self, host, binary="cinder-volume", disabled_reason=None
+    ):
+        data = {"binary": binary, "host": host}
+        if disabled_reason is not None:
+            data["disabled_reason"] = disabled_reason
+        self.oc.block_storage.put("/os-services/disable-log-reason", json=data)
+
+    def volume_ensure_service_enabled(self, host, binary="cinder-volume"):
+        data = {"binary": binary, "host": host}
+        self.oc.block_storage.put("/os-services/enable", json=data)
 
     def compute_get_services(self, host=None, binary="nova-compute"):
         return list(self.oc.compute.services(host=host, binary=binary))

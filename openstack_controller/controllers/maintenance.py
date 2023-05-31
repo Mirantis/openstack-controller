@@ -6,6 +6,7 @@ from openstack_controller import kube
 from openstack_controller import health
 from openstack_controller import settings
 from openstack_controller import utils
+from openstack_controller import services
 from openstack_controller import maintenance
 from openstack_controller import osdplstatus
 
@@ -61,7 +62,7 @@ async def node_maintenance_request_change_handler(body, **kwargs):
         # Verify if we can handle nmr by specific services.
         active_locks = nwl.maintenance_locks()
         services_can_handle_nmr = {}
-        for service_name, service_class in maintenance.ORDERED_SERVICES:
+        for service_name, service_class in services.ORDERED_SERVICES:
             service = service_class(mspec, LOG, osdplst)
             if service.maintenance_api:
                 services_can_handle_nmr[
@@ -73,7 +74,7 @@ async def node_maintenance_request_change_handler(body, **kwargs):
             raise kopf.TemporaryError(msg)
 
         nwl.set_inner_state_active()
-        for service, service_class in maintenance.ORDERED_SERVICES:
+        for service, service_class in services.ORDERED_SERVICES:
             service = service_class(mspec, LOG, osdplst)
             if service.maintenance_api:
                 LOG.info(
@@ -139,7 +140,7 @@ async def node_maintenance_request_delete_handler(body, **kwargs):
             LOG.info(f"All pods are ready on node {node.name}.")
             break
 
-        for service, service_class in reversed(maintenance.ORDERED_SERVICES):
+        for service, service_class in reversed(services.ORDERED_SERVICES):
             service = service_class(mspec, LOG, osdplst)
             if service.maintenance_api:
                 LOG.info(
@@ -247,9 +248,7 @@ async def node_deletion_request_change_handler(body, **kwargs):
         )
         node = kube.find(kube.Node, node_name, silent=True)
         if node and node.exists():
-            for service, service_class in reversed(
-                maintenance.ORDERED_SERVICES
-            ):
+            for service, service_class in reversed(services.ORDERED_SERVICES):
                 service = service_class(mspec, LOG, osdplst)
                 if service.maintenance_api:
                     LOG.info(

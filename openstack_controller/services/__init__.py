@@ -402,7 +402,7 @@ class Barbican(OpenStackService):
     }
 
 
-class Cinder(OpenStackServiceWithCeph):
+class Cinder(OpenStackServiceWithCeph, MaintenanceApiMixin):
     service = "block-storage"
     openstack_chart = "cinder"
     available_releases = [
@@ -501,6 +501,77 @@ class Cinder(OpenStackServiceWithCeph):
             if kind == "Job":
                 await child_obj.purge()
             await child_obj.enable(self.openstack_version, True)
+
+    async def remove_node_from_scheduling(self, node):
+        try:
+            os_client = openstack_utils.OpenStackClientManager()
+            volume_services = os_client.volume_get_services(
+                host=node.name, binary="cinder-volume"
+            )
+            if len(volume_services) > 0:
+                os_client.volume_ensure_service_disabled(
+                    host=node.name,
+                    binary="cinder-volume",
+                    disabled_reason=openstack_utils.VOLUME_SERVICE_DISABLED_REASON,
+                )
+            else:
+                LOG.info(f"Did not found block storage services on the host.")
+        except exceptions.SDKException as e:
+            nwl = maintenance.NodeWorkloadLock.get_resource(node.name)
+            LOG.error(f"Cannot execute openstack commands, error: {e}")
+            msg = (
+                "Can not disable block-storage service on a host to be deleted"
+            )
+            nwl.set_error_message(msg)
+            raise kopf.TemporaryError(msg)
+
+    async def prepare_node_for_reboot(self, node):
+        pass
+
+    async def prepare_node_after_reboot(self, node):
+        pass
+
+    async def add_node_to_scheduling(self, node):
+        try:
+            os_client = openstack_utils.OpenStackClientManager()
+            volume_services = os_client.volume_get_services(
+                host=node.name, binary="cinder-volume"
+            )
+            if len(volume_services) > 0:
+                volume_service = volume_services[0]
+                if (
+                    volume_service["disabled_reason"]
+                    == openstack_utils.VOLUME_SERVICE_DISABLED_REASON
+                ):
+                    os_client.volume_ensure_service_enabled(
+                        host=node.name,
+                        binary="cinder-volume",
+                    )
+            else:
+                LOG.info(f"Did not found block storage services on the host.")
+        except exceptions.SDKException as e:
+            nwl = maintenance.NodeWorkloadLock.get_resource(node.name)
+            LOG.error(f"Cannot execute openstack commands, error: {e}")
+            msg = f"Can not enable block-storage service on the host {node.name}."
+            nwl.set_error_message(msg)
+            raise kopf.TemporaryError(msg)
+
+    async def process_ndr(self, node, nwl):
+        await self.remove_node_from_scheduling(node)
+        if not CONF.getboolean("maintenance", "ndr_skip_volume_check"):
+            os_client = openstack_utils.OpenStackClientManager()
+            volumes = os_client.volume_get_volumes(host=node.name)
+            volumes = [x["id"] for x in volumes]
+            if volumes:
+                msg = f"Some volumes {volumes} are still present on host {node.name}. Blocking node removal unless they removed or migrated."
+                nwl.set_error_message(msg)
+                raise kopf.TemporaryError(msg)
+
+    async def cleanup_metadata(self, node, nwl):
+        # TODO(vsaienko): no way to remove services from API, only direct db-manage call
+        # we have a cronjob that cleanup down services. Call it explicitly, wait for
+        # completion and check services are removed.
+        pass
 
 
 class Cloudprober(Service):
@@ -2304,3 +2375,14 @@ class Manila(OpenStackService):
 
 
 registry = Service.registry
+
+# NOTE(vsaienko): keep here to avoid cyclic import with openstack_controller.maintenance
+ORDERED_SERVICES = list(
+    sorted(
+        filter(
+            lambda tup: tup[0] in constants.SERVICE_ORDER,
+            registry.items(),
+        ),
+        key=lambda tup: constants.SERVICE_ORDER[tup[0]],
+    )
+)
