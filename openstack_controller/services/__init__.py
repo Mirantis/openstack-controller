@@ -568,10 +568,11 @@ class Cinder(OpenStackServiceWithCeph, MaintenanceApiMixin):
                 raise kopf.TemporaryError(msg)
 
     async def cleanup_metadata(self, node, nwl):
-        # TODO(vsaienko): no way to remove services from API, only direct db-manage call
-        # we have a cronjob that cleanup down services. Call it explicitly, wait for
-        # completion and check services are removed.
-        pass
+        cleaner = kube.find(
+            kube.CronJob, "cinder-service-cleaner", self.namespace
+        )
+        job = await cleaner.run(wait_completion=True)
+        job.delete()
 
 
 class Cloudprober(Service):
