@@ -7,6 +7,7 @@ spec:
         tags:
           cloudprober: cloudprober:latest
           cloudprober_openstack_discovery: cloudprober-openstack-discovery:latest
+          dep_check: dep-check:latest
       endpoints:
         cluster_domain_suffix: cluster.local
         identity:

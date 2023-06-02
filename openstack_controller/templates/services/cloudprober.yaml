@@ -14,7 +14,7 @@ spec:
 {%- for image in [
     "cloudprober",
     "cloudprober_openstack_discovery",
-    ] %}
+    "dep_check"] %}
         {%- if image in images %}
           {{ image }}: {{ images[image] }}
         {%- endif %}
