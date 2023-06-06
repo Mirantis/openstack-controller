@@ -124,6 +124,14 @@ def client():
 
 
 @pytest.fixture
+def osdpl(mocker):
+    osdpl = mocker.patch("openstack_controller.kube.get_osdpl")
+    osdpl.return_value = mock.AsyncMock()
+    yield osdpl
+    mocker.stopall()
+
+
+@pytest.fixture
 def osdplst(mocker):
     osdplst = mocker.patch(
         "openstack_controller.osdplstatus.OpenStackDeploymentStatus"
@@ -2073,3 +2081,14 @@ def test_manila_install_fail_with_TF(client):
         response.json["response"]["allowed"] is False
     ), "Shared Filesystems (Manila) services is not supported with TungstenFabric networking."
     assert response.json["response"]["status"]["code"] == 400
+
+
+def test_openstack_create_osdpl_fail(client, osdpl):
+    req = copy.deepcopy(ADMISSION_REQ)
+    response = client.simulate_post("/validate", json=req)
+    assert response.status == falcon.HTTP_OK
+    assert response.json["response"]["allowed"] is False
+    assert (
+        "OpenStackDeployment already exist in namespace"
+        in response.json["response"]["status"]["message"]
+    )
