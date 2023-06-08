@@ -145,7 +145,7 @@ placement_db_sync: '{{ images_base_url }}/openstack/placement:wallaby-focal-2023
 keystone_db_sync_expand: '{{ images_base_url }}/openstack/keystone:wallaby-focal-20230522062719'
 keystone_db_sync_migrate: '{{ images_base_url }}/openstack/keystone:wallaby-focal-20230522062719'
 keystone_db_sync_contract: '{{ images_base_url }}/openstack/keystone:wallaby-focal-20230522062719'
-octavia_amphora: '{{ binary_base_url }}/openstack/bin/octavia/amphora-x64-haproxy-wallaby-20230522065454.qcow2'
+octavia_amphora: '{{ binary_base_url }}/openstack/bin/octavia/amphora-x64-haproxy-wallaby-20230608065423.qcow2'
 etcd: '{{ images_base_url }}/openstack/extra/etcd:v3.5.8-alpine-20230422141943'
 etcd_db_compact: '{{ images_base_url }}/openstack/extra/etcd:v3.5.8-alpine-20230422141943'
 cinder_db_sync_online: '{{ images_base_url }}/openstack/cinder:wallaby-focal-20230522062719'
@@ -182,7 +182,7 @@ mariadb_controller: '{{ images_base_url }}/general/mariadb:10.6.12-focal-2023052
 horizon_mirantis_theme_sha256summ: 482e5f23356499ce53ecff63060af797bf910af3fd3bd0062fc45de64ea2b96a
 horizon_mirantis_theme_url: '{{ binary_base_url }}/openstack/bin/horizon/mirantis-wallaby-08bd92e-20220110111451.tar.gz'
 ceph_config_helper: '{{ images_base_url }}/openstack/openstack-tools:yoga-focal-20230602114221'
-octavia_amphora_checksum: 0df41663ef069055f391682f85782ff9
+octavia_amphora_checksum: e8e15ec238306ffd86d2ac8166fceaaa
 masakari_db_sync: '{{ images_base_url }}/openstack/masakari:wallaby-focal-20230522062719'
 masakari_api: '{{ images_base_url }}/openstack/masakari:wallaby-focal-20230522062719'
 masakari_engine: '{{ images_base_url }}/openstack/masakari:wallaby-focal-20230522062719'
