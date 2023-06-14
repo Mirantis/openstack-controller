@@ -15,10 +15,10 @@ class ElasticLogsCollector(base.BaseLogsCollector):
     name = "elastic"
 
     def __init__(self, args):
+        super().__init__(args)
         self.elastic_url = args.elastic_url
         self.elastic_query_size = args.elastic_query_size
         self.elastic_index_name = "logstash-*"
-        self.workspace = os.path.join(args.workspace, "elastic")
         self.hosts = set(args.host)
         self.components = set(args.component)
         self.since = args.since

@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import abc
+import os
 
 
 class BaseLogsCollector:
@@ -12,6 +13,7 @@ class BaseLogsCollector:
 
     def __init__(self, args):
         self.args = args
+        self.workspace = os.path.join(args.workspace, self.name)
 
     @abc.abstractmethod
     def get_tasks(self):
