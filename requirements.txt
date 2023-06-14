@@ -13,3 +13,4 @@ prometheus_client
 openstacksdk>=0.53
 keystoneauth1
 marshmallow-dataclass
+opensearch-py

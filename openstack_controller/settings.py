@@ -271,6 +271,9 @@ LOGGING_CONFIG = {
         "aiohttp": {
             "level": "WARNING",
         },
+        "opensearch": {
+            "level": "WARNING",
+        },
     },
     "root": {
         "handlers": ["default"],

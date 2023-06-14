@@ -12,11 +12,12 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from openstack_controller.osctl.plugins import base
-from openstack_controller.osctl.plugins.sos import SosReportShell
-from openstack_controller.osctl.plugins.credentials import CredentialsShell
+from openstack_controller.osctl.plugins.sosreport import base
+from openstack_controller.osctl.plugins.sosreport.elastic import (
+    ElasticLogsCollector,
+)
 
 
-__all__ = (CredentialsShell, SosReportShell)
+__all__ = ElasticLogsCollector
 
-registry = base.OsctlShell.registry
+registry = base.BaseLogsCollector.registry
