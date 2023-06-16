@@ -1,6 +1,13 @@
 class OpenStackControllerException(Exception):
     """A generic OpenStack Controller exception to be inherited from"""
 
+    _msg_fmt = "An unknown exception occurred."
+
+    def __init__(self, message=None, **kwargs):
+        if not message:
+            message = self._msg_fmt % kwargs
+        super().__init__(message)
+
 
 class TaskException(OpenStackControllerException):
     """A generic handler error exception"""
@@ -29,3 +36,7 @@ class OsdplSubstitutionFailed(OpenStackControllerException):
     def __init__(self, message="Trying to substitute osdpl fileds failed."):
         super().__init__()
         self.message = message
+
+
+class PodExecCommandFailed(OpenStackControllerException):
+    _msg_fmt = "Running command in pod returned stderr: %(stderr)s"

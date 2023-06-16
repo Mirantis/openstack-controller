@@ -14,3 +14,4 @@ openstacksdk>=0.53
 keystoneauth1
 marshmallow-dataclass
 opensearch-py
+websocket-client # LGPLv2+

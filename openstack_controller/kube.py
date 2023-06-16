@@ -6,6 +6,7 @@ from os import urandom
 import sys
 from typing import List
 import functools
+from urllib.parse import urlencode
 
 import kopf
 import pykube
@@ -15,6 +16,8 @@ from . import constants as const
 from . import settings
 from . import utils
 from . import layers
+from . import websocket_client
+from . import exception
 
 LOG = utils.get_logger(__name__)
 CONF = settings.CONF
@@ -496,6 +499,62 @@ class Pod(pykube.Pod):
         ):
             return True
         return False
+
+    def _check_exec_errors(self, resp, raise_on_error=False):
+        error = resp.get("stderr")
+        if error:
+            LOG.error(f"Got stderr while running command in pod: {error}")
+            if raise_on_error:
+                raise exception.PodExecCommandFailed(error)
+
+    def exec(self, command, container=None, timeout=15, raise_on_error=False):
+        """Run command in pod and return output
+
+        :param command: List with command to execute
+        :param container: The name of container
+        :param timeout: Timeout to run command
+        :param raise_on_error: Boolean to raise exception on error.
+
+        :raises PodExecCommandFailed: When stderr is not empty and raise_on_error
+                is set to True
+        """
+        kwargs = {}
+        headers = {
+            "User-Agent": f"pykube-ng/{self.version}",
+            "Sec-Websocket-Protocol": "v4.channel.k8s.io",
+        }
+        query_string = urlencode({"command": command}, doseq=True)
+        params = {
+            "tty": False,
+            "stdin": False,
+            "stderr": True,
+            "stdout": True,
+        }
+        if container is not None:
+            params["container"] = container
+        kwargs["headers"] = headers
+        kwargs["params"] = params
+        kwargs["operation"] = "exec"
+
+        api_kwargs = self.api_kwargs(**kwargs)
+        api_kwargs["url"] = (
+            self.api_kwargs(**kwargs)["url"] + f"&{query_string}"
+        )
+        data = self.api.get_kwargs(**api_kwargs)
+
+        wsclient = None
+        res = {}
+        try:
+            wsclient = websocket_client.KubernetesWebSocketsClient(
+                self.api.config, **data
+            )
+            wsclient.run_forever(timeout=timeout)
+            res["all"] = wsclient.read_all()
+        finally:
+            if wsclient is not None:
+                wsclient.close()
+        self._check_exec_errors(res, raise_on_error)
+        return res
 
 
 class Node(pykube.Node):
