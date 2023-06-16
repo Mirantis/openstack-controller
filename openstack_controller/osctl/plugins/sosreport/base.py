@@ -15,6 +15,16 @@ class BaseLogsCollector:
         self.args = args
         self.workspace = os.path.join(args.workspace, self.name)
 
+    def dump_exec_result(self, dst, res):
+        os.makedirs(os.path.dirname(dst), exist_ok=True)
+
+        if res.get("stdout"):
+            with open(dst, "w") as f:
+                f.write(res["stdout"])
+        if res.get("stderr"):
+            with open(f"{dst}.error", "w") as f:
+                f.write(res["stderr"])
+
     @abc.abstractmethod
     def get_tasks(self):
         """Returns tuple with task and arguments for logs collection."""

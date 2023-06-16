@@ -524,6 +524,11 @@ class Pod(pykube.Pod):
             "Sec-Websocket-Protocol": "v4.channel.k8s.io",
         }
         query_string = urlencode({"command": command}, doseq=True)
+        # NOTE(vsaienko): when running with stdin: False, ie passed needed command
+        # API will not return error in stderr channel, and everything will be combined
+        # into stdout. To split channels we need use interactive mode, but with this
+        # we do not know actually when command finished and will wait whole timeout.
+        # Handle stderr here maybe in future this will be fixed in kubernetes API.
         params = {
             "tty": False,
             "stdin": False,
@@ -549,7 +554,7 @@ class Pod(pykube.Pod):
                 self.api.config, **data
             )
             wsclient.run_forever(timeout=timeout)
-            res["all"] = wsclient.read_all()
+            res = wsclient.read_all()
         finally:
             if wsclient is not None:
                 wsclient.close()
