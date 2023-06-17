@@ -7,6 +7,7 @@ from openstack_controller.admission.validators import neutron
 from openstack_controller.admission.validators import nova
 from openstack_controller.admission.validators import openstack
 from openstack_controller.admission.validators import nodes
+from openstack_controller.admission.validators import cinder
 
 __all__ = [
     barbican.BarbicanValidator,
@@ -18,4 +19,5 @@ __all__ = [
     nodes.NodeSpecificValidator,
     glance.GlanceValidator,
     ironic.IronicValidator,
+    cinder.CinderValidator,
 ]

@@ -2092,3 +2092,43 @@ def test_openstack_create_osdpl_fail(client, osdpl):
         "OpenStackDeployment already exist in namespace"
         in response.json["response"]["status"]["message"]
     )
+
+
+def test_cinder_buckup_drivers_ok(client):
+    allow_in = ["yoga"]
+    req = copy.deepcopy(ADMISSION_REQ)
+    req["request"]["object"]["spec"]["features"]["cinder"] = {
+        "backup": {"enabled": False}
+    }
+    for os_version in allow_in:
+        req["request"]["object"]["spec"]["openstack_version"] = os_version
+        response = client.simulate_post("/validate", json=req)
+        assert response.status == falcon.HTTP_OK
+        assert (
+            response.json["response"]["allowed"] is True
+        ), "Cinder backup management is supported from Yoga release."
+
+
+def test_cinder_buckup_drivers_fail(client):
+    deny_in = [
+        "queens",
+        "rocky",
+        "stein",
+        "train",
+        "ussuri",
+        "victoria",
+        "wallaby",
+        "xena",
+    ]
+    req = copy.deepcopy(ADMISSION_REQ)
+    req["request"]["object"]["spec"]["features"]["cinder"] = {
+        "backup": {"enabled": False}
+    }
+    for os_version in deny_in:
+        req["request"]["object"]["spec"]["openstack_version"] = os_version
+        response = client.simulate_post("/validate", json=req)
+        assert response.status == falcon.HTTP_OK
+        assert (
+            response.json["response"]["allowed"] is False
+        ), "Cinder backup management is supported from Yoga release."
+        assert response.json["response"]["status"]["code"] == 400
