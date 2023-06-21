@@ -555,6 +555,13 @@ class Pod(pykube.Pod):
             )
             wsclient.run_forever(timeout=timeout)
             res = wsclient.read_all()
+            if "stdout" not in res:
+                res["stdout"] = ""
+        except Exception as e:
+            LOG.exception(
+                f"Running command {command} inside pod {self.name}:{container} failed."
+            )
+            res = {"stdout": "", "stderr": f"Running command failed: {e}"}
         finally:
             if wsclient is not None:
                 wsclient.close()

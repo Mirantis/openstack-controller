@@ -22,8 +22,16 @@ from openstack_controller.osctl.plugins.sosreport.k8s import (
 from openstack_controller.osctl.plugins.sosreport.nova import (
     NovaObjectsCollector,
 )
+from openstack_controller.osctl.plugins.sosreport.neutron import (
+    NeutronObjectsCollector,
+)
 
 
-__all__ = (ElasticLogsCollector, K8sObjectsCollector, NovaObjectsCollector)
+__all__ = (
+    ElasticLogsCollector,
+    K8sObjectsCollector,
+    NovaObjectsCollector,
+    NeutronObjectsCollector,
+)
 
 registry = base.BaseLogsCollector.registry
