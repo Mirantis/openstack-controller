@@ -40,6 +40,9 @@ spec:
                           type: string
                           description: >
                             The current state of LCM operation one of WAITING, APPLYING or APPLIED.
+                        release:
+                          description: The MOSK release version.
+                          type: string
                         openstack_version:
                           type: string
                           description: >
@@ -148,6 +151,9 @@ spec:
       - name: State
         type: string
         jsonPath: .status.osdpl.state
+      - name: MOSK Release
+        type: string
+        jsonPath: .status.osdpl.release
   # either Namespaced or Cluster
   scope: Namespaced
   names:
