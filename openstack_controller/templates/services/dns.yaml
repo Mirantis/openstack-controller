@@ -130,8 +130,10 @@ spec:
 {%- endif %}
           oslo_messaging_notifications:
             topics: {{ notification_topics|join(',') }}
+      {%- if spec.openstack_version not in ["queens", "rocky", "stein", "train", "ussuri"] %}
           coordination:
             backend_url: {{ get_etcd3_endpoint(spec.openstack_version, 'etcd3gw') }}
+      {%- endif %}
         logging:
           logger_designate:
             level: {{ designate_log_level }}
