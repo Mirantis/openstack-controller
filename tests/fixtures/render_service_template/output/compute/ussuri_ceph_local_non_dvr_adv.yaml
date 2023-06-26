@@ -101,6 +101,18 @@ spec:
             level: INFO
           logger_os.brick:
             level: INFO
+        paste:
+          composite:osapi_compute:
+            /v2: oscomputeversion_legacy_v2
+            /v2.1: oscomputeversion_v2
+            /v2/+: openstack_compute_api_v21_legacy_v2_compatible
+            /v2.1/+: openstack_compute_api_v21
+          pipeline:oscomputeversion_v2:
+            pipeline: cors compute_req_id faultwrap http_proxy_to_wsgi oscomputeversionapp_v2
+          pipeline:oscomputeversion_legacy_v2:
+            pipeline: cors compute_req_id faultwrap http_proxy_to_wsgi legacy_v2_compatible oscomputeversionapp_v2
+          app:oscomputeversionapp_v2:
+            paste.app_factory: nova.api.openstack.compute.versions:VersionsV2.factory
         nova:
           DEFAULT:
             initial_cpu_allocation_ratio: 8.0
