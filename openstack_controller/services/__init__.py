@@ -567,7 +567,28 @@ class Cinder(OpenStackServiceWithCeph, MaintenanceApiMixin):
                 nwl.set_error_message(msg)
                 raise kopf.TemporaryError(msg)
 
-    async def cleanup_metadata(self, node, nwl):
+    async def cleanup_metadata(self, nwl):
+        node_name = nwl.obj["spec"]["nodeName"]
+        os_client = openstack_utils.OpenStackClientManager()
+
+        def wait_for_services_down():
+            volume_services = os_client.volume_get_services(
+                host=node_name, binary="cinder-volume"
+            )
+            if len(volume_services) > 0:
+                up_services = [
+                    svc
+                    for svc in volume_services
+                    if svc["state"].lower() == "up"
+                ]
+                if up_services:
+                    return False
+            return True
+
+        await asyncio.wait_for(
+            utils.async_retry(wait_for_services_down),
+            timeout=300,
+        )
         cleaner = kube.find(
             kube.CronJob, "cinder-service-cleaner", self.namespace
         )
@@ -1523,9 +1544,10 @@ class Neutron(OpenStackService, MaintenanceApiMixin):
     async def process_ndr(self, node, nwl):
         return await self.remove_node_from_scheduling(node)
 
-    async def cleanup_metadata(self, node, nwl):
+    async def cleanup_metadata(self, nwl):
+        node_name = nwl.obj["spec"]["nodeName"]
         os_client = openstack_utils.OpenStackClientManager()
-        os_client.network_ensure_agents_absent(host=node.name)
+        os_client.network_ensure_agents_absent(host=node_name)
 
 
 class Nova(OpenStackServiceWithCeph, MaintenanceApiMixin):
@@ -1983,9 +2005,10 @@ class Nova(OpenStackServiceWithCeph, MaintenanceApiMixin):
                 nwl.set_error_message(msg)
                 raise kopf.TemporaryError(msg)
 
-    async def cleanup_metadata(self, node, nwl):
+    async def cleanup_metadata(self, nwl):
+        node_name = nwl.obj["spec"]["nodeName"]
         os_client = openstack_utils.OpenStackClientManager()
-        os_client.compute_ensure_services_absent(host=node.name)
+        os_client.compute_ensure_services_absent(host=node_name)
 
 
 class Placement(OpenStackService):

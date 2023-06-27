@@ -121,9 +121,9 @@ class LockBase(pykube.objects.APIObject):
                 self.set_state(LockState.active.value)
                 self.set_release(settings.OSCTL_CLUSTER_RELEASE)
 
-    def absent(self):
+    def absent(self, propagation_policy=None):
         if self.exists():
-            self.delete()
+            self.delete(propagation_policy=propagation_policy)
 
     def is_active(self):
         self.reload()
@@ -176,8 +176,10 @@ class ClusterWorkloadLock(LockBase):
 
 
 class NodeWorkloadLock(LockBase):
+    version = "lcm.mirantis.com/v1alpha1"
     endpoint = "nodeworkloadlocks"
     kind = "NodeWorkloadLock"
+    kopf_on_args = *version.split("/"), endpoint
 
     @classmethod
     def _base_spec(cls, name):

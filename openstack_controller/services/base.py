@@ -757,13 +757,12 @@ class MaintenanceApiMixin:
         """
         return True
 
-    async def cleanup_metadata(self, node, nwl):
+    async def cleanup_metadata(self, nwl):
         """Cleanup metadata tied with specific node.
 
         At this point no pods are running on the node so here
         we can proceed with metadata cleanup.
 
-        :param node: the node object
         :param nwl: the nodeWorkloadLock object
 
         :returns True: when node is ready for deletion

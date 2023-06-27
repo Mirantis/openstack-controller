@@ -99,7 +99,7 @@ async def node_maintenance_request_delete_handler(body, **kwargs):
     nwl = maintenance.NodeWorkloadLock.get_resource(node_name)
     nmr = maintenance.NodeMaintenanceRequest.get_resource(body)
     if not node or not nwl.required_for_node(node):
-        nwl.absent()
+        nwl.absent(propagation_policy="Background")
         return
 
     osdpl = kube.get_osdpl()
@@ -261,3 +261,40 @@ async def node_deletion_request_change_handler(body, **kwargs):
     nwl.set_state_inactive()
     nwl.unset_error_message()
     LOG.info(f"The node {node_name} is ready for deletion.")
+
+
+@kopf.on.delete(*maintenance.NodeWorkloadLock.kopf_on_args)
+async def node_workloadlock_request_delete_handler(body, **kwargs):
+    name = body["metadata"]["name"]
+    node_name = body["spec"]["nodeName"]
+    LOG.info(f"Got nodeworkloadlock deletion request change event {name}")
+    if not settings.OSCTL_NODE_MAINTENANCE_ENABLED:
+        return
+
+    if not body["spec"].get("controllerName") == "openstack":
+        return
+
+    osdpl = kube.get_osdpl()
+    if osdpl and osdpl.exists():
+        node = kube.find(kube.Node, name, silent=True)
+        if node and node.exists():
+            msg = "The kubernetes node {node_name} still exists. Deffer OpenStack service metadata removal."
+            raise kopf.TemporaryError(msg)
+
+        nwl = maintenance.NodeWorkloadLock.get_resource(node_name)
+        mspec = osdpl.mspec
+        osdpl_name = osdpl.metadata["name"]
+        osdpl_namespace = osdpl.metadata["namespace"]
+        osdplst = osdplstatus.OpenStackDeploymentStatus(
+            osdpl_name, osdpl_namespace
+        )
+
+        for service, service_class in reversed(services.ORDERED_SERVICES):
+            service = service_class(mspec, LOG, osdplst)
+            if service.maintenance_api:
+                LOG.info(f"Cleaning metadata for node {name}")
+                await service.cleanup_metadata(nwl)
+
+    LOG.info(
+        f"The nodeworkloadlock for node {node_name} is ready for deletion."
+    )

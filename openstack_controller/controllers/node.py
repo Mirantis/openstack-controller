@@ -18,10 +18,8 @@ import kopf
 
 from openstack_controller import constants as const
 from openstack_controller import kube
-from openstack_controller import services
 from openstack_controller import maintenance
 from openstack_controller import openstack_utils as ostutils
-from openstack_controller import osdplstatus
 from openstack_controller import settings
 from openstack_controller import utils
 
@@ -104,7 +102,7 @@ async def node_change_handler(body, reason, **kwargs):
         LOG.info(
             f"We do not have OS workloads on node {name} anymore. Remove NodeWorkloadLock."
         )
-        nwl.absent()
+        nwl.absent(propagation_policy="Background")
 
 
 @kopf.on.delete("", "v1", "nodes")
@@ -112,21 +110,7 @@ async def node_delete_handler(body, **kwargs):
     name = body["metadata"]["name"]
     LOG.info(f"Got delete event for node {name}")
     nwl = maintenance.NodeWorkloadLock.get_resource(name)
-
-    node = kube.find(kube.Node, name, silent=True)
-
-    osdpl = kube.get_osdpl()
-    if osdpl and osdpl.exists():
-        mspec = osdpl.mspec
-        osdpl_name = osdpl.metadata["name"]
-        osdpl_namespace = osdpl.metadata["namespace"]
-        osdplst = osdplstatus.OpenStackDeploymentStatus(
-            osdpl_name, osdpl_namespace
-        )
-
-        for service, service_class in reversed(services.ORDERED_SERVICES):
-            service = service_class(mspec, LOG, osdplst)
-            if service.maintenance_api:
-                LOG.info(f"Cleaning metadata for node {name}")
-                await service.cleanup_metadata(node, nwl)
-    nwl.absent()
+    # NOTE(vsaienko): we start OpenStack metadata cleanup on nwl removal.
+    # Do not lock node deletion here, as we wait node is deleted and services
+    # are not running anymore before starting to remove them.
+    nwl.absent(propagation_policy="Background")

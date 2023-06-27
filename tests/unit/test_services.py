@@ -70,11 +70,36 @@ def _get_node(host="host1", role="compute"):
     return node_obj
 
 
+def _get_nwl_obj(controller, host):
+    return {
+        "apiVersion": "v1",
+        "kind": "NodeWorkloadLock",
+        "metadata": {
+            "name": f"{controller}-{host}",
+        },
+        "spec": {
+            "controllerName": controller,
+            "nodeName": host,
+            "nodeDeletionRequestSupported": True,
+        },
+    }
+
+
 @pytest.fixture
 def mock_osdpl(mocker):
     osdpl = mocker.patch("openstack_controller.kube.get_osdpl")
     osdpl.return_value = mock.MagicMock()
     yield osdpl
+    mocker.stopall()
+
+
+@pytest.fixture
+def kube_find(mocker):
+    mock_get_obj = mocker.patch(
+        "openstack_controller.kube.find",
+        mock.Mock(),
+    )
+    yield mock_get_obj
     mocker.stopall()
 
 
@@ -325,6 +350,14 @@ def node_maintenance_config(mocker):
     )
     nmc.return_value = mock.MagicMock()
     yield nmc
+    mocker.stopall()
+
+
+@pytest.fixture
+def nwl(mocker):
+    nwl = mocker.patch("openstack_controller.maintenance.NodeWorkloadLock")
+    nwl.return_value = mock.MagicMock()
+    yield nwl
     mocker.stopall()
 
 
@@ -986,18 +1019,13 @@ async def test_nova_process_ndr_compute_1instance_ndr_skip_instance_check(
 
 @pytest.mark.asyncio
 async def test_nova_cleanup_metadata_controller(
-    mocker,
-    openstack_client,
-    openstackdeployment_mspec,
+    mocker, openstack_client, openstackdeployment_mspec, nwl
 ):
     osdplstmock = mock.Mock()
-    nwl = mock.Mock()
-    node3 = kube.Node(
-        mock.Mock, copy.deepcopy(_get_node(host="host3", role="control"))
-    )
+    nwl.obj = _get_nwl_obj("openstack", "host1")
     await services.Nova(
         openstackdeployment_mspec, logging, osdplstmock
-    ).cleanup_metadata(node3, nwl)
+    ).cleanup_metadata(nwl)
     openstack_client.return_value.compute_ensure_services_absent.assert_called_once()
 
 
@@ -1006,15 +1034,13 @@ async def test_nova_cleanup_metadata_compute(
     mocker,
     openstack_client,
     openstackdeployment_mspec,
+    nwl,
 ):
     osdplstmock = mock.Mock()
-    nwl = mock.Mock()
-    node3 = kube.Node(
-        mock.Mock, copy.deepcopy(_get_node(host="host3", role="compute"))
-    )
+    nwl.obj = _get_nwl_obj("openstack", "host1")
     await services.Nova(
         openstackdeployment_mspec, logging, osdplstmock
-    ).cleanup_metadata(node3, nwl)
+    ).cleanup_metadata(nwl)
     openstack_client.return_value.compute_ensure_services_absent.assert_called_once()
 
 
@@ -1023,16 +1049,61 @@ async def test_neutron_cleanup_metadata_compute(
     mocker,
     openstack_client,
     openstackdeployment_mspec,
+    nwl,
 ):
     osdplstmock = mock.Mock()
-    nwl = mock.Mock()
-    node3 = kube.Node(
-        mock.Mock, copy.deepcopy(_get_node(host="host3", role="compute"))
-    )
+    nwl.obj = _get_nwl_obj("openstack", "host1")
     await services.Neutron(
         openstackdeployment_mspec, logging, osdplstmock
-    ).cleanup_metadata(node3, nwl)
+    ).cleanup_metadata(nwl)
     openstack_client.return_value.network_ensure_agents_absent.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_cinder_cleanup_metadata(
+    mocker,
+    openstack_client,
+    openstackdeployment_mspec,
+    nwl,
+    kube_find,
+):
+    osdplstmock = mock.Mock()
+    kube_find.return_value = AsyncMock()
+    nwl.obj = _get_nwl_obj("openstack", "host1")
+    openstack_client.return_value.volume_get_services.return_value = [
+        _get_volume_service_obj({"host": "host3@lvm", "state": "down"})
+    ]
+    await services.Cinder(
+        openstackdeployment_mspec, logging, osdplstmock
+    ).cleanup_metadata(nwl)
+    openstack_client.return_value.volume_get_services.assert_called_once()
+    kube.find.assert_called_once_with(
+        kube.CronJob, "cinder-service-cleaner", "openstack"
+    )
+
+
+@pytest.mark.asyncio
+async def test_cinder_cleanup_metadata_retry(
+    mocker,
+    openstack_client,
+    openstackdeployment_mspec,
+    nwl,
+    kube_find,
+):
+    osdplstmock = mock.Mock()
+    kube_find.return_value = AsyncMock()
+    nwl.obj = _get_nwl_obj("openstack", "host1")
+    openstack_client.return_value.volume_get_services.side_effect = [
+        [_get_volume_service_obj({"host": "host3@lvm", "state": "up"})],
+        [_get_volume_service_obj({"host": "host3@lvm", "state": "down"})],
+    ]
+    await services.Cinder(
+        openstackdeployment_mspec, logging, osdplstmock
+    ).cleanup_metadata(nwl)
+    assert 2 == openstack_client.return_value.volume_get_services.call_count
+    kube.find.assert_called_once_with(
+        kube.CronJob, "cinder-service-cleaner", "openstack"
+    )
 
 
 @pytest.mark.asyncio
