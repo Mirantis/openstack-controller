@@ -589,11 +589,27 @@ class Cinder(OpenStackServiceWithCeph, MaintenanceApiMixin):
             utils.async_retry(wait_for_services_down),
             timeout=300,
         )
-        cleaner = kube.find(
-            kube.CronJob, "cinder-service-cleaner", self.namespace
-        )
-        job = await cleaner.run(wait_completion=True)
-        job.delete()
+
+        cinder_api_pod = list(
+            kube.resource_list(
+                kube.Pod,
+                {"application": "cinder", "component": "api"},
+                self.namespace,
+            )
+        )[0]
+        for svc in os_client.volume_get_services(
+            host=node_name, binary="cinder-volume"
+        ):
+            cinder_api_pod.exec(
+                [
+                    "cinder-manage",
+                    "service",
+                    "remove",
+                    "cinder-volume",
+                    svc["host"],
+                ],
+                "cinder-api",
+            )
 
 
 class Cloudprober(Service):

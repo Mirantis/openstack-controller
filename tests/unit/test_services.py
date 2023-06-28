@@ -1065,21 +1065,22 @@ async def test_cinder_cleanup_metadata(
     openstack_client,
     openstackdeployment_mspec,
     nwl,
-    kube_find,
+    kube_resource_list,
 ):
     osdplstmock = mock.Mock()
-    kube_find.return_value = AsyncMock()
     nwl.obj = _get_nwl_obj("openstack", "host1")
     openstack_client.return_value.volume_get_services.return_value = [
         _get_volume_service_obj({"host": "host3@lvm", "state": "down"})
     ]
-    await services.Cinder(
-        openstackdeployment_mspec, logging, osdplstmock
-    ).cleanup_metadata(nwl)
-    openstack_client.return_value.volume_get_services.assert_called_once()
-    kube.find.assert_called_once_with(
-        kube.CronJob, "cinder-service-cleaner", "openstack"
-    )
+    kube_resource_list.return_value = [kube.Pod(api=mock.Mock(), obj=None)]
+    with mock.patch.object(kube.Pod, "exec"):
+        await services.Cinder(
+            openstackdeployment_mspec, logging, osdplstmock
+        ).cleanup_metadata(nwl)
+        assert (
+            2 == openstack_client.return_value.volume_get_services.call_count
+        )
+        kube_resource_list.assert_called_once()
 
 
 @pytest.mark.asyncio
@@ -1088,22 +1089,24 @@ async def test_cinder_cleanup_metadata_retry(
     openstack_client,
     openstackdeployment_mspec,
     nwl,
-    kube_find,
+    kube_resource_list,
 ):
     osdplstmock = mock.Mock()
-    kube_find.return_value = AsyncMock()
     nwl.obj = _get_nwl_obj("openstack", "host1")
     openstack_client.return_value.volume_get_services.side_effect = [
         [_get_volume_service_obj({"host": "host3@lvm", "state": "up"})],
         [_get_volume_service_obj({"host": "host3@lvm", "state": "down"})],
+        [_get_volume_service_obj({"host": "host3@lvm", "state": "down"})],
     ]
-    await services.Cinder(
-        openstackdeployment_mspec, logging, osdplstmock
-    ).cleanup_metadata(nwl)
-    assert 2 == openstack_client.return_value.volume_get_services.call_count
-    kube.find.assert_called_once_with(
-        kube.CronJob, "cinder-service-cleaner", "openstack"
-    )
+    kube_resource_list.return_value = [kube.Pod(api=mock.Mock(), obj=None)]
+    with mock.patch.object(kube.Pod, "exec"):
+        await services.Cinder(
+            openstackdeployment_mspec, logging, osdplstmock
+        ).cleanup_metadata(nwl)
+        assert (
+            3 == openstack_client.return_value.volume_get_services.call_count
+        )
+        kube_resource_list.assert_called_once()
 
 
 @pytest.mark.asyncio
