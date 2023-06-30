@@ -7,9 +7,9 @@ import random
 import datetime
 import shutil
 
-from openstack_controller import constants
 from openstack_controller.osctl.plugins import base
 from openstack_controller.osctl.plugins import sosreport
+from openstack_controller.osctl.plugins import constants
 from openstack_controller import utils
 
 LOG = utils.get_logger(__name__)
@@ -18,7 +18,7 @@ now = datetime.datetime.utcnow()
 
 class SosReportShell(base.OsctlShell):
     name = "sos"
-    description = "Collect sos report from deployment."
+    description = "Collect sos report from deployment. Collects logs from Elastic, Kubernetes objects and low level data from backends."
 
     def build_options(self):
         sos_sub = self.pl_parser.add_subparsers(
@@ -32,9 +32,8 @@ class SosReportShell(base.OsctlShell):
             "--component",
             required=True,
             action="append",
-            choices=constants.OS_SERVICES_MAP.values(),
             type=str,
-            help="Name of component to create report for. Can be specified multiple times.",
+            help=f"Name of component to create report for. Can be specified multiple times. List of known components: {list(constants.OSCTL_COMPONENT_LOGGERS.keys())}",
         )
         logs_parser.add_argument(
             "--host",

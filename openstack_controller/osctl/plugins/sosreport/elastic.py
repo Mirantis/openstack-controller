@@ -4,6 +4,7 @@ import os
 
 from opensearchpy import OpenSearch
 
+from openstack_controller.osctl.plugins import constants
 from openstack_controller.osctl.plugins.sosreport import base
 from openstack_controller.osctl import utils as osctl_utils
 from openstack_controller import utils
@@ -20,17 +21,26 @@ class ElasticLogsCollector(base.BaseLogsCollector):
         self.elastic_query_size = args.elastic_query_size
         self.elastic_index_name = "logstash-*"
         self.hosts = set(args.host)
-        self.components = set(args.component)
+        self.loggers = self.get_loggers(args.component)
         self.since = args.since
 
-    def query_logger(self, component):
+    def get_loggers(self, components):
+        loggers = set()
+        for component in set(components):
+            for logger in constants.OSCTL_COMPONENT_LOGGERS.get(
+                component, [component]
+            ):
+                loggers.add(logger)
+        return loggers
+
+    def query_logger(self, logger):
         return {
             "bool": {
                 "should": [
                     {
                         "query_string": {
                             "fields": ["logger"],
-                            "query": f"{component}\\-*",
+                            "query": f"{logger}\\-*",
                         }
                     }
                 ],
@@ -61,7 +71,7 @@ class ElasticLogsCollector(base.BaseLogsCollector):
         """
         return {"range": {"@timestamp": {"gte": f"now-{since}"}}}
 
-    def get_query(self, host, component, since="1w"):
+    def get_query(self, host, logger, since="1w"):
         return {
             "size": self.elastic_query_size,
             "sort": [
@@ -77,7 +87,7 @@ class ElasticLogsCollector(base.BaseLogsCollector):
                     "filter": [
                         {"match_all": {}},
                         self.query_host(host),
-                        self.query_logger(component),
+                        self.query_logger(logger),
                         self.query_timestamp(since),
                     ],
                     "should": [],
@@ -87,10 +97,10 @@ class ElasticLogsCollector(base.BaseLogsCollector):
         }
 
     @osctl_utils.generic_exception
-    def collect_logs(self, host, component, since="1w"):
-        LOG.info(f"Starting logs collection for {host} {component}")
+    def collect_logs(self, host, logger, since="1w"):
+        LOG.info(f"Starting logs collection for {host} {logger}")
         client = OpenSearch([self.elastic_url], timeout=60, http_compress=True)
-        query = self.get_query(host, component, since)
+        query = self.get_query(host, logger, since)
         response = client.search(
             body=query, index=self.elastic_index_name, request_timeout=60
         )
@@ -101,7 +111,12 @@ class ElasticLogsCollector(base.BaseLogsCollector):
                 level = hit["_source"].get("severity_label", "UNKNOWN")
                 message = hit["_source"].get("message", "UNCNOWN")
                 pod_name = hit["_source"]["kubernetes"]["pod_name"]
-                logs_dst = os.path.join(self.workspace, host, pod_name)
+                container_name = hit["_source"]["kubernetes"]["container_name"]
+                logs_dst_base = os.path.join(self.workspace, host, pod_name)
+                os.makedirs(logs_dst_base, exist_ok=True)
+                logs_dst = os.path.join(
+                    self.workspace, host, pod_name, container_name
+                )
                 msg = f"{ts} {level} {message}"
                 with open(logs_dst, "a") as f:
                     f.write(msg)
@@ -110,16 +125,16 @@ class ElasticLogsCollector(base.BaseLogsCollector):
             search_after = response["hits"]["hits"][-1]["sort"]
             query["search_after"] = search_after
             response = client.search(body=query, index=self.elastic_index_name)
-        LOG.info(f"Successfully collected logs for {host} {component}")
+        LOG.info(f"Successfully collected logs for {host} {logger}")
 
     def get_tasks(self):
         res = []
         for host in self.hosts:
-            for component in self.components:
+            for logger in self.loggers:
                 res.append(
                     (
                         self.collect_logs,
-                        (host, component),
+                        (host, logger),
                         {"since": self.since},
                     )
                 )
