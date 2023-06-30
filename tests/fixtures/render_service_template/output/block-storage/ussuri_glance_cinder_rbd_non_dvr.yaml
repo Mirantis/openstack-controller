@@ -9,7 +9,7 @@ spec:
           volumes-hdd:
             volume_backend_name: volumes-hdd
           volumes-hdd_multiattach:
-            multiattach: "\"<is> True\""
+            multiattach: '"<is> True"'
             volume_backend_name: volumes-hdd
       ceph_client:
         configmap: rook-ceph-config

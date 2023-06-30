@@ -324,6 +324,9 @@ spec:
 {%- for backend in enabled_backends %}
           {{ backend }}:
             volume_backend_name: {{ backend }}
+          {{ backend }}_multiattach:
+            volume_backend_name: {{ backend }}
+            multiattach: "\"<is> True\""
 {%- endfor %}
 {%- for label, override in node_specific.items() %}
   {%- set cinder_override = override.get("cinder", {}) %}
