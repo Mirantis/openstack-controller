@@ -574,7 +574,7 @@ properties:
                 - type: string
                 - type: object
                   additionalProperties: false
-                  properties:
+                  properties: &value_from
                     value_from:
                       type: object
                       additionalProperties: false
@@ -1425,6 +1425,59 @@ properties:
                 description: |
                   Enable cinder backup service. Disable for cephless deployment.
                   default: true
+              drivers:
+                type: object
+                description: |
+                  Backends to perform backup to. Could be: ceph, s3. Default is ceph.
+                additionalProperties: False
+                patternProperties:
+                  ".*":
+                    description: |
+                      Backup backend name.
+                    type: object
+                    additionalProperties: False
+                    required:
+                      - type
+                      - enabled
+                    properties:
+                      type:
+                        type: string
+                        enum:
+                          - s3
+                      enabled:
+                        type: boolean
+                      endpoint_url:
+                        type: string
+                        description: |
+                          The url where the S3 server is listening
+                      store_bucket:
+                        type: string
+                        description: |
+                          The S3 bucket to be used to store the Cinder backup data
+                      store_access_key:
+                        type: object
+                        description: |
+                          The S3 query token access key.
+                        additionalProperties: false
+                        properties:
+                          *value_from
+                      store_secret_key:
+                        type: object
+                        description: |
+                          The S3 query token secret key.
+                        additionalProperties: false
+                        properties:
+                          *value_from
+                    if:
+                      properties:
+                        type:
+                          const: s3
+                    then:
+                      required:
+                        - endpoint_url
+                        - store_bucket
+                        - store_access_key
+                        - store_secret_key
       logging:
         type: object
         additionalProperties: false

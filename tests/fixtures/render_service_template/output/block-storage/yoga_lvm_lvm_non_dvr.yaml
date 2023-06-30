@@ -60,11 +60,16 @@ spec:
         backends: null
         cinder:
           DEFAULT:
+            backup_driver: cinder.backup.drivers.s3.S3BackupDriver
+            backup_s3_endpoint_url: https://openstack-store.it.just.works/
+            backup_s3_store_access_key: ac5n2R3kzf5cy4rcMSWu
+            backup_s3_store_bucket: cinder-backup
+            backup_s3_store_secret_key: snJdDvibofDLi4KMVZJd
             control_exchange: cinder
             host: <None>
             scheduler_default_filters: AvailabilityZoneFilter,CapacityFilter,CapabilitiesFilter,InstanceLocalityFilter
           coordination:
-            backend_url: etcd3+http://etcd:2379
+            backend_url: etcd3+http://etcd:2379?api_version=auto
           keystone_authtoken:
             memcache_secret_key: 76HsSsABaJvTQU6I
             memcache_security_strategy: ENCRYPT
@@ -215,6 +220,7 @@ spec:
           scheme:
             default: http
             public: https
+          state: absent
         volumev3:
           host_fqdn_override:
             public:
@@ -295,7 +301,7 @@ spec:
         cron_service_cleaner: true
         job_drop_default_volume_type: true
         cron_volume_usage_audit: false
-        statefulset_backup: false
+        statefulset_backup: true
         statefulset_volume: false
         ceph_conf: false
         job_clean: false

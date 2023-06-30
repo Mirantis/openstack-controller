@@ -30,6 +30,12 @@
 {%- set cadf_audit = spec.get('features', {}).get('logging', {}).get('cadf', {'enabled': false}) %}
 {%- set cadf_audit_driver = spec.get('features', {}).get('logging', {}).get('cadf', {}).get('driver', 'messagingv2') %}
 {%- set is_backup_enabled = spec.get('features', {}).get('cinder', {}).get('backup', {}).get('enabled', True) %}
+{%- if is_backup_enabled %}
+{%- set backup_drivers = [] %}
+{%-   for driver_name, driver in spec.get('features', {}).get('cinder', {}).get('backup', {}).get('drivers', {}).items() if driver.get('enabled', False) %}
+{%-     do backup_drivers.append(driver) %}
+{%-   endfor %}
+{%- endif %}
 
 spec:
   releases:
@@ -244,6 +250,7 @@ spec:
   {%- endif %}
 {%- endif %}
 {%- if is_backup_enabled %}
+  {%- if not backup_drivers %}
             backup_driver: cinder.backup.drivers.ceph.CephBackupDriver
     {%- for backend, backend_config in ceph.cinder.pools.items() %}
       {%- if backend_config.role == 'backup' %}
@@ -251,6 +258,14 @@ spec:
             backup_ceph_pool: {{ backend_config.name }}
       {%- endif %}
     {%- endfor %}
+  {%- elif backup_drivers[0]["type"] == "s3" %}
+            backup_driver: cinder.backup.drivers.s3.S3BackupDriver
+    {%- for param, param_val in backup_drivers[0].items() %}
+      {%- if param not in ["type", "enabled"] %}
+            backup_s3_{{ param }}: {{ param_val }}
+      {%- endif %}
+    {%- endfor %}
+  {%- endif %}
 {%- endif %}
             control_exchange: cinder
 {%- if is_ceph_enabled %}
@@ -323,7 +338,7 @@ spec:
       secrets:
         rbd:
           volume: {{ ceph.cinder.secrets }}
-  {%- if is_backup_enabled %}
+  {%- if is_backup_enabled and not backup_drivers %}
           backup: {{ ceph.cinder.secrets }}
   {%- endif %}
 {%- endif %}
