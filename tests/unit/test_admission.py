@@ -2098,7 +2098,33 @@ def test_cinder_buckup_drivers_ok(client):
     allow_in = ["yoga"]
     req = copy.deepcopy(ADMISSION_REQ)
     req["request"]["object"]["spec"]["features"]["cinder"] = {
-        "backup": {"enabled": False}
+        "backup": {
+            "enabled": False,
+            "drivers": {
+                "testdriver": {
+                    "type": "s3",
+                    "enabled": True,
+                    "endpoint_url": "http://test.me",
+                    "store_bucket": "test",
+                    "store_access_key": {
+                        "value_from": {
+                            "secret_key_ref": {
+                                "key": "ak",
+                                "name": "secret_name",
+                            }
+                        }
+                    },
+                    "store_secret_key": {
+                        "value_from": {
+                            "secret_key_ref": {
+                                "key": "sk",
+                                "name": "secret_name",
+                            }
+                        }
+                    },
+                }
+            },
+        }
     }
     for os_version in allow_in:
         req["request"]["object"]["spec"]["openstack_version"] = os_version
@@ -2106,7 +2132,7 @@ def test_cinder_buckup_drivers_ok(client):
         assert response.status == falcon.HTTP_OK
         assert (
             response.json["response"]["allowed"] is True
-        ), "Cinder backup management is supported from Yoga release."
+        ), "Custom Cinder backup driver is allowed from Yoga release."
 
 
 def test_cinder_buckup_drivers_fail(client):
@@ -2122,7 +2148,33 @@ def test_cinder_buckup_drivers_fail(client):
     ]
     req = copy.deepcopy(ADMISSION_REQ)
     req["request"]["object"]["spec"]["features"]["cinder"] = {
-        "backup": {"enabled": False}
+        "backup": {
+            "enabled": False,
+            "drivers": {
+                "testdriver": {
+                    "type": "s3",
+                    "enabled": True,
+                    "endpoint_url": "http://test.me",
+                    "store_bucket": "test",
+                    "store_access_key": {
+                        "value_from": {
+                            "secret_key_ref": {
+                                "key": "ak",
+                                "name": "secret_name",
+                            }
+                        }
+                    },
+                    "store_secret_key": {
+                        "value_from": {
+                            "secret_key_ref": {
+                                "key": "sk",
+                                "name": "secret_name",
+                            }
+                        }
+                    },
+                }
+            },
+        }
     }
     for os_version in deny_in:
         req["request"]["object"]["spec"]["openstack_version"] = os_version
@@ -2130,5 +2182,5 @@ def test_cinder_buckup_drivers_fail(client):
         assert response.status == falcon.HTTP_OK
         assert (
             response.json["response"]["allowed"] is False
-        ), "Cinder backup management is supported from Yoga release."
+        ), "Custom Cinder backup driver is allowed from Yoga release."
         assert response.json["response"]["status"]["code"] == 400
