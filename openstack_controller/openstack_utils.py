@@ -110,7 +110,7 @@ class OpenStackClientManager:
         def match_host(volume, host=None):
             if host is None:
                 return True
-            volume_host = volume["os-vol-host-attr:host"] or ""
+            volume_host = volume.get("host", "")
             return host == volume_host.split("@")[0]
 
         return [
