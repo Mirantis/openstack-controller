@@ -23,22 +23,25 @@ class CinderValidator(base.BaseValidator):
         spec = review_request.get("object", {}).get("spec", {})
         cinder_section = spec.get("features", {}).get("cinder", {})
 
-        self._check_custom_backup_allowed(spec)
+        self._check_custom_backup_driver_allowed(spec)
         self._check_backup_drivers_count(cinder_section)
 
-    def _check_custom_backup_allowed(self, spec):
+    def _check_custom_backup_driver_allowed(self, spec):
         openstack_version = spec["openstack_version"]
-        backup_section = (
-            spec.get("features", {}).get("cinder", {}).get("backup", {})
+        drivers_section = (
+            spec.get("features", {})
+            .get("cinder", {})
+            .get("backup", {})
+            .get("drivers", {})
         )
 
-        if backup_section:
+        if drivers_section:
             if (
                 constants.OpenStackVersion[openstack_version].value
-                < constants.OpenStackVersion["yoga"]
+                < constants.OpenStackVersion["yoga"].value
             ):
                 raise exception.OsDplValidationFailed(
-                    "Cinder backup management is supported from Yoga release."
+                    "Custom Cinder backup driver is allowed from Yoga release."
                 )
 
     def _check_backup_drivers_count(self, cinder_section):
