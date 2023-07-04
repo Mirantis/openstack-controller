@@ -56,7 +56,7 @@ class KubernetesWebSocketsClient:
         self.sock = WebSocket(
             sslopt=self.ssl_headers, skip_utf8_validation=False
         )
-        self.sock.connect(self.url)
+        self.sock.connect(self.url, header=headers)
 
         self._connected = True
 

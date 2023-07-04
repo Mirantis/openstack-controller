@@ -523,6 +523,11 @@ class Pod(pykube.Pod):
             "User-Agent": f"pykube-ng/{self.version}",
             "Sec-Websocket-Protocol": "v4.channel.k8s.io",
         }
+        if "token" in self.api.config.user:
+            headers.update(
+                {"Authorization": f"Bearer {self.api.config.user['token']}"}
+            )
+
         query_string = urlencode({"command": command}, doseq=True)
         # NOTE(vsaienko): when running with stdin: False, ie passed needed command
         # API will not return error in stderr channel, and everything will be combined
