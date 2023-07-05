@@ -45,8 +45,15 @@ class SosReportShell(base.OsctlShell):
         logs_parser.add_argument(
             "--elastic-url",
             required=False,
+            default="http://opensearch-master-headless.stacklight.svc.cluster.local:9200",
             type=str,
-            help="Url to connect to elasticsearch service. By default is taken from stacklight namespace. For example http://localhost:9200",
+            help="Url to connect to elasticsearch service. By default is http://opensearch-master-headless.stacklight.svc.cluster.local:9200",
+        )
+        logs_parser.add_argument(
+            "--elastic-index-name",
+            default="logstash-*",
+            type=str,
+            help="Elastic search index name to look logs for.",
         )
         logs_parser.add_argument(
             "--elastic-query-size",
