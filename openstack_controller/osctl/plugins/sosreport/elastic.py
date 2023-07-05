@@ -20,7 +20,6 @@ class ElasticLogsCollector(base.BaseLogsCollector):
         self.elastic_url = args.elastic_url
         self.elastic_query_size = args.elastic_query_size
         self.elastic_index_name = args.elastic_index_name
-        self.hosts = set(args.host)
         self.loggers = self.get_loggers(args.component)
         self.since = args.since
 
