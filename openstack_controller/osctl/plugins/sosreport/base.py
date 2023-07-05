@@ -14,6 +14,7 @@ class BaseLogsCollector:
     def __init__(self, args):
         self.args = args
         self.workspace = os.path.join(args.workspace, self.name)
+        self.hosts = set(args.host)
 
     def dump_exec_result(self, dst, res):
         os.makedirs(os.path.dirname(dst), exist_ok=True)

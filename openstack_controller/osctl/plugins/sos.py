@@ -113,7 +113,7 @@ class SosReportShell(base.OsctlShell):
             tasks.extend(instance.get_tasks())
         random.shuffle(tasks)
         stop_event = threading.Event()
-        with futures.ProcessPoolExecutor(
+        with futures.ThreadPoolExecutor(
             max_workers=args.workers_number
         ) as executor:
             for task in tasks:
