@@ -133,6 +133,9 @@ spec:
                         type: string
                         description: >
                           The version of openstack controller that handle osdpl object.
+                      release:
+                        description: The MOSK release version.
+                        type: string
                       timestamp:
                         type: string
                         description: >
