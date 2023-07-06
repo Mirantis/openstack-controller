@@ -1,61 +1,11 @@
-from collections import deque
 import kopf
-import os
-import subprocess
 import time
 
 from openstack_controller import settings
 from openstack_controller import utils
-from openstack_controller import kube
 
 
 LOG = utils.get_logger(__name__)
-
-RECV_QUEUE_LEN = 3
-RECV_QUEUE = deque(RECV_QUEUE_LEN * [0], RECV_QUEUE_LEN)
-
-
-@kopf.on.probe(id="recv_q")
-def check_recv_queue(**kwargs):
-    """Check if tcp recieve queue is not processing.
-
-    When tcp queue is not equal to 0 and growing during last 3 times
-    or not changing raise error.
-
-    """
-    cmd = ["netstat", "-plan", "--tcp"]
-    cmd_res = subprocess.run(cmd, stdout=subprocess.PIPE, text=True)
-    pid = os.getpid()
-    # the urllib3 connection might time out and closed from server/client side
-    # since neither pykube or urllib3 has periodic tasks to close socket
-    # after TCP connection closed, socket will be in CLOSE_WAIT unless we close
-    # connection explicitly from application. Run get() here to refresh connection
-    # and let urllib3 to close timed out connections. Related issue https://github.com/urllib3/urllib3/issues/2100
-    kube.api.get()
-    LOG.debug(f"Checking Rec-Q for pid: {pid}")
-    global RECV_QUEUE
-    recv_q_max = 0
-    for line in cmd_res.stdout.splitlines():
-        out = line.strip().split()
-        # proto, recvQ, sendQ, local, remote, state, pid/name
-        if out[0] == "tcp" and out[6].startswith(f"{pid}/"):
-            recv_q = int(out[1])
-            recv_q_max = max(recv_q_max, recv_q)
-
-    LOG.debug(f"The Rec-Q for pid: {pid} is: {RECV_QUEUE}")
-
-    RECV_QUEUE.append(recv_q_max)
-
-    if recv_q_max == 0 or set(list(RECV_QUEUE)[:-1]) == {0}:
-        return list(RECV_QUEUE)
-
-    # In case the queue is growing or not changing
-    if list(RECV_QUEUE) == sorted(RECV_QUEUE):
-        LOG.debug(f"The Rec-Q for pid: {pid} is: {recv_q}")
-        raise ValueError(
-            f"The Rec-Q for {pid} is growing or not changing {RECV_QUEUE}"
-        )
-    return list(RECV_QUEUE)
 
 
 @kopf.on.probe(id="delay")

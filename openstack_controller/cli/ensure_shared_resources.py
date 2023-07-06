@@ -22,6 +22,7 @@ def _wait_for_obj(obj):
 
 
 def main():
+    kube_api = kube.kube_client()
     for resource_file in sorted(glob.glob(f"{CONFIG_DIRECTORY}/*.yaml")):
         with open(resource_file, "r") as f:
             for document in yaml.safe_load_all(f):
@@ -32,8 +33,8 @@ def main():
                     LOG.info(f"Skipping document, doesn't have kind")
                     continue
                 obj = kube.object_factory(
-                    kube.api, document["apiVersion"], document["kind"]
-                )(kube.api, document)
+                    kube_api, document["apiVersion"], document["kind"]
+                )(kube_api, document)
                 action = (
                     document["metadata"]
                     .get("annotations", {})

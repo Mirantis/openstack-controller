@@ -109,7 +109,7 @@ def kopf_adopt(mocker):
 
 @pytest.fixture
 def kubeapi(mocker):
-    mock_api = mocker.patch("openstack_controller.kube.api")
+    mock_api = mocker.patch("openstack_controller.kube.KUBE_API")
     yield mock_api
     mocker.stopall()
 
@@ -169,7 +169,7 @@ def override_setting(request, mocker):
 
 @pytest.fixture
 def fake_osdpl(openstackdeployment):
-    osdpl = kube.OpenStackDeployment(kube.api, openstackdeployment)
+    osdpl = kube.OpenStackDeployment(kube.kube_client(), openstackdeployment)
     yield osdpl
 
 

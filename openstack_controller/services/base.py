@@ -859,7 +859,7 @@ class OpenStackServiceWithCeph(OpenStackService):
                 },
             }
             try:
-                pykube.Secret(kube.api, secret).create()
+                pykube.Secret(kube.kube_client(), secret).create()
             except Exception:
                 # TODO check for resource exists exception.
                 pass

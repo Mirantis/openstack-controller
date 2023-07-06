@@ -22,17 +22,21 @@ from . import exception
 LOG = utils.get_logger(__name__)
 CONF = settings.CONF
 
-
-def login():
-    config = pykube.KubeConfig.from_env()
-    client = pykube.HTTPClient(
-        config=config, timeout=settings.OSCTL_PYKUBE_HTTP_REQUEST_TIMEOUT
-    )
-    LOG.info(f"Created k8s api client from context {config.current_context}")
-    return client
+KUBE_API = None
 
 
-api = login()
+def kube_client():
+    global KUBE_API
+    if KUBE_API is None:
+        config = pykube.KubeConfig.from_env()
+        client = pykube.HTTPClient(
+            config=config, timeout=settings.OSCTL_PYKUBE_HTTP_REQUEST_TIMEOUT
+        )
+        LOG.info(
+            f"Created k8s api client from context {config.current_context}"
+        )
+        KUBE_API = client
+    return KUBE_API
 
 
 def generate_random_name(length):
@@ -117,7 +121,7 @@ class OpenStackDeploymentSecret(pykube.objects.NamespacedAPIObject):
             "spec": {},
             "status": {},
         }
-        return super().__init__(api, self.dummy)
+        return super().__init__(kube_client(), self.dummy)
 
 
 class HelmBundle(pykube.objects.NamespacedAPIObject):
@@ -417,7 +421,7 @@ class CronJob(pykube.CronJob, HelmBundleMixin):
         job["metadata"]["name"] = job_name
         job["metadata"]["namespace"] = self.namespace
         kopf.adopt(job, self.obj)
-        kube_job = Job(api, job)
+        kube_job = Job(kube_client(), job)
         kube_job.create()
 
         async def _wait_completion(job, delay):
@@ -587,7 +591,7 @@ class Node(pykube.Node):
         return False
 
     def get_pods(self, namespace=None):
-        pods = Pod.objects(api).filter(namespace=namespace)
+        pods = Pod.objects(kube_client()).filter(namespace=namespace)
         pods = [
             pod for pod in pods if pod.obj["spec"].get("nodeName") == self.name
         ]
@@ -616,28 +620,36 @@ class RedisFailover(pykube.objects.NamespacedAPIObject):
 
 
 def resource(data):
-    return object_factory(api, data["apiVersion"], data["kind"])(api, data)
+    kube_api = kube_client()
+    return object_factory(kube_api, data["apiVersion"], data["kind"])(
+        kube_api, data
+    )
 
 
 def dummy(klass, name, namespace=None):
     meta = {"name": name}
     if namespace:
         meta["namespace"] = namespace
-    return klass(api, {"metadata": meta})
+    return klass(kube_client(), {"metadata": meta})
 
 
 def find(klass, name, namespace=None, silent=False, cluster=False):
+    kube_api = kube_client()
     try:
         if cluster:
-            return klass.objects(api).get(name=name)
-        return klass.objects(api).filter(namespace=namespace).get(name=name)
+            return klass.objects(kube_api).get(name=name)
+        return (
+            klass.objects(kube_api).filter(namespace=namespace).get(name=name)
+        )
     except pykube.exceptions.ObjectDoesNotExist:
         if not silent:
             raise
 
 
 def resource_list(klass, selector, namespace=None):
-    return klass.objects(api).filter(namespace=namespace, selector=selector)
+    return klass.objects(kube_client()).filter(
+        namespace=namespace, selector=selector
+    )
 
 
 def wait_for_resource(klass, name, namespace=None, delay=60):
@@ -691,12 +703,13 @@ def save_secret_data(
     if labels is not None:
         secret["metadata"]["labels"] = labels
 
+    kube_api = kube_client()
     try:
         find(pykube.Secret, name, namespace)
     except pykube.exceptions.ObjectDoesNotExist:
-        pykube.Secret(api, secret).create()
+        pykube.Secret(kube_api, secret).create()
     else:
-        pykube.Secret(api, secret).update()
+        pykube.Secret(kube_api, secret).update()
 
 
 async def wait_for_deleted(
@@ -713,7 +726,9 @@ async def wait_for_deleted(
 
 def get_osdpl(namespace=settings.OSCTL_OS_DEPLOYMENT_NAMESPACE):
     LOG.debug("Getting osdpl object")
-    osdpl = list(OpenStackDeployment.objects(api).filter(namespace=namespace))
+    osdpl = list(
+        OpenStackDeployment.objects(kube_client()).filter(namespace=namespace)
+    )
     if len(osdpl) != 1:
         LOG.warning(
             f"Could not find unique OpenStackDeployment resource "
