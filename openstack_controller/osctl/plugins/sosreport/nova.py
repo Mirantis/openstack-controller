@@ -16,7 +16,7 @@ class NovaObjectsCollector(base.BaseLogsCollector):
 
     @osctl_utils.generic_exception
     def collect_instances_info(self):
-        for pod in kube.Pod.objects(kube.api).filter(
+        for pod in kube.Pod.objects(kube.kube_client()).filter(
             namespace=settings.OSCTL_OS_DEPLOYMENT_NAMESPACE,
             selector={"application": "libvirt", "component": "libvirt"},
         ):

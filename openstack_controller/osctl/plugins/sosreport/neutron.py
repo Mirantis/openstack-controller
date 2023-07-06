@@ -17,7 +17,7 @@ class NeutronObjectsCollector(base.BaseLogsCollector):
 
     @osctl_utils.generic_exception
     def collect_namespaces_info(self):
-        for pod in kube.Pod.objects(kube.api).filter(
+        for pod in kube.Pod.objects(kube.kube_client()).filter(
             namespace=settings.OSCTL_OS_DEPLOYMENT_NAMESPACE,
             selector={"application": "neutron", "component": "l3-agent"},
         ):
@@ -59,7 +59,7 @@ class NeutronObjectsCollector(base.BaseLogsCollector):
     @osctl_utils.generic_exception
     def collect_ovs_info(self):
         ovs_container = "openvswitch-vswitchd"
-        for pod in kube.Pod.objects(kube.api).filter(
+        for pod in kube.Pod.objects(kube.kube_client()).filter(
             namespace=settings.OSCTL_OS_DEPLOYMENT_NAMESPACE,
             selector={
                 "application": "openvswitch",

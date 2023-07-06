@@ -105,7 +105,7 @@ class LockBase(pykube.objects.APIObject):
             "metadata": {"name": f"{cls.workload}-{name}"},
             "spec": spec,
         }
-        return cls(kube.api, dummy)
+        return cls(kube.kube_client(), dummy)
 
     def present(self):
         if not self.exists():
@@ -200,7 +200,7 @@ class NodeWorkloadLock(LockBase):
     def get_all(cls):
         return [
             o
-            for o in cls.objects(kube.api)
+            for o in cls.objects(kube.kube_client())
             if o.obj["spec"]["controllerName"] == cls.workload
         ]
 
@@ -239,7 +239,7 @@ class MaintenanceRequestBase(pykube.objects.APIObject):
 
     @classmethod
     def get_resource(cls, data):
-        return cls(kube.api, data)
+        return cls(kube.kube_client(), data)
 
     def get_scope(self):
         return self.obj["spec"]["scope"]

@@ -36,7 +36,7 @@ class OpenStackDeploymentStatus(pykube.objects.NamespacedAPIObject):
             "spec": {},
             "status": {},
         }
-        return super().__init__(kube.api, self.dummy)
+        return super().__init__(kube.kube_client(), self.dummy)
 
     def present(self, osdpl_obj):
         if not self.exists():

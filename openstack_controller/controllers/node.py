@@ -40,7 +40,8 @@ async def node_status_update_handler(name, body, old, new, reason, **kwargs):
     # NOTE(vsaienko) get conditions from the object to avoid fake reporing by
     # calico when kubelet is down on the node.
     # Do not remove pods from flapping node.
-    node = kube.Node(kube.api, body)
+    kube_api = kube.kube_client()
+    node = kube.Node(kube_api, body)
     if node.ready:
         return True
 
@@ -94,7 +95,8 @@ async def node_change_handler(body, reason, **kwargs):
     if not settings.OSCTL_NODE_MAINTENANCE_ENABLED:
         LOG.warning("The maintenance API is not enabled.")
         return
-    node = kube.Node(kube.api, body)
+    kube_api = kube.kube_client()
+    node = kube.Node(kube_api, body)
     nwl = maintenance.NodeWorkloadLock.get_resource(name)
     if nwl.required_for_node(node):
         nwl.present()

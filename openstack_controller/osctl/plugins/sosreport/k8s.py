@@ -57,7 +57,9 @@ class K8sObjectsCollector(base.BaseLogsCollector):
                         "Kind: {kind} is not present in the cluster. Skip objects collection."
                     )
                 for obj in (
-                    kube_class.objects(kube.api).filter(namespace=namespace)
+                    kube_class.objects(kube.kube_client()).filter(
+                        namespace=namespace
+                    )
                     or []
                 ):
                     dst = os.path.join(work_dir, obj.name)
