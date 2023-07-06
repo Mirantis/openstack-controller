@@ -8,6 +8,9 @@ spec:
         volume_types:
           volumes-hdd:
             volume_backend_name: volumes-hdd
+          volumes-hdd_multiattach:
+            multiattach: '"<is> True"'
+            volume_backend_name: volumes-hdd
       ceph_client:
         configmap: rook-ceph-config
         user_secret_name: cinder-rbd-keyring
