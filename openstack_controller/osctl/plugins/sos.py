@@ -40,7 +40,7 @@ class SosReportShell(base.OsctlShell):
             required=True,
             action="append",
             type=str,
-            help="Name of kubernetes node to gather support dump for. Can be specified multiple times.",
+            help="Name or label=value of kubernetes node to gather support dump for. Can be specified multiple times.",
         )
         logs_parser.add_argument(
             "--elastic-url",
