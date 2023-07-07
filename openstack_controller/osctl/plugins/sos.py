@@ -120,7 +120,13 @@ class SosReportShell(base.OsctlShell):
             help="Dstination folder to store logs in.",
         )
 
-        # TODO(vsaienko): Add --all-hosts functionality
+        logs_parser.add_argument(
+            "--no-archive",
+            required=False,
+            action="store_true",
+            default=False,
+            help="Archive report result",
+        )
 
     def progress(self, workspace, stop_event):
         while not stop_event.is_set():
@@ -159,9 +165,15 @@ class SosReportShell(base.OsctlShell):
             progress_thread.start()
             futures.wait(futures_list)
             stop_event.set()
-        LOG.info(f"Archiving {workspace} directory")
-        shutil.make_archive(workspace, "gztar", workspace)
-        shutil.rmtree(workspace)
-        LOG.info(
-            f"All tasks are completed. Sos report is saved to: {workspace}.tar.gz"
-        )
+
+        if args.no_archive:
+            LOG.info(
+                f"All tasks are completed. Sos report is saved to: {workspace}"
+            )
+        else:
+            LOG.info(f"Archiving {workspace} directory")
+            shutil.make_archive(workspace, "gztar", workspace)
+            shutil.rmtree(workspace)
+            LOG.info(
+                f"All tasks are completed. Sos report is saved to: {workspace}.tar.gz"
+            )
