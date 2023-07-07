@@ -20,14 +20,22 @@ class BaseLogsCollector:
 
     def get_hosts(self):
         hosts = set()
+
+        kube_client = kube.kube_client()
+
+        if self.args.all_hosts:
+            for host in kube.Node.objects(kube_client):
+                hosts.add(host.name)
+            return hosts
+
         for host_pattern in set(self.args.host):
             if "=" in host_pattern:
                 selector = {}
                 for selector_pattern in host_pattern.split(","):
                     label, value = selector_pattern.split("=")
                     selector.update({label: value})
-                for host in kube.Node.objects(kube.kube_client()).filter(
-                    selector=selector,
+                for host in kube.Node.objects(kube_client).filter(
+                    selector=selector
                 ):
                     hosts.add(host.name)
             else:

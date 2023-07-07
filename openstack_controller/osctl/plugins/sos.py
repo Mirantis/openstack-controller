@@ -28,6 +28,7 @@ class SosReportShell(base.OsctlShell):
         logs_parser = sos_sub.add_parser(
             "report", help="Gather sos report for deployment."
         )
+
         logs_parser.add_argument(
             "--component",
             required=True,
@@ -35,13 +36,27 @@ class SosReportShell(base.OsctlShell):
             type=str,
             help=f"Name of component to create report for. Can be specified multiple times. List of known components: {list(constants.OSCTL_COMPONENT_LOGGERS.keys())}",
         )
-        logs_parser.add_argument(
+
+        host_select_group = logs_parser.add_mutually_exclusive_group(
+            required=True
+        )
+
+        host_select_group.add_argument(
             "--host",
-            required=True,
+            required=False,
             action="append",
             type=str,
             help="Name or label=value of kubernetes node to gather support dump for. Can be specified multiple times.",
         )
+
+        host_select_group.add_argument(
+            "--all-hosts",
+            required=False,
+            default=False,
+            action="store_true",
+            help="Gather support dump for all hosts",
+        )
+
         elastic_group = logs_parser.add_argument_group(title="Elastic")
         elastic_group.add_argument(
             "--elastic-url",
@@ -50,18 +65,21 @@ class SosReportShell(base.OsctlShell):
             type=str,
             help="Url to connect to elasticsearch service. By default is http://opensearch-master-headless.stacklight.svc.cluster.local:9200",
         )
+
         elastic_group.add_argument(
             "--elastic-username",
             required=False,
             type=str,
             help="Username for http authorization.",
         )
+
         elastic_group.add_argument(
             "--elastic-password",
             required=False,
             type=str,
             help="Password for http authorization.",
         )
+
         elastic_group.add_argument(
             "--elastic-index-name",
             default="logstash-*",
@@ -85,6 +103,7 @@ class SosReportShell(base.OsctlShell):
                 "Valid endings are: y: Years, M: Months, w: Weeks, d: Days, h or H: Hours, m: Minutes, s: Seconds. Default is 1w"
             ),
         )
+
         logs_parser.add_argument(
             "--workers-number",
             required=False,
@@ -92,6 +111,7 @@ class SosReportShell(base.OsctlShell):
             default=5,
             help="Number of workers to handle logs collection in parallel. Default is 5",
         )
+
         logs_parser.add_argument(
             "--workspace",
             required=False,
