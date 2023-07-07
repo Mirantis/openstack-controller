@@ -48,6 +48,9 @@ spec:
             volume_backend_name: lvm_fast
           lvm_slow:
             volume_backend_name: lvm_slow
+          lvm_slow_multiattach:
+            multiattach: '"<is> True"'
+            volume_backend_name: lvm_slow
       conf:
         policy.d:
           01-controller-default.yaml: {'block-storage_rule1': 'block-storage_value1'}

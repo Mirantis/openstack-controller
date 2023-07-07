@@ -334,6 +334,11 @@ spec:
       {%- for backend_name,backend_opts in cinder_override.get("volume", {}).get("backends", {}).items() %}
           {{ backend_name }}:
             volume_backend_name: {{ backend_name }}
+        {%- if "lvm" in backend_opts %}
+          {{ backend_name }}_multiattach:
+            volume_backend_name: {{ backend_name }}
+            multiattach: "\"<is> True\""
+        {%- endif %}
       {%- endfor %}
     {%- endif %}
 {%- endfor %}
