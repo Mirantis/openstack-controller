@@ -42,35 +42,40 @@ class SosReportShell(base.OsctlShell):
             type=str,
             help="Name or label=value of kubernetes node to gather support dump for. Can be specified multiple times.",
         )
-        logs_parser.add_argument(
+        elastic_group = logs_parser.add_argument_group(title="Elastic")
+        elastic_group.add_argument(
             "--elastic-url",
             required=False,
             default="http://opensearch-master-headless.stacklight.svc.cluster.local:9200",
             type=str,
             help="Url to connect to elasticsearch service. By default is http://opensearch-master-headless.stacklight.svc.cluster.local:9200",
         )
-        logs_parser.add_argument(
+        elastic_group.add_argument(
+            "--elastic-username",
+            required=False,
+            type=str,
+            help="Username for http authorization.",
+        )
+        elastic_group.add_argument(
+            "--elastic-password",
+            required=False,
+            type=str,
+            help="Password for http authorization.",
+        )
+        elastic_group.add_argument(
             "--elastic-index-name",
             default="logstash-*",
             type=str,
             help="Elastic search index name to look logs for.",
         )
-        logs_parser.add_argument(
+        elastic_group.add_argument(
             "--elastic-query-size",
             required=False,
             type=int,
             default=10000,
             help="Number of documents to request from elastic in single query. By default is 10000.",
         )
-        logs_parser.add_argument(
-            "--workers-number",
-            required=False,
-            type=int,
-            default=5,
-            help="Number of workers to handle logs collection in parallel. Default is 5",
-        )
-
-        logs_parser.add_argument(
+        elastic_group.add_argument(
             "--since",
             required=False,
             type=str,
@@ -79,6 +84,13 @@ class SosReportShell(base.OsctlShell):
                 "Defines timeframe for which take logs, is relative to current time."
                 "Valid endings are: y: Years, M: Months, w: Weeks, d: Days, h or H: Hours, m: Minutes, s: Seconds. Default is 1w"
             ),
+        )
+        logs_parser.add_argument(
+            "--workers-number",
+            required=False,
+            type=int,
+            default=5,
+            help="Number of workers to handle logs collection in parallel. Default is 5",
         )
         logs_parser.add_argument(
             "--workspace",

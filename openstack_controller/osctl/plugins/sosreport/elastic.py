@@ -22,6 +22,12 @@ class ElasticLogsCollector(base.BaseLogsCollector):
         self.elastic_index_name = args.elastic_index_name
         self.loggers = self.get_loggers(args.component)
         self.since = args.since
+        self.http_auth = None
+        if self.args.elastic_username and self.args.elastic_password:
+            self.http_auth = (
+                self.args.elastic_username,
+                self.args.elastic_password,
+            )
 
     def get_loggers(self, components):
         loggers = set()
@@ -39,7 +45,7 @@ class ElasticLogsCollector(base.BaseLogsCollector):
                     {
                         "query_string": {
                             "fields": ["logger"],
-                            "query": f"{logger}\\-*",
+                            "query": f"{logger}*",
                         }
                     }
                 ],
@@ -50,7 +56,7 @@ class ElasticLogsCollector(base.BaseLogsCollector):
     def query_host(self, host):
         return {
             "bool": {
-                "should": [{"match": {"kubernetes.host": host}}],
+                "should": [{"match_phrase": {"kubernetes.host": host}}],
                 "minimum_should_match": 1,
             }
         }
@@ -98,7 +104,12 @@ class ElasticLogsCollector(base.BaseLogsCollector):
     @osctl_utils.generic_exception
     def collect_logs(self, host, logger, since="1w"):
         LOG.info(f"Starting logs collection for {host} {logger}")
-        client = OpenSearch([self.elastic_url], timeout=60, http_compress=True)
+        client = OpenSearch(
+            [self.elastic_url],
+            timeout=60,
+            http_auth=self.http_auth,
+            http_compress=True,
+        )
         query = self.get_query(host, logger, since)
         response = client.search(
             body=query, index=self.elastic_index_name, request_timeout=60
