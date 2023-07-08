@@ -25,19 +25,26 @@ class SosReportShell(base.OsctlShell):
             dest="sub_subcommand", required=True
         )
 
-        logs_parser = sos_sub.add_parser(
+        report_parser = sos_sub.add_parser(
             "report", help="Gather sos report for deployment."
         )
 
-        logs_parser.add_argument(
+        component_group = report_parser.add_mutually_exclusive_group(
+            required=True
+        )
+        component_group.add_argument(
             "--component",
-            required=True,
             action="append",
             type=str,
             help=f"Name of component to create report for. Can be specified multiple times. List of known components: {list(constants.OSCTL_COMPONENT_LOGGERS.keys())}",
         )
+        component_group.add_argument(
+            "--all-components",
+            action="store_true",
+            help="Gather support dump for all components.",
+        )
 
-        host_select_group = logs_parser.add_mutually_exclusive_group(
+        host_select_group = report_parser.add_mutually_exclusive_group(
             required=True
         )
         host_select_group.add_argument(
@@ -50,12 +57,11 @@ class SosReportShell(base.OsctlShell):
         host_select_group.add_argument(
             "--all-hosts",
             required=False,
-            default=False,
             action="store_true",
-            help="Gather support dump for all hosts",
+            help="Gather support dump for all hosts.",
         )
 
-        elastic_group = logs_parser.add_argument_group(title="Elastic")
+        elastic_group = report_parser.add_argument_group(title="Elastic")
         elastic_group.add_argument(
             "--elastic-url",
             required=False,
@@ -99,28 +105,28 @@ class SosReportShell(base.OsctlShell):
             ),
         )
 
-        logs_parser.add_argument(
+        report_parser.add_argument(
             "--workers-number",
             required=False,
             type=int,
             default=5,
             help="Number of workers to handle logs collection in parallel. Default is 5",
         )
-        logs_parser.add_argument(
+        report_parser.add_argument(
             "--workspace",
             required=False,
             type=str,
             default=f"/tmp/sosreport-{now.strftime('%Y%m%d%H%M%S')}",
             help="Dstination folder to store logs in.",
         )
-        logs_parser.add_argument(
+        report_parser.add_argument(
             "--no-archive",
             required=False,
             action="store_true",
             default=False,
             help="Archive report result",
         )
-        logs_parser.add_argument(
+        report_parser.add_argument(
             "--collector",
             required=False,
             action="append",

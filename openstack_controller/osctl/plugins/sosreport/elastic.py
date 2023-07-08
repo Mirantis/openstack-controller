@@ -20,7 +20,7 @@ class ElasticLogsCollector(base.BaseLogsCollector):
         self.elastic_url = args.elastic_url
         self.elastic_query_size = args.elastic_query_size
         self.elastic_index_name = args.elastic_index_name
-        self.loggers = self.get_loggers(args.component)
+        self.loggers = self.get_loggers(self.components)
         self.since = args.since
         self.http_auth = None
         if self.args.elastic_username and self.args.elastic_password:

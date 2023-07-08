@@ -135,7 +135,7 @@ class NeutronObjectsCollector(base.BaseLogsCollector):
 
     def get_tasks(self):
         res = []
-        if "neutron" in set(self.args.component):
+        if "neutron" in self.components:
             for host in self.hosts:
                 res.append((self.collect_ovs_info, (host,), {}))
                 res.append((self.collect_namespaces_info, (host,), {}))

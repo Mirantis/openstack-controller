@@ -3,6 +3,7 @@ import abc
 import os
 
 from openstack_controller import kube
+from openstack_controller.osctl.plugins import constants
 
 
 class BaseLogsCollector:
@@ -17,6 +18,7 @@ class BaseLogsCollector:
         self.args = args
         self.workspace = os.path.join(args.workspace, self.name)
         self.hosts = self.get_hosts()
+        self.components = self.get_components()
 
     def get_hosts(self):
         hosts = set()
@@ -41,6 +43,11 @@ class BaseLogsCollector:
             else:
                 hosts.add(host_pattern)
         return hosts
+
+    def get_components(self):
+        if self.args.all_components:
+            return set(constants.OSCTL_COMPONENT_LOGGERS.keys())
+        return set(self.args.component)
 
     def dump_exec_result(self, dst, res):
         os.makedirs(os.path.dirname(dst), exist_ok=True)

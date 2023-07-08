@@ -66,7 +66,7 @@ class NovaObjectsCollector(base.BaseLogsCollector):
 
     def get_tasks(self):
         res = []
-        if "nova" in set(self.args.component):
+        if "nova" in self.components:
             for host in self.hosts:
                 res.append((self.collect_instances_info, (host,), {}))
         return res
