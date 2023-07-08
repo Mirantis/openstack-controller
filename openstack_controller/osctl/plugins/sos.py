@@ -13,7 +13,6 @@ from openstack_controller.osctl.plugins import constants
 from openstack_controller import utils
 
 LOG = utils.get_logger(__name__)
-now = datetime.datetime.utcnow()
 
 
 class SosReportShell(base.OsctlShell):
@@ -116,7 +115,7 @@ class SosReportShell(base.OsctlShell):
             "--workspace",
             required=False,
             type=str,
-            default=f"/tmp/sosreport-{now.strftime('%Y%m%d%H%M%S')}",
+            default="/tmp/",
             help="Dstination folder to store logs in.",
         )
         report_parser.add_argument(
@@ -152,7 +151,11 @@ class SosReportShell(base.OsctlShell):
     def report(self, args):
         tasks = []
         futures_list = []
-        workspace = args.workspace
+        now = datetime.datetime.utcnow()
+        workspace = os.path.join(
+            args.workspace, f"sosreport-{now.strftime('%Y%m%d%H%M%S')}"
+        )
+        os.makedirs(workspace, exist_ok=True)
         for name, plugin in sosreport.registry.items():
             if args.collector and name not in set(args.collector):
                 continue
