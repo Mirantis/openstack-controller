@@ -29,6 +29,13 @@ class ElasticLogsCollector(base.BaseLogsCollector):
                 self.args.elastic_password,
             )
 
+    def get_hosts(self):
+        if self.args.all_hosts:
+            # NOTE(vsaienko): skip discovery via kubernetes
+            # get host directly from elastic/opensearch.
+            return [None]
+        return super().get_hosts()
+
     def get_loggers(self, components):
         loggers = set()
         for component in set(components):
@@ -76,7 +83,14 @@ class ElasticLogsCollector(base.BaseLogsCollector):
         """
         return {"range": {"@timestamp": {"gte": f"now-{since}"}}}
 
-    def get_query(self, host, logger, since="1w"):
+    def get_query(self, logger, host=None, since="1w"):
+        filters = [
+            {"match_all": {}},
+            self.query_logger(logger),
+            self.query_timestamp(since),
+        ]
+        if host is not None:
+            filters.append(self.query_host(host))
         return {
             "size": self.elastic_query_size,
             "sort": [
@@ -89,12 +103,7 @@ class ElasticLogsCollector(base.BaseLogsCollector):
             "query": {
                 "bool": {
                     "must": [],
-                    "filter": [
-                        {"match_all": {}},
-                        self.query_host(host),
-                        self.query_logger(logger),
-                        self.query_timestamp(since),
-                    ],
+                    "filter": filters,
                     "should": [],
                     "must_not": [],
                 }
@@ -102,26 +111,34 @@ class ElasticLogsCollector(base.BaseLogsCollector):
         }
 
     @osctl_utils.generic_exception
-    def collect_logs(self, host, logger, since="1w"):
-        LOG.info(f"Starting logs collection for {host} {logger}")
+    def collect_logs(self, logger, host=None, since="1w"):
+        msg = f"Starting logs collection for {host} {logger}"
+        if host is None:
+            msg = f"Starting logs collection for all hosts {logger}"
+        LOG.info(msg)
         client = OpenSearch(
             [self.elastic_url],
             timeout=60,
             http_auth=self.http_auth,
             http_compress=True,
         )
-        query = self.get_query(host, logger, since)
+        query = self.get_query(logger, host=host, since=since)
         response = client.search(
             body=query, index=self.elastic_index_name, request_timeout=60
         )
-        os.makedirs(os.path.join(self.workspace, host), exist_ok=True)
         while len(response["hits"]["hits"]):
             for hit in response["hits"]["hits"]:
                 ts = hit["_source"]["@timestamp"]
                 level = hit["_source"].get("severity_label", "UNKNOWN")
                 message = hit["_source"].get("message", "UNCNOWN")
-                pod_name = hit["_source"]["kubernetes"]["pod_name"]
-                container_name = hit["_source"]["kubernetes"]["container_name"]
+                source_kubernetes = hit["_source"].get("kubernetes")
+                if not source_kubernetes:
+                    continue
+                pod_name = source_kubernetes.get("pod_name", "UNCNOWN")
+                container_name = source_kubernetes.get(
+                    "container_name", "UNCNOWN"
+                )
+                host = source_kubernetes.get("host", "UNKNOWN")
                 logs_dst_base = os.path.join(self.workspace, host, pod_name)
                 os.makedirs(logs_dst_base, exist_ok=True)
                 logs_dst = os.path.join(
@@ -144,8 +161,8 @@ class ElasticLogsCollector(base.BaseLogsCollector):
                 res.append(
                     (
                         self.collect_logs,
-                        (host, logger),
-                        {"since": self.since},
+                        (logger,),
+                        {"host": host, "since": self.since},
                     )
                 )
         return res
