@@ -159,7 +159,7 @@ class SosReportShell(base.OsctlShell):
         for name, plugin in sosreport.registry.items():
             if args.collector and name not in set(args.collector):
                 continue
-            instance = plugin(args)
+            instance = plugin(args, workspace)
             tasks.extend(instance.get_tasks())
         random.shuffle(tasks)
         stop_event = threading.Event()
@@ -171,7 +171,7 @@ class SosReportShell(base.OsctlShell):
                 future = executor.submit(task[0], *task[1], **task[2])
                 futures_list.append(future)
             progress_thread = threading.Thread(
-                target=self.progress, args=(args.workspace, stop_event)
+                target=self.progress, args=(workspace, stop_event)
             )
             progress_thread.daemon = True
             progress_thread.start()
