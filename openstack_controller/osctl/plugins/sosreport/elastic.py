@@ -15,8 +15,8 @@ LOG = utils.get_logger(__name__)
 class ElasticLogsCollector(base.BaseLogsCollector):
     name = "elastic"
 
-    def __init__(self, args):
-        super().__init__(args)
+    def __init__(self, args, workspace):
+        super().__init__(args, workspace)
         self.elastic_url = args.elastic_url
         self.elastic_query_size = args.elastic_query_size
         self.elastic_index_name = args.elastic_index_name
