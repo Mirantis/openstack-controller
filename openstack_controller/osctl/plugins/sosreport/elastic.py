@@ -15,8 +15,8 @@ LOG = utils.get_logger(__name__)
 class ElasticLogsCollector(base.BaseLogsCollector):
     name = "elastic"
 
-    def __init__(self, args, workspace):
-        super().__init__(args, workspace)
+    def __init__(self, args, workspace, mode):
+        super().__init__(args, workspace, mode)
         self.elastic_url = args.elastic_url
         self.elastic_query_size = args.elastic_query_size
         self.elastic_index_name = args.elastic_index_name
@@ -60,6 +60,14 @@ class ElasticLogsCollector(base.BaseLogsCollector):
             }
         }
 
+    def query_message(self, phrase):
+        return {
+            "bool": {
+                "should": [{"match_phrase": {"message": phrase}}],
+                "minimum_should_match": 1,
+            }
+        }
+
     def query_host(self, host):
         return {
             "bool": {
@@ -83,7 +91,7 @@ class ElasticLogsCollector(base.BaseLogsCollector):
         """
         return {"range": {"@timestamp": {"gte": f"now-{since}"}}}
 
-    def get_query(self, logger, host=None, since="1w"):
+    def get_query(self, logger, host=None, message=None, since="1w"):
         filters = [
             {"match_all": {}},
             self.query_logger(logger),
@@ -91,6 +99,8 @@ class ElasticLogsCollector(base.BaseLogsCollector):
         ]
         if host is not None:
             filters.append(self.query_host(host))
+        if message is not None:
+            filters.append(self.query_message(message))
         return {
             "size": self.elastic_query_size,
             "sort": [
@@ -111,7 +121,7 @@ class ElasticLogsCollector(base.BaseLogsCollector):
         }
 
     @osctl_utils.generic_exception
-    def collect_logs(self, logger, host=None, since="1w"):
+    def collect_logs(self, logger, host=None, message=None, since="1w"):
         msg = f"Starting logs collection for {host} {logger}"
         if host is None:
             msg = f"Starting logs collection for all hosts {logger}"
@@ -122,7 +132,7 @@ class ElasticLogsCollector(base.BaseLogsCollector):
             http_auth=self.http_auth,
             http_compress=True,
         )
-        query = self.get_query(logger, host=host, since=since)
+        query = self.get_query(logger, host=host, message=message, since=since)
         response = client.search(
             body=query, index=self.elastic_index_name, request_timeout=60
         )
@@ -156,13 +166,20 @@ class ElasticLogsCollector(base.BaseLogsCollector):
 
     def get_tasks(self):
         res = []
+        message = None
+        if self.mode == "trace" and self.args.message:
+            message = self.args.message
         for host in self.hosts:
             for logger in self.loggers:
                 res.append(
                     (
                         self.collect_logs,
                         (logger,),
-                        {"host": host, "since": self.since},
+                        {
+                            "host": host,
+                            "since": self.since,
+                            "message": message,
+                        },
                     )
                 )
         return res

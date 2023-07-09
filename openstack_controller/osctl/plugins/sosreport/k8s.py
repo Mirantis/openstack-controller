@@ -14,8 +14,8 @@ LOG = utils.get_logger(__name__)
 class K8sObjectsCollector(base.BaseLogsCollector):
     name = "k8s"
 
-    def __init__(self, args, workspace):
-        super().__init__(args, workspace)
+    def __init__(self, args, workspace, mode):
+        super().__init__(args, workspace, mode)
         self.objects = {
             "openstack": {
                 "PersistentVolumeClaim",
