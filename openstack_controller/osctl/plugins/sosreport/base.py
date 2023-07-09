@@ -14,9 +14,10 @@ class BaseLogsCollector:
         super().__init_subclass__(*args, **kwargs)
         cls.registry[cls.name] = cls
 
-    def __init__(self, args, workspace):
+    def __init__(self, args, workspace, mode):
         self.args = args
         self.workspace = os.path.join(workspace, self.name)
+        self.mode = mode
         self.hosts = self.get_hosts()
         self.components = self.get_components()
 

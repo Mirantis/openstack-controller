@@ -24,11 +24,15 @@ class SosReportShell(base.OsctlShell):
             dest="sub_subcommand", required=True
         )
 
-        report_parser = sos_sub.add_parser(
-            "report", help="Gather sos report for deployment."
+        sos_sub.add_parser(
+            "report", help="Gather generic sos report for deployment."
         )
 
-        component_group = report_parser.add_mutually_exclusive_group(
+        filter_group = self.pl_parser.add_argument_group(
+            title="Filter",
+            description="Defines options for filtering purposes.",
+        )
+        component_group = filter_group.add_mutually_exclusive_group(
             required=True
         )
         component_group.add_argument(
@@ -39,11 +43,12 @@ class SosReportShell(base.OsctlShell):
         )
         component_group.add_argument(
             "--all-components",
+            required=False,
             action="store_true",
             help="Gather support dump for all components.",
         )
 
-        host_select_group = report_parser.add_mutually_exclusive_group(
+        host_select_group = filter_group.add_mutually_exclusive_group(
             required=True
         )
         host_select_group.add_argument(
@@ -60,7 +65,10 @@ class SosReportShell(base.OsctlShell):
             help="Gather support dump for all hosts.",
         )
 
-        elastic_group = report_parser.add_argument_group(title="Elastic")
+        elastic_group = self.pl_parser.add_argument_group(
+            title="Elastic",
+            description="Defines elasticsearch connection options.",
+        )
         elastic_group.add_argument(
             "--elastic-url",
             required=False,
@@ -104,28 +112,31 @@ class SosReportShell(base.OsctlShell):
             ),
         )
 
-        report_parser.add_argument(
+        core_group = self.pl_parser.add_argument_group(
+            title="Core", description="Defines core options."
+        )
+        core_group.add_argument(
             "--workers-number",
             required=False,
             type=int,
             default=5,
             help="Number of workers to handle logs collection in parallel. Default is 5",
         )
-        report_parser.add_argument(
+        core_group.add_argument(
             "--workspace",
             required=False,
             type=str,
             default="/tmp/",
             help="Dstination folder to store logs in.",
         )
-        report_parser.add_argument(
+        core_group.add_argument(
             "--no-archive",
             required=False,
             action="store_true",
             default=False,
             help="Archive report result",
         )
-        report_parser.add_argument(
+        core_group.add_argument(
             "--collector",
             required=False,
             action="append",
@@ -133,6 +144,25 @@ class SosReportShell(base.OsctlShell):
             choices=list(sosreport.registry.keys()),
             help="List of collectors to use in the dump. By default use all collectors.",
         )
+
+        trace_parser = sos_sub.add_parser(
+            "trace",
+            help="Trace issue for specific resource. Provides more sophisticated searching creterias than report.",
+        )
+        trace_parser.add_argument(
+            "--message",
+            required=False,
+            type=str,
+            help="Message pattern to search for. For example resource uuid or request_id",
+        )
+
+    def trace(self, args):
+        mode = "trace"
+        self._run(args, mode)
+
+    def report(self, args):
+        mode = "report"
+        self._run(args, mode)
 
     def progress(self, workspace, stop_event):
         while not stop_event.is_set():
@@ -148,18 +178,18 @@ class SosReportShell(base.OsctlShell):
                 f"Still collecting logs. Current logs size is {total_size} bytes"
             )
 
-    def report(self, args):
+    def _run(self, args, mode):
         tasks = []
         futures_list = []
         now = datetime.datetime.utcnow()
         workspace = os.path.join(
-            args.workspace, f"sosreport-{now.strftime('%Y%m%d%H%M%S')}"
+            args.workspace, f"sos{mode}-{now.strftime('%Y%m%d%H%M%S')}"
         )
         os.makedirs(workspace, exist_ok=True)
         for name, plugin in sosreport.registry.items():
             if args.collector and name not in set(args.collector):
                 continue
-            instance = plugin(args, workspace)
+            instance = plugin(args, workspace, mode)
             tasks.extend(instance.get_tasks())
         random.shuffle(tasks)
         stop_event = threading.Event()
