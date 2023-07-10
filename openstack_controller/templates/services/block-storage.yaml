@@ -35,6 +35,10 @@
 {%-   for driver_name, driver in spec.get('features', {}).get('cinder', {}).get('backup', {}).get('drivers', {}).items() if driver.get('enabled', False) %}
 {%-     do backup_drivers.append(driver) %}
 {%-   endfor %}
+# NOTE: we allow only one enabled backup driver at the moment in admission. More than 1 driver will require own statefulsets which is not supported at the moment.
+{%-   if backup_drivers %}
+{%-     set main_backup_driver = backup_drivers[0] %}
+{%-   endif %}
 {%- endif %}
 
 spec:
@@ -258,13 +262,16 @@ spec:
             backup_ceph_pool: {{ backend_config.name }}
       {%- endif %}
     {%- endfor %}
-  {%- elif backup_drivers[0]["type"] == "s3" %}
+  {%- elif main_backup_driver["type"] == "s3" %}
             backup_driver: cinder.backup.drivers.s3.S3BackupDriver
-    {%- for param, param_val in backup_drivers[0].items() %}
-      {%- if param not in ["type", "enabled"] %}
+    {%- for param, param_val in main_backup_driver.items() %}
+      {%- if param in ["endpoint_url", "store_bucket", "store_access_key", "store_secret_key"] %}
             backup_s3_{{ param }}: {{ param_val }}
       {%- endif %}
     {%- endfor %}
+  {%- elif main_backup_driver["type"] == "nfs" %}
+            backup_driver: cinder.backup.drivers.nfs.NFSBackupDriver
+            backup_share: {{ main_backup_driver["backup_share"] }}
   {%- endif %}
 {%- endif %}
             control_exchange: cinder

@@ -1444,6 +1444,7 @@ properties:
                         type: string
                         enum:
                           - s3
+                          - nfs
                       enabled:
                         type: boolean
                       endpoint_url:
@@ -1468,16 +1469,28 @@ properties:
                         additionalProperties: false
                         properties:
                           *value_from
-                    if:
-                      properties:
-                        type:
-                          const: s3
-                    then:
-                      required:
-                        - endpoint_url
-                        - store_bucket
-                        - store_access_key
-                        - store_secret_key
+                      backup_share:
+                        type: string
+                        description: |
+                          NFS share in hostname:path, ipv4addr:path, or [ipv6addr]:path format.
+                    allOf:
+                      - if:
+                          properties:
+                            type:
+                              const: s3
+                        then:
+                          required:
+                            - endpoint_url
+                            - store_bucket
+                            - store_access_key
+                            - store_secret_key
+                      - if:
+                          properties:
+                            type:
+                              const: nfs
+                        then:
+                          required:
+                            - backup_share
       logging:
         type: object
         additionalProperties: false
