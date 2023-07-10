@@ -66,6 +66,13 @@ class K8sObjectsCollector(base.BaseLogsCollector):
                     with open(dst, "w") as f:
                         yaml.dump(obj.obj, f)
 
+    @property
+    def can_run(self):
+        if self.mode == "trace":
+            LOG.warning("Can't use k8s collector in trace mode.")
+            return False
+        return True
+
     def get_tasks(self):
         res = []
         res.append((self.collect_objects, (), {}))

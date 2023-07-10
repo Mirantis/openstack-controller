@@ -64,3 +64,8 @@ class BaseLogsCollector:
     def get_tasks(self):
         """Returns tuple with task and arguments for logs collection."""
         pass
+
+    @property
+    def can_run(self):
+        """Returns True when using collector in current configuration is possible"""
+        return True

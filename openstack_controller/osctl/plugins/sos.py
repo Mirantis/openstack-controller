@@ -190,7 +190,8 @@ class SosReportShell(base.OsctlShell):
             if args.collector and name not in set(args.collector):
                 continue
             instance = plugin(args, workspace, mode)
-            tasks.extend(instance.get_tasks())
+            if instance.can_run:
+                tasks.extend(instance.get_tasks())
         random.shuffle(tasks)
         stop_event = threading.Event()
         with futures.ThreadPoolExecutor(

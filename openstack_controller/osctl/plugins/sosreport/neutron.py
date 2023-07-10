@@ -133,6 +133,13 @@ class NeutronObjectsCollector(base.BaseLogsCollector):
                     pod.exec(command=command, container=ovs_container),
                 )
 
+    @property
+    def can_run(self):
+        if self.mode == "trace":
+            LOG.warning("Can't use neutron collector in trace mode.")
+            return False
+        return True
+
     def get_tasks(self):
         res = []
         if "neutron" in self.components:

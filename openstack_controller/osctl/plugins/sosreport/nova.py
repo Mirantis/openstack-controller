@@ -64,6 +64,13 @@ class NovaObjectsCollector(base.BaseLogsCollector):
                 )
         LOG.info(f"Finished instance info collection for {host}")
 
+    @property
+    def can_run(self):
+        if self.mode == "trace":
+            LOG.warning("Can't use nova collector in trace mode.")
+            return False
+        return True
+
     def get_tasks(self):
         res = []
         if "nova" in self.components:
