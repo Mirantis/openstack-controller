@@ -4,6 +4,7 @@ import abc
 
 class OsctlShell:
     name = ""
+    description = ""
     registry = {}
 
     def __init_subclass__(cls, *args, **kwargs):

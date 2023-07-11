@@ -44,6 +44,16 @@ def generate_random_name(length):
     return "".join(chars[c % len(chars)] for c in urandom(length))
 
 
+def _get_kubernetes_objects(module):
+    k_objects = {}
+    for name, obj in inspect.getmembers(module, inspect.isclass):
+        if issubclass(obj, pykube.objects.APIObject) and getattr(
+            obj, "kind", None
+        ):
+            k_objects[(obj.version, obj.kind)] = obj
+    return k_objects
+
+
 def get_kubernetes_objects():
     """Return all classes that are subclass of pykube.objects.APIObject.
 
@@ -52,15 +62,6 @@ def get_kubernetes_objects():
     2. pykube.objects classes
 
     """
-
-    def _get_kubernetes_objects(module):
-        k_objects = {}
-        for name, obj in inspect.getmembers(module, inspect.isclass):
-            if issubclass(obj, pykube.objects.APIObject) and getattr(
-                obj, "kind", None
-            ):
-                k_objects[(obj.version, obj.kind)] = obj
-        return k_objects
 
     objects = _get_kubernetes_objects(pykube.objects)
     objects.update(_get_kubernetes_objects(sys.modules[__name__]))
@@ -162,12 +163,13 @@ class HelmBundleMixin:
         self.__helmbundle_ext = helmbundle_ext
 
     async def _enable(
-        self,
-        version,
-        wait_completion=False,
-        extra_values=None,
-        delay=CONF.getint("helmbundle", "manifest_enable_delay"),
+        self, version, wait_completion=False, extra_values=None, delay=None
     ):
+        delay = (
+            delay
+            if delay is not None
+            else CONF.getint("helmbundle", "manifest_enable_delay")
+        )
         diff = {"images": {"tags": {}}, "manifests": {}}
         for image in self.helmbundle_ext.images:
             diff["images"]["tags"][image] = self.service.get_image(
@@ -182,6 +184,7 @@ class HelmBundleMixin:
             await self.service.set_release_values(
                 self.helmbundle_ext.chart, diff
             )
+
             await asyncio.sleep(delay)
 
             if not wait_completion:
@@ -203,9 +206,19 @@ class HelmBundleMixin:
         version,
         wait_completion=False,
         extra_values=None,
-        timeout=CONF.getint("helmbundle", "manifest_enable_timeout"),
-        delay=CONF.getint("helmbundle", "manifest_enable_delay"),
+        timeout=None,
+        delay=None,
     ):
+        timeout = (
+            timeout
+            if timeout is not None
+            else CONF.getint("helmbundle", "manifest_enable_timeout")
+        )
+        delay = (
+            delay
+            if delay is not None
+            else CONF.getint("helmbundle", "manifest_enable_delay")
+        )
         await asyncio.wait_for(
             self._enable(
                 version,
@@ -219,8 +232,14 @@ class HelmBundleMixin:
     async def _disable(
         self,
         wait_completion=False,
-        delay=CONF.getint("helmbundle", "manifest_disable_delay"),
+        delay=None,
     ):
+        delay = (
+            delay
+            if delay is not None
+            else CONF.getint("helmbundle", "manifest_disable_delay")
+        )
+
         diff = {"images": {"tags": {}}, "manifests": {}}
         diff["manifests"][self.helmbundle_ext.manifest] = False
         i = 1
@@ -241,9 +260,20 @@ class HelmBundleMixin:
     async def disable(
         self,
         wait_completion=False,
-        timeout=CONF.getint("helmbundle", "manifest_disable_timeout"),
-        delay=CONF.getint("helmbundle", "manifest_disable_delay"),
+        timeout=None,
+        delay=None,
     ):
+        timeout = (
+            timeout
+            if timeout is not None
+            else CONF.getint("helmbundle", "manifest_disable_timeout")
+        )
+        delay = (
+            delay
+            if delay is not None
+            else CONF.getint("helmbundle", "manifest_disable_delay")
+        )
+
         await asyncio.wait_for(
             self._disable(wait_completion=wait_completion, delay=delay),
             timeout=timeout,
@@ -251,9 +281,19 @@ class HelmBundleMixin:
 
     async def _purge(
         self,
-        timeout=CONF.getint("helmbundle", "manifest_purge_timeout"),
-        delay=CONF.getint("helmbundle", "manifest_purge_delay"),
+        timeout=None,
+        delay=None,
     ):
+        timeout = (
+            timeout
+            if timeout is not None
+            else CONF.getint("helmbundle", "manifest_purge_timeout")
+        )
+        delay = (
+            delay
+            if delay is not None
+            else CONF.getint("helmbundle", "manifest_purge_delay")
+        )
         i = 1
         while True:
             if not self.exists():
@@ -268,9 +308,19 @@ class HelmBundleMixin:
 
     async def purge(
         self,
-        timeout=CONF.getint("helmbundle", "manifest_purge_timeout"),
-        delay=CONF.getint("helmbundle", "manifest_purge_delay"),
+        timeout=None,
+        delay=None,
     ):
+        timeout = (
+            timeout
+            if timeout is not None
+            else CONF.getint("helmbundle", "manifest_purge_timeout")
+        )
+        delay = (
+            delay
+            if delay is not None
+            else CONF.getint("helmbundle", "manifest_purge_delay")
+        )
         await asyncio.wait_for(self._purge(delay=delay), timeout=timeout)
 
     def image_applied(self, value):
@@ -376,8 +426,13 @@ class CronJob(pykube.CronJob, HelmBundleMixin):
     async def _suspend(
         self,
         wait_completion=False,
-        delay=CONF.getint("helmbundle", "manifest_disable_delay"),
+        delay=None,
     ):
+        delay = (
+            delay
+            if delay is not None
+            else CONF.getint("helmbundle", "manifest_disable_delay")
+        )
         diff = {"conf": {"cronjob": {"suspend": True}}}
         i = 1
         while True:
@@ -402,10 +457,16 @@ class CronJob(pykube.CronJob, HelmBundleMixin):
         timeout=None,
         delay=None,
     ):
-        timeout = timeout or CONF.getint(
-            "helmbundle", "manifest_disable_timeout"
+        timeout = (
+            timeout
+            if timeout is not None
+            else CONF.getint("helmbundle", "manifest_disable_timeout")
         )
-        delay = delay or CONF.getint("helmbundle", "manifest_disable_delay")
+        delay = (
+            delay
+            if delay is not None
+            else CONF.getint("helmbundle", "manifest_disable_delay")
+        )
         await asyncio.wait_for(
             self._suspend(wait_completion=wait_completion, delay=delay),
             timeout=timeout,
@@ -740,5 +801,4 @@ def get_osdpl(namespace=settings.OSCTL_OS_DEPLOYMENT_NAMESPACE):
 
 find_osdpl = functools.partial(find, OpenStackDeployment)
 find_secret = functools.partial(find, Secret)
-
 KUBE_OBJECTS = get_kubernetes_objects()
