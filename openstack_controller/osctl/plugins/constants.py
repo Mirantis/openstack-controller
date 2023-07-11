@@ -36,4 +36,5 @@ OSCTL_COMPONENT_LOGGERS = {
     "frr": ["frr"],
     "iscsi": ["iscsi"],
     "strongswan": ["strongswan"],
+    "openstack-operator": ["openstack-operator"],
 }

@@ -48,14 +48,7 @@ class ElasticLogsCollector(base.BaseLogsCollector):
     def query_logger(self, logger):
         return {
             "bool": {
-                "should": [
-                    {
-                        "query_string": {
-                            "fields": ["logger"],
-                            "query": f"{logger}*",
-                        }
-                    }
-                ],
+                "should": [{"match_phrase": {"logger": f"{logger}*"}}],
                 "minimum_should_match": 1,
             }
         }
