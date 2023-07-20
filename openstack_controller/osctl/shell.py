@@ -13,7 +13,6 @@ class Osctl:
             dest="subcommand", required=True
         )
         self.plugins = self.load_plugins()
-        self.args = self.parser.parse_args()
 
     def load_plugins(self):
         res = {}
@@ -24,7 +23,8 @@ class Osctl:
         return res
 
     def run(self):
-        self.plugins[self.args.subcommand].run(self.args)
+        args = self.parser.parse_args()
+        self.plugins[args.subcommand].run(args)
         pass
 
 
