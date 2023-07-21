@@ -69,8 +69,8 @@ class TestK8sObjectsCollector(utils.BaseTestCase):
             ]
         )
         collector = k8s.K8sObjectsCollector(args, "/workspace", "report")
-        self.assertTrue(
-            collector.get_tasks(), [collector.collect_objects, (), {}]
+        self.assertEquals(
+            collector.get_tasks(), [(collector.collect_objects, (), {})]
         )
 
     @mock.patch.object(yaml, "dump")
