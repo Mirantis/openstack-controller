@@ -4,8 +4,8 @@ import os
 import time
 import threading
 import random
-import datetime
 import shutil
+from datetime import datetime
 
 from openstack_controller.osctl.plugins import base
 from openstack_controller.osctl.plugins import sosreport
@@ -181,7 +181,7 @@ class SosReportShell(base.OsctlShell):
     def _run(self, args, mode):
         tasks = []
         futures_list = []
-        now = datetime.datetime.utcnow()
+        now = datetime.utcnow()
         workspace = os.path.join(
             args.workspace, f"sos{mode}-{now.strftime('%Y%m%d%H%M%S')}"
         )
