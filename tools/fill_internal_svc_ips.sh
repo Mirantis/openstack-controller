@@ -2,7 +2,7 @@
 set -e
 set -o pipefail
 
-SERVICES="cinder-api keystone-api glance-api nova-api neutron-server barbican-api designate-api octavia-api placement-api"
+SERVICES="cinder-api keystone-api glance-api nova-api neutron-server barbican-api designate-api octavia-api placement-api masakari-api"
 
 HOSTS_FILE_IDENTIFIER="# Automatically set IP"
 
