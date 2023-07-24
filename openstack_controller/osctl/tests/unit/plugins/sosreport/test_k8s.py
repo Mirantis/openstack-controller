@@ -1,7 +1,6 @@
 import argparse
 from unittest import mock
 import yaml
-import os
 
 from openstack_controller.osctl.tests.unit import utils
 from openstack_controller.osctl.plugins import sos
@@ -11,6 +10,7 @@ from openstack_controller import kube
 
 class TestK8sObjectsCollector(utils.BaseTestCase):
     def setUp(self):
+        super().setUp()
         self.parser = argparse.ArgumentParser()
         self.subparsers = self.parser.add_subparsers(
             dest="subcommand", required=True
@@ -77,9 +77,8 @@ class TestK8sObjectsCollector(utils.BaseTestCase):
     @mock.patch.object(
         kube, "get_object_by_kind", side_effect=Exception("Boom")
     )
-    @mock.patch.object(os, "makedirs")
     def test_collect_objects_exception(
-        self, mock_makedirs, mock_get_obj_by_kind, mock_yaml_dump
+        self, mock_get_obj_by_kind, mock_yaml_dump
     ):
         args = self.parser.parse_args(
             [
@@ -97,7 +96,7 @@ class TestK8sObjectsCollector(utils.BaseTestCase):
         }
         with self.assertRaises(Exception):
             collector.collect_objects()
-        mock_makedirs.assert_called_once_with(
+        self.mock_os_makedirs.assert_called_once_with(
             "/workspace/k8s/namespaced/mynamespace/job", exist_ok=True
         )
         mock_yaml_dump.assert_not_called()
@@ -105,9 +104,8 @@ class TestK8sObjectsCollector(utils.BaseTestCase):
     @mock.patch("builtins.open", new_callable=mock.mock_open)
     @mock.patch.object(yaml, "dump")
     @mock.patch.object(kube, "get_object_by_kind", return_value=kube.Node)
-    @mock.patch.object(os, "makedirs")
     def test_collect_objects(
-        self, mock_makedirs, mock_get_obj_by_kind, mock_yaml_dump, mock_open
+        self, mock_get_obj_by_kind, mock_yaml_dump, mock_open
     ):
         args = self.parser.parse_args(
             [
@@ -126,7 +124,7 @@ class TestK8sObjectsCollector(utils.BaseTestCase):
         self.mock_node_obj.return_value.filter.return_value = [self.mock_node]
 
         collector.collect_objects()
-        mock_makedirs.assert_called_once_with(
+        self.mock_os_makedirs.assert_called_once_with(
             "/workspace/k8s/cluster/node", exist_ok=True
         )
         mock_yaml_dump.assert_called_once_with({"foo": "bar"}, mock.ANY)
