@@ -25,6 +25,9 @@ from openstack_controller.osctl.plugins.sosreport.nova import (
 from openstack_controller.osctl.plugins.sosreport.neutron import (
     NeutronObjectsCollector,
 )
+from openstack_controller.osctl.plugins.sosreport.cinder import (
+    CinderObjectsCollector,
+)
 
 
 __all__ = (
@@ -32,6 +35,7 @@ __all__ = (
     K8sObjectsCollector,
     NovaObjectsCollector,
     NeutronObjectsCollector,
+    CinderObjectsCollector,
 )
 
 registry = base.BaseLogsCollector.registry
