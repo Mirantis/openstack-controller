@@ -15,7 +15,6 @@
 import base64
 from datetime import datetime
 from enum import IntEnum
-import os
 
 from keystoneauth1 import exceptions as ksa_exceptions
 import kopf
@@ -67,9 +66,6 @@ VOLUME_SERVICE_DISABLED_REASON = COMPUTE_SERVICE_DISABLE_REASON
 
 
 def init_keystone_admin_creds():
-    if os.path.exists(settings.OS_CLIENT_CONFIG_FILE):
-        return
-
     keystone_secret = kube.resource_list(
         pykube.Secret,
         None,
@@ -84,6 +80,9 @@ def init_keystone_admin_creds():
     clouds_yaml = base64.b64decode(
         keystone_secret.obj["data"]["clouds.yaml"]
     ).decode("utf-8")
+
+    # NOTE(vsaienko): the password may be rotated, as result we need to reinitiate
+    # connection each time.
     with open(settings.OS_CLIENT_CONFIG_FILE, "w") as f:
         f.write(clouds_yaml)
 
@@ -220,7 +219,12 @@ class OpenStackClientManager:
             kwargs["is_alive"] = is_alive
         if is_admin_state_up is not None:
             kwargs["is_admin_state_up"] = is_admin_state_up
-        return list(self.oc.network.agents(**kwargs))
+        res = []
+        try:
+            res = list(self.oc.network.agents(**kwargs))
+        except openstack.exceptions.ResourceNotFound:
+            pass
+        return res
 
     def network_ensure_agents_absent(self, host):
         for agent in self.network_get_agents(host=host):

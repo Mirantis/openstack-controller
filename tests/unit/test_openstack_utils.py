@@ -80,7 +80,7 @@ async def test_init_keystone_admin_creds_multiple_times(
     )
     openstack_utils.init_keystone_admin_creds()
     openstack_utils.init_keystone_admin_creds()
-    kube_resource_list.assert_called_once()
+    assert 2 == kube_resource_list.call_count
 
 
 @pytest.mark.asyncio
