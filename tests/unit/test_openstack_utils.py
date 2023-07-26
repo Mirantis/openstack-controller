@@ -16,6 +16,7 @@ import base64
 from os import path
 from unittest import mock
 import copy
+import openstack
 
 from keystoneauth1 import exceptions as ksa_exceptions
 import kopf
@@ -130,12 +131,38 @@ async def test_notify_masakari_host_down_exception_no_masakari(
 
 @mock.patch.object(openstack_utils, "OpenStackClientManager")
 @pytest.mark.asyncio
-async def test_notify_masakari_host_down_host_not_in_segment(
+async def test_notify_masakari_host_down_host_not_in_segment_400(
     openstack_client_manager,
 ):
     node = kube.Node(mock.Mock, copy.deepcopy(_get_node()))
-    openstack_client_manager.side_effect = Exception(
-        f"Host with name {node.name} could not be found."
+    openstack_client_manager.side_effect = openstack.exceptions.HttpException(
+        f"Host with name {node.name} could not be found.", http_status=400
     )
     await openstack_utils.notify_masakari_host_down(node)
+    openstack_client_manager.return_value.instance_ha_create_notification.assert_not_called()
+
+
+@mock.patch.object(openstack_utils, "OpenStackClientManager")
+@pytest.mark.asyncio
+async def test_notify_masakari_host_down_host_not_in_segment_500(
+    openstack_client_manager,
+):
+    node = kube.Node(mock.Mock, copy.deepcopy(_get_node()))
+    openstack_client_manager.side_effect = openstack.exceptions.HttpException(
+        f"Host with name {node.name} could not be found.", http_status=500
+    )
+    with pytest.raises(kopf.TemporaryError):
+        await openstack_utils.notify_masakari_host_down(node)
+    openstack_client_manager.return_value.instance_ha_create_notification.assert_not_called()
+
+
+@mock.patch.object(openstack_utils, "OpenStackClientManager")
+@pytest.mark.asyncio
+async def test_notify_masakari_host_down_unknown(
+    openstack_client_manager,
+):
+    node = kube.Node(mock.Mock, copy.deepcopy(_get_node()))
+    openstack_client_manager.side_effect = Exception("Error")
+    with pytest.raises(kopf.TemporaryError):
+        await openstack_utils.notify_masakari_host_down(node)
     openstack_client_manager.return_value.instance_ha_create_notification.assert_not_called()

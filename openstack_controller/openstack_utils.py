@@ -16,7 +16,6 @@ import base64
 from datetime import datetime
 from enum import IntEnum
 import os
-import re
 
 from keystoneauth1 import exceptions as ksa_exceptions
 import kopf
@@ -242,10 +241,11 @@ async def notify_masakari_host_down(node):
         LOG.info("Instance-HA service is not deployed, ignore notifying")
         return
     except Exception as e:
-        # NOTE(vsaienko): do not resend notifications if host does not belong
-        # to any segments.
-        if re.search("Host with name .* could not be found.", str(e)):
-            LOG.warning(e)
-            return
+        if isinstance(e, openstack.exceptions.HttpException):
+            # NOTE(vsaienko): do not resend notifications if host does not belong
+            # to any segments.
+            if e.status_code in [400, 409]:
+                LOG.warning(e)
+                return
         LOG.warning(f"Failed to notify Masakari - {e}")
         raise kopf.TemporaryError(f"{e}") from e
