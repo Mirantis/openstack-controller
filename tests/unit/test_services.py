@@ -386,7 +386,6 @@ async def test_nova_prepare_node_after_reboot(
 
 @pytest.mark.asyncio
 async def test_nova_prepare_node_after_reboot_not_compute(
-    init_keystone_admin_creds,
     openstack_client,
     kube_resource_list,
     kopf_adopt,
@@ -439,7 +438,6 @@ async def test_nova_prepare_node_after_reboot_openstacksdk_exception(
 
 @pytest.mark.asyncio
 async def test_nova_add_node_to_scheduling(
-    init_keystone_admin_creds,
     openstack_client,
     openstackdeployment_mspec,
     mock_osdpl,

@@ -437,12 +437,14 @@ spec:
             - name: openstack-controller-config
               mountPath: /etc/openstack-controller/conf.d/
       volumes:
-        - name: os-clouds
-          emptyDir: {}
         - name: openstack-controller-config
           configMap:
             name: openstack-controller-config
             defaultMode: 0555
+        - name: os-clouds
+          secret:
+            secretName: keystone-os-clouds
+            defaultMode: 365
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

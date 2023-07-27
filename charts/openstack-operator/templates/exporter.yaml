@@ -96,7 +96,9 @@ spec:
               mountPath: /etc/openstack-controller/exporter
       volumes:
         - name: os-clouds
-          emptyDir: {}
+          secret:
+            secretName: keystone-os-clouds
+            defaultMode: 365
         - name: exporter-etc
           secret:
             secretName: {{ include "openstack-controller.fullname" . }}-exporter-etc

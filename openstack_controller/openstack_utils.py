@@ -12,17 +12,13 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import base64
 from datetime import datetime
 from enum import IntEnum
 
 from keystoneauth1 import exceptions as ksa_exceptions
 import kopf
 import openstack
-import pykube
 
-from openstack_controller import constants
-from openstack_controller import kube
 from openstack_controller import settings
 from openstack_controller import utils
 
@@ -65,31 +61,8 @@ COMPUTE_SERVICE_DISABLE_REASON = "OSDPL: Node is under maintenance"
 VOLUME_SERVICE_DISABLED_REASON = COMPUTE_SERVICE_DISABLE_REASON
 
 
-def init_keystone_admin_creds():
-    keystone_secret = kube.resource_list(
-        pykube.Secret,
-        None,
-        settings.OSCTL_OS_DEPLOYMENT_NAMESPACE,
-    ).get_or_none(name=constants.COMPUTE_NODE_CONTROLLER_SECRET_NAME)
-
-    if keystone_secret is None:
-        raise kopf.TemporaryError(
-            "Keystone admin secret not found, can not get keystone admin creds."
-        )
-
-    clouds_yaml = base64.b64decode(
-        keystone_secret.obj["data"]["clouds.yaml"]
-    ).decode("utf-8")
-
-    # NOTE(vsaienko): the password may be rotated, as result we need to reinitiate
-    # connection each time.
-    with open(settings.OS_CLIENT_CONFIG_FILE, "w") as f:
-        f.write(clouds_yaml)
-
-
 class OpenStackClientManager:
     def __init__(self, cloud=settings.OS_CLOUD, metrics=None):
-        init_keystone_admin_creds()
         # NOTE(vsaienko): disable built in opestacksdk metrics as they
         # leads to deadlock in custom collectors.
         # https://github.com/prometheus/client_python/issues/353

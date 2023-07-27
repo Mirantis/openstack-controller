@@ -456,3 +456,6 @@ async def handle_keystone_osclouds_secret(
     }
 
     secrets.ExternalCredentialSecret("identity").save(encoded_ext_data)
+
+    os_clouds_secret = secrets.OpenStackControllerOSCloudsSecret()
+    os_clouds_secret.save(encoded_ext_data)

@@ -1095,6 +1095,13 @@ class StackLightSecret(SecretCopy):
         super().__init__(namespace)
 
 
+class OpenStackControllerOSCloudsSecret(SecretCopy):
+    secret_name = constants.KEYSTONE_OSCLOUDS_SECRET
+
+    def __init__(self, namespace="osh-system"):
+        super().__init__(namespace)
+
+
 class ExternalTopicSecret(SecretCopy):
     def __init__(
         self,

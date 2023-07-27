@@ -141,15 +141,6 @@ def asyncio_wait_for_timeout(mocker):
 
 
 @pytest.fixture
-def init_keystone_admin_creds(mocker):
-    mocker.patch(
-        "openstack_controller.openstack_utils.init_keystone_admin_creds",
-        AsyncMock(),
-    )
-    mocker.stopall()
-
-
-@pytest.fixture
 def openstack_connect(mocker):
     mock_connect = mocker.patch("openstack.connect")
     yield mock_connect

@@ -12,8 +12,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import base64
-from os import path
 from unittest import mock
 import copy
 import openstack
@@ -23,7 +21,6 @@ import kopf
 import pytest
 
 from openstack_controller import openstack_utils
-from openstack_controller import settings
 from openstack_controller import kube
 
 
@@ -51,47 +48,8 @@ def _get_node(host="host1", role="compute"):
 
 
 @pytest.mark.asyncio
-async def test_init_keystone_admin_creds_timeout(kube_resource_list):
-    get_or_none_mock = mock.Mock()
-    get_or_none_mock.return_value = None
-    openstack_utils.ADMIN_CREDS = None
-
-    kube_resource_list.return_value.get_or_none.return_value = None
-
-    with pytest.raises(kopf.TemporaryError):
-        openstack_utils.init_keystone_admin_creds()
-
-
-@pytest.mark.asyncio
-async def test_init_keystone_admin_creds_multiple_times(
-    mocker, kube_resource_list
-):
-    file_exists_mock = mocker.patch.object(path, "exists")
-    mocker.patch.object(
-        settings, "OS_CLIENT_CONFIG_FILE", "/tmp/osctl-clouds.yaml"
-    )
-    file_exists_mock.side_effect = [False, True]
-    kube_resource_list.return_value.get_or_none.return_value = mock.Mock(
-        obj={
-            "data": {
-                "clouds.yaml": base64.b64encode("foo".encode("utf-8")),
-            }
-        }
-    )
-    openstack_utils.init_keystone_admin_creds()
-    openstack_utils.init_keystone_admin_creds()
-    assert 2 == kube_resource_list.call_count
-
-
-@pytest.mark.asyncio
 async def test_openstack_client_no_creds(mocker, openstack_connect):
-    init_keystone_creds_mock = mocker.patch.object(
-        openstack_utils, "init_keystone_admin_creds"
-    )
-    init_keystone_creds_mock.return_value = None
-
     openstack_utils.OpenStackClientManager()
-    init_keystone_creds_mock.assert_called_once()
 
 
 @mock.patch.object(openstack_utils, "OpenStackClientManager")
