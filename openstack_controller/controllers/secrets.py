@@ -419,6 +419,14 @@ async def handle_substitution_secrets(
     "secrets",
     labels={"application": "keystone", "component": "os-clouds"},
 )
+# Resume is needed only to copy keystone-os-clouds to osh-system namespace
+# during update case, later this handled may be dropped.
+@kopf.on.resume(
+    "",
+    "v1",
+    "secrets",
+    labels={"application": "keystone", "component": "os-clouds"},
+)
 async def handle_keystone_osclouds_secret(
     body,
     meta,
@@ -439,6 +447,7 @@ async def handle_keystone_osclouds_secret(
     data = yaml.safe_load(
         base64.b64decode(body["data"]["clouds.yaml"]).decode()
     )
+    secrets.OpenStackControllerOSCloudsSecret().save(body["data"])
 
     ext_data = {"clouds": {}}
     for context in ["admin", "admin-system"]:
@@ -456,6 +465,3 @@ async def handle_keystone_osclouds_secret(
     }
 
     secrets.ExternalCredentialSecret("identity").save(encoded_ext_data)
-
-    os_clouds_secret = secrets.OpenStackControllerOSCloudsSecret()
-    os_clouds_secret.save(encoded_ext_data)
