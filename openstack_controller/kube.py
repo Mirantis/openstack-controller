@@ -704,6 +704,12 @@ class NodeMaintenanceRequest(pykube.objects.APIObject):
     kind = "NodeMaintenanceRequest"
 
 
+class OpenStackDeploymentStatus(pykube.objects.NamespacedAPIObject):
+    version = "lcm.mirantis.com/v1alpha1"
+    kind = "OpenStackDeploymentStatus"
+    endpoint = "openstackdeploymentstatus"
+
+
 def resource(data):
     kube_api = kube_client()
     return object_factory(kube_api, data["apiVersion"], data["kind"])(

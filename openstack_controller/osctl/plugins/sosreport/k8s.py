@@ -24,6 +24,8 @@ class K8sObjectsCollector(base.BaseLogsCollector):
                 "StatefulSet",
                 "Pod",
                 "Job",
+                "OpenStackDeployment",
+                "OpenStackDeploymentStatus",
             },
             "openstack-redis": {
                 "PersistentVolumeClaim",
