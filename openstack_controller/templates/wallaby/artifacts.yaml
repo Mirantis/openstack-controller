@@ -109,7 +109,7 @@ tempest_run_tests: '{{ images_base_url }}/openstack/tempest:victoria-focal-20230
 tempest-uuids-init: '{{ images_base_url }}/openstack/heat:wallaby-focal-20230223184118'
 glance_metadefs_load: '{{ images_base_url }}/openstack/glance:wallaby-focal-20230223184118'
 memcached: '{{ images_base_url }}/general/memcached:v1.6.20-alpine-20230614113432'
-ingress: '{{ images_base_url }}/openstack/extra/nginx-ingress-controller:1.3.1-alpine-20230422140933'
+ingress: '{{ images_base_url }}/openstack/extra/nginx-ingress-controller:1.8.0-alpine-20230617191825'
 error_pages: '{{ images_base_url }}/openstack/extra/defaultbackend:v1.19.2-77af1ef-20220823043839'
 ironic_manage_networks: '{{ images_base_url }}/openstack/heat:wallaby-focal-20230223184118'
 ironic_retrieve_networks: '{{ images_base_url }}/openstack/heat:wallaby-focal-20230223184118'
