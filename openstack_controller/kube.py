@@ -680,6 +680,30 @@ class RedisFailover(pykube.objects.NamespacedAPIObject):
     endpoint = "redisfailovers"
 
 
+class ClusterWorkloadLock(pykube.objects.APIObject):
+    version = "lcm.mirantis.com/v1alpha1"
+    kind = "ClusterWorkloadLock"
+    endpoint = "clusterworkloadlocks"
+
+
+class NodeWorkloadLock(pykube.objects.APIObject):
+    version = "lcm.mirantis.com/v1alpha1"
+    endpoint = "nodeworkloadlocks"
+    kind = "NodeWorkloadLock"
+
+
+class ClusterMaintenanceRequest(pykube.objects.APIObject):
+    version = "lcm.mirantis.com/v1alpha1"
+    endpoint = "clustermaintenancerequests"
+    kind = "ClusterMaintenanceRequest"
+
+
+class NodeMaintenanceRequest(pykube.objects.APIObject):
+    version = "lcm.mirantis.com/v1alpha1"
+    endpoint = "nodemaintenancerequests"
+    kind = "NodeMaintenanceRequest"
+
+
 def resource(data):
     kube_api = kube_client()
     return object_factory(kube_api, data["apiVersion"], data["kind"])(

@@ -37,7 +37,14 @@ class K8sObjectsCollector(base.BaseLogsCollector):
                 "Pod",
                 "Job",
             },
-            None: {"Node", "PersistentVolume"},
+            None: {
+                "Node",
+                "PersistentVolume",
+                "ClusterWorkloadLock",
+                "NodeWorkloadLock",
+                "ClusterMaintenanceRequest",
+                "NodeMaintenanceRequest",
+            },
         }
 
     @osctl_utils.generic_exception
@@ -54,8 +61,9 @@ class K8sObjectsCollector(base.BaseLogsCollector):
                 kube_class = kube.get_object_by_kind(kind)
                 if kube_class is None:
                     LOG.warning(
-                        "Kind: {kind} is not present in the cluster. Skip objects collection."
+                        f"Kind: {kind} is not present in the cluster. Skip objects collection."
                     )
+                    continue
                 for obj in (
                     kube_class.objects(kube.kube_client()).filter(
                         namespace=namespace
