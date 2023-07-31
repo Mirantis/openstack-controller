@@ -223,4 +223,3 @@ manila_service_image: '{{ binary_base_url }}/openstack/bin/manila/manila-service
 manila-uuids-init: '{{ images_base_url }}/openstack/openstack-tools:yoga-focal-20230730141349'
 neutron_dr: '{{ images_base_url }}/openstack/neutron:wallaby-focal-20230223184118'
 requirements: '{{ images_base_url }}/openstack/requirements:wallaby-focal-20230223184118'
-rabbitmq_amqproxy: '{{ images_base_url }}/general/amqproxy:0.8.6-alpine3.17.3-20230422135216'

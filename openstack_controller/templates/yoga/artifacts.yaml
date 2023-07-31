@@ -229,4 +229,3 @@ manila-uuids-init: '{{ images_base_url }}/openstack/openstack-tools:yoga-focal-2
 manila_share_daemonset: '{{ images_base_url }}/openstack/manila:yoga-focal-20230730141349'
 manila_db_purge: '{{ images_base_url }}/openstack/manila:yoga-focal-20230730141349'
 requirements: '{{ images_base_url }}/openstack/requirements:yoga-focal-20230730141349'
-rabbitmq_amqproxy: '{{ images_base_url }}/general/amqproxy:0.8.6-alpine3.17.3-20230422135216'
