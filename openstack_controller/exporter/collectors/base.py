@@ -82,12 +82,22 @@ class OsdplMetricsCollector(object):
                 LOG.info(f"Task {name} took {took_time} to complete.")
         self.check_stuck_tasks()
 
+    def wait_for_tasks(self, timeout):
+        start = datetime.utcnow()
+        while any(
+            [
+                task["future"].is_alive()
+                for task in self.gather_tasks.copy().values()
+            ]
+        ):
+            if (datetime.utcnow() - start).total_seconds() >= timeout:
+                return
+
     def collect(self):
         osdpl = kube.get_osdpl()
 
         if not osdpl:
             return
-
         self.update_tasks_status()
         if osdpl:
             LOG.info(f"The osdpl {osdpl.name} found. Collecting metrics")
@@ -95,6 +105,7 @@ class OsdplMetricsCollector(object):
                 self.submit_task(
                     collector_instance._name, collector_instance.refresh_data
                 )
+        self.wait_for_tasks(settings.OSCTL_SCRAPE_TIMEOUT)
 
         for collector_instance in self.collector_instances:
             yield from collector_instance.collect(osdpl)

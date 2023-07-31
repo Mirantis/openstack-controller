@@ -23,11 +23,16 @@ from openstack_controller.exporter.collectors.openstack_services import (
     OsdplIronicMetricCollector,
 )
 
+from openstack_controller.exporter.collectors.osdpl import (
+    OsdplMetricCollector,
+)
+
 __all__ = (
     OsdplMetricsCollector,
     OsdplCertsMetricCollector,
     OsdplNovaMetricCollector,
     OsdplIronicMetricCollector,
+    OsdplMetricCollector,
 )
 
 registry = base.BaseMetricsCollector.registry
