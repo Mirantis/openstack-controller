@@ -192,8 +192,6 @@ frr_init: '{{ images_base_url }}/openstack/openstack-tools:yoga-focal-2023072406
 frr_info: '{{ images_base_url }}/openstack/openstack-tools:yoga-focal-20230724060020'
 frr: '{{ images_base_url }}/general/external/docker.io/frrouting/frr:v8.5.1-20230619084330'
 cinder_service_cleaner: '{{ images_base_url }}/openstack/cinder:wallaby-focal-20230731094548'
-iscsi_iscsi: '{{ images_base_url }}/openstack/cinder:wallaby-focal-20230731094548'
-iscsi_tgt: '{{ images_base_url }}/general/tgt:1.0.x-focal-20230730124813'
 strongswan: '{{ images_base_url }}/openstack/extra/strongswan:alpine-5.9.8-20230720054838'
 keystone_init_secrets: '{{ images_base_url }}/openstack/openstack-tools:yoga-focal-20230724060020'
 rsyslog: '{{ images_base_url }}/openstack/extra/rsyslog:v8.2001.0-20230730124813'

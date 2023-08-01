@@ -206,8 +206,6 @@ images:
   test: test:latest
   masakari_api: masakari-api:latest
   masakari_db_sync: masakari-db-sync:latest
-  iscsi_iscsi: cinder-volume:latest
-  iscsi_tgt: cinder-volume:latest
   openvswitch_ovn_db_nb: openvswitch-ovn-db-nb:latest
   openvswitch_ovn_db_sb: openvswitch-ovn-db-sb:latest
   openvswitch_ovn_northd: openvswitch-ovn-northd:latest
