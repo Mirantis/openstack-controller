@@ -24,10 +24,14 @@ OSCTL_EXPORTER_BIND_PORT = int(os.getenv("OSCTL_EXPORTER_BIND_PORT", 9102))
 # List of enabled collectors
 OSCTL_EXPORTER_ENABLED_COLLECTORS = os.getenv(
     "OSCTL_EXPORTER_ENABLED_COLLECTORS",
-    "osdpl_certificate,osdpl_nova,osdpl_ironic",
+    "osdpl_certificate,osdpl_nova,osdpl_ironic,osdpl",
 ).split(",")
 
 # Number in seconds we allow for polling, when exceeds exporter is stopped.
 OSCTL_EXPORTER_MAX_POLL_TIMEOUT = int(
     os.getenv("OSCTL_EXPORTER_MAX_POLL_TIMEOUT", "300")
 )
+
+# Number of seconds we can wait for polling tasks before return cached result
+# Should be lover than prometheus scrape_timeout which is 1m by default.
+OSCTL_SCRAPE_TIMEOUT = int(os.getenv("OSCTL_SCRAPE_TIMEOUT", "45"))
