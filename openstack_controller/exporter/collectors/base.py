@@ -113,13 +113,22 @@ class OsdplMetricsCollector(object):
             "Durations in seconds taken by collector to refresh metrics.",
             labels=["collector"],
         )
+        scrape_sucess = GaugeMetricFamily(
+            "osdpl_scrape_collector_success",
+            "Flag inidicates if collector was able to refresh metrics successfully.",
+            labels=["collector"],
+        )
 
         for collector_instance in self.collector_instances:
             yield from collector_instance.collect(osdpl)
             scrape_duration.add_metric(
                 [collector_instance._name], collector_instance.scrape_duration
             )
+            scrape_sucess.add_metric(
+                [collector_instance._name], collector_instance.scrape_success
+            )
         yield scrape_duration
+        yield scrape_sucess
 
 
 class BaseMetricsCollector(object):
@@ -134,6 +143,7 @@ class BaseMetricsCollector(object):
     def __init__(self):
         self.data = {}
         self.scrape_duration = 0
+        self.scrape_success = False
 
     @abc.abstractmethod
     def collect(self, osdpl):
@@ -150,7 +160,12 @@ class BaseMetricsCollector(object):
             )
             self.data = {}
         start = datetime.utcnow()
-        self.data = self.take_data()
+        try:
+            self.data = self.take_data()
+            self.scrape_success = True
+        except Exception as e:
+            self.scrape_success = False
+            LOG.exception(e)
         self.scrape_duration = (datetime.utcnow() - start).total_seconds()
 
     @property
