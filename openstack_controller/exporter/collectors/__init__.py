@@ -18,9 +18,17 @@ from openstack_controller.exporter.collectors.base import OsdplMetricsCollector
 from openstack_controller.exporter.collectors.certificates import (
     OsdplCertsMetricCollector,
 )
-from openstack_controller.exporter.collectors.openstack_services import (
+from openstack_controller.exporter.collectors.openstack.nova import (
     OsdplNovaMetricCollector,
+)
+from openstack_controller.exporter.collectors.openstack.ironic import (
     OsdplIronicMetricCollector,
+)
+from openstack_controller.exporter.collectors.openstack.heat import (
+    OsdplHeatMetricCollector,
+)
+from openstack_controller.exporter.collectors.openstack.keystone import (
+    OsdplKeystoneMetricCollector,
 )
 
 from openstack_controller.exporter.collectors.osdpl import (
@@ -33,6 +41,8 @@ __all__ = (
     OsdplNovaMetricCollector,
     OsdplIronicMetricCollector,
     OsdplMetricCollector,
+    OsdplHeatMetricCollector,
+    OsdplKeystoneMetricCollector,
 )
 
 registry = base.BaseMetricsCollector.registry
