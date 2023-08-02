@@ -19,6 +19,8 @@ from datetime import datetime
 import sys
 from threading import Thread
 
+from prometheus_client.core import GaugeMetricFamily
+
 from openstack_controller.exporter import settings
 from openstack_controller.exporter import collectors
 from openstack_controller import utils
@@ -106,9 +108,18 @@ class OsdplMetricsCollector(object):
                     collector_instance._name, collector_instance.refresh_data
                 )
         self.wait_for_tasks(settings.OSCTL_SCRAPE_TIMEOUT)
+        scrape_duration = GaugeMetricFamily(
+            "osdpl_scrape_collector_duration_seconds",
+            "Durations in seconds taken by collector to refresh metrics.",
+            labels=["collector"],
+        )
 
         for collector_instance in self.collector_instances:
             yield from collector_instance.collect(osdpl)
+            scrape_duration.add_metric(
+                [collector_instance._name], collector_instance.scrape_duration
+            )
+        yield scrape_duration
 
 
 class BaseMetricsCollector(object):
@@ -122,6 +133,7 @@ class BaseMetricsCollector(object):
 
     def __init__(self):
         self.data = {}
+        self.scrape_duration = 0
 
     @abc.abstractmethod
     def collect(self, osdpl):
@@ -137,7 +149,9 @@ class BaseMetricsCollector(object):
                 f"Collector {self._name} is enabled, but collection for it is not possible."
             )
             self.data = {}
+        start = datetime.utcnow()
         self.data = self.take_data()
+        self.scrape_duration = (datetime.utcnow() - start).total_seconds()
 
     @property
     @abc.abstractmethod
