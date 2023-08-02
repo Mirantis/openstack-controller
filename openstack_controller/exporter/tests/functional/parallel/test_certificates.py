@@ -11,7 +11,7 @@ class CertificatesCollectorFunctionalTestCase(base.BaseFunctionalTestCase):
     def test_metric_present(self):
         self.assertIsNotNone(self.metric)
 
-    def test_mandatiry_samples(self):
+    def test_mandatory_samples(self):
         for identifier in ["keystone_public", "octavia_amphora_ca"]:
             labels = {"identifier": identifier}
             samples = self.filter_metric_samples(self.metric, labels)

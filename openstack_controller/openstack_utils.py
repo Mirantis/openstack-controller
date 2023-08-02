@@ -118,6 +118,14 @@ class OpenStackClientManager:
                 disabled_reason=disabled_reason,
             )
 
+    def compute_ensure_service_force_down(self, service, force_down):
+        state = "down" if force_down else "up"
+        if service["state"].lower() != state:
+            self.oc.compute.update_service(
+                service["id"],
+                force_down=force_down,
+            )
+
     def compute_ensure_services_absent(self, host):
         for service in self.compute_get_services(host=host, binary=None):
             self.oc.compute.delete_service(service)
