@@ -10,7 +10,6 @@ from openstack_controller import openstack_utils
 class BaseFunctionalTestCase(TestCase):
     def setUp(self):
         self.exporter_url = self.get_exporter_url()
-        self.metric_families = [x for x in self.get_metric_families()]
         self.kube_api = kube.kube_client()
         self.ocm = openstack_utils.OpenStackClientManager()
         self.osdpl = kube.get_osdpl()
@@ -23,7 +22,8 @@ class BaseFunctionalTestCase(TestCase):
         internal_ip = svc.obj["spec"]["clusterIPs"][0]
         return f"http://{internal_ip}:9102"
 
-    def get_metric_families(self):
+    @property
+    def metric_families(self):
         res = requests.get(self.exporter_url)
         return text_string_to_metric_families(res.text + "# EOF")
 
