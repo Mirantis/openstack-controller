@@ -1,0 +1,8 @@
+from openstack_controller.exporter.tests.functional import base
+
+
+class ExporterHealthCollectorFunctionalTestCase(base.BaseFunctionalTestCase):
+    def test_scrape_collector_duration_seconds(self):
+        metric = self.get_metric("osdpl_scrape_collector_duration_seconds")
+        self.assertIsNotNone(metric)
+        self.assertTrue(len(metric.samples) > 0)
