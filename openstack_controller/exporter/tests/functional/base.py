@@ -1,3 +1,4 @@
+import os
 import requests
 
 from unittest import TestCase
@@ -15,6 +16,8 @@ class BaseFunctionalTestCase(TestCase):
         self.osdpl = kube.get_osdpl()
 
     def get_exporter_url(self):
+        if os.environ.get("OSDPL_EXPORTER_URL"):
+            return os.environ.get("OSDPL_EXPORTER_URL")
         svc_class = kube.get_object_by_kind("Service")
         svc = kube.find(
             svc_class, "openstack-controller-exporter", namespace="osh-system"

@@ -27,26 +27,26 @@ class OpenStackBaseMetricCollector(base.BaseMetricsCollector):
 
     def __init__(self):
         super().__init__()
-        self._oc = None
 
     @property
     def oc(self):
-        if self._oc is None:
-            try:
-                self._oc = openstack_utils.OpenStackClientManager()
-            except Exception as e:
-                LOG.warning("Failed to initialize openstack client manager")
-                LOG.exception(e)
-        return self._oc
+        try:
+            return openstack_utils.OpenStackClientManager()
+        except Exception as e:
+            LOG.warning("Failed to initialize openstack client manager")
+            LOG.exception(e)
 
     @property
     def is_service_available(self):
+        endpoints = []
         for service_type in self._os_service_types:
-            if self.oc.oc.endpoint_for(service_type):
-                return True
-        LOG.info(
-            f"Can't find endpoints for service types {self._os_service_types}"
-        )
+            endpoints.append(self.oc.oc.endpoint_for(service_type))
+        if not any(endpoints):
+            LOG.info(
+                f"Can't find endpoints for service types {self._os_service_types}"
+            )
+            return False
+        return True
 
     @property
     def can_collect_data(self):

@@ -121,12 +121,15 @@ class OsdplMetricsCollector(object):
 
         for collector_instance in self.collector_instances:
             yield from collector_instance.collect(osdpl)
-            scrape_duration.add_metric(
-                [collector_instance._name], collector_instance.scrape_duration
-            )
-            scrape_sucess.add_metric(
-                [collector_instance._name], collector_instance.scrape_success
-            )
+            if collector_instance.can_collect_data:
+                scrape_duration.add_metric(
+                    [collector_instance._name],
+                    collector_instance.scrape_duration,
+                )
+                scrape_sucess.add_metric(
+                    [collector_instance._name],
+                    collector_instance.scrape_success,
+                )
         yield scrape_duration
         yield scrape_sucess
 
@@ -159,6 +162,8 @@ class BaseMetricsCollector(object):
                 f"Collector {self._name} is enabled, but collection for it is not possible."
             )
             self.data = {}
+            return
+
         start = datetime.utcnow()
         try:
             self.data = self.take_data()
