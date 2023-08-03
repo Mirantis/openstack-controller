@@ -30,6 +30,9 @@ from openstack_controller.exporter.collectors.openstack.heat import (
 from openstack_controller.exporter.collectors.openstack.keystone import (
     OsdplKeystoneMetricCollector,
 )
+from openstack_controller.exporter.collectors.openstack.glance import (
+    OsdplGlanceMetricCollector,
+)
 
 from openstack_controller.exporter.collectors.osdpl import (
     OsdplMetricCollector,
@@ -43,6 +46,7 @@ __all__ = (
     OsdplMetricCollector,
     OsdplHeatMetricCollector,
     OsdplKeystoneMetricCollector,
+    OsdplGlanceMetricCollector,
 )
 
 registry = base.BaseMetricsCollector.registry

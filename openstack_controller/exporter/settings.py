@@ -24,7 +24,7 @@ OSCTL_EXPORTER_BIND_PORT = int(os.getenv("OSCTL_EXPORTER_BIND_PORT", 9102))
 # List of enabled collectors
 OSCTL_EXPORTER_ENABLED_COLLECTORS = os.getenv(
     "OSCTL_EXPORTER_ENABLED_COLLECTORS",
-    "osdpl_certificate,osdpl_nova,osdpl_ironic,osdpl_keystone,osdpl_heat,osdpl",
+    "osdpl_certificate,osdpl_nova,osdpl_ironic,osdpl_keystone,osdpl_heat,osdpl_glance,osdpl",
 ).split(",")
 
 # Number in seconds we allow for polling, when exceeds exporter is stopped.
