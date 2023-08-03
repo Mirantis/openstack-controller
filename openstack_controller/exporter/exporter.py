@@ -15,37 +15,12 @@
 
 import prometheus_client
 from prometheus_client.core import REGISTRY
-from wsgiref.simple_server import make_server, WSGIRequestHandler
 
 from openstack_controller import utils
-from openstack_controller.exporter import settings
 from openstack_controller.exporter import collectors
 
 
 LOG = utils.get_logger(__name__)
-
-
-class LoggingWSGIRequestHandler(WSGIRequestHandler):
-    def log_message(self, format, *args):
-        LOG.info(
-            "%s - - [%s] %s\n"
-            % (
-                self.address_string(),
-                self.log_date_time_string(),
-                format % args,
-            )
-        )
-
-
-def run_webserver():
-    app = prometheus_client.make_wsgi_app(REGISTRY)
-    httpd = make_server(
-        "",
-        settings.OSCTL_EXPORTER_BIND_PORT,
-        app,
-        handler_class=LoggingWSGIRequestHandler,
-    )
-    httpd.serve_forever()
 
 
 def main():
@@ -57,4 +32,5 @@ def main():
     osdpl_collector = collectors.OsdplMetricsCollector()
 
     REGISTRY.register(osdpl_collector)
-    run_webserver()
+    app = prometheus_client.make_wsgi_app(REGISTRY)
+    return app

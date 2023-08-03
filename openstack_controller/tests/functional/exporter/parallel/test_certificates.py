@@ -1,6 +1,6 @@
 import unittest
 
-from openstack_controller.exporter.tests.functional import base
+from openstack_controller.tests.functional.exporter import base
 
 
 class CertificatesCollectorFunctionalTestCase(base.BaseFunctionalTestCase):

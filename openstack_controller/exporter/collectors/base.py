@@ -18,6 +18,7 @@ import abc
 from datetime import datetime
 import sys
 from threading import Thread
+import time
 
 from prometheus_client.core import GaugeMetricFamily
 
@@ -35,7 +36,6 @@ class OsdplMetricsCollector(object):
         self.collector_instances = []
         self.gather_tasks = {}
         self.max_poll_timeout = settings.OSCTL_EXPORTER_MAX_POLL_TIMEOUT
-
         for name, collector in collectors.registry.items():
             if name in settings.OSCTL_EXPORTER_ENABLED_COLLECTORS:
                 LOG.info(f"Adding collector {name} to registry")
@@ -56,7 +56,7 @@ class OsdplMetricsCollector(object):
                 f"The task {name} already running for {running_for}. Highly likely this occur due to frequent metric collection."
             )
             return False
-        LOG.info(f"Starting metric collector thread  for {name}")
+        LOG.info(f"Starting metric collector thread for {name}")
         future = Thread(target=func)
         self.gather_tasks[name] = {"future": future, "started_at": start}
         future.start()
@@ -94,6 +94,7 @@ class OsdplMetricsCollector(object):
         ):
             if (datetime.utcnow() - start).total_seconds() >= timeout:
                 return
+            time.sleep(1)
 
     def collect(self):
         osdpl = kube.get_osdpl()
@@ -120,8 +121,8 @@ class OsdplMetricsCollector(object):
         )
 
         for collector_instance in self.collector_instances:
-            yield from collector_instance.collect(osdpl)
-            if collector_instance.can_collect_data:
+            if collector_instance.data.get("can_collect_data", False):
+                yield from collector_instance.collect(osdpl)
                 scrape_duration.add_metric(
                     [collector_instance._name],
                     collector_instance.scrape_duration,
@@ -144,29 +145,31 @@ class BaseMetricsCollector(object):
         cls.registry[cls._name] = cls
 
     def __init__(self):
-        self.data = {}
+        self.data = {"can_collect_data": False}
         self.scrape_duration = 0
         self.scrape_success = False
 
     @abc.abstractmethod
     def collect(self, osdpl):
+        """Builds metrics from cache. Should be as fast as possible."""
         pass
 
     @abc.abstractmethod
     def take_data(self):
+        """Long running task for taking data."""
         pass
 
     def refresh_data(self):
-        if not self.can_collect_data:
+        self.data["can_collect_data"] = self.can_collect_data
+        if not self.data["can_collect_data"]:
             LOG.warning(
                 f"Collector {self._name} is enabled, but collection for it is not possible."
             )
-            self.data = {}
             return
 
         start = datetime.utcnow()
         try:
-            self.data = self.take_data()
+            self.data.update(self.take_data())
             self.scrape_success = True
         except Exception as e:
             self.scrape_success = False

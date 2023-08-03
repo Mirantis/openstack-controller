@@ -167,6 +167,15 @@ affinity: {}
 
 exporter:
   enabled: true
+  cmd:
+   - uwsgi
+   - --http
+   - 0.0.0.0:9102
+   - --wsgi-file
+   - /usr/local/bin/osctl-exporter
+   - --enable-threads
+   - --threads
+   - "128"
   pod:
     liveness:
       params:

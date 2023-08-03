@@ -18,10 +18,7 @@ OSCTL_EXPORTER_CERTIFICATES_INFO_FILE = os.getenv(
     "/etc/openstack-controller/exporter/certs_info.yaml",
 )
 
-# Port to start exporter
-OSCTL_EXPORTER_BIND_PORT = int(os.getenv("OSCTL_EXPORTER_BIND_PORT", 9102))
-
-# List of enabled collectors
+# List of enabled collectors, when not set all collectors are enabled
 OSCTL_EXPORTER_ENABLED_COLLECTORS = os.getenv(
     "OSCTL_EXPORTER_ENABLED_COLLECTORS",
     "osdpl_certificate,osdpl_nova,osdpl_ironic,osdpl_keystone,osdpl_heat,osdpl_glance,osdpl",
