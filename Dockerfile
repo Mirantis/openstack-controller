@@ -1,6 +1,7 @@
 ARG FROM=docker-remote.docker.mirantis.net/ubuntu:focal
 
 FROM $FROM as builder
+ARG TEST_IMAGE
 # NOTE(pas-ha) need Git for pbr to install from source checkout w/o sdist
 ADD https://bootstrap.pypa.io/get-pip.py /tmp/get-pip.py
 
@@ -38,10 +39,16 @@ RUN set -ex; \
 
     rm -rf /opt/operator/source_requirements
 
-RUN pip wheel --wheel-dir /opt/wheels --find-links /opt/wheels /opt/operator
+RUN set -ex; \
+    OPENSTACK_CONTROLLER_EXTRAS=""; \
+    if [[ "${TEST_IMAGE}" == "True" ]]; then \
+        OPENSTACK_CONTROLLER_EXTRAS="[test]"; \
+    fi; \
+    pip wheel --wheel-dir /opt/wheels --find-links /opt/wheels /opt/operator${OPENSTACK_CONTROLLER_EXTRAS}
 
 FROM $FROM
 ARG HELM_BINARY="https://binary.mirantis.com/openstack/bin/utils/helm/helm-v3.12.1-linux-amd64"
+ARG TEST_IMAGE
 
 COPY --from=builder /tmp/get-pip.py /tmp/get-pip.py
 COPY --from=builder /opt/wheels /opt/wheels
@@ -73,7 +80,11 @@ RUN set -ex; \
     rm -vf python3-distutils*.deb; \
     python3.8 /tmp/get-pip.py; \
     pip install --no-index --no-cache --find-links /opt/wheels --pre -r /opt/operator/source-requirements.txt; \
-    pip install --no-index --no-cache --find-links /opt/wheels openstack-controller; \
+    OPENSTACK_CONTROLLER_PKG=openstack-controller; \
+    if [[ "${TEST_IMAGE}" == "True" ]]; then \
+        OPENSTACK_CONTROLLER_PKG=openstack-controller[test]; \
+    fi; \
+    pip install --no-index --no-cache --find-links /opt/wheels ${OPENSTACK_CONTROLLER_PKG}; \
     cd /usr/local/lib/python3.8/dist-packages; \
     for p in $(ls /tmp/kopf-patches/*.patch); do \
          patch -p1 < $p; \
@@ -87,4 +98,7 @@ RUN rm -rvf /opt/wheels; \
     apt-get -q clean; \
     rm -rvf /var/lib/apt/lists/*; \
     IMAGE_TAG=$(cat /opt/operator/image_tag.txt); \
+    if [[ "${TEST_IMAGE}" == "True" ]]; then \
+        IMAGE_TAG="${IMAGE_TAG}-tests"; \
+    fi; \
     sh -c "echo \"LABELS:\n  IMAGE_TAG: ${IMAGE_TAG}\" > /dockerimage_metadata"
