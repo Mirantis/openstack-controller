@@ -36,7 +36,6 @@ class OsdplCertsMetricCollector(base.BaseMetricsCollector):
         super().__init__()
         with open(settings.OSCTL_EXPORTER_CERTIFICATES_INFO_FILE) as f:
             self.certs_info = yaml.safe_load(f)
-        self.data = {}
 
     @property
     def can_collect_data(self):
@@ -48,7 +47,7 @@ class OsdplCertsMetricCollector(base.BaseMetricsCollector):
             f"{self._description}: expiration unix timestamp",
             labels=["identifier", "osdpl"],
         )
-        for identifier, cert in self.data.items():
+        for identifier, cert in self.data.get("certificates", {}).items():
             gauge.add_metric(
                 [identifier, osdpl.name],
                 float(cert.not_valid_after.timestamp()),
@@ -56,7 +55,7 @@ class OsdplCertsMetricCollector(base.BaseMetricsCollector):
         yield gauge
 
     def take_data(self):
-        return self.load_certificates()
+        return {"certificates": self.load_certificates()}
 
     def load_certificates(self):
         """Load certificates from kubernetes secrets

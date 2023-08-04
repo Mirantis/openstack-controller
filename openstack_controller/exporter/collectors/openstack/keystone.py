@@ -33,21 +33,25 @@ class OsdplKeystoneMetricCollector(base.OpenStackBaseMetricCollector):
             "Number of keystone users in environment",
             labels=["osdpl"],
         )
-        users.add_metric([osdpl.name], self.data["users_total"])
+        if "users_total" in self.data:
+            users.add_metric([osdpl.name], self.data["users_total"])
 
         domains = GaugeMetricFamily(
             f"{self._name}_domains",
             "Number of keystone domains in environment",
             labels=["osdpl"],
         )
-        domains.add_metric([osdpl.name], self.data["domains_total"])
+        if "domains_total" in self.data:
+            domains.add_metric([osdpl.name], self.data["domains_total"])
 
         projects = GaugeMetricFamily(
             f"{self._name}_project",
             "Number of keystone projects in environment",
             labels=["osdpl"],
         )
-        projects.add_metric([osdpl.name], self.data["projects_total"])
+        if "projects_total" in self.data:
+            projects.add_metric([osdpl.name], self.data["projects_total"])
+
         yield users
         yield projects
         yield domains

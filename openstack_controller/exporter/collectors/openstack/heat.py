@@ -34,7 +34,8 @@ class OsdplHeatMetricCollector(base.OpenStackBaseMetricCollector):
             labels=["osdpl"],
         )
 
-        stacks.add_metric([osdpl.name], len(self.data["stacks"]))
+        if "stacks" in self.data:
+            stacks.add_metric([osdpl.name], len(self.data["stacks"]))
 
         yield stacks
 
