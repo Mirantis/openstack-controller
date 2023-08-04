@@ -52,7 +52,8 @@ class OsdplGlanceMetricCollector(base.OpenStackBaseMetricCollector):
         images_size = 0
         for image in self.oc.oc.image.images():
             images_total += 1
-            images_size += image.get("size", 0)
+            # NOTE(vsaienko): the size may be None from API.
+            images_size += image.get("size") or 0
         return {
             "images_total": images_total,
             "images_size": images_size,

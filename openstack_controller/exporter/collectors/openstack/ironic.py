@@ -13,7 +13,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from prometheus_client.core import StateSetMetricFamily, GaugeMetricFamily
+from prometheus_client.core import GaugeMetricFamily
 
 from openstack_controller import utils
 from openstack_controller.exporter.collectors.openstack import base
@@ -33,24 +33,10 @@ class OsdplIronicMetricCollector(base.OpenStackBaseMetricCollector):
             "The baremetal nodes total count",
             labels=["osdpl"],
         )
-        nodes_available = StateSetMetricFamily(
-            f"{self._name}_nodes_available",
-            "Available baremetal nodes",
-            labels=["uuid", "name", "osdpl"],
-        )
-        total_nodes = 0
-        for node in self.data.get("nodes", {}):
-            total_nodes = 1 + total_nodes
-            is_available = self.oc.baremetal_is_node_available(node)
-            # TODO(vsaienko): use uuid when switch to zed version
-            nodes_available.add_metric(
-                [node["id"], node["name"], osdpl.name],
-                {"available": is_available},
-            )
-        nodes_total.add_metric([osdpl.name], total_nodes)
+        if "nodes_total" in self.data:
+            nodes_total.add_metric([osdpl.name], self.data["nodes_total"])
 
-        yield nodes_available
         yield nodes_total
 
     def take_data(self):
-        return {"nodes": [x for x in self.oc.baremetal_get_nodes()]}
+        return {"nodes_total": len([x for x in self.oc.baremetal_get_nodes()])}
