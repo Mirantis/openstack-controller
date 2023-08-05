@@ -13,6 +13,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from functools import cached_property
+
 from prometheus_client.core import GaugeMetricFamily
 
 from openstack_controller import utils
@@ -34,47 +36,42 @@ class OsdplCinderMetricCollector(base.OpenStackBaseMetricCollector):
         "block-store",
     ]
 
-    def collect(self, osdpl):
-        volumes = GaugeMetricFamily(
-            f"{self._name}_volumes",
-            "Number of cinder volumes in environment",
-            labels=["osdpl"],
-        )
-        if "volumes_total" in self.data:
-            volumes.add_metric([osdpl.name], self.data["volumes_total"])
+    @cached_property
+    def families(self):
+        return {
+            "volumes": GaugeMetricFamily(
+                f"{self._name}_volumes",
+                "Number of cinder volumes in environment",
+                labels=["osdpl"],
+            ),
+            "volumes_size": GaugeMetricFamily(
+                f"{self._name}_volumes_size",
+                "Total size of all volumes in bytes",
+                labels=["osdpl"],
+            ),
+            "snapshots": GaugeMetricFamily(
+                f"{self._name}_snapshots",
+                "Number of cinder snapshots in environment",
+                labels=["osdpl"],
+            ),
+            "snapshots_size": GaugeMetricFamily(
+                f"{self._name}_snapshots_size",
+                "Total size of all snapshots in bytes",
+                labels=["osdpl"],
+            ),
+            "service_state": GaugeMetricFamily(
+                f"{self._name}_service_state",
+                "Cinder service state",
+                labels=["host", "binary", "zone", "osdpl"],
+            ),
+            "service_status": GaugeMetricFamily(
+                f"{self._name}_service_status",
+                "Cinder service status",
+                labels=["host", "binary", "zone", "osdpl"],
+            ),
+        }
 
-        volumes_size = GaugeMetricFamily(
-            f"{self._name}_volumes_size",
-            "Total size of all volumes in bytes",
-            labels=["osdpl"],
-        )
-        if "volumes_size" in self.data:
-            volumes_size.add_metric([osdpl.name], self.data["volumes_size"])
-
-        snapshots = GaugeMetricFamily(
-            f"{self._name}_snapshots",
-            "Number of cinder snapshots in environment",
-            labels=["osdpl"],
-        )
-        if "snapshots_total" in self.data:
-            snapshots.add_metric([osdpl.name], self.data["snapshots_total"])
-
-        snapshots_size = GaugeMetricFamily(
-            f"{self._name}_snapshots_size",
-            "Total size of all snapshots in bytes",
-            labels=["osdpl"],
-        )
-        if "snapshots_size" in self.data:
-            snapshots_size.add_metric(
-                [osdpl.name], self.data["snapshots_size"]
-            )
-
-        yield volumes
-        yield volumes_size
-        yield snapshots
-        yield snapshots_size
-
-    def take_data(self):
+    def update_samples(self):
         volumes_total = 0
         volumes_size = 0
         snapshots_total = 0
@@ -83,14 +80,43 @@ class OsdplCinderMetricCollector(base.OpenStackBaseMetricCollector):
             volumes_total += 1
             # NOTE(vsaienko): the size may be None from API.
             volumes_size += volume.get("size") or 0
-
+        self.set_samples("volumes", [([self.osdpl.name], volumes_total)])
+        self.set_samples(
+            "volumes_size", [([self.osdpl.name], volumes_size * constants.Gi)]
+        )
         for snapshot in self.oc.oc.volume.snapshots(all_tenants=True):
             snapshots_total += 1
             snapshots_size += snapshot.get("size") or 0
+        self.set_samples("snapshots", [([self.osdpl.name], snapshots_total)])
+        self.set_samples(
+            "snapshots_size",
+            [([self.osdpl.name], snapshots_size * constants.Gi)],
+        )
 
-        return {
-            "volumes_total": volumes_total,
-            "volumes_size": volumes_size * constants.Gi,
-            "snapshots_total": snapshots_total,
-            "snapshots_size": snapshots_size * constants.Gi,
-        }
+        service_state_samples = []
+        service_status_samples = []
+        for service in self.oc.volume_get_services():
+            service_state_samples.append(
+                (
+                    [
+                        service["host"],
+                        service["binary"],
+                        service["zone"],
+                        self.osdpl.name,
+                    ],
+                    getattr(constants.ServiceState, service["state"]),
+                )
+            )
+            service_status_samples.append(
+                (
+                    [
+                        service["host"],
+                        service["binary"],
+                        service["zone"],
+                        self.osdpl.name,
+                    ],
+                    getattr(constants.ServiceStatus, service["status"]),
+                )
+            )
+        self.set_samples("service_state", service_state_samples)
+        self.set_samples("service_status", service_status_samples)

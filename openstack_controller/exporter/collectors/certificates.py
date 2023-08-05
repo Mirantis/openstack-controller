@@ -15,6 +15,7 @@
 
 import yaml
 import base64
+from functools import cached_property
 
 from cryptography import x509
 from cryptography.hazmat.backends import default_backend
@@ -41,21 +42,26 @@ class OsdplCertsMetricCollector(base.BaseMetricsCollector):
     def can_collect_data(self):
         return True
 
-    def collect(self, osdpl):
-        gauge = GaugeMetricFamily(
-            f"{self._name}_expiry",
-            f"{self._description}: expiration unix timestamp",
-            labels=["identifier", "osdpl"],
-        )
-        for identifier, cert in self.data.get("certificates", {}).items():
-            gauge.add_metric(
-                [identifier, osdpl.name],
-                float(cert.not_valid_after.timestamp()),
+    @cached_property
+    def families(self):
+        return {
+            "expiry": GaugeMetricFamily(
+                f"{self._name}_expiry",
+                f"{self._description}: expiration unix timestamp",
+                labels=["identifier", "osdpl"],
             )
-        yield gauge
+        }
 
-    def take_data(self):
-        return {"certificates": self.load_certificates()}
+    def update_samples(self):
+        certificate_samples = []
+        for identifier, cert in self.load_certificates().items():
+            certificate_samples.append(
+                (
+                    [identifier, self.osdpl.name],
+                    float(cert.not_valid_after.timestamp()),
+                )
+            )
+        self.set_samples("expiry", certificate_samples)
 
     def load_certificates(self):
         """Load certificates from kubernetes secrets

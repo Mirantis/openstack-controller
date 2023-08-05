@@ -19,6 +19,7 @@ from datetime import datetime
 import sys
 from threading import Thread
 import time
+from functools import cached_property
 
 from prometheus_client.core import GaugeMetricFamily
 
@@ -121,8 +122,8 @@ class OsdplMetricsCollector(object):
         )
 
         for collector_instance in self.collector_instances:
-            if collector_instance.data.get("can_collect_data", False):
-                yield from collector_instance.collect(osdpl)
+            if collector_instance.can_collect:
+                yield from collector_instance.collect()
                 scrape_duration.add_metric(
                     [collector_instance._name],
                     collector_instance.scrape_duration,
@@ -145,23 +146,34 @@ class BaseMetricsCollector(object):
         cls.registry[cls._name] = cls
 
     def __init__(self):
-        self.data = {"can_collect_data": False}
+        self.can_collect = False
         self.scrape_duration = 0
         self.scrape_success = False
+        self.osdpl = kube.get_osdpl()
+
+    @cached_property
+    def families(self):
+        """Return all known collector metric families"""
+        return {}
+
+    def set_samples(self, name, samples):
+        """Sets metric samples on falimy"""
+        self.families[name].samples = []
+        for sample in samples:
+            self.families[name].add_metric(*sample)
+
+    def collect(self):
+        for name, metric in self.families.items():
+            yield metric
 
     @abc.abstractmethod
-    def collect(self, osdpl):
-        """Builds metrics from cache. Should be as fast as possible."""
-        pass
-
-    @abc.abstractmethod
-    def take_data(self):
+    def update_samples(self):
         """Long running task for taking data."""
         pass
 
     def refresh_data(self):
-        self.data["can_collect_data"] = self.can_collect_data
-        if not self.data["can_collect_data"]:
+        self.can_collect = self.can_collect_data
+        if not self.can_collect:
             LOG.warning(
                 f"Collector {self._name} is enabled, but collection for it is not possible."
             )
@@ -169,7 +181,7 @@ class BaseMetricsCollector(object):
 
         start = datetime.utcnow()
         try:
-            self.data.update(self.take_data())
+            self.update_samples()
             self.scrape_success = True
         except Exception as e:
             self.scrape_success = False

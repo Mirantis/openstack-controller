@@ -13,6 +13,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from functools import cached_property
+
 from prometheus_client.core import GaugeMetricFamily
 
 from openstack_controller import utils
@@ -27,34 +29,27 @@ class OsdplGlanceMetricCollector(base.OpenStackBaseMetricCollector):
     _description = "OpenStack Image service metrics"
     _os_service_types = ["image"]
 
-    def collect(self, osdpl):
-        images = GaugeMetricFamily(
-            f"{self._name}_images",
-            "Number of glance images in environment",
-            labels=["osdpl"],
-        )
-        if "images_total" in self.data:
-            images.add_metric([osdpl.name], self.data["images_total"])
+    @cached_property
+    def families(self):
+        return {
+            "images": GaugeMetricFamily(
+                f"{self._name}_images",
+                "Number of glance images in environment",
+                labels=["osdpl"],
+            ),
+            "images_size": GaugeMetricFamily(
+                f"{self._name}_images_size",
+                "Total size of all images in bytes",
+                labels=["osdpl"],
+            ),
+        }
 
-        images_size = GaugeMetricFamily(
-            f"{self._name}_images_size",
-            "Total size of all images in bytes",
-            labels=["osdpl"],
-        )
-        if "images_size" in self.data:
-            images_size.add_metric([osdpl.name], self.data["images_size"])
-
-        yield images
-        yield images_size
-
-    def take_data(self):
+    def update_samples(self):
         images_total = 0
         images_size = 0
         for image in self.oc.oc.image.images():
             images_total += 1
             # NOTE(vsaienko): the size may be None from API.
             images_size += image.get("size") or 0
-        return {
-            "images_total": images_total,
-            "images_size": images_size,
-        }
+        self.set_samples("images", [([self.osdpl.name], images_total)])
+        self.set_samples("images_size", [([self.osdpl.name], images_size)])

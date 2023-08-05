@@ -13,6 +13,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from functools import cached_property
+
 from prometheus_client.core import GaugeMetricFamily
 
 from openstack_controller import utils
@@ -27,17 +29,16 @@ class OsdplHeatMetricCollector(base.OpenStackBaseMetricCollector):
     _description = "OpenStack Orchestration service metrics"
     _os_service_types = ["orchestration"]
 
-    def collect(self, osdpl):
-        stacks = GaugeMetricFamily(
-            f"{self._name}_stacks",
-            "Number of heat stacks in environment",
-            labels=["osdpl"],
-        )
+    @cached_property
+    def families(self):
+        return {
+            "stacks": GaugeMetricFamily(
+                f"{self._name}_stacks",
+                "Number of heat stacks in environment",
+                labels=["osdpl"],
+            )
+        }
 
-        if "stacks" in self.data:
-            stacks.add_metric([osdpl.name], len(self.data["stacks"]))
-
-        yield stacks
-
-    def take_data(self):
-        return {"stacks": [x for x in self.oc.oc.orchestration.stacks()]}
+    def update_samples(self):
+        stacks = len(list(self.oc.oc.orchestration.stacks()))
+        self.set_samples("stacks", [([self.osdpl.name], stacks)])

@@ -13,6 +13,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from functools import cached_property
+
 from prometheus_client.core import GaugeMetricFamily
 
 from openstack_controller import utils
@@ -27,34 +29,25 @@ class OsdplKeystoneMetricCollector(base.OpenStackBaseMetricCollector):
     _description = "OpenStack Identity service metrics"
     _os_service_types = ["identity"]
 
-    def collect(self, osdpl):
-        users = GaugeMetricFamily(
-            f"{self._name}_users",
-            "Number of keystone users in environment",
-            labels=["osdpl"],
-        )
-        if "users_total" in self.data:
-            users.add_metric([osdpl.name], self.data["users_total"])
-
-        domains = GaugeMetricFamily(
-            f"{self._name}_domains",
-            "Number of keystone domains in environment",
-            labels=["osdpl"],
-        )
-        if "domains_total" in self.data:
-            domains.add_metric([osdpl.name], self.data["domains_total"])
-
-        projects = GaugeMetricFamily(
-            f"{self._name}_project",
-            "Number of keystone projects in environment",
-            labels=["osdpl"],
-        )
-        if "projects_total" in self.data:
-            projects.add_metric([osdpl.name], self.data["projects_total"])
-
-        yield users
-        yield projects
-        yield domains
+    @cached_property
+    def families(self):
+        return {
+            "users": GaugeMetricFamily(
+                f"{self._name}_users",
+                "Number of keystone users in environment",
+                labels=["osdpl"],
+            ),
+            "domains": GaugeMetricFamily(
+                f"{self._name}_domains",
+                "Number of keystone domains in environment",
+                labels=["osdpl"],
+            ),
+            "projects": GaugeMetricFamily(
+                f"{self._name}_project",
+                "Number of keystone projects in environment",
+                labels=["osdpl"],
+            ),
+        }
 
     def users_total(self, domain_id):
         users_total = 0
@@ -68,7 +61,7 @@ class OsdplKeystoneMetricCollector(base.OpenStackBaseMetricCollector):
             projects_total += 1
         return projects_total
 
-    def take_data(self):
+    def update_samples(self):
         domains_total = 0
         users_total = 0
         projects_total = 0
@@ -76,8 +69,6 @@ class OsdplKeystoneMetricCollector(base.OpenStackBaseMetricCollector):
             domains_total += 1
             users_total += self.users_total(domain["id"])
             projects_total += self.projects_total(domain["id"])
-        return {
-            "users_total": users_total,
-            "projects_total": projects_total,
-            "domains_total": domains_total,
-        }
+        self.set_samples("users", [([self.osdpl.name], users_total)])
+        self.set_samples("projects", [([self.osdpl.name], projects_total)])
+        self.set_samples("domains", [([self.osdpl.name], domains_total)])

@@ -13,6 +13,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from functools import cached_property
+
 from prometheus_client.core import GaugeMetricFamily
 
 from openstack_controller import utils
@@ -28,30 +30,36 @@ class OsdplNovaMetricCollector(base.OpenStackBaseMetricCollector):
     _description = "OpenStack Compute service metrics"
     _os_service_types = ["compute"]
 
-    def collect(self, osdpl):
-        state_metric = GaugeMetricFamily(
-            f"{self._name}_service_state",
-            "Nova compute service state",
-            labels=["host", "binary", "osdpl"],
-        )
-        status_metric = GaugeMetricFamily(
-            f"{self._name}_service_status",
-            "Nova compute service status",
-            labels=["host", "binary", "osdpl"],
-        )
+    @cached_property
+    def families(self):
+        return {
+            "service_state": GaugeMetricFamily(
+                f"{self._name}_service_state",
+                "Nova compute service state",
+                labels=["host", "binary", "osdpl"],
+            ),
+            "service_status": GaugeMetricFamily(
+                f"{self._name}_service_status",
+                "Nova compute service status",
+                labels=["host", "binary", "osdpl"],
+            ),
+        }
 
-        for service in self.data.get("services", []):
-            state_metric.add_metric(
-                [service["host"], service["binary"], osdpl.name],
-                getattr(constants.NovaServiceState, service["state"]),
+    def update_samples(self):
+        state_samples = []
+        status_samples = []
+        for service in self.oc.compute_get_services():
+            state_samples.append(
+                (
+                    [service["host"], service["binary"], self.osdpl.name],
+                    getattr(constants.ServiceState, service["state"]),
+                )
             )
-            status_metric.add_metric(
-                [service["host"], service["binary"], osdpl.name],
-                getattr(constants.NovaServiceStatus, service["status"]),
+            status_samples.append(
+                (
+                    [service["host"], service["binary"], self.osdpl.name],
+                    getattr(constants.ServiceStatus, service["status"]),
+                )
             )
-
-        yield state_metric
-        yield status_metric
-
-    def take_data(self):
-        return {"services": [x for x in self.oc.compute_get_services()]}
+            self.set_samples("service_state", state_samples)
+            self.set_samples("service_status", status_samples)

@@ -13,6 +13,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from functools import cached_property
+
 from prometheus_client.core import GaugeMetricFamily
 
 from openstack_controller import utils
@@ -27,16 +29,16 @@ class OsdplIronicMetricCollector(base.OpenStackBaseMetricCollector):
     _description = "OpenStack Baremetal service metrics"
     _os_service_types = ["baremetal"]
 
-    def collect(self, osdpl):
-        nodes_total = GaugeMetricFamily(
-            f"{self._name}_nodes_total",
-            "The baremetal nodes total count",
-            labels=["osdpl"],
-        )
-        if "nodes_total" in self.data:
-            nodes_total.add_metric([osdpl.name], self.data["nodes_total"])
+    @cached_property
+    def families(self):
+        return {
+            "nodes": GaugeMetricFamily(
+                f"{self._name}_nodes_total",
+                "The baremetal nodes total count",
+                labels=["osdpl"],
+            )
+        }
 
-        yield nodes_total
-
-    def take_data(self):
-        return {"nodes_total": len([x for x in self.oc.baremetal_get_nodes()])}
+    def update_samples(self):
+        nodes_total = len(list(self.oc.baremetal_get_nodes()))
+        self.set_samples("nodes", [([self.osdpl.name], nodes_total)])
