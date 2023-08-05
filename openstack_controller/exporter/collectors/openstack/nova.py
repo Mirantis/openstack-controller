@@ -13,10 +13,11 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from prometheus_client.core import StateSetMetricFamily
+from prometheus_client.core import GaugeMetricFamily
 
 from openstack_controller import utils
 from openstack_controller.exporter.collectors.openstack import base
+from openstack_controller.exporter import constants
 
 
 LOG = utils.get_logger(__name__)
@@ -28,27 +29,25 @@ class OsdplNovaMetricCollector(base.OpenStackBaseMetricCollector):
     _os_service_types = ["compute"]
 
     def collect(self, osdpl):
-        state_metric = StateSetMetricFamily(
+        state_metric = GaugeMetricFamily(
             f"{self._name}_service_state",
             "Nova compute service state",
             labels=["host", "binary", "osdpl"],
         )
-        status_metric = StateSetMetricFamily(
+        status_metric = GaugeMetricFamily(
             f"{self._name}_service_status",
             "Nova compute service status",
             labels=["host", "binary", "osdpl"],
         )
 
         for service in self.data.get("services", []):
-            is_up = service["state"] == "up"
-            is_enabled = service["status"] == "enabled"
             state_metric.add_metric(
                 [service["host"], service["binary"], osdpl.name],
-                {"up": is_up, "down": not is_up},
+                getattr(constants.NovaServiceState, service["state"]),
             )
             status_metric.add_metric(
                 [service["host"], service["binary"], osdpl.name],
-                {"enabled": is_enabled, "disabled": not is_enabled},
+                getattr(constants.NovaServiceStatus, service["status"]),
             )
 
         yield state_metric

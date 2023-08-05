@@ -13,6 +13,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from functools import cached_property
+
 from openstack_controller import utils
 from openstack_controller.exporter.collectors import base
 from openstack_controller import openstack_utils
@@ -28,7 +30,7 @@ class OpenStackBaseMetricCollector(base.BaseMetricsCollector):
     def __init__(self):
         super().__init__()
 
-    @property
+    @cached_property
     def oc(self):
         try:
             return openstack_utils.OpenStackClientManager()
