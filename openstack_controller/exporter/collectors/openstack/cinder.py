@@ -69,6 +69,21 @@ class OsdplCinderMetricCollector(base.OpenStackBaseMetricCollector):
                 "Cinder service status",
                 labels=["host", "binary", "zone", "osdpl"],
             ),
+            "pool_free_capacity": GaugeMetricFamily(
+                f"{self._name}_pool_free_capacity",
+                "Free capacity in bytes of cinder backend pools in environment",
+                labels=["osdpl"],
+            ),
+            "pool_total_capacity": GaugeMetricFamily(
+                f"{self._name}_pool_free_capacity",
+                "Total capacity in bytes of cinder backend pools in environment",
+                labels=["osdpl"],
+            ),
+            "pool_allocated_capacity": GaugeMetricFamily(
+                f"{self._name}_pool_free_capacity",
+                "Allocated capacity in bytes of cinder backend pools in environment",
+                labels=["osdpl"],
+            ),
         }
 
     def update_samples(self):
@@ -120,3 +135,50 @@ class OsdplCinderMetricCollector(base.OpenStackBaseMetricCollector):
             )
         self.set_samples("service_state", service_state_samples)
         self.set_samples("service_status", service_status_samples)
+
+        pool_free_capacity_samples = []
+        pool_total_capacity_samples = []
+        pool_allocated_capacity_samples = []
+        for backend_pool in self.oc.oc.volume.backend_pools():
+            pool_free_capacity_samples.append(
+                (
+                    [self.osdpl.name],
+                    (
+                        backend_pool.get("capabilities", {}).get(
+                            "free_capacity_gb"
+                        )
+                        or 0
+                    )
+                    * constants.Gi,
+                )
+            )
+            pool_total_capacity_samples.append(
+                (
+                    [self.osdpl.name],
+                    (
+                        backend_pool.get("capabilities", {}).get(
+                            "total_capacity_gb"
+                        )
+                        or 0
+                    )
+                    * constants.Gi,
+                )
+            )
+            pool_allocated_capacity_samples.append(
+                (
+                    [self.osdpl.name],
+                    (
+                        backend_pool.get("capabilities", {}).get(
+                            "allocated_capacity_gb"
+                        )
+                        or 0
+                    )
+                    * constants.Gi,
+                )
+            )
+
+        self.set_samples("pool_free_capacity", pool_free_capacity_samples)
+        self.set_samples("pool_total_capacity", pool_total_capacity_samples)
+        self.set_samples(
+            "pool_allocated_capacity", pool_allocated_capacity_samples
+        )
