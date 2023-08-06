@@ -42,6 +42,7 @@ class OsdplMetricsCollector(object):
                 LOG.info(f"Adding collector {name} to registry")
                 instance = collector()
                 self.collector_instances.append(instance)
+        self.initialized = False
 
     def submit_task(self, name, func):
         """Submit a taks with data collection
@@ -96,6 +97,9 @@ class OsdplMetricsCollector(object):
             if (datetime.utcnow() - start).total_seconds() >= timeout:
                 return
             time.sleep(1)
+        LOG.warning(
+            f"Tasks did not complete in {timeout}, return cache result."
+        )
 
     def collect(self):
         osdpl = kube.get_osdpl()
@@ -103,13 +107,16 @@ class OsdplMetricsCollector(object):
         if not osdpl:
             return
         self.update_tasks_status()
-        if osdpl:
-            LOG.info(f"The osdpl {osdpl.name} found. Collecting metrics")
-            for collector_instance in self.collector_instances:
-                self.submit_task(
-                    collector_instance._name, collector_instance.refresh_data
-                )
-        self.wait_for_tasks(settings.OSCTL_SCRAPE_TIMEOUT)
+        if self.initialized:
+            if osdpl:
+                LOG.info(f"The osdpl {osdpl.name} found. Collecting metrics")
+                for collector_instance in self.collector_instances:
+                    self.submit_task(
+                        collector_instance._name,
+                        collector_instance.refresh_data,
+                    )
+            self.wait_for_tasks(settings.OSCTL_SCRAPE_TIMEOUT)
+        self.initialized = True
         scrape_duration = GaugeMetricFamily(
             "osdpl_scrape_collector_duration_seconds",
             "Durations in seconds taken by collector to refresh metrics.",

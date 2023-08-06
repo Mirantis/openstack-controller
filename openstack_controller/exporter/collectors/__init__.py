@@ -36,6 +36,9 @@ from openstack_controller.exporter.collectors.openstack.glance import (
 from openstack_controller.exporter.collectors.openstack.cinder import (
     OsdplCinderMetricCollector,
 )
+from openstack_controller.exporter.collectors.openstack.neutron import (
+    OsdplNeutronMetricCollector,
+)
 
 from openstack_controller.exporter.collectors.osdpl import (
     OsdplMetricCollector,
@@ -51,6 +54,7 @@ __all__ = (
     OsdplKeystoneMetricCollector,
     OsdplGlanceMetricCollector,
     OsdplCinderMetricCollector,
+    OsdplNeutronMetricCollector,
 )
 
 registry = base.BaseMetricsCollector.registry
