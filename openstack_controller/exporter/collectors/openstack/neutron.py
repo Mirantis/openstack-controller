@@ -53,8 +53,8 @@ class OsdplNeutronMetricCollector(base.OpenStackBaseMetricCollector):
                 labels=["osdpl"],
             ),
             "floating_ips": GaugeMetricFamily(
-                f"{self._name}_routers",
-                "Number of neutron routers in environment",
+                f"{self._name}_floating_ips",
+                "Number of neutron floating ips in environment",
                 labels=["osdpl"],
             ),
             "agent_state": GaugeMetricFamily(

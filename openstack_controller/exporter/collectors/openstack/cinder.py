@@ -75,12 +75,12 @@ class OsdplCinderMetricCollector(base.OpenStackBaseMetricCollector):
                 labels=["osdpl"],
             ),
             "pool_total_capacity": GaugeMetricFamily(
-                f"{self._name}_pool_free_capacity",
+                f"{self._name}_pool_total_capacity",
                 "Total capacity in bytes of cinder backend pools in environment",
                 labels=["osdpl"],
             ),
             "pool_allocated_capacity": GaugeMetricFamily(
-                f"{self._name}_pool_free_capacity",
+                f"{self._name}_pool_allocated_capacity",
                 "Allocated capacity in bytes of cinder backend pools in environment",
                 labels=["osdpl"],
             ),

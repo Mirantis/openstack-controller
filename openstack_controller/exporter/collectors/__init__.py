@@ -42,6 +42,9 @@ from openstack_controller.exporter.collectors.openstack.neutron import (
 from openstack_controller.exporter.collectors.openstack.octavia import (
     OsdplOctaviaMetricCollector,
 )
+from openstack_controller.exporter.collectors.openstack.api import (
+    OsdplApiMetricCollector,
+)
 
 from openstack_controller.exporter.collectors.osdpl import (
     OsdplMetricCollector,
@@ -59,6 +62,7 @@ __all__ = (
     OsdplCinderMetricCollector,
     OsdplNeutronMetricCollector,
     OsdplOctaviaMetricCollector,
+    OsdplApiMetricCollector,
 )
 
 registry = base.BaseMetricsCollector.registry
