@@ -14,6 +14,7 @@
 #    under the License.
 
 import requests
+from urllib3.exceptions import InsecureRequestWarning
 from functools import cached_property
 
 from prometheus_client.core import GaugeMetricFamily
@@ -58,7 +59,11 @@ class OsdplApiMetricCollector(base.OpenStackBaseMetricCollector):
             url = endpoint["url"].split("%")[0]
             success = True
             try:
-                resp = requests.get(url, timeout=5)
+                # TODO(vsaienko): mount ssl ca_cert from osdpl and use here.
+                requests.packages.urllib3.disable_warnings(
+                    category=InsecureRequestWarning
+                )
+                resp = requests.get(url, timeout=5, verify=False)
             except Exception as e:
                 LOG.warning(f"Failed to get responce from {url}. Error: {e}")
                 success = False

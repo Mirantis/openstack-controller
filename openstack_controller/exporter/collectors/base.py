@@ -156,7 +156,6 @@ class BaseMetricsCollector(object):
         self.can_collect = False
         self.scrape_duration = 0
         self.scrape_success = False
-        self.osdpl = kube.get_osdpl()
 
     @cached_property
     def families(self):
@@ -188,6 +187,7 @@ class BaseMetricsCollector(object):
 
         start = datetime.utcnow()
         try:
+            self.osdpl = kube.get_osdpl()
             self.update_samples()
             self.scrape_success = True
         except Exception as e:
