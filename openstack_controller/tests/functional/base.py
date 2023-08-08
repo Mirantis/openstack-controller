@@ -1,7 +1,11 @@
+from kombu import Connection
 from unittest import TestCase
 
 from openstack_controller import kube
 from openstack_controller import openstack_utils
+from openstack_controller import utils
+
+LOG = utils.get_logger(__name__)
 
 
 class BaseFunctionalTestCase(TestCase):
@@ -9,3 +13,18 @@ class BaseFunctionalTestCase(TestCase):
         self.kube_api = kube.kube_client()
         self.ocm = openstack_utils.OpenStackClientManager()
         self.osdpl = kube.get_osdpl()
+
+    def check_rabbitmq_connection(
+        self, username, password, host, port, vhost, ssl=False
+    ):
+        rabbitmq_url = f"amqp://{username}:{password}@{host}:{port}/{vhost}"
+        connection = Connection(rabbitmq_url, ssl=ssl)
+        try:
+            LOG.info(f"Connecting to the: {rabbitmq_url}")
+            connection.ensure_connection(max_retries=3)
+            connection.channel()
+            return True
+        except Exception as e:
+            LOG.error(f"Connection error. Error: {e}")
+        finally:
+            connection.release()
