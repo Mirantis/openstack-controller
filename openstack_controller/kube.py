@@ -374,7 +374,7 @@ class StatefulSet(pykube.StatefulSet, HelmBundleMixin):
             if self.obj["status"].get("readyReplicas", 0) == count:
                 return True
             await asyncio.sleep(seconds)
-        return False
+        raise ValueError("Not ready yet.")
 
 
 class Ingress(pykube.objects.NamespacedAPIObject, HelmBundleMixin):
@@ -523,7 +523,7 @@ class Deployment(pykube.Deployment, HelmBundleMixin):
             if self.obj["status"].get("readyReplicas", 0) == count:
                 return True
             await asyncio.sleep(seconds)
-        return False
+        raise ValueError("Not ready yet.")
 
 
 class DaemonSet(pykube.DaemonSet, HelmBundleMixin):
