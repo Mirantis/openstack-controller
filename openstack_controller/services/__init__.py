@@ -104,7 +104,44 @@ class Redis(Service):
         self.set_children_status("Applying")
         LOG.info(f"Applying config for {self.service}")
         data = self.render()
-        LOG.info(f"Config applied for {self.service}")
+
+        rfs_deployment = kube.find(
+            kube.Deployment,
+            "rfs-openstack-redis",
+            settings.OSCTL_REDIS_NAMESPACE,
+            silent=True,
+        )
+        operator_deployment = kube.find(
+            kube.Deployment,
+            "os-redis-operator",
+            settings.OSCTL_REDIS_NAMESPACE,
+            silent=True,
+        )
+        # PRODX-34488: to avoid races when image of sentinel is changed use cold start
+        if rfs_deployment and rfs_deployment.exists():
+            new_image = data["spec"]["sentinel"]["image"]
+            if not rfs_deployment.image_applied(new_image):
+                LOG.info(f"Redis sentinel image is changed.")
+                operator_deployment = kube.find(
+                    kube.Deployment,
+                    "os-redis-operator",
+                    settings.OSCTL_REDIS_NAMESPACE,
+                    silent=True,
+                )
+                rfr_statefulset = kube.find(
+                    kube.StatefulSet,
+                    "rfr-openstack-redis",
+                    settings.OSCTL_REDIS_NAMESPACE,
+                    silent=True,
+                )
+                for obj in [
+                    operator_deployment,
+                    rfr_statefulset,
+                    rfs_deployment,
+                ]:
+                    obj.reload()
+                    obj.scale(0)
+                    await obj.wait_for_replicas(0)
 
         # kopf.adopt is not used as kubernetes doesn't allow to use
         # cross namespace ownerReference
@@ -129,6 +166,9 @@ class Redis(Service):
                 f"{redisfailover_obj.kind} child is created: %s",
                 redisfailover_obj.obj,
             )
+        if operator_deployment and operator_deployment.exists():
+            operator_deployment.scale(1)
+        LOG.info(f"Config applied for {self.service}")
         kopf.info(
             self.osdpl.obj,
             reason=event.capitalize(),
