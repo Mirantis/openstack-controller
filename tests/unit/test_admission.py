@@ -211,10 +211,13 @@ def test_openstack_upgrade_ok(client, osdplst):
 def test_openstack_upgrade_another_upgrade(client, osdplst):
     req = copy.deepcopy(ADMISSION_REQ)
     osdplst.return_value.obj = {
-        "status": {"openstack_version": "train", "osdpl": {"state": "APPYING"}}
+        "status": {
+            "openstack_version": "train",
+            "osdpl": {"state": "APPLYING"},
+        }
     }
     get_osdpl_status_mock = mock.Mock()
-    get_osdpl_status_mock.return_value = "APPYING"
+    get_osdpl_status_mock.return_value = "APPLYING"
     osdplst.return_value.get_osdpl_status = get_osdpl_status_mock
 
     req["request"]["operation"] = "UPDATE"
@@ -272,7 +275,7 @@ def test_openstack_skiplevel_upgrade_fail(client):
     assert response.json["response"]["allowed"] is False
     assert response.json["response"]["status"]["code"] == 400
     assert (
-        "Skip-level OpenStack version upgrade is not permitted"
+        "Skip-level OpenStack version upgrade is not permitted between stein and ussuri"
         in response.json["response"]["status"]["message"]
     )
 
@@ -304,6 +307,41 @@ def test_upgrade_with_extra_changes_fail(client):
     assert response.json["response"]["status"]["code"] == 400
     assert (
         "changing other values in the spec is not permitted"
+        in response.json["response"]["status"]["message"]
+    )
+
+
+def test_openstack_upgrade_on_slurp_release_ok(client, osdplst):
+    allow_in = ["yoga", "zed"]
+    req = copy.deepcopy(ADMISSION_REQ)
+    get_osdpl_status_mock = mock.Mock()
+    get_osdpl_status_mock.return_value = "APPLIED"
+    osdplst.return_value.get_osdpl_status = get_osdpl_status_mock
+    req["request"]["operation"] = "UPDATE"
+    req["request"]["oldObject"] = copy.deepcopy(req["request"]["object"])
+    req["request"]["object"]["spec"]["openstack_version"] = "antelope"
+    for os_version in allow_in:
+        req["request"]["oldObject"]["spec"]["openstack_version"] = os_version
+        response = client.simulate_post("/validate", json=req)
+        assert response.status == falcon.HTTP_OK
+        assert response.json["response"]["allowed"] is True
+
+
+def test_openstack_upgrade_on_slurp_release_fail(client, osdplst):
+    req = copy.deepcopy(ADMISSION_REQ)
+    get_osdpl_status_mock = mock.Mock()
+    get_osdpl_status_mock.return_value = "APPLIED"
+    osdplst.return_value.get_osdpl_status = get_osdpl_status_mock
+    req["request"]["operation"] = "UPDATE"
+    req["request"]["oldObject"] = copy.deepcopy(req["request"]["object"])
+    req["request"]["oldObject"]["spec"]["openstack_version"] = "xena"
+    req["request"]["object"]["spec"]["openstack_version"] = "antelope"
+    response = client.simulate_post("/validate", json=req)
+    assert response.status == falcon.HTTP_OK
+    assert response.json["response"]["allowed"] is False
+    assert response.json["response"]["status"]["code"] == 400
+    assert (
+        "Skip-level OpenStack version upgrade is not permitted between xena and antelope"
         in response.json["response"]["status"]["message"]
     )
 
@@ -484,7 +522,7 @@ def test_physnet_required_no_tf(client):
 
 
 def test_instance_ha_allow_in_services(client):
-    allow_in = ["ussuri", "victoria"]
+    allow_in = ["ussuri", "victoria", "wallaby", "xena", "yoga", "antelope"]
     for os_version in allow_in:
         req = copy.deepcopy(ADMISSION_REQ)
         req["request"]["object"]["spec"]["openstack_version"] = os_version
@@ -1558,7 +1596,7 @@ def test_panko_install_ok(client):
 
 
 def test_panko_install_fail(client):
-    deny_in = ["xena", "master"]
+    deny_in = ["xena", "yoga", "antelope", "master"]
     req = copy.deepcopy(ADMISSION_REQ)
     req["request"]["object"]["spec"]["features"]["services"].append("event")
     for os_version in deny_in:
@@ -2030,7 +2068,7 @@ def test_cron_validation(client):
 
 
 def test_manila_install_ok(client):
-    allow_in = ["yoga"]
+    allow_in = ["yoga", "antelope"]
     req = copy.deepcopy(ADMISSION_REQ)
     req["request"]["object"]["spec"]["features"]["services"].append(
         "shared-file-system"
@@ -2095,7 +2133,7 @@ def test_openstack_create_osdpl_fail(client, osdpl):
 
 
 def test_cinder_buckup_drivers_ok(client):
-    allow_in = ["yoga"]
+    allow_in = ["yoga", "antelope"]
     req = copy.deepcopy(ADMISSION_REQ)
     req["request"]["object"]["spec"]["features"]["cinder"] = {
         "backup": {

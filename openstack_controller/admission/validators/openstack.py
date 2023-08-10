@@ -136,6 +136,22 @@ class OpenStackValidator(base.BaseValidator):
                 "OpenStack version upgrade is not possible while another upgrade is in progress."
             )
 
+    def _upgrade_max_distance(self, new_version):
+        # Calculation of the allowed upgrade level for OpenStack releases
+        slurp_releases = constants.SLURP_RELEASES
+        if (
+            new_version in slurp_releases
+            and slurp_releases.index(new_version) != 0
+        ):
+            new_version_index = slurp_releases.index(new_version)
+            allowed_from = slurp_releases[new_version_index - 1]
+            return (
+                constants.OpenStackVersion[new_version].value
+                - constants.OpenStackVersion[allowed_from].value
+            )
+        else:
+            return 1
+
     def _validate_openstack_upgrade(self, old_obj, new_obj):
         # NOTE(pas-ha) this logic relies on 'master' already has been denied
         old_version = constants.OpenStackVersion[
@@ -148,10 +164,13 @@ class OpenStackValidator(base.BaseValidator):
             raise exception.OsDplValidationFailed(
                 "OpenStack version downgrade is not permitted"
             )
-        if new_version.value - old_version.value != 1:
+        if new_version.value - old_version.value > self._upgrade_max_distance(
+            new_version.name
+        ):
             raise exception.OsDplValidationFailed(
-                "Skip-level OpenStack version upgrade is not permitted"
+                f"Skip-level OpenStack version upgrade is not permitted between {old_version.name} and {new_version.name}"
             )
+
         # validate that nothing else is changed together with
         # openstack_version
         _old_spec = copy.deepcopy(old_obj["spec"])

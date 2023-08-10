@@ -109,10 +109,12 @@ spec:
           horizon:
 {%- if spec.openstack_version == 'queens' %}
             dashboard_path: /var/lib/openstack/lib/python2.7/site-packages/openstack_dashboard
-{%- elif spec.openstack_version in ['rocky', 'stein', 'train', 'ussuri', 'master' ] %}
+{%- elif spec.openstack_version in ['rocky', 'stein', 'train', 'ussuri'] %}
             dashboard_path: /var/lib/openstack/lib/python3.6/site-packages/openstack_dashboard
-{%- else %}
+{%- elif spec.openstack_version in ['victoria', 'wallaby', 'xena', 'yoga'] %}
             dashboard_path: /var/lib/openstack/lib/python3.8/site-packages/openstack_dashboard
+{%- else %}
+            dashboard_path: /var/lib/openstack/lib/python3.10/site-packages/openstack_dashboard
 {%- endif %}
         horizon:
           policy:
