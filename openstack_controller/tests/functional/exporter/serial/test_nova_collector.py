@@ -1,7 +1,9 @@
 from openstack_controller.tests.functional.exporter import base
 
 
-class NovaCollectorSerialFunctionalTestCase(base.BaseFunctionalTestCase):
+class NovaCollectorSerialFunctionalTestCase(
+    base.BaseFunctionalExporterTestCase
+):
     def setUp(self):
         super().setUp()
         svc = [

@@ -1,7 +1,7 @@
 from openstack_controller.tests.functional.exporter import base
 
 
-class OsdplCollectprFunctionalTestCase(base.BaseFunctionalTestCase):
+class OsdplCollectprFunctionalTestCase(base.BaseFunctionalExporterTestCase):
     def test_openstack_version(self):
         metric = self.get_metric("osdpl_version_info")
         self.assertIsNotNone(metric)
