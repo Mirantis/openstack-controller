@@ -1,4 +1,5 @@
 import asyncio
+import base64
 from dataclasses import dataclass
 import inspect
 import json
@@ -350,11 +351,24 @@ class HelmBundleMixin:
 
 
 class Secret(pykube.Secret, HelmBundleMixin):
-    pass
+    @property
+    def data_decoded(self):
+        return {
+            key: base64.b64decode(value).decode("utf-8")
+            for key, value in self.obj["data"].items()
+        }
 
 
 class Service(pykube.Service, HelmBundleMixin):
-    pass
+    @property
+    def loadbalancer_ips(self):
+        res = []
+        for ingress in (
+            self.obj["status"].get("loadBalancer", {}).get("ingress", [])
+        ):
+            if ingress.get("ip"):
+                res.append(ingress["ip"])
+        return res
 
 
 class StatefulSet(pykube.StatefulSet, HelmBundleMixin):
