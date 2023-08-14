@@ -42,7 +42,18 @@ class OsdplMetricsCollector(object):
                 LOG.info(f"Adding collector {name} to registry")
                 instance = collector()
                 self.collector_instances.append(instance)
+        self.init_tasks_status_tread()
         self.initialized = False
+
+    def init_tasks_status_tread(self):
+        LOG.info(f"Starting tasks status thread.")
+        future = Thread(target=self.watch_for_tasks, daemon=True)
+        future.start()
+
+    def watch_for_tasks(self):
+        while True:
+            self.update_tasks_status()
+            time.sleep(5)
 
     def submit_task(self, name, func):
         """Submit a taks with data collection
