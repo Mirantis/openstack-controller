@@ -42,7 +42,9 @@ class OpenStackBaseMetricCollector(base.BaseMetricsCollector):
     def is_service_available(self):
         endpoints = []
         for service_type in self._os_service_types:
-            endpoints.append(self.oc.oc.endpoint_for(service_type))
+            # NOTE(vsaienko): do not use get_endpoint_for or find_service as
+            # they use cached data from token. Do API call each time.
+            endpoints.append(self.oc.oc.identity.services(type=service_type))
         if not any(endpoints):
             LOG.info(
                 f"Can't find endpoints for service types {self._os_service_types}"

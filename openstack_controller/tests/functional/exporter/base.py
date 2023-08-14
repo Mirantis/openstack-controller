@@ -24,7 +24,7 @@ class BaseFunctionalExporterTestCase(base.BaseFunctionalTestCase):
 
     @property
     def metric_families(self):
-        res = requests.get(self.exporter_url)
+        res = requests.get(self.exporter_url, timeout=60)
         return text_string_to_metric_families(res.text + "# EOF")
 
     def get_metric(self, name):

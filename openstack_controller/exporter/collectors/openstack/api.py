@@ -63,11 +63,10 @@ class OsdplApiMetricCollector(base.OpenStackBaseMetricCollector):
                 requests.packages.urllib3.disable_warnings(
                     category=InsecureRequestWarning
                 )
-                resp = requests.get(url, timeout=5, verify=False)
+                resp = requests.get(url, timeout=30, verify=False)
             except Exception as e:
                 LOG.warning(f"Failed to get responce from {url}. Error: {e}")
                 success = False
-                continue
             if success:
                 statuses.append(([self.osdpl.name, url], resp.status_code))
                 latencies.append(
