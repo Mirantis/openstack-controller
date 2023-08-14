@@ -1,19 +1,16 @@
 import os
 import requests
 
-from unittest import TestCase
 from prometheus_client.openmetrics.parser import text_string_to_metric_families
 
 from openstack_controller import kube
-from openstack_controller import openstack_utils
+from openstack_controller.tests.functional import base
 
 
-class BaseFunctionalTestCase(TestCase):
+class BaseFunctionalExporterTestCase(base.BaseFunctionalTestCase):
     def setUp(self):
+        super().setUp()
         self.exporter_url = self.get_exporter_url()
-        self.kube_api = kube.kube_client()
-        self.ocm = openstack_utils.OpenStackClientManager()
-        self.osdpl = kube.get_osdpl()
 
     def get_exporter_url(self):
         if os.environ.get("OSDPL_EXPORTER_URL"):

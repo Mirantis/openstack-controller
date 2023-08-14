@@ -3,7 +3,9 @@ import unittest
 from openstack_controller.tests.functional.exporter import base
 
 
-class CertificatesCollectorFunctionalTestCase(base.BaseFunctionalTestCase):
+class CertificatesCollectorFunctionalTestCase(
+    base.BaseFunctionalExporterTestCase
+):
     def setUp(self):
         super().setUp()
         self.metric = self.get_metric("osdpl_certificate_expiry")
