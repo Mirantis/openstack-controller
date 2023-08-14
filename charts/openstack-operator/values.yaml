@@ -176,12 +176,15 @@ exporter:
    - --enable-threads
    - --threads
    - "128"
+   - --http-keepalive
   pod:
     liveness:
       params:
+        # NOTE(vsaienko): this will call metric polling, use 5 min probe to
+        # do not cause high load
         initialDelaySeconds: 60
-        periodSeconds: 60
-        timeoutSeconds: 5
+        periodSeconds: 300
+        timeoutSeconds: 120
     readiness:
       params:
         initialDelaySeconds: 10

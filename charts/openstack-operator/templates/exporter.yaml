@@ -79,11 +79,12 @@ spec:
               value: "{{ $optionValue }}"
             {{- end }}
           livenessProbe:
-            # NOTE(vsaienko): do tcp checks only to avoid starting polling functions.
-            tcpSocket:
+            httpGet:
+              path: /
               port: {{ .Values.exporter.settings.raw.OSCTL_EXPORTER_BIND_PORT }}
             {{- toYaml .Values.exporter.pod.liveness.params | nindent 12}}
           readinessProbe:
+            # NOTE(vsaienko): do tcp checks only to avoid starting polling functions.
             tcpSocket:
               port: {{ .Values.exporter.settings.raw.OSCTL_EXPORTER_BIND_PORT }}
             {{- toYaml .Values.exporter.pod.readiness.params | nindent 12}}
