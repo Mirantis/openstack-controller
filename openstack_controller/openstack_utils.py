@@ -68,7 +68,9 @@ class OpenStackClientManager:
         # https://github.com/prometheus/client_python/issues/353
         if metrics is None:
             metrics = {"prometheus": {"enabled": False}}
-        self.oc = openstack.connect(cloud=cloud, metrics=metrics)
+        self.oc = openstack.connect(
+            cloud=cloud, metrics=metrics, api_timeout=300
+        )
 
     def volume_get_services(self, **kwargs):
         res = []
