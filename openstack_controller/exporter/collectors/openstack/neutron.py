@@ -33,7 +33,7 @@ class OsdplNeutronMetricCollector(base.OpenStackBaseMetricCollector):
     def families(self):
         return {
             "networks": GaugeMetricFamily(
-                f"{self._name}_networs",
+                f"{self._name}_networks",
                 "Number of neutron networks in environment",
                 labels=["osdpl"],
             ),
@@ -55,7 +55,7 @@ class OsdplNeutronMetricCollector(base.OpenStackBaseMetricCollector):
             "floating_ips": GaugeMetricFamily(
                 f"{self._name}_floating_ips",
                 "Number of neutron floating ips in environment",
-                labels=["osdpl"],
+                labels=["osdpl", "state"],
             ),
             "agent_state": GaugeMetricFamily(
                 f"{self._name}_agent_state",
@@ -74,8 +74,24 @@ class OsdplNeutronMetricCollector(base.OpenStackBaseMetricCollector):
             total = len(list(getattr(self.oc.oc.network, resource)()))
             self.set_samples(resource, [([self.osdpl.name], total)])
 
-        floating_ips = len(list(self.oc.oc.network.ips()))
-        self.set_samples("floating_ips", [([self.osdpl.name], floating_ips)])
+        floating_ips_associated = 0
+        floating_ips_not_associated = 0
+        for fip in self.oc.oc.network.ips():
+            if fip.get("port_id") is not None:
+                floating_ips_associated += 1
+            else:
+                floating_ips_not_associated += 1
+
+        self.set_samples(
+            "floating_ips",
+            [
+                ([self.osdpl.name, "associated"], floating_ips_associated),
+                (
+                    [self.osdpl.name, "not_associated"],
+                    floating_ips_not_associated,
+                ),
+            ],
+        )
 
         agent_samples = {"is_alive": [], "is_admin_state_up": []}
         for agent in self.oc.oc.network.agents():
