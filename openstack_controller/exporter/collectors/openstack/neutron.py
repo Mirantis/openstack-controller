@@ -47,6 +47,21 @@ class OsdplNeutronMetricCollector(base.OpenStackBaseMetricCollector):
                 "Number of neutron ports in environment",
                 labels=["osdpl"],
             ),
+            "error_ports": GaugeMetricFamily(
+                f"{self._name}_error_ports",
+                "Number of neutron ports in the ERROR state in environment",
+                labels=["osdpl"],
+            ),
+            "down_ports": GaugeMetricFamily(
+                f"{self._name}_down_ports",
+                "Number of neutron ports in the DOWN state in environment",
+                labels=["osdpl"],
+            ),
+            "active_ports": GaugeMetricFamily(
+                f"{self._name}_active_ports",
+                "Number of neutron ports in the ACTIVE state in environment",
+                labels=["osdpl"],
+            ),
             "routers": GaugeMetricFamily(
                 f"{self._name}_routers",
                 "Number of neutron routers in environment",
@@ -70,9 +85,22 @@ class OsdplNeutronMetricCollector(base.OpenStackBaseMetricCollector):
         }
 
     def update_samples(self):
-        for resource in ["networks", "subnets", "ports", "routers"]:
+        for resource in ["networks", "subnets", "routers"]:
             total = len(list(getattr(self.oc.oc.network, resource)()))
             self.set_samples(resource, [([self.osdpl.name], total)])
+
+        ports = {"total": 0, "active": 0, "down": 0}
+        for port in self.oc.oc.network.ports():
+            port_status = port["status"].lower()
+            if port_status in ports.keys():
+                ports[port_status] += 1
+
+        self.set_samples("ports", [([self.osdpl.name], ports["total"])])
+        for port_status in ["active", "down"]:
+            self.set_samples(
+                f"{port_status}_ports",
+                [([self.osdpl.name], ports[port_status])],
+            )
 
         floating_ips_associated = 0
         floating_ips_not_associated = 0
