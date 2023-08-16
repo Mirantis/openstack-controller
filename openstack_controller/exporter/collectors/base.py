@@ -17,7 +17,7 @@
 import abc
 from datetime import datetime
 import sys
-from threading import Thread
+from threading import Thread, Lock
 import time
 from functools import cached_property
 
@@ -167,6 +167,7 @@ class BaseMetricsCollector(object):
         self.can_collect = False
         self.scrape_duration = 0
         self.scrape_success = False
+        self.lock_samples = Lock()
 
     @cached_property
     def families(self):
@@ -175,13 +176,15 @@ class BaseMetricsCollector(object):
 
     def set_samples(self, name, samples):
         """Sets metric samples on falimy"""
-        self.families[name].samples = []
-        for sample in samples:
-            self.families[name].add_metric(*sample)
+        with self.lock_samples:
+            self.families[name].samples = []
+            for sample in samples:
+                self.families[name].add_metric(*sample)
 
     def collect(self):
-        for name, metric in self.families.items():
-            yield metric
+        with self.lock_samples:
+            for name, metric in self.families.items():
+                yield metric
 
     @abc.abstractmethod
     def update_samples(self):
