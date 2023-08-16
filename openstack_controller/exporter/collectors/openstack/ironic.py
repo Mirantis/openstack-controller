@@ -33,8 +33,8 @@ class OsdplIronicMetricCollector(base.OpenStackBaseMetricCollector):
     def families(self):
         return {
             "nodes": GaugeMetricFamily(
-                f"{self._name}_nodes_total",
-                "The baremetal nodes total count",
+                f"{self._name}_nodes",
+                "The number of baremetal nodes",
                 labels=["osdpl"],
             )
         }

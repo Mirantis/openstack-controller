@@ -72,17 +72,17 @@ class OsdplCinderMetricCollector(base.OpenStackBaseMetricCollector):
             "pool_free_capacity": GaugeMetricFamily(
                 f"{self._name}_pool_free_capacity",
                 "Free capacity in bytes of cinder backend pools in environment",
-                labels=["osdpl"],
+                labels=["osdpl", "name"],
             ),
             "pool_total_capacity": GaugeMetricFamily(
                 f"{self._name}_pool_total_capacity",
                 "Total capacity in bytes of cinder backend pools in environment",
-                labels=["osdpl"],
+                labels=["osdpl", "name"],
             ),
             "pool_allocated_capacity": GaugeMetricFamily(
                 f"{self._name}_pool_allocated_capacity",
                 "Allocated capacity in bytes of cinder backend pools in environment",
-                labels=["osdpl"],
+                labels=["osdpl", "name"],
             ),
         }
 
@@ -142,7 +142,7 @@ class OsdplCinderMetricCollector(base.OpenStackBaseMetricCollector):
         for backend_pool in self.oc.oc.volume.backend_pools():
             pool_free_capacity_samples.append(
                 (
-                    [self.osdpl.name],
+                    [self.osdpl.name, backend_pool["name"]],
                     (
                         backend_pool.get("capabilities", {}).get(
                             "free_capacity_gb"
@@ -154,7 +154,7 @@ class OsdplCinderMetricCollector(base.OpenStackBaseMetricCollector):
             )
             pool_total_capacity_samples.append(
                 (
-                    [self.osdpl.name],
+                    [self.osdpl.name, backend_pool["name"]],
                     (
                         backend_pool.get("capabilities", {}).get(
                             "total_capacity_gb"
@@ -166,7 +166,7 @@ class OsdplCinderMetricCollector(base.OpenStackBaseMetricCollector):
             )
             pool_allocated_capacity_samples.append(
                 (
-                    [self.osdpl.name],
+                    [self.osdpl.name, backend_pool["name"]],
                     (
                         backend_pool.get("capabilities", {}).get(
                             "allocated_capacity_gb"

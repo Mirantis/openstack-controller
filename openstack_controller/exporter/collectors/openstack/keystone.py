@@ -43,7 +43,7 @@ class OsdplKeystoneMetricCollector(base.OpenStackBaseMetricCollector):
                 labels=["osdpl"],
             ),
             "projects": GaugeMetricFamily(
-                f"{self._name}_project",
+                f"{self._name}_projects",
                 "Number of keystone projects in environment",
                 labels=["osdpl"],
             ),
