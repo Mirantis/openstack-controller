@@ -36,12 +36,12 @@ class OsdplNovaMetricCollector(base.OpenStackBaseMetricCollector):
             "service_state": GaugeMetricFamily(
                 f"{self._name}_service_state",
                 "Nova compute service state",
-                labels=["host", "binary", "osdpl"],
+                labels=["host", "binary", "zone", "osdpl"],
             ),
             "service_status": GaugeMetricFamily(
                 f"{self._name}_service_status",
                 "Nova compute service status",
-                labels=["host", "binary", "osdpl"],
+                labels=["host", "binary", "zone", "osdpl"],
             ),
         }
 
@@ -49,15 +49,26 @@ class OsdplNovaMetricCollector(base.OpenStackBaseMetricCollector):
         state_samples = []
         status_samples = []
         for service in self.oc.compute_get_services():
+            zone = service.get("availability_zone", "nova")
             state_samples.append(
                 (
-                    [service["host"], service["binary"], self.osdpl.name],
+                    [
+                        service["host"],
+                        service["binary"],
+                        zone,
+                        self.osdpl.name,
+                    ],
                     getattr(constants.ServiceState, service["state"]),
                 )
             )
             status_samples.append(
                 (
-                    [service["host"], service["binary"], self.osdpl.name],
+                    [
+                        service["host"],
+                        service["binary"],
+                        zone,
+                        self.osdpl.name,
+                    ],
                     getattr(constants.ServiceStatus, service["status"]),
                 )
             )
