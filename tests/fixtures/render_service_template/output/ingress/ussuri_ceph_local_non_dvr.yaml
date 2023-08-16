@@ -9,9 +9,27 @@ spec:
         ingress:
           nginx-status-ipv4-whitelist: 0.0.0.0/0
           client-header-buffer-size: 10k
+          bind-address: 127.0.0.1
           large-client-header-buffers: 4 16k
+          ssl-redirect: "false"
+          use-proxy-protocol: "true"
       endpoints:
         cluster_domain_suffix: cluster.local
+        ingress:
+          port:
+            https:
+              default: 5443
+        tls_proxy:
+          host_fqdn_override:
+            public:
+              tls:
+                crt: |
+                  TEST CRT
+                key: |
+                  TEST KEY
+          port:
+            proxy:
+              default: 443
       images:
         tags:
           dep_check: dep-check:latest
@@ -27,6 +45,7 @@ spec:
           node_selector_value: linux
       manifests:
         network_policy: false
+        tls_proxy: true
       network:
         service:
           externalTrafficPolicy: Local

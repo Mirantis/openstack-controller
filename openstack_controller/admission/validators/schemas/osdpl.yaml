@@ -560,6 +560,7 @@ properties:
                 type: boolean
                 description: |
                   Enable FIPS compliant TLS proxy for public endpoints.
+                  Default: true
           public_endpoints:
             type: object
             additionalProperties: false

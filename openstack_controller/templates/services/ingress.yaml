@@ -1,5 +1,6 @@
 #apiVersion: lcm.mirantis.com/v1alpha1
 #kind: HelmBundle
+{%- set is_tls_proxy_enabled = spec.get('features', {}).get('ssl', {}).get('tls_proxy', {}).get('enabled', True) %}
 
 spec:
   releases:
@@ -39,7 +40,7 @@ spec:
           # NOTE(vsaienko) jwt tokens might be too big
           client-header-buffer-size: 10k
           large-client-header-buffers: 4 16k
-{%- if spec.get('features', {}).get('ssl', {}).get('tls_proxy', {}).get('enabled', False) %}
+{%- if is_tls_proxy_enabled %}
           ssl-redirect: "false"
           bind-address: "127.0.0.1"
           use-proxy-protocol: "true"
@@ -58,20 +59,17 @@ spec:
                   timeoutSeconds: 5
       manifests:
         network_policy: false
-{%- if spec.get('features', {}).get('ssl', {}).get('tls_proxy', {}).get('enabled', False) %}
+{%- if is_tls_proxy_enabled %}
         tls_proxy: true
 {%- endif %}
       endpoints:
         cluster_domain_suffix: {{ spec.internal_domain_name }}
-{%- if spec.get('features', {}).get('ssl', {}).get('tls_proxy', {}).get('enabled', False) %}
+{%- if is_tls_proxy_enabled %}
         ingress:
           port:
             https:
               default: 5443
         tls_proxy:
-          port:
-            proxy:
-              default: 443
           host_fqdn_override:
             public:
               tls:
@@ -79,4 +77,7 @@ spec:
 {{ spec.features.ssl.public_endpoints.api_cert | indent( width=18, first=True) }}
                 key: |
 {{ spec.features.ssl.public_endpoints.api_key | indent( width=18, first=True) }}
+          port:
+            proxy:
+              default: 443
 {%- endif %}
