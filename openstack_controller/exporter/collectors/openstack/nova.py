@@ -90,6 +90,11 @@ class OsdplNovaMetricCollector(base.OpenStackBaseMetricCollector):
                 "Information about host aggregate mapping",
                 labels=[],
             ),
+            "availability_zone_info": InfoMetricFamily(
+                f"{self._name}_availability_zone_info",
+                "Information about nova availability zones",
+                labels=[],
+            ),
         }
 
     def update_samples(self):
@@ -171,3 +176,17 @@ class OsdplNovaMetricCollector(base.OpenStackBaseMetricCollector):
                     )
                 )
         self.set_samples("host_aggregate_info", host_aggregate_info_samples)
+
+        availability_zone_info_samples = []
+        for zone in self.oc.oc.compute.availability_zones():
+            availability_zone_info_samples.append(
+                (
+                    [],
+                    {
+                        "name": zone["name"],
+                    },
+                )
+            )
+        self.set_samples(
+            "availability_zone_info", availability_zone_info_samples
+        )

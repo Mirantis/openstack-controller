@@ -15,7 +15,7 @@
 
 from functools import cached_property
 
-from prometheus_client.core import GaugeMetricFamily
+from prometheus_client.core import GaugeMetricFamily, InfoMetricFamily
 
 from openstack_controller import utils
 from openstack_controller.exporter.collectors.openstack import base
@@ -82,6 +82,11 @@ class OsdplNeutronMetricCollector(base.OpenStackBaseMetricCollector):
                 "Administrative status of neutron agent in environment",
                 labels=["host", "binary", "zone"],
             ),
+            "availability_zone_info": InfoMetricFamily(
+                f"{self._name}_availability_zone_info",
+                "Information about neutron availability zones",
+                labels=[],
+            ),
         }
 
     def update_samples(self):
@@ -138,3 +143,18 @@ class OsdplNeutronMetricCollector(base.OpenStackBaseMetricCollector):
                     )
         self.set_samples("agent_state", agent_samples["is_alive"])
         self.set_samples("agent_status", agent_samples["is_admin_state_up"])
+
+        availability_zone_info_samples = []
+        for zone in self.oc.oc.network.availability_zones():
+            availability_zone_info_samples.append(
+                (
+                    [],
+                    {
+                        "name": zone["name"],
+                        "resource": zone["resource"],
+                    },
+                )
+            )
+        self.set_samples(
+            "availability_zone_info", availability_zone_info_samples
+        )
