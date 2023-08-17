@@ -1,10 +1,14 @@
 import os
 import requests
+import retry
 
 from prometheus_client.openmetrics.parser import text_string_to_metric_families
 
 from openstack_controller import kube
+from openstack_controller import utils
 from openstack_controller.tests.functional import base
+
+LOG = utils.get_logger(__name__)
 
 
 class BaseFunctionalExporterTestCase(base.BaseFunctionalTestCase):
@@ -23,6 +27,13 @@ class BaseFunctionalExporterTestCase(base.BaseFunctionalTestCase):
         return f"http://{internal_ip}:9102"
 
     @property
+    @retry.retry(
+        requests.exceptions.ConnectionError,
+        delay=1,
+        tries=7,
+        backoff=2,
+        logger=LOG,
+    )
     def metric_families(self):
         res = requests.get(self.exporter_url, timeout=60)
         return text_string_to_metric_families(res.text + "# EOF")
