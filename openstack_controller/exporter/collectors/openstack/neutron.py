@@ -35,59 +35,59 @@ class OsdplNeutronMetricCollector(base.OpenStackBaseMetricCollector):
             "networks": GaugeMetricFamily(
                 f"{self._name}_networks",
                 "Number of neutron networks in environment",
-                labels=["osdpl"],
+                labels=[],
             ),
             "subnets": GaugeMetricFamily(
                 f"{self._name}_subnets",
                 "Number of neutron subnets in environment",
-                labels=["osdpl"],
+                labels=[],
             ),
             "ports": GaugeMetricFamily(
                 f"{self._name}_ports",
                 "Number of neutron ports in environment",
-                labels=["osdpl"],
+                labels=[],
             ),
             "error_ports": GaugeMetricFamily(
                 f"{self._name}_error_ports",
                 "Number of neutron ports in the ERROR state in environment",
-                labels=["osdpl"],
+                labels=[],
             ),
             "down_ports": GaugeMetricFamily(
                 f"{self._name}_down_ports",
                 "Number of neutron ports in the DOWN state in environment",
-                labels=["osdpl"],
+                labels=[],
             ),
             "active_ports": GaugeMetricFamily(
                 f"{self._name}_active_ports",
                 "Number of neutron ports in the ACTIVE state in environment",
-                labels=["osdpl"],
+                labels=[],
             ),
             "routers": GaugeMetricFamily(
                 f"{self._name}_routers",
                 "Number of neutron routers in environment",
-                labels=["osdpl"],
+                labels=[],
             ),
             "floating_ips": GaugeMetricFamily(
                 f"{self._name}_floating_ips",
                 "Number of neutron floating ips in environment",
-                labels=["osdpl", "state"],
+                labels=["state"],
             ),
             "agent_state": GaugeMetricFamily(
                 f"{self._name}_agent_state",
                 "State of neutron agent in environment",
-                labels=["host", "binary", "osdpl", "zone"],
+                labels=["host", "binary", "zone"],
             ),
             "agent_status": GaugeMetricFamily(
                 f"{self._name}_agent_status",
                 "Administrative status of neutron agent in environment",
-                labels=["host", "binary", "osdpl", "zone"],
+                labels=["host", "binary", "zone"],
             ),
         }
 
     def update_samples(self):
         for resource in ["networks", "subnets", "routers"]:
             total = len(list(getattr(self.oc.oc.network, resource)()))
-            self.set_samples(resource, [([self.osdpl.name], total)])
+            self.set_samples(resource, [([], total)])
 
         ports = {"total": 0, "active": 0, "down": 0}
         for port in self.oc.oc.network.ports():
@@ -95,11 +95,11 @@ class OsdplNeutronMetricCollector(base.OpenStackBaseMetricCollector):
             if port_status in ports.keys():
                 ports[port_status] += 1
 
-        self.set_samples("ports", [([self.osdpl.name], ports["total"])])
+        self.set_samples("ports", [([], ports["total"])])
         for port_status in ["active", "down"]:
             self.set_samples(
                 f"{port_status}_ports",
-                [([self.osdpl.name], ports[port_status])],
+                [([], ports[port_status])],
             )
 
         floating_ips_associated = 0
@@ -113,9 +113,9 @@ class OsdplNeutronMetricCollector(base.OpenStackBaseMetricCollector):
         self.set_samples(
             "floating_ips",
             [
-                ([self.osdpl.name, "associated"], floating_ips_associated),
+                (["associated"], floating_ips_associated),
                 (
-                    [self.osdpl.name, "not_associated"],
+                    ["not_associated"],
                     floating_ips_not_associated,
                 ),
             ],
@@ -131,7 +131,6 @@ class OsdplNeutronMetricCollector(base.OpenStackBaseMetricCollector):
                             [
                                 agent["host"],
                                 agent["binary"],
-                                self.osdpl.name,
                                 az,
                             ],
                             int(agent[field]),

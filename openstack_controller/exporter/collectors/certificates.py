@@ -48,7 +48,7 @@ class OsdplCertsMetricCollector(base.BaseMetricsCollector):
             "expiry": GaugeMetricFamily(
                 f"{self._name}_expiry",
                 f"{self._description}: expiration unix timestamp",
-                labels=["identifier", "osdpl"],
+                labels=["identifier"],
             )
         }
 
@@ -57,7 +57,7 @@ class OsdplCertsMetricCollector(base.BaseMetricsCollector):
         for identifier, cert in self.load_certificates().items():
             certificate_samples.append(
                 (
-                    [identifier, self.osdpl.name],
+                    [identifier],
                     float(cert.not_valid_after.timestamp()),
                 )
             )

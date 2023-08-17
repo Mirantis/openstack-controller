@@ -26,6 +26,6 @@ class IronicCollectorFunctionalTestCase(base.BaseFunctionalExporterTestCase):
             self.assertEqual(baremetal_nodes, metric.samples[0].value)
 
             self.assertCountEqual(
-                ["osdpl"],
+                [],
                 metric.samples[0].labels.keys(),
             )

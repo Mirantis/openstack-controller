@@ -35,10 +35,10 @@ class OsdplHeatMetricCollector(base.OpenStackBaseMetricCollector):
             "stacks": GaugeMetricFamily(
                 f"{self._name}_stacks",
                 "Number of heat stacks in environment",
-                labels=["osdpl"],
+                labels=[],
             )
         }
 
     def update_samples(self):
         stacks = len(list(self.oc.oc.orchestration.stacks()))
-        self.set_samples("stacks", [([self.osdpl.name], stacks)])
+        self.set_samples("stacks", [([], stacks)])

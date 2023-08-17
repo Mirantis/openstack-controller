@@ -35,12 +35,12 @@ class OsdplGlanceMetricCollector(base.OpenStackBaseMetricCollector):
             "images": GaugeMetricFamily(
                 f"{self._name}_images",
                 "Number of glance images in environment",
-                labels=["osdpl"],
+                labels=[],
             ),
             "images_size": GaugeMetricFamily(
                 f"{self._name}_images_size",
                 "Total size of all images in bytes",
-                labels=["osdpl"],
+                labels=[],
             ),
         }
 
@@ -51,5 +51,5 @@ class OsdplGlanceMetricCollector(base.OpenStackBaseMetricCollector):
             images_total += 1
             # NOTE(vsaienko): the size may be None from API.
             images_size += image.get("size") or 0
-        self.set_samples("images", [([self.osdpl.name], images_total)])
-        self.set_samples("images_size", [([self.osdpl.name], images_size)])
+        self.set_samples("images", [([], images_total)])
+        self.set_samples("images_size", [([], images_size)])

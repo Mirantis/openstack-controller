@@ -37,17 +37,17 @@ class OsdplApiMetricCollector(base.OpenStackBaseMetricCollector):
             "status": GaugeMetricFamily(
                 f"{self._name}_status",
                 "API endpoint connection status",
-                labels=["osdpl", "url"],
+                labels=["url"],
             ),
             "latency": GaugeMetricFamily(
                 f"{self._name}_latency",
                 "API endpoint connection latency microseconds",
-                labels=["osdpl", "url"],
+                labels=["url"],
             ),
             "success": GaugeMetricFamily(
                 f"{self._name}_success",
                 "API endpoint connection success status",
-                labels=["osdpl", "url"],
+                labels=["url"],
             ),
         }
 
@@ -68,11 +68,9 @@ class OsdplApiMetricCollector(base.OpenStackBaseMetricCollector):
                 LOG.warning(f"Failed to get responce from {url}. Error: {e}")
                 success = False
             if success:
-                statuses.append(([self.osdpl.name, url], resp.status_code))
-                latencies.append(
-                    ([self.osdpl.name, url], resp.elapsed.microseconds)
-                )
-            successes.append(([self.osdpl.name, url], int(success)))
+                statuses.append(([url], resp.status_code))
+                latencies.append(([url], resp.elapsed.microseconds))
+            successes.append(([url], int(success)))
         self.set_samples("status", statuses)
         self.set_samples("latency", latencies)
         self.set_samples("success", successes)
