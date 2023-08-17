@@ -85,6 +85,11 @@ class OsdplNovaMetricCollector(base.OpenStackBaseMetricCollector):
                 "Total number of instances per hypervisor",
                 labels=["host", "zone"],
             ),
+            "host_aggregate_hosts": GaugeMetricFamily(
+                f"{self._name}_host_aggregate_hosts",
+                "Total number of compute hosts per host aggregate zone",
+                labels=["id", "name"],
+            ),
             "host_aggregate_info": InfoMetricFamily(
                 f"{self._name}_host_aggregate",
                 "Information about host aggregate mapping",
@@ -160,11 +165,14 @@ class OsdplNovaMetricCollector(base.OpenStackBaseMetricCollector):
         self.set_samples("hypervisor_instances", hypervisor_instances_samples)
 
         host_aggregate_info_samples = []
+        host_aggregate_hosts_samples = []
         for aggregate in self.oc.oc.compute.aggregates():
+            host_aggregate_hosts_total = 0
             hosts = aggregate["hosts"] or []
             aggregate_name = aggregate["name"]
             aggregate_id = aggregate["id"]
             for host in hosts:
+                host_aggregate_hosts_total += 1
                 host_aggregate_info_samples.append(
                     (
                         [],
@@ -175,7 +183,15 @@ class OsdplNovaMetricCollector(base.OpenStackBaseMetricCollector):
                         },
                     )
                 )
+            host_aggregate_hosts_samples.append(
+                (
+                    [str(aggregate_id), aggregate_name],
+                    host_aggregate_hosts_total,
+                )
+            )
+
         self.set_samples("host_aggregate_info", host_aggregate_info_samples)
+        self.set_samples("host_aggregate_hosts", host_aggregate_hosts_samples)
 
         availability_zone_info_samples = []
         for zone in self.oc.oc.compute.availability_zones():
