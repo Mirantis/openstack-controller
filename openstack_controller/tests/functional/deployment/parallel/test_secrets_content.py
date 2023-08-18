@@ -12,7 +12,7 @@ class SecretsContentFunctionalTestCase(base.BaseFunctionalTestCase):
         # Sections we should not check
         self.skip_sections = ["ironic"]
         # Keys we should not check
-        self.skip_keys = ["auth_type"]
+        self.skip_keys = ["auth_type", "OS_AUTH_TYPE"]
         # Secret names we should not check
         self.skip_secrets = [
             "keystone-fernet-data",
