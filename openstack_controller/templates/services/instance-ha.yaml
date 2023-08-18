@@ -109,6 +109,7 @@ spec:
             {%- if spec.openstack_version not in ("queens", "rocky", "stein") %}
             service_type: instance-ha
             {%- endif %}
+{% include 'base/_oslo_policy_enforce_defaults.yaml' %}
         logging:
           logger_masakari:
             level: {{ spec.get('features', {}).get('logging', {}).get('masakari', {}).get('level', 'INFO') }}

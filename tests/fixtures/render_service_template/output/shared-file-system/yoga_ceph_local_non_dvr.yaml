@@ -38,6 +38,9 @@ spec:
               noop
           oslo_messaging_notifications:
             topics: notifications,stacklight_notifications
+          oslo_policy:
+            enforce_new_defaults: false
+            enforce_scope: false
         policy.d:
           01-controller-default.yaml:
             shared-file-system_rule1: shared-file-system_value1

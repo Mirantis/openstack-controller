@@ -178,6 +178,7 @@ spec:
 {%- endif %}
           oslo_messaging_notifications:
             topics: {{ notification_topics|join(',') }}
+{% include 'base/_oslo_policy_enforce_defaults.yaml' %}
         {%- if overrides.enabled %}
         standalone_backends:
           daemonset:

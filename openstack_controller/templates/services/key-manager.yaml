@@ -121,6 +121,7 @@ spec:
           oslo_messaging_notifications:
             driver: messagingv2
             topics: {{ notification_topics|join(',') }}
+{% include 'base/_oslo_policy_enforce_defaults.yaml' %}
           DEFAULT:
             sql_idle_timeout: 3600
             sql_max_retries: -1
