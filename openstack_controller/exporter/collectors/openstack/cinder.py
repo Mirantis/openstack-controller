@@ -84,6 +84,11 @@ class OsdplCinderMetricCollector(base.OpenStackBaseMetricCollector):
                 "Allocated capacity in bytes of cinder backend pools in environment",
                 labels=["name"],
             ),
+            "zone_volumes": GaugeMetricFamily(
+                f"{self._name}_zone_volumes",
+                "Number of cinder volumes inspecific zone in environment",
+                labels=["zone"],
+            ),
         }
 
     def update_samples(self):
@@ -91,12 +96,20 @@ class OsdplCinderMetricCollector(base.OpenStackBaseMetricCollector):
         volumes_size = 0
         snapshots_total = 0
         snapshots_size = 0
+        volume_zone_total = {}
         for volume in self.oc.oc.volume.volumes(all_tenants=True):
+            volume_zone = volume.get("zone", "None")
             volumes_total += 1
             # NOTE(vsaienko): the size may be None from API.
             volumes_size += volume.get("size") or 0
+            volume_zone_total.setdefault(volume_zone, 0)
+            volume_zone_total[volume_zone] += 1
         self.set_samples("volumes", [([], volumes_total)])
         self.set_samples("volumes_size", [([], volumes_size * constants.Gi)])
+        zone_volumes_samples = []
+        for zone, volumes in volume_zone_total.items():
+            zone_volumes_samples.append(([zone], volume_zone_total[zone]))
+        self.set_samples("zone_volumes", zone_volumes_samples)
         for snapshot in self.oc.oc.volume.snapshots(all_tenants=True):
             snapshots_total += 1
             snapshots_size += snapshot.get("size") or 0

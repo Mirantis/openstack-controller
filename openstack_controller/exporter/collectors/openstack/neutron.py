@@ -87,12 +87,31 @@ class OsdplNeutronMetricCollector(base.OpenStackBaseMetricCollector):
                 "Information about neutron availability zones",
                 labels=[],
             ),
+            "zone_routers": GaugeMetricFamily(
+                f"{self._name}_zone_routers",
+                "State of neutron routers in specific zone in environment",
+                labels=["zone"],
+            ),
         }
 
     def update_samples(self):
-        for resource in ["networks", "subnets", "routers"]:
+        for resource in ["networks", "subnets"]:
             total = len(list(getattr(self.oc.oc.network, resource)()))
             self.set_samples(resource, [([], total)])
+
+        routers_total = 0
+        zone_routers = {}
+        for router in self.oc.oc.network.routers():
+            routers_total += 1
+            router_zones = router.get("availability_zones", [])
+            for zone in router_zones:
+                zone_routers.setdefault(zone, 0)
+                zone_routers[zone] += 1
+
+        zone_routers_samples = []
+        for zone, routers in zone_routers.items():
+            zone_routers_samples.append(([zone], zone_routers[zone]))
+        self.set_samples("zone_routers", zone_routers_samples)
 
         ports = {"total": 0, "active": 0, "down": 0}
         for port in self.oc.oc.network.ports():
