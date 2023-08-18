@@ -12,7 +12,7 @@ class NovaCollectorFunctionalTestCase(base.BaseFunctionalExporterTestCase):
         self.assertIsNotNone(metric)
         self.assertEqual(self.compute_number, len(metric.samples))
         self.assertCountEqual(
-            ["host", "osdpl", "zone", "binary"],
+            ["host", "zone", "binary"],
             metric.samples[0].labels.keys(),
         )
 
@@ -21,6 +21,6 @@ class NovaCollectorFunctionalTestCase(base.BaseFunctionalExporterTestCase):
         self.assertIsNotNone(metric)
         self.assertEqual(self.compute_number, len(metric.samples))
         self.assertCountEqual(
-            ["host", "osdpl", "zone", "binary"],
+            ["host", "zone", "binary"],
             metric.samples[0].labels.keys(),
         )

@@ -61,7 +61,7 @@ class OsdplOctaviaMetricCollector(base.OpenStackBaseMetricCollector):
         loadbalancers_by_status_samples = []
         for labels, value in loadbalancers_by_status.items():
             loadbalancers_by_status_samples.append(
-                ([self.osdpl.name, labels[0], labels[1]], value)
+                ([labels[0], labels[1]], value)
             )
         self.set_samples(
             "loadbalancers",

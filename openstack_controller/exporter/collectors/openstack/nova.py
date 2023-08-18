@@ -25,10 +25,32 @@ from openstack_controller.exporter import constants
 LOG = utils.get_logger(__name__)
 
 
+class Host:
+    running_instances = None
+    memory_mb = None
+    memory_mb_free = None
+    memory_mb_used = None
+    memory_mb_allocation_ratio = None
+    vcpus = None
+    vcpus_free = None
+    vcpus_used = None
+    vcpu_allocation_ratio = None
+    local_gb = None
+    local_gb_free = None
+    local_gb_used = None
+    local_gb_allocation_ratio = None
+
+    def __init__(self, name):
+        self.name = name
+
+
 class OsdplNovaMetricCollector(base.OpenStackBaseMetricCollector):
     _name = "osdpl_nova"
     _description = "OpenStack Compute service metrics"
     _os_service_types = ["compute"]
+
+    def __init(self):
+        super().__init__()
 
     @cached_property
     def families(self):
@@ -36,37 +58,37 @@ class OsdplNovaMetricCollector(base.OpenStackBaseMetricCollector):
             "service_state": GaugeMetricFamily(
                 f"{self._name}_service_state",
                 "Nova compute service state",
-                labels=["host", "binary", "zone", "osdpl"],
+                labels=["host", "binary", "zone"],
             ),
             "service_status": GaugeMetricFamily(
                 f"{self._name}_service_status",
                 "Nova compute service status",
-                labels=["host", "binary", "zone", "osdpl"],
+                labels=["host", "binary", "zone"],
             ),
             "instances": GaugeMetricFamily(
                 f"{self._name}_instances",
                 "Total number of instances",
-                labels=["osdpl"],
+                labels=[],
             ),
             "error_instances": GaugeMetricFamily(
                 f"{self._name}_error_instances",
                 "Total number of instances in error state",
-                labels=["osdpl"],
+                labels=[],
             ),
             "active_instances": GaugeMetricFamily(
                 f"{self._name}_active_instances",
                 "Total number of instances in active state",
-                labels=["osdpl"],
+                labels=[],
             ),
             "hypervisor_instances": GaugeMetricFamily(
                 f"{self._name}_hypervisor_instances",
                 "Total number of instances per hypervisor",
-                labels=["host", "zone", "osdpl"],
+                labels=["host", "zone"],
             ),
             "host_aggregate_info": InfoMetricFamily(
                 f"{self._name}_host_aggregate",
                 "Information about host aggregate mapping",
-                labels=["osdpl"],
+                labels=[],
             ),
         }
 
@@ -86,7 +108,6 @@ class OsdplNovaMetricCollector(base.OpenStackBaseMetricCollector):
                         service["host"],
                         service["binary"],
                         zone,
-                        self.osdpl.name,
                     ],
                     getattr(constants.ServiceState, service["state"]),
                 )
@@ -97,7 +118,6 @@ class OsdplNovaMetricCollector(base.OpenStackBaseMetricCollector):
                         service["host"],
                         service["binary"],
                         zone,
-                        self.osdpl.name,
                     ],
                     getattr(constants.ServiceStatus, service["status"]),
                 )
@@ -118,13 +138,9 @@ class OsdplNovaMetricCollector(base.OpenStackBaseMetricCollector):
                 hypervisor_instances.setdefault(host, {"total": 0})
                 hypervisor_instances[host]["total"] += 1
 
-        self.set_samples(
-            "instances", [([self.osdpl.name], instances["total"])]
-        )
+        self.set_samples("instances", [([], instances["total"])])
         for key in ["error", "active"]:
-            self.set_samples(
-                f"{key}_instances", [([self.osdpl.name], instances[key])]
-            )
+            self.set_samples(f"{key}_instances", [([], instances[key])])
         hypervisor_instances_samples = []
         for host, instance_number in hypervisor_instances.items():
             hypervisor_instances_samples.append(
@@ -132,7 +148,6 @@ class OsdplNovaMetricCollector(base.OpenStackBaseMetricCollector):
                     [
                         host,
                         hypervisors_info.get(host, {}).get("zone", "None"),
-                        self.osdpl.name,
                     ],
                     hypervisor_instances[host]["total"],
                 )
@@ -147,7 +162,7 @@ class OsdplNovaMetricCollector(base.OpenStackBaseMetricCollector):
             for host in hosts:
                 host_aggregate_info_samples.append(
                     (
-                        [self.osdpl.name],
+                        [],
                         {
                             "host": host,
                             "id": str(aggregate_id),

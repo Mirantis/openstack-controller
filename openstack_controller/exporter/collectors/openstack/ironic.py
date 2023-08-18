@@ -35,10 +35,10 @@ class OsdplIronicMetricCollector(base.OpenStackBaseMetricCollector):
             "nodes": GaugeMetricFamily(
                 f"{self._name}_nodes",
                 "The number of baremetal nodes",
-                labels=["osdpl"],
+                labels=[],
             )
         }
 
     def update_samples(self):
         nodes_total = len(list(self.oc.baremetal_get_nodes()))
-        self.set_samples("nodes", [([self.osdpl.name], nodes_total)])
+        self.set_samples("nodes", [([], nodes_total)])

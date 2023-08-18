@@ -42,47 +42,47 @@ class OsdplCinderMetricCollector(base.OpenStackBaseMetricCollector):
             "volumes": GaugeMetricFamily(
                 f"{self._name}_volumes",
                 "Number of cinder volumes in environment",
-                labels=["osdpl"],
+                labels=[],
             ),
             "volumes_size": GaugeMetricFamily(
                 f"{self._name}_volumes_size",
                 "Total size of all volumes in bytes",
-                labels=["osdpl"],
+                labels=[],
             ),
             "snapshots": GaugeMetricFamily(
                 f"{self._name}_snapshots",
                 "Number of cinder snapshots in environment",
-                labels=["osdpl"],
+                labels=[],
             ),
             "snapshots_size": GaugeMetricFamily(
                 f"{self._name}_snapshots_size",
                 "Total size of all snapshots in bytes",
-                labels=["osdpl"],
+                labels=[],
             ),
             "service_state": GaugeMetricFamily(
                 f"{self._name}_service_state",
                 "Cinder service state",
-                labels=["host", "binary", "zone", "osdpl"],
+                labels=["host", "binary", "zone"],
             ),
             "service_status": GaugeMetricFamily(
                 f"{self._name}_service_status",
                 "Cinder service status",
-                labels=["host", "binary", "zone", "osdpl"],
+                labels=["host", "binary", "zone"],
             ),
             "pool_free_capacity": GaugeMetricFamily(
                 f"{self._name}_pool_free_capacity",
                 "Free capacity in bytes of cinder backend pools in environment",
-                labels=["osdpl", "name"],
+                labels=["name"],
             ),
             "pool_total_capacity": GaugeMetricFamily(
                 f"{self._name}_pool_total_capacity",
                 "Total capacity in bytes of cinder backend pools in environment",
-                labels=["osdpl", "name"],
+                labels=["name"],
             ),
             "pool_allocated_capacity": GaugeMetricFamily(
                 f"{self._name}_pool_allocated_capacity",
                 "Allocated capacity in bytes of cinder backend pools in environment",
-                labels=["osdpl", "name"],
+                labels=["name"],
             ),
         }
 
@@ -95,17 +95,15 @@ class OsdplCinderMetricCollector(base.OpenStackBaseMetricCollector):
             volumes_total += 1
             # NOTE(vsaienko): the size may be None from API.
             volumes_size += volume.get("size") or 0
-        self.set_samples("volumes", [([self.osdpl.name], volumes_total)])
-        self.set_samples(
-            "volumes_size", [([self.osdpl.name], volumes_size * constants.Gi)]
-        )
+        self.set_samples("volumes", [([], volumes_total)])
+        self.set_samples("volumes_size", [([], volumes_size * constants.Gi)])
         for snapshot in self.oc.oc.volume.snapshots(all_tenants=True):
             snapshots_total += 1
             snapshots_size += snapshot.get("size") or 0
-        self.set_samples("snapshots", [([self.osdpl.name], snapshots_total)])
+        self.set_samples("snapshots", [([], snapshots_total)])
         self.set_samples(
             "snapshots_size",
-            [([self.osdpl.name], snapshots_size * constants.Gi)],
+            [([], snapshots_size * constants.Gi)],
         )
 
         service_state_samples = []
@@ -117,7 +115,6 @@ class OsdplCinderMetricCollector(base.OpenStackBaseMetricCollector):
                         service["host"],
                         service["binary"],
                         service["zone"],
-                        self.osdpl.name,
                     ],
                     getattr(constants.ServiceState, service["state"]),
                 )
@@ -128,7 +125,6 @@ class OsdplCinderMetricCollector(base.OpenStackBaseMetricCollector):
                         service["host"],
                         service["binary"],
                         service["zone"],
-                        self.osdpl.name,
                     ],
                     getattr(constants.ServiceStatus, service["status"]),
                 )
@@ -142,7 +138,7 @@ class OsdplCinderMetricCollector(base.OpenStackBaseMetricCollector):
         for backend_pool in self.oc.oc.volume.backend_pools():
             pool_free_capacity_samples.append(
                 (
-                    [self.osdpl.name, backend_pool["name"]],
+                    [backend_pool["name"]],
                     (
                         backend_pool.get("capabilities", {}).get(
                             "free_capacity_gb"
@@ -154,7 +150,7 @@ class OsdplCinderMetricCollector(base.OpenStackBaseMetricCollector):
             )
             pool_total_capacity_samples.append(
                 (
-                    [self.osdpl.name, backend_pool["name"]],
+                    [backend_pool["name"]],
                     (
                         backend_pool.get("capabilities", {}).get(
                             "total_capacity_gb"
@@ -166,7 +162,7 @@ class OsdplCinderMetricCollector(base.OpenStackBaseMetricCollector):
             )
             pool_allocated_capacity_samples.append(
                 (
-                    [self.osdpl.name, backend_pool["name"]],
+                    [backend_pool["name"]],
                     (
                         backend_pool.get("capabilities", {}).get(
                             "allocated_capacity_gb"
