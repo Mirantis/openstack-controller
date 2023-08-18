@@ -100,15 +100,22 @@ class OsdplNovaMetricCollector(base.OpenStackBaseMetricCollector):
                 "Information about nova availability zones",
                 labels=[],
             ),
+            "availability_zone_hosts": GaugeMetricFamily(
+                f"{self._name}_availability_zone_hosts",
+                "Total number of compute hosts per availability zone",
+                labels=["name"],
+            ),
         }
 
     def update_samples(self):
         state_samples = []
         status_samples = []
         hypervisors_info = {}
-
+        availability_zone_hosts_total = {}
         for service in self.oc.compute_get_services():
             zone = service.get("availability_zone", "nova")
+            availability_zone_hosts_total.setdefault(zone, 0)
+            availability_zone_hosts_total[zone] += 1
             hypervisors_info[service["host"]] = {
                 "zone": service["availability_zone"]
             }
@@ -135,6 +142,13 @@ class OsdplNovaMetricCollector(base.OpenStackBaseMetricCollector):
 
         self.set_samples("service_state", state_samples)
         self.set_samples("service_status", status_samples)
+
+        availability_zone_hosts_samples = []
+        for zone, total in availability_zone_hosts_total.items():
+            availability_zone_hosts_samples.append(([zone], total))
+        self.set_samples(
+            "availability_zone_hosts", availability_zone_hosts_samples
+        )
 
         instances = {"total": 0, "active": 0, "error": 0}
         hypervisor_instances = {}
