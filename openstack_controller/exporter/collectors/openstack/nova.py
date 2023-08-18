@@ -15,7 +15,7 @@
 
 from functools import cached_property
 
-from prometheus_client.core import GaugeMetricFamily
+from prometheus_client.core import GaugeMetricFamily, InfoMetricFamily
 
 from openstack_controller import utils
 from openstack_controller.exporter.collectors.openstack import base
@@ -62,6 +62,11 @@ class OsdplNovaMetricCollector(base.OpenStackBaseMetricCollector):
                 f"{self._name}_hypervisor_instances",
                 "Total number of instances per hypervisor",
                 labels=["host", "zone", "osdpl"],
+            ),
+            "host_aggregate_info": InfoMetricFamily(
+                f"{self._name}_host_aggregate",
+                "Information about host aggregate mapping",
+                labels=["osdpl"],
             ),
         }
 
@@ -133,3 +138,21 @@ class OsdplNovaMetricCollector(base.OpenStackBaseMetricCollector):
                 )
             )
         self.set_samples("hypervisor_instances", hypervisor_instances_samples)
+
+        host_aggregate_info_samples = []
+        for aggregate in self.oc.oc.compute.aggregates():
+            hosts = aggregate["hosts"] or []
+            aggregate_name = aggregate["name"]
+            aggregate_id = aggregate["id"]
+            for host in hosts:
+                host_aggregate_info_samples.append(
+                    (
+                        [self.osdpl.name],
+                        {
+                            "host": host,
+                            "id": str(aggregate_id),
+                            "name": aggregate_name,
+                        },
+                    )
+                )
+        self.set_samples("host_aggregate_info", host_aggregate_info_samples)
