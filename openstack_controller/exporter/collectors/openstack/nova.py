@@ -96,14 +96,19 @@ class OsdplNovaMetricCollector(base.OpenStackBaseMetricCollector):
                 labels=[],
             ),
             "availability_zone_info": InfoMetricFamily(
-                f"{self._name}_availability_zone_info",
+                f"{self._name}_availability_zone",
                 "Information about nova availability zones",
                 labels=[],
             ),
             "availability_zone_hosts": GaugeMetricFamily(
                 f"{self._name}_availability_zone_hosts",
                 "Total number of compute hosts per availability zone",
-                labels=["name"],
+                labels=["zone"],
+            ),
+            "availability_zone_instances": GaugeMetricFamily(
+                f"{self._name}_availability_zone_instances",
+                "Total number of instances per availability zone",
+                labels=["zone"],
             ),
         }
 
@@ -152,19 +157,30 @@ class OsdplNovaMetricCollector(base.OpenStackBaseMetricCollector):
 
         instances = {"total": 0, "active": 0, "error": 0}
         hypervisor_instances = {}
+        availability_zone_instances_total = {}
         for instance in self.oc.oc.compute.servers(all_projects=True):
             status = instance["status"].lower()
-            host = instance.get("compute_host")
+            host = instance.get("compute_host") or "None"
+            zone = instance.get("availability_zone") or "None"
             instances["total"] += 1
             if status in instances.keys():
                 instances[status] += 1
-            if host is not None:
                 hypervisor_instances.setdefault(host, {"total": 0})
                 hypervisor_instances[host]["total"] += 1
+            availability_zone_instances_total.setdefault(zone, 0)
+            availability_zone_instances_total[zone] += 1
 
         self.set_samples("instances", [([], instances["total"])])
         for key in ["error", "active"]:
             self.set_samples(f"{key}_instances", [([], instances[key])])
+
+        availability_zone_instances_samples = []
+        for zone, total in availability_zone_instances_total.items():
+            availability_zone_instances_samples.append(([zone], total))
+        self.set_samples(
+            "availability_zone_instances", availability_zone_instances_samples
+        )
+
         hypervisor_instances_samples = []
         for host, instance_number in hypervisor_instances.items():
             hypervisor_instances_samples.append(

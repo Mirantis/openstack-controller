@@ -83,7 +83,7 @@ class OsdplNeutronMetricCollector(base.OpenStackBaseMetricCollector):
                 labels=["host", "binary", "zone"],
             ),
             "availability_zone_info": InfoMetricFamily(
-                f"{self._name}_availability_zone_info",
+                f"{self._name}_availability_zone",
                 "Information about neutron availability zones",
                 labels=[],
             ),
