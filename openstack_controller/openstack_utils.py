@@ -219,6 +219,12 @@ class OpenStackClientManager:
             pass
         return []
 
+    def placement_resource_provider_absent(self, host):
+        rp_list = list(self.oc.placement.resource_providers())
+        for rp in rp_list:
+            if rp["name"].split(".")[0] == host:
+                self.oc.placement.delete_resource_provider(rp)
+
 
 async def notify_masakari_host_down(node):
     try:
