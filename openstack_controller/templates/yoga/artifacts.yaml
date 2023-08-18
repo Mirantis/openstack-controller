@@ -180,8 +180,8 @@ octavia_db_sync_persistence: '{{ images_base_url }}/openstack/octavia:yoga-focal
 mariadb_phy_backup: '{{ images_base_url }}/general/mariadb:10.6.14-focal-20230730124341'
 mariadb_phy_restore: '{{ images_base_url }}/general/mariadb:10.6.14-focal-20230730124341'
 mariadb_controller: '{{ images_base_url }}/general/mariadb:10.6.14-focal-20230730124341'
-horizon_mirantis_theme_sha256summ: 3bd995aceef8d93ed76d83f667403aebbdca54bc12adc0fc4f80ebbe0e164336
-horizon_mirantis_theme_url: '{{ binary_base_url }}/openstack/bin/horizon/mirantis-xena-9f691e3-20220110111511.tar.gz'
+horizon_mirantis_theme_sha256summ: 2adc0dbe89c7130df052c97438cdf8106b7e631cee85290e50170fa3351e5384
+horizon_mirantis_theme_url: '{{ binary_base_url }}/openstack/bin/horizon/mirantis-yoga-186584b-20230817112411.tar.gz'
 ceph_config_helper: '{{ images_base_url }}/openstack/openstack-tools:yoga-focal-20230814060018'
 octavia_amphora_checksum: 6a05df6411214e6ab5b260485494f1a5
 masakari_db_sync: '{{ images_base_url }}/openstack/masakari:yoga-focal-20230814060018'
