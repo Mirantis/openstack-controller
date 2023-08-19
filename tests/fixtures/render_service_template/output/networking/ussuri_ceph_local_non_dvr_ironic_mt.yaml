@@ -424,7 +424,7 @@ spec:
         server:
           ingress:
             annotations:
-              nginx.ingress.kubernetes.io/proxy-read-timeout: "120"
+              nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
         core_plugin: ml2
         interface:
           tunnel: ens3
