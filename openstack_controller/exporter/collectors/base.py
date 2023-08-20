@@ -117,7 +117,6 @@ class OsdplMetricsCollector(object):
 
         if not osdpl:
             return
-        self.update_tasks_status()
         if self.initialized:
             if osdpl:
                 LOG.info(f"The osdpl {osdpl.name} found. Collecting metrics")
