@@ -52,6 +52,13 @@ class OsdplNovaMetricCollector(base.OpenStackBaseMetricCollector):
             self.oc.oc.placement.resource_providers()
         )
 
+    def get_availability_zones(self):
+        return [
+            x
+            for x in self.cache.get("aggregates", {})
+            if x.get("availability_zone") is not None
+        ]
+
     def get_host_resource_provider(self, name):
         for resource_provider in self.cache.get("resource_providers", []):
             if resource_provider["name"] == name:
@@ -172,8 +179,13 @@ class OsdplNovaMetricCollector(base.OpenStackBaseMetricCollector):
             ),
             "availability_zone_instances": GaugeMetricFamily(
                 f"{self._name}_availability_zone_instances",
-                "Total number of instances per availability zone.",
+                "Total number of instances with defined availability zone.",
                 labels=["zone"],
+            ),
+            "aggregate_instances": GaugeMetricFamily(
+                f"{self._name}_aggregate_instances",
+                "Total number of instances on all compute hosts in host aggregate.",
+                labels=["name"],
             ),
         }
         for resource_class in self.hypervisor_resource_classes:
@@ -358,6 +370,8 @@ class OsdplNovaMetricCollector(base.OpenStackBaseMetricCollector):
         instances = {"total": 0, "active": 0, "error": 0}
         hypervisor_instances = {}
         availability_zone_instances_total = {}
+        for zone in self.get_availability_zones():
+            availability_zone_instances_total[zone["name"]] = 0
         for instance in self.oc.oc.compute.servers(all_projects=True):
             status = instance["status"].lower()
             host = instance.get("compute_host")
@@ -393,6 +407,30 @@ class OsdplNovaMetricCollector(base.OpenStackBaseMetricCollector):
                 )
             )
         self.set_samples("hypervisor_instances", hypervisor_instances_samples)
+        return hypervisor_instances
+
+    def update_aggregate_instances(self, hypervisor_instances):
+        def sum_hosts_instances(hypervisor_instances, hosts):
+            res = 0
+            for host in hosts:
+                res = (
+                    res + hypervisor_instances.get(host, {"total": 0})["total"]
+                )
+            return res
+
+        aggregate_instances_samples = []
+        for aggregate in self.cache.get("aggregates", []):
+            ag_name = aggregate["name"]
+            ag_hosts = aggregate["hosts"] or []
+            if aggregate.get("availability_zone") is not None:
+                continue
+            aggregate_instances_samples.append(
+                (
+                    [ag_name],
+                    sum_hosts_instances(hypervisor_instances, ag_hosts),
+                )
+            )
+        self.set_samples("aggregate_instances", aggregate_instances_samples)
 
     def update_samples(self):
         self.update_cache()
@@ -403,4 +441,5 @@ class OsdplNovaMetricCollector(base.OpenStackBaseMetricCollector):
         self.update_host_aggregate_samples()
         self.update_host_group_samples(host_placement_metrics)
         self.update_availability_zone_info_samples()
-        self.update_instances_samples()
+        hypervisor_instances = self.update_instances_samples()
+        self.update_aggregate_instances(hypervisor_instances)
