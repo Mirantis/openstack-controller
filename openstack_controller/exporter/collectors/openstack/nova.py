@@ -160,7 +160,7 @@ class OsdplNovaMetricCollector(base.OpenStackBaseMetricCollector):
             "aggregate_hosts": GaugeMetricFamily(
                 f"{self._name}_aggregate_hosts",
                 "Total number of compute hosts per host aggregate zone",
-                labels=["id", "name"],
+                labels=["name"],
             ),
             "host_aggregate_info": InfoMetricFamily(
                 f"{self._name}_host_aggregate",
@@ -290,21 +290,19 @@ class OsdplNovaMetricCollector(base.OpenStackBaseMetricCollector):
                 availability_zone_hosts_samples.append(([zone], hosts_number))
             else:
                 aggregate_name = aggregate["name"]
-                aggregate_id = aggregate["id"]
                 for host in hosts:
                     host_aggregate_info_samples.append(
                         (
                             [],
                             {
                                 "host": host,
-                                "id": str(aggregate_id),
                                 "name": aggregate_name,
                             },
                         )
                     )
                 host_aggregate_hosts_samples.append(
                     (
-                        [str(aggregate_id), aggregate_name],
+                        [aggregate_name],
                         hosts_number,
                     )
                 )
@@ -324,16 +322,12 @@ class OsdplNovaMetricCollector(base.OpenStackBaseMetricCollector):
                     f"hypervisor_{resource_class}_{metric}"
                 ] = []
 
-        for host in host_placement_metrics:
+        for host, host_metrics in host_placement_metrics.items():
             zone = self.get_host_availability_zone(host)
-            for resource_class in self.hypervisor_resource_classes:
-                host_metrics = host_placement_metrics[host]
-
-                for metric_name, metric_value in host_metrics.items():
-                    hypervisors_samples[f"hypervisor_{metric_name}"].append(
-                        ([host, zone], metric_value)
-                    )
-
+            for metric_name, metric_value in host_metrics.items():
+                hypervisors_samples[f"hypervisor_{metric_name}"].append(
+                    ([host, zone], metric_value)
+                )
         for metric_name, samples in hypervisors_samples.items():
             self.set_samples(metric_name, samples)
 
