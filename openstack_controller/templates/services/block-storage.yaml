@@ -284,6 +284,9 @@ spec:
             # NOTE(vsaienko): Use dedicated pool for cinder only, this will allow to improve
             # scale characteristics
             rbd_exclusive_cinder_pool: true
+            # NOTE(vsaienko): always specify rbd_secret_uuid as since Antelope this is set
+            # by default on cinder cide. Should be matched with values in nova/cinder keyrings
+            rbd_secret_uuid: c9543a17-411c-45e1-8a25-3f03e0090dc2
           # Needed for InstanceLocalityFilter
           nova:
             auth_section: keystone_authtoken
