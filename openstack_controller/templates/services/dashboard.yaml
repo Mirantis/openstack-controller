@@ -111,10 +111,10 @@ spec:
             dashboard_path: /var/lib/openstack/lib/python2.7/site-packages/openstack_dashboard
 {%- elif spec.openstack_version in ['rocky', 'stein', 'train', 'ussuri'] %}
             dashboard_path: /var/lib/openstack/lib/python3.6/site-packages/openstack_dashboard
-{%- elif spec.openstack_version in ['victoria', 'wallaby', 'xena', 'yoga'] %}
+{%- elif spec.openstack_version in ['victoria', 'wallaby', 'xena'] %}
             dashboard_path: /var/lib/openstack/lib/python3.8/site-packages/openstack_dashboard
 {%- else %}
-            dashboard_path: /var/lib/openstack/lib/python3.10/site-packages/openstack_dashboard
+            dashboard_path: /usr/local/share/openstack_dashboard
 {%- endif %}
         horizon:
           policy:
