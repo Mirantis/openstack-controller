@@ -60,6 +60,7 @@ spec:
             {%- endif %}
           database:
             alarm_history_time_to_live: {{ aodh_db_cleanup.get('age', 1) * 86400 }}
+{% include 'base/_oslo_policy_enforce_defaults.yaml' %}
         logging:
           logger_aodh:
             level: {{ spec.get('features', {}).get('logging', {}).get('aodh', {}).get('level', 'INFO') }}

@@ -118,6 +118,7 @@ spec:
             {%- endif %}
           indexer:
             driver: mysql
+{% include 'base/_oslo_policy_enforce_defaults.yaml' %}
       dependencies:
         static:
           db_init:

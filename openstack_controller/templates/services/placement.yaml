@@ -66,6 +66,7 @@ spec:
           {%- endif %}
           oslo_messaging_notifications:
             topics: {{ notification_topics|join(',') }}
+{% include 'base/_oslo_policy_enforce_defaults.yaml' %}
         logging:
           logger_placement:
             level: {{ spec.get('features', {}).get('logging', {}).get('placement', {}).get('level', 'INFO') }}

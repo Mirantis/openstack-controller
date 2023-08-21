@@ -153,6 +153,7 @@ spec:
 {%- endif %}
           oslo_messaging_notifications:
             topics: {{ notification_topics|join(',') }}
+{% include 'base/_oslo_policy_enforce_defaults.yaml' %}
         logging:
           logger_heat:
             level: {{ spec.get('features', {}).get('logging', {}).get('heat', {}).get('level', 'INFO') }}

@@ -273,6 +273,7 @@ spec:
             topics: {{ notification_topics|join(',') }}
           oslo_middleware:
             max_request_body_size: 114688
+{% include 'base/_oslo_policy_enforce_defaults.yaml' %}
           coordination:
             #There are some problems with etcd3 driver so we shouldn't use it
             #BUG: https://mirantis.jira.com/browse/PRODX-21783
