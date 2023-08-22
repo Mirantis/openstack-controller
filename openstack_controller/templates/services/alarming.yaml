@@ -49,9 +49,13 @@ spec:
             gnocchi_external_project_owner: service
             gnocchi_external_domain_name: service
           coordination:
+{%- if spec.openstack_version in ("antelope",) %}
+            backend_url: {{ get_etcd3_endpoint(spec.openstack_version, 'etcd3gw') }}
+{%- else %}
             #There are some problems with etcd3+http driver so we shouldn't use it
             #BUG: https://mirantis.jira.com/browse/PRODX-21784
             backend_url: {{ get_etcd3_endpoint(spec.openstack_version, 'etcd3') }}
+{%- endif %}
           keystone_authtoken:
             memcache_security_strategy: ENCRYPT
             memcache_secret_key: {{ credentials[0].memcached }}

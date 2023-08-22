@@ -56,9 +56,13 @@ spec:
               values:
                 - gnocchi
           coordination:
+{%- if spec.openstack_version in ("antelope",) %}
+            backend_url: {{ get_etcd3_endpoint(spec.openstack_version, 'etcd3gw') }}
+{%- else %}
             #There are some problems with etcd3+http driver so we shouldn't use it
             #BUG: https://mirantis.jira.com/browse/PRODX-21785
             backend_url: {{ get_etcd3_endpoint(spec.openstack_version, 'etcd3') }}
+{%- endif %}
           api:
             aodh_is_enabled: "True"
           compute:

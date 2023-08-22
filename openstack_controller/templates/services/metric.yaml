@@ -104,9 +104,13 @@ spec:
 {%- else %}
             debug: false
 {%- endif %}
+{%- if spec.openstack_version in ("antelope",) %}
+            coordination_url: {{ get_etcd3_endpoint(spec.openstack_version, 'etcd3gw') }}
+{%- else %}
             #There are some problems with etcd3+http driver so we shouldn't use it
             #BUG: https://mirantis.jira.com/browse/PRODX-21786
             coordination_url: {{ get_etcd3_endpoint(spec.openstack_version, 'etcd3') }}
+{%- endif %}
           storage:
             driver: redis
             redis_url: redis://:{{ redis_secret }}@rfs-openstack-redis.{{ redis_namespace }}:26379?sentinel=mymaster&db=0
