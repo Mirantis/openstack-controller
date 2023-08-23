@@ -3,6 +3,16 @@ set -e
 set -o pipefail
 
 source tools/get_service_account.sh
+
+REPLICAS=`kubectl -n osh-system get deployment openstack-controller -o jsonpath='{.spec.replicas}' || echo 0`
+if [ $REPLICAS -gt 0 ];
+then
+    echo "Found running OpenStack Operator inststance."
+    echo "Please, scale down openstack-operator deployment using the following command:"
+    echo "kubectl -n osh-system scale deployment openstack-controller --replicas 0"
+    exit 1
+fi
+
 python3 tools/set-cluster-insecure.py $KUBECFG_FILE_NAME
 echo using kube config file $KUBECFG_FILE_NAME
 export KUBECONFIG=$KUBECFG_FILE_NAME
