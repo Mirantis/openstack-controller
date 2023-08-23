@@ -28,7 +28,13 @@ class Identity(base_section.BaseSection):
 
     @property
     def admin_role(self):
-        pass
+        if (
+            self.spec["features"]
+            .get("policies", {})
+            .get("strict_admin", {})
+            .get("enabled", False)
+        ):
+            return "service"
 
     @property
     def auth_version(self):
