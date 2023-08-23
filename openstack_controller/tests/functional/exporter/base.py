@@ -12,6 +12,14 @@ LOG = utils.get_logger(__name__)
 
 
 class BaseFunctionalExporterTestCase(base.BaseFunctionalTestCase):
+    known_metrics = {}
+    # Dictionary with known metrics for exporter to check.
+    #  * that metric is present
+    #  * metric labels are set
+    #  * metric has at least one sample
+    #
+    # {'<metric_name>': {"labels": []}}
+
     def setUp(self):
         super().setUp()
         self.exporter_url = self.get_exporter_url()
@@ -52,3 +60,16 @@ class BaseFunctionalExporterTestCase(base.BaseFunctionalTestCase):
             else:
                 res.append(sample)
         return res
+
+    def test_known_metrics_present_and_not_none(self):
+        for metric_name in self.known_metrics.keys():
+            metric = self.get_metric(metric_name)
+            self.assertIsNotNone(metric)
+            self.assertTrue(len(metric.samples) > 0)
+
+    def test_known_metrics_labels(self):
+        for metric_name, data in self.known_metrics.items():
+            metric = self.get_metric(metric_name)
+            for sample in metric.samples:
+                for label in data.get("labels", []):
+                    self.assertTrue(label in sample.labels)
