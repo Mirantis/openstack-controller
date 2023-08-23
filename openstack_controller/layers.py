@@ -42,6 +42,7 @@ ENV.filters["b64encode"] = base64.b64encode
 ENV.filters["toyaml"] = yaml.dump
 ENV.filters["decode"] = lambda x: x.decode()
 ENV.filters["encode"] = lambda x: x.encode()
+ENV.globals["OSVer"] = constants.OpenStackVersion
 
 
 def kopf_exception(f):

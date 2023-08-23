@@ -157,7 +157,7 @@ spec:
             --gateway 10.20.40.1 \
             --network tempest-fixed-net
 {%- endif %}
-{%- if spec.openstack_version not in ['queens', 'rocky', 'stein', 'train', 'ussuri', 'victoria', 'wallaby', 'xena'] %}
+{%- if OSVer.yoga <= OSVer[spec.openstack_version] %}
 {%- raw %}
           {{- if not .Values.conf.tempest.DEFAULT.production }}
           function ensure_tld_present {
@@ -174,7 +174,7 @@ spec:
           project_count: 25
           project_count_with_network: 10
           project_count_without_network: 15
-          {%- if spec.openstack_version not in ['queens', 'rocky', 'stein', 'train', 'ussuri', 'victoria', 'wallaby', 'xena'] %}
+          {%- if OSVer.yoga <= OSVer[spec.openstack_version] %}
           create_reader_user: true
           {%- endif %}
           user_count: 3
@@ -185,7 +185,7 @@ spec:
 {%- endif %}
           identity:
 # turn on option for versions starting from yoga besides master
-{%- if spec.openstack_version in openstack_versions[openstack_versions.index('yoga'):-1] %}
+{%- if OSVer.yoga <= OSVer[spec.openstack_version] < OSVer.master %}
             default_domain_id: tempest
 {%- else %}
             default_domain_id: Default
