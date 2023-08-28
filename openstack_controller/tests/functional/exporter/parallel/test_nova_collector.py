@@ -4,7 +4,7 @@ from openstack_controller.tests.functional.exporter import base
 class NovaCollectorFunctionalTestCase(base.BaseFunctionalExporterTestCase):
     def setUp(self):
         super().setUp()
-        self.compute_svc = self.ocm.compute_get_services()
+        self.compute_svc = self.ocm.compute_get_services(binary=None)
         self.compute_number = len(self.compute_svc)
 
     def test_service_state(self):
