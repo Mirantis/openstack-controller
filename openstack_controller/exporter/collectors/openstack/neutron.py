@@ -101,9 +101,10 @@ class OsdplNeutronMetricCollector(base.OpenStackBaseMetricCollector):
 
         routers_total = 0
         zone_routers = {}
-        for router in self.oc.oc.network.routers():
+        for router in self.oc.oc.network.routers() or []:
             routers_total += 1
-            router_zones = router.get("availability_zones", [])
+            # NOTE(vsaienko): TF return None instead of []
+            router_zones = router.get("availability_zones") or []
             for zone in router_zones:
                 zone_routers.setdefault(zone, 0)
                 zone_routers[zone] += 1
@@ -146,7 +147,7 @@ class OsdplNeutronMetricCollector(base.OpenStackBaseMetricCollector):
         )
 
         agent_samples = {"is_alive": [], "is_admin_state_up": []}
-        for agent in self.oc.oc.network.agents():
+        for agent in self.oc.network_get_agents():
             az = agent["availability_zone"] or "nova"
             for field in agent_samples.keys():
                 if field in agent.to_dict():
@@ -164,7 +165,7 @@ class OsdplNeutronMetricCollector(base.OpenStackBaseMetricCollector):
         self.set_samples("agent_status", agent_samples["is_admin_state_up"])
 
         availability_zone_info_samples = []
-        for zone in self.oc.oc.network.availability_zones():
+        for zone in self.oc.network_get_availability_zones():
             availability_zone_info_samples.append(
                 (
                     [],

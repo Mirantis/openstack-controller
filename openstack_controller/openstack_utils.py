@@ -202,16 +202,22 @@ class OpenStackClientManager:
             kwargs["is_alive"] = is_alive
         if is_admin_state_up is not None:
             kwargs["is_admin_state_up"] = is_admin_state_up
-        res = []
         try:
-            res = list(self.oc.network.agents(**kwargs))
+            yield from self.oc.network.agents(**kwargs)
         except openstack.exceptions.ResourceNotFound:
             pass
-        return res
+        return []
 
     def network_ensure_agents_absent(self, host):
         for agent in self.network_get_agents(host=host):
             self.oc.network.delete_agent(agent)
+
+    def network_get_availability_zones(self):
+        try:
+            yield from self.oc.network.availability_zones()
+        except openstack.exceptions.ResourceNotFound:
+            pass
+        return []
 
 
 async def notify_masakari_host_down(node):
