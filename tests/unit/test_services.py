@@ -1021,6 +1021,7 @@ async def test_nova_cleanup_metadata_controller(
 ):
     osdplstmock = mock.Mock()
     nwl.obj = _get_nwl_obj("openstack", "host1")
+    openstack_client.return_value.compute_wait_service_state = AsyncMock()
     await services.Nova(
         openstackdeployment_mspec, logging, osdplstmock
     ).cleanup_metadata(nwl)
@@ -1037,6 +1038,7 @@ async def test_nova_cleanup_metadata_compute(
 ):
     osdplstmock = mock.Mock()
     nwl.obj = _get_nwl_obj("openstack", "host1")
+    openstack_client.return_value.compute_wait_service_state = AsyncMock()
     await services.Nova(
         openstackdeployment_mspec, logging, osdplstmock
     ).cleanup_metadata(nwl)
@@ -1053,6 +1055,7 @@ async def test_neutron_cleanup_metadata_compute(
 ):
     osdplstmock = mock.Mock()
     nwl.obj = _get_nwl_obj("openstack", "host1")
+    openstack_client.return_value.network_wait_agent_state = AsyncMock()
     await services.Neutron(
         openstackdeployment_mspec, logging, osdplstmock
     ).cleanup_metadata(nwl)

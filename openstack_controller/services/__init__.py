@@ -1629,6 +1629,9 @@ class Neutron(OpenStackService, MaintenanceApiMixin):
     async def cleanup_metadata(self, nwl):
         node_name = nwl.obj["spec"]["nodeName"]
         os_client = openstack_utils.OpenStackClientManager()
+        await os_client.network_wait_agent_state(
+            host=node_name, is_alive=False
+        )
         os_client.network_ensure_agents_absent(host=node_name)
 
 
@@ -2090,6 +2093,9 @@ class Nova(OpenStackServiceWithCeph, MaintenanceApiMixin):
     async def cleanup_metadata(self, nwl):
         node_name = nwl.obj["spec"]["nodeName"]
         os_client = openstack_utils.OpenStackClientManager()
+        await os_client.compute_wait_service_state(
+            host=node_name, state="down"
+        )
         os_client.compute_ensure_services_absent(host=node_name)
         os_client.placement_resource_provider_absent(host=node_name)
 
