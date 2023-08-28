@@ -98,6 +98,8 @@ spec:
     "designate_worker",
     "designate_central",
     "powerdns",
+    "designate_pool_manage",
+    "designate_pool_manage_hash",
     "powerdns_db_sync",] %}
         {%- if image in images %}
           {{ image }}: {{ images[image] }}

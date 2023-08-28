@@ -718,10 +718,18 @@ class Designate(OpenStackService):
                     "manifest": "job_powerdns_db_init",
                     "hash_fields": ["endpoints.oslo_db_powerdns.*"],
                 },
+                "designate-pool-manage": {
+                    "images": [
+                        "designate_pool_manage_hash",
+                        "designate_pool_manage",
+                    ],
+                    "manifest": "job_pool_manage",
+                    "hash_fields": ["endpoints.oslo_db_powerdns.*"],
+                },
                 "designate-powerdns-db-sync": {
                     "images": ["powerdns_db_sync"],
                     "manifest": "job_powerdns_db_sync",
-                    "hash_fields": ["endpoints.oslo_db_powerdns.*"],
+                    "hash_fields": ["endpoints.oslo_db.*"],
                 },
             },
         },

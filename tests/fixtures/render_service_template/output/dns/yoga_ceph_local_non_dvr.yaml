@@ -203,6 +203,8 @@ spec:
           powerdns: powerdns:latest
           powerdns_db_sync: powerdns-db-sync:latest
           rabbit_init: rabbit-init:latest
+          designate_pool_manage: designate-pool-manage:latest
+          designate_pool_manage_hash: designate-pool-manage-hash:latest
       jobs:
         ks_endpoints:
           restartPolicy: Never

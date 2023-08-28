@@ -39,6 +39,8 @@ images:
   designate_producer: designate-producer:latest
   designate_sink: designate-sink:latest
   designate_worker: designate-worker:latest
+  designate_pool_manage: designate-pool-manage:latest
+  designate_pool_manage_hash: designate-pool-manage-hash:latest
   entrypoint: entrypoint:latest
   error_pages: error-pages:latest
   etcd: etcd:latest
