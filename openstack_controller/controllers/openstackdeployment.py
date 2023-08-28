@@ -257,6 +257,10 @@ async def handle(body, meta, spec, logger, reason, **kwargs):
     LOG.info(f"Got osdpl event {reason}")
     LOG.info(f"Changes are: {kwargs['diff']}")
 
+    if spec.get("draft"):
+        LOG.info("OpenStack deployment is in draft mode, skipping handling...")
+        return {"lastStatus": f"{reason} drafted"}
+
     # TODO(vsaienko): remove legacy status
     kwargs["patch"].setdefault("status", {})
     kwargs["patch"]["status"]["version"] = version.release_string
@@ -273,10 +277,6 @@ async def handle(body, meta, spec, logger, reason, **kwargs):
 
     if not settings.OSCTL_NODE_MAINTENANCE_ENABLED:
         cwl.set_state_inactive()
-
-    if spec.get("draft"):
-        LOG.info("OpenStack deployment is in draft mode, skipping handling...")
-        return {"lastStatus": f"{reason} drafted"}
 
     check_handling_allowed(kwargs["old"], kwargs["new"], reason)
 
