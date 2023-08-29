@@ -1025,6 +1025,7 @@ async def test_nova_cleanup_metadata_controller(
         openstackdeployment_mspec, logging, osdplstmock
     ).cleanup_metadata(nwl)
     openstack_client.return_value.compute_ensure_services_absent.assert_called_once()
+    openstack_client.return_value.placement_resource_provider_absent.assert_called_once()
 
 
 @pytest.mark.asyncio
@@ -1040,6 +1041,7 @@ async def test_nova_cleanup_metadata_compute(
         openstackdeployment_mspec, logging, osdplstmock
     ).cleanup_metadata(nwl)
     openstack_client.return_value.compute_ensure_services_absent.assert_called_once()
+    openstack_client.return_value.placement_resource_provider_absent.assert_called_once()
 
 
 @pytest.mark.asyncio

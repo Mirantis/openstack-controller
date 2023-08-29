@@ -2073,6 +2073,7 @@ class Nova(OpenStackServiceWithCeph, MaintenanceApiMixin):
         node_name = nwl.obj["spec"]["nodeName"]
         os_client = openstack_utils.OpenStackClientManager()
         os_client.compute_ensure_services_absent(host=node_name)
+        os_client.placement_resource_provider_absent(host=node_name)
 
 
 class Placement(OpenStackService):
