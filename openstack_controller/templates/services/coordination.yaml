@@ -24,6 +24,10 @@ spec:
       pod:
         replicas:
           etcd: 3
+        affinity:
+          anti:
+            type:
+              default: requiredDuringSchedulingIgnoredDuringExecution
       volume:
         class_name: {{ spec.get('local_volume_storage_class', 'openstack-operator-bind-mounts') }}
 
