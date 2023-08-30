@@ -11,6 +11,7 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
+import asyncio
 
 from datetime import datetime
 from enum import IntEnum
@@ -132,6 +133,20 @@ class OpenStackClientManager:
         for service in self.compute_get_services(host=host, binary=None):
             self.oc.compute.delete_service(service)
 
+    async def compute_wait_service_state(
+        self, host, binary=None, state="down"
+    ):
+        alive = [False]
+        while not all(alive):
+            alive = [
+                service["state"] == state
+                for service in self.compute_get_services(
+                    host=host, binary=binary
+                )
+            ]
+            LOG.info(f"Waiting 30 for compute services are down on the {host}")
+            await asyncio.sleep(30)
+
     def compute_get_all_servers(self, host=None, status=None):
         filters = {}
         if host:
@@ -211,6 +226,16 @@ class OpenStackClientManager:
     def network_ensure_agents_absent(self, host):
         for agent in self.network_get_agents(host=host):
             self.oc.network.delete_agent(agent)
+
+    async def network_wait_agent_state(self, host, is_alive=True):
+        alive = [False]
+        while not all(alive):
+            alive = [
+                service["is_alive"] == is_alive
+                for service in self.network_get_agents(host=host)
+            ]
+            LOG.info(f"Waiting 30 for network agents are down on the {host}")
+            await asyncio.sleep(30)
 
     def network_get_availability_zones(self):
         try:
