@@ -170,7 +170,7 @@ class OsdplNeutronMetricCollector(base.OpenStackBaseMetricCollector):
                 (
                     [],
                     {
-                        "name": zone["name"],
+                        "zone": zone["name"],
                         "resource": zone["resource"],
                     },
                 )

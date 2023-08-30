@@ -270,7 +270,7 @@ class OsdplNovaMetricCollector(base.OpenStackBaseMetricCollector):
                 (
                     [],
                     {
-                        "name": aggregate["name"],
+                        "zone": aggregate["name"],
                     },
                 )
             )
