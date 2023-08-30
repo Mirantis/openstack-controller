@@ -5,7 +5,6 @@ import kopf
 import pykube
 import hashlib
 import yaml
-from urllib.parse import urlsplit
 
 from openstack_controller import constants
 from openstack_controller import kube
@@ -161,78 +160,6 @@ async def handle_bgpvpnsecret(
         },
         subresource="status",
     )
-
-
-@kopf.on.update(
-    "",
-    "v1",
-    "secrets",
-    labels={"application": "rabbitmq", "component": "server"},
-)
-@kopf.on.create(
-    "",
-    "v1",
-    "secrets",
-    labels={"application": "rabbitmq", "component": "server"},
-)
-async def handle_rabbitmq_secret(
-    body,
-    meta,
-    name,
-    status,
-    logger,
-    diff,
-    **kwargs,
-):
-    if name != constants.RABBITMQ_USERS_CREDENTIALS_SECRET:
-        return
-
-    LOG.debug(f"Handling secret create {name}")
-    LOG.info(f"The secret {name} changes are: {diff}")
-
-    secret_data = json.loads(
-        base64.b64decode(body["data"]["RABBITMQ_USERS"]).decode()
-    )
-
-    if "stacklight_service_notifications" not in secret_data:
-        LOG.debug("The stacklight data is not present in secret.")
-        return
-
-    credentials = {
-        key: base64.b64encode(value.encode()).decode()
-        for key, value in secret_data["stacklight_service_notifications"][
-            "auth"
-        ]["stacklight"].items()
-    }
-
-    kube.wait_for_secret(meta["namespace"], constants.KEYSTONE_CONFIG_SECRET)
-    keystone_config_secret = kube.find(
-        pykube.Secret, constants.KEYSTONE_CONFIG_SECRET, meta["namespace"]
-    )
-    keystone_conf = base64.b64decode(
-        keystone_config_secret.obj["data"]["keystone.conf"]
-    ).decode()
-    config = configparser.ConfigParser(strict=False)
-    config.read_string(keystone_conf)
-
-    transport_url = urlsplit(
-        config["oslo_messaging_notifications"]["transport_url"]
-    )
-    location_path = {
-        key: base64.b64encode(value.encode()).decode()
-        for key, value in {
-            "hosts": json.dumps(
-                [
-                    host.split("@")[1]
-                    for host in transport_url.netloc.split(",")
-                ]
-            ),
-            "vhost": transport_url.path,
-        }.items()
-    }
-
-    sls = secrets.StackLightSecret()
-    sls.save({**credentials, **location_path})
 
 
 @kopf.on.update(

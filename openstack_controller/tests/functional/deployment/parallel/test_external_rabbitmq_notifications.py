@@ -1,4 +1,3 @@
-from kombu import Connection
 import ssl
 import tempfile
 import unittest
@@ -6,31 +5,13 @@ import unittest
 from openstack_controller.tests.functional import base
 from openstack_controller import constants
 from openstack_controller import kube
-from openstack_controller import utils
-
-LOG = utils.get_logger(__name__)
 
 
-class SecretsContentFunctionalTestCase(base.BaseFunctionalTestCase):
+class ExternalRmqNotificationsFunctionalTestCase(base.BaseFunctionalTestCase):
     def setUp(self):
         super().setUp()
         if not self.external_notifications.get("enabled", False):
             raise unittest.SkipTest("External notifications not enabled.")
-
-    def check_connection(
-        self, username, password, host, port, vhost, ssl=False
-    ):
-        rabbitmq_url = f"amqp://{username}:{password}@{host}:{port}/{vhost}"
-        connection = Connection(rabbitmq_url, ssl=ssl)
-        try:
-            LOG.info(f"Connecting to the: {rabbitmq_url}")
-            connection.ensure_connection(max_retries=3)
-            connection.channel()
-            return True
-        except Exception as e:
-            LOG.error(f"Connection error. Error: {e}")
-        finally:
-            connection.release()
 
     @property
     def external_notifications(self):
@@ -117,7 +98,7 @@ class SecretsContentFunctionalTestCase(base.BaseFunctionalTestCase):
                     certs[k] = f.name
                     f.write(secret_data[v].encode("utf-8"))
                     f.close()
-                check_test_connection = self.check_connection(
+                check_test_connection = self.check_rabbitmq_connection(
                     secret_data["username"],
                     secret_data["password"],
                     secret_data["hosts"],
@@ -134,7 +115,7 @@ class SecretsContentFunctionalTestCase(base.BaseFunctionalTestCase):
     def test_connection_plain(self):
         for creds_secret in self.secrets:
             secret_data = creds_secret.data_decoded
-            check_test_connection = self.check_connection(
+            check_test_connection = self.check_rabbitmq_connection(
                 secret_data["username"],
                 secret_data["password"],
                 secret_data["hosts"],

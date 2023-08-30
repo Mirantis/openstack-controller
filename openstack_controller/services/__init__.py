@@ -275,6 +275,24 @@ class RabbitMQ(Service):
         sl_secret.ensure()
         credentials["stacklight"] = sl_secret.get()
 
+        if utils.get_in(self.mspec, ["features", "stacklight", "enabled"]):
+            sls_data = {
+                "username": credentials["stacklight"].username,
+                "password": credentials["stacklight"].password,
+                "hosts": json.dumps(
+                    [
+                        f"openstack-rabbitmq-rabbitmq-0.rabbitmq.{self.namespace}.svc.{self.mspec['internal_domain_name']}:5672"
+                    ]
+                ),
+                "vhost": "/openstack",
+            }
+            secrets.StackLightSecret().save(
+                {
+                    k: base64.b64encode(v.encode()).decode()
+                    for k, v in sls_data.items()
+                }
+            )
+
         cloudprober_enabled = "cloudprober" in services
         sl_config_data = {
             "conf.json": {
