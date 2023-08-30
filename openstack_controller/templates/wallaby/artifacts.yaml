@@ -85,7 +85,7 @@ octavia_hm_port: '{{ images_base_url }}/openstack/octavia:wallaby-focal-20230811
 octavia_housekeeping: '{{ images_base_url }}/openstack/octavia:wallaby-focal-20230811200526'
 openvswitch_db_server: '{{ images_base_url }}/general/openvswitch:2.13-focal-20230830072226'
 openvswitch_vswitchd: '{{ images_base_url }}/general/openvswitch:2.13-focal-20230830072226'
-openvswitch_vswitchd_dpdk: '{{ images_base_url }}/general/openvswitch-dpdk:2.13-focal-20230830072226'
+openvswitch_vswitchd_dpdk: '{{ images_base_url }}/general/openvswitch-dpdk:2.13-focal-20230830072225'
 openvswitch_ovn_db_nb: '{{ images_base_url }}/general/openvswitch:2.13-focal-20230830072226'
 openvswitch_ovn_db_sb: '{{ images_base_url }}/general/openvswitch:2.13-focal-20230830072226'
 openvswitch_ovn_northd: '{{ images_base_url }}/general/openvswitch:2.13-focal-20230830072226'
