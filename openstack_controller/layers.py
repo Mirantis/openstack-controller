@@ -127,6 +127,8 @@ def render_service_template(service, mspec, logger, **template_args):
 
     # get supported openstack versions
     openstack_versions = [v for v in constants.OpenStackVersion.__members__]
+    # get supported SLURP releases
+    slurp_releases = constants.SLURP_RELEASES
     service_policy = {}
     # Add default policies
     if service in constants.OS_POLICY_SERVICES:
@@ -143,6 +145,7 @@ def render_service_template(service, mspec, logger, **template_args):
         spec=mspec,
         openstack_versions=openstack_versions,
         service_policy=service_policy,
+        slurp_releases=slurp_releases,
         **template_args,
     )
     data = yaml.safe_load(text)
