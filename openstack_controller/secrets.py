@@ -744,12 +744,11 @@ class ExternalTopicPasswordSecret(Secret):
     def __init__(self, namespace: str, topic: str, name: str):
         super().__init__(namespace)
         self.secret_name = f"generated-notifications-{name}-passwords"
-        self.topic = topic
 
     def create(self) -> OSSytemCreds:
         return OSSytemCreds(
             password=generate_password(length=32),
-            username=generate_name(prefix=self.topic, length=16),
+            username=generate_name(length=16),
         )
 
 
