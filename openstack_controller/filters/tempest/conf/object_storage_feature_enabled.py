@@ -8,6 +8,7 @@ class ObjectStorageFeatureEnabled(base_section.BaseSection):
         "discoverability",
         "discoverable_apis",
         "object_versioning",
+        "tempurl_digest_hashlib",
     ]
 
     @property
@@ -25,3 +26,10 @@ class ObjectStorageFeatureEnabled(base_section.BaseSection):
     @property
     def object_versioning(self):
         pass
+
+    def tempurl_digest_hashlib(self):
+        # see tempest Change-Id Ia4923d47870fcb914a33adecb7155763ec1d0b2f
+        # recent Swift supports more secure algos like sha256 or sha512,
+        # and tempest since approx Zed release defaults to sha256,
+        # however Ceph RGW still does still only support sha1 here.
+        return "sha1"
