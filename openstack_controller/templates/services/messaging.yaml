@@ -3,6 +3,15 @@
 
 {%- from 'macros/messaging_service_creds.j2' import messaging_service_creds %}
 {%- set latest_openstack_versions = openstack_versions[openstack_versions.index(spec.openstack_version):openstack_versions.index(spec.openstack_version)+2] %}
+{%- if spec.openstack_version in openstack_versions[openstack_versions.index('yoga'):-1] %}
+  {%- set next_openstack_versions = openstack_versions[openstack_versions.index(spec.openstack_version)+1:] %}
+  {%- for next_openstack_version in next_openstack_versions %}
+    {%- if next_openstack_version in slurp_releases %}
+      {%- do latest_openstack_versions.append(next_openstack_version) if next_openstack_version not in latest_openstack_versions %}
+      {%- break %}
+    {%- endif %}
+  {%- endfor %}
+{%- endif %}
 {%- set stacklight_enabled = spec.get('features', {}).get('stacklight', {}).get('enabled', False) %}
 {%- set enabled_vhosts = [] %}
 {%- set notification_vhost = 'openstack' %}
