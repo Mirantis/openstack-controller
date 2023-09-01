@@ -73,6 +73,8 @@ spec:
           host_fqdn_override:
             public:
               tls:
+                ca: |
+{{ spec.features.ssl.public_endpoints.ca_cert | indent( width=18, first=True) }}
                 crt: |
 {{ spec.features.ssl.public_endpoints.api_cert | indent( width=18, first=True) }}
                 key: |
