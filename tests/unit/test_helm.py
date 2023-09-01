@@ -40,7 +40,7 @@ def release_values():
 @pytest.fixture
 def subprocess_shell(mocker):
     mock_get_creds = mocker.patch(
-        "asyncio.create_subprocess_shell",
+        "asyncio.create_subprocess_exec",
         mock.AsyncMock(),
     )
     yield mock_get_creds
@@ -86,7 +86,7 @@ async def test_exists(subprocess_shell, single_helm_release):
     )
     subprocess_shell.return_value.returncode = 0
     expected_cmd = [
-        "helm3",
+        "/usr/local/bin/helm3",
         "list",
         "--namespace",
         "openstack",
@@ -98,7 +98,7 @@ async def test_exists(subprocess_shell, single_helm_release):
 
     assert await hc.exist("test-release", args=["custom", "arg"])
     subprocess_shell.assert_called_once_with(
-        " ".join(expected_cmd),
+        *expected_cmd,
         env=mock.ANY,
         stdin=mock.ANY,
         stdout=mock.ANY,
@@ -129,7 +129,7 @@ async def test_list(subprocess_shell, single_helm_release):
     )
     subprocess_shell.return_value.returncode = 0
     expected_cmd = [
-        "helm3",
+        "/usr/local/bin/helm3",
         "list",
         "--namespace",
         "openstack",
@@ -142,7 +142,7 @@ async def test_list(subprocess_shell, single_helm_release):
     res = await hc.list(args=["custom", "arg"])
     assert json.loads(single_helm_release) == res
     subprocess_shell.assert_called_once_with(
-        " ".join(expected_cmd),
+        *expected_cmd,
         env=mock.ANY,
         stdin=mock.ANY,
         stdout=mock.ANY,
@@ -159,7 +159,7 @@ async def test_get_release_values(subprocess_shell, release_values):
     )
     subprocess_shell.return_value.returncode = 0
     expected_cmd = [
-        "helm3",
+        "/usr/local/bin/helm3",
         "get",
         "values",
         "--namespace",
@@ -174,7 +174,7 @@ async def test_get_release_values(subprocess_shell, release_values):
     res = await hc.get_release_values("test-release", args=["custom", "arg"])
     assert json.loads(release_values) == res
     subprocess_shell.assert_called_once_with(
-        " ".join(expected_cmd),
+        *expected_cmd,
         env=mock.ANY,
         stdin=mock.ANY,
         stdout=mock.ANY,
@@ -269,13 +269,17 @@ async def test_install_rollback(subprocess_shell, helm_error_rollout_restart):
 
     with pytest.raises(kopf.TemporaryError):
         await hc.run_cmd(
-            ["helm3", "upgrade", "--install", "test-release"],
+            ["upgrade", "--install", "test-release"],
             release_name="test-release",
         )
     subprocess_shell.assert_has_calls(
         [
             mock.call(
-                "helm3 rollback test-release --namespace openstack",
+                "/usr/local/bin/helm3",
+                "rollback",
+                "test-release",
+                "--namespace",
+                "openstack",
                 env=mock.ANY,
                 stdin=mock.ANY,
                 stdout=mock.ANY,

@@ -1,5 +1,6 @@
 import asyncio
 import contextlib
+from datetime import datetime
 import os
 import re
 import yaml
@@ -13,10 +14,12 @@ from openstack_controller import utils
 from openstack_controller import constants
 from openstack_controller import exception
 from openstack_controller import kube
+from openstack_controller import settings
 
 LOG = utils.get_logger(__name__)
 
 HELM_LOCK = threading.Lock()
+CONF = settings.CONF
 
 
 @contextlib.asynccontextmanager
@@ -34,10 +37,21 @@ def helm_retry(func):
         attempt = 1
         while True:
             try:
-                return await func(*args, **kwargs)
+                start = datetime.utcnow()
+                res = await asyncio.wait_for(
+                    func(*args, **kwargs),
+                    timeout=CONF.getint("helmbundle", "helm_cmd_timeout"),
+                )
+                running_for = (datetime.utcnow() - start).total_seconds()
+                LOG.info(
+                    f"Running helm {args}, {kwargs} command took {running_for}"
+                )
+                return res
+
             except (
                 exception.HelmImmutableFieldChange,
                 exception.HelmRollback,
+                asyncio.exceptions.TimeoutError,
             ) as e:
                 LOG.warning(
                     f"Got retriable exception {e}, when calling {func}, retrying, attempt: {attempt}"
@@ -48,7 +62,12 @@ def helm_retry(func):
 
 
 class HelmManager:
-    def __init__(self, binary="helm3", namespace="openstack", history_max=1):
+    def __init__(
+        self,
+        binary="/usr/local/bin/helm3",
+        namespace="openstack",
+        history_max=1,
+    ):
         self.binary = binary
         self.namespace = namespace
         self.max_history = str(history_max)
@@ -101,9 +120,13 @@ class HelmManager:
             self.namespace,
             *args,
         ]
-        cmd = " ".join([self.binary, *cmd])
-        process = await asyncio.create_subprocess_shell(
-            cmd, env=self.env, stdin=PIPE, stdout=PIPE, stderr=PIPE
+        process = await asyncio.create_subprocess_exec(
+            self.binary,
+            *cmd,
+            env=self.env,
+            stdin=PIPE,
+            stdout=PIPE,
+            stderr=PIPE,
         )
         stdout, stderr = await process.communicate()
         stdout = stdout.decode() or None
@@ -112,19 +135,28 @@ class HelmManager:
 
     @helm_retry
     async def _run_cmd(self, cmd, raise_on_error=True, release_name=None):
-        process = await asyncio.create_subprocess_shell(
-            cmd, env=self.env, stdin=PIPE, stdout=PIPE, stderr=PIPE
+        LOG.info(
+            "Running helm command started: '%s'",
+            cmd,
+        )
+        process = await asyncio.create_subprocess_exec(
+            self.binary,
+            *cmd,
+            env=self.env,
+            stdin=PIPE,
+            stdout=PIPE,
+            stderr=PIPE,
         )
         stdout, stderr = await process.communicate()
         stdout = stdout.decode()
         stderr = stderr.decode()
 
         LOG.debug(
-            "Helm command output is: stdout: %s, stderr: %s",
+            "Helm command %s output is: stdout: %s, stderr: %s",
+            cmd,
             stdout,
             stderr,
         )
-
         if process.returncode and raise_on_error:
             LOG.error(
                 "Helm command failed. stdout: %s, stderr: %s",
@@ -145,17 +177,15 @@ class HelmManager:
                 LOG.warning(
                     f"The release {release_name} stuck in install/upgrade/rollback. Rollback it."
                 )
-                await self._rollback(release_name)
+                await asyncio.wait_for(
+                    self._rollback(release_name),
+                    timeout=CONF.getint("helmbundle", "helm_cmd_timeout"),
+                )
                 raise exception.HelmRollback()
             raise kopf.TemporaryError("Helm command failed")
         return (stdout, stderr)
 
     async def run_cmd(self, cmd, raise_on_error=True, release_name=None):
-        cmd = " ".join([self.binary, *cmd])
-        LOG.info(
-            "Running helm command started: '%s'",
-            cmd,
-        )
         async with helm_lock(HELM_LOCK):
             return await self._run_cmd(cmd, raise_on_error, release_name)
 
