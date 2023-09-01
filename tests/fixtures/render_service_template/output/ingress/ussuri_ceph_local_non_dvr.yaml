@@ -23,6 +23,8 @@ spec:
           host_fqdn_override:
             public:
               tls:
+                ca: |
+                  TEST CA
                 crt: |
                   TEST CRT
                 key: |
