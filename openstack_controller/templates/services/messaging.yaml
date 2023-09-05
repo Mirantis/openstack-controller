@@ -209,6 +209,8 @@ spec:
             user:
               username: {{ admin_creds.messaging.username }}
               password: {{ admin_creds.messaging.password }}
+            guest:
+              password: {{ guest_creds.password }}
           statefulset:
             replicas: 1
             name: openstack-rabbitmq-rabbitmq

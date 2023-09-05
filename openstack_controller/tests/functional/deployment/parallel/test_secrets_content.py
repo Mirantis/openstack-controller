@@ -21,8 +21,6 @@ class SecretsContentFunctionalTestCase(base.BaseFunctionalTestCase):
             "ingress-openstack-openstack-ingress-nginx",
             "openstack-mariadb-openstack-mariadb-mariadb-ingress",
             "openstack-mariadb-mariadb-state",
-            # PRODX-34578
-            "openstack-rabbitmq-admin-user",
         ]
 
     def check_secret_field(self, data):
