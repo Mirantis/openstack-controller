@@ -1,0 +1,20 @@
+horizon:
+  Job:
+    horizon-db-drop:
+      hash_fields:
+      - endpoints.oslo_db.*
+      images:
+      - db_drop
+      manifest: job_db_drop
+    horizon-db-init:
+      hash_fields:
+      - endpoints.oslo_db.*
+      images:
+      - db_init
+      manifest: job_db_init
+    horizon-db-sync:
+      hash_fields:
+      - endpoints.oslo_db.*
+      images:
+      - horizon_db_sync
+      manifest: job_db_sync

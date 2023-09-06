@@ -1,0 +1,86 @@
+heat:
+  Deployment:
+    heat-api:
+      hash_fields: []
+      images:
+      - heat_api
+      manifest: deployment_api
+    heat-cfn:
+      hash_fields: []
+      images:
+      - heat_cfn
+      manifest: deployment_cfn
+    heat-engine:
+      hash_fields: []
+      images:
+      - heat_engine
+      manifest: deployment_engine
+  Job:
+    heat-bootstrap:
+      hash_fields:
+      - network.proxy.*
+      - bootstrap.*
+      images:
+      - bootstrap
+      manifest: job_bootstrap
+    heat-db-drop:
+      hash_fields:
+      - endpoints.oslo_db.*
+      images:
+      - db_drop
+      manifest: job_db_drop
+    heat-db-init:
+      hash_fields:
+      - endpoints.oslo_db.*
+      images:
+      - db_init
+      manifest: job_db_init
+    heat-db-sync:
+      hash_fields:
+      - endpoints.oslo_db.*
+      images:
+      - heat_db_sync
+      manifest: job_db_sync
+    heat-domain-ks-user:
+      hash_fields:
+      - conf.*
+      - endpoints.*
+      images:
+      - ks_user
+      manifest: job_ks_user_domain
+    heat-ks-endpoints:
+      hash_fields: []
+      images:
+      - ks_endpoints
+      manifest: job_ks_endpoints
+    heat-ks-service:
+      hash_fields: []
+      images:
+      - ks_service
+      manifest: job_ks_service
+    heat-ks-user:
+      hash_fields:
+      - endpoints.*
+      images:
+      - ks_user
+      manifest: job_ks_user
+    heat-trustee-ks-user:
+      hash_fields:
+      - endpoints.*
+      images:
+      - ks_user
+      manifest: job_ks_user_trustee
+    heat-trusts:
+      hash_fields:
+      - conf.*
+      images:
+      - ks_trusts
+      manifest: job_heat_trusts
+rabbitmq:
+  Job:
+    openstack-heat-rabbitmq-cluster-wait:
+      hash_fields:
+      - endpoints.oslo_messaging.*
+      images:
+      - rabbitmq_scripted_test
+      manifest: job_cluster_wait

@@ -1,6 +1,6 @@
 import asyncio
 import base64
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 import inspect
 import json
 from os import urandom
@@ -140,7 +140,7 @@ class HelmBundleExt:
     images: List[str]
     # List of jsonpath-ng expressions, describes values in release
     # that modify immutable fields.
-    hash_fields: List[str]
+    hash_fields: list = field(default_factory=lambda: [])
 
 
 class HelmBundleMixin:

@@ -1,6 +1,7 @@
 import logging
 import os
 import yaml
+from jsonschema import validate
 from unittest import mock
 
 import pytest
@@ -12,6 +13,50 @@ logger = logging.getLogger(__name__)
 
 OUTPUT_DIR = "tests/fixtures/render_service_template/output"
 INPUT_DIR = "tests/fixtures/render_service_template/input"
+CHILD_OBJECTS_DIR = "child_objects"
+CHILD_OBJECTS_SCHEMA = """
+type: object
+additionalProperties: False
+patternProperties:
+  ".*":
+    type: object
+    additionalProperties: False
+    patternProperties:
+      ".*":
+        additionalProperties: False
+        type: object
+        patternProperties:
+          ".*":
+            additionalProperties: False
+            type: object
+            required:
+              - hash_fields
+              - images
+              - manifest
+            properties:
+              hash_fields:
+                type: array
+                items:
+                  type: string
+              images:
+                type: array
+                items:
+                  type: string
+              manifest:
+                type: string
+              type:
+                type: string
+                enum:
+                  - static
+                  - dynamic
+              selector:
+                type: object
+                patternProperties:
+                  ".*":
+                    type: array
+                    items:
+                      type: string
+"""
 
 # Remove excluded services once contexts with these services are added
 excluded_services = {
@@ -86,6 +131,20 @@ def get_services_and_contexts():
     return params
 
 
+def get_child_object_templates():
+    all_services = (
+        set(constants.OS_SERVICES_MAP.keys())
+        .union(infra_services)
+        .difference(excluded_services)
+    )
+    res = []
+    for service in all_services:
+        res.append(
+            (service, os.path.join(CHILD_OBJECTS_DIR, f"{service}.yaml"))
+        )
+    return res
+
+
 @pytest.mark.parametrize("service,context", get_services_and_contexts())
 @mock.patch.object(layers, "_get_dashboard_default_policy")
 @mock.patch.object(layers, "_get_default_policy")
@@ -111,3 +170,13 @@ def test_render_service_template(
     with open(f"{OUTPUT_DIR}/{service}/{context}.yaml") as f:
         output = yaml.safe_load(f)
         assert data == output, f"Mismatch when comparing to file {f.name}"
+
+
+@pytest.mark.parametrize("service,template", get_child_object_templates())
+def test_render_child_object_template(
+    service,
+    template,
+):
+    schema = yaml.safe_load(CHILD_OBJECTS_SCHEMA)
+    data = layers.render_template(template)
+    validate(data, schema)

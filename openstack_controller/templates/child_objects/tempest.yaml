@@ -1,0 +1,24 @@
+tempest:
+  Job:
+    openstack-tempest-run-tests:
+      hash_fields: []
+      images:
+      - tempest_run_tests
+      - tempest-uuids-init
+      manifest: job_run_tests
+    tempest-bootstrap:
+      hash_fields: []
+      images:
+      - bootstrap
+      manifest: job_bootstrap
+    tempest-image-repo-sync:
+      hash_fields: []
+      images:
+      - image_repo_sync
+      manifest: job_image_repo_sync
+    tempest-ks-user:
+      hash_fields:
+      - endpoints.*
+      images:
+      - ks_user
+      manifest: job_ks_user

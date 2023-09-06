@@ -1,0 +1,12 @@
+mariadb:
+  Job:
+    exporter-create-sql-user:
+      hash_fields: []
+      images:
+      - prometheus_create_mysql_user
+      manifest: ''
+    openstack-mariadb-cluster-wait:
+      hash_fields: []
+      images:
+      - mariadb_scripted_test
+      manifest: job_cluster_wait

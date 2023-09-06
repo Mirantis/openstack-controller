@@ -121,6 +121,16 @@ def _get_dashboard_default_policy(spec, charts):
 
 
 @kopf_exception
+def render_template(template, **template_args):
+    tpl = ENV.get_template(template)
+    text = tpl.render(
+        **template_args,
+    )
+    data = yaml.safe_load(text)
+    return data
+
+
+@kopf_exception
 def render_service_template(service, mspec, logger, **template_args):
     tpl = ENV.get_template(f"services/{service}.yaml")
     LOG.debug(f"Using template {tpl.filename}")
