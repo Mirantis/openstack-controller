@@ -32,6 +32,7 @@ class Volume(base_section.BaseSection):
         "vendor_name",
         "volume_size",
         "scheduler_default_filters",
+        "volume_type_multiattach",
     ]
 
     @property
@@ -105,7 +106,7 @@ class Volume(base_section.BaseSection):
             "services.tempest.tempest.values.conf.convert_to_uuid.compute.flavor_ref"
         )
         flavors = self.get_values_item(
-            "nova", f"bootstrap.structured.flavors.options", {}
+            "nova", "bootstrap.structured.flavors.options", {}
         )
         default_flavors_disks = {
             "m1.tiny": 1,
@@ -125,3 +126,11 @@ class Volume(base_section.BaseSection):
             "cinder", "conf.cinder.DEFAULT.scheduler_default_filters", None
         )
         return scheduler_default_filters
+
+    @property
+    def volume_type_multiattach(self):
+        for volume_type, volume_type_prop in self.get_values_item(
+            "cinder", "bootstrap.volume_types"
+        ).items():
+            if "multiattach" in volume_type_prop.keys():
+                return volume_type

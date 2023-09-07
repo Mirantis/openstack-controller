@@ -58,7 +58,6 @@ class ComputeFeatureEnabled(base_section.BaseSection):
         "vnc_server_header",
         "volume_multiattach",
         "volume_backed_live_migration",
-        "volume_type_multiattach",
         "hostname_fqdn_sanitization",
     ]
 
@@ -279,14 +278,6 @@ class ComputeFeatureEnabled(base_section.BaseSection):
         """
         version = self.spec["openstack_version"]
         return MULTIATTACH_CEPH_RELEASE_MAPPING.get(version)
-
-    @property
-    def volume_type_multiattach(self):
-        for volume_type, volume_type_prop in self.get_values_item(
-            "cinder", "bootstrap.volume_types"
-        ).items():
-            if "multiattach" in volume_type_prop.keys():
-                return volume_type
 
     @property
     def volume_backed_live_migration(self):
