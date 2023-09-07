@@ -1,0 +1,41 @@
+placement:
+  Job:
+    placement-db-drop:
+      hash_fields:
+      - endpoints.oslo_db.*
+      images:
+      - db_drop
+      manifest: job_db_drop
+    placement-db-init:
+      hash_fields:
+      - endpoints.oslo_db.*
+      images:
+      - db_init
+      manifest: job_db_init
+    placement-db-nova-migrate-placement:
+      images:
+      - placement_db_nova_migrate_placement
+      manifest: job_db_nova_migrate_placement
+      hash_fields: []
+    placement-db-sync:
+      hash_fields:
+      - endpoints.oslo_db.*
+      images:
+      - placement_db_sync
+      manifest: job_db_sync
+    placement-ks-endpoints:
+      hash_fields: []
+      images:
+      - ks_endpoints
+      manifest: job_ks_endpoints
+    placement-ks-service:
+      hash_fields: []
+      images:
+      - ks_service
+      manifest: job_ks_service
+    placement-ks-user:
+      hash_fields:
+      - endpoints.*
+      images:
+      - ks_user
+      manifest: job_ks_user

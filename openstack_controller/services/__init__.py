@@ -197,22 +197,6 @@ class MariaDB(Service):
     def health_groups(self):
         return ["mariadb"]
 
-    _child_objects = {
-        "mariadb": {
-            "Job": {
-                "openstack-mariadb-cluster-wait": {
-                    "images": ["mariadb_scripted_test"],
-                    "manifest": "job_cluster_wait",
-                },
-                "exporter-create-sql-user": {
-                    "images": ["prometheus_create_mysql_user"],
-                    # TODO(vsaienko): add support of hierarchical
-                    "manifest": "",
-                },
-            }
-        }
-    }
-
     def template_args(self):
         admin_creds = self._get_admin_creds()
         galera_secret = secrets.GaleraSecret(self.namespace)
@@ -239,18 +223,6 @@ class RabbitMQ(Service):
     @property
     def health_groups(self):
         return ["rabbitmq"]
-
-    _child_objects = {
-        "rabbitmq": {
-            "Job": {
-                "openstack-rabbitmq-cluster-wait": {
-                    "images": ["rabbitmq_scripted_test"],
-                    "manifest": "job_cluster_wait",
-                    "hash_fields": ["endpoints.oslo_messaging.*"],
-                }
-            }
-        }
-    }
 
     def template_args(self):
         credentials = {}
@@ -358,17 +330,6 @@ class Descheduler(Service):
     def health_groups(self):
         return []
 
-    _child_objects = {
-        "descheduler": {
-            "CronJob": {
-                "descheduler": {
-                    "images": ["descheduler"],
-                    "manifest": "cronjob",
-                }
-            }
-        }
-    }
-
 
 class Aodh(OpenStackService):
     service = "alarming"
@@ -447,17 +408,6 @@ class Barbican(OpenStackService):
     openstack_chart = "barbican"
     available_releases = ["openstack-barbican-rabbitmq", "openstack-barbican"]
     _secret_class = secrets.BarbicanSecret
-    _child_objects = {
-        "rabbitmq": {
-            "Job": {
-                "openstack-barbican-rabbitmq-cluster-wait": {
-                    "images": ["rabbitmq_scripted_test"],
-                    "manifest": "job_cluster_wait",
-                    "hash_fields": ["endpoints.oslo_messaging.*"],
-                }
-            }
-        }
-    }
 
 
 class Cinder(OpenStackServiceWithCeph, MaintenanceApiMixin):
@@ -468,66 +418,6 @@ class Cinder(OpenStackServiceWithCeph, MaintenanceApiMixin):
         "openstack-iscsi",
         "openstack-cinder",
     ]
-    _child_objects = {
-        "cinder": {
-            "Job": {
-                "cinder-backup-storage-init": {
-                    "images": ["cinder_backup_storage_init"],
-                    "manifest": "job_backup_storage_init",
-                },
-                "cinder-create-internal-tenant": {
-                    "images": ["ks_user"],
-                    "manifest": "job_create_internal_tenant",
-                },
-                "cinder-storage-init": {
-                    "images": ["cinder_storage_init"],
-                    "manifest": "job_storage_init",
-                },
-                "cinder-db-sync-online": {
-                    "images": ["cinder_db_sync_online"],
-                    "manifest": "job_db_sync_online",
-                },
-                "cinder-db-sync": {
-                    "images": ["cinder_db_sync"],
-                    "manifest": "job_db_sync",
-                    "hash_fields": ["endpoints.oslo_db.*"],
-                },
-                "cinder-drop-default-volume-type": {
-                    "images": ["cinder_drop_default_volume_type"],
-                    "manifest": "job_drop_default_volume_type",
-                },
-            },
-            "Deployment": {
-                "cinder-api": {
-                    "images": ["cinder_api"],
-                    "manifest": "deployment_api",
-                },
-            },
-            "StatefulSet": {
-                "cinder-scheduler": {
-                    "images": ["cinder_scheduler"],
-                    "manifest": "statefulset_scheduler",
-                },
-                "cinder-volume": {
-                    "images": ["cinder_volume"],
-                    "manifest": "statefulset_volume",
-                },
-                "cinder-backup": {
-                    "images": ["cinder_backup"],
-                    "manifest": "statefulset_backup",
-                },
-            },
-        },
-        "rabbitmq": {
-            "Job": {
-                "openstack-cinder-rabbitmq-cluster-wait": {
-                    "images": ["rabbitmq_scripted_test"],
-                    "manifest": "job_cluster_wait",
-                    "hash_fields": ["endpoints.oslo_messaging.*"],
-                }
-            }
-        },
-    }
 
     @property
     def is_ceph_enabled(self):
@@ -697,26 +587,6 @@ class Stepler(OpenStackService):
     service = "stepler"
     available_releases = ["openstack-stepler"]
 
-    _child_objects = {
-        "stepler": {
-            "Job": {
-                "stepler-run-tests": {
-                    "images": ["stepler_run_tests"],
-                    "manifest": "job_run_tests",
-                },
-                "stepler-bootstrap": {
-                    "images": ["bootstrap"],
-                    "manifest": "job_bootstrap",
-                },
-                "stepler-ks-user": {
-                    "images": ["ks_user"],
-                    "manifest": "job_ks_user",
-                    "hash_fields": ["endpoints.*"],
-                },
-            }
-        },
-    }
-
     # ovveride health_groups to skip tempest during upgrade
     @property
     def health_groups(self):
@@ -728,39 +598,6 @@ class Designate(OpenStackService):
     backend_service = "powerdns"
     openstack_chart = "designate"
     available_releases = ["openstack-designate"]
-    _child_objects = {
-        "designate": {
-            "Job": {
-                "designate-powerdns-db-init": {
-                    "images": ["db_init"],
-                    "manifest": "job_powerdns_db_init",
-                    "hash_fields": ["endpoints.oslo_db_powerdns.*"],
-                },
-                "designate-pool-manage": {
-                    "images": [
-                        "designate_pool_manage_hash",
-                        "designate_pool_manage",
-                    ],
-                    "manifest": "job_pool_manage",
-                    "hash_fields": ["endpoints.oslo_db_powerdns.*"],
-                },
-                "designate-powerdns-db-sync": {
-                    "images": ["powerdns_db_sync"],
-                    "manifest": "job_powerdns_db_sync",
-                    "hash_fields": ["endpoints.oslo_db.*"],
-                },
-            },
-        },
-        "rabbitmq": {
-            "Job": {
-                "openstack-designate-rabbitmq-cluster-wait": {
-                    "images": ["rabbitmq_scripted_test"],
-                    "manifest": "job_cluster_wait",
-                    "hash_fields": ["endpoints.oslo_messaging.*"],
-                }
-            }
-        },
-    }
 
     def template_args(self):
         t_args = super().template_args()
@@ -775,48 +612,6 @@ class Glance(OpenStackServiceWithCeph):
     service = "image"
     openstack_chart = "glance"
     available_releases = ["openstack-glance-rabbitmq", "openstack-glance"]
-
-    _child_objects = {
-        "glance": {
-            "Job": {
-                "glance-metadefs-load": {
-                    "images": ["glance_metadefs_load"],
-                    "manifest": "job_metadefs_load",
-                },
-                "glance-storage-init": {
-                    "images": ["glance_storage_init"],
-                    "manifest": "job_storage_init",
-                },
-                "glance-db-expand": {
-                    "images": ["glance_db_expand"],
-                    "manifest": "job_db_expand",
-                },
-                "glance-db-migrate": {
-                    "images": ["glance_db_migrate"],
-                    "manifest": "job_db_migrate",
-                },
-                "glance-db-contract": {
-                    "images": ["glance_db_contract"],
-                    "manifest": "job_db_contract",
-                },
-            },
-            "Deployment": {
-                "glance-api": {
-                    "images": ["glance_api"],
-                    "manifest": "deployment_api",
-                }
-            },
-        },
-        "rabbitmq": {
-            "Job": {
-                "openstack-glance-rabbitmq-cluster-wait": {
-                    "images": ["rabbitmq_scripted_test"],
-                    "manifest": "job_cluster_wait",
-                    "hash_fields": ["endpoints.oslo_messaging.*"],
-                }
-            }
-        },
-    }
 
     @property
     def is_ceph_enabled(self):
@@ -843,55 +638,6 @@ class Heat(OpenStackService):
     available_releases = ["openstack-heat-rabbitmq", "openstack-heat"]
     _service_accounts = ["heat_trustee", "heat_stack_user"]
     _protected_accounts = ["heat_trustee"]
-    _child_objects = {
-        "heat": {
-            "Job": {
-                "heat-domain-ks-user": {
-                    "images": ["ks_user"],
-                    "manifest": "job_ks_user_domain",
-                    "hash_fields": ["conf.*", "endpoints.*"],
-                },
-                "heat-trustee-ks-user": {
-                    "images": ["ks_user"],
-                    "manifest": "job_ks_user_trustee",
-                    "hash_fields": ["endpoints.*"],
-                },
-                "heat-trusts": {
-                    "images": ["ks_trusts"],
-                    "hash_fields": ["conf.*"],
-                    "manifest": "job_heat_trusts",
-                },
-                "heat-db-sync": {
-                    "images": ["heat_db_sync"],
-                    "manifest": "job_db_sync",
-                    "hash_fields": ["endpoints.oslo_db.*"],
-                },
-            },
-            "Deployment": {
-                "heat-api": {
-                    "images": ["heat_api"],
-                    "manifest": "deployment_api",
-                },
-                "heat-cfn": {
-                    "images": ["heat_cfn"],
-                    "manifest": "deployment_cfn",
-                },
-                "heat-engine": {
-                    "images": ["heat_engine"],
-                    "manifest": "deployment_engine",
-                },
-            },
-        },
-        "rabbitmq": {
-            "Job": {
-                "openstack-heat-rabbitmq-cluster-wait": {
-                    "images": ["rabbitmq_scripted_test"],
-                    "manifest": "job_cluster_wait",
-                    "hash_fields": ["endpoints.oslo_messaging.*"],
-                }
-            }
-        },
-    }
 
     @layers.kopf_exception
     async def _upgrade(self, event, **kwargs):
@@ -996,119 +742,12 @@ class Ironic(OpenStackService):
     def required_accounts(self):
         return {"networking": ["neutron"], "image": ["glance"]}
 
-    _child_objects = {
-        "ironic": {
-            "Job": {
-                "ironic-manage-networks": {
-                    "images": ["ironic_manage_networks"],
-                    "manifest": "job_manage_networks",
-                },
-                "ironic-update-nodes-metadata": {
-                    "images": ["ironic_update_nodes_metadata"],
-                    "manifest": "job_update_nodes_metadata",
-                    "hash_fields": ["conf.nodes.*"],
-                },
-            }
-        },
-        "rabbitmq": {
-            "Job": {
-                "openstack-ironic-rabbitmq-cluster-wait": {
-                    "images": ["rabbitmq_scripted_test"],
-                    "manifest": "job_cluster_wait",
-                    "hash_fields": ["endpoints.oslo_messaging.*"],
-                }
-            }
-        },
-    }
-
 
 class Keystone(OpenStackService):
     service = "identity"
     openstack_chart = "keystone"
     available_releases = ["openstack-keystone"]
     _service_accounts = ["osctl"]
-
-    @property
-    def _child_generic_objects(self):
-        return {
-            "keystone": {
-                "job_db_init",
-                "job_db_sync",
-                "job_db_drop",
-                "job_bootstrap",
-            }
-        }
-
-    _child_objects = {
-        "keystone": {
-            "Job": {
-                "keystone-bootstrap": {
-                    "images": ["bootstrap"],
-                    "manifest": "job_bootstrap",
-                    "hash_fields": ["endpoints.*"],
-                },
-                "keystone-domain-manage": {
-                    "images": ["keystone_domain_manage"],
-                    "manifest": "job_domain_manage",
-                    "hash_fields": ["conf.*"],
-                },
-                "keystone-fernet-setup": {
-                    "images": ["keystone_fernet_setup"],
-                    "manifest": "job_fernet_setup",
-                    "hash_fields": ["conf.*"],
-                },
-                "keystone-credential-setup": {
-                    "images": ["keystone_credential_setup"],
-                    "manifest": "job_credential_setup",
-                    "hash_fields": ["conf.*"],
-                },
-                "keystone-db-sync": {
-                    "images": ["keystone_db_sync"],
-                    "manifest": "job_db_sync",
-                    "hash_fields": [
-                        "endpoints.oslo_db.*",
-                        "endpoints.identity.auth.*",
-                    ],
-                },
-                "keystone-db-sync-expand": {
-                    "images": ["keystone_db_sync_expand"],
-                    "manifest": "job_db_sync_expand",
-                },
-                "keystone-db-sync-migrate": {
-                    "images": ["keystone_db_sync_migrate"],
-                    "manifest": "job_db_sync_migrate",
-                },
-                "keystone-db-sync-contract": {
-                    "images": ["keystone_db_sync_contract"],
-                    "manifest": "job_db_sync_contract",
-                },
-                "keystone-federations-create": {
-                    "images": ["keystone_federations_create"],
-                    "manifest": "job_federations_create",
-                },
-                "osctl-ks-user": {
-                    "images": ["ks_user"],
-                    "manifest": "job_ks_user",
-                    "hash_fields": ["endpoints.*"],
-                },
-            },
-            "Deployment": {
-                "keystone-api": {
-                    "images": ["keystone_api"],
-                    "manifest": "deployment_api",
-                }
-            },
-        },
-        "rabbitmq": {
-            "Job": {
-                "openstack-keystone-rabbitmq-cluster-wait": {
-                    "images": ["rabbitmq_scripted_test"],
-                    "manifest": "job_cluster_wait",
-                    "hash_fields": ["endpoints.oslo_messaging.*"],
-                }
-            }
-        },
-    }
 
     def _get_keycloak_args(self):
         args = {}
@@ -1369,85 +1008,6 @@ class Neutron(OpenStackService, MaintenanceApiMixin):
 
         return health_groups
 
-    @property
-    def _child_objects(self):
-        neutron_jobs = {
-            "neutron-db-sync": {
-                "images": ["neutron_db_sync"],
-                "manifest": "job_db_sync",
-                "hash_fields": ["endpoints.oslo_db.*"],
-            },
-        }
-        if (
-            utils.get_in(self.mspec["features"], ["neutron", "backend"])
-            == "tungstenfabric"
-        ):
-            neutron_jobs = {
-                "tungstenfabric-ks-service": {
-                    "images": ["ks_service"],
-                    "manifest": "job_ks_service",
-                },
-                "tungstenfabric-ks-endpoints": {
-                    "images": ["ks_endpoints"],
-                    "manifest": "job_ks_endpoints",
-                },
-            }
-
-        return {
-            "neutron": {
-                "Job": neutron_jobs,
-                "Deployment": {
-                    "neutron-server": {
-                        "images": ["neutron_server"],
-                        "manifest": "deployment_server",
-                    },
-                },
-            },
-            "rabbitmq": {
-                "Job": {
-                    "openstack-neutron-rabbitmq-cluster-wait": {
-                        "images": ["rabbitmq_scripted_test"],
-                        "manifest": "job_cluster_wait",
-                        "hash_fields": ["endpoints.oslo_messaging.*"],
-                    }
-                }
-            },
-        }
-
-    @property
-    def _child_objects_dynamic(self):
-        if (
-            utils.get_in(self.mspec["features"], ["neutron", "backend"])
-            == "tungstenfabric"
-        ):
-            return {}
-        return {
-            "neutron": {
-                "DaemonSet": {
-                    "ovs-agent": {
-                        "selector": {
-                            "application__in": {"neutron"},
-                            "component__in": {"neutron-ovs-agent"},
-                        },
-                        "meta": {
-                            "images": ["neutron_openvswitch_agent"],
-                            "manifest": "daemonset_ovs_agent",
-                        },
-                    },
-                    "sriov-agent": {
-                        "selector": {
-                            "application__in": {"neutron"},
-                            "component__in": {"neutron-sriov-agent"},
-                        },
-                        "meta": {
-                            "images": ["neutron_sriov_agent"],
-                            "manifest": "daemonset_sriov_agent",
-                        },
-                    },
-                }
-            }
-        }
-
     @layers.kopf_exception
     async def _upgrade(self, event, **kwargs):
         static_map = [
@@ -1459,6 +1019,11 @@ class Neutron(OpenStackService, MaintenanceApiMixin):
             ("DaemonSet", "sriov-agent"),
             ("DaemonSet", "ovs-agent"),
         ]
+        if (
+            utils.get_in(self.mspec["features"], ["neutron", "backend"])
+            != "tungstenfabric"
+        ):
+            dynamic_map = {}
 
         for kind, obj_name in static_map:
             child_obj = self.get_child_object(kind, obj_name)
@@ -1666,118 +1231,6 @@ class Nova(OpenStackServiceWithCeph, MaintenanceApiMixin):
         if "baremetal" in services:
             r_accounts["baremetal"] = ["ironic"]
         return r_accounts
-
-    @property
-    def _child_objects(self):
-        nova_jobs = {
-            "nova-cell-setup": {
-                "images": ["nova_cell_setup", "nova_cell_setup_init"],
-                "manifest": "job_cell_setup",
-            },
-            "nova-db-sync-api": {
-                "images": ["nova_db_sync_api"],
-                "manifest": "job_db_sync_api",
-                "hash_fields": ["endpoints.oslo_db.*"],
-            },
-            "nova-db-sync-db": {
-                "images": ["nova_db_sync_db"],
-                "manifest": "job_db_sync_db",
-                "hash_fields": ["endpoints.oslo_db.*"],
-            },
-            "nova-db-sync-online": {
-                "images": ["nova_db_sync_online"],
-                "manifest": "job_db_sync_online",
-            },
-            "nova-db-sync": {
-                "images": ["nova_db_sync"],
-                "manifest": "job_db_sync",
-                "hash_fields": [
-                    "endpoints.oslo_db.*",
-                    "endpoints.oslo_messaging.*",
-                ],
-            },
-        }
-        nova_deployments = {}
-        nova_secrets = {}
-        nova_ingresses = {}
-        nova_services = {}
-        if self.openstack_version in [
-            "queens",
-            "rocky",
-            # Consider placement resources as childs in stein too,
-            # needed for upgrade from rocky to stein. The effect is
-            # that when nova is upgraded from rocky to stein or
-            # from stein to train it will remove placement-ks-*
-            # jobs. But there is no negative effect on placement
-            # upgrade result.
-            "stein",
-        ]:
-            nova_jobs = {
-                **nova_jobs,
-                "placement-ks-user": {
-                    "images": ["ks_user"],
-                    "manifest": "job_ks_placement_user",
-                    "hash_fields": ["endpoints.*"],
-                },
-                "placement-ks-service": {
-                    "images": ["ks_service"],
-                    "manifest": "job_ks_placement_service",
-                },
-                "placement-ks-endpoints": {
-                    "images": ["ks_endpoints"],
-                    "manifest": "job_ks_placement_endpoints",
-                },
-            }
-            nova_deployments = {
-                **nova_deployments,
-                "nova-placement-api": {
-                    "manifest": "deployment_placement",
-                    "images": [],
-                },
-            }
-            nova_secrets = {
-                **nova_secrets,
-                "placement-tls-public": {
-                    "manifest": "ingress_placement",
-                    "images": [],
-                },
-            }
-            nova_services = {
-                **nova_services,
-                "placement-api": {
-                    "manifest": "service_placement",
-                    "images": [],
-                },
-                "placement": {
-                    "manifest": "service_ingress_placement",
-                    "images": [],
-                },
-            }
-            nova_ingresses = {
-                **nova_ingresses,
-                "placement": {
-                    "manifest": "ingress_placement",
-                    "images": [],
-                },
-            }
-        return {
-            "nova": {
-                "Job": nova_jobs,
-                "Secret": nova_secrets,
-                "Deployment": nova_deployments,
-                "Service": nova_services,
-                "Ingress": nova_ingresses,
-            },
-            "rabbitmq": {
-                "Job": {
-                    "openstack-nova-rabbitmq-cluster-wait": {
-                        "images": ["rabbitmq_scripted_test"],
-                        "manifest": "job_cluster_wait",
-                        "hash_fields": ["endpoints.oslo_messaging.*"],
-                    }
-                }
-            },
-        }
 
     def template_args(self):
         t_args = super().template_args()
@@ -2124,16 +1577,6 @@ class Placement(OpenStackService):
         # NOTE(mkarpin): skip health check for stein release,
         # as this is first release where placement is added
         if self.mspec["openstack_version"] == "stein":
-            self._child_objects = {
-                "placement": {
-                    "Job": {
-                        "placement-db-nova-migrate-placement": {
-                            "images": ["placement_db_nova_migrate_placement"],
-                            "manifest": "job_db_nova_migrate_placement",
-                        },
-                    },
-                },
-            }
             upgrade_map = [
                 ("Deployment", "nova-placement-api"),
                 ("Job", "placement-ks-user"),
@@ -2201,41 +1644,6 @@ class Octavia(OpenStackService):
     openstack_chart = "octavia"
     available_releases = ["openstack-octavia-rabbitmq", "openstack-octavia"]
 
-    @property
-    def _child_objects(self):
-        ch_objects = {
-            "octavia": {
-                "Job": {
-                    "octavia-create-resources": {
-                        "images": ["create_resources"],
-                        "manifest": "job_create_resources",
-                        "hash_fields": [
-                            "octavia.settings.amphora_image_url",
-                            "network.proxy.*",
-                            "endpoints.*",
-                        ],
-                    }
-                }
-            },
-            "rabbitmq": {
-                "Job": {
-                    "openstack-octavia-rabbitmq-cluster-wait": {
-                        "images": ["rabbitmq_scripted_test"],
-                        "manifest": "job_cluster_wait",
-                        "hash_fields": ["endpoints.oslo_messaging.*"],
-                    }
-                }
-            },
-        }
-
-        if self.openstack_version not in ["queens", "rocky", "stein", "train"]:
-            ch_objects["octavia"]["Job"]["octavia-db-sync-persistence"] = {
-                "images": ["octavia_db_sync_persistence"],
-                "manifest": "job_db_sync_persistence",
-                "hash_fields": ["endpoints.oslo_db.*"],
-            }
-        return ch_objects
-
     def template_args(self):
         t_args = super().template_args()
         cert_secret = secrets.SignedCertificateSecret(
@@ -2276,31 +1684,6 @@ class Octavia(OpenStackService):
 class RadosGateWay(OpenStackService):
     service = "object-storage"
     available_releases = ["openstack-ceph-rgw"]
-
-    _child_objects = {
-        "ceph-rgw": {
-            "Job": {
-                "ceph-ks-endpoints": {
-                    "images": ["ks_endpoints"],
-                    "manifest": "job_ks_endpoints",
-                    "hash_fields": ["endpoints.*"],
-                },
-                "ceph-ks-service": {
-                    "images": ["ks_service"],
-                    "manifest": "job_ks_service",
-                },
-                "ceph-rgw-ks-user": {
-                    "images": ["ks_user"],
-                    "manifest": "job_ks_user",
-                    "hash_fields": ["endpoints.*"],
-                },
-            }
-        }
-    }
-
-    @property
-    def _child_generic_objects(self):
-        return {}
 
     # override health groups to skip wait for healthy service check
     # as ceph rgw contain only jobs
@@ -2389,34 +1772,6 @@ class RadosGateWay(OpenStackService):
 class Tempest(OpenStackService):
     service = "tempest"
     available_releases = ["openstack-tempest"]
-
-    _child_objects = {
-        "tempest": {
-            "Job": {
-                "openstack-tempest-run-tests": {
-                    "images": ["tempest_run_tests", "tempest-uuids-init"],
-                    "manifest": "job_run_tests",
-                },
-                "tempest-bootstrap": {
-                    "images": ["bootstrap"],
-                    "manifest": "job_bootstrap",
-                },
-                "tempest-image-repo-sync": {
-                    "images": ["image_repo_sync"],
-                    "manifest": "job_image_repo_sync",
-                },
-                "tempest-ks-user": {
-                    "images": ["ks_user"],
-                    "manifest": "job_ks_user",
-                    "hash_fields": ["endpoints.*"],
-                },
-            }
-        },
-    }
-
-    @property
-    def _child_generic_objects(self):
-        return {}
 
     # ovveride health_groups to skip tempest during upgrade
     @property

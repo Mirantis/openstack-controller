@@ -26,74 +26,6 @@ LOG = utils.get_logger(__name__)
 CONF = settings.CONF
 
 
-class GenericChildObject:
-    def __init__(self, service, chart):
-        self.chart = chart
-        self.service = service
-        self.namespace = service.namespace
-
-    def _get_job_object(self, suffix, manifest, images, hash_fields=None):
-        child_obj = kube.dummy(
-            kube.Job, f"{self.chart}-{suffix}", self.namespace
-        )
-        if hash_fields is None:
-            hash_fields = []
-        helmbundle_ext = kube.HelmBundleExt(
-            self.chart, manifest, images, hash_fields=hash_fields
-        )
-        child_obj.helmbundle_ext = helmbundle_ext
-        child_obj.service = self.service
-
-        return child_obj
-
-    def job_db_init(self):
-        return self._get_job_object(
-            "db-init",
-            "job_db_init",
-            ["db_init"],
-            hash_fields=["endpoints.oslo_db.*"],
-        )
-
-    def job_db_sync(self):
-        return self._get_job_object(
-            "db-sync",
-            "job_db_sync",
-            [f"{self.chart}_db_sync"],
-            hash_fields=["endpoints.oslo_db.*"],
-        )
-
-    def job_db_drop(self):
-        return self._get_job_object(
-            "db-drop",
-            "job_db_drop",
-            ["db_drop"],
-            hash_fields=["endpoints.oslo_db.*"],
-        )
-
-    def job_ks_endpoints(self):
-        return self._get_job_object(
-            "ks-endpoints", "job_ks_endpoints", ["ks_endpoints"]
-        )
-
-    def job_ks_service(self):
-        return self._get_job_object(
-            "ks-service", "job_ks_service", ["ks_service"]
-        )
-
-    def job_ks_user(self):
-        return self._get_job_object(
-            "ks-user", "job_ks_user", ["ks_user"], hash_fields=["endpoints.*"]
-        )
-
-    def job_bootstrap(self):
-        return self._get_job_object(
-            "bootstrap",
-            "job_bootstrap",
-            ["bootstrap"],
-            hash_fields=["network.proxy.*", "bootstrap.*"],
-        )
-
-
 class Service:
     service = None
     namespace = None
@@ -102,30 +34,6 @@ class Service:
     kind = "HelmBundle"
     registry = {}
     available_releases = []
-    _child_objects = {
-        #       '<chart>': {
-        #           '<Kind>': {
-        #               '<kubernetes resource name>': {
-        #                   'images': ['List of images'],
-        #                   'manifest': '<manifest flag>'
-        #               }
-        #           }
-        #       }
-    }
-
-    _child_objects_dynamic = {
-        #       '<chart>' {
-        #           '<kind>': {
-        #               '<abstract_name>': {
-        #                   'selector': {},
-        #                   'meta': {
-        #                       'images': ['List of images'],
-        #                       'manifest': '<manifest flag>'
-        #                    }
-        #               }
-        #           }
-        #       }
-    }
 
     _service_accounts = []
     _secret_class = None
@@ -156,10 +64,6 @@ class Service:
         if service_name:
             return self._service_accounts + [service_name, "test"]
         return self._service_accounts
-
-    @property
-    def _child_generic_objects(self):
-        return {}
 
     def __init_subclass__(cls, *args, **kwargs):
         super().__init_subclass__(*args, **kwargs)
@@ -208,48 +112,33 @@ class Service:
     def health_groups(self):
         return []
 
-    def _get_generic_child_objects(self):
-        res = []
-        for chart, items in self._child_generic_objects.items():
-            for item in items:
-                res.append(
-                    GenericChildObject(self, chart).__getattribute__(item)()
-                )
-        return res
-
     @property
     def child_objects(self):
         res = []
-        generic_objects = self._get_generic_child_objects()
-        for chart_name, charts in self._child_objects.items():
-            child = {}
-            m_ext = {}
-            for kind, kinds in charts.items():
-                child["kind"] = kind
-                for kind_name, meta in kinds.items():
-                    m_ext = meta
-                    if "hash_fields" not in meta:
-                        m_ext["hash_fields"] = []
+        child_objects = layers.render_template(
+            f"child_objects/{self.service}.yaml"
+        )
+        for chart_name, kinds in child_objects.items():
+            for kind, objects in kinds.items():
+                for obj_name, meta in objects.items():
+                    obj_type = meta.get("type", "static")
+                    if obj_type != "static":
+                        continue
+                    m_ext = {}
+                    for field in ["images", "hash_fields", "manifest"]:
+                        if field in meta:
+                            m_ext[field] = meta[field]
                     m_ext["chart"] = chart_name
                     m_ext_obj = kube.HelmBundleExt(**m_ext)
-
                     child_obj = kube.dummy(
-                        kube.__getattribute__(kind), kind_name, self.namespace
+                        kube.__getattribute__(kind),
+                        obj_name,
+                        self.namespace,
                     )
                     child_obj.helmbundle_ext = m_ext_obj
                     child_obj.service = self
-
-                    # Remove objects that defined explicitly
-                    for obj in generic_objects:
-                        if (
-                            obj.helmbundle_ext.chart == chart_name
-                            and obj.kind == kind
-                            and obj.name == kind_name
-                        ):
-                            generic_objects.remove(obj)
                     res.append(child_obj)
-
-        return res + generic_objects
+        return res
 
     async def set_release_values(self, chart, values):
         release_name = f"openstack-{chart}"
@@ -288,32 +177,36 @@ class Service:
 
     def get_child_objects_dynamic(self, kind, abstract_name):
         res = []
-        for chart_name, charts in self._child_objects_dynamic.items():
-            child = {}
-            m_ext = {}
-            for kind, abstracts in charts.items():
-                child["kind"] = kind
-                abstract = abstracts[abstract_name]
-                meta = abstract["meta"]
-                m_ext = meta
-                if "hash_fields" not in meta:
-                    m_ext["hash_fields"] = []
-                m_ext["chart"] = chart_name
-                m_ext_obj = kube.HelmBundleExt(**m_ext)
-                for dynamic_object in kube.resource_list(
-                    kube.__getattribute__(kind),
-                    selector=abstract["selector"],
-                    namespace=self.namespace,
-                ):
-                    child_obj = kube.dummy(
+        child_objects = layers.render_template(
+            f"child_objects/{self.service}.yaml"
+        )
+        for chart_name, kinds in child_objects.items():
+            for kinds, objects in kinds.items():
+                for obj_name, meta in objects.items():
+                    obj_type = meta.get("type", "static")
+                    if obj_type != "dynamic":
+                        continue
+                    if obj_name != abstract_name:
+                        continue
+                    m_ext = {}
+                    for field in ["images", "hash_fields", "manifest"]:
+                        if field in meta:
+                            m_ext[field] = meta[field]
+                    m_ext["chart"] = chart_name
+                    m_ext_obj = kube.HelmBundleExt(**m_ext)
+                    for dynamic_object in kube.resource_list(
                         kube.__getattribute__(kind),
-                        dynamic_object.name,
-                        dynamic_object.namespace,
-                    )
-                    child_obj.helmbundle_ext = m_ext_obj
-                    child_obj.service = self
-
-                    res.append(child_obj)
+                        selector=meta["selector"],
+                        namespace=self.namespace,
+                    ):
+                        child_obj = kube.dummy(
+                            kube.__getattribute__(kind),
+                            dynamic_object.name,
+                            dynamic_object.namespace,
+                        )
+                        child_obj.helmbundle_ext = m_ext_obj
+                        child_obj.service = self
+                        res.append(child_obj)
         return res
 
     def get_child_object(self, kind, name):
@@ -475,6 +368,8 @@ class Service:
                 return True
 
         for resource in self.child_objects:
+            if not resource.exists():
+                continue
             # NOTE(vsaienko): even the object is not immutable, it may have immutable fields.
             chart_name = resource.helmbundle_ext.chart
             old_values = release_mapping.get(chart_name, {}).get(
@@ -778,20 +673,6 @@ class OpenStackService(Service):
     @property
     def health_groups(self):
         return [self.openstack_chart]
-
-    @property
-    def _child_generic_objects(self):
-        return {
-            f"{self.openstack_chart}": {
-                "job_db_init",
-                "job_db_sync",
-                "job_db_drop",
-                "job_ks_endpoints",
-                "job_ks_service",
-                "job_ks_user",
-                "job_bootstrap",
-            }
-        }
 
     @property
     def is_ceph_enabled(self):

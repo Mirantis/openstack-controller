@@ -1,0 +1,82 @@
+glance:
+  Deployment:
+    glance-api:
+      hash_fields: []
+      images:
+      - glance_api
+      manifest: deployment_api
+  Job:
+    glance-bootstrap:
+      hash_fields:
+      - network.proxy.*
+      - bootstrap.*
+      images:
+      - bootstrap
+      manifest: job_bootstrap
+    glance-db-contract:
+      hash_fields: []
+      images:
+      - glance_db_contract
+      manifest: job_db_contract
+    glance-db-drop:
+      hash_fields:
+      - endpoints.oslo_db.*
+      images:
+      - db_drop
+      manifest: job_db_drop
+    glance-db-expand:
+      hash_fields: []
+      images:
+      - glance_db_expand
+      manifest: job_db_expand
+    glance-db-init:
+      hash_fields:
+      - endpoints.oslo_db.*
+      images:
+      - db_init
+      manifest: job_db_init
+    glance-db-migrate:
+      hash_fields: []
+      images:
+      - glance_db_migrate
+      manifest: job_db_migrate
+    glance-db-sync:
+      hash_fields:
+      - endpoints.oslo_db.*
+      images:
+      - glance_db_sync
+      manifest: job_db_sync
+    glance-ks-endpoints:
+      hash_fields: []
+      images:
+      - ks_endpoints
+      manifest: job_ks_endpoints
+    glance-ks-service:
+      hash_fields: []
+      images:
+      - ks_service
+      manifest: job_ks_service
+    glance-ks-user:
+      hash_fields:
+      - endpoints.*
+      images:
+      - ks_user
+      manifest: job_ks_user
+    glance-metadefs-load:
+      hash_fields: []
+      images:
+      - glance_metadefs_load
+      manifest: job_metadefs_load
+    glance-storage-init:
+      hash_fields: []
+      images:
+      - glance_storage_init
+      manifest: job_storage_init
+rabbitmq:
+  Job:
+    openstack-glance-rabbitmq-cluster-wait:
+      hash_fields:
+      - endpoints.oslo_messaging.*
+      images:
+      - rabbitmq_scripted_test
+      manifest: job_cluster_wait

@@ -1,0 +1,70 @@
+designate:
+  Job:
+    designate-bootstrap:
+      hash_fields:
+      - network.proxy.*
+      - bootstrap.*
+      images:
+      - bootstrap
+      manifest: job_bootstrap
+    designate-db-drop:
+      hash_fields:
+      - endpoints.oslo_db.*
+      images:
+      - db_drop
+      manifest: job_db_drop
+    designate-db-init:
+      hash_fields:
+      - endpoints.oslo_db.*
+      images:
+      - db_init
+      manifest: job_db_init
+    designate-db-sync:
+      hash_fields:
+      - endpoints.oslo_db.*
+      images:
+      - designate_db_sync
+      manifest: job_db_sync
+    designate-ks-endpoints:
+      hash_fields: []
+      images:
+      - ks_endpoints
+      manifest: job_ks_endpoints
+    designate-ks-service:
+      hash_fields: []
+      images:
+      - ks_service
+      manifest: job_ks_service
+    designate-ks-user:
+      hash_fields:
+      - endpoints.*
+      images:
+      - ks_user
+      manifest: job_ks_user
+    designate-pool-manage:
+      hash_fields:
+      - endpoints.oslo_db_powerdns.*
+      images:
+      - designate_pool_manage_hash
+      - designate_pool_manage
+      manifest: job_pool_manage
+    designate-powerdns-db-init:
+      hash_fields:
+      - endpoints.oslo_db_powerdns.*
+      images:
+      - db_init
+      manifest: job_powerdns_db_init
+    designate-powerdns-db-sync:
+      hash_fields:
+      - endpoints.oslo_db.*
+      images:
+      - powerdns_db_sync
+      manifest: job_powerdns_db_sync
+rabbitmq:
+  Job:
+    openstack-designate-rabbitmq-cluster-wait:
+      hash_fields:
+      - endpoints.oslo_messaging.*
+      images:
+      - rabbitmq_scripted_test
+      manifest: job_cluster_wait

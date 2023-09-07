@@ -1,0 +1,7 @@
+descheduler:
+  CronJob:
+    descheduler:
+      hash_fields: []
+      images:
+      - descheduler
+      manifest: cronjob

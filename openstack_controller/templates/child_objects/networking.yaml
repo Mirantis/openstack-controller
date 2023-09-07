@@ -1,0 +1,90 @@
+neutron:
+  DaemonSet:
+    ovs-agent:
+      hash_fields: []
+      images:
+      - neutron_openvswitch_agent
+      manifest: daemonset_ovs_agent
+      selector:
+        application__in:
+        - neutron
+        component__in:
+        - neutron-ovs-agent
+      type: dynamic
+    sriov-agent:
+      hash_fields: []
+      images:
+      - neutron_sriov_agent
+      manifest: daemonset_sriov_agent
+      selector:
+        application__in:
+        - neutron
+        component__in:
+        - neutron-sriov-agent
+      type: dynamic
+  Deployment:
+    neutron-server:
+      hash_fields: []
+      images:
+      - neutron_server
+      manifest: deployment_server
+  Job:
+    neutron-bootstrap:
+      hash_fields:
+      - network.proxy.*
+      - bootstrap.*
+      images:
+      - bootstrap
+      manifest: job_bootstrap
+    neutron-db-drop:
+      hash_fields:
+      - endpoints.oslo_db.*
+      images:
+      - db_drop
+      manifest: job_db_drop
+    neutron-db-init:
+      hash_fields:
+      - endpoints.oslo_db.*
+      images:
+      - db_init
+      manifest: job_db_init
+    neutron-db-sync:
+      hash_fields:
+      - endpoints.oslo_db.*
+      images:
+      - neutron_db_sync
+      manifest: job_db_sync
+    neutron-ks-endpoints:
+      hash_fields: []
+      images:
+      - ks_endpoints
+      manifest: job_ks_endpoints
+    neutron-ks-service:
+      hash_fields: []
+      images:
+      - ks_service
+      manifest: job_ks_service
+    neutron-ks-user:
+      hash_fields:
+      - endpoints.*
+      images:
+      - ks_user
+      manifest: job_ks_user
+    tungstenfabric-ks-endpoints:
+      images:
+      - ks_endpoints
+      manifest: job_ks_endpoints
+      hash_fields: []
+    tungstenfabric-ks-service:
+      images:
+      - ks_service
+      manifest: job_ks_service
+      hash_fields: []
+rabbitmq:
+  Job:
+    openstack-neutron-rabbitmq-cluster-wait:
+      hash_fields:
+      - endpoints.oslo_messaging.*
+      images:
+      - rabbitmq_scripted_test
+      manifest: job_cluster_wait

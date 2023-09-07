@@ -1,0 +1,85 @@
+keystone:
+  Deployment:
+    keystone-api:
+      hash_fields: []
+      images:
+      - keystone_api
+      manifest: deployment_api
+  Job:
+    keystone-bootstrap:
+      hash_fields:
+      - endpoints.*
+      images:
+      - bootstrap
+      manifest: job_bootstrap
+    keystone-credential-setup:
+      hash_fields:
+      - conf.*
+      images:
+      - keystone_credential_setup
+      manifest: job_credential_setup
+    keystone-db-drop:
+      hash_fields:
+      - endpoints.oslo_db.*
+      images:
+      - db_drop
+      manifest: job_db_drop
+    keystone-db-init:
+      hash_fields:
+      - endpoints.oslo_db.*
+      images:
+      - db_init
+      manifest: job_db_init
+    keystone-db-sync:
+      hash_fields:
+      - endpoints.oslo_db.*
+      - endpoints.identity.auth.*
+      images:
+      - keystone_db_sync
+      manifest: job_db_sync
+    keystone-db-sync-contract:
+      hash_fields: []
+      images:
+      - keystone_db_sync_contract
+      manifest: job_db_sync_contract
+    keystone-db-sync-expand:
+      hash_fields: []
+      images:
+      - keystone_db_sync_expand
+      manifest: job_db_sync_expand
+    keystone-db-sync-migrate:
+      hash_fields: []
+      images:
+      - keystone_db_sync_migrate
+      manifest: job_db_sync_migrate
+    keystone-domain-manage:
+      hash_fields:
+      - conf.*
+      images:
+      - keystone_domain_manage
+      manifest: job_domain_manage
+    keystone-federations-create:
+      hash_fields: []
+      images:
+      - keystone_federations_create
+      manifest: job_federations_create
+    keystone-fernet-setup:
+      hash_fields:
+      - conf.*
+      images:
+      - keystone_fernet_setup
+      manifest: job_fernet_setup
+    osctl-ks-user:
+      hash_fields:
+      - endpoints.*
+      images:
+      - ks_user
+      manifest: job_ks_user
+rabbitmq:
+  Job:
+    openstack-keystone-rabbitmq-cluster-wait:
+      hash_fields:
+      - endpoints.oslo_messaging.*
+      images:
+      - rabbitmq_scripted_test
+      manifest: job_cluster_wait

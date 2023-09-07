@@ -1,0 +1,8 @@
+rabbitmq:
+  Job:
+    openstack-rabbitmq-cluster-wait:
+      hash_fields:
+      - endpoints.oslo_messaging.*
+      images:
+      - rabbitmq_scripted_test
+      manifest: job_cluster_wait

@@ -1,0 +1,115 @@
+nova:
+  Ingress:
+    placement:
+      manifest: ingress_placement
+      images: []
+      hash_fields: []
+  Deployment:
+    nova-placement-api:
+      images: []
+      manifest: deployment_placement
+      hash_fields: []
+  Job:
+    nova-bootstrap:
+      hash_fields:
+      - network.proxy.*
+      - bootstrap.*
+      images:
+      - bootstrap
+      manifest: job_bootstrap
+    nova-cell-setup:
+      hash_fields: []
+      images:
+      - nova_cell_setup
+      - nova_cell_setup_init
+      manifest: job_cell_setup
+    nova-db-drop:
+      hash_fields:
+      - endpoints.oslo_db.*
+      images:
+      - db_drop
+      manifest: job_db_drop
+    nova-db-init:
+      hash_fields:
+      - endpoints.oslo_db.*
+      images:
+      - db_init
+      manifest: job_db_init
+    nova-db-sync:
+      hash_fields:
+      - endpoints.oslo_db.*
+      - endpoints.oslo_messaging.*
+      images:
+      - nova_db_sync
+      manifest: job_db_sync
+    nova-db-sync-api:
+      hash_fields:
+      - endpoints.oslo_db.*
+      images:
+      - nova_db_sync_api
+      manifest: job_db_sync_api
+    nova-db-sync-db:
+      hash_fields:
+      - endpoints.oslo_db.*
+      images:
+      - nova_db_sync_db
+      manifest: job_db_sync_db
+    nova-db-sync-online:
+      hash_fields: []
+      images:
+      - nova_db_sync_online
+      manifest: job_db_sync_online
+    nova-ks-endpoints:
+      hash_fields: []
+      images:
+      - ks_endpoints
+      manifest: job_ks_endpoints
+    nova-ks-service:
+      hash_fields: []
+      images:
+      - ks_service
+      manifest: job_ks_service
+    nova-ks-user:
+      hash_fields:
+      - endpoints.*
+      images:
+      - ks_user
+      manifest: job_ks_user
+    placement-ks-endpoints:
+      images:
+      - ks_endpoints
+      manifest: job_ks_placement_endpoints
+      hash_fields: []
+    placement-ks-service:
+      images:
+      - ks_service
+      manifest: job_ks_placement_service
+      hash_fields: []
+    placement-ks-user:
+      hash_fields:
+      - endpoints.*
+      images:
+      - ks_user
+      manifest: job_ks_placement_user
+  Secret:
+    placement-tls-public:
+      images: []
+      manifest: ingress_placement
+      hash_fields: []
+  Service:
+    placement:
+      images: []
+      manifest: service_ingress_placement
+      hash_fields: []
+    placement-api:
+      images: []
+      manifest: service_placement
+      hash_fields: []
+rabbitmq:
+  Job:
+    openstack-nova-rabbitmq-cluster-wait:
+      hash_fields:
+      - endpoints.oslo_messaging.*
+      images:
+      - rabbitmq_scripted_test
+      manifest: job_cluster_wait

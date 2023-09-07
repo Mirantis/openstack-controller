@@ -1,0 +1,43 @@
+masakari:
+  Job:
+    masakari-bootstrap:
+      hash_fields:
+      - network.proxy.*
+      - bootstrap.*
+      images:
+      - bootstrap
+      manifest: job_bootstrap
+    masakari-db-drop:
+      hash_fields:
+      - endpoints.oslo_db.*
+      images:
+      - db_drop
+      manifest: job_db_drop
+    masakari-db-init:
+      hash_fields:
+      - endpoints.oslo_db.*
+      images:
+      - db_init
+      manifest: job_db_init
+    masakari-db-sync:
+      hash_fields:
+      - endpoints.oslo_db.*
+      images:
+      - masakari_db_sync
+      manifest: job_db_sync
+    masakari-ks-endpoints:
+      hash_fields: []
+      images:
+      - ks_endpoints
+      manifest: job_ks_endpoints
+    masakari-ks-service:
+      hash_fields: []
+      images:
+      - ks_service
+      manifest: job_ks_service
+    masakari-ks-user:
+      hash_fields:
+      - endpoints.*
+      images:
+      - ks_user
+      manifest: job_ks_user

@@ -1,0 +1,62 @@
+ironic:
+  Job:
+    ironic-bootstrap:
+      hash_fields:
+      - network.proxy.*
+      - bootstrap.*
+      images:
+      - bootstrap
+      manifest: job_bootstrap
+    ironic-db-drop:
+      hash_fields:
+      - endpoints.oslo_db.*
+      images:
+      - db_drop
+      manifest: job_db_drop
+    ironic-db-init:
+      hash_fields:
+      - endpoints.oslo_db.*
+      images:
+      - db_init
+      manifest: job_db_init
+    ironic-db-sync:
+      hash_fields:
+      - endpoints.oslo_db.*
+      images:
+      - ironic_db_sync
+      manifest: job_db_sync
+    ironic-ks-endpoints:
+      hash_fields: []
+      images:
+      - ks_endpoints
+      manifest: job_ks_endpoints
+    ironic-ks-service:
+      hash_fields: []
+      images:
+      - ks_service
+      manifest: job_ks_service
+    ironic-ks-user:
+      hash_fields:
+      - endpoints.*
+      images:
+      - ks_user
+      manifest: job_ks_user
+    ironic-manage-networks:
+      hash_fields: []
+      images:
+      - ironic_manage_networks
+      manifest: job_manage_networks
+    ironic-update-nodes-metadata:
+      hash_fields:
+      - conf.nodes.*
+      images:
+      - ironic_update_nodes_metadata
+      manifest: job_update_nodes_metadata
+rabbitmq:
+  Job:
+    openstack-ironic-rabbitmq-cluster-wait:
+      hash_fields:
+      - endpoints.oslo_messaging.*
+      images:
+      - rabbitmq_scripted_test
+      manifest: job_cluster_wait

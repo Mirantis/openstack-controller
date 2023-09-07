@@ -1,0 +1,98 @@
+cinder:
+  Deployment:
+    cinder-api:
+      hash_fields: []
+      images:
+      - cinder_api
+      manifest: deployment_api
+  Job:
+    cinder-backup-storage-init:
+      hash_fields: []
+      images:
+      - cinder_backup_storage_init
+      manifest: job_backup_storage_init
+    cinder-bootstrap:
+      hash_fields:
+      - network.proxy.*
+      - bootstrap.*
+      images:
+      - bootstrap
+      manifest: job_bootstrap
+    cinder-create-internal-tenant:
+      hash_fields: []
+      images:
+      - ks_user
+      manifest: job_create_internal_tenant
+    cinder-db-drop:
+      hash_fields:
+      - endpoints.oslo_db.*
+      images:
+      - db_drop
+      manifest: job_db_drop
+    cinder-db-init:
+      hash_fields:
+      - endpoints.oslo_db.*
+      images:
+      - db_init
+      manifest: job_db_init
+    cinder-db-sync:
+      hash_fields:
+      - endpoints.oslo_db.*
+      images:
+      - cinder_db_sync
+      manifest: job_db_sync
+    cinder-db-sync-online:
+      hash_fields: []
+      images:
+      - cinder_db_sync_online
+      manifest: job_db_sync_online
+    cinder-drop-default-volume-type:
+      hash_fields: []
+      images:
+      - cinder_drop_default_volume_type
+      manifest: job_drop_default_volume_type
+    cinder-ks-endpoints:
+      hash_fields: []
+      images:
+      - ks_endpoints
+      manifest: job_ks_endpoints
+    cinder-ks-service:
+      hash_fields: []
+      images:
+      - ks_service
+      manifest: job_ks_service
+    cinder-ks-user:
+      hash_fields:
+      - endpoints.*
+      images:
+      - ks_user
+      manifest: job_ks_user
+    cinder-storage-init:
+      hash_fields: []
+      images:
+      - cinder_storage_init
+      manifest: job_storage_init
+  StatefulSet:
+    cinder-backup:
+      hash_fields: []
+      images:
+      - cinder_backup
+      manifest: statefulset_backup
+    cinder-scheduler:
+      hash_fields: []
+      images:
+      - cinder_scheduler
+      manifest: statefulset_scheduler
+    cinder-volume:
+      hash_fields: []
+      images:
+      - cinder_volume
+      manifest: statefulset_volume
+rabbitmq:
+  Job:
+    openstack-cinder-rabbitmq-cluster-wait:
+      hash_fields:
+      - endpoints.oslo_messaging.*
+      images:
+      - rabbitmq_scripted_test
+      manifest: job_cluster_wait

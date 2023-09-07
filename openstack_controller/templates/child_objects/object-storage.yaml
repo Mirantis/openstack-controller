@@ -1,0 +1,19 @@
+ceph-rgw:
+  Job:
+    ceph-ks-endpoints:
+      hash_fields:
+      - endpoints.*
+      images:
+      - ks_endpoints
+      manifest: job_ks_endpoints
+    ceph-ks-service:
+      hash_fields: []
+      images:
+      - ks_service
+      manifest: job_ks_service
+    ceph-rgw-ks-user:
+      hash_fields:
+      - endpoints.*
+      images:
+      - ks_user
+      manifest: job_ks_user
