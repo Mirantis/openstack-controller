@@ -355,12 +355,10 @@ class Service:
             # For case when inf ochild object doesn't exist in values.
             if not old_values and not new_values:
                 return False
-            #                            old_version = old_values["version"]
-            #                            new_version = new_release["version"]
+
             old_image = old_values["images"]["tags"].get(image)
             new_image = new_values["images"]["tags"][image]
-            #                            if old_version != new_version:
-            #                                return True
+
             # When image name is changed it will not present in helmbundle object
             # on deployed environmet. At the same time in current version of code
             # we will use new name of image.
@@ -370,6 +368,10 @@ class Service:
         for resource in self.child_objects:
             if not resource.exists():
                 continue
+            # NOTE(vsaienko): Do not try to remove object if hash_fields are empty
+            if not resource.helmbundle_ext.hash_fields:
+                continue
+
             # NOTE(vsaienko): even the object is not immutable, it may have immutable fields.
             chart_name = resource.helmbundle_ext.chart
             old_values = release_mapping.get(chart_name, {}).get(
