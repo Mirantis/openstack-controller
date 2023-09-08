@@ -37,6 +37,7 @@ ENV.filters[
 ] = substitute_local_proxy_hostname
 ENV.globals["raise_error"] = raise_error
 ENV.filters["b64encode"] = base64.b64encode
+ENV.filters["toyaml"] = yaml.dump
 ENV.filters["decode"] = lambda x: x.decode()
 ENV.filters["encode"] = lambda x: x.encode()
 
@@ -128,6 +129,16 @@ def render_template(template, **template_args):
     )
     data = yaml.safe_load(text)
     return data
+
+
+def get_child_tree(mspec):
+    res = {}
+    for template in ENV.loader.list_templates():
+        if not template.startswith("child_objects"):
+            continue
+        name = template.split("/")[-1].split(".")[0]
+        res[name] = render_template(template)
+    return res
 
 
 @kopf_exception

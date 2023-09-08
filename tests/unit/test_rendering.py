@@ -22,7 +22,96 @@ patternProperties:
     type: object
     additionalProperties: False
     patternProperties:
-      ".*":
+      "(Deployment|StatefulSet|DaemonSet)":
+        additionalProperties: False
+        type: object
+        patternProperties:
+          ".*":
+            additionalProperties: False
+            type: object
+            required:
+              - hash_fields
+              - images
+              - manifest
+              - pod_labels
+            properties:
+              hash_fields:
+                type: array
+                items:
+                  type: string
+              images:
+                type: array
+                items:
+                  type: string
+              manifest:
+                type: string
+              type:
+                type: string
+                enum:
+                  - static
+                  - dynamic
+              pod_labels:
+                type: object
+                patternProperties:
+                  ".*":
+                    type: string
+              ports:
+                type: array
+                items:
+                   required:
+                   - name
+                   - port
+                   - protocol
+                   type: object
+                   properties:
+                     port:
+                       type: integer
+                     protocol:
+                       type: string
+                       enum:
+                       - TCP
+                       - UDP
+                     name:
+                       type: string
+              connections:
+                type: object
+                items: &connection_items
+                  properties:
+                    egress:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          to_child_object:
+                            type: object
+                            required:
+                            - service
+                            - chart
+                            - kind
+                            - ports
+                            properties:
+                              service:
+                                type: string
+                              chart:
+                                type: string
+                              kind:
+                                type: string
+                                enum:
+                                - StatefulSet
+                                - DaemonSet
+                                - Deployment
+                              ports:
+                                type: array
+                                items:
+                                  type: string
+              selector:
+                type: object
+                patternProperties:
+                  ".*":
+                    type: array
+                    items:
+                      type: string
+      "(Ingress|Job|Service|Secret)":
         additionalProperties: False
         type: object
         patternProperties:
@@ -49,6 +138,11 @@ patternProperties:
                 enum:
                   - static
                   - dynamic
+              pod_labels:
+                type: object
+                patternProperties:
+                  ".*":
+                    type: string
               selector:
                 type: object
                 patternProperties:
@@ -56,6 +150,9 @@ patternProperties:
                     type: array
                     items:
                       type: string
+              connections:
+                type: object
+                <<: *connection_items
 """
 
 # Remove excluded services once contexts with these services are added
@@ -165,7 +262,6 @@ def test_render_service_template(
         gdp_mock.return_value = {f"{service}_rule1": f"{service}_value1"}
     logger.info(f"Rendering service {service} for context {context}")
     spec, kwargs = get_render_kwargs(service, context, common_template_args)
-    # import pdb; pdb.set_trace()
     data = render_helmbundle(service, spec, **kwargs)
     with open(f"{OUTPUT_DIR}/{service}/{context}.yaml") as f:
         output = yaml.safe_load(f)

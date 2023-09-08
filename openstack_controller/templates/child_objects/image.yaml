@@ -5,6 +5,9 @@ glance:
       images:
       - glance_api
       manifest: deployment_api
+      pod_labels:
+        application: glance
+        component: api
   Job:
     glance-bootstrap:
       hash_fields:
