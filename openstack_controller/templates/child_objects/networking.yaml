@@ -1,3 +1,4 @@
+{%- from 'macros/connections.j2' import to_child_object %}
 neutron:
   DaemonSet:
     ovs-agent:
@@ -5,6 +6,9 @@ neutron:
       images:
       - neutron_openvswitch_agent
       manifest: daemonset_ovs_agent
+      pod_labels:
+        application: neutron
+        component: neutron-ovs-angent
       selector:
         application__in:
         - neutron
@@ -16,6 +20,9 @@ neutron:
       images:
       - neutron_sriov_agent
       manifest: daemonset_sriov_agent
+      pod_labels:
+        application: neutron
+        component: neutron-sriov-agent
       selector:
         application__in:
         - neutron
@@ -28,6 +35,12 @@ neutron:
       images:
       - neutron_server
       manifest: deployment_server
+      pod_labels:
+        application: neutron
+        component: server
+      connections:
+        egress:
+          - {{ to_child_object("database", "mariadb", "StatefulSet", "mariadb-server", ["mysql"]) | indent(12)}}
   Job:
     neutron-bootstrap:
       hash_fields:
@@ -48,12 +61,24 @@ neutron:
       images:
       - db_init
       manifest: job_db_init
+      pod_labels:
+        application: neutron
+        component: db-init
+      connections:
+        egress:
+          - {{ to_child_object("database", "mariadb", "StatefulSet", "mariadb-server", ["mysql"]) | indent(12)}}
     neutron-db-sync:
       hash_fields:
       - endpoints.oslo_db.*
       images:
       - neutron_db_sync
       manifest: job_db_sync
+      pod_labels:
+        application: neutron
+        component: db-sync
+      connections:
+        egress:
+          - {{ to_child_object("database", "mariadb", "StatefulSet", "mariadb-server", ["mysql"]) | indent(12)}}
     neutron-ks-endpoints:
       hash_fields: []
       images:

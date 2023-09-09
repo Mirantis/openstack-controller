@@ -5,6 +5,9 @@ cinder:
       images:
       - cinder_api
       manifest: deployment_api
+      pod_labels:
+        application: cinder
+        component: api
   Job:
     cinder-backup-storage-init:
       hash_fields: []
@@ -78,16 +81,25 @@ cinder:
       images:
       - cinder_backup
       manifest: statefulset_backup
+      pod_labels:
+        application: cinder
+        component: backup
     cinder-scheduler:
       hash_fields: []
       images:
       - cinder_scheduler
       manifest: statefulset_scheduler
+      pod_labels:
+        application: cinder
+        component: scheduler
     cinder-volume:
       hash_fields: []
       images:
       - cinder_volume
       manifest: statefulset_volume
+      pod_labels:
+        application: cinder
+        component: volume
 rabbitmq:
   Job:
     openstack-cinder-rabbitmq-cluster-wait:

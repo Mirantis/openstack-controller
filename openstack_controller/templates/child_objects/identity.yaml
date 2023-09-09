@@ -5,6 +5,9 @@ keystone:
       images:
       - keystone_api
       manifest: deployment_api
+      pod_labels:
+        application: keystone
+        component: api
   Job:
     keystone-bootstrap:
       hash_fields:

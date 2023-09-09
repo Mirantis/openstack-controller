@@ -1,0 +1,8 @@
+{% macro to_child_object(service, chart, kind, name, ports) %}
+to_child_object: 
+  service: {{ service }}
+  chart: {{ chart }}
+  kind: {{ kind }}
+  name: {{ name }}
+  ports: {{ ports }}
+{%- endmacro -%}

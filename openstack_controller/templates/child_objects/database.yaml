@@ -1,4 +1,29 @@
+{%- from 'macros/connections.j2' import to_child_object %}
 mariadb:
+  StatefulSet:
+    mariadb-server:
+      hash_fields: []
+      images: []
+      manifest: ''
+      ports:
+        - protocol: TCP
+          port: 3306
+          name: mysql
+        - protocol: TCP
+          port: 9104
+          name: metrics
+        - protocol: TCP
+          port: 4567
+          name: wsrep
+        - protocol: TCP
+          port: 4568
+          name: ist
+        - protocol: TCP
+          port: 4444
+          name: sst
+      pod_labels:
+        application: mariadb
+        component: server
   Job:
     exporter-create-sql-user:
       hash_fields: []

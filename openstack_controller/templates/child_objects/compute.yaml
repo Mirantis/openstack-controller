@@ -9,6 +9,9 @@ nova:
       images: []
       manifest: deployment_placement
       hash_fields: []
+      pod_labels:
+        application: nova
+        component: placement
   Job:
     nova-bootstrap:
       hash_fields:

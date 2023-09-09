@@ -5,16 +5,25 @@ heat:
       images:
       - heat_api
       manifest: deployment_api
+      pod_labels:
+        application: heat
+        component: api
     heat-cfn:
       hash_fields: []
       images:
       - heat_cfn
       manifest: deployment_cfn
+      pod_labels:
+        application: heat
+        component: cfn
     heat-engine:
       hash_fields: []
       images:
       - heat_engine
       manifest: deployment_engine
+      pod_labels:
+        application: heat
+        component: engine
   Job:
     heat-bootstrap:
       hash_fields:
