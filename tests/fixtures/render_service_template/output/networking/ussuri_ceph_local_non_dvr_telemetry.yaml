@@ -70,7 +70,23 @@ spec:
           rabbitmq_scripted_test: rabbitmq-scripted-test:latest
       manifests:
         job_users_create: true
-        network_policy: false
+        network_policy: true
+      network_policy:
+        server:
+          spec:
+            ingress:
+              - from:
+                 - default: selector
+              - from:
+                 - ipBlock:
+                     cidr: 192.168.0.0/16
+            podSelector:
+              matchLabels:
+                application: rabbitmq
+                component: server
+                release_group: openstack-neutron-rabbitmq
+            policyTypes:
+            - Ingress
       monitoring:
         prometheus:
           enabled: true

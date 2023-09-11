@@ -1,0 +1,15 @@
+database:mariadb:StatefulSet:mariadb-server:
+- from:
+  - podSelector:
+      matchLabels:
+        application: mariadb
+        component: server
+  ports:
+  - port: 3306
+    protocol: TCP
+  - port: 4567
+    protocol: TCP
+  - port: 4568
+    protocol: TCP
+  - port: 4444
+    protocol: TCP

@@ -1,0 +1,41 @@
+networking:rabbitmq:StatefulSet:openstack-neutron-rabbitmq-rabbitmq:
+- from:
+  - podSelector:
+      matchLabels:
+        application: neutron
+        component: neutron-ovs-angent
+  - podSelector:
+      matchLabels:
+        application: neutron
+        component: neutron-sriov-agent
+  - podSelector:
+      matchLabels:
+        application: neutron
+        component: metadata-agent
+  - podSelector:
+      matchLabels:
+        application: neutron
+        component: l3-agent
+  - podSelector:
+      matchLabels:
+        application: neutron
+        component: l2gw-agent
+  - podSelector:
+      matchLabels:
+        application: neutron
+        component: dr-agent
+  - podSelector:
+      matchLabels:
+        application: neutron
+        component: dhcp-agent
+  - podSelector:
+      matchLabels:
+        application: neutron
+        component: bagpipe-bgp
+  - podSelector:
+      matchLabels:
+        application: neutron
+        component: server
+  ports:
+  - port: 5672
+    protocol: TCP

@@ -246,6 +246,11 @@ OSCTL_PROXY_SECRET_NAMESPACE = os.environ.get(
 # The dict defining IAM data {"client": "os", "enabled": True, "oidcCASecret": "oidc-cert", url: "https://1.2.3.4"}
 OSDPL_IAM_DATA = json_from_env("OSDPL_IAM_DATA", {"enabled": False})
 
+# List with pod networks data [{"cidr": "1.2.3.0/24"}]
+OSCTL_POD_NETWORKS_DATA = json_from_env(
+    "OSCTL_POD_NETWORKS_DATA", [{"cidr": "192.168.0.0/16"}]
+)
+
 LOGGING_CONFIG = {
     "version": 1,
     "disable_existing_loggers": False,

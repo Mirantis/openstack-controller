@@ -106,6 +106,8 @@ spec:
               value: '{{ toJson .Values.iam }}'
             - name: OSCTL_PROXY_DATA
               value: '{{ toJson .Values.global.proxy }}'
+            - name: OSCTL_POD_NETWORKS_DATA
+              value: '{{ toJson .Values.global.podNetworks }}'
 {{ tuple . | include "openstack-controller.common_env" | indent 12 }}
           livenessProbe:
             exec:

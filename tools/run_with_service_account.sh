@@ -19,6 +19,7 @@ export KUBECONFIG=$KUBECFG_FILE_NAME
 HELM_BINARY="https://binary.mirantis.com/openstack/bin/utils/helm/helm-v3.6.2-linux-amd64"
 
 export NODE_IP=${NODE_IP:$(ip route get 4.2.2.1 | awk '{print $7}' | head -1)}
+export OSCTL_POD_NETWORKS_DATA=${OSCTL_POD_NETWORKS_DATA:-'[{"cidr":"192.168.0.0/16"}]'}
 export OS_CLIENT_CONFIG_FILE="/tmp/osctl-clouds.yaml"
 
 if ! which helm3; then

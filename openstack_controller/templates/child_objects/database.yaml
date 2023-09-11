@@ -24,6 +24,9 @@ mariadb:
       pod_labels:
         application: mariadb
         component: server
+      connections:
+        egress:
+          - {{ to_child_object("database", "mariadb", "StatefulSet", "mariadb-server", ["mysql", "wsrep", "ist", "sst"]) | indent(12)}}
   Job:
     exporter-create-sql-user:
       hash_fields: []
