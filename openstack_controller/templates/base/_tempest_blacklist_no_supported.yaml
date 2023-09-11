@@ -114,7 +114,3 @@
             # TODO: PRODX-28093 run full multi-tenancy tests for Ironic to fully cover network isolation tests
             - (?:ironic_tempest_plugin.tests.scenario.test_baremetal_single_tenant.BaremetalSingleTenant)
             - (?:ironic_tempest_plugin.tests.scenario.test_baremetal_multitenancy.BaremetalMultitenancy)
-
-            # WATCHER
-            # Skip tests watcher client functionality, don't check clients in tempest tests
-            - (?:watcher_tempest_plugin.tests.client_functional)
