@@ -86,7 +86,7 @@ async def test_exists(subprocess_shell, single_helm_release):
     )
     subprocess_shell.return_value.returncode = 0
     expected_cmd = [
-        "/usr/local/bin/helm3",
+        "helm3",
         "list",
         "--namespace",
         "openstack",
@@ -129,7 +129,7 @@ async def test_list(subprocess_shell, single_helm_release):
     )
     subprocess_shell.return_value.returncode = 0
     expected_cmd = [
-        "/usr/local/bin/helm3",
+        "helm3",
         "list",
         "--namespace",
         "openstack",
@@ -159,7 +159,7 @@ async def test_get_release_values(subprocess_shell, release_values):
     )
     subprocess_shell.return_value.returncode = 0
     expected_cmd = [
-        "/usr/local/bin/helm3",
+        "helm3",
         "get",
         "values",
         "--namespace",
@@ -275,7 +275,7 @@ async def test_install_rollback(subprocess_shell, helm_error_rollout_restart):
     subprocess_shell.assert_has_calls(
         [
             mock.call(
-                "/usr/local/bin/helm3",
+                "helm3",
                 "rollback",
                 "test-release",
                 "--namespace",

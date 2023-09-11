@@ -46,18 +46,14 @@ class OsdplNovaMetricCollector(base.OpenStackBaseMetricCollector):
         """
 
         self.cache["aggregates"] = list(self.oc.oc.compute.aggregates())
+        self.cache["availability_zones"] = list(
+            self.oc.oc.compute.availability_zones()
+        )
         self.cache["hypervisors"] = list(self.oc.oc.compute.hypervisors())
         self.cache["services"] = list(self.oc.oc.compute.services())
         self.cache["resource_providers"] = list(
             self.oc.oc.placement.resource_providers()
         )
-
-    def get_availability_zones(self):
-        return [
-            x
-            for x in self.cache.get("aggregates", {})
-            if x.get("availability_zone") is not None
-        ]
 
     def get_host_resource_provider(self, name):
         for resource_provider in self.cache.get("resource_providers", []):
@@ -78,6 +74,16 @@ class OsdplNovaMetricCollector(base.OpenStackBaseMetricCollector):
         for service in self.cache.get("services", []):
             if service["host"] == host:
                 return service["availability_zone"]
+
+    def get_availability_zone_hosts(self, zone):
+        res = []
+        for service in self.cache.get("services", []):
+            if (
+                service.get("zone", "nova") == zone
+                and service.get("binary") == "nova-compute"
+            ):
+                res.append(service["host"])
+        return res
 
     def get_hosts_placement_metrics(self):
         """Return metrics from placement for hosts
@@ -230,47 +236,63 @@ class OsdplNovaMetricCollector(base.OpenStackBaseMetricCollector):
                 )
         return res
 
-    def update_host_group_samples(self, host_placement_metrics):
-        """Update availability_zone and host aggregate samples.
+    def update_aggregate_samples(self, host_placement_metrics):
+        """Update aggregate samples.
 
         :param host_placement_metrics: Dictionary with placement metadata for hosts.
         """
-        group_type_metrics = {"aggregate": {}, "availability_zone": {}}
+        aggregate_metrics = {}
         for aggregate in self.cache.get("aggregates", []):
-            group_type = "aggregate"
-            if aggregate.get("availability_zone") is not None:
-                group_type = "availability_zone"
-
             metrics = self.summ_hosts_metrics(
                 host_placement_metrics, aggregate["hosts"]
             )
-            group_type_metrics[group_type][aggregate["name"]] = metrics
+            aggregate_metrics[aggregate["name"]] = metrics
 
-        group_type_metric_samples = {}
-        for gt, gt_data in group_type_metrics.items():
-            for gt_name, metrics in gt_data.items():
-                for metric_name, metric_value in metrics.items():
-                    group_type_metric_samples.setdefault(
-                        f"{gt}_{metric_name}", []
-                    )
-                    group_type_metric_samples[f"{gt}_{metric_name}"].append(
-                        ([gt_name], metric_value)
-                    )
+        aggregate_metric_samples = {}
+        for aggregate_name, metrics in aggregate_metrics.items():
+            for metric_name, metric_value in metrics.items():
+                aggregate_metric_samples.setdefault(
+                    f"aggregate_{metric_name}", []
+                )
+                aggregate_metric_samples[f"aggregate_{metric_name}"].append(
+                    ([aggregate_name], metric_value)
+                )
 
-        for metric_name, samples in group_type_metric_samples.items():
+        for metric_name, samples in aggregate_metric_samples.items():
+            self.set_samples(metric_name, samples)
+
+    def update_availability_zone_samples(self, host_placement_metrics):
+        """Update availability_zone samples.
+
+        :param host_placement_metrics: Dictionary with placement metadata for hosts.
+        """
+        az_metrics = {}
+        for zone in self.cache.get("availability_zones", []):
+            hosts = self.get_availability_zone_hosts(zone["name"])
+            metrics = self.summ_hosts_metrics(host_placement_metrics, hosts)
+            az_metrics[zone["name"]] = metrics
+
+        az_metric_samples = {}
+        for zone_name, metrics in az_metrics.items():
+            for metric_name, metric_value in metrics.items():
+                az_metric_samples.setdefault(
+                    f"availability_zone_{metric_name}", []
+                )
+                az_metric_samples[f"availability_zone_{metric_name}"].append(
+                    ([zone_name], metric_value)
+                )
+
+        for metric_name, samples in az_metric_samples.items():
             self.set_samples(metric_name, samples)
 
     def update_availability_zone_info_samples(self):
         availability_zone_info_samples = []
-        for aggregate in self.cache.get("aggregates", []):
-            if aggregate.get("availability_zone") is None:
-                # This is regular aggregate
-                continue
+        for zone in self.cache.get("availability_zones", []):
             availability_zone_info_samples.append(
                 (
                     [],
                     {
-                        "zone": aggregate["name"],
+                        "zone": zone["name"],
                     },
                 )
             )
@@ -278,40 +300,43 @@ class OsdplNovaMetricCollector(base.OpenStackBaseMetricCollector):
             "availability_zone_info", availability_zone_info_samples
         )
 
-    def update_host_aggregate_samples(self):
-        host_aggregate_info_samples = []
-        host_aggregate_hosts_samples = []
+    def update_availability_zone_hosts(self):
         availability_zone_hosts_samples = []
-        for aggregate in self.cache.get("aggregates", []):
-            zone = aggregate.get("availability_zone")
-            hosts = aggregate["hosts"] or []
-            hosts_number = len(hosts)
-            if zone:
-                availability_zone_hosts_samples.append(([zone], hosts_number))
-            else:
-                aggregate_name = aggregate["name"]
-                for host in hosts:
-                    host_aggregate_info_samples.append(
-                        (
-                            [],
-                            {
-                                "host": host,
-                                "name": aggregate_name,
-                            },
-                        )
-                    )
-                host_aggregate_hosts_samples.append(
-                    (
-                        [aggregate_name],
-                        hosts_number,
-                    )
-                )
+        for zone in self.cache.get("availability_zones", []):
+            zone_name = zone["name"]
+            hosts_number = len(self.get_availability_zone_hosts(zone_name))
+            availability_zone_hosts_samples.append(([zone_name], hosts_number))
 
-        self.set_samples("host_aggregate_info", host_aggregate_info_samples)
-        self.set_samples("aggregate_hosts", host_aggregate_hosts_samples)
         self.set_samples(
             "availability_zone_hosts", availability_zone_hosts_samples
         )
+
+    def update_host_aggregate_samples(self):
+        host_aggregate_info_samples = []
+        host_aggregate_hosts_samples = []
+        for aggregate in self.cache.get("aggregates", []):
+            hosts = aggregate["hosts"] or []
+            hosts_number = len(hosts)
+            aggregate_name = aggregate["name"]
+            for host in hosts:
+                host_aggregate_info_samples.append(
+                    (
+                        [],
+                        {
+                            "host": host,
+                            "name": aggregate_name,
+                        },
+                    )
+                )
+            host_aggregate_hosts_samples.append(
+                (
+                    [aggregate_name],
+                    hosts_number,
+                )
+            )
+
+        self.set_samples("host_aggregate_info", host_aggregate_info_samples)
+        self.set_samples("aggregate_hosts", host_aggregate_hosts_samples)
 
     def update_hypervisor_samples(self, host_placement_metrics):
         hypervisors_samples = {}
@@ -364,7 +389,7 @@ class OsdplNovaMetricCollector(base.OpenStackBaseMetricCollector):
         instances = {"total": 0, "active": 0, "error": 0}
         hypervisor_instances = {}
         availability_zone_instances_total = {}
-        for zone in self.get_availability_zones():
+        for zone in self.cache.get("availability_zones", []):
             availability_zone_instances_total[zone["name"]] = 0
         for instance in self.oc.oc.compute.servers(all_projects=True):
             status = instance["status"].lower()
@@ -433,7 +458,9 @@ class OsdplNovaMetricCollector(base.OpenStackBaseMetricCollector):
         self.update_service_samples()
         self.update_hypervisor_samples(host_placement_metrics)
         self.update_host_aggregate_samples()
-        self.update_host_group_samples(host_placement_metrics)
+        self.update_aggregate_samples(host_placement_metrics)
+        self.update_availability_zone_samples(host_placement_metrics)
         self.update_availability_zone_info_samples()
+        self.update_availability_zone_hosts()
         hypervisor_instances = self.update_instances_samples()
         self.update_aggregate_instances(hypervisor_instances)
