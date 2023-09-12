@@ -50,8 +50,6 @@ class SecretsContentFunctionalTestCase(base.BaseFunctionalTestCase):
         except configparser.MissingSectionHeaderError:
             data = data.replace(" ", "")
 
-            for skip_key in self.skip_keys:
-                data.replace(f"{skip_key}=password", "")
             # Password may contains as:
             # 1. Option of config file
             # 2. Part of URL in config files
@@ -71,6 +69,8 @@ class SecretsContentFunctionalTestCase(base.BaseFunctionalTestCase):
             if secret.name in self.skip_secrets:
                 continue
             for key, value in secret.obj.get("data", {}).items():
+                if key in self.skip_keys:
+                    continue
                 data = base64.b64decode(value).decode("utf-8")
                 if not self.check_secret_field(data):
                     errors.append((secret.name, key, data))
