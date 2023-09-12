@@ -272,7 +272,8 @@ def test_render_service_template(
 def test_render_child_object_template(
     service,
     template,
+    openstackdeployment_mspec,
 ):
     schema = yaml.safe_load(CHILD_OBJECTS_SCHEMA)
-    data = layers.render_template(template)
+    data = layers.render_template(template, spec=openstackdeployment_mspec)
     validate(data, schema)

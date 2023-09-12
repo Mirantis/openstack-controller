@@ -116,7 +116,7 @@ class Service:
     def child_objects(self):
         res = []
         child_objects = layers.render_template(
-            f"child_objects/{self.service}.yaml"
+            f"child_objects/{self.service}.yaml", spec=self.mspec
         )
         for chart_name, kinds in child_objects.items():
             for kind, objects in kinds.items():
@@ -178,7 +178,7 @@ class Service:
     def get_child_objects_dynamic(self, kind, abstract_name):
         res = []
         child_objects = layers.render_template(
-            f"child_objects/{self.service}.yaml"
+            f"child_objects/{self.service}.yaml", spec=self.mspec
         )
         for chart_name, kinds in child_objects.items():
             for kinds, objects in kinds.items():

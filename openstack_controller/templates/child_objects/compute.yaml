@@ -1,17 +1,4 @@
 nova:
-  Ingress:
-    placement:
-      manifest: ingress_placement
-      images: []
-      hash_fields: []
-  Deployment:
-    nova-placement-api:
-      images: []
-      manifest: deployment_placement
-      hash_fields: []
-      pod_labels:
-        application: nova
-        component: placement
   Job:
     nova-bootstrap:
       hash_fields:
@@ -78,6 +65,7 @@ nova:
       images:
       - ks_user
       manifest: job_ks_user
+{%- if spec.openstack_version not in ['queens', 'rocky'] %}
     placement-ks-endpoints:
       images:
       - ks_endpoints
@@ -108,6 +96,20 @@ nova:
       images: []
       manifest: service_placement
       hash_fields: []
+  Ingress:
+    placement:
+      manifest: ingress_placement
+      images: []
+      hash_fields: []
+  Deployment:
+    nova-placement-api:
+      images: []
+      manifest: deployment_placement
+      hash_fields: []
+      pod_labels:
+        application: nova
+        component: placement
+{%- endif %}
 rabbitmq:
   Job:
     openstack-nova-rabbitmq-cluster-wait:
