@@ -1,1 +1,11 @@
-{}
+cloudprober:
+  Deployment:
+    openstack-cloudprober:
+      hash_fields: []
+      images:
+      - cloudprober_openstack_discovery
+      - cloudprober
+      manifest: deployment
+      pod_labels:
+        application: cloudprober
+        component: prober
