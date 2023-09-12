@@ -1,4 +1,46 @@
 aodh:
+  CronJob:
+    aodh-db-purge:
+      hash_fields: []
+      images:
+      - aodh_db_purge
+      manifest: cron_job_db_purge
+      pod_labels:
+        application: aodh
+        component: db-purge
+  Deployment:
+    aodh-api:
+      hash_fields: []
+      images:
+      - aodh_api
+      manifest: deployment_api
+      pod_labels:
+        application: aodh
+        component: api
+    aodh-evaluator:
+      hash_fields: []
+      images:
+      - aodh_evaluator
+      manifest: deployment_evaluator
+      pod_labels:
+        application: aodh
+        component: evaluator
+    aodh-listener:
+      hash_fields: []
+      images:
+      - aodh_listener
+      manifest: deployment_listener
+      pod_labels:
+        application: aodh
+        component: listener
+    aodh-notifier:
+      hash_fields: []
+      images:
+      - aodh_notifier
+      manifest: deployment_notifier
+      pod_labels:
+        application: aodh
+        component: notifier
   Job:
     aodh-bootstrap:
       hash_fields:
@@ -7,37 +49,66 @@ aodh:
       images:
       - bootstrap
       manifest: job_bootstrap
+      pod_labels:
+        application: aodh
+        component: bootstrap
     aodh-db-drop:
       hash_fields:
       - endpoints.oslo_db.*
       images:
       - db_drop
       manifest: job_db_drop
+      pod_labels:
+        application: aodh
+        component: db-drop
     aodh-db-init:
       hash_fields:
       - endpoints.oslo_db.*
       images:
       - db_init
       manifest: job_db_init
+      pod_labels:
+        application: aodh
+        component: db-init
     aodh-db-sync:
       hash_fields:
       - endpoints.oslo_db.*
       images:
       - aodh_db_sync
       manifest: job_db_sync
+      pod_labels:
+        application: aodh
+        component: db-sync
     aodh-ks-endpoints:
       hash_fields: []
       images:
       - ks_endpoints
       manifest: job_ks_endpoints
+      pod_labels:
+        application: aodh
+        component: ks-endpoints
     aodh-ks-service:
       hash_fields: []
       images:
       - ks_service
       manifest: job_ks_service
+      pod_labels:
+        application: aodh
+        component: ks-service
     aodh-ks-user:
       hash_fields:
       - endpoints.*
       images:
       - ks_user
       manifest: job_ks_user
+      pod_labels:
+        application: aodh
+        component: ks-user
+    aodh-rabbit-init:
+      hash_fields: []
+      images:
+      - job_rabbit_init
+      manifest: job_rabbit_init
+      pod_labels:
+        application: aodh
+        component: rabbit-init
