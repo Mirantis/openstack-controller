@@ -255,6 +255,8 @@ spec:
             backup_driver: cinder.backup.drivers.nfs.NFSBackupDriver
             backup_share: {{ main_backup_driver["backup_share"] }}
   {%- endif %}
+{%- elif spec.openstack_version not in ("queens", "rocky", "stein", "train", "ussuri", "victoria", "wallaby", "xena") %}
+            backup_api_class: cinder.backup.api.NoOp
 {%- endif %}
             control_exchange: cinder
 {%- if is_ceph_enabled %}
