@@ -369,7 +369,12 @@ class Service:
             if not resource.exists():
                 continue
             # NOTE(vsaienko): Do not try to remove object if hash_fields are empty
-            if not resource.helmbundle_ext.hash_fields:
+            # but still allow to remove the object if it is immutable, we need to
+            # still check for image changes
+            if (
+                not resource.immutable
+                and not resource.helmbundle_ext.hash_fields
+            ):
                 continue
 
             # NOTE(vsaienko): even the object is not immutable, it may have immutable fields.
