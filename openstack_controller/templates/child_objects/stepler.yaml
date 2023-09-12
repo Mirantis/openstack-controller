@@ -43,17 +43,31 @@ None:
       manifest: job_ks_user
 stepler:
   Job:
+    openstack-stepler-run-tests:
+      hash_fields: []
+      images:
+      - stepler_run_tests
+      manifest: job_run_tests
+      pod_labels:
+        application: stepler
+        component: run-tests
     stepler-bootstrap:
       hash_fields: []
       images:
       - bootstrap
       manifest: job_bootstrap
+      pod_labels:
+        application: stepler
+        component: bootstrap
     stepler-ks-user:
       hash_fields:
       - endpoints.*
       images:
       - ks_user
       manifest: job_ks_user
+      pod_labels:
+        application: stepler
+        component: ks-user
     stepler-run-tests:
       hash_fields: []
       images:

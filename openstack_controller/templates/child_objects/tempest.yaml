@@ -6,19 +6,39 @@ tempest:
       - tempest_run_tests
       - tempest-uuids-init
       manifest: job_run_tests
+      pod_labels:
+        application: tempest
+        component: run-tests
     tempest-bootstrap:
       hash_fields: []
       images:
       - bootstrap
       manifest: job_bootstrap
+      pod_labels:
+        application: tempest
+        component: bootstrap
     tempest-image-repo-sync:
       hash_fields: []
       images:
       - image_repo_sync
       manifest: job_image_repo_sync
+      pod_labels:
+        application: tempest
+        component: image-repo-sync
     tempest-ks-user:
       hash_fields:
       - endpoints.*
       images:
       - ks_user
       manifest: job_ks_user
+      pod_labels:
+        application: tempest
+        component: ks-user
+    tempest-static-accounts:
+      hash_fields: []
+      images:
+      - tempest_static_accounts
+      manifest: job_static_accounts
+      pod_labels:
+        application: tempest
+        component: static-accounts
