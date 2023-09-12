@@ -64,7 +64,7 @@ def helm_retry(func):
 class HelmManager:
     def __init__(
         self,
-        binary="/usr/local/bin/helm3",
+        binary="helm3",
         namespace="openstack",
         history_max=1,
     ):
