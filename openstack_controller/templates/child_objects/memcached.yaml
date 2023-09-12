@@ -1,1 +1,11 @@
-{}
+memcached:
+  StatefulSet:
+    openstack-memcached-memcached:
+      hash_fields: []
+      images:
+      - memcached
+      - prometheus_memcached_exporter
+      manifest: statefulset
+      pod_labels:
+        application: memcached
+        component: server
