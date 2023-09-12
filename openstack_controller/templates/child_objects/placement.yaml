@@ -1,4 +1,13 @@
 placement:
+  Deployment:
+    placement-api:
+      hash_fields: []
+      images:
+      - placement
+      manifest: deployment
+      pod_labels:
+        application: placement
+        component: api
   Job:
     placement-db-drop:
       hash_fields:
@@ -6,36 +15,73 @@ placement:
       images:
       - db_drop
       manifest: job_db_drop
+      pod_labels:
+        application: placement
+        component: db-drop
     placement-db-init:
       hash_fields:
       - endpoints.oslo_db.*
       images:
       - db_init
       manifest: job_db_init
+      pod_labels:
+        application: placement
+        component: db-init
+    placement-db-migrate:
+      hash_fields: []
+      images:
+      - db_migrate
+      manifest: job_db_migrate
+      pod_labels:
+        application: placement
+        component: db_migrate
     placement-db-nova-migrate-placement:
+      hash_fields: []
       images:
       - placement_db_nova_migrate_placement
       manifest: job_db_nova_migrate_placement
-      hash_fields: []
+      pod_labels:
+        application: placement
+        component: db-nova-migrate-placement
     placement-db-sync:
       hash_fields:
       - endpoints.oslo_db.*
       images:
       - placement_db_sync
       manifest: job_db_sync
+      pod_labels:
+        application: placement
+        component: db-sync
+    placement-image-repo-sync:
+      hash_fields: []
+      images:
+      - image_repo_sync
+      manifest: job_image_repo_sync
+      pod_labels:
+        application: placement
+        component: image-repo-sync
     placement-ks-endpoints:
       hash_fields: []
       images:
       - ks_endpoints
       manifest: job_ks_endpoints
+      pod_labels:
+        application: placement
+        component: ks-endpoints
     placement-ks-service:
       hash_fields: []
       images:
       - ks_service
       manifest: job_ks_service
+      pod_labels:
+        application: placement
+        component: ks-service
     placement-ks-user:
       hash_fields:
       - endpoints.*
       images:
       - ks_user
       manifest: job_ks_user
+      pod_labels:
+        application: placement
+        component: ks-user
