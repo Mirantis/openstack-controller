@@ -1,4 +1,22 @@
 barbican:
+  CronJob:
+    barbican-db-purge:
+      hash_fields: []
+      images:
+      - barbican_db_purge
+      manifest: cron_job_db_purge
+      pod_labels:
+        application: barbican
+        component: db-purge
+  Deployment:
+    barbican-api:
+      hash_fields: []
+      images:
+      - barbican_api
+      manifest: deployment_api
+      pod_labels:
+        application: barbican
+        component: api
   Job:
     barbican-bootstrap:
       hash_fields:
@@ -7,40 +25,61 @@ barbican:
       images:
       - bootstrap
       manifest: job_bootstrap
+      pod_labels:
+        application: barbican
+        component: bootstrap
     barbican-db-drop:
       hash_fields:
       - endpoints.oslo_db.*
       images:
       - db_drop
       manifest: job_db_drop
+      pod_labels:
+        application: barbican
+        component: db-drop
     barbican-db-init:
       hash_fields:
       - endpoints.oslo_db.*
       images:
       - db_init
       manifest: job_db_init
+      pod_labels:
+        application: barbican
+        component: db-init
     barbican-db-sync:
       hash_fields:
       - endpoints.oslo_db.*
       images:
       - barbican_db_sync
       manifest: job_db_sync
+      pod_labels:
+        application: barbican
+        component: db-sync
     barbican-ks-endpoints:
       hash_fields: []
       images:
       - ks_endpoints
       manifest: job_ks_endpoints
+      pod_labels:
+        application: barbican
+        component: ks-endpoints
     barbican-ks-service:
       hash_fields: []
       images:
       - ks_service
       manifest: job_ks_service
+      pod_labels:
+        application: barbican
+        component: ks-service
     barbican-ks-user:
       hash_fields:
       - endpoints.*
       images:
       - ks_user
       manifest: job_ks_user
+      pod_labels:
+        application: barbican
+        component: ks-user
 rabbitmq:
   Job:
     openstack-barbican-rabbitmq-cluster-wait:
