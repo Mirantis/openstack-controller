@@ -1,4 +1,21 @@
 heat:
+  CronJob:
+    heat-db-purge:
+      hash_fields: []
+      images:
+      - heat_db_purge
+      manifest: cron_job_db_purge
+      pod_labels:
+        application: heat
+        component: db-purge
+    heat-engine-cleaner:
+      hash_fields: []
+      images:
+      - heat_engine_cleaner
+      manifest: cron_job_engine_cleaner
+      pod_labels:
+        application: heat
+        component: engine-cleaner
   Deployment:
     heat-api:
       hash_fields: []
@@ -16,6 +33,14 @@ heat:
       pod_labels:
         application: heat
         component: cfn
+    heat-cloudwatch:
+      hash_fields: []
+      images:
+      - heat_cloudwatch
+      manifest: deployment_cloudwatch
+      pod_labels:
+        application: heat
+        component: cloudwatch
     heat-engine:
       hash_fields: []
       images:
@@ -32,24 +57,36 @@ heat:
       images:
       - bootstrap
       manifest: job_bootstrap
+      pod_labels:
+        application: heat
+        component: bootstrap
     heat-db-drop:
       hash_fields:
       - endpoints.oslo_db.*
       images:
       - db_drop
       manifest: job_db_drop
+      pod_labels:
+        application: heat
+        component: db-drop
     heat-db-init:
       hash_fields:
       - endpoints.oslo_db.*
       images:
       - db_init
       manifest: job_db_init
+      pod_labels:
+        application: heat
+        component: db-init
     heat-db-sync:
       hash_fields:
       - endpoints.oslo_db.*
       images:
       - heat_db_sync
       manifest: job_db_sync
+      pod_labels:
+        application: heat
+        component: db-sync
     heat-domain-ks-user:
       hash_fields:
       - conf.*
@@ -57,22 +94,42 @@ heat:
       images:
       - ks_user
       manifest: job_ks_user_domain
+      pod_labels:
+        application: heat
+        component: ks-user
+    heat-image-repo-sync:
+      hash_fields: []
+      images:
+      - image_repo_sync
+      manifest: job_image_repo_sync
+      pod_labels:
+        application: heat
+        component: image-repo-sync
     heat-ks-endpoints:
       hash_fields: []
       images:
       - ks_endpoints
       manifest: job_ks_endpoints
+      pod_labels:
+        application: heat
+        component: ks-endpoints
     heat-ks-service:
       hash_fields: []
       images:
       - ks_service
       manifest: job_ks_service
+      pod_labels:
+        application: heat
+        component: ks-service
     heat-ks-user:
       hash_fields:
       - endpoints.*
       images:
       - ks_user
       manifest: job_ks_user
+      pod_labels:
+        application: heat
+        component: ks-user
     heat-trustee-ks-user:
       hash_fields:
       - endpoints.*
@@ -85,6 +142,18 @@ heat:
       images:
       - ks_trusts
       manifest: job_heat_trusts
+      pod_labels:
+        application: heat
+        component: ks-user
+  StatefulSet:
+    heat-engine:
+      hash_fields: []
+      images:
+      - heat_engine
+      manifest: deployment_engine
+      pod_labels:
+        application: heat
+        component: engine
 rabbitmq:
   Job:
     openstack-heat-rabbitmq-cluster-wait:
