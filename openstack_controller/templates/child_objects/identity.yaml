@@ -1,4 +1,21 @@
 keystone:
+  CronJob:
+    keystone-credential-rotate:
+      hash_fields: []
+      images:
+      - keystone_credential_rotate
+      manifest: cron_credential_rotate
+      pod_labels:
+        application: keystone
+        component: credential-rotate
+    keystone-fernet-rotate:
+      hash_fields: []
+      images:
+      - keystone_fernet_rotate
+      manifest: cron_fernet_rotate
+      pod_labels:
+        application: keystone
+        component: fernet-rotate
   Deployment:
     keystone-api:
       hash_fields: []
@@ -8,6 +25,14 @@ keystone:
       pod_labels:
         application: keystone
         component: api
+    keystone-client:
+      hash_fields: []
+      images:
+      - keystone_client
+      manifest: deployment_client
+      pod_labels:
+        application: keystone
+        component: client
   Job:
     keystone-bootstrap:
       hash_fields:
@@ -15,24 +40,44 @@ keystone:
       images:
       - bootstrap
       manifest: job_bootstrap
+      pod_labels:
+        application: keystone
+        component: bootstrap
+    keystone-credential-cleanup:
+      hash_fields: []
+      images:
+      - keystone_credential_cleanup
+      manifest: job_credential_cleanup
+      pod_labels:
+        application: keystone
+        component: credential-cleanup
     keystone-credential-setup:
       hash_fields:
       - conf.*
       images:
       - keystone_credential_setup
       manifest: job_credential_setup
+      pod_labels:
+        application: keystone
+        component: credential-setup
     keystone-db-drop:
       hash_fields:
       - endpoints.oslo_db.*
       images:
       - db_drop
       manifest: job_db_drop
+      pod_labels:
+        application: keystone
+        component: db-drop
     keystone-db-init:
       hash_fields:
       - endpoints.oslo_db.*
       images:
       - db_init
       manifest: job_db_init
+      pod_labels:
+        application: keystone
+        component: db-init
     keystone-db-sync:
       hash_fields:
       - endpoints.oslo_db.*
@@ -40,38 +85,68 @@ keystone:
       images:
       - keystone_db_sync
       manifest: job_db_sync
+      pod_labels:
+        application: keystone
+        component: db-sync
     keystone-db-sync-contract:
       hash_fields: []
       images:
       - keystone_db_sync_contract
       manifest: job_db_sync_contract
+      pod_labels:
+        application: keystone
+        component: db-sync-contract
     keystone-db-sync-expand:
       hash_fields: []
       images:
       - keystone_db_sync_expand
       manifest: job_db_sync_expand
+      pod_labels:
+        application: keystone
+        component: db-sync-expand
     keystone-db-sync-migrate:
       hash_fields: []
       images:
       - keystone_db_sync_migrate
       manifest: job_db_sync_migrate
+      pod_labels:
+        application: keystone
+        component: db-sync-migrate
     keystone-domain-manage:
       hash_fields:
       - conf.*
       images:
       - keystone_domain_manage
       manifest: job_domain_manage
+      pod_labels:
+        application: keystone
+        component: domain-manage
     keystone-federations-create:
       hash_fields: []
       images:
+      - bootstrap
       - keystone_federations_create
       manifest: job_federations_create
+      pod_labels:
+        application: keystone
+        component: federations-create
     keystone-fernet-setup:
       hash_fields:
       - conf.*
       images:
       - keystone_fernet_setup
       manifest: job_fernet_setup
+      pod_labels:
+        application: keystone
+        component: fernet-setup
+    keystone-ks-user:
+      hash_fields: []
+      images:
+      - ks_user
+      manifest: job_ks_user
+      pod_labels:
+        application: keystone
+        component: ks-user
     osctl-ks-user:
       hash_fields:
       - endpoints.*
