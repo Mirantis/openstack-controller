@@ -1,4 +1,22 @@
 panko:
+  CronJob:
+    panko-events-cleaner:
+      hash_fields: []
+      images:
+      - panko_events_cleaner
+      manifest: cron_job_events_cleaner
+      pod_labels:
+        application: panko
+        component: events-cleaner
+  Deployment:
+    panko-api:
+      hash_fields: []
+      images:
+      - panko_api
+      manifest: deployment_api
+      pod_labels:
+        application: panko
+        component: api
   Job:
     panko-bootstrap:
       hash_fields:
@@ -7,37 +25,66 @@ panko:
       images:
       - bootstrap
       manifest: job_bootstrap
+      pod_labels:
+        application: panko
+        component: bootstrap
     panko-db-drop:
       hash_fields:
       - endpoints.oslo_db.*
       images:
       - db_drop
       manifest: job_db_drop
+      pod_labels:
+        application: panko
+        component: db-drop
     panko-db-init:
       hash_fields:
       - endpoints.oslo_db.*
       images:
       - db_init
       manifest: job_db_init
+      pod_labels:
+        application: panko
+        component: db-init
     panko-db-sync:
       hash_fields:
       - endpoints.oslo_db.*
       images:
       - panko_db_sync
       manifest: job_db_sync
+      pod_labels:
+        application: panko
+        component: db-sync
+    panko-image-repo-sync:
+      hash_fields: []
+      images:
+      - image_repo_sync
+      manifest: job_image_repo_sync
+      pod_labels:
+        application: panko
+        component: image-repo-sync
     panko-ks-endpoints:
       hash_fields: []
       images:
       - ks_endpoints
       manifest: job_ks_endpoints
+      pod_labels:
+        application: panko
+        component: ks-endpoints
     panko-ks-service:
       hash_fields: []
       images:
       - ks_service
       manifest: job_ks_service
+      pod_labels:
+        application: panko
+        component: ks-service
     panko-ks-user:
       hash_fields:
       - endpoints.*
       images:
       - ks_user
       manifest: job_ks_user
+      pod_labels:
+        application: panko
+        component: ks-user
