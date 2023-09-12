@@ -1,1 +1,21 @@
-{}
+ingress:
+  DaemonSet:
+    ingress:
+      hash_fields: []
+      images:
+      - ingress
+      - ingress_module_init
+      - ingress_tls_proxy
+      manifest: deployment_ingress
+      pod_labels:
+        application: ingress
+        component: server
+  Deployment:
+    ingress-error-pages:
+      hash_fields: []
+      images:
+      - error_pages
+      manifest: deployment_error
+      pod_labels:
+        application: ingress
+        component: error-pages
