@@ -1,4 +1,39 @@
 masakari:
+  CronJob:
+    masakari-db-purge:
+      hash_fields: []
+      images:
+      - masakari_db_purge
+      manifest: cron_job_db_purge
+      pod_labels:
+        application: masakari
+        component: db-purge
+  DaemonSet:
+    masakari-monitors:
+      hash_fields: []
+      images:
+      - masakari_monitors
+      manifest: daemonset_monitors
+      pod_labels:
+        application: masakari
+        component: monitors
+  Deployment:
+    masakari-api:
+      hash_fields: []
+      images:
+      - masakari_api
+      manifest: deployment_api
+      pod_labels:
+        application: masakari
+        component: api
+    masakari-engine:
+      hash_fields: []
+      images:
+      - masakari_engine
+      manifest: deployment_engine
+      pod_labels:
+        application: masakari
+        component: engine
   Job:
     masakari-bootstrap:
       hash_fields:
@@ -7,37 +42,66 @@ masakari:
       images:
       - bootstrap
       manifest: job_bootstrap
+      pod_labels:
+        application: masakari
+        component: bootstrap
     masakari-db-drop:
       hash_fields:
       - endpoints.oslo_db.*
       images:
       - db_drop
       manifest: job_db_drop
+      pod_labels:
+        application: masakari
+        component: db-drop
     masakari-db-init:
       hash_fields:
       - endpoints.oslo_db.*
       images:
       - db_init
       manifest: job_db_init
+      pod_labels:
+        application: masakari
+        component: db-init
     masakari-db-sync:
       hash_fields:
       - endpoints.oslo_db.*
       images:
       - masakari_db_sync
       manifest: job_db_sync
+      pod_labels:
+        application: masakari
+        component: db-sync
+    masakari-image-repo-sync:
+      hash_fields: []
+      images:
+      - image_repo_sync
+      manifest: job_image_repo_sync
+      pod_labels:
+        application: masakari
+        component: image-repo-sync
     masakari-ks-endpoints:
       hash_fields: []
       images:
       - ks_endpoints
       manifest: job_ks_endpoints
+      pod_labels:
+        application: masakari
+        component: ks-endpoints
     masakari-ks-service:
       hash_fields: []
       images:
       - ks_service
       manifest: job_ks_service
+      pod_labels:
+        application: masakari
+        component: ks-service
     masakari-ks-user:
       hash_fields:
       - endpoints.*
       images:
       - ks_user
       manifest: job_ks_user
+      pod_labels:
+        application: masakari
+        component: ks-user
