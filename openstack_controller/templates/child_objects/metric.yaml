@@ -1,4 +1,41 @@
 gnocchi:
+  CronJob:
+    gnocchi-resources-cleaner:
+      hash_fields: []
+      images:
+      - gnocchi_resources_cleaner
+      manifest: cron_job_resources_cleaner
+      pod_labels:
+        application: gnocchi
+        component: resources-cleaner
+  DaemonSet:
+    gnocchi-metricd:
+      hash_fields: []
+      images:
+      - gnocchi_api
+      - gnocchi_metricd
+      manifest: daemonset_metricd
+      pod_labels:
+        application: gnocchi
+        component: metricd
+    gnocchi-statsd:
+      hash_fields: []
+      images:
+      - gnocchi_api
+      - gnocchi_statsd
+      manifest: daemonset_statsd
+      pod_labels:
+        application: gnocchi
+        component: metricd
+  Deployment:
+    gnocchi-api:
+      hash_fields: []
+      images:
+      - gnocchi_api
+      manifest: deployment_api
+      pod_labels:
+        application: gnocchi
+        component: api
   Job:
     gnocchi-bootstrap:
       hash_fields:
@@ -7,37 +44,92 @@ gnocchi:
       images:
       - bootstrap
       manifest: job_bootstrap
+      pod_labels:
+        application: gnocchi
+        component: bootstrap
+    gnocchi-clean:
+      hash_fields: []
+      images:
+      - gnocchi_storage_init
+      manifest: job_clean
+      pod_labels:
+        application: gnocchi
+        component: clean
     gnocchi-db-drop:
       hash_fields:
       - endpoints.oslo_db.*
       images:
       - db_drop
       manifest: job_db_drop
+      pod_labels:
+        application: gnocchi
+        component: db-drop
     gnocchi-db-init:
       hash_fields:
       - endpoints.oslo_db.*
       images:
       - db_init
       manifest: job_db_init
+      pod_labels:
+        application: gnocchi
+        component: db-init
+    gnocchi-db-init-indexer:
+      hash_fields: []
+      images:
+      - db_init_indexer
+      manifest: job_db_init_indexer
+      pod_labels:
+        application: gnocchi
+        component: db-init-indexer
     gnocchi-db-sync:
       hash_fields:
       - endpoints.oslo_db.*
       images:
+      - gnocchi_api
       - gnocchi_db_sync
       manifest: job_db_sync
+      pod_labels:
+        application: gnocchi
+        component: db-sync
+    gnocchi-image-repo-sync:
+      hash_fields: []
+      images:
+      - image_repo_sync
+      manifest: job_image_repo_sync
+      pod_labels:
+        application: gnocchi
+        component: image-repo-sync
     gnocchi-ks-endpoints:
       hash_fields: []
       images:
       - ks_endpoints
       manifest: job_ks_endpoints
+      pod_labels:
+        application: gnocchi
+        component: ks-endpoints
     gnocchi-ks-service:
       hash_fields: []
       images:
       - ks_service
       manifest: job_ks_service
+      pod_labels:
+        application: gnocchi
+        component: ks-service
     gnocchi-ks-user:
       hash_fields:
       - endpoints.*
       images:
       - ks_user
       manifest: job_ks_user
+      pod_labels:
+        application: gnocchi
+        component: ks-user
+    gnocchi-storage-init:
+      hash_fields: []
+      images:
+      - gnocchi_api
+      - gnocchi_storage_init
+      manifest: job_storage_init
+      pod_labels:
+        application: gnocchi
+        component: storage-init
