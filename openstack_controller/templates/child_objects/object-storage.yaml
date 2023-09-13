@@ -6,11 +6,17 @@ ceph-rgw:
       images:
       - ks_endpoints
       manifest: job_ks_endpoints
+      pod_labels:
+        application: ceph
+        component: ks-endpoints
     ceph-ks-service:
       hash_fields: []
       images:
       - ks_service
       manifest: job_ks_service
+      pod_labels:
+        application: ceph
+        component: ks-service
     ceph-rgw-ks-user:
       hash_fields:
       - endpoints.*
