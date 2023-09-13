@@ -3,6 +3,30 @@ networking:rabbitmq:StatefulSet:openstack-neutron-rabbitmq-rabbitmq:
   - podSelector:
       matchLabels:
         application: neutron
+        component: bagpipe-bgp
+  - podSelector:
+      matchLabels:
+        application: neutron
+        component: dhcp-agent
+  - podSelector:
+      matchLabels:
+        application: neutron
+        component: dr-agent
+  - podSelector:
+      matchLabels:
+        application: neutron
+        component: l2gw-agent
+  - podSelector:
+      matchLabels:
+        application: neutron
+        component: l3-agent
+  - podSelector:
+      matchLabels:
+        application: neutron
+        component: metadata-agent
+  - podSelector:
+      matchLabels:
+        application: neutron
         component: neutron-ovs-agent
   - podSelector:
       matchLabels:
@@ -11,31 +35,11 @@ networking:rabbitmq:StatefulSet:openstack-neutron-rabbitmq-rabbitmq:
   - podSelector:
       matchLabels:
         application: neutron
-        component: metadata-agent
-  - podSelector:
-      matchLabels:
-        application: neutron
-        component: l3-agent
-  - podSelector:
-      matchLabels:
-        application: neutron
-        component: l2gw-agent
-  - podSelector:
-      matchLabels:
-        application: neutron
-        component: dr-agent
-  - podSelector:
-      matchLabels:
-        application: neutron
-        component: dhcp-agent
-  - podSelector:
-      matchLabels:
-        application: neutron
-        component: bagpipe-bgp
-  - podSelector:
-      matchLabels:
-        application: neutron
         component: server
+  - podSelector:
+      matchLabels:
+        application: neutron
+        component: ironic-agent
   ports:
   - port: 5672
     protocol: TCP
