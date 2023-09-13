@@ -1,4 +1,39 @@
 manila:
+  CronJob:
+    manila-db-purge:
+      hash_fields: []
+      images:
+      - manila_db_purge
+      manifest: cron_job_db_purge
+      pod_labels:
+        application: manila
+        component: db-purge
+  DaemonSet:
+    manila-share-ds:
+      hash_fields: []
+      images:
+      - manila_share
+      - manila-uuids-init
+      - manila_share_daemonset
+      manifest: daemonset_share
+      pod_labels:
+        application: manila
+        component: share_daemonset
+      selector:
+        application__in:
+        - manila
+        component__in:
+        - share_daemonset
+      type: dynamic
+  Deployment:
+    manila-api:
+      hash_fields: []
+      images:
+      - manila_api
+      manifest: deployment_api
+      pod_labels:
+        application: manila
+        component: api
   Job:
     manila-bootstrap:
       hash_fields:
@@ -7,37 +42,76 @@ manila:
       images:
       - bootstrap
       manifest: job_bootstrap
+      pod_labels:
+        application: manila
+        component: bootstrap
     manila-db-drop:
       hash_fields:
       - endpoints.oslo_db.*
       images:
       - db_drop
       manifest: job_db_drop
+      pod_labels:
+        application: manila
+        component: db-drop
     manila-db-init:
       hash_fields:
       - endpoints.oslo_db.*
       images:
       - db_init
       manifest: job_db_init
+      pod_labels:
+        application: manila
+        component: db-init
     manila-db-sync:
       hash_fields:
       - endpoints.oslo_db.*
       images:
       - manila_db_sync
       manifest: job_db_sync
+      pod_labels:
+        application: manila
+        component: db-sync
     manila-ks-endpoints:
       hash_fields: []
       images:
       - ks_endpoints
       manifest: job_ks_endpoints
+      pod_labels:
+        application: manila
+        component: ks-endpoints
     manila-ks-service:
       hash_fields: []
       images:
       - ks_service
       manifest: job_ks_service
+      pod_labels:
+        application: manila
+        component: ks-service
     manila-ks-user:
       hash_fields:
       - endpoints.*
       images:
       - ks_user
       manifest: job_ks_user
+      pod_labels:
+        application: manila
+        component: ks-user
+  StatefulSet:
+    manila-scheduler:
+      hash_fields: []
+      images:
+      - manila_scheduler
+      manifest: statefulset_scheduler
+      pod_labels:
+        application: manila
+        component: scheduler
+    manila-share:
+      hash_fields: []
+      images:
+      - manila_share
+      - manila-uuids-init
+      manifest: statefulset_share
+      pod_labels:
+        application: manila
+        component: share
