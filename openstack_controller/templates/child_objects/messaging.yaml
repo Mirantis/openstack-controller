@@ -6,3 +6,17 @@ rabbitmq:
       images:
       - rabbitmq_scripted_test
       manifest: job_cluster_wait
+      pod_labels:
+        application: rabbitmq
+        component: cluster-wait
+  StatefulSet:
+    openstack-rabbitmq-rabbitmq:
+      hash_fields: []
+      images:
+      - rabbitmq_init
+      - rabbitmq
+      manifest: statefulset
+      pod_labels:
+        application: rabbitmq
+        component: server
+        release_group: openstack-rabbitmq-rabbitmq
