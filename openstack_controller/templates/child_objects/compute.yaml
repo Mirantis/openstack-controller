@@ -65,7 +65,7 @@ nova:
       images:
       - ks_user
       manifest: job_ks_user
-{%- if spec.openstack_version not in ['queens', 'rocky'] %}
+{%- if spec.openstack_version in ['queens', 'rocky', 'stein'] %}
     placement-ks-endpoints:
       images:
       - ks_endpoints
