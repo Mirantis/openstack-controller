@@ -1,20 +1,46 @@
 horizon:
+  Deployment:
+    horizon:
+      hash_fields: []
+      images:
+      - horizon
+      manifest: deployment
+      pod_labels:
+        application: horizon
+        component: server
   Job:
+    horizon-clean-cache:
+      hash_fields: []
+      images:
+      - horizon_clean_cache
+      manifest: job_clean_cache
+      pod_labels:
+        application: horizon
+        component: clean-cache
     horizon-db-drop:
       hash_fields:
       - endpoints.oslo_db.*
       images:
       - db_drop
       manifest: job_db_drop
+      pod_labels:
+        application: horizon
+        component: db-drop
     horizon-db-init:
       hash_fields:
       - endpoints.oslo_db.*
       images:
       - db_init
       manifest: job_db_init
+      pod_labels:
+        application: horizon
+        component: db-init
     horizon-db-sync:
       hash_fields:
       - endpoints.oslo_db.*
       images:
       - horizon_db_sync
       manifest: job_db_sync
+      pod_labels:
+        application: horizon
+        component: db-sync
