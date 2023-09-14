@@ -1,0 +1,12 @@
+{%- from 'macros/connections.j2' import from_all %}
+        server:
+          spec:
+            podSelector:
+              matchLabels:
+                application: ingress
+                component: server
+            policyTypes:
+            - Ingress
+            ingress:
+              - from:
+{{ from_all() | indent(18) }}

@@ -47,7 +47,7 @@ spec:
           node_selector_key: kubernetes.io/os
           node_selector_value: linux
       manifests:
-        network_policy: false
+        network_policy: true
         tls_proxy: true
       network:
         service:
@@ -65,3 +65,16 @@ spec:
               readiness:
                 enabled: true
                 params: {}
+      network_policy:
+        server:
+          spec:
+            policyTypes:
+            - Ingress
+            ingress:
+             - from:
+                - ipBlock:
+                    cidr: 0.0.0.0/0
+            podSelector:
+              matchLabels:
+                application: ingress
+                component: server

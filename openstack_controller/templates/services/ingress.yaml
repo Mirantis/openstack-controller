@@ -58,7 +58,7 @@ spec:
                   initialDelaySeconds: 10
                   timeoutSeconds: 5
       manifests:
-        network_policy: false
+        network_policy: {{ spec.get("features", {}).get("network_policies", {}).get("enabled", false) }}
 {%- if is_tls_proxy_enabled %}
         tls_proxy: true
 {%- endif %}
@@ -82,4 +82,8 @@ spec:
           port:
             proxy:
               default: 443
+{%- endif %}
+{%- if spec.get("features", {}).get("network_policies", {}).get("enabled", false) %}
+      network_policy:
+{% include 'base/network_policies/ingress.yaml' %}
 {%- endif %}

@@ -13,3 +13,8 @@ to_child_object:
     cidr: {{ network["cidr"] }}
 {%- endfor %}
 {%- endmacro -%}
+
+{% macro from_all() %}
+- ipBlock:
+    cidr: '0.0.0.0/0'
+{%- endmacro -%}
