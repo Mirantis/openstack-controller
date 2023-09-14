@@ -27,6 +27,7 @@ class ObjectStorageFeatureEnabled(base_section.BaseSection):
     def object_versioning(self):
         pass
 
+    @property
     def tempurl_digest_hashlib(self):
         # see tempest Change-Id Ia4923d47870fcb914a33adecb7155763ec1d0b2f
         # recent Swift supports more secure algos like sha256 or sha512,
