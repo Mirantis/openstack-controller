@@ -117,6 +117,10 @@ spec:
         prometheus:
           enabled: true
   {%- endif %}
+{%- if spec.get("features", {}).get("network_policies", {}).get("enabled", false) %}
+      network_policy:
+{% include 'base/network_policies/networking-rabbitmq.yaml' %}
+{%- endif %}
       pod:
         replicas:
           server: 1
@@ -134,6 +138,7 @@ spec:
       manifests:
         network_policy: false
         job_users_create: true
+        network_policy: {{ spec.get("features", {}).get("network_policies", {}).get("enabled", false) }}
       volume:
         enabled: false
       endpoints:

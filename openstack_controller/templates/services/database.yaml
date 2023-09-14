@@ -90,6 +90,7 @@ spec:
         deployment_controller: true
         service_master: true
         secret_ca_bundle: true
+        network_policy: {{ spec.get("features", {}).get("network_policies", {}).get("enabled", false) }}
       network:
         proxy:
 {% include 'base/_proxy_vars.yaml' %}
@@ -152,3 +153,7 @@ spec:
             server: {{ backup_params['pv_nfs']['server'] }}
             path: {{ backup_params['pv_nfs']['path'] }}
           {%- endif %}
+{%- if spec.get("features", {}).get("network_policies", {}).get("enabled", false) %}
+      network_policy:
+{% include 'base/network_policies/database.yaml' %}
+{%- endif %}

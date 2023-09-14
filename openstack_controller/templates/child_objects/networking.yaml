@@ -15,6 +15,9 @@ neutron:
         component__in:
         - neutron-ovs-agent
       type: dynamic
+      connections:
+        egress:
+          - {{ to_child_object("networking", "rabbitmq", "StatefulSet", "openstack-neutron-rabbitmq-rabbitmq", ["amqp"]) | indent(12)}}
     sriov-agent:
       hash_fields: []
       images:
@@ -29,6 +32,111 @@ neutron:
         component__in:
         - neutron-sriov-agent
       type: dynamic
+      connections:
+        egress:
+          - {{ to_child_object("networking", "rabbitmq", "StatefulSet", "openstack-neutron-rabbitmq-rabbitmq", ["amqp"]) | indent(12)}}
+    neutron-metadata-agent:
+      hash_fields: []
+      images:
+      - neutron_metadata
+      manifest: daemonset_metadata_agent
+      pod_labels:
+        application: neutron
+        component: metadata-agent
+      selector:
+        application__in:
+        - neutron
+        component__in:
+        - metadata-agent
+      type: dynamic
+      connections:
+        egress:
+          - {{ to_child_object("networking", "rabbitmq", "StatefulSet", "openstack-neutron-rabbitmq-rabbitmq", ["amqp"]) | indent(12)}}
+    neutron-l3-agent:
+      hash_fields: []
+      images:
+      - neutron_l3
+      manifest: daemonset_l3_agent
+      pod_labels:
+        application: neutron
+        component: l3-agent
+      selector:
+        application__in:
+        - neutron
+        component__in:
+        - l3-agent
+      type: dynamic
+      connections:
+        egress:
+          - {{ to_child_object("networking", "rabbitmq", "StatefulSet", "openstack-neutron-rabbitmq-rabbitmq", ["amqp"]) | indent(12)}}
+    neutron-l2gw-agent:
+      hash_fields: []
+      images:
+      - neutron_l2gw
+      manifest: daemonset_l2gw_agent
+      pod_labels:
+        application: neutron
+        component: l2gw-agent
+      selector:
+        application__in:
+        - neutron
+        component__in:
+        - l2gw-agent
+      type: dynamic
+      connections:
+        egress:
+          - {{ to_child_object("networking", "rabbitmq", "StatefulSet", "openstack-neutron-rabbitmq-rabbitmq", ["amqp"]) | indent(12)}}
+    neutron-dr-agent:
+      hash_fields: []
+      images:
+      - neutron_dr
+      manifest: daemonset_dr_agent
+      pod_labels:
+        application: neutron
+        component: dr-agent
+      selector:
+        application__in:
+        - neutron
+        component__in:
+        - dr-agent
+      type: dynamic
+      connections:
+        egress:
+          - {{ to_child_object("networking", "rabbitmq", "StatefulSet", "openstack-neutron-rabbitmq-rabbitmq", ["amqp"]) | indent(12)}}
+    neutron-dhcp-agent:
+      hash_fields: []
+      images:
+      - neutron_dhcp
+      manifest: daemonset_dhcp_agent
+      pod_labels:
+        application: neutron
+        component: dhcp-agent
+      selector:
+        application__in:
+        - neutron
+        component__in:
+        - dhcp-agent
+      type: dynamic
+      connections:
+        egress:
+          - {{ to_child_object("networking", "rabbitmq", "StatefulSet", "openstack-neutron-rabbitmq-rabbitmq", ["amqp"]) | indent(12)}}
+    bagpipe-bgp:
+      hash_fields: []
+      images:
+      - neutron_bagpipe_bgp
+      manifest: daemonset_bagpipe_bgp
+      pod_labels:
+        application: neutron
+        component: bagpipe-bgp
+      selector:
+        application__in:
+        - neutron
+        component__in:
+        - bagpipe-bgp
+      type: dynamic
+      connections:
+        egress:
+          - {{ to_child_object("networking", "rabbitmq", "StatefulSet", "openstack-neutron-rabbitmq-rabbitmq", ["amqp"]) | indent(12)}}
   Deployment:
     neutron-server:
       hash_fields: []
@@ -40,7 +148,7 @@ neutron:
         component: server
       connections:
         egress:
-          - {{ to_child_object("database", "mariadb", "StatefulSet", "mariadb-server", ["mysql"]) | indent(12)}}
+          - {{ to_child_object("networking", "rabbitmq", "StatefulSet", "openstack-neutron-rabbitmq-rabbitmq", ["amqp"]) | indent(12)}}
   Job:
     neutron-bootstrap:
       hash_fields:
@@ -64,9 +172,6 @@ neutron:
       pod_labels:
         application: neutron
         component: db-init
-      connections:
-        egress:
-          - {{ to_child_object("database", "mariadb", "StatefulSet", "mariadb-server", ["mysql"]) | indent(12)}}
     neutron-db-sync:
       hash_fields:
       - endpoints.oslo_db.*
@@ -76,9 +181,6 @@ neutron:
       pod_labels:
         application: neutron
         component: db-sync
-      connections:
-        egress:
-          - {{ to_child_object("database", "mariadb", "StatefulSet", "mariadb-server", ["mysql"]) | indent(12)}}
     neutron-ks-endpoints:
       hash_fields: []
       images:
@@ -106,6 +208,25 @@ neutron:
       manifest: job_ks_service
       hash_fields: []
 rabbitmq:
+  StatefulSet:
+    openstack-neutron-rabbitmq-rabbitmq:
+      images: []
+      manifest: ''
+      hash_fields: []
+      pod_labels:
+        application: rabbitmq
+        component: server
+        release_group: openstack-neutron-rabbitmq
+      ports:
+      - port: 15672
+        name: http
+        protocol: TCP
+      - port: 5672
+        name: amqp
+        protocol: TCP
+      - port: 25672
+        name: clustering
+        protocol: TCP
   Job:
     openstack-neutron-rabbitmq-cluster-wait:
       hash_fields:

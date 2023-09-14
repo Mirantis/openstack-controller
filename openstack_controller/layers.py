@@ -137,7 +137,7 @@ def get_child_tree(mspec):
         if not template.startswith("child_objects"):
             continue
         name = template.split("/")[-1].split(".")[0]
-        res[name] = render_template(template)
+        res[name] = render_template(template, spec=mspec)
     return res
 
 
@@ -162,11 +162,14 @@ def render_service_template(service, mspec, logger, **template_args):
         )
         service_policy = _get_dashboard_default_policy(mspec, charts)
 
+    pod_networks = settings.OSCTL_POD_NETWORKS_DATA
+
     text = tpl.render(
         spec=mspec,
         openstack_versions=openstack_versions,
         service_policy=service_policy,
         slurp_releases=slurp_releases,
+        pod_networks=pod_networks,
         **template_args,
     )
     data = yaml.safe_load(text)

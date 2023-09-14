@@ -72,6 +72,7 @@ spec:
         service_ingress: false
         service_master: true
         secret_ca_bundle: true
+        network_policy: true
       monitoring:
         prometheus:
           enabled: true
@@ -93,3 +94,15 @@ spec:
         phy_backup:
           class_name: mirablock-k8s-block-hdd
           enabled: true
+      network_policy:
+        mariadb-server:
+          spec:
+            ingress:
+              - from:
+                - default: selector
+            podSelector:
+              matchLabels:
+                application: mariadb
+                component: server
+            policyTypes:
+            - Ingress

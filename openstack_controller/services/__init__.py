@@ -204,6 +204,7 @@ class MariaDB(Service):
         return {
             "admin_creds": admin_creds,
             "galera_creds": galera_secret.get(),
+            "network_policies": self.child_view.network_policies,
         }
 
 

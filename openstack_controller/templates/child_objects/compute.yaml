@@ -1,3 +1,4 @@
+{%- from 'macros/connections.j2' import to_child_object %}
 nova:
   Job:
     nova-bootstrap:
@@ -19,12 +20,18 @@ nova:
       images:
       - db_drop
       manifest: job_db_drop
+      pod_labels:
+        application: nova
+        component: db-drop
     nova-db-init:
       hash_fields:
       - endpoints.oslo_db.*
       images:
       - db_init
       manifest: job_db_init
+      pod_labels:
+        application: nova
+        component: db-init
     nova-db-sync:
       hash_fields:
       - endpoints.oslo_db.*
@@ -32,23 +39,35 @@ nova:
       images:
       - nova_db_sync
       manifest: job_db_sync
+      pod_labels:
+        application: nova
+        component: db-sync
     nova-db-sync-api:
       hash_fields:
       - endpoints.oslo_db.*
       images:
       - nova_db_sync_api
       manifest: job_db_sync_api
+      pod_labels:
+        application: nova
+        component: db-sync-api
     nova-db-sync-db:
       hash_fields:
       - endpoints.oslo_db.*
       images:
       - nova_db_sync_db
       manifest: job_db_sync_db
+      pod_labels:
+        application: nova
+        component: db-sync-db
     nova-db-sync-online:
       hash_fields: []
       images:
       - nova_db_sync_online
       manifest: job_db_sync_online
+      pod_labels:
+        application: nova
+        component: db-sync-online
     nova-ks-endpoints:
       hash_fields: []
       images:

@@ -1,0 +1,10 @@
+        mariadb-server:
+          spec:
+            podSelector:
+              matchLabels:
+                application: mariadb
+                component: server
+            policyTypes:
+            - Ingress
+            ingress:
+{{ network_policies["ingress"]["database:mariadb:StatefulSet:mariadb-server"] | toyaml | indent(14, first=True) }}

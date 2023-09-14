@@ -150,6 +150,15 @@ properties:
       - neutron
       - nova
     properties:
+      network_policies:
+        type: object
+        additionalProperties: false
+        properties:
+          enabled:
+            type: boolean
+            description: |
+              Trigger network policy enforcement for OpenStack related pods.
+              Only ingress policies are applied. Default is False.
       policies:
         type: object
         additionalProperties: false

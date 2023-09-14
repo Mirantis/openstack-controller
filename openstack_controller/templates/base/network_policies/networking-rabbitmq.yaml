@@ -1,0 +1,14 @@
+{%- from 'macros/connections.j2' import from_pod_networks %}
+        server:
+          spec:
+            podSelector:
+              matchLabels:
+                application: rabbitmq
+                component: server
+                release_group: openstack-neutron-rabbitmq
+            policyTypes:
+            - Ingress
+            ingress:
+{{ network_policies["ingress"]["networking:rabbitmq:StatefulSet:openstack-neutron-rabbitmq-rabbitmq"] | toyaml | indent(14, first=True) }}
+              - from:
+{{ from_pod_networks(pod_networks) | indent(18) }}

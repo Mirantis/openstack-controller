@@ -19,6 +19,7 @@ from openstack_controller import settings
 from openstack_controller import version
 from openstack_controller import utils
 from openstack_controller import helm
+from openstack_controller import resource_view
 from openstack_controller.osdplstatus import APPLYING, APPLIED, DELETING
 
 
@@ -81,6 +82,7 @@ class Service:
 
         self.helm_manager = helm.HelmManager(namespace=self.namespace)
         self.osdplst = osdplst
+        self.child_view = resource_view.ChildObjectView(self.mspec)
 
     def _get_admin_creds(self) -> secrets.OpenStackAdminCredentials:
         admin_secret = secrets.OpenStackAdminSecret(self.namespace)
@@ -441,7 +443,6 @@ class Service:
         self.set_children_status("Applying")
         LOG.info(f"Applying config for {self.service}")
         data = self.render()
-
         if kwargs.get("helmobj_overrides", {}):
             self._merge_helm_override(data, kwargs["helmobj_overrides"])
 
@@ -543,6 +544,7 @@ class Service:
             LOG.debug(
                 f"Set proxy variables for {self.service}: {template_args['proxy_vars']}"
             )
+        template_args["network_policies"] = self.child_view.network_policies
         return template_args
 
     @layers.kopf_exception
@@ -704,6 +706,7 @@ class OpenStackService(Service):
         admin_creds = self._get_admin_creds()
         guest_creds = self._get_guest_creds()
         keystone_creds = self._get_keystone_creds()
+        network_policies = self.child_view.network_policies
 
         template_args.update(
             {
@@ -711,6 +714,7 @@ class OpenStackService(Service):
                 "guest_creds": guest_creds,
                 "keystone_creds": keystone_creds,
                 "is_ceph_enabled": self.is_ceph_enabled,
+                "network_policies": network_policies,
             }
         )
         return template_args

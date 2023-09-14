@@ -204,6 +204,9 @@ def get_render_kwargs(service, context, default_args):
         service_t_args["proxy_settings"] = context_template_args.get(
             "proxy_settings", default_args["proxy_settings"]
         )
+        service_t_args["network_policies"] = context_template_args.get(
+            "network_policies", default_args["network_policies"]
+        )
 
     with open(f"{INPUT_DIR}/{context}/context_spec.yaml", "r") as f:
         spec = yaml.safe_load(f)
