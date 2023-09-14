@@ -1,4 +1,13 @@
 glance:
+  CronJob:
+    glance-db-purge:
+      hash_fields: []
+      images:
+      - glance_db_purge
+      manifest: cron_job_db_purge
+      pod_labels:
+        application: glance
+        component: db-purge
   Deployment:
     glance-api:
       hash_fields: []
@@ -8,7 +17,23 @@ glance:
       pod_labels:
         application: glance
         component: api
+    glance-registry:
+      hash_fields: []
+      images:
+      - glance_registry
+      manifest: deployment_registry
+      pod_labels:
+        application: glance
+        component: registry
   Job:
+    glance-barbican-cert-init:
+      hash_fields: []
+      images:
+      - glance_barbican_cert_init
+      manifest: job_barbican_cert_init
+      pod_labels:
+        application: glance
+        component: barbican-cert-init
     glance-bootstrap:
       hash_fields:
       - network.proxy.*
@@ -16,65 +41,119 @@ glance:
       images:
       - bootstrap
       manifest: job_bootstrap
+      pod_labels:
+        application: glance
+        component: bootstrap
+    glance-clean:
+      hash_fields: []
+      images:
+      - glance_storage_init
+      - bootstrap
+      manifest: job_clean
+      pod_labels:
+        application: glance
+        component: clean
     glance-db-contract:
       hash_fields: []
       images:
       - glance_db_contract
       manifest: job_db_contract
+      pod_labels:
+        application: glance
+        component: db-contract
     glance-db-drop:
       hash_fields:
       - endpoints.oslo_db.*
       images:
       - db_drop
       manifest: job_db_drop
+      pod_labels:
+        application: glance
+        component: db-drop
     glance-db-expand:
       hash_fields: []
       images:
       - glance_db_expand
       manifest: job_db_expand
+      pod_labels:
+        application: glance
+        component: db-expand
     glance-db-init:
       hash_fields:
       - endpoints.oslo_db.*
       images:
       - db_init
       manifest: job_db_init
+      pod_labels:
+        application: glance
+        component: db-init
     glance-db-migrate:
       hash_fields: []
       images:
       - glance_db_migrate
       manifest: job_db_migrate
+      pod_labels:
+        application: glance
+        component: db-migrate
     glance-db-sync:
       hash_fields:
       - endpoints.oslo_db.*
       images:
       - glance_db_sync
       manifest: job_db_sync
+      pod_labels:
+        application: glance
+        component: db-sync
+    glance-image-repo-sync:
+      hash_fields: []
+      images:
+      - image_repo_sync
+      manifest: job_image_repo_sync
+      pod_labels:
+        application: glance
+        component: image-repo-sync
     glance-ks-endpoints:
       hash_fields: []
       images:
       - ks_endpoints
       manifest: job_ks_endpoints
+      pod_labels:
+        application: glance
+        component: ks-endpoints
     glance-ks-service:
       hash_fields: []
       images:
       - ks_service
       manifest: job_ks_service
+      pod_labels:
+        application: glance
+        component: ks-service
     glance-ks-user:
       hash_fields:
       - endpoints.*
       images:
       - ks_user
       manifest: job_ks_user
+      pod_labels:
+        application: glance
+        component: ks-user
     glance-metadefs-load:
       hash_fields: []
       images:
       - glance_metadefs_load
       manifest: job_metadefs_load
+      pod_labels:
+        application: glance
+        component: metadefs_load
     glance-storage-init:
       hash_fields: []
       images:
+      - glance_api
       - glance_storage_init
       manifest: job_storage_init
+      pod_labels:
+        application: glance
+        component: storage-init
 rabbitmq:
   Job:
     openstack-glance-rabbitmq-cluster-wait:
