@@ -13,7 +13,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from functools import cached_property
 
 from prometheus_client.core import GaugeMetricFamily
 
@@ -36,8 +35,7 @@ class OsdplCinderMetricCollector(base.OpenStackBaseMetricCollector):
         "block-store",
     ]
 
-    @cached_property
-    def families(self):
+    def init_families(self):
         return {
             "volumes": GaugeMetricFamily(
                 f"{self._name}_volumes",

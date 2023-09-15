@@ -15,7 +15,6 @@
 
 import yaml
 import base64
-from functools import cached_property
 
 from cryptography import x509
 from cryptography.hazmat.backends import default_backend
@@ -42,8 +41,7 @@ class OsdplCertsMetricCollector(base.BaseMetricsCollector):
     def can_collect_data(self):
         return True
 
-    @cached_property
-    def families(self):
+    def init_families(self):
         return {
             "expiry": GaugeMetricFamily(
                 f"{self._name}_expiry",

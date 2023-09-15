@@ -19,7 +19,6 @@ from datetime import datetime
 import sys
 from threading import Thread, Lock
 import time
-from functools import cached_property
 
 from prometheus_client.core import GaugeMetricFamily
 
@@ -167,9 +166,9 @@ class BaseMetricsCollector(object):
         self.scrape_duration = 0
         self.scrape_success = False
         self.lock_samples = Lock()
+        self.families = self.init_families()
 
-    @cached_property
-    def families(self):
+    def init_families(self):
         """Return all known collector metric families"""
         return {}
 

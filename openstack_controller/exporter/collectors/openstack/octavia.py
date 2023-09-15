@@ -13,8 +13,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from functools import cached_property
-
 from prometheus_client.core import GaugeMetricFamily
 
 from openstack_controller import utils
@@ -30,8 +28,7 @@ class OsdplOctaviaMetricCollector(base.OpenStackBaseMetricCollector):
     _description = "OpenStack Orchestration service metrics"
     _os_service_types = ["load-balancer"]
 
-    @cached_property
-    def families(self):
+    def init_families(self):
         return {
             "loadbalancers": GaugeMetricFamily(
                 f"{self._name}_loadbalancers",

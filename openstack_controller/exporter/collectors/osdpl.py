@@ -13,8 +13,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from functools import cached_property
-
 from prometheus_client.core import InfoMetricFamily
 
 from openstack_controller import utils
@@ -28,8 +26,7 @@ class OsdplMetricCollector(base.BaseMetricsCollector):
     _name = "osdpl"
     _description = "OpenStack Deployment metrics"
 
-    @cached_property
-    def families(self):
+    def init_families(self):
         return {
             "version": InfoMetricFamily(
                 f"{self._name}_version",
