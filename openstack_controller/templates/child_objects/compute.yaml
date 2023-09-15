@@ -1,5 +1,122 @@
 {%- from 'macros/connections.j2' import to_child_object %}
+libvirt:
+  DaemonSet:
+    libvirt:
+      hash_fields: []
+      images:
+      - libvirt
+      - ceph_config_helper
+      manifest: daemonset_libvirt
+      pod_labels:
+        application: libvirt
+        component: libvirt
+      type: dynamic
 nova:
+  CronJob:
+    nova-cell-setup:
+      hash_fields: []
+      images:
+      - nova_cell_setup
+      manifest: cron_job_cell_setup
+      pod_labels:
+        application: nova
+        component: cell-setup
+    nova-db-purge:
+      hash_fields: []
+      images:
+      - nova_db_purge
+      manifest: cron_job_db_purge
+      pod_labels:
+        application: nova
+        component: db-purge
+    nova-service-cleaner:
+      hash_fields: []
+      images:
+      - nova_service_cleaner
+      manifest: cron_job_service_cleaner
+      pod_labels:
+        application: nova
+        component: service-cleaner
+  DaemonSet:
+    nova-compute:
+      hash_fields: []
+      images:
+      - nova_compute
+      - nova_compute_ssh
+      manifest: daemonset_compute
+      pod_labels:
+        application: nova
+        component: compute
+      type: dynamic
+  Deployment:
+    nova-api-metadata:
+      hash_fields: []
+      images:
+      - nova_api
+      manifest: deployment_api_metadata
+      pod_labels:
+        application: nova
+        component: metadata
+    nova-api-osapi:
+      hash_fields: []
+      images:
+      - nova_api
+      manifest: deployment_api_osapi
+      pod_labels:
+        application: nova
+        component: os-api
+    nova-conductor:
+      hash_fields: []
+      images:
+      - nova_conductor
+      manifest: deployment_conductor
+      pod_labels:
+        application: nova
+        component: conductor
+    nova-consoleauth:
+      hash_fields: []
+      images:
+      - nova_consoleauth
+      manifest: deployment_consoleauth
+      pod_labels:
+        application: nova
+        component: consoleauth
+    nova-novncproxy:
+      hash_fields: []
+      images:
+      - nova_novncproxy_assets
+      - nova_novncproxy
+      manifest: deployment_novncproxy
+      pod_labels:
+        application: nova
+        component: novnc-proxy
+{%- if spec.openstack_version not in ['queens', 'rocky', 'stein'] %}
+    nova-placement-api:
+      hash_fields: []
+      images:
+      - nova_placement
+      manifest: deployment_placement
+      pod_labels:
+        application: nova
+        component: placement
+{%- endif %}
+    nova-scheduler:
+      hash_fields: []
+      images:
+      - nova_scheduler
+      manifest: deployment_scheduler
+      pod_labels:
+        application: nova
+        component: scheduler
+    nova-spiceproxy:
+      hash_fields: []
+      images:
+      - nova_spiceproxy_assets
+      - nova_spiceproxy
+      manifest: deployment_spiceproxy
+      pod_labels:
+        application: nova
+        component: spice-proxy
   Job:
     nova-bootstrap:
       hash_fields:
@@ -7,13 +124,20 @@ nova:
       - bootstrap.*
       images:
       - bootstrap
+      - nova_wait_for_computes_init
       manifest: job_bootstrap
+      pod_labels:
+        application: nova
+        component: bootstrap
     nova-cell-setup:
       hash_fields: []
       images:
       - nova_cell_setup
       - nova_cell_setup_init
       manifest: job_cell_setup
+      pod_labels:
+        application: nova
+        component: cell-setup
     nova-db-drop:
       hash_fields:
       - endpoints.oslo_db.*
@@ -73,62 +197,97 @@ nova:
       images:
       - ks_endpoints
       manifest: job_ks_endpoints
+      pod_labels:
+        application: nova
+        component: ks-endpoints
     nova-ks-service:
       hash_fields: []
       images:
       - ks_service
       manifest: job_ks_service
+      pod_labels:
+        application: nova
+        component: ks-service
     nova-ks-user:
       hash_fields:
       - endpoints.*
       images:
       - ks_user
       manifest: job_ks_user
-{%- if spec.openstack_version in ['queens', 'rocky', 'stein'] %}
+      pod_labels:
+        application: nova
+        component: ks-user
+{%- if spec.openstack_version not in ['queens', 'rocky', 'stein'] %}
     placement-ks-endpoints:
+      hash_fields: []
       images:
       - ks_endpoints
       manifest: job_ks_placement_endpoints
-      hash_fields: []
+      pod_labels:
+        application: placement
+        component: ks-endpoints
     placement-ks-service:
+      hash_fields: []
       images:
       - ks_service
       manifest: job_ks_placement_service
-      hash_fields: []
+      pod_labels:
+        application: placement
+        component: ks-service
     placement-ks-user:
       hash_fields:
       - endpoints.*
       images:
       - ks_user
       manifest: job_ks_placement_user
-  Secret:
-    placement-tls-public:
-      images: []
-      manifest: ingress_placement
-      hash_fields: []
-  Service:
-    placement:
-      images: []
-      manifest: service_ingress_placement
-      hash_fields: []
-    placement-api:
-      images: []
-      manifest: service_placement
-      hash_fields: []
+      pod_labels:
+        application: placement
+        component: ks-user
   Ingress:
     placement:
+      hash_fields: []
+      images: []
       manifest: ingress_placement
-      images: []
+  Secret:
+    placement-tls-public:
       hash_fields: []
-  Deployment:
-    nova-placement-api:
       images: []
-      manifest: deployment_placement
+      manifest: ingress_placement
+  Service:
+    placement:
       hash_fields: []
+      images: []
+      manifest: service_ingress_placement
+    placement-api:
+      hash_fields: []
+      images: []
+      manifest: service_placement
+{%- endif %}
+  StatefulSet:
+    nova-compute-ironic:
+      hash_fields: []
+      images:
+      - nova_compute_ironic
+      manifest: statefulset_compute_ironic
       pod_labels:
         application: nova
-        component: placement
-{%- endif %}
+        component: compute
+    nova-conductor:
+      hash_fields: []
+      images:
+      - nova_conductor
+      manifest: statefulset_conductor
+      pod_labels:
+        application: nova
+        component: conductor
+    nova-scheduler:
+      hash_fields: []
+      images:
+      - nova_scheduler
+      manifest: statefulset_scheduler
+      pod_labels:
+        application: nova
+        component: scheduler
 rabbitmq:
   Job:
     openstack-nova-rabbitmq-cluster-wait:
