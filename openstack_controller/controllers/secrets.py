@@ -186,6 +186,21 @@ async def handle_rabbitmq_external_secret(
     if name != constants.RABBITMQ_USERS_CREDENTIALS_SECRET:
         return
 
+    def _secrets_delete(secrets):
+        for secret in secrets:
+            LOG.info(
+                "Deleting outdated rabbitmq notifications external secret"
+                f" {secret.namespace}/{secret.name}"
+            )
+            secret.delete()
+
+    existent_secrets = list(
+        kube.resource_list(
+            kube.Secret,
+            constants.RABBITMQ_EXTERNAL_SECRETS_LABELS,
+            constants.OPENSTACK_EXTERNAL_NAMESPACE,
+        )
+    )
     osdpl = kube.get_osdpl(settings.OSCTL_OS_DEPLOYMENT_NAMESPACE)
     if (
         not osdpl.obj.get("spec", {})
@@ -195,6 +210,7 @@ async def handle_rabbitmq_external_secret(
         .get("external", {})
         .get("enabled", False)
     ):
+        _secrets_delete(existent_secrets)
         return
 
     LOG.debug(f"Handling secret create {name}")
@@ -290,6 +306,12 @@ async def handle_rabbitmq_external_secret(
         name = utils.get_topic_normalized_name(topic)
         ets = secrets.ExternalTopicSecret(name)
         ets.save({**credentials, **external_secret_data_enc})
+
+        existent_secrets = [
+            es for es in existent_secrets if es.name != ets.secret_name
+        ]
+
+    _secrets_delete(existent_secrets)
 
 
 @kopf.on.update(

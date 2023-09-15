@@ -411,8 +411,6 @@ class RabbitMQ(Service):
             external_topics = self.mspec["features"]["messaging"][
                 "notifications"
             ]["external"].get("topics", [])
-            # TODO(dbiletskyi): figure out how to remove the secret
-            # when the topic is removed
             for topic in external_topics:
                 name = utils.get_topic_normalized_name(topic)
                 topic_secret = secrets.ExternalTopicPasswordSecret(
