@@ -1,4 +1,45 @@
 cinder:
+  CronJob:
+    cinder-db-purge:
+      hash_fields: []
+      images:
+      - cinder_db_purge
+      manifest: cron_job_db_purge
+      pod_labels:
+        application: cinder
+        component: db-purge
+    cinder-service-cleaner:
+      hash_fields: []
+      images:
+      - ks_endpoints
+      - cinder_service_cleaner
+      manifest: cron_service_cleaner
+      pod_labels:
+        application: cinder
+        component: service-cleaner
+    cinder-volume-usage-audit:
+      hash_fields: []
+      images:
+      - cinder_volume_usage_audit
+      manifest: cron_volume_usage_audit
+      pod_labels:
+        application: cinder
+        component: volume-usage-audit
+  DaemonSet:
+    cinder-volume-ds:
+      hash_fields: []
+      images:
+      - cinder_volume_daemonset
+      manifest: daemonset_volume
+      pod_labels:
+        application: cinder
+        component: volume_daemonset
+      selector:
+        application__in:
+        - cinder
+        component__in:
+        - volume_daemonset
+      type: dynamic
   Deployment:
     cinder-api:
       hash_fields: []
@@ -14,6 +55,9 @@ cinder:
       images:
       - cinder_backup_storage_init
       manifest: job_backup_storage_init
+      pod_labels:
+        application: cinder
+        component: storage-init
     cinder-bootstrap:
       hash_fields:
       - network.proxy.*
@@ -21,60 +65,102 @@ cinder:
       images:
       - bootstrap
       manifest: job_bootstrap
+      pod_labels:
+        application: cinder
+        component: bootstrap
+    cinder-clean:
+      hash_fields: []
+      images:
+      - cinder_storage_init
+      - cinder_backup_storage_init
+      manifest: job_clean
+      pod_labels:
+        application: cinder
+        component: clean
     cinder-create-internal-tenant:
       hash_fields: []
       images:
-      - ks_user
+      - cinder_create_internal_tenant
       manifest: job_create_internal_tenant
+      pod_labels:
+        application: cinder
+        component: create-internal-tenant
     cinder-db-drop:
       hash_fields:
       - endpoints.oslo_db.*
       images:
       - db_drop
       manifest: job_db_drop
+      pod_labels:
+        application: cinder
+        component: db-drop
     cinder-db-init:
       hash_fields:
       - endpoints.oslo_db.*
       images:
       - db_init
       manifest: job_db_init
+      pod_labels:
+        application: cinder
+        component: db-init
     cinder-db-sync:
       hash_fields:
       - endpoints.oslo_db.*
       images:
       - cinder_db_sync
       manifest: job_db_sync
+      pod_labels:
+        application: cinder
+        component: db-sync
     cinder-db-sync-online:
       hash_fields: []
       images:
       - cinder_db_sync_online
       manifest: job_db_sync_online
+      pod_labels:
+        application: cinder
+        component: db-sync-online
     cinder-drop-default-volume-type:
       hash_fields: []
       images:
       - cinder_drop_default_volume_type
       manifest: job_drop_default_volume_type
+      pod_labels:
+        application: cinder
+        component: drop-default-volume-type
     cinder-ks-endpoints:
       hash_fields: []
       images:
       - ks_endpoints
       manifest: job_ks_endpoints
+      pod_labels:
+        application: cinder
+        component: ks-endpoints
     cinder-ks-service:
       hash_fields: []
       images:
       - ks_service
       manifest: job_ks_service
+      pod_labels:
+        application: cinder
+        component: ks-service
     cinder-ks-user:
       hash_fields:
       - endpoints.*
       images:
       - ks_user
       manifest: job_ks_user
+      pod_labels:
+        application: cinder
+        component: ks-user
     cinder-storage-init:
       hash_fields: []
       images:
       - cinder_storage_init
       manifest: job_storage_init
+      pod_labels:
+        application: cinder
+        component: storage-init
   StatefulSet:
     cinder-backup:
       hash_fields: []
@@ -100,6 +186,7 @@ cinder:
       pod_labels:
         application: cinder
         component: volume
+      type: dynamic
 rabbitmq:
   Job:
     openstack-cinder-rabbitmq-cluster-wait:
