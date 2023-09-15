@@ -196,9 +196,12 @@ class Service:
                             m_ext[field] = meta[field]
                     m_ext["chart"] = chart_name
                     m_ext_obj = kube.HelmBundleExt(**m_ext)
+                    selector = {
+                        f"{k}__in": [v] for k, v in meta["pod_labels"].items()
+                    }
                     for dynamic_object in kube.resource_list(
                         kube.__getattribute__(kind),
-                        selector=meta["selector"],
+                        selector=selector,
                         namespace=self.namespace,
                     ):
                         child_obj = kube.dummy(

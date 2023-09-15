@@ -35,11 +35,6 @@ cinder:
       pod_labels:
         application: cinder
         component: volume_daemonset
-      selector:
-        application__in:
-        - cinder
-        component__in:
-        - volume_daemonset
       type: dynamic
       connections:
         egress:

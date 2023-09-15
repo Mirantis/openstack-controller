@@ -20,11 +20,6 @@ manila:
       pod_labels:
         application: manila
         component: share_daemonset
-      selector:
-        application__in:
-        - manila
-        component__in:
-        - share_daemonset
       type: dynamic
       connections:
         egress:

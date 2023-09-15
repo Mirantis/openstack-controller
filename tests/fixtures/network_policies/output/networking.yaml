@@ -3,7 +3,7 @@ networking:rabbitmq:StatefulSet:openstack-neutron-rabbitmq-rabbitmq:
   - podSelector:
       matchLabels:
         application: neutron
-        component: neutron-ovs-angent
+        component: neutron-ovs-agent
   - podSelector:
       matchLabels:
         application: neutron

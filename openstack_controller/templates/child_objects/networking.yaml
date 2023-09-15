@@ -8,12 +8,7 @@ neutron:
       manifest: daemonset_ovs_agent
       pod_labels:
         application: neutron
-        component: neutron-ovs-angent
-      selector:
-        application__in:
-        - neutron
-        component__in:
-        - neutron-ovs-agent
+        component: neutron-ovs-agent
       type: dynamic
       connections:
         egress:
@@ -26,11 +21,6 @@ neutron:
       pod_labels:
         application: neutron
         component: neutron-sriov-agent
-      selector:
-        application__in:
-        - neutron
-        component__in:
-        - neutron-sriov-agent
       type: dynamic
       connections:
         egress:
@@ -43,11 +33,6 @@ neutron:
       pod_labels:
         application: neutron
         component: metadata-agent
-      selector:
-        application__in:
-        - neutron
-        component__in:
-        - metadata-agent
       type: dynamic
       connections:
         egress:
@@ -60,11 +45,6 @@ neutron:
       pod_labels:
         application: neutron
         component: l3-agent
-      selector:
-        application__in:
-        - neutron
-        component__in:
-        - l3-agent
       type: dynamic
       connections:
         egress:
@@ -77,11 +57,6 @@ neutron:
       pod_labels:
         application: neutron
         component: l2gw-agent
-      selector:
-        application__in:
-        - neutron
-        component__in:
-        - l2gw-agent
       type: dynamic
       connections:
         egress:
@@ -94,11 +69,6 @@ neutron:
       pod_labels:
         application: neutron
         component: dr-agent
-      selector:
-        application__in:
-        - neutron
-        component__in:
-        - dr-agent
       type: dynamic
       connections:
         egress:
@@ -111,11 +81,6 @@ neutron:
       pod_labels:
         application: neutron
         component: dhcp-agent
-      selector:
-        application__in:
-        - neutron
-        component__in:
-        - dhcp-agent
       type: dynamic
       connections:
         egress:
@@ -128,11 +93,6 @@ neutron:
       pod_labels:
         application: neutron
         component: bagpipe-bgp
-      selector:
-        application__in:
-        - neutron
-        component__in:
-        - bagpipe-bgp
       type: dynamic
       connections:
         egress:

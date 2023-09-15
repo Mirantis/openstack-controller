@@ -104,13 +104,6 @@ patternProperties:
                                 type: array
                                 items:
                                   type: string
-              selector:
-                type: object
-                patternProperties:
-                  ".*":
-                    type: array
-                    items:
-                      type: string
       "(Ingress|Job|Service|Secret)":
         additionalProperties: False
         type: object
@@ -143,13 +136,6 @@ patternProperties:
                 patternProperties:
                   ".*":
                     type: string
-              selector:
-                type: object
-                patternProperties:
-                  ".*":
-                    type: array
-                    items:
-                      type: string
               connections:
                 type: object
                 <<: *connection_items

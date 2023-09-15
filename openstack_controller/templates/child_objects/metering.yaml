@@ -9,11 +9,6 @@ ceilometer:
       pod_labels:
         application: ceilometer
         component: compute
-      selector:
-        application__in:
-        - ceilometer
-        component__in:
-        - compute
       type: dynamic
       connections:
         egress:
@@ -26,11 +21,6 @@ ceilometer:
       pod_labels:
         application: ceilometer
         component: ipmi
-      selector:
-        application__in:
-        - ceilometer
-        component__in:
-        - compute
       type: dynamic
       connections:
         egress:

@@ -9,11 +9,6 @@ octavia:
       pod_labels:
         application: octavia
         component: health_manager
-      selector:
-        application__in:
-        - octavia
-        component__in:
-        - health_manager
       type: dynamic
   Deployment:
     octavia-api:
