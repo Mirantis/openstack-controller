@@ -1,3 +1,4 @@
+{%- from 'macros/connections.j2' import to_child_object %}
 etcd:
   CronJob:
     etcd-db-compaction:
@@ -17,3 +18,13 @@ etcd:
       pod_labels:
         application: etcd
         component: server
+      connections:
+        egress:
+          - {{ to_child_object("coordination", "etcd", "StatefulSet", "etcd-etcd", ["client", "peer"]) | indent(12)}}
+      ports:
+        - port: 2379
+          name: client
+          protocol: TCP
+        - port: 2380
+          name: peer
+          protocol: TCP

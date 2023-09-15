@@ -231,4 +231,7 @@ network_policies:
     networking:rabbitmq:StatefulSet:openstack-neutron-rabbitmq-rabbitmq:
       - from:
         - default: selector
+    coordination:etcd:StatefulSet:etcd-etcd:
+      - from:
+        - default: selector
   egress: {}

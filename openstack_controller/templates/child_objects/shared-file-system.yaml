@@ -1,3 +1,4 @@
+{%- from 'macros/connections.j2' import to_child_object %}
 manila:
   CronJob:
     manila-db-purge:
@@ -25,6 +26,9 @@ manila:
         component__in:
         - share_daemonset
       type: dynamic
+      connections:
+        egress:
+          - {{ to_child_object("coordination", "etcd", "StatefulSet", "etcd-etcd", ["client"]) | indent(12)}}
   Deployment:
     manila-api:
       hash_fields: []
@@ -34,6 +38,9 @@ manila:
       pod_labels:
         application: manila
         component: api
+      connections:
+        egress:
+          - {{ to_child_object("coordination", "etcd", "StatefulSet", "etcd-etcd", ["client"]) | indent(12)}}
   Job:
     manila-bootstrap:
       hash_fields:
@@ -106,6 +113,9 @@ manila:
       pod_labels:
         application: manila
         component: scheduler
+      connections:
+        egress:
+          - {{ to_child_object("coordination", "etcd", "StatefulSet", "etcd-etcd", ["client"]) | indent(12)}}
     manila-share:
       hash_fields: []
       images:
@@ -115,3 +125,6 @@ manila:
       pod_labels:
         application: manila
         component: share
+      connections:
+        egress:
+          - {{ to_child_object("coordination", "etcd", "StatefulSet", "etcd-etcd", ["client"]) | indent(12)}}

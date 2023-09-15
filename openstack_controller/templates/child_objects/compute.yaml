@@ -48,6 +48,9 @@ nova:
         application: nova
         component: compute
       type: dynamic
+      connections:
+        egress:
+          - {{ to_child_object("coordination", "etcd", "StatefulSet", "etcd-etcd", ["client"]) | indent(12)}}
   Deployment:
     nova-api-metadata:
       hash_fields: []
@@ -57,6 +60,9 @@ nova:
       pod_labels:
         application: nova
         component: metadata
+      connections:
+        egress:
+          - {{ to_child_object("coordination", "etcd", "StatefulSet", "etcd-etcd", ["client"]) | indent(12)}}
     nova-api-osapi:
       hash_fields: []
       images:
@@ -65,6 +71,9 @@ nova:
       pod_labels:
         application: nova
         component: os-api
+      connections:
+        egress:
+          - {{ to_child_object("coordination", "etcd", "StatefulSet", "etcd-etcd", ["client"]) | indent(12)}}
     nova-conductor:
       hash_fields: []
       images:
@@ -73,6 +82,9 @@ nova:
       pod_labels:
         application: nova
         component: conductor
+      connections:
+        egress:
+          - {{ to_child_object("coordination", "etcd", "StatefulSet", "etcd-etcd", ["client"]) | indent(12)}}
     nova-consoleauth:
       hash_fields: []
       images:
@@ -81,6 +93,9 @@ nova:
       pod_labels:
         application: nova
         component: consoleauth
+      connections:
+        egress:
+          - {{ to_child_object("coordination", "etcd", "StatefulSet", "etcd-etcd", ["client"]) | indent(12)}}
     nova-novncproxy:
       hash_fields: []
       images:
@@ -90,6 +105,9 @@ nova:
       pod_labels:
         application: nova
         component: novnc-proxy
+      connections:
+        egress:
+          - {{ to_child_object("coordination", "etcd", "StatefulSet", "etcd-etcd", ["client"]) | indent(12)}}
 {%- if spec.openstack_version not in ['queens', 'rocky', 'stein'] %}
     nova-placement-api:
       hash_fields: []
@@ -99,6 +117,9 @@ nova:
       pod_labels:
         application: nova
         component: placement
+      connections:
+        egress:
+          - {{ to_child_object("coordination", "etcd", "StatefulSet", "etcd-etcd", ["client"]) | indent(12)}}
 {%- endif %}
     nova-scheduler:
       hash_fields: []
@@ -108,6 +129,9 @@ nova:
       pod_labels:
         application: nova
         component: scheduler
+      connections:
+        egress:
+          - {{ to_child_object("coordination", "etcd", "StatefulSet", "etcd-etcd", ["client"]) | indent(12)}}
   Job:
     nova-bootstrap:
       hash_fields:
@@ -262,6 +286,9 @@ nova:
       pod_labels:
         application: nova
         component: compute
+      connections:
+        egress:
+          - {{ to_child_object("coordination", "etcd", "StatefulSet", "etcd-etcd", ["client"]) | indent(12)}}
     nova-conductor:
       hash_fields: []
       images:
@@ -270,6 +297,9 @@ nova:
       pod_labels:
         application: nova
         component: conductor
+      connections:
+        egress:
+          - {{ to_child_object("coordination", "etcd", "StatefulSet", "etcd-etcd", ["client"]) | indent(12)}}
     nova-scheduler:
       hash_fields: []
       images:
@@ -278,6 +308,9 @@ nova:
       pod_labels:
         application: nova
         component: scheduler
+      connections:
+        egress:
+          - {{ to_child_object("coordination", "etcd", "StatefulSet", "etcd-etcd", ["client"]) | indent(12)}}
 rabbitmq:
   Job:
     openstack-nova-rabbitmq-cluster-wait:

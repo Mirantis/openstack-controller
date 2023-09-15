@@ -1,3 +1,4 @@
+{%- from 'macros/connections.j2' import to_child_object %}
 aodh:
   CronJob:
     aodh-db-purge:
@@ -17,6 +18,9 @@ aodh:
       pod_labels:
         application: aodh
         component: api
+      connections:
+        egress:
+          - {{ to_child_object("coordination", "etcd", "StatefulSet", "etcd-etcd", ["client"]) | indent(12)}}
     aodh-evaluator:
       hash_fields: []
       images:
@@ -25,6 +29,9 @@ aodh:
       pod_labels:
         application: aodh
         component: evaluator
+      connections:
+        egress:
+          - {{ to_child_object("coordination", "etcd", "StatefulSet", "etcd-etcd", ["client"]) | indent(12)}}
     aodh-listener:
       hash_fields: []
       images:
@@ -33,6 +40,9 @@ aodh:
       pod_labels:
         application: aodh
         component: listener
+      connections:
+        egress:
+          - {{ to_child_object("coordination", "etcd", "StatefulSet", "etcd-etcd", ["client"]) | indent(12)}}
     aodh-notifier:
       hash_fields: []
       images:
@@ -41,6 +51,9 @@ aodh:
       pod_labels:
         application: aodh
         component: notifier
+      connections:
+        egress:
+          - {{ to_child_object("coordination", "etcd", "StatefulSet", "etcd-etcd", ["client"]) | indent(12)}}
   Job:
     aodh-bootstrap:
       hash_fields:

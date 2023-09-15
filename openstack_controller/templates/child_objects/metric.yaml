@@ -1,3 +1,4 @@
+{%- from 'macros/connections.j2' import to_child_object %}
 gnocchi:
   CronJob:
     gnocchi-resources-cleaner:
@@ -18,6 +19,9 @@ gnocchi:
       pod_labels:
         application: gnocchi
         component: metricd
+      connections:
+        egress:
+          - {{ to_child_object("coordination", "etcd", "StatefulSet", "etcd-etcd", ["client"]) | indent(12)}}
     gnocchi-statsd:
       hash_fields: []
       images:
@@ -27,6 +31,9 @@ gnocchi:
       pod_labels:
         application: gnocchi
         component: metricd
+      connections:
+        egress:
+          - {{ to_child_object("coordination", "etcd", "StatefulSet", "etcd-etcd", ["client"]) | indent(12)}}
   Deployment:
     gnocchi-api:
       hash_fields: []
@@ -36,6 +43,9 @@ gnocchi:
       pod_labels:
         application: gnocchi
         component: api
+      connections:
+        egress:
+          - {{ to_child_object("coordination", "etcd", "StatefulSet", "etcd-etcd", ["client"]) | indent(12)}}
   Job:
     gnocchi-bootstrap:
       hash_fields:

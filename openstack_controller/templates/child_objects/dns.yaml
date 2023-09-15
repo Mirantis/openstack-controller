@@ -1,3 +1,4 @@
+{%- from 'macros/connections.j2' import to_child_object %}
 designate:
   Job:
     designate-bootstrap:
@@ -93,6 +94,9 @@ designate:
       pod_labels:
         application: designate
         component: api
+      connections:
+        egress:
+          - {{ to_child_object("coordination", "etcd", "StatefulSet", "etcd-etcd", ["client"]) | indent(12)}}
     designate-central:
       hash_fields: []
       images:
@@ -102,6 +106,9 @@ designate:
       pod_labels:
         application: designate
         component: central
+      connections:
+        egress:
+          - {{ to_child_object("coordination", "etcd", "StatefulSet", "etcd-etcd", ["client"]) | indent(12)}}
     designate-mdns:
       hash_fields: []
       images:
@@ -112,6 +119,9 @@ designate:
       pod_labels:
         application: designate
         component: mdns
+      connections:
+        egress:
+          - {{ to_child_object("coordination", "etcd", "StatefulSet", "etcd-etcd", ["client"]) | indent(12)}}
     designate-producer:
       hash_fields: []
       images:
@@ -120,6 +130,9 @@ designate:
       pod_labels:
         application: designate
         component: producer
+      connections:
+        egress:
+          - {{ to_child_object("coordination", "etcd", "StatefulSet", "etcd-etcd", ["client"]) | indent(12)}}
 rabbitmq:
   Job:
     openstack-designate-rabbitmq-cluster-wait:

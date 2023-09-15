@@ -1,0 +1,13 @@
+{%- from 'macros/connections.j2' import from_pod_networks %}
+        server:
+          spec:
+            podSelector:
+              matchLabels:
+                application: etcd
+                component: server
+            policyTypes:
+            - Ingress
+            ingress:
+{{ network_policies["ingress"]["coordination:etcd:StatefulSet:etcd-etcd"] | toyaml | indent(14, first=True) }}
+              - from:
+{{ from_pod_networks(pod_networks) | indent(18) }}

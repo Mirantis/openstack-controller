@@ -1,3 +1,4 @@
+{%- from 'macros/connections.j2' import to_child_object %}
 masakari:
   CronJob:
     masakari-db-purge:
@@ -17,6 +18,9 @@ masakari:
       pod_labels:
         application: masakari
         component: monitors
+      connections:
+        egress:
+          - {{ to_child_object("coordination", "etcd", "StatefulSet", "etcd-etcd", ["client"]) | indent(12)}}
   Deployment:
     masakari-api:
       hash_fields: []
@@ -26,6 +30,9 @@ masakari:
       pod_labels:
         application: masakari
         component: api
+      connections:
+        egress:
+          - {{ to_child_object("coordination", "etcd", "StatefulSet", "etcd-etcd", ["client"]) | indent(12)}}
     masakari-engine:
       hash_fields: []
       images:
@@ -34,6 +41,9 @@ masakari:
       pod_labels:
         application: masakari
         component: engine
+      connections:
+        egress:
+          - {{ to_child_object("coordination", "etcd", "StatefulSet", "etcd-etcd", ["client"]) | indent(12)}}
   Job:
     masakari-bootstrap:
       hash_fields:

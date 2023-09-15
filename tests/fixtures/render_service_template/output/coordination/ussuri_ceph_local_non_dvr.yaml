@@ -13,6 +13,7 @@ spec:
           image_repo_sync: image-repo-sync:latest
       manifests:
         cron_job_db_compact: true
+        network_policy: false
       pod:
         replicas:
           etcd: 3

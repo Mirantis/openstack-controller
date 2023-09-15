@@ -1,3 +1,4 @@
+{%- from 'macros/connections.j2' import to_child_object %}
 cinder:
   CronJob:
     cinder-db-purge:
@@ -40,6 +41,9 @@ cinder:
         component__in:
         - volume_daemonset
       type: dynamic
+      connections:
+        egress:
+          - {{ to_child_object("coordination", "etcd", "StatefulSet", "etcd-etcd", ["client"]) | indent(12)}}
   Deployment:
     cinder-api:
       hash_fields: []
@@ -49,6 +53,9 @@ cinder:
       pod_labels:
         application: cinder
         component: api
+      connections:
+        egress:
+          - {{ to_child_object("coordination", "etcd", "StatefulSet", "etcd-etcd", ["client"]) | indent(12)}}
   Job:
     cinder-backup-storage-init:
       hash_fields: []
@@ -170,6 +177,9 @@ cinder:
       pod_labels:
         application: cinder
         component: backup
+      connections:
+        egress:
+          - {{ to_child_object("coordination", "etcd", "StatefulSet", "etcd-etcd", ["client"]) | indent(12)}}
     cinder-scheduler:
       hash_fields: []
       images:
@@ -178,6 +188,9 @@ cinder:
       pod_labels:
         application: cinder
         component: scheduler
+      connections:
+        egress:
+          - {{ to_child_object("coordination", "etcd", "StatefulSet", "etcd-etcd", ["client"]) | indent(12)}}
     cinder-volume:
       hash_fields: []
       images:
@@ -186,6 +199,9 @@ cinder:
       pod_labels:
         application: cinder
         component: volume
+      connections:
+        egress:
+          - {{ to_child_object("coordination", "etcd", "StatefulSet", "etcd-etcd", ["client"]) | indent(12)}}
       type: dynamic
 rabbitmq:
   Job:
