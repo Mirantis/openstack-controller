@@ -1,91 +1,10 @@
 {%- from 'macros/connections.j2' import to_child_object %}
 neutron:
   DaemonSet:
-    ovs-agent:
-      hash_fields: []
-      images:
-      - neutron_openvswitch_agent
-      manifest: daemonset_ovs_agent
-      pod_labels:
-        application: neutron
-        component: neutron-ovs-agent
-      type: dynamic
-      connections:
-        egress:
-          - {{ to_child_object("networking", "rabbitmq", "StatefulSet", "openstack-neutron-rabbitmq-rabbitmq", ["amqp"]) | indent(12)}}
-    sriov-agent:
-      hash_fields: []
-      images:
-      - neutron_sriov_agent
-      manifest: daemonset_sriov_agent
-      pod_labels:
-        application: neutron
-        component: neutron-sriov-agent
-      type: dynamic
-      connections:
-        egress:
-          - {{ to_child_object("networking", "rabbitmq", "StatefulSet", "openstack-neutron-rabbitmq-rabbitmq", ["amqp"]) | indent(12)}}
-    neutron-metadata-agent:
-      hash_fields: []
-      images:
-      - neutron_metadata
-      manifest: daemonset_metadata_agent
-      pod_labels:
-        application: neutron
-        component: metadata-agent
-      type: dynamic
-      connections:
-        egress:
-          - {{ to_child_object("networking", "rabbitmq", "StatefulSet", "openstack-neutron-rabbitmq-rabbitmq", ["amqp"]) | indent(12)}}
-    neutron-l3-agent:
-      hash_fields: []
-      images:
-      - neutron_l3
-      manifest: daemonset_l3_agent
-      pod_labels:
-        application: neutron
-        component: l3-agent
-      type: dynamic
-      connections:
-        egress:
-          - {{ to_child_object("networking", "rabbitmq", "StatefulSet", "openstack-neutron-rabbitmq-rabbitmq", ["amqp"]) | indent(12)}}
-    neutron-l2gw-agent:
-      hash_fields: []
-      images:
-      - neutron_l2gw
-      manifest: daemonset_l2gw_agent
-      pod_labels:
-        application: neutron
-        component: l2gw-agent
-      type: dynamic
-      connections:
-        egress:
-          - {{ to_child_object("networking", "rabbitmq", "StatefulSet", "openstack-neutron-rabbitmq-rabbitmq", ["amqp"]) | indent(12)}}
-    neutron-dr-agent:
-      hash_fields: []
-      images:
-      - neutron_dr
-      manifest: daemonset_dr_agent
-      pod_labels:
-        application: neutron
-        component: dr-agent
-      type: dynamic
-      connections:
-        egress:
-          - {{ to_child_object("networking", "rabbitmq", "StatefulSet", "openstack-neutron-rabbitmq-rabbitmq", ["amqp"]) | indent(12)}}
-    neutron-dhcp-agent:
-      hash_fields: []
-      images:
-      - neutron_dhcp
-      manifest: daemonset_dhcp_agent
-      pod_labels:
-        application: neutron
-        component: dhcp-agent
-      type: dynamic
-      connections:
-        egress:
-          - {{ to_child_object("networking", "rabbitmq", "StatefulSet", "openstack-neutron-rabbitmq-rabbitmq", ["amqp"]) | indent(12)}}
     bagpipe-bgp:
+      connections:
+        egress:
+          - {{ to_child_object("networking", "rabbitmq", "StatefulSet", "openstack-neutron-rabbitmq-rabbitmq", ["amqp"]) | indent(12)}}
       hash_fields: []
       images:
       - neutron_bagpipe_bgp
@@ -94,11 +13,105 @@ neutron:
         application: neutron
         component: bagpipe-bgp
       type: dynamic
+    neutron-dhcp-agent:
       connections:
         egress:
           - {{ to_child_object("networking", "rabbitmq", "StatefulSet", "openstack-neutron-rabbitmq-rabbitmq", ["amqp"]) | indent(12)}}
+      hash_fields: []
+      images:
+      - neutron_dhcp
+      manifest: daemonset_dhcp_agent
+      pod_labels:
+        application: neutron
+        component: dhcp-agent
+      type: dynamic
+    neutron-dr-agent:
+      connections:
+        egress:
+          - {{ to_child_object("networking", "rabbitmq", "StatefulSet", "openstack-neutron-rabbitmq-rabbitmq", ["amqp"]) | indent(12)}}
+      hash_fields: []
+      images:
+      - neutron_dr
+      manifest: daemonset_dr_agent
+      pod_labels:
+        application: neutron
+        component: dr-agent
+      type: dynamic
+    neutron-l2gw-agent:
+      connections:
+        egress:
+          - {{ to_child_object("networking", "rabbitmq", "StatefulSet", "openstack-neutron-rabbitmq-rabbitmq", ["amqp"]) | indent(12)}}
+      hash_fields: []
+      images:
+      - neutron_l2gw
+      manifest: daemonset_l2gw_agent
+      pod_labels:
+        application: neutron
+        component: l2gw-agent
+      type: dynamic
+    neutron-l3-agent:
+      connections:
+        egress:
+          - {{ to_child_object("networking", "rabbitmq", "StatefulSet", "openstack-neutron-rabbitmq-rabbitmq", ["amqp"]) | indent(12)}}
+      hash_fields: []
+      images:
+      - neutron_l3
+      manifest: daemonset_l3_agent
+      pod_labels:
+        application: neutron
+        component: l3-agent
+      type: dynamic
+    neutron-metadata-agent:
+      connections:
+        egress:
+          - {{ to_child_object("networking", "rabbitmq", "StatefulSet", "openstack-neutron-rabbitmq-rabbitmq", ["amqp"]) | indent(12)}}
+      hash_fields: []
+      images:
+      - neutron_metadata
+      manifest: daemonset_metadata_agent
+      pod_labels:
+        application: neutron
+        component: metadata-agent
+      type: dynamic
+    neutron-netns-cleanup-cron:
+      hash_fields: []
+      images:
+      - neutron_netns_cleanup_cron
+      manifest: daemonset_netns_cleanup_cron
+      pod_labels:
+        application: neutron
+        component: netns-cleanup-cron
+      type: dynamic
+    neutron-ovs-agent:
+      connections:
+        egress:
+          - {{ to_child_object("networking", "rabbitmq", "StatefulSet", "openstack-neutron-rabbitmq-rabbitmq", ["amqp"]) | indent(12)}}
+      hash_fields: []
+      images:
+      - neutron_openvswitch_agent
+      manifest: daemonset_ovs_agent
+      pod_labels:
+        application: neutron
+        component: neutron-ovs-agent
+      type: dynamic
+    neutron-sriov-agent:
+      connections:
+        egress:
+          - {{ to_child_object("networking", "rabbitmq", "StatefulSet", "openstack-neutron-rabbitmq-rabbitmq", ["amqp"]) | indent(12)}}
+      hash_fields: []
+      images:
+      - neutron_sriov_agent_init
+      - neutron_sriov_agent
+      manifest: daemonset_sriov_agent
+      pod_labels:
+        application: neutron
+        component: neutron-sriov-agent
+      type: dynamic
   Deployment:
     neutron-server:
+      connections:
+        egress:
+          - {{ to_child_object("networking", "rabbitmq", "StatefulSet", "openstack-neutron-rabbitmq-rabbitmq", ["amqp"]) | indent(12)}}
       hash_fields: []
       images:
       - neutron_server
@@ -106,9 +119,6 @@ neutron:
       pod_labels:
         application: neutron
         component: server
-      connections:
-        egress:
-          - {{ to_child_object("networking", "rabbitmq", "StatefulSet", "openstack-neutron-rabbitmq-rabbitmq", ["amqp"]) | indent(12)}}
   Job:
     neutron-bootstrap:
       hash_fields:
@@ -117,12 +127,18 @@ neutron:
       images:
       - bootstrap
       manifest: job_bootstrap
+      pod_labels:
+        application: neutron
+        component: bootstrap
     neutron-db-drop:
       hash_fields:
       - endpoints.oslo_db.*
       images:
       - db_drop
       manifest: job_db_drop
+      pod_labels:
+        application: neutron
+        component: db-drop
     neutron-db-init:
       hash_fields:
       - endpoints.oslo_db.*
@@ -146,27 +162,106 @@ neutron:
       images:
       - ks_endpoints
       manifest: job_ks_endpoints
+      pod_labels:
+        application: neutron
+        component: ks-endpoints
     neutron-ks-service:
       hash_fields: []
       images:
       - ks_service
       manifest: job_ks_service
+      pod_labels:
+        application: neutron
+        component: ks-service
     neutron-ks-user:
       hash_fields:
       - endpoints.*
       images:
       - ks_user
       manifest: job_ks_user
+      pod_labels:
+        application: neutron
+        component: ks-user
     tungstenfabric-ks-endpoints:
+      hash_fields: []
       images:
       - ks_endpoints
       manifest: job_ks_endpoints
-      hash_fields: []
+      pod_labels:
+        application: tungstenfabric
+        component: ks-endpoints
     tungstenfabric-ks-service:
+      hash_fields: []
       images:
       - ks_service
       manifest: job_ks_service
+      pod_labels:
+        application: tungstenfabric
+        component: ks-service
+  StatefulSet:
+    neutron-ironic-agent:
       hash_fields: []
+      images:
+      - neutron_ironic_agent
+      manifest: deployment_ironic_agent
+      pod_labels:
+        application: neutron
+        component: ironic-agent
+      connections:
+        egress:
+          - {{ to_child_object("networking", "rabbitmq", "StatefulSet", "openstack-neutron-rabbitmq-rabbitmq", ["amqp"]) | indent(12)}}
+openvswitch:
+  DaemonSet:
+    ovn-controller:
+      hash_fields: []
+      images:
+      - openvswitch_ovn_controller
+      - openvswitch_ovn_vswitchd
+      - openvswitch_ovn_db
+      manifest: daemonset_ovn_controller
+      pod_labels:
+        application: openvswitch_ovn
+        component: controller
+      type: dynamic
+    openvswitch-db:
+      hash_fields: []
+      images:
+      - openvswitch_db_server
+      manifest: daemonset_ovs_db
+      pod_labels:
+        application: openvswitch
+        component: openvswitch-vswitchd-db
+      type: dynamic
+    openvswitch-vswitchd:
+      hash_fields: []
+      images:
+      - openvswitch_vswitchd
+      - openvswitch_vswitchd_dpdk
+      - openvswitch_db_server
+      manifest: daemonset_ovs_vswitchd
+      pod_labels:
+        application: openvswitch
+        component: openvswitch-vswitchd
+      type: dynamic
+  StatefulSet:
+    openvswitch-ovn-db:
+      hash_fields: []
+      images:
+      - openvswitch_ovn_db
+      - openvswitch_ovn_db_nb
+      - openvswitch_ovn_db_sb
+      manifest: statefulset_ovn_db
+      pod_labels:
+        application: openvswitch_ovn
+        component: db
+    openvswitch-ovn-northd:
+      hash_fields: []
+      images:
+      - openvswitch_ovn_northd
+      manifest: statefulset_ovn_northd
+      pod_labels:
+        application: openvswitch_ovn
+        component: northd
 rabbitmq:
   StatefulSet:
     openstack-neutron-rabbitmq-rabbitmq:

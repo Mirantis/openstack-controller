@@ -1017,8 +1017,8 @@ class Neutron(OpenStackService, MaintenanceApiMixin):
         ]
 
         dynamic_map = [
-            ("DaemonSet", "sriov-agent"),
-            ("DaemonSet", "ovs-agent"),
+            ("DaemonSet", "neutron-sriov-agent"),
+            ("DaemonSet", "neutron-ovs-agent"),
         ]
         if (
             utils.get_in(self.mspec["features"], ["neutron", "backend"])
@@ -1118,8 +1118,8 @@ class Neutron(OpenStackService, MaintenanceApiMixin):
 
             # NOTE(vsaienko): Ensure l2 agents updated prior all other services.
             dynamic_map = [
-                ("DaemonSet", "sriov-agent"),
-                ("DaemonSet", "ovs-agent"),
+                ("DaemonSet", "neutron-sriov-agent"),
+                ("DaemonSet", "neutron-ovs-agent"),
             ]
             for kind, abstract_name in dynamic_map:
                 child_objs = self.get_child_objects_dynamic(
