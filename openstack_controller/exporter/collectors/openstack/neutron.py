@@ -13,8 +13,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from functools import cached_property
-
 from prometheus_client.core import GaugeMetricFamily, InfoMetricFamily
 
 from openstack_controller import utils
@@ -29,8 +27,7 @@ class OsdplNeutronMetricCollector(base.OpenStackBaseMetricCollector):
     _description = "OpenStack Networking service metrics"
     _os_service_types = ["network"]
 
-    @cached_property
-    def families(self):
+    def init_families(self):
         return {
             "networks": GaugeMetricFamily(
                 f"{self._name}_networks",

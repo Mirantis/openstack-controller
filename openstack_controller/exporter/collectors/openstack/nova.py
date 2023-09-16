@@ -13,8 +13,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from functools import cached_property
-
 from prometheus_client.core import GaugeMetricFamily, InfoMetricFamily
 
 from openstack_controller import utils
@@ -31,11 +29,11 @@ class OsdplNovaMetricCollector(base.OpenStackBaseMetricCollector):
     _os_service_types = ["compute"]
 
     def __init__(self):
-        super().__init__()
         self.hypervisor_resource_classes = ["vcpu", "disk_gb", "memory_mb"]
         self.hypervisor_metrics = ["used", "free", "allocation_ratio"]
         self.host_group_types = ["aggregate", "availability_zone"]
         self.cache = {}
+        super().__init__()
 
     def update_cache(self):
         """Upadate cache for some API objects
@@ -130,8 +128,7 @@ class OsdplNovaMetricCollector(base.OpenStackBaseMetricCollector):
                 res[metric] += value
         return res
 
-    @cached_property
-    def families(self):
+    def init_families(self):
         res = {
             "service_state": GaugeMetricFamily(
                 f"{self._name}_service_state",

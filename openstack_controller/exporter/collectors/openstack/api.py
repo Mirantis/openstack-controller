@@ -15,7 +15,6 @@
 
 import requests
 from urllib3.exceptions import InsecureRequestWarning
-from functools import cached_property
 
 from prometheus_client.core import GaugeMetricFamily
 
@@ -31,8 +30,7 @@ class OsdplApiMetricCollector(base.OpenStackBaseMetricCollector):
     _description = "OpenStack API endpoints"
     _os_service_types = ["identity"]
 
-    @cached_property
-    def families(self):
+    def init_families(self):
         return {
             "status": GaugeMetricFamily(
                 f"{self._name}_status",

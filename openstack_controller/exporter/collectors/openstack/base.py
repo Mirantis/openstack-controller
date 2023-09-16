@@ -13,8 +13,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from functools import cached_property
-
 from openstack_controller import utils
 from openstack_controller.exporter.collectors import base
 from openstack_controller import openstack_utils
@@ -29,14 +27,19 @@ class OpenStackBaseMetricCollector(base.BaseMetricsCollector):
 
     def __init__(self):
         super().__init__()
+        self._oc = None
 
-    @cached_property
+    @property
     def oc(self):
-        try:
-            return openstack_utils.OpenStackClientManager()
-        except Exception as e:
-            LOG.warning("Failed to initialize openstack client manager")
-            LOG.exception(e)
+        if self._oc is None:
+            try:
+                LOG.info("Start OpenStackClient initialization")
+                self._oc = openstack_utils.OpenStackClientManager()
+                LOG.info("OpenStackClient initialized")
+            except Exception as e:
+                LOG.warning("Failed to initialize openstack client manager")
+                LOG.exception(e)
+        return self._oc
 
     @property
     def is_service_available(self):
@@ -47,6 +50,7 @@ class OpenStackBaseMetricCollector(base.BaseMetricsCollector):
             endpoints.append(
                 len(list(self.oc.oc.identity.services(type=service_type)))
             )
+            LOG.info(f"Endpoints list for {service_type} is: {endpoints}")
         if not any(endpoints):
             LOG.info(
                 f"Can't find endpoints for service types {self._os_service_types}"
