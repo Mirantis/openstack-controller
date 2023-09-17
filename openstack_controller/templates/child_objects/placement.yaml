@@ -30,11 +30,12 @@ placement:
     placement-db-migrate:
       hash_fields: []
       images:
-      - db_migrate
+      - placement
       manifest: job_db_migrate
       pod_labels:
         application: placement
         component: db_migrate
+{%- if spec["openstack_version"] in ['stein'] %}
     placement-db-nova-migrate-placement:
       hash_fields: []
       images:
@@ -43,6 +44,7 @@ placement:
       pod_labels:
         application: placement
         component: db-nova-migrate-placement
+{%- endif %}
     placement-db-sync:
       hash_fields:
       - endpoints.oslo_db.*

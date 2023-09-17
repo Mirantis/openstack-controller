@@ -83,14 +83,6 @@ gnocchi:
       pod_labels:
         application: gnocchi
         component: db-init
-    gnocchi-db-init-indexer:
-      hash_fields: []
-      images:
-      - db_init_indexer
-      manifest: job_db_init_indexer
-      pod_labels:
-        application: gnocchi
-        component: db-init-indexer
     gnocchi-db-sync:
       hash_fields:
       - endpoints.oslo_db.*

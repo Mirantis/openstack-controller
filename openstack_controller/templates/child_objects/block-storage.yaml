@@ -197,7 +197,8 @@ cinder:
       connections:
         egress:
           - {{ to_child_object("coordination", "etcd", "StatefulSet", "etcd-etcd", ["client"]) | indent(12)}}
-      type: dynamic
+      # TODO(vsaienko): implement support of dynamic child objects for sts
+      # type: dynamic
 rabbitmq:
   Job:
     openstack-cinder-rabbitmq-cluster-wait:

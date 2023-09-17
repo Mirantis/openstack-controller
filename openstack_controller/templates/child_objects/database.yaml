@@ -18,22 +18,6 @@ mariadb:
       pod_labels:
         application: mariadb
         component: controller
-    mariadb-ingress:
-      hash_fields: []
-      images:
-      - mariadb_ingress
-      manifest: deployment_ingress
-      pod_labels:
-        application: mariadb
-        component: ingress
-    mariadb-ingress-error-pages:
-      hash_fields: []
-      images:
-      - error_pages
-      manifest: deployment_error
-      pod_labels:
-        application: mariadb
-        component: ingress-error-pages
   Job:
     exporter-create-sql-user:
       hash_fields: []
