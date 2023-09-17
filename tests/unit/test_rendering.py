@@ -1,4 +1,5 @@
 import logging
+import copy
 import os
 import yaml
 from jsonschema import validate
@@ -223,11 +224,38 @@ def get_child_object_templates():
         .union(infra_services)
         .difference(excluded_services)
     )
+    all_openstack_versions = set(
+        [it.name for it in constants.OpenStackVersion]
+    ) - set(["zed", "master"])
+    service_excludes = {
+        "shared-file-system": [
+            "queens",
+            "rocky",
+            "stein",
+            "train",
+            "ussuri",
+            "victoria",
+            "xena",
+            "wallaby",
+        ],
+        "placement": ["queens", "rocky"],
+        "instance-ha": ["queens", "rocky", "stein", "train", "ussuri"],
+    }
     res = []
     for service in all_services:
-        res.append(
-            (service, os.path.join(CHILD_OBJECTS_DIR, f"{service}.yaml"))
-        )
+        openstack_versions = all_openstack_versions
+        if service in service_excludes:
+            openstack_versions = set(all_openstack_versions) - set(
+                service_excludes.get(service, [])
+            )
+        for openstack_version in openstack_versions:
+            res.append(
+                (
+                    service,
+                    os.path.join(CHILD_OBJECTS_DIR, f"{service}.yaml"),
+                    openstack_version,
+                )
+            )
     return res
 
 
@@ -257,12 +285,37 @@ def test_render_service_template(
         assert data == output, f"Mismatch when comparing to file {f.name}"
 
 
-@pytest.mark.parametrize("service,template", get_child_object_templates())
+@pytest.mark.parametrize(
+    "service,template,openstack_version", get_child_object_templates()
+)
 def test_render_child_object_template(
     service,
     template,
+    openstack_version,
     openstackdeployment_mspec,
 ):
     schema = yaml.safe_load(CHILD_OBJECTS_SCHEMA)
     data = layers.render_template(template, spec=openstackdeployment_mspec)
     validate(data, schema)
+
+
+@pytest.mark.parametrize(
+    "service,template,openstack_version", get_child_object_templates()
+)
+def test_render_child_object_template_ensure_images(
+    service,
+    template,
+    openstack_version,
+    openstackdeployment_mspec,
+):
+    osdpl = copy.deepcopy(openstackdeployment_mspec)
+    osdpl["openstack_version"] = openstack_version
+    data = layers.render_template(template, spec=osdpl)
+    images = layers.render_artifacts(osdpl)
+    for chart, kinds in data.items():
+        for kind, childs in kinds.items():
+            for child_name, child_meta in childs.items():
+                for image in child_meta["images"]:
+                    assert (
+                        image in images.keys()
+                    ), f"Image {image} is not present in {openstack_version}/artifacts.yaml"

@@ -117,11 +117,3 @@ aodh:
       pod_labels:
         application: aodh
         component: ks-user
-    aodh-rabbit-init:
-      hash_fields: []
-      images:
-      - job_rabbit_init
-      manifest: job_rabbit_init
-      pod_labels:
-        application: aodh
-        component: rabbit-init
