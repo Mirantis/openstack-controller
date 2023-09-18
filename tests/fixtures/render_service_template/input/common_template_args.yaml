@@ -234,4 +234,7 @@ network_policies:
     coordination:etcd:StatefulSet:etcd-etcd:
       - from:
         - default: selector
+    compute:rabbitmq:StatefulSet:openstack-nova-rabbitmq-rabbitmq:
+      - from:
+        - default: selector
   egress: {}
