@@ -2,6 +2,9 @@
 designate:
   Job:
     designate-bootstrap:
+      connections:
+        egress:
+          - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
       hash_fields:
       - network.proxy.*
       - bootstrap.*
@@ -36,6 +39,9 @@ designate:
         application: designate
         component: db-sync
     designate-ks-endpoints:
+      connections:
+        egress:
+          - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
       hash_fields: []
       images:
       - ks_endpoints
@@ -44,6 +50,9 @@ designate:
         application: designate
         component: ks-endpoints
     designate-ks-service:
+      connections:
+        egress:
+          - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
       hash_fields: []
       images:
       - ks_service
@@ -52,6 +61,9 @@ designate:
         application: designate
         component: ks-service
     designate-ks-user:
+      connections:
+        egress:
+          - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
       hash_fields:
       - endpoints.*
       images:
@@ -87,6 +99,10 @@ designate:
         component: powerdns-db-sync
   StatefulSet:
     designate-api:
+      connections:
+        egress:
+          - {{ to_child_object("coordination", "etcd", "StatefulSet", "etcd-etcd", ["client"]) | indent(12)}}
+          - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
       hash_fields: []
       images:
       - designate_api
@@ -94,10 +110,11 @@ designate:
       pod_labels:
         application: designate
         component: api
+    designate-central:
       connections:
         egress:
           - {{ to_child_object("coordination", "etcd", "StatefulSet", "etcd-etcd", ["client"]) | indent(12)}}
-    designate-central:
+          - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
       hash_fields: []
       images:
       - ks_user
@@ -106,10 +123,11 @@ designate:
       pod_labels:
         application: designate
         component: central
+    designate-mdns:
       connections:
         egress:
           - {{ to_child_object("coordination", "etcd", "StatefulSet", "etcd-etcd", ["client"]) | indent(12)}}
-    designate-mdns:
+          - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
       hash_fields: []
       images:
       - designate_mdns
@@ -119,10 +137,11 @@ designate:
       pod_labels:
         application: designate
         component: mdns
+    designate-producer:
       connections:
         egress:
           - {{ to_child_object("coordination", "etcd", "StatefulSet", "etcd-etcd", ["client"]) | indent(12)}}
-    designate-producer:
+          - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
       hash_fields: []
       images:
       - designate_producer
@@ -130,9 +149,6 @@ designate:
       pod_labels:
         application: designate
         component: producer
-      connections:
-        egress:
-          - {{ to_child_object("coordination", "etcd", "StatefulSet", "etcd-etcd", ["client"]) | indent(12)}}
 rabbitmq:
   Job:
     openstack-designate-rabbitmq-cluster-wait:

@@ -11,6 +11,10 @@ aodh:
         component: db-purge
   Deployment:
     aodh-api:
+      connections:
+        egress:
+          - {{ to_child_object("coordination", "etcd", "StatefulSet", "etcd-etcd", ["client"]) | indent(12)}}
+          - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
       hash_fields: []
       images:
       - aodh_api
@@ -18,10 +22,11 @@ aodh:
       pod_labels:
         application: aodh
         component: api
+    aodh-evaluator:
       connections:
         egress:
           - {{ to_child_object("coordination", "etcd", "StatefulSet", "etcd-etcd", ["client"]) | indent(12)}}
-    aodh-evaluator:
+          - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
       hash_fields: []
       images:
       - aodh_evaluator
@@ -29,10 +34,11 @@ aodh:
       pod_labels:
         application: aodh
         component: evaluator
+    aodh-listener:
       connections:
         egress:
           - {{ to_child_object("coordination", "etcd", "StatefulSet", "etcd-etcd", ["client"]) | indent(12)}}
-    aodh-listener:
+          - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
       hash_fields: []
       images:
       - aodh_listener
@@ -40,10 +46,11 @@ aodh:
       pod_labels:
         application: aodh
         component: listener
+    aodh-notifier:
       connections:
         egress:
           - {{ to_child_object("coordination", "etcd", "StatefulSet", "etcd-etcd", ["client"]) | indent(12)}}
-    aodh-notifier:
+          - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
       hash_fields: []
       images:
       - aodh_notifier
@@ -51,9 +58,6 @@ aodh:
       pod_labels:
         application: aodh
         component: notifier
-      connections:
-        egress:
-          - {{ to_child_object("coordination", "etcd", "StatefulSet", "etcd-etcd", ["client"]) | indent(12)}}
   Job:
     aodh-bootstrap:
       hash_fields:
@@ -93,6 +97,9 @@ aodh:
         application: aodh
         component: db-sync
     aodh-ks-endpoints:
+      connections:
+        egress:
+          - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
       hash_fields: []
       images:
       - ks_endpoints
@@ -101,6 +108,9 @@ aodh:
         application: aodh
         component: ks-endpoints
     aodh-ks-service:
+      connections:
+        egress:
+          - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
       hash_fields: []
       images:
       - ks_service
@@ -109,6 +119,9 @@ aodh:
         application: aodh
         component: ks-service
     aodh-ks-user:
+      connections:
+        egress:
+          - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
       hash_fields:
       - endpoints.*
       images:

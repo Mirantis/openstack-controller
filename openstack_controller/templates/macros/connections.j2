@@ -18,3 +18,11 @@ to_child_object:
 - ipBlock:
     cidr: '0.0.0.0/0'
 {%- endmacro -%}
+
+{% macro from_namespaces(ns_list) %}
+  {%- for ns in ns_list %}
+- namespaceSelector:
+    matchLabels:
+        name: {{ ns }}
+  {%- endfor -%}
+{%- endmacro -%}

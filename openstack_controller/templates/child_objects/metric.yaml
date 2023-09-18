@@ -11,6 +11,10 @@ gnocchi:
         component: resources-cleaner
   DaemonSet:
     gnocchi-metricd:
+      connections:
+        egress:
+          - {{ to_child_object("coordination", "etcd", "StatefulSet", "etcd-etcd", ["client"]) | indent(12)}}
+          - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
       hash_fields: []
       images:
       - gnocchi_api
@@ -19,10 +23,11 @@ gnocchi:
       pod_labels:
         application: gnocchi
         component: metricd
+    gnocchi-statsd:
       connections:
         egress:
           - {{ to_child_object("coordination", "etcd", "StatefulSet", "etcd-etcd", ["client"]) | indent(12)}}
-    gnocchi-statsd:
+          - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
       hash_fields: []
       images:
       - gnocchi_api
@@ -31,11 +36,12 @@ gnocchi:
       pod_labels:
         application: gnocchi
         component: metricd
+  Deployment:
+    gnocchi-api:
       connections:
         egress:
           - {{ to_child_object("coordination", "etcd", "StatefulSet", "etcd-etcd", ["client"]) | indent(12)}}
-  Deployment:
-    gnocchi-api:
+          - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
       hash_fields: []
       images:
       - gnocchi_api
@@ -43,11 +49,11 @@ gnocchi:
       pod_labels:
         application: gnocchi
         component: api
-      connections:
-        egress:
-          - {{ to_child_object("coordination", "etcd", "StatefulSet", "etcd-etcd", ["client"]) | indent(12)}}
   Job:
     gnocchi-bootstrap:
+      connections:
+        egress:
+          - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
       hash_fields:
       - network.proxy.*
       - bootstrap.*
@@ -93,15 +99,10 @@ gnocchi:
       pod_labels:
         application: gnocchi
         component: db-sync
-    gnocchi-image-repo-sync:
-      hash_fields: []
-      images:
-      - image_repo_sync
-      manifest: job_image_repo_sync
-      pod_labels:
-        application: gnocchi
-        component: image-repo-sync
     gnocchi-ks-endpoints:
+      connections:
+        egress:
+          - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
       hash_fields: []
       images:
       - ks_endpoints
@@ -110,6 +111,9 @@ gnocchi:
         application: gnocchi
         component: ks-endpoints
     gnocchi-ks-service:
+      connections:
+        egress:
+          - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
       hash_fields: []
       images:
       - ks_service
@@ -118,6 +122,9 @@ gnocchi:
         application: gnocchi
         component: ks-service
     gnocchi-ks-user:
+      connections:
+        egress:
+          - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
       hash_fields:
       - endpoints.*
       images:

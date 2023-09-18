@@ -1,6 +1,10 @@
+{%- from 'macros/connections.j2' import to_child_object %}
 octavia:
   DaemonSet:
     octavia-health-manager:
+      connections:
+        egress:
+          - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
       hash_fields: []
       images:
       - openvswitch_vswitchd
@@ -12,6 +16,9 @@ octavia:
       type: dynamic
   Deployment:
     octavia-api:
+      connections:
+        egress:
+          - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
       hash_fields: []
       images:
       - octavia_api
@@ -21,6 +28,9 @@ octavia:
         application: octavia
         component: api
     octavia-housekeeping:
+      connections:
+        egress:
+          - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
       hash_fields: []
       images:
       - octavia_housekeeping
@@ -29,6 +39,9 @@ octavia:
         application: octavia
         component: housekeeping
     octavia-worker:
+      connections:
+        egress:
+          - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
       hash_fields: []
       images:
       - octavia_worker
@@ -38,6 +51,9 @@ octavia:
         component: worker
   Job:
     octavia-bootstrap:
+      connections:
+        egress:
+          - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
       hash_fields:
       - network.proxy.*
       - bootstrap.*
@@ -48,6 +64,9 @@ octavia:
         application: octavia
         component: bootstrap
     octavia-create-resources:
+      connections:
+        egress:
+          - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
       hash_fields:
       - octavia.settings.amphora_image_url
       - network.proxy.*
@@ -95,6 +114,9 @@ octavia:
         application: octavia
         component: db-sync-persistence
     octavia-ks-endpoints:
+      connections:
+        egress:
+          - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
       hash_fields: []
       images:
       - ks_endpoints
@@ -103,6 +125,9 @@ octavia:
         application: octavia
         component: ks-endpoints
     octavia-ks-service:
+      connections:
+        egress:
+          - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
       hash_fields: []
       images:
       - ks_service
@@ -111,6 +136,9 @@ octavia:
         application: octavia
         component: ks-service
     octavia-ks-user:
+      connections:
+        egress:
+          - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
       hash_fields:
       - endpoints.*
       images:

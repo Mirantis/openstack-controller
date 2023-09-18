@@ -195,8 +195,36 @@ spec:
           ks_user: ks-user:latest
           rabbit_init: rabbit-init:latest
           test: test:latest
+      network_policy:
+        keystine-api:
+          spec:
+            ingress:
+              - from:
+                - default: selector
+              - from:
+                - ipBlock:
+                    cidr: 192.168.0.0/16
+              - from:
+                - namespaceSelector:
+                    matchLabels:
+                      name: osh-system
+                - namespaceSelector:
+                    matchLabels:
+                      name: rook-ceph
+                - namespaceSelector:
+                    matchLabels:
+                      name: stacklight
+                - namespaceSelector:
+                    matchLabels:
+                      name: tf
+            podSelector:
+              matchLabels:
+                application: keystone
+                component: api
+            policyTypes:
+            - Ingress
       manifests:
         job_credential_cleanup: false
         job_rabbit_init: false
-        network_policy: false
+        network_policy: true
         secret_ca_bundle: true

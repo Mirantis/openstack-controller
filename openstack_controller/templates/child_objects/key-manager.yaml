@@ -1,3 +1,4 @@
+{%- from 'macros/connections.j2' import to_child_object %}
 barbican:
   CronJob:
     barbican-db-purge:
@@ -10,6 +11,9 @@ barbican:
         component: db-purge
   Deployment:
     barbican-api:
+      connections:
+        egress:
+          - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
       hash_fields: []
       images:
       - barbican_api
@@ -56,6 +60,9 @@ barbican:
         application: barbican
         component: db-sync
     barbican-ks-endpoints:
+      connections:
+        egress:
+          - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
       hash_fields: []
       images:
       - ks_endpoints
@@ -64,6 +71,9 @@ barbican:
         application: barbican
         component: ks-endpoints
     barbican-ks-service:
+      connections:
+        egress:
+          - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
       hash_fields: []
       images:
       - ks_service
@@ -72,6 +82,9 @@ barbican:
         application: barbican
         component: ks-service
     barbican-ks-user:
+      connections:
+        egress:
+          - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
       hash_fields:
       - endpoints.*
       images:

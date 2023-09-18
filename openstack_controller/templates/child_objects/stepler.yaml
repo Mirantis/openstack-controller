@@ -1,49 +1,10 @@
-None:
-  Job:
-    None-bootstrap:
-      hash_fields:
-      - network.proxy.*
-      - bootstrap.*
-      images:
-      - bootstrap
-      manifest: job_bootstrap
-    None-db-drop:
-      hash_fields:
-      - endpoints.oslo_db.*
-      images:
-      - db_drop
-      manifest: job_db_drop
-    None-db-init:
-      hash_fields:
-      - endpoints.oslo_db.*
-      images:
-      - db_init
-      manifest: job_db_init
-    None-db-sync:
-      hash_fields:
-      - endpoints.oslo_db.*
-      images:
-      - None_db_sync
-      manifest: job_db_sync
-    None-ks-endpoints:
-      hash_fields: []
-      images:
-      - ks_endpoints
-      manifest: job_ks_endpoints
-    None-ks-service:
-      hash_fields: []
-      images:
-      - ks_service
-      manifest: job_ks_service
-    None-ks-user:
-      hash_fields:
-      - endpoints.*
-      images:
-      - ks_user
-      manifest: job_ks_user
+{%- from 'macros/connections.j2' import to_child_object %}
 stepler:
   Job:
     openstack-stepler-run-tests:
+      connections:
+        egress:
+          - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
       hash_fields: []
       images:
       - stepler_run_tests
@@ -60,6 +21,9 @@ stepler:
         application: stepler
         component: bootstrap
     stepler-ks-user:
+      connections:
+        egress:
+          - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
       hash_fields:
       - endpoints.*
       images:

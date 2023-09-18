@@ -10,6 +10,9 @@ cinder:
         application: cinder
         component: db-purge
     cinder-service-cleaner:
+      connections:
+        egress:
+          - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
       hash_fields: []
       images:
       - ks_endpoints
@@ -28,6 +31,10 @@ cinder:
         component: volume-usage-audit
   DaemonSet:
     cinder-volume-ds:
+      connections:
+        egress:
+          - {{ to_child_object("coordination", "etcd", "StatefulSet", "etcd-etcd", ["client"]) | indent(12)}}
+          - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
       hash_fields: []
       images:
       - cinder_volume_daemonset
@@ -36,11 +43,12 @@ cinder:
         application: cinder
         component: volume_daemonset
       type: dynamic
+  Deployment:
+    cinder-api:
       connections:
         egress:
           - {{ to_child_object("coordination", "etcd", "StatefulSet", "etcd-etcd", ["client"]) | indent(12)}}
-  Deployment:
-    cinder-api:
+          - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
       hash_fields: []
       images:
       - cinder_api
@@ -48,9 +56,6 @@ cinder:
       pod_labels:
         application: cinder
         component: api
-      connections:
-        egress:
-          - {{ to_child_object("coordination", "etcd", "StatefulSet", "etcd-etcd", ["client"]) | indent(12)}}
   Job:
     cinder-backup-storage-init:
       hash_fields: []
@@ -61,6 +66,9 @@ cinder:
         application: cinder
         component: storage-init
     cinder-bootstrap:
+      connections:
+        egress:
+          - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
       hash_fields:
       - network.proxy.*
       - bootstrap.*
@@ -80,6 +88,9 @@ cinder:
         application: cinder
         component: clean
     cinder-create-internal-tenant:
+      connections:
+        egress:
+          - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
       hash_fields: []
       images:
       - cinder_create_internal_tenant
@@ -123,6 +134,9 @@ cinder:
         application: cinder
         component: db-sync-online
     cinder-drop-default-volume-type:
+      connections:
+        egress:
+          - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
       hash_fields: []
       images:
       - cinder_drop_default_volume_type
@@ -131,6 +145,9 @@ cinder:
         application: cinder
         component: drop-default-volume-type
     cinder-ks-endpoints:
+      connections:
+        egress:
+          - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
       hash_fields: []
       images:
       - ks_endpoints
@@ -139,6 +156,9 @@ cinder:
         application: cinder
         component: ks-endpoints
     cinder-ks-service:
+      connections:
+        egress:
+          - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
       hash_fields: []
       images:
       - ks_service
@@ -147,6 +167,9 @@ cinder:
         application: cinder
         component: ks-service
     cinder-ks-user:
+      connections:
+        egress:
+          - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
       hash_fields:
       - endpoints.*
       images:
@@ -165,6 +188,10 @@ cinder:
         component: storage-init
   StatefulSet:
     cinder-backup:
+      connections:
+        egress:
+          - {{ to_child_object("coordination", "etcd", "StatefulSet", "etcd-etcd", ["client"]) | indent(12)}}
+          - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
       hash_fields: []
       images:
       - cinder_backup
@@ -172,10 +199,11 @@ cinder:
       pod_labels:
         application: cinder
         component: backup
+    cinder-scheduler:
       connections:
         egress:
           - {{ to_child_object("coordination", "etcd", "StatefulSet", "etcd-etcd", ["client"]) | indent(12)}}
-    cinder-scheduler:
+          - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
       hash_fields: []
       images:
       - cinder_scheduler
@@ -183,10 +211,11 @@ cinder:
       pod_labels:
         application: cinder
         component: scheduler
+    cinder-volume:
       connections:
         egress:
           - {{ to_child_object("coordination", "etcd", "StatefulSet", "etcd-etcd", ["client"]) | indent(12)}}
-    cinder-volume:
+          - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
       hash_fields: []
       images:
       - cinder_volume
@@ -194,9 +223,6 @@ cinder:
       pod_labels:
         application: cinder
         component: volume
-      connections:
-        egress:
-          - {{ to_child_object("coordination", "etcd", "StatefulSet", "etcd-etcd", ["client"]) | indent(12)}}
       # TODO(vsaienko): implement support of dynamic child objects for sts
       # type: dynamic
 rabbitmq:

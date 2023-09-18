@@ -4,6 +4,7 @@ neutron:
     bagpipe-bgp:
       connections:
         egress:
+          - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
           - {{ to_child_object("networking", "rabbitmq", "StatefulSet", "openstack-neutron-rabbitmq-rabbitmq", ["amqp"]) | indent(12)}}
       hash_fields: []
       images:
@@ -16,6 +17,7 @@ neutron:
     neutron-dhcp-agent:
       connections:
         egress:
+          - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
           - {{ to_child_object("networking", "rabbitmq", "StatefulSet", "openstack-neutron-rabbitmq-rabbitmq", ["amqp"]) | indent(12)}}
       hash_fields: []
       images:
@@ -28,6 +30,7 @@ neutron:
     neutron-dr-agent:
       connections:
         egress:
+          - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
           - {{ to_child_object("networking", "rabbitmq", "StatefulSet", "openstack-neutron-rabbitmq-rabbitmq", ["amqp"]) | indent(12)}}
       hash_fields: []
       images:
@@ -40,6 +43,7 @@ neutron:
     neutron-l2gw-agent:
       connections:
         egress:
+          - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
           - {{ to_child_object("networking", "rabbitmq", "StatefulSet", "openstack-neutron-rabbitmq-rabbitmq", ["amqp"]) | indent(12)}}
       hash_fields: []
       images:
@@ -52,6 +56,7 @@ neutron:
     neutron-l3-agent:
       connections:
         egress:
+          - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
           - {{ to_child_object("networking", "rabbitmq", "StatefulSet", "openstack-neutron-rabbitmq-rabbitmq", ["amqp"]) | indent(12)}}
       hash_fields: []
       images:
@@ -64,6 +69,7 @@ neutron:
     neutron-metadata-agent:
       connections:
         egress:
+          - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
           - {{ to_child_object("networking", "rabbitmq", "StatefulSet", "openstack-neutron-rabbitmq-rabbitmq", ["amqp"]) | indent(12)}}
       hash_fields: []
       images:
@@ -85,6 +91,7 @@ neutron:
     neutron-ovs-agent:
       connections:
         egress:
+          - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
           - {{ to_child_object("networking", "rabbitmq", "StatefulSet", "openstack-neutron-rabbitmq-rabbitmq", ["amqp"]) | indent(12)}}
       hash_fields: []
       images:
@@ -97,6 +104,7 @@ neutron:
     neutron-sriov-agent:
       connections:
         egress:
+          - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
           - {{ to_child_object("networking", "rabbitmq", "StatefulSet", "openstack-neutron-rabbitmq-rabbitmq", ["amqp"]) | indent(12)}}
       hash_fields: []
       images:
@@ -111,6 +119,7 @@ neutron:
     neutron-server:
       connections:
         egress:
+          - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
           - {{ to_child_object("networking", "rabbitmq", "StatefulSet", "openstack-neutron-rabbitmq-rabbitmq", ["amqp"]) | indent(12)}}
       hash_fields: []
       images:
@@ -121,6 +130,9 @@ neutron:
         component: server
   Job:
     neutron-bootstrap:
+      connections:
+        egress:
+          - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
       hash_fields:
       - network.proxy.*
       - bootstrap.*
@@ -158,6 +170,9 @@ neutron:
         application: neutron
         component: db-sync
     neutron-ks-endpoints:
+      connections:
+        egress:
+          - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
       hash_fields: []
       images:
       - ks_endpoints
@@ -166,6 +181,9 @@ neutron:
         application: neutron
         component: ks-endpoints
     neutron-ks-service:
+      connections:
+        egress:
+          - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
       hash_fields: []
       images:
       - ks_service
@@ -174,6 +192,9 @@ neutron:
         application: neutron
         component: ks-service
     neutron-ks-user:
+      connections:
+        egress:
+          - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
       hash_fields:
       - endpoints.*
       images:
@@ -183,6 +204,9 @@ neutron:
         application: neutron
         component: ks-user
     tungstenfabric-ks-endpoints:
+      connections:
+        egress:
+          - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
       hash_fields: []
       images:
       - ks_endpoints
@@ -191,6 +215,9 @@ neutron:
         application: tungstenfabric
         component: ks-endpoints
     tungstenfabric-ks-service:
+      connections:
+        egress:
+          - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
       hash_fields: []
       images:
       - ks_service
@@ -200,6 +227,10 @@ neutron:
         component: ks-service
   StatefulSet:
     neutron-ironic-agent:
+      connections:
+        egress:
+          - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
+          - {{ to_child_object("networking", "rabbitmq", "StatefulSet", "openstack-neutron-rabbitmq-rabbitmq", ["amqp"]) | indent(12)}}
       hash_fields: []
       images:
       - neutron_ironic_agent
@@ -207,9 +238,6 @@ neutron:
       pod_labels:
         application: neutron
         component: ironic-agent
-      connections:
-        egress:
-          - {{ to_child_object("networking", "rabbitmq", "StatefulSet", "openstack-neutron-rabbitmq-rabbitmq", ["amqp"]) | indent(12)}}
 openvswitch:
   DaemonSet:
     ovn-controller:

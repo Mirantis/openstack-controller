@@ -1,3 +1,4 @@
+{%- from 'macros/connections.j2' import to_child_object %}
 heat:
   CronJob:
     heat-db-purge:
@@ -9,6 +10,9 @@ heat:
         application: heat
         component: db-purge
     heat-engine-cleaner:
+      connections:
+        egress:
+          - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
       hash_fields: []
       images:
       - heat_engine_cleaner
@@ -18,6 +22,9 @@ heat:
         component: engine-cleaner
   Deployment:
     heat-api:
+      connections:
+        egress:
+          - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
       hash_fields: []
       images:
       - heat_api
@@ -26,6 +33,9 @@ heat:
         application: heat
         component: api
     heat-cfn:
+      connections:
+        egress:
+          - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
       hash_fields: []
       images:
       - heat_cfn
@@ -34,6 +44,9 @@ heat:
         application: heat
         component: cfn
     heat-cloudwatch:
+      connections:
+        egress:
+          - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
       hash_fields: []
       images:
       - heat_cloudwatch
@@ -42,6 +55,9 @@ heat:
         application: heat
         component: cloudwatch
     heat-engine:
+      connections:
+        egress:
+          - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
       hash_fields: []
       images:
       - heat_engine
@@ -51,6 +67,9 @@ heat:
         component: engine
   Job:
     heat-bootstrap:
+      connections:
+        egress:
+          - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
       hash_fields:
       - network.proxy.*
       - bootstrap.*
@@ -88,6 +107,9 @@ heat:
         application: heat
         component: db-sync
     heat-domain-ks-user:
+      connections:
+        egress:
+          - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
       hash_fields:
       - conf.*
       - endpoints.*
@@ -97,15 +119,10 @@ heat:
       pod_labels:
         application: heat
         component: ks-user
-    heat-image-repo-sync:
-      hash_fields: []
-      images:
-      - image_repo_sync
-      manifest: job_image_repo_sync
-      pod_labels:
-        application: heat
-        component: image-repo-sync
     heat-ks-endpoints:
+      connections:
+        egress:
+          - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
       hash_fields: []
       images:
       - ks_endpoints
@@ -114,6 +131,9 @@ heat:
         application: heat
         component: ks-endpoints
     heat-ks-service:
+      connections:
+        egress:
+          - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
       hash_fields: []
       images:
       - ks_service
@@ -122,6 +142,9 @@ heat:
         application: heat
         component: ks-service
     heat-ks-user:
+      connections:
+        egress:
+          - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
       hash_fields:
       - endpoints.*
       images:
@@ -131,12 +154,21 @@ heat:
         application: heat
         component: ks-user
     heat-trustee-ks-user:
+      connections:
+        egress:
+          - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
       hash_fields:
       - endpoints.*
       images:
       - ks_user
       manifest: job_ks_user_trustee
+      pod_labels:
+        application: heat
+        component: ks-user
     heat-trusts:
+      connections:
+        egress:
+          - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
       hash_fields:
       - conf.*
       images:
@@ -144,9 +176,12 @@ heat:
       manifest: job_heat_trusts
       pod_labels:
         application: heat
-        component: ks-user
+        component: trusts
   StatefulSet:
     heat-engine:
+      connections:
+        egress:
+          - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
       hash_fields: []
       images:
       - heat_engine
