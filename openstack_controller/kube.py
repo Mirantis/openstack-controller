@@ -429,9 +429,15 @@ class Job(pykube.Job, HelmBundleMixin):
         self.obj["metadata"].pop("selfLink", None)
         self.obj["metadata"].pop("uid", None)
         self.obj["metadata"]["labels"].pop("controller-uid", None)
+        self.obj["metadata"]["labels"].pop(
+            "batch.kubernetes.io/controller-uid", None
+        )
         self.obj["spec"]["template"]["metadata"].pop("creationTimestamp", None)
         self.obj["spec"]["template"]["metadata"]["labels"].pop(
             "controller-uid", None
+        )
+        self.obj["spec"]["template"]["metadata"]["labels"].pop(
+            "batch.kubernetes.io/controller-uid", None
         )
         self.obj["spec"].pop("selector", None)
 
