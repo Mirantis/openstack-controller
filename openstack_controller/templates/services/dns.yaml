@@ -4,7 +4,6 @@
 {%- from 'macros/messaging_service_creds.j2' import messaging_service_creds %}
 {%- from 'macros/etcd3.j2' import get_etcd3_endpoint %}
 {%- set service = 'designate' %}
-{%- set components_with_dedicated_messaging = spec.get('features', {}).get('messaging', {}).get('components_with_dedicated_messaging', []) %}
 {%- set stacklight_enabled = spec.get('features', {}).get('stacklight', {}).get('enabled', False) %}
 {%- set notification_topics = ['notifications'] %}
 {%- do notification_topics.append('stacklight_notifications') if stacklight_enabled %}
@@ -26,55 +25,6 @@
 
 spec:
   releases:
-{%- if 'dns' in components_with_dedicated_messaging %}
-  - name: openstack-designate-rabbitmq
-    chart: {{spec.common.infra.repo}}/rabbitmq
-    values:
-{% include 'base/_rabbitmq_images.yaml' %}
-  {%- if stacklight_enabled %}
-      monitoring:
-        prometheus:
-          enabled: true
-  {%- endif %}
-      pod:
-        replicas:
-          server: 1
-      manifests:
-        network_policy: false
-        job_users_create: true
-      volume:
-        enabled: false
-      endpoints:
-        cluster_domain_suffix: {{ spec.internal_domain_name }}
-{% include 'base/_messaging_dedicated.yaml' %}
-      conf:
-        users:
-          {{ messaging_service_creds(credentials, "designate", ["/designate"], enable_notifications=False)  }}
-        aux_conf:
-          policies:
-          - vhost: designate
-            name: default-policy
-            pattern: '^(?!amq\.).*'
-            definition:
-              message-ttl: 120000
-              expires: 600000
-          - vhost: designate
-            name: results_expire
-            pattern: '^results\.'
-            definition:
-              expires: 600000
-            priority: 1
-          - vhost: designate
-            name: tasks_expire
-            pattern: '^tasks\.'
-            definition:
-              expires: 600000
-            priority: 1
-  {%- if stacklight_enabled %}
-        prometheus_exporter:
-          rabbit_exporters: "overview,exchange,node"
-  {%- endif %}
-{%- endif %}
 {%- if spec.get('migration', {}).get('designate', {}).get('deploy_main_service', True) %}
   - name: openstack-designate
     chart: {{spec.common.openstack.repo}}/designate
@@ -201,11 +151,7 @@ spec:
             powerdns:
               username: {{ powerdns.database.username }}
               password: {{ powerdns.database.password }}
-{%- if 'dns' in components_with_dedicated_messaging %}
-{% include 'base/_messaging_dedicated.yaml' %}
-{%- else %}
 {% include 'base/_messaging_shared.yaml' %}
-{%- endif %}
 {% include 'base/_notifications.yaml' %}
         powerdns:
           auth:
