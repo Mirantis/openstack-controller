@@ -78,8 +78,12 @@ spec:
                   periodSeconds: 60
                   timeoutSeconds: 30
       manifests:
-        network_policy: false
         job_users_create: true
+        network_policy: {{ spec.get("features", {}).get("network_policies", {}).get("enabled", false) }}
+{%- if spec.get("features", {}).get("network_policies", {}).get("enabled", false) %}
+      network_policy:
+{% include 'base/network_policies/compute-rabbitmq.yaml' %}
+{%- endif %}
       volume:
         enabled: false
       endpoints:

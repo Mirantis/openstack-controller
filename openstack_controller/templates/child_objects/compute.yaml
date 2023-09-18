@@ -51,6 +51,7 @@ nova:
       connections:
         egress:
           - {{ to_child_object("coordination", "etcd", "StatefulSet", "etcd-etcd", ["client"]) | indent(12)}}
+          - {{ to_child_object("compute", "rabbitmq", "StatefulSet", "openstack-nova-rabbitmq-rabbitmq", ["amqp"]) | indent(12)}}
   Deployment:
     nova-api-metadata:
       hash_fields: []
@@ -63,6 +64,7 @@ nova:
       connections:
         egress:
           - {{ to_child_object("coordination", "etcd", "StatefulSet", "etcd-etcd", ["client"]) | indent(12)}}
+          - {{ to_child_object("compute", "rabbitmq", "StatefulSet", "openstack-nova-rabbitmq-rabbitmq", ["amqp"]) | indent(12)}}
     nova-api-osapi:
       hash_fields: []
       images:
@@ -74,6 +76,7 @@ nova:
       connections:
         egress:
           - {{ to_child_object("coordination", "etcd", "StatefulSet", "etcd-etcd", ["client"]) | indent(12)}}
+          - {{ to_child_object("compute", "rabbitmq", "StatefulSet", "openstack-nova-rabbitmq-rabbitmq", ["amqp"]) | indent(12)}}
     nova-conductor:
       hash_fields: []
       images:
@@ -85,6 +88,7 @@ nova:
       connections:
         egress:
           - {{ to_child_object("coordination", "etcd", "StatefulSet", "etcd-etcd", ["client"]) | indent(12)}}
+          - {{ to_child_object("compute", "rabbitmq", "StatefulSet", "openstack-nova-rabbitmq-rabbitmq", ["amqp"]) | indent(12)}}
     nova-consoleauth:
       hash_fields: []
       images:
@@ -96,6 +100,7 @@ nova:
       connections:
         egress:
           - {{ to_child_object("coordination", "etcd", "StatefulSet", "etcd-etcd", ["client"]) | indent(12)}}
+          - {{ to_child_object("compute", "rabbitmq", "StatefulSet", "openstack-nova-rabbitmq-rabbitmq", ["amqp"]) | indent(12)}}
     nova-novncproxy:
       hash_fields: []
       images:
@@ -108,6 +113,7 @@ nova:
       connections:
         egress:
           - {{ to_child_object("coordination", "etcd", "StatefulSet", "etcd-etcd", ["client"]) | indent(12)}}
+          - {{ to_child_object("compute", "rabbitmq", "StatefulSet", "openstack-nova-rabbitmq-rabbitmq", ["amqp"]) | indent(12)}}
 {%- if spec.openstack_version not in ['queens', 'rocky', 'stein'] %}
     nova-placement-api:
       hash_fields: []
@@ -132,6 +138,7 @@ nova:
       connections:
         egress:
           - {{ to_child_object("coordination", "etcd", "StatefulSet", "etcd-etcd", ["client"]) | indent(12)}}
+          - {{ to_child_object("compute", "rabbitmq", "StatefulSet", "openstack-nova-rabbitmq-rabbitmq", ["amqp"]) | indent(12)}}
   Job:
     nova-bootstrap:
       hash_fields:
@@ -312,6 +319,25 @@ nova:
         egress:
           - {{ to_child_object("coordination", "etcd", "StatefulSet", "etcd-etcd", ["client"]) | indent(12)}}
 rabbitmq:
+  StatefulSet:
+    openstack-nova-rabbitmq-rabbitmq:
+      images: []
+      manifest: ''
+      hash_fields: []
+      pod_labels:
+        application: rabbitmq
+        component: server
+        release_group: openstack-nova-rabbitmq
+      ports:
+      - port: 15672
+        name: http
+        protocol: TCP
+      - port: 5672
+        name: amqp
+        protocol: TCP
+      - port: 25672
+        name: clustering
+        protocol: TCP
   Job:
     openstack-nova-rabbitmq-cluster-wait:
       hash_fields:
