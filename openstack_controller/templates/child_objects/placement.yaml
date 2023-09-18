@@ -5,6 +5,7 @@ placement:
       connections:
         egress:
           - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
+          - {{ to_child_object("database", "mariadb", "StatefulSet", "mariadb-server", ["mysql"]) | indent(12)}}
       hash_fields: []
       images:
       - placement
@@ -13,15 +14,6 @@ placement:
         application: placement
         component: api
   Job:
-    placement-db-drop:
-      hash_fields:
-      - endpoints.oslo_db.*
-      images:
-      - db_drop
-      manifest: job_db_drop
-      pod_labels:
-        application: placement
-        component: db-drop
     placement-db-init:
       hash_fields:
       - endpoints.oslo_db.*
@@ -31,7 +23,21 @@ placement:
       pod_labels:
         application: placement
         component: db-init
+      connections:
+        egress:
+          - {{ to_child_object("database", "mariadb", "StatefulSet", "mariadb-server", ["mysql"]) | indent(12)}}
 {%- if spec["openstack_version"] in ['stein'] %}
+    placement-db-migrate:
+      hash_fields: []
+      images:
+      - placement
+      manifest: job_db_migrate
+      pod_labels:
+        application: placement
+        component: db_migrate
+      connections:
+        egress:
+          - {{ to_child_object("database", "mariadb", "StatefulSet", "mariadb-server", ["mysql"]) | indent(12)}}
     placement-db-nova-migrate-placement:
       hash_fields: []
       images:
@@ -40,6 +46,9 @@ placement:
       pod_labels:
         application: placement
         component: db-nova-migrate-placement
+      connections:
+        egress:
+          - {{ to_child_object("database", "mariadb", "StatefulSet", "mariadb-server", ["mysql"]) | indent(12)}}
 {%- endif %}
     placement-db-sync:
       hash_fields:
@@ -50,6 +59,9 @@ placement:
       pod_labels:
         application: placement
         component: db-sync
+      connections:
+        egress:
+          - {{ to_child_object("database", "mariadb", "StatefulSet", "mariadb-server", ["mysql"]) | indent(12)}}
     placement-ks-endpoints:
       connections:
         egress:

@@ -40,6 +40,11 @@ networking:rabbitmq:StatefulSet:openstack-neutron-rabbitmq-rabbitmq:
       matchLabels:
         application: neutron
         component: ironic-agent
+  - podSelector:
+      matchLabels:
+        application: rabbitmq
+        component: cluster-wait
+        release_group: openstack-neutron-rabbitmq
   ports:
   - port: 5672
     protocol: TCP

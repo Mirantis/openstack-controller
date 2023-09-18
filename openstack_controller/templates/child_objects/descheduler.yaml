@@ -5,3 +5,6 @@ descheduler:
       images:
       - descheduler
       manifest: cronjob
+      pod_labels:
+        application: descheduler
+        component: descheduler

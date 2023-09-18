@@ -9,6 +9,7 @@ rabbitmq:
       pod_labels:
         application: rabbitmq
         component: cluster-wait
+        release_group: openstack-rabbitmq-rabbitmq
   StatefulSet:
     openstack-rabbitmq-rabbitmq:
       hash_fields: []

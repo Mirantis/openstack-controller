@@ -1,3 +1,4 @@
+{%- from 'macros/connections.j2' import from_pod_networks %}
         mariadb-server:
           spec:
             podSelector:
@@ -8,3 +9,5 @@
             - Ingress
             ingress:
 {{ network_policies["ingress"]["database:mariadb:StatefulSet:mariadb-server"] | toyaml | indent(14, first=True) }}
+              - from:
+{{ from_pod_networks(pod_networks) | indent(18) }}

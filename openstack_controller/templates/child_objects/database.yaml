@@ -9,6 +9,9 @@ mariadb:
       pod_labels:
         application: mariadb
         component: backup
+      connections:
+        egress:
+          - {{ to_child_object("database", "mariadb", "StatefulSet", "mariadb-server", ["mysql"]) | indent(12)}}
   Deployment:
     mariadb-controller:
       hash_fields: []
@@ -27,6 +30,9 @@ mariadb:
       pod_labels:
         application: prometheus-mysql-exporter
         component: create-sql-user
+      connections:
+        egress:
+          - {{ to_child_object("database", "mariadb", "StatefulSet", "mariadb-server", ["mysql"]) | indent(12)}}
     mariadb-phy-restore:
       hash_fields: []
       images:
@@ -35,6 +41,9 @@ mariadb:
       pod_labels:
         application: mariadb
         component: restore
+      connections:
+        egress:
+          - {{ to_child_object("database", "mariadb", "StatefulSet", "mariadb-server", ["mysql"]) | indent(12)}}
     openstack-mariadb-cluster-wait:
       hash_fields: []
       images:
@@ -43,6 +52,9 @@ mariadb:
       pod_labels:
         application: mariadb
         component: cluster-wait
+      connections:
+        egress:
+          - {{ to_child_object("database", "mariadb", "StatefulSet", "mariadb-server", ["mysql"]) | indent(12)}}
   StatefulSet:
     mariadb-server:
       connections:
