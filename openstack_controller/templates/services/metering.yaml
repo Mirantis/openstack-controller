@@ -2,7 +2,6 @@
 #kind: HelmBundle
 
 {%- set service = 'ceilometer' %}
-{%- set components_with_dedicated_messaging = spec.get('features', {}).get('messaging', {}).get('components_with_dedicated_messaging', []) %}
 {%- set stacklight_enabled = spec.get('features', {}).get('stacklight', {}).get('enabled', False) %}
 {%- set notification_topics = ['notifications'] %}
 {%- set telemetry_mode = spec.get('features', {}).get('telemetry', {}).get('mode', 'autoscaling') %}
@@ -129,11 +128,7 @@ spec:
               username:   {{ event_credentials[0].database.user.username }}
               password:   {{ event_credentials[0].database.user.password }}
   {%- endif %}
-{%- if 'metering' in components_with_dedicated_messaging %}
-{% include 'base/_messaging_dedicated.yaml' %}
-{%- else %}
 {% include 'base/_messaging_shared.yaml' %}
-{%- endif %}
 {% include 'base/_notifications.yaml' %}
         metering:
           host_fqdn_override:

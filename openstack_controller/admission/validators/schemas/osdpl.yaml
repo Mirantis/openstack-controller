@@ -1231,13 +1231,7 @@ properties:
             items:
               type: string
               enum:
-                - load-balancer
-                - dns
-                - key-manager
-                - block-storage
-                - orchestration
                 - compute
-                - baremetal
                 - networking
           notifications:
             type: object

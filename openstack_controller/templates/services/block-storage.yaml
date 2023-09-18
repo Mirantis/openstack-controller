@@ -3,7 +3,6 @@
 
 {%- from 'macros/messaging_service_creds.j2' import messaging_service_creds %}
 {%- set service = 'cinder' %}
-{%- set components_with_dedicated_messaging = spec.get('features', {}).get('messaging', {}).get('components_with_dedicated_messaging', []) %}
 {%- set stacklight_enabled = spec.get('features', {}).get('stacklight', {}).get('enabled', False) %}
 {%- set notification_topics = ['notifications'] %}
 {%- do notification_topics.append('stacklight_notifications') if stacklight_enabled %}
@@ -43,55 +42,6 @@
 
 spec:
   releases:
-{%- if 'block-storage' in components_with_dedicated_messaging %}
-  - name: openstack-cinder-rabbitmq
-    chart: {{spec.common.infra.repo}}/rabbitmq
-    values:
-{% include 'base/_rabbitmq_images.yaml' %}
-  {%- if stacklight_enabled %}
-      monitoring:
-        prometheus:
-          enabled: true
-  {%- endif %}
-      pod:
-        replicas:
-          server: 1
-      manifests:
-        network_policy: false
-        job_users_create: true
-      volume:
-        enabled: false
-      endpoints:
-        cluster_domain_suffix: {{ spec.internal_domain_name }}
-{% include 'base/_messaging_dedicated.yaml' %}
-      conf:
-        users:
-          {{ messaging_service_creds(credentials, "cinder", ["/cinder"], enable_notifications=False)  }}
-        aux_conf:
-          policies:
-          - vhost: cinder
-            name: default-policy
-            pattern: '^(?!amq\.).*'
-            definition:
-              message-ttl: 120000
-              expires: 600000
-          - vhost: cinder
-            name: results_expire
-            pattern: '^results\.'
-            definition:
-              expires: 600000
-            priority: 1
-          - vhost: cinder
-            name: tasks_expire
-            pattern: '^tasks\.'
-            definition:
-              expires: 600000
-            priority: 1
-  {%- if stacklight_enabled %}
-        prometheus_exporter:
-          rabbit_exporters: "overview,exchange,node"
-  {%- endif %}
-{%- endif %}
 {%- if spec.get('migration', {}).get('cinder', {}).get('deploy_main_service', True) %}
   - name: openstack-cinder
     chart: {{spec.common.openstack.repo}}/cinder
@@ -431,11 +381,7 @@ spec:
             cinder:
               username: {{ credentials[0].database.user.username }}
               password: {{ credentials[0].database.user.password }}
-{%- if 'block-storage' in components_with_dedicated_messaging %}
-{% include 'base/_messaging_dedicated.yaml' %}
-{%- else %}
 {% include 'base/_messaging_shared.yaml' %}
-{%- endif %}
 {% include 'base/_notifications.yaml' %}
         volume:
           enabled: false
