@@ -114,7 +114,7 @@ nova:
         egress:
           - {{ to_child_object("coordination", "etcd", "StatefulSet", "etcd-etcd", ["client"]) | indent(12)}}
           - {{ to_child_object("compute", "rabbitmq", "StatefulSet", "openstack-nova-rabbitmq-rabbitmq", ["amqp"]) | indent(12)}}
-{%- if spec.openstack_version not in ['queens', 'rocky', 'stein'] %}
+{%- if spec.openstack_version in ['queens', 'rocky', 'stein'] %}
     nova-placement-api:
       hash_fields: []
       images:
@@ -238,7 +238,7 @@ nova:
       pod_labels:
         application: nova
         component: ks-user
-{%- if spec.openstack_version not in ['queens', 'rocky', 'stein'] %}
+{%- if spec.openstack_version in ['queens', 'rocky', 'stein'] %}
     placement-ks-endpoints:
       hash_fields: []
       images:
