@@ -19,7 +19,7 @@ service_policies = {}
 for identifier, policies in network_policy["ingress"].items():
     service, chart, kind, name = identifier.split(':')
     service_policies.setdefault(service, {})
-    service_policies[service] = {identifier: policies}
+    service_policies[service][identifier] = policies
 
 for service, policies in service_policies.items():
     out_template = os.path.join(OUTPUT_DIR, f"{service}.yaml")

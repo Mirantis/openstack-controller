@@ -240,4 +240,13 @@ network_policies:
     identity:keystone:Deployment:keystone-api:
       - from:
         - default: selector
+    compute:nova:Deployment:nova-novncproxy:
+      - from:
+        - default: selector
+    compute:nova:Deployment:nova-api-metadata:
+      - from:
+        - default: selector
+    compute:nova:Deployment:nova-api-osapi:
+      - from:
+        - default: selector
   egress: {}

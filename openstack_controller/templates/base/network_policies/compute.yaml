@@ -1,0 +1,44 @@
+{%- from 'macros/connections.j2' import from_pod_networks %}
+{%- from 'macros/connections.j2' import from_namespaces %}
+{%- set api_ns_list = ["os_controller", "lma_deployment", "tf_deployment"] | namespaces  %}
+{%- set metadata_ns_list = ["tf_deployment"] | namespaces  %}
+        metadata:
+          spec:
+            podSelector:
+              matchLabels:
+                application: nova
+                component: metadata
+            policyTypes:
+            - Ingress
+            ingress:
+# Pods with host network such as neutron-metadata
+{{ network_policies["ingress"]["compute:nova:Deployment:nova-api-metadata"] | toyaml | indent(14, first=True) }}
+              - from:
+{{ from_pod_networks(pod_networks) | indent(18) }}
+              - from:
+{{ from_namespaces(metadata_ns_list) | indent(18) }}
+        api:
+          spec:
+            podSelector:
+              matchLabels:
+                application: nova
+                component: os-api
+            policyTypes:
+            - Ingress
+            ingress:
+{{ network_policies["ingress"]["compute:nova:Deployment:nova-api-osapi"] | toyaml | indent(14, first=True) }}
+              - from:
+# Pods with host network such as octavia-worker
+{{ from_pod_networks(pod_networks) | indent(18) }}
+              - from:
+{{ from_namespaces(api_ns_list) | indent(18) }}
+        novncproxy:
+          spec:
+            podSelector:
+              matchLabels:
+                application: nova
+                component: novnc-proxy   
+            policyTypes:
+            - Ingress   
+            ingress: 
+{{ network_policies["ingress"]["compute:nova:Deployment:nova-novncproxy"] | toyaml | indent(14, first=True) }}

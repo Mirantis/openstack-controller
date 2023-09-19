@@ -441,13 +441,67 @@ spec:
         job_ks_placement_service: false
         job_ks_placement_user: false
         job_rabbit_init: false
-        network_policy: false
+        network_policy: true
         pdb_placement: false
         secret_ca_bundle: true
         secret_keystone_placement: false
         service_ingress_placement: false
         service_placement: false
         ceph_conf: true
+      network_policy:
+        api:
+          spec:
+            ingress:
+              - from:
+                - default: selector
+              - from:
+                - ipBlock:
+                    cidr: 192.168.0.0/16
+              - from:
+                - namespaceSelector:
+                    matchLabels:
+                      name: osh-system
+                - namespaceSelector:
+                    matchLabels:
+                      name: stacklight
+                - namespaceSelector:
+                    matchLabels:
+                      name: tf
+            podSelector:
+              matchLabels:
+                application: nova
+                component: os-api
+            policyTypes:
+            - Ingress
+        metadata:
+          spec:
+            ingress:
+              - from:
+                - default: selector
+              - from:
+                - ipBlock:
+                    cidr: 192.168.0.0/16
+              - from:
+                - namespaceSelector:
+                    matchLabels:
+                      name: tf
+            podSelector:
+              matchLabels:
+                application: nova
+                component: metadata
+            policyTypes:
+            - Ingress
+        novncproxy:
+          spec:
+            ingress:
+              - from:
+                - default: selector
+            podSelector:
+              matchLabels:
+                application: nova
+                component: novnc-proxy
+            policyTypes:
+            - Ingress
       network:
         core_plugin: ml2
         sshd:

@@ -498,7 +498,7 @@ spec:
               - openstack-mariadb-cluster-wait
       manifests:
         cron_job_db_purge: true
-        network_policy: false
+        network_policy: {{ spec.get("features", {}).get("network_policies", {}).get("enabled", false) }}
         job_rabbit_init: false
         ceph_conf: true
 {%- if spec.openstack_version not in ['queens', 'rocky'] %}
@@ -522,6 +522,10 @@ spec:
       {%- if vnc_tls_enabled %}
         secret_novncproxy_tls: true
       {%- endif %}
+{%- if spec.get("features", {}).get("network_policies", {}).get("enabled", false) %}
+      network_policy:
+{% include 'base/network_policies/compute.yaml' %}
+{%- endif %}
       endpoints:
         cluster_domain_suffix: {{ spec.internal_domain_name }}
 {% include 'base/_admin_identity.yaml' %}
