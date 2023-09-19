@@ -214,8 +214,45 @@ spec:
       manifests:
         cron_job_db_purge: true
         job_rabbit_init: false
-        network_policy: false
+        network_policy: true
         secret_ca_bundle: true
         job_heat_trusts: false
       network:
         core_plugin: ml2
+      network_policy:
+        heat-api:
+          spec:
+            ingress:
+              - from:
+                - default: selector
+              - from:
+                - namespaceSelector:
+                    matchLabels:
+                      name: osh-system
+                - namespaceSelector:
+                    matchLabels:
+                      name: stacklight
+            podSelector:
+              matchLabels:
+                application: heat
+                component: api
+            policyTypes:
+            - Ingress
+        heat-cfn:
+          spec:
+            ingress:
+              - from:
+                - default: selector
+              - from:
+                - namespaceSelector:
+                    matchLabels:
+                      name: osh-system
+                - namespaceSelector:
+                    matchLabels:
+                      name: stacklight
+            podSelector:
+              matchLabels:
+                application: heat
+                component: cfn
+            policyTypes:
+            - Ingress
