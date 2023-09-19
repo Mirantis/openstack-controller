@@ -105,7 +105,43 @@ patternProperties:
                                 type: array
                                 items:
                                   type: string
-      "(Ingress|Job|Service|Secret)":
+      "(Job|CronJob)":
+        additionalProperties: False
+        type: object
+        patternProperties:
+          ".*":
+            additionalProperties: False
+            type: object
+            required:
+              - hash_fields
+              - images
+              - manifest
+              - pod_labels
+            properties:
+              hash_fields:
+                type: array
+                items:
+                  type: string
+              images:
+                type: array
+                items:
+                  type: string
+              manifest:
+                type: string
+              type:
+                type: string
+                enum:
+                  - static
+                  - dynamic
+              pod_labels:
+                type: object
+                patternProperties:
+                  ".*":
+                    type: string
+              connections:
+                type: object
+                <<: *connection_items
+      "(Ingress|Service|Secret)":
         additionalProperties: False
         type: object
         patternProperties:

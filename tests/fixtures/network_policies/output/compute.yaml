@@ -1,0 +1,52 @@
+compute:rabbitmq:StatefulSet:openstack-nova-rabbitmq-rabbitmq:
+- from:
+  - podSelector:
+      matchLabels:
+        application: nova
+        component: compute
+  - podSelector:
+      matchLabels:
+        application: nova
+        component: metadata
+  - podSelector:
+      matchLabels:
+        application: nova
+        component: os-api
+  - podSelector:
+      matchLabels:
+        application: nova
+        component: conductor
+  - podSelector:
+      matchLabels:
+        application: nova
+        component: consoleauth
+  - podSelector:
+      matchLabels:
+        application: nova
+        component: novnc-proxy
+  - podSelector:
+      matchLabels:
+        application: nova
+        component: placement
+  - podSelector:
+      matchLabels: &id001
+        application: nova
+        component: scheduler
+  - podSelector:
+      matchLabels: *id001
+  - podSelector:
+      matchLabels:
+        application: nova
+        component: conductor
+  - podSelector:
+      matchLabels:
+        application: nova
+        component: scheduler
+  - podSelector:
+      matchLabels:
+        application: rabbitmq
+        component: cluster-wait
+        release_group: openstack-nova-rabbitmq
+  ports:
+  - port: 5672
+    protocol: TCP

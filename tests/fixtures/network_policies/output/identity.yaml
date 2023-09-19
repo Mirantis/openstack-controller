@@ -254,6 +254,27 @@ identity:keystone:Deployment:keystone-api:
         component: client
   - podSelector:
       matchLabels:
+        application: keystone
+        component: bootstrap
+  - podSelector:
+      matchLabels:
+        application: keystone
+        component: domain-manage
+  - podSelector:
+      matchLabels:
+        application: keystone
+        component: federations-create
+  - podSelector:
+      matchLabels:
+        application: keystone
+        component: ks-user
+  - podSelector:
+      matchLabels:
+        application: keystone
+        component: ks-user
+        job-name: osctl-ks-user
+  - podSelector:
+      matchLabels:
         application: glance
         component: api
   - podSelector:
@@ -304,6 +325,10 @@ identity:keystone:Deployment:keystone-api:
       matchLabels:
         application: masakari
         component: engine
+  - podSelector:
+      matchLabels:
+        application: masakari
+        component: bootstrap
   - podSelector:
       matchLabels:
         application: masakari
@@ -367,6 +392,46 @@ identity:keystone:Deployment:keystone-api:
   - podSelector:
       matchLabels:
         application: octavia
+        component: ks-user
+  - podSelector:
+      matchLabels:
+        application: ceilometer
+        component: compute
+  - podSelector:
+      matchLabels:
+        application: ceilometer
+        component: ipmi
+  - podSelector:
+      matchLabels:
+        application: ceilometer
+        component: api
+  - podSelector:
+      matchLabels:
+        application: ceilometer
+        component: central
+  - podSelector:
+      matchLabels:
+        application: ceilometer
+        component: collector
+  - podSelector:
+      matchLabels:
+        application: ceilometer
+        component: notification
+  - podSelector:
+      matchLabels:
+        application: ceilometer
+        component: bootstrap
+  - podSelector:
+      matchLabels:
+        application: ceilometer
+        component: ks-endpoints
+  - podSelector:
+      matchLabels:
+        application: ceilometer
+        component: ks-service
+  - podSelector:
+      matchLabels:
+        application: ceilometer
         component: ks-user
   - podSelector:
       matchLabels:

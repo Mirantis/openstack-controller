@@ -9,11 +9,15 @@ panko:
       pod_labels:
         application: panko
         component: events-cleaner
+      connections:
+        egress:
+          - {{ to_child_object("database", "mariadb", "StatefulSet", "mariadb-server", ["mysql"]) | indent(12)}}
   Deployment:
     panko-api:
       connections:
         egress:
           - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
+          - {{ to_child_object("database", "mariadb", "StatefulSet", "mariadb-server", ["mysql"]) | indent(12)}}
       hash_fields: []
       images:
       - panko_api
@@ -32,15 +36,6 @@ panko:
       pod_labels:
         application: panko
         component: bootstrap
-    panko-db-drop:
-      hash_fields:
-      - endpoints.oslo_db.*
-      images:
-      - db_drop
-      manifest: job_db_drop
-      pod_labels:
-        application: panko
-        component: db-drop
     panko-db-init:
       hash_fields:
       - endpoints.oslo_db.*
@@ -50,6 +45,9 @@ panko:
       pod_labels:
         application: panko
         component: db-init
+      connections:
+        egress:
+          - {{ to_child_object("database", "mariadb", "StatefulSet", "mariadb-server", ["mysql"]) | indent(12)}}
     panko-db-sync:
       hash_fields:
       - endpoints.oslo_db.*
@@ -59,6 +57,9 @@ panko:
       pod_labels:
         application: panko
         component: db-sync
+      connections:
+        egress:
+          - {{ to_child_object("database", "mariadb", "StatefulSet", "mariadb-server", ["mysql"]) | indent(12)}}
     panko-ks-endpoints:
       connections:
         egress:

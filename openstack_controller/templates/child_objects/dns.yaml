@@ -14,12 +14,6 @@ designate:
       pod_labels:
         application: designate
         component: bootstrap
-    designate-db-drop:
-      hash_fields:
-      - endpoints.oslo_db.*
-      images:
-      - db_drop
-      manifest: job_db_drop
     designate-db-init:
       hash_fields:
       - endpoints.oslo_db.*
@@ -29,6 +23,9 @@ designate:
       pod_labels:
         application: designate
         component: db-init
+      connections:
+        egress:
+          - {{ to_child_object("database", "mariadb", "StatefulSet", "mariadb-server", ["mysql"]) | indent(12)}}
     designate-db-sync:
       hash_fields:
       - endpoints.oslo_db.*
@@ -38,6 +35,9 @@ designate:
       pod_labels:
         application: designate
         component: db-sync
+      connections:
+        egress:
+          - {{ to_child_object("database", "mariadb", "StatefulSet", "mariadb-server", ["mysql"]) | indent(12)}}
     designate-ks-endpoints:
       connections:
         egress:
@@ -82,12 +82,21 @@ designate:
       pod_labels:
         application: designate
         component: pool-manage
+      connections:
+        egress:
+          - {{ to_child_object("database", "mariadb", "StatefulSet", "mariadb-server", ["mysql"]) | indent(12)}}
     designate-powerdns-db-init:
       hash_fields:
       - endpoints.oslo_db_powerdns.*
       images:
       - db_init
       manifest: job_powerdns_db_init
+      pod_labels:
+        application: designate
+        component: powerdns-db-init
+      connections:
+        egress:
+          - {{ to_child_object("database", "mariadb", "StatefulSet", "mariadb-server", ["mysql"]) | indent(12)}}
     designate-powerdns-db-sync:
       hash_fields:
       - endpoints.oslo_db.*
@@ -97,6 +106,9 @@ designate:
       pod_labels:
         application: designate
         component: powerdns-db-sync
+      connections:
+        egress:
+          - {{ to_child_object("database", "mariadb", "StatefulSet", "mariadb-server", ["mysql"]) | indent(12)}}
   StatefulSet:
     designate-api:
       connections:
@@ -115,6 +127,7 @@ designate:
         egress:
           - {{ to_child_object("coordination", "etcd", "StatefulSet", "etcd-etcd", ["client"]) | indent(12)}}
           - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
+          - {{ to_child_object("database", "mariadb", "StatefulSet", "mariadb-server", ["mysql"]) | indent(12)}}
       hash_fields: []
       images:
       - ks_user
@@ -128,6 +141,7 @@ designate:
         egress:
           - {{ to_child_object("coordination", "etcd", "StatefulSet", "etcd-etcd", ["client"]) | indent(12)}}
           - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
+          - {{ to_child_object("database", "mariadb", "StatefulSet", "mariadb-server", ["mysql"]) | indent(12)}}
       hash_fields: []
       images:
       - designate_mdns
@@ -142,6 +156,7 @@ designate:
         egress:
           - {{ to_child_object("coordination", "etcd", "StatefulSet", "etcd-etcd", ["client"]) | indent(12)}}
           - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
+          - {{ to_child_object("database", "mariadb", "StatefulSet", "mariadb-server", ["mysql"]) | indent(12)}}
       hash_fields: []
       images:
       - designate_producer
@@ -149,11 +164,3 @@ designate:
       pod_labels:
         application: designate
         component: producer
-rabbitmq:
-  Job:
-    openstack-designate-rabbitmq-cluster-wait:
-      hash_fields:
-      - endpoints.oslo_messaging.*
-      images:
-      - rabbitmq_scripted_test
-      manifest: job_cluster_wait

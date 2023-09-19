@@ -17,6 +17,7 @@ nova:
       connections:
         egress:
           - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
+          - {{ to_child_object("database", "mariadb", "StatefulSet", "mariadb-server", ["mysql"]) | indent(12)}}
       hash_fields: []
       images:
       - nova_cell_setup
@@ -32,6 +33,9 @@ nova:
       pod_labels:
         application: nova
         component: db-purge
+      connections:
+        egress:
+          - {{ to_child_object("database", "mariadb", "StatefulSet", "mariadb-server", ["mysql"]) | indent(12)}}
     nova-service-cleaner:
       connections:
         egress:
@@ -66,6 +70,7 @@ nova:
           - {{ to_child_object("compute", "rabbitmq", "StatefulSet", "openstack-nova-rabbitmq-rabbitmq", ["amqp"]) | indent(12)}}
           - {{ to_child_object("coordination", "etcd", "StatefulSet", "etcd-etcd", ["client"]) | indent(12)}}
           - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
+          - {{ to_child_object("database", "mariadb", "StatefulSet", "mariadb-server", ["mysql"]) | indent(12)}}
       hash_fields: []
       images:
       - nova_api
@@ -79,6 +84,7 @@ nova:
           - {{ to_child_object("compute", "rabbitmq", "StatefulSet", "openstack-nova-rabbitmq-rabbitmq", ["amqp"]) | indent(12)}}
           - {{ to_child_object("coordination", "etcd", "StatefulSet", "etcd-etcd", ["client"]) | indent(12)}}
           - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
+          - {{ to_child_object("database", "mariadb", "StatefulSet", "mariadb-server", ["mysql"]) | indent(12)}}
       hash_fields: []
       images:
       - nova_api
@@ -92,6 +98,7 @@ nova:
           - {{ to_child_object("compute", "rabbitmq", "StatefulSet", "openstack-nova-rabbitmq-rabbitmq", ["amqp"]) | indent(12)}}
           - {{ to_child_object("coordination", "etcd", "StatefulSet", "etcd-etcd", ["client"]) | indent(12)}}
           - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
+          - {{ to_child_object("database", "mariadb", "StatefulSet", "mariadb-server", ["mysql"]) | indent(12)}}
       hash_fields: []
       images:
       - nova_conductor
@@ -105,6 +112,7 @@ nova:
           - {{ to_child_object("compute", "rabbitmq", "StatefulSet", "openstack-nova-rabbitmq-rabbitmq", ["amqp"]) | indent(12)}}
           - {{ to_child_object("coordination", "etcd", "StatefulSet", "etcd-etcd", ["client"]) | indent(12)}}
           - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
+          - {{ to_child_object("database", "mariadb", "StatefulSet", "mariadb-server", ["mysql"]) | indent(12)}}
       hash_fields: []
       images:
       - nova_consoleauth
@@ -118,6 +126,7 @@ nova:
           - {{ to_child_object("compute", "rabbitmq", "StatefulSet", "openstack-nova-rabbitmq-rabbitmq", ["amqp"]) | indent(12)}}
           - {{ to_child_object("coordination", "etcd", "StatefulSet", "etcd-etcd", ["client"]) | indent(12)}}
           - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
+          - {{ to_child_object("database", "mariadb", "StatefulSet", "mariadb-server", ["mysql"]) | indent(12)}}
       hash_fields: []
       images:
       - nova_novncproxy_assets
@@ -132,6 +141,8 @@ nova:
         egress:
           - {{ to_child_object("coordination", "etcd", "StatefulSet", "etcd-etcd", ["client"]) | indent(12)}}
           - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
+          - {{ to_child_object("compute", "rabbitmq", "StatefulSet", "openstack-nova-rabbitmq-rabbitmq", ["amqp"]) | indent(12)}}
+          - {{ to_child_object("database", "mariadb", "StatefulSet", "mariadb-server", ["mysql"]) | indent(12)}}
       hash_fields: []
       images:
       - nova_placement
@@ -146,6 +157,8 @@ nova:
           - {{ to_child_object("compute", "rabbitmq", "StatefulSet", "openstack-nova-rabbitmq-rabbitmq", ["amqp"]) | indent(12)}}
           - {{ to_child_object("coordination", "etcd", "StatefulSet", "etcd-etcd", ["client"]) | indent(12)}}
           - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
+          - {{ to_child_object("compute", "rabbitmq", "StatefulSet", "openstack-nova-rabbitmq-rabbitmq", ["amqp"]) | indent(12)}}
+          - {{ to_child_object("database", "mariadb", "StatefulSet", "mariadb-server", ["mysql"]) | indent(12)}}
       hash_fields: []
       images:
       - nova_scheduler
@@ -171,6 +184,7 @@ nova:
       connections:
         egress:
           - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
+          - {{ to_child_object("database", "mariadb", "StatefulSet", "mariadb-server", ["mysql"]) | indent(12)}}
       hash_fields: []
       images:
       - nova_cell_setup
@@ -179,15 +193,6 @@ nova:
       pod_labels:
         application: nova
         component: cell-setup
-    nova-db-drop:
-      hash_fields:
-      - endpoints.oslo_db.*
-      images:
-      - db_drop
-      manifest: job_db_drop
-      pod_labels:
-        application: nova
-        component: db-drop
     nova-db-init:
       hash_fields:
       - endpoints.oslo_db.*
@@ -197,6 +202,9 @@ nova:
       pod_labels:
         application: nova
         component: db-init
+      connections:
+        egress:
+          - {{ to_child_object("database", "mariadb", "StatefulSet", "mariadb-server", ["mysql"]) | indent(12)}}
     nova-db-sync:
       hash_fields:
       - endpoints.oslo_db.*
@@ -207,6 +215,9 @@ nova:
       pod_labels:
         application: nova
         component: db-sync
+      connections:
+        egress:
+          - {{ to_child_object("database", "mariadb", "StatefulSet", "mariadb-server", ["mysql"]) | indent(12)}}
     nova-db-sync-api:
       hash_fields:
       - endpoints.oslo_db.*
@@ -216,6 +227,9 @@ nova:
       pod_labels:
         application: nova
         component: db-sync-api
+      connections:
+        egress:
+          - {{ to_child_object("database", "mariadb", "StatefulSet", "mariadb-server", ["mysql"]) | indent(12)}}
     nova-db-sync-db:
       hash_fields:
       - endpoints.oslo_db.*
@@ -225,6 +239,9 @@ nova:
       pod_labels:
         application: nova
         component: db-sync-db
+      connections:
+        egress:
+          - {{ to_child_object("database", "mariadb", "StatefulSet", "mariadb-server", ["mysql"]) | indent(12)}}
     nova-db-sync-online:
       hash_fields: []
       images:
@@ -233,6 +250,9 @@ nova:
       pod_labels:
         application: nova
         component: db-sync-online
+      connections:
+        egress:
+          - {{ to_child_object("database", "mariadb", "StatefulSet", "mariadb-server", ["mysql"]) | indent(12)}}
     nova-ks-endpoints:
       connections:
         egress:
@@ -338,8 +358,10 @@ nova:
     nova-conductor:
       connections:
         egress:
+          - {{ to_child_object("compute", "rabbitmq", "StatefulSet", "openstack-nova-rabbitmq-rabbitmq", ["amqp"]) | indent(12)}}
           - {{ to_child_object("coordination", "etcd", "StatefulSet", "etcd-etcd", ["client"]) | indent(12)}}
           - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
+          - {{ to_child_object("database", "mariadb", "StatefulSet", "mariadb-server", ["mysql"]) | indent(12)}}
       hash_fields: []
       images:
       - nova_conductor
@@ -350,8 +372,10 @@ nova:
     nova-scheduler:
       connections:
         egress:
+          - {{ to_child_object("compute", "rabbitmq", "StatefulSet", "openstack-nova-rabbitmq-rabbitmq", ["amqp"]) | indent(12)}}
           - {{ to_child_object("coordination", "etcd", "StatefulSet", "etcd-etcd", ["client"]) | indent(12)}}
           - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
+          - {{ to_child_object("database", "mariadb", "StatefulSet", "mariadb-server", ["mysql"]) | indent(12)}}
       hash_fields: []
       images:
       - nova_scheduler
@@ -386,3 +410,10 @@ rabbitmq:
       images:
       - rabbitmq_scripted_test
       manifest: job_cluster_wait
+      pod_labels:
+        application: rabbitmq
+        component: cluster-wait
+        release_group: openstack-nova-rabbitmq
+      connections:
+        egress:
+          - {{ to_child_object("compute", "rabbitmq", "StatefulSet", "openstack-nova-rabbitmq-rabbitmq", ["amqp"]) | indent(12)}}

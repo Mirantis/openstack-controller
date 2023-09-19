@@ -5,6 +5,7 @@ ceilometer:
       connections:
         egress:
           - {{ to_child_object("coordination", "etcd", "StatefulSet", "etcd-etcd", ["client"]) | indent(12)}}
+          - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
       hash_fields: []
       images:
       - ceilometer_compute
@@ -17,6 +18,8 @@ ceilometer:
       connections:
         egress:
           - {{ to_child_object("coordination", "etcd", "StatefulSet", "etcd-etcd", ["client"]) | indent(12)}}
+          - {{ to_child_object("database", "mariadb", "StatefulSet", "mariadb-server", ["mysql"]) | indent(12)}}
+          - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
       hash_fields: []
       images:
       - ceilometer_ipmi
@@ -30,6 +33,8 @@ ceilometer:
       connections:
         egress:
           - {{ to_child_object("coordination", "etcd", "StatefulSet", "etcd-etcd", ["client"]) | indent(12)}}
+          - {{ to_child_object("database", "mariadb", "StatefulSet", "mariadb-server", ["mysql"]) | indent(12)}}
+          - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
       hash_fields: []
       images:
       - ceilometer_api
@@ -41,6 +46,8 @@ ceilometer:
       connections:
         egress:
           - {{ to_child_object("coordination", "etcd", "StatefulSet", "etcd-etcd", ["client"]) | indent(12)}}
+          - {{ to_child_object("database", "mariadb", "StatefulSet", "mariadb-server", ["mysql"]) | indent(12)}}
+          - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
       hash_fields: []
       images:
       - ceilometer_central
@@ -52,6 +59,8 @@ ceilometer:
       connections:
         egress:
           - {{ to_child_object("coordination", "etcd", "StatefulSet", "etcd-etcd", ["client"]) | indent(12)}}
+          - {{ to_child_object("database", "mariadb", "StatefulSet", "mariadb-server", ["mysql"]) | indent(12)}}
+          - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
       hash_fields: []
       images:
       - ceilometer_collector
@@ -63,6 +72,8 @@ ceilometer:
       connections:
         egress:
           - {{ to_child_object("coordination", "etcd", "StatefulSet", "etcd-etcd", ["client"]) | indent(12)}}
+          - {{ to_child_object("database", "mariadb", "StatefulSet", "mariadb-server", ["mysql"]) | indent(12)}}
+          - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
       hash_fields: []
       images:
       - ceilometer_notification
@@ -72,6 +83,9 @@ ceilometer:
         component: notification
   Job:
     ceilometer-bootstrap:
+      connections:
+        egress:
+          - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
       hash_fields:
       - network.proxy.*
       - bootstrap.*
@@ -81,15 +95,6 @@ ceilometer:
       pod_labels:
         application: ceilometer
         component: bootstrap
-    ceilometer-db-drop:
-      hash_fields:
-      - endpoints.oslo_db.*
-      images:
-      - db_drop
-      manifest: job_db_drop
-      pod_labels:
-        application: ceilometer
-        component: db-drop
     ceilometer-db-init:
       hash_fields:
       - endpoints.oslo_db.*
@@ -99,6 +104,9 @@ ceilometer:
       pod_labels:
         application: ceilometer
         component: db-init
+      connections:
+        egress:
+          - {{ to_child_object("database", "mariadb", "StatefulSet", "mariadb-server", ["mysql"]) | indent(12)}}
     ceilometer-db-sync:
       hash_fields:
       - endpoints.oslo_db.*
@@ -108,7 +116,13 @@ ceilometer:
       pod_labels:
         application: ceilometer
         component: db-sync
+      connections:
+        egress:
+          - {{ to_child_object("database", "mariadb", "StatefulSet", "mariadb-server", ["mysql"]) | indent(12)}}
     ceilometer-ks-endpoints:
+      connections:
+        egress:
+          - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
       hash_fields: []
       images:
       - ks_endpoints
@@ -117,6 +131,9 @@ ceilometer:
         application: ceilometer
         component: ks-endpoints
     ceilometer-ks-service:
+      connections:
+        egress:
+          - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
       hash_fields: []
       images:
       - ks_service
@@ -125,6 +142,9 @@ ceilometer:
         application: ceilometer
         component: ks-service
     ceilometer-ks-user:
+      connections:
+        egress:
+          - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
       hash_fields:
       - endpoints.*
       images:

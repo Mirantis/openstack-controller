@@ -19,6 +19,7 @@ neutron:
         egress:
           - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
           - {{ to_child_object("networking", "rabbitmq", "StatefulSet", "openstack-neutron-rabbitmq-rabbitmq", ["amqp"]) | indent(12)}}
+          - {{ to_child_object("database", "mariadb", "StatefulSet", "mariadb-server", ["mysql"]) | indent(12)}}
       hash_fields: []
       images:
       - neutron_dhcp
@@ -32,6 +33,7 @@ neutron:
         egress:
           - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
           - {{ to_child_object("networking", "rabbitmq", "StatefulSet", "openstack-neutron-rabbitmq-rabbitmq", ["amqp"]) | indent(12)}}
+          - {{ to_child_object("database", "mariadb", "StatefulSet", "mariadb-server", ["mysql"]) | indent(12)}}
       hash_fields: []
       images:
       - neutron_dr
@@ -45,6 +47,7 @@ neutron:
         egress:
           - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
           - {{ to_child_object("networking", "rabbitmq", "StatefulSet", "openstack-neutron-rabbitmq-rabbitmq", ["amqp"]) | indent(12)}}
+          - {{ to_child_object("database", "mariadb", "StatefulSet", "mariadb-server", ["mysql"]) | indent(12)}}
       hash_fields: []
       images:
       - neutron_l2gw
@@ -58,6 +61,7 @@ neutron:
         egress:
           - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
           - {{ to_child_object("networking", "rabbitmq", "StatefulSet", "openstack-neutron-rabbitmq-rabbitmq", ["amqp"]) | indent(12)}}
+          - {{ to_child_object("database", "mariadb", "StatefulSet", "mariadb-server", ["mysql"]) | indent(12)}}
       hash_fields: []
       images:
       - neutron_l3
@@ -71,6 +75,7 @@ neutron:
         egress:
           - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
           - {{ to_child_object("networking", "rabbitmq", "StatefulSet", "openstack-neutron-rabbitmq-rabbitmq", ["amqp"]) | indent(12)}}
+          - {{ to_child_object("database", "mariadb", "StatefulSet", "mariadb-server", ["mysql"]) | indent(12)}}
       hash_fields: []
       images:
       - neutron_metadata
@@ -93,6 +98,7 @@ neutron:
         egress:
           - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
           - {{ to_child_object("networking", "rabbitmq", "StatefulSet", "openstack-neutron-rabbitmq-rabbitmq", ["amqp"]) | indent(12)}}
+          - {{ to_child_object("database", "mariadb", "StatefulSet", "mariadb-server", ["mysql"]) | indent(12)}}
       hash_fields: []
       images:
       - neutron_openvswitch_agent
@@ -106,6 +112,7 @@ neutron:
         egress:
           - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
           - {{ to_child_object("networking", "rabbitmq", "StatefulSet", "openstack-neutron-rabbitmq-rabbitmq", ["amqp"]) | indent(12)}}
+          - {{ to_child_object("database", "mariadb", "StatefulSet", "mariadb-server", ["mysql"]) | indent(12)}}
       hash_fields: []
       images:
       - neutron_sriov_agent_init
@@ -121,6 +128,7 @@ neutron:
         egress:
           - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
           - {{ to_child_object("networking", "rabbitmq", "StatefulSet", "openstack-neutron-rabbitmq-rabbitmq", ["amqp"]) | indent(12)}}
+          - {{ to_child_object("database", "mariadb", "StatefulSet", "mariadb-server", ["mysql"]) | indent(12)}}
       hash_fields: []
       images:
       - neutron_server
@@ -142,15 +150,6 @@ neutron:
       pod_labels:
         application: neutron
         component: bootstrap
-    neutron-db-drop:
-      hash_fields:
-      - endpoints.oslo_db.*
-      images:
-      - db_drop
-      manifest: job_db_drop
-      pod_labels:
-        application: neutron
-        component: db-drop
     neutron-db-init:
       hash_fields:
       - endpoints.oslo_db.*
@@ -160,6 +159,9 @@ neutron:
       pod_labels:
         application: neutron
         component: db-init
+      connections:
+        egress:
+          - {{ to_child_object("database", "mariadb", "StatefulSet", "mariadb-server", ["mysql"]) | indent(12)}}
     neutron-db-sync:
       hash_fields:
       - endpoints.oslo_db.*
@@ -169,6 +171,9 @@ neutron:
       pod_labels:
         application: neutron
         component: db-sync
+      connections:
+        egress:
+          - {{ to_child_object("database", "mariadb", "StatefulSet", "mariadb-server", ["mysql"]) | indent(12)}}
     neutron-ks-endpoints:
       connections:
         egress:
@@ -231,6 +236,7 @@ neutron:
         egress:
           - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
           - {{ to_child_object("networking", "rabbitmq", "StatefulSet", "openstack-neutron-rabbitmq-rabbitmq", ["amqp"]) | indent(12)}}
+          - {{ to_child_object("database", "mariadb", "StatefulSet", "mariadb-server", ["mysql"]) | indent(12)}}
       hash_fields: []
       images:
       - neutron_ironic_agent
@@ -317,3 +323,10 @@ rabbitmq:
       images:
       - rabbitmq_scripted_test
       manifest: job_cluster_wait
+      pod_labels:
+        application: rabbitmq
+        component: cluster-wait
+        release_group: openstack-neutron-rabbitmq
+      connections:
+        egress:
+          - {{ to_child_object("networking", "rabbitmq", "StatefulSet", "openstack-neutron-rabbitmq-rabbitmq", ["amqp"]) | indent(12)}}

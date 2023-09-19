@@ -99,6 +99,9 @@ spec:
             ingress:
               - from:
                 - default: selector
+              - from:
+                 - ipBlock:
+                     cidr: 192.168.0.0/16
             podSelector:
               matchLabels:
                 application: mariadb

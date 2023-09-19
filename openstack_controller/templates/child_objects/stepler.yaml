@@ -32,8 +32,3 @@ stepler:
       pod_labels:
         application: stepler
         component: ks-user
-    stepler-run-tests:
-      hash_fields: []
-      images:
-      - stepler_run_tests
-      manifest: job_run_tests

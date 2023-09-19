@@ -5,6 +5,7 @@ ironic:
       connections:
         egress:
           - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
+          - {{ to_child_object("database", "mariadb", "StatefulSet", "mariadb-server", ["mysql"]) | indent(12)}}
       hash_fields: []
       images:
       - ironic_retrieve_swift_config
@@ -28,15 +29,6 @@ ironic:
       pod_labels:
         application: ironic
         component: bootstrap
-    ironic-db-drop:
-      hash_fields:
-      - endpoints.oslo_db.*
-      images:
-      - db_drop
-      manifest: job_db_drop
-      pod_labels:
-        application: ironic
-        component: db-drop
     ironic-db-init:
       hash_fields:
       - endpoints.oslo_db.*
@@ -46,6 +38,9 @@ ironic:
       pod_labels:
         application: ironic
         component: db-init
+      connections:
+        egress:
+          - {{ to_child_object("database", "mariadb", "StatefulSet", "mariadb-server", ["mysql"]) | indent(12)}}
     ironic-db-sync:
       hash_fields:
       - endpoints.oslo_db.*
@@ -55,6 +50,9 @@ ironic:
       pod_labels:
         application: ironic
         component: db-sync
+      connections:
+        egress:
+          - {{ to_child_object("database", "mariadb", "StatefulSet", "mariadb-server", ["mysql"]) | indent(12)}}
     ironic-ks-endpoints:
       connections:
         egress:
@@ -117,6 +115,7 @@ ironic:
       connections:
         egress:
           - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
+          - {{ to_child_object("database", "mariadb", "StatefulSet", "mariadb-server", ["mysql"]) | indent(12)}}
       hash_fields: []
       images:
       - ironic_pxe_init
@@ -129,11 +128,3 @@ ironic:
       pod_labels:
         application: ironic
         component: conductor
-rabbitmq:
-  Job:
-    openstack-ironic-rabbitmq-cluster-wait:
-      hash_fields:
-      - endpoints.oslo_messaging.*
-      images:
-      - rabbitmq_scripted_test
-      manifest: job_cluster_wait
