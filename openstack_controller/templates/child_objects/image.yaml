@@ -26,6 +26,10 @@ glance:
       pod_labels:
         application: glance
         component: api
+      ports:
+      - name: g-api
+        port: 9292
+        protocol: TCP
     glance-registry:
       connections:
         egress:
@@ -39,6 +43,10 @@ glance:
       pod_labels:
         application: glance
         component: registry
+      ports:
+      - name: g-reg
+        port: 9191
+        protocol: TCP
   Job:
     glance-barbican-cert-init:
       connections:
@@ -55,6 +63,7 @@ glance:
       connections:
         egress:
           - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
+          - {{ to_child_object("image", "glance", "Deployment", "glance-api", ["g-api"]) | indent(12)}}
       hash_fields:
       - network.proxy.*
       - bootstrap.*
@@ -68,6 +77,7 @@ glance:
       connections:
         egress:
           - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
+          - {{ to_child_object("image", "glance", "Deployment", "glance-api", ["g-api"]) | indent(12)}}
       hash_fields: []
       images:
       - glance_storage_init

@@ -267,4 +267,10 @@ network_policies:
     messaging:rabbitmq:StatefulSet:openstack-rabbitmq-rabbitmq:
       - from:
         - default: selector
+    image:glance:Deployment:glance-api:
+      - from:
+        - default: selector
+    image:glance:Deployment:glance-registry:
+      - from:
+        - default: selector
   egress: {}

@@ -37,8 +37,8 @@
             podSelector:
               matchLabels:
                 application: nova
-                component: novnc-proxy   
+                component: novnc-proxy
             policyTypes:
-            - Ingress   
-            ingress: 
+            - Ingress
+            ingress:
 {{ network_policies["ingress"]["compute:nova:Deployment:nova-novncproxy"] | toyaml | indent(14, first=True) }}
