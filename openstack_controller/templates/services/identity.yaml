@@ -241,8 +241,12 @@ spec:
               </Location>
 {%- endif %}
               </VirtualHost>
+{%- if spec.get("features", {}).get("network_policies", {}).get("enabled", false) %}
+      network_policy:
+{% include 'base/network_policies/identity.yaml' %}
+{%- endif %}
       manifests:
-        network_policy: false
+        network_policy: {{ spec.get("features", {}).get("network_policies", {}).get("enabled", false) }}
         job_credential_cleanup: false
 {%- if keystone_keycloak.get('enabled', False) %}
         job_federations_create: true

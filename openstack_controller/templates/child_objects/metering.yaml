@@ -2,6 +2,9 @@
 ceilometer:
   DaemonSet:
     ceilometer-compute:
+      connections:
+        egress:
+          - {{ to_child_object("coordination", "etcd", "StatefulSet", "etcd-etcd", ["client"]) | indent(12)}}
       hash_fields: []
       images:
       - ceilometer_compute
@@ -10,10 +13,10 @@ ceilometer:
         application: ceilometer
         component: compute
       type: dynamic
+    ceilometer-ipmi:
       connections:
         egress:
           - {{ to_child_object("coordination", "etcd", "StatefulSet", "etcd-etcd", ["client"]) | indent(12)}}
-    ceilometer-ipmi:
       hash_fields: []
       images:
       - ceilometer_ipmi
@@ -22,11 +25,11 @@ ceilometer:
         application: ceilometer
         component: ipmi
       type: dynamic
+  Deployment:
+    ceilometer-api:
       connections:
         egress:
           - {{ to_child_object("coordination", "etcd", "StatefulSet", "etcd-etcd", ["client"]) | indent(12)}}
-  Deployment:
-    ceilometer-api:
       hash_fields: []
       images:
       - ceilometer_api
@@ -34,10 +37,10 @@ ceilometer:
       pod_labels:
         application: ceilometer
         component: api
+    ceilometer-central:
       connections:
         egress:
           - {{ to_child_object("coordination", "etcd", "StatefulSet", "etcd-etcd", ["client"]) | indent(12)}}
-    ceilometer-central:
       hash_fields: []
       images:
       - ceilometer_central
@@ -45,10 +48,10 @@ ceilometer:
       pod_labels:
         application: ceilometer
         component: central
+    ceilometer-collector:
       connections:
         egress:
           - {{ to_child_object("coordination", "etcd", "StatefulSet", "etcd-etcd", ["client"]) | indent(12)}}
-    ceilometer-collector:
       hash_fields: []
       images:
       - ceilometer_collector
@@ -56,10 +59,10 @@ ceilometer:
       pod_labels:
         application: ceilometer
         component: collector
+    ceilometer-notification:
       connections:
         egress:
           - {{ to_child_object("coordination", "etcd", "StatefulSet", "etcd-etcd", ["client"]) | indent(12)}}
-    ceilometer-notification:
       hash_fields: []
       images:
       - ceilometer_notification
@@ -67,9 +70,6 @@ ceilometer:
       pod_labels:
         application: ceilometer
         component: notification
-      connections:
-        egress:
-          - {{ to_child_object("coordination", "etcd", "StatefulSet", "etcd-etcd", ["client"]) | indent(12)}}
   Job:
     ceilometer-bootstrap:
       hash_fields:

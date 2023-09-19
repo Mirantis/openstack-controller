@@ -1,6 +1,10 @@
+{%- from 'macros/connections.j2' import to_child_object %}
 tempest:
   Job:
     openstack-tempest-run-tests:
+      connections:
+        egress:
+          - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
       hash_fields: []
       images:
       - tempest_run_tests
@@ -17,15 +21,10 @@ tempest:
       pod_labels:
         application: tempest
         component: bootstrap
-    tempest-image-repo-sync:
-      hash_fields: []
-      images:
-      - image_repo_sync
-      manifest: job_image_repo_sync
-      pod_labels:
-        application: tempest
-        component: image-repo-sync
     tempest-ks-user:
+      connections:
+        egress:
+          - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
       hash_fields:
       - endpoints.*
       images:
@@ -35,6 +34,9 @@ tempest:
         application: tempest
         component: ks-user
     tempest-static-accounts:
+      connections:
+        egress:
+          - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
       hash_fields: []
       images:
       - tempest_static_accounts

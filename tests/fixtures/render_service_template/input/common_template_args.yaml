@@ -237,4 +237,7 @@ network_policies:
     compute:rabbitmq:StatefulSet:openstack-nova-rabbitmq-rabbitmq:
       - from:
         - default: selector
+    identity:keystone:Deployment:keystone-api:
+      - from:
+        - default: selector
   egress: {}

@@ -1,3 +1,4 @@
+{%- from 'macros/connections.j2' import to_child_object %}
 panko:
   CronJob:
     panko-events-cleaner:
@@ -10,6 +11,9 @@ panko:
         component: events-cleaner
   Deployment:
     panko-api:
+      connections:
+        egress:
+          - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
       hash_fields: []
       images:
       - panko_api
@@ -55,15 +59,10 @@ panko:
       pod_labels:
         application: panko
         component: db-sync
-    panko-image-repo-sync:
-      hash_fields: []
-      images:
-      - image_repo_sync
-      manifest: job_image_repo_sync
-      pod_labels:
-        application: panko
-        component: image-repo-sync
     panko-ks-endpoints:
+      connections:
+        egress:
+          - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
       hash_fields: []
       images:
       - ks_endpoints
@@ -72,6 +71,9 @@ panko:
         application: panko
         component: ks-endpoints
     panko-ks-service:
+      connections:
+        egress:
+          - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
       hash_fields: []
       images:
       - ks_service
@@ -80,6 +82,9 @@ panko:
         application: panko
         component: ks-service
     panko-ks-user:
+      connections:
+        egress:
+          - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
       hash_fields:
       - endpoints.*
       images:

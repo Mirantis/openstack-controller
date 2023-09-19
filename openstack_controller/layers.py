@@ -17,6 +17,7 @@ from openstack_controller.filters.tempest import generate_tempest_config
 from openstack_controller.filters.common_filters import (
     substitute_local_proxy_hostname,
     raise_error,
+    namespaces,
 )
 from openstack_controller import utils
 from openstack_controller import kube
@@ -35,6 +36,7 @@ ENV.filters["generate_tempest_config"] = generate_tempest_config
 ENV.filters[
     "substitute_local_proxy_hostname"
 ] = substitute_local_proxy_hostname
+ENV.filters["namespaces"] = namespaces
 ENV.globals["raise_error"] = raise_error
 ENV.filters["b64encode"] = base64.b64encode
 ENV.filters["toyaml"] = yaml.dump

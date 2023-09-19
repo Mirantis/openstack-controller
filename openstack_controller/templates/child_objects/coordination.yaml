@@ -11,6 +11,9 @@ etcd:
         component: db-compact
   StatefulSet:
     etcd-etcd:
+      connections:
+        egress:
+          - {{ to_child_object("coordination", "etcd", "StatefulSet", "etcd-etcd", ["client", "peer"]) | indent(12)}}
       hash_fields: []
       images:
       - etcd
@@ -18,9 +21,6 @@ etcd:
       pod_labels:
         application: etcd
         component: server
-      connections:
-        egress:
-          - {{ to_child_object("coordination", "etcd", "StatefulSet", "etcd-etcd", ["client", "peer"]) | indent(12)}}
       ports:
         - port: 2379
           name: client

@@ -11,6 +11,10 @@ masakari:
         component: db-purge
   DaemonSet:
     masakari-monitors:
+      connections:
+        egress:
+          - {{ to_child_object("coordination", "etcd", "StatefulSet", "etcd-etcd", ["client"]) | indent(12)}}
+          - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
       hash_fields: []
       images:
       - masakari_monitors
@@ -18,11 +22,13 @@ masakari:
       pod_labels:
         application: masakari
         component: monitors
+      type: dynamic
+  Deployment:
+    masakari-api:
       connections:
         egress:
           - {{ to_child_object("coordination", "etcd", "StatefulSet", "etcd-etcd", ["client"]) | indent(12)}}
-  Deployment:
-    masakari-api:
+          - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
       hash_fields: []
       images:
       - masakari_api
@@ -30,10 +36,11 @@ masakari:
       pod_labels:
         application: masakari
         component: api
+    masakari-engine:
       connections:
         egress:
           - {{ to_child_object("coordination", "etcd", "StatefulSet", "etcd-etcd", ["client"]) | indent(12)}}
-    masakari-engine:
+          - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
       hash_fields: []
       images:
       - masakari_engine
@@ -41,9 +48,6 @@ masakari:
       pod_labels:
         application: masakari
         component: engine
-      connections:
-        egress:
-          - {{ to_child_object("coordination", "etcd", "StatefulSet", "etcd-etcd", ["client"]) | indent(12)}}
   Job:
     masakari-bootstrap:
       hash_fields:
@@ -82,15 +86,10 @@ masakari:
       pod_labels:
         application: masakari
         component: db-sync
-    masakari-image-repo-sync:
-      hash_fields: []
-      images:
-      - image_repo_sync
-      manifest: job_image_repo_sync
-      pod_labels:
-        application: masakari
-        component: image-repo-sync
     masakari-ks-endpoints:
+      connections:
+        egress:
+          - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
       hash_fields: []
       images:
       - ks_endpoints
@@ -99,6 +98,9 @@ masakari:
         application: masakari
         component: ks-endpoints
     masakari-ks-service:
+      connections:
+        egress:
+          - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
       hash_fields: []
       images:
       - ks_service
@@ -107,6 +109,9 @@ masakari:
         application: masakari
         component: ks-service
     masakari-ks-user:
+      connections:
+        egress:
+          - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
       hash_fields:
       - endpoints.*
       images:
