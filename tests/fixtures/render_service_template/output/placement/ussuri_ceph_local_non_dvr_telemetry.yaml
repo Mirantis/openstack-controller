@@ -130,8 +130,23 @@ spec:
         ks_user:
           restartPolicy: Never
       manifests:
-        network_policy: false
+        network_policy: true
         secret_ca_bundle: true
+      network_policy:
+        api:
+          spec:
+            ingress:
+              - from:
+                - default: selector
+              - from:
+                - ipBlock:
+                    cidr: 192.168.0.0/16
+            podSelector:
+              matchLabels:
+                application: placement
+                component: api
+            policyTypes:
+            - Ingress
       pod:
         replicas:
           api: 1

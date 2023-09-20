@@ -1,0 +1,13 @@
+{%- from 'macros/connections.j2' import from_pod_networks %}
+        api:
+          spec:
+            podSelector:
+              matchLabels:
+                application: placement
+                component: api
+            policyTypes:
+            - Ingress
+            ingress:
+{{ network_policies["ingress"]["placement:placement:Deployment:placement-api"] | toyaml | indent(14, first=True) }}
+              - from:
+{{ from_pod_networks(pod_networks) | indent(18) }}

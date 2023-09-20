@@ -249,4 +249,7 @@ network_policies:
     compute:nova:Deployment:nova-api-osapi:
       - from:
         - default: selector
+    placement:placement:Deployment:placement-api:
+      - from:
+        - default: selector
   egress: {}

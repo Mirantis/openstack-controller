@@ -13,6 +13,10 @@ placement:
       pod_labels:
         application: placement
         component: api
+      ports:
+        - port: 8778
+          name: p-api
+          protocol: TCP
   Job:
     placement-db-init:
       hash_fields:
