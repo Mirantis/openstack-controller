@@ -38,7 +38,7 @@ heat:
         application: heat
         component: api
       ports:
-      - name: http
+      - name: h-api
         port: 8004
         protocol: TCP
     heat-cfn:
@@ -54,7 +54,7 @@ heat:
         application: heat
         component: cfn
       ports:
-      - name: http
+      - name: h-cfn
         port: 8000
         protocol: TCP
     heat-engine:

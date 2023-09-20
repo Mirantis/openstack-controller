@@ -162,8 +162,27 @@ spec:
             config:
               age: 30
               max_rows: 1000
+      network_policy:
+        api:
+          spec:
+            ingress:
+              - from:
+                - default: selector
+              - from:
+                - ipBlock:
+                    cidr: 192.168.0.0/16
+              - from:
+                - namespaceSelector:
+                    matchLabels:
+                      name: osh-system
+            podSelector:
+              matchLabels:
+                application: masakari
+                component: api
+            policyTypes:
+            - Ingress
       manifests:
         cron_job_db_purge: true
         job_rabbit_init: false
-        network_policy: false
+        network_policy: true
         secret_ca_bundle: true

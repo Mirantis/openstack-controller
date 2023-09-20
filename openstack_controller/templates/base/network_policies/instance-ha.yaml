@@ -1,0 +1,18 @@
+{%- from 'macros/connections.j2' import from_pod_networks %}
+{%- from 'macros/connections.j2' import from_namespaces %}
+{%- set ns_list = ["os_controller"] | namespaces  %}
+        api:
+          spec:
+            podSelector:
+              matchLabels:
+                application: masakari
+                component: api
+            policyTypes:
+            - Ingress
+            ingress:
+{{ network_policies["ingress"]["instance-ha:masakari:Deployment:masakari-api"] | toyaml | indent(14, first=True) }}
+# For masakari-monitors which run with host networking
+              - from:
+{{ from_pod_networks(pod_networks) | indent(18) }}
+              - from:
+{{ from_namespaces(ns_list) | indent(18) }}

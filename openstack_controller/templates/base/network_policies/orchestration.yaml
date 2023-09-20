@@ -1,7 +1,6 @@
-{%- from 'macros/connections.j2' import from_pod_networks %}
 {%- from 'macros/connections.j2' import from_namespaces %}
 {%- set ns_list = ["os_controller", "lma_deployment"] | namespaces  %}
-        heat-api:
+        api:
           spec:
             podSelector:
               matchLabels:
@@ -13,7 +12,7 @@
 {{ network_policies["ingress"]["orchestration:heat:Deployment:heat-api"] | toyaml | indent(14, first=True) }}
               - from:
 {{ from_namespaces(ns_list) | indent(18) }}
-        heat-cfn:
+        cfn:
           spec:
             podSelector:
               matchLabels:

@@ -261,4 +261,7 @@ network_policies:
     networking:neutron:Deployment:neutron-server:
       - from:
         - default: selector
+    instance-ha:masakari:Deployment:masakari-api:
+      - from:
+        - default: selector
   egress: {}
