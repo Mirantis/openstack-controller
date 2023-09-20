@@ -34,6 +34,10 @@ placement:placement:Deployment:placement-api:
         component: scheduler
   - podSelector:
       matchLabels:
+        application: keystone
+        component: client
+  - podSelector:
+      matchLabels:
         application: neutron
         component: dhcp-agent
   - podSelector:

@@ -141,6 +141,13 @@ spec:
               - from:
                 - ipBlock:
                     cidr: 192.168.0.0/16
+              - from:
+                - namespaceSelector:
+                    matchLabels:
+                      name: osh-system
+                - namespaceSelector:
+                    matchLabels:
+                      name: stacklight
             podSelector:
               matchLabels:
                 application: placement

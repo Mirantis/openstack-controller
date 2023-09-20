@@ -421,6 +421,8 @@ spec:
           restartPolicy: Never
       manifests:
         job_rabbit_init: false
+        network_policy: false
+        network_policy: false
         deployment_ironic_agent: true
         secret_ca_bundle: true
       network:

@@ -104,6 +104,10 @@ compute:nova:Deployment:nova-api-osapi:
   - podSelector:
       matchLabels:
         application: tempest
+        component: bootstrap
+  - podSelector:
+      matchLabels:
+        application: tempest
         component: static-accounts
   ports:
   - port: 8774

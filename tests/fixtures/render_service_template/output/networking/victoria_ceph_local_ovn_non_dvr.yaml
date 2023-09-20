@@ -511,6 +511,8 @@ spec:
           restartPolicy: Never
       manifests:
         job_rabbit_init: false
+        network_policy: false
+        network_policy: false
         secret_ca_bundle: true
         daemonset_dhcp_agent: false
         daemonset_l3_agent: false

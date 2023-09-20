@@ -644,6 +644,10 @@ identity:keystone:Deployment:keystone-api:
   - podSelector:
       matchLabels:
         application: tempest
+        component: bootstrap
+  - podSelector:
+      matchLabels:
+        application: tempest
         component: ks-user
   - podSelector:
       matchLabels:
