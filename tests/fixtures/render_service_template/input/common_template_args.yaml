@@ -264,4 +264,7 @@ network_policies:
     instance-ha:masakari:Deployment:masakari-api:
       - from:
         - default: selector
+    messaging:rabbitmq:StatefulSet:openstack-rabbitmq-rabbitmq:
+      - from:
+        - default: selector
   egress: {}

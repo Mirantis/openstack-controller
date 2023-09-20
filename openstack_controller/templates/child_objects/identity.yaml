@@ -33,6 +33,7 @@ keystone:
       connections:
         egress:
           - {{ to_child_object("database", "mariadb", "StatefulSet", "mariadb-server", ["mysql"]) | indent(12)}}
+          - {{ to_child_object("messaging", "rabbitmq", "StatefulSet", "openstack-rabbitmq-rabbitmq", ["amqp"]) | indent(12)}}
     keystone-client:
       connections:
         egress:
@@ -105,6 +106,8 @@ keystone:
       connections:
         egress:
           - {{ to_child_object("database", "mariadb", "StatefulSet", "mariadb-server", ["mysql"]) | indent(12)}}
+          # NOTE(vsaienko): notifications are done from DB layer.
+          - {{ to_child_object("messaging", "rabbitmq", "StatefulSet", "openstack-rabbitmq-rabbitmq", ["amqp"]) | indent(12)}}
     keystone-db-sync-contract:
       hash_fields: []
       images:
@@ -116,6 +119,7 @@ keystone:
       connections:
         egress:
           - {{ to_child_object("database", "mariadb", "StatefulSet", "mariadb-server", ["mysql"]) | indent(12)}}
+          - {{ to_child_object("messaging", "rabbitmq", "StatefulSet", "openstack-rabbitmq-rabbitmq", ["amqp"]) | indent(12)}}
     keystone-db-sync-expand:
       hash_fields: []
       images:
@@ -127,6 +131,7 @@ keystone:
       connections:
         egress:
           - {{ to_child_object("database", "mariadb", "StatefulSet", "mariadb-server", ["mysql"]) | indent(12)}}
+          - {{ to_child_object("messaging", "rabbitmq", "StatefulSet", "openstack-rabbitmq-rabbitmq", ["amqp"]) | indent(12)}}
     keystone-db-sync-migrate:
       hash_fields: []
       images:
@@ -138,6 +143,7 @@ keystone:
       connections:
         egress:
           - {{ to_child_object("database", "mariadb", "StatefulSet", "mariadb-server", ["mysql"]) | indent(12)}}
+          - {{ to_child_object("messaging", "rabbitmq", "StatefulSet", "openstack-rabbitmq-rabbitmq", ["amqp"]) | indent(12)}}
     keystone-domain-manage:
       connections:
         egress:

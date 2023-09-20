@@ -19,6 +19,7 @@ masakari:
           - {{ to_child_object("coordination", "etcd", "StatefulSet", "etcd-etcd", ["client"]) | indent(12)}}
           - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
           - {{ to_child_object("instance-ha", "masakari", "Deployment", "masakari-api", ["m-api"]) | indent(12)}}
+          - {{ to_child_object("messaging", "rabbitmq", "StatefulSet", "openstack-rabbitmq-rabbitmq", ["amqp"]) | indent(12)}}
       hash_fields: []
       images:
       - masakari_monitors
@@ -34,6 +35,7 @@ masakari:
           - {{ to_child_object("coordination", "etcd", "StatefulSet", "etcd-etcd", ["client"]) | indent(12)}}
           - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
           - {{ to_child_object("database", "mariadb", "StatefulSet", "mariadb-server", ["mysql"]) | indent(12)}}
+          - {{ to_child_object("messaging", "rabbitmq", "StatefulSet", "openstack-rabbitmq-rabbitmq", ["amqp"]) | indent(12)}}
       hash_fields: []
       images:
       - masakari_api
@@ -52,6 +54,7 @@ masakari:
           - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
           - {{ to_child_object("database", "mariadb", "StatefulSet", "mariadb-server", ["mysql"]) | indent(12)}}
           - {{ to_child_object("compute", "nova", "Deployment", "nova-api-osapi", ["n-api"]) | indent(12)}}
+          - {{ to_child_object("messaging", "rabbitmq", "StatefulSet", "openstack-rabbitmq-rabbitmq", ["amqp"]) | indent(12)}}
       hash_fields: []
       images:
       - masakari_engine

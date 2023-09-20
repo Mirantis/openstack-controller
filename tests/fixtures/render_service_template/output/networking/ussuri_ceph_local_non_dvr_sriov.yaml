@@ -419,7 +419,6 @@ spec:
       manifests:
         job_rabbit_init: false
         network_policy: false
-        network_policy: false
         secret_ca_bundle: true
         daemonset_sriov_agent: true
       network:
