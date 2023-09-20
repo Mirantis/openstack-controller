@@ -426,8 +426,31 @@ spec:
           restartPolicy: Never
         ks_user:
           restartPolicy: Never
+      network_policy:
+        server:
+          spec:
+            ingress:
+              - from:
+                - default: selector
+              - from:
+                - ipBlock:
+                    cidr: 192.168.0.0/16
+              - from:
+                - namespaceSelector:
+                    matchLabels:
+                      name: osh-system
+                - namespaceSelector:
+                    matchLabels:
+                      name: stacklight
+            podSelector:
+              matchLabels:
+                application: neutron
+                component: server
+            policyTypes:
+            - Ingress
       manifests:
         job_rabbit_init: false
+        network_policy: true
         secret_ca_bundle: true
       network:
         server:

@@ -1,16 +1,17 @@
 {%- from 'macros/connections.j2' import from_pod_networks %}
 {%- from 'macros/connections.j2' import from_namespaces %}
 {%- set api_ns_list = ["os_controller", "lma_deployment"] | namespaces  %}
-        api:
+        server:
           spec:
             podSelector:
               matchLabels:
-                application: placement
-                component: api
+                application: neutron
+                component: server
             policyTypes:
             - Ingress
             ingress:
-{{ network_policies["ingress"]["placement:placement:Deployment:placement-api"] | toyaml | indent(14, first=True) }}
+# Pods with host network such as nova-compute
+{{ network_policies["ingress"]["networking:neutron:Deployment:neutron-server"] | toyaml | indent(14, first=True) }}
               - from:
 {{ from_pod_networks(pod_networks) | indent(18) }}
               - from:

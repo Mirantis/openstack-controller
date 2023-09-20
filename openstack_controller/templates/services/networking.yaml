@@ -660,6 +660,10 @@ spec:
             default: http
             public: https
       {%- endif %}
+{%- if spec.get("features", {}).get("network_policies", {}).get("enabled", false) %}
+      network_policy:
+{% include 'base/network_policies/networking.yaml' %}
+{%- endif %}
       manifests:
       {%- if sriov.enabled %}
         daemonset_sriov_agent: true
@@ -687,6 +691,7 @@ spec:
       {%- if dynamic_routing.enabled %}
         daemonset_dr_agent: true
       {%- endif %}
+        network_policy: {{ spec.get("features", {}).get("network_policies", {}).get("enabled", false) }}
       network:
         server:
           ingress:

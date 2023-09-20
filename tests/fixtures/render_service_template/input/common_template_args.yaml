@@ -258,4 +258,7 @@ network_policies:
     orchestration:heat:Deployment:heat-cfn:
       - from:
         - default: selector
+    networking:neutron:Deployment:neutron-server:
+      - from:
+        - default: selector
   egress: {}

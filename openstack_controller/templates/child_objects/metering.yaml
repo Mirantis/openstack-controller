@@ -7,6 +7,7 @@ ceilometer:
           - {{ to_child_object("coordination", "etcd", "StatefulSet", "etcd-etcd", ["client"]) | indent(12)}}
           - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
           - {{ to_child_object("compute", "nova", "Deployment", "nova-api-osapi", ["n-api"]) | indent(12)}}
+          - {{ to_child_object("networking", "neutron", "Deployment", "neutron-server", ["q-api"]) | indent(12)}}
       hash_fields: []
       images:
       - ceilometer_compute
@@ -22,6 +23,7 @@ ceilometer:
           - {{ to_child_object("database", "mariadb", "StatefulSet", "mariadb-server", ["mysql"]) | indent(12)}}
           - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
           - {{ to_child_object("compute", "nova", "Deployment", "nova-api-osapi", ["n-api"]) | indent(12)}}
+          - {{ to_child_object("networking", "neutron", "Deployment", "neutron-server", ["q-api"]) | indent(12)}}
       hash_fields: []
       images:
       - ceilometer_ipmi
@@ -38,6 +40,7 @@ ceilometer:
           - {{ to_child_object("database", "mariadb", "StatefulSet", "mariadb-server", ["mysql"]) | indent(12)}}
           - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
           - {{ to_child_object("compute", "nova", "Deployment", "nova-api-osapi", ["n-api"]) | indent(12)}}
+          - {{ to_child_object("networking", "neutron", "Deployment", "neutron-server", ["q-api"]) | indent(12)}}
       hash_fields: []
       images:
       - ceilometer_api
@@ -52,6 +55,7 @@ ceilometer:
           - {{ to_child_object("database", "mariadb", "StatefulSet", "mariadb-server", ["mysql"]) | indent(12)}}
           - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
           - {{ to_child_object("compute", "nova", "Deployment", "nova-api-osapi", ["n-api"]) | indent(12)}}
+          - {{ to_child_object("networking", "neutron", "Deployment", "neutron-server", ["q-api"]) | indent(12)}}
       hash_fields: []
       images:
       - ceilometer_central
@@ -66,6 +70,7 @@ ceilometer:
           - {{ to_child_object("database", "mariadb", "StatefulSet", "mariadb-server", ["mysql"]) | indent(12)}}
           - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
           - {{ to_child_object("compute", "nova", "Deployment", "nova-api-osapi", ["n-api"]) | indent(12)}}
+          - {{ to_child_object("networking", "neutron", "Deployment", "neutron-server", ["q-api"]) | indent(12)}}
       hash_fields: []
       images:
       - ceilometer_collector
@@ -80,6 +85,7 @@ ceilometer:
           - {{ to_child_object("database", "mariadb", "StatefulSet", "mariadb-server", ["mysql"]) | indent(12)}}
           - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
           - {{ to_child_object("compute", "nova", "Deployment", "nova-api-osapi", ["n-api"]) | indent(12)}}
+          - {{ to_child_object("networking", "neutron", "Deployment", "neutron-server", ["q-api"]) | indent(12)}}
       hash_fields: []
       images:
       - ceilometer_notification

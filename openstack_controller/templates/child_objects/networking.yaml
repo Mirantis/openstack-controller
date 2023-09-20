@@ -147,6 +147,10 @@ neutron:
       pod_labels:
         application: neutron
         component: server
+      ports:
+        - port: 9696
+          name: q-api
+          protocol: TCP
   Job:
     neutron-bootstrap:
       connections:
