@@ -267,12 +267,34 @@ spec:
           script:
             config:
               age: 30
+      network_policy:
+        api:
+          spec:
+            ingress:
+              - from:
+                - default: selector
+              - from:
+                - ipBlock:
+                    cidr: 192.168.0.0/16
+              - from:
+                - namespaceSelector:
+                    matchLabels:
+                      name: osh-system
+                - namespaceSelector:
+                    matchLabels:
+                      name: stacklight
+            podSelector:
+              matchLabels:
+                application: cinder
+                component: api
+            policyTypes:
+            - Ingress
       manifests:
         cron_job_db_purge: true
         job_backup_storage_init: false
         job_rabbit_init: false
         job_storage_init: false
-        network_policy: false
+        network_policy: true
         secret_ca_bundle: true
         cron_service_cleaner: true
         cron_volume_usage_audit: false
