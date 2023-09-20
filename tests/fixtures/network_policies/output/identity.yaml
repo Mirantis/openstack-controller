@@ -552,10 +552,6 @@ identity:keystone:Deployment:keystone-api:
   - podSelector:
       matchLabels:
         application: heat
-        component: cloudwatch
-  - podSelector:
-      matchLabels:
-        application: heat
         component: engine
   - podSelector:
       matchLabels:
@@ -581,10 +577,6 @@ identity:keystone:Deployment:keystone-api:
       matchLabels:
         application: heat
         component: ks-user
-  - podSelector:
-      matchLabels:
-        application: heat
-        component: trusts
   - podSelector:
       matchLabels:
         application: heat

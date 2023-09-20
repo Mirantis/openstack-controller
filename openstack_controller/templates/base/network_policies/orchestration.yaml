@@ -1,0 +1,27 @@
+{%- from 'macros/connections.j2' import from_pod_networks %}
+{%- from 'macros/connections.j2' import from_namespaces %}
+{%- set ns_list = ["os_controller", "lma_deployment"] | namespaces  %}
+        heat-api:
+          spec:
+            podSelector:
+              matchLabels:
+                application: heat
+                component: api
+            policyTypes:
+            - Ingress
+            ingress:
+{{ network_policies["ingress"]["orchestration:heat:Deployment:heat-api"] | toyaml | indent(14, first=True) }}
+              - from:
+{{ from_namespaces(ns_list) | indent(18) }}
+        heat-cfn:
+          spec:
+            podSelector:
+              matchLabels:
+                application: heat
+                component: cfn
+            policyTypes:
+            - Ingress
+            ingress:
+{{ network_policies["ingress"]["orchestration:heat:Deployment:heat-cfn"] | toyaml | indent(14, first=True) }}
+              - from:
+{{ from_namespaces(ns_list) | indent(18) }}

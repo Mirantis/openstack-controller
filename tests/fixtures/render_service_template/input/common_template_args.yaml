@@ -252,4 +252,10 @@ network_policies:
     placement:placement:Deployment:placement-api:
       - from:
         - default: selector
+    orchestration:heat:Deployment:heat-api:
+      - from:
+        - default: selector
+    orchestration:heat:Deployment:heat-cfn:
+      - from:
+        - default: selector
   egress: {}

@@ -4,6 +4,8 @@ ingress:
     ingress:
       connections:
         egress:
+          - {{ to_child_object("orchestration", "heat", "Deployment", "heat-api", ["http"]) | indent(12)}}
+          - {{ to_child_object("orchestration", "heat", "Deployment", "heat-cfn", ["http"]) | indent(12)}}
           - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
           - {{ to_child_object("compute", "nova", "Deployment", "nova-api-metadata", ["n-metadata"]) | indent(12)}}
           - {{ to_child_object("compute", "nova", "Deployment", "nova-novncproxy", ["n-novnc"]) | indent(12)}}

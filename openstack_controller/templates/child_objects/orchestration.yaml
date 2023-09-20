@@ -37,6 +37,10 @@ heat:
       pod_labels:
         application: heat
         component: api
+      ports:
+      - name: http
+        port: 8004
+        protocol: TCP
     heat-cfn:
       connections:
         egress:
@@ -49,18 +53,10 @@ heat:
       pod_labels:
         application: heat
         component: cfn
-    heat-cloudwatch:
-      connections:
-        egress:
-          - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
-          - {{ to_child_object("database", "mariadb", "StatefulSet", "mariadb-server", ["mysql"]) | indent(12)}}
-      hash_fields: []
-      images:
-      - heat_cloudwatch
-      manifest: deployment_cloudwatch
-      pod_labels:
-        application: heat
-        component: cloudwatch
+      ports:
+      - name: http
+        port: 8000
+        protocol: TCP
     heat-engine:
       connections:
         egress:
@@ -171,18 +167,6 @@ heat:
       pod_labels:
         application: heat
         component: ks-user
-    heat-trusts:
-      connections:
-        egress:
-          - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
-      hash_fields:
-      - conf.*
-      images:
-      - ks_trusts
-      manifest: job_heat_trusts
-      pod_labels:
-        application: heat
-        component: trusts
   StatefulSet:
     heat-engine:
       connections:
