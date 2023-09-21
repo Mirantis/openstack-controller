@@ -220,7 +220,7 @@ spec:
       network:
         core_plugin: ml2
       network_policy:
-        heat-api:
+        api:
           spec:
             ingress:
               - from:
@@ -238,7 +238,7 @@ spec:
                 component: api
             policyTypes:
             - Ingress
-        heat-cfn:
+        cfn:
           spec:
             ingress:
               - from:
