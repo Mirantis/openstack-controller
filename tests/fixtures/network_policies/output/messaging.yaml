@@ -239,6 +239,10 @@ messaging:rabbitmq:StatefulSet:openstack-rabbitmq-rabbitmq:
         component: engine
   - podSelector:
       matchLabels:
+        application: heat
+        component: engine
+  - podSelector:
+      matchLabels:
         application: placement
         component: api
   - podSelector:

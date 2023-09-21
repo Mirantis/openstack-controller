@@ -62,6 +62,10 @@ block-storage:cinder:Deployment:cinder-api:
         component: engine
   - podSelector:
       matchLabels:
+        application: heat
+        component: engine
+  - podSelector:
+      matchLabels:
         application: manila
         component: share_daemonset
   - podSelector:
