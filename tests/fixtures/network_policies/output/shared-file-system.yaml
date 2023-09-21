@@ -1,13 +1,9 @@
-baremetal:ironic:Deployment:ironic-api:
+shared-file-system:manila:Deployment:manila-api:
 - from:
   - podSelector:
       matchLabels:
-        application: ironic
-        component: update-nodes-metadata
-  - podSelector:
-      matchLabels:
-        application: nova
-        component: compute
+        application: horizon
+        component: server
   - podSelector:
       matchLabels:
         application: keystone
@@ -24,6 +20,14 @@ baremetal:ironic:Deployment:ironic-api:
       matchLabels:
         application: heat
         component: engine
+  - podSelector:
+      matchLabels:
+        application: manila
+        component: bootstrap
+  - podSelector:
+      matchLabels:
+        application: tempest
+        component: run-tests
   ports:
-  - port: 6385
+  - port: 8786
     protocol: TCP

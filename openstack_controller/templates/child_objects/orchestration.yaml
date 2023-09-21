@@ -72,6 +72,7 @@ heat:
           - {{ to_child_object("instance-ha", "masakari", "Deployment", "masakari-api", ["m-api"]) | indent(12)}}
           - {{ to_child_object("networking", "neutron", "Deployment", "neutron-server", ["q-api"]) | indent(12)}}
           - {{ to_child_object("block-storage", "cinder", "Deployment", "cinder-api", ["c-api"]) | indent(12)}}
+          - {{ to_child_object("shared-file-system", "manila", "Deployment", "manila-api", ["m-api"]) | indent(12)}}
       hash_fields: []
       images:
       - heat_engine
@@ -188,6 +189,8 @@ heat:
           - {{ to_child_object("instance-ha", "masakari", "Deployment", "masakari-api", ["m-api"]) | indent(12)}}
           - {{ to_child_object("networking", "neutron", "Deployment", "neutron-server", ["q-api"]) | indent(12)}}
           - {{ to_child_object("block-storage", "cinder", "Deployment", "cinder-api", ["c-api"]) | indent(12)}}
+          - {{ to_child_object("shared-file-system", "manila", "Deployment", "manila-api", ["m-api"]) | indent(12)}}
+          - {{ to_child_object("baremetal", "ironic", "Deployment", "ironic-api", ["m-api"]) | indent(12)}}
       hash_fields: []
       images:
       - heat_engine

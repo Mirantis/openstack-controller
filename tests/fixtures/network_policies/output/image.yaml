@@ -42,6 +42,10 @@ image:glance:Deployment:glance-api:
         component: server
   - podSelector:
       matchLabels:
+        application: keystone
+        component: client
+  - podSelector:
+      matchLabels:
         application: glance
         component: bootstrap
   - podSelector:

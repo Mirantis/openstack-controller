@@ -279,4 +279,7 @@ network_policies:
     baremetal:ironic:Deployment:ironic-api:
       - from:
         - default: selector
+    shared-file-system:manila:Deployment:manila-api:
+      - from:
+        - default: selector
   egress: {}
