@@ -90,6 +90,10 @@ networking:neutron:Deployment:neutron-server:
         component: engine
   - podSelector:
       matchLabels:
+        application: heat
+        component: engine
+  - podSelector:
+      matchLabels:
         application: manila
         component: share_daemonset
   - podSelector:
