@@ -7,6 +7,10 @@ networking:neutron:Deployment:neutron-server:
   - podSelector:
       matchLabels:
         application: ironic
+        component: manage-networks
+  - podSelector:
+      matchLabels:
+        application: ironic
         component: conductor
   - podSelector:
       matchLabels:

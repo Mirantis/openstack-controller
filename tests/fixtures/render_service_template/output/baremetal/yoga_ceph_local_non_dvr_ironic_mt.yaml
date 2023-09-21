@@ -218,9 +218,28 @@ spec:
           restartPolicy: Never
       manifests:
         job_rabbit_init: false
-        network_policy: false
+        network_policy: true
         secret_ca_bundle: true
         job_update_nodes_metadata: true
+      network_policy:
+        api:
+          spec:
+            ingress:
+              - from:
+                - default: selector
+              - from:
+                - namespaceSelector:
+                    matchLabels:
+                      name: osh-system
+                - namespaceSelector:
+                    matchLabels:
+                      name: stacklight
+            podSelector:
+              matchLabels:
+                application: ironic
+                component: api
+            policyTypes:
+            - Ingress
       network:
         cleaning: &id001
           external: true

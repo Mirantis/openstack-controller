@@ -1,0 +1,25 @@
+baremetal:ironic:Deployment:ironic-api:
+- from:
+  - podSelector:
+      matchLabels:
+        application: ironic
+        component: update-nodes-metadata
+  - podSelector:
+      matchLabels:
+        application: nova
+        component: compute
+  - podSelector:
+      matchLabels:
+        application: keystone
+        component: client
+  - podSelector:
+      matchLabels:
+        application: ingress
+        component: server
+  - podSelector:
+      matchLabels:
+        application: heat
+        component: engine
+  ports:
+  - port: 6385
+    protocol: TCP
