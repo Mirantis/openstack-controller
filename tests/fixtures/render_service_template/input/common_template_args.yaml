@@ -273,4 +273,7 @@ network_policies:
     image:glance:Deployment:glance-registry:
       - from:
         - default: selector
+    block-storage:cinder:Deployment:cinder-api:
+      - from:
+        - default: selector
   egress: {}

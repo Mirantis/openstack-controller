@@ -9,6 +9,7 @@ ceilometer:
           - {{ to_child_object("compute", "nova", "Deployment", "nova-api-osapi", ["n-api"]) | indent(12)}}
           - {{ to_child_object("networking", "neutron", "Deployment", "neutron-server", ["q-api"]) | indent(12)}}
           - {{ to_child_object("image", "glance", "Deployment", "glance-api", ["g-api"]) | indent(12)}}
+          - {{ to_child_object("block-storage", "cinder", "Deployment", "cinder-api", ["c-api"]) | indent(12)}}
       hash_fields: []
       images:
       - ceilometer_compute
@@ -26,6 +27,7 @@ ceilometer:
           - {{ to_child_object("compute", "nova", "Deployment", "nova-api-osapi", ["n-api"]) | indent(12)}}
           - {{ to_child_object("networking", "neutron", "Deployment", "neutron-server", ["q-api"]) | indent(12)}}
           - {{ to_child_object("image", "glance", "Deployment", "glance-api", ["g-api"]) | indent(12)}}
+          - {{ to_child_object("block-storage", "cinder", "Deployment", "cinder-api", ["c-api"]) | indent(12)}}
       hash_fields: []
       images:
       - ceilometer_ipmi
@@ -59,6 +61,7 @@ ceilometer:
           - {{ to_child_object("compute", "nova", "Deployment", "nova-api-osapi", ["n-api"]) | indent(12)}}
           - {{ to_child_object("networking", "neutron", "Deployment", "neutron-server", ["q-api"]) | indent(12)}}
           - {{ to_child_object("image", "glance", "Deployment", "glance-api", ["g-api"]) | indent(12)}}
+          - {{ to_child_object("block-storage", "cinder", "Deployment", "cinder-api", ["c-api"]) | indent(12)}}
       hash_fields: []
       images:
       - ceilometer_central
@@ -75,6 +78,7 @@ ceilometer:
           - {{ to_child_object("compute", "nova", "Deployment", "nova-api-osapi", ["n-api"]) | indent(12)}}
           - {{ to_child_object("networking", "neutron", "Deployment", "neutron-server", ["q-api"]) | indent(12)}}
           - {{ to_child_object("image", "glance", "Deployment", "glance-api", ["g-api"]) | indent(12)}}
+          - {{ to_child_object("block-storage", "cinder", "Deployment", "cinder-api", ["c-api"]) | indent(12)}}
       hash_fields: []
       images:
       - ceilometer_collector

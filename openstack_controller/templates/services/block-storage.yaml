@@ -295,12 +295,16 @@ spec:
           backup: {{ ceph.cinder.secrets }}
   {%- endif %}
 {%- endif %}
+{%- if spec.get("features", {}).get("network_policies", {}).get("enabled", false) %}
+      network_policy:
+{% include 'base/network_policies/block-storage.yaml' %}
+{%- endif %}
       manifests:
         cron_job_db_purge: true
         {%- if spec.openstack_version not in ['queens', 'rocky', 'stein', 'train', 'ussuri'] %}
         job_drop_default_volume_type: true
         {%- endif %}
-        network_policy: false
+        network_policy: {{ spec.get("features", {}).get("network_policies", {}).get("enabled", false) }}
         job_rabbit_init: false
         job_storage_init: false
         job_backup_storage_init: false

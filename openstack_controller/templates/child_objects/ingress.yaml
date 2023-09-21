@@ -13,6 +13,7 @@ ingress:
           - {{ to_child_object("instance-ha", "masakari", "Deployment", "masakari-api", ["m-api"]) | indent(12)}}
           - {{ to_child_object("image", "glance", "Deployment", "glance-api", ["g-api"]) | indent(12)}}
           - {{ to_child_object("image", "glance", "Deployment", "glance-registry", ["g-reg"]) | indent(12)}}
+          - {{ to_child_object("block-storage", "cinder", "Deployment", "cinder-api", ["c-api"]) | indent(12)}}
       hash_fields: []
       images:
       - ingress

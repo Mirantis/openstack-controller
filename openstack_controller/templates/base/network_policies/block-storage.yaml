@@ -1,0 +1,17 @@
+{%- from 'macros/connections.j2' import from_pod_networks %}
+{%- from 'macros/connections.j2' import from_namespaces %}
+{%- set ns_list = ["os_controller", "lma_deployment"] | namespaces  %}
+        api:
+          spec:
+            podSelector:
+              matchLabels:
+                application: cinder
+                component: api
+            policyTypes:
+            - Ingress
+            ingress:
+{{ network_policies["ingress"]["block-storage:cinder:Deployment:cinder-api"] | toyaml | indent(14, first=True) }}
+              - from:
+{{ from_pod_networks(pod_networks) | indent(18) }}
+              - from:
+{{ from_namespaces(ns_list) | indent(18) }}
