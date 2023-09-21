@@ -291,4 +291,7 @@ network_policies:
     metric:gnocchi:Deployment:gnocchi-api:
       - from:
         - default: selector
+    dns:designate:StatefulSet:designate-api:
+      - from:
+        - default: selector
   egress: {}

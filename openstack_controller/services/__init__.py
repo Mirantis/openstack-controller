@@ -205,6 +205,7 @@ class MariaDB(Service):
             "admin_creds": admin_creds,
             "galera_creds": galera_secret.get(),
             "network_policies": self.child_view.network_policies,
+            "service_childs": self.child_view.childs,
         }
 
 
@@ -316,6 +317,7 @@ class RabbitMQ(Service):
             "notifications_creds": notifications_creds,
             "tls_external_certs": tls_external_certs,
             "network_policies": self.child_view.network_policies,
+            "service_childs": self.child_view.childs,
         }
 
 

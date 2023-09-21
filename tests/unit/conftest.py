@@ -17,6 +17,7 @@ import logging
 from unittest import mock
 from openstack_controller import kube
 from openstack_controller import layers
+from openstack_controller import resource_view
 
 import pytest
 import yaml
@@ -42,14 +43,18 @@ def openstackdeployment():
     yield yaml.safe_load(open("tests/fixtures/openstackdeployment.yaml"))
 
 
-@pytest.fixture
-def openstackdeployment_mspec():
+def render_mspec():
     osdpl = yaml.safe_load(open("tests/fixtures/openstackdeployment.yaml"))
     mspec = layers.merge_spec(osdpl["spec"], LOG)
     # Set explicit version for tests
     mspec["common"]["openstack"]["releases"]["version"] = "0.1.0-os-0"
     mspec["common"]["infra"]["releases"]["version"] = "0.1.0-infra-0"
     return mspec
+
+
+@pytest.fixture
+def openstackdeployment_mspec():
+    return render_mspec()
 
 
 @pytest.fixture
@@ -219,3 +224,9 @@ def helm_error_pvc_test():
     with open(fixture_file, "rb") as f:
         error = f.read()
     yield error
+
+
+@pytest.fixture(scope="session")
+def child_view():
+    mspec = render_mspec()
+    return resource_view.ChildObjectView(mspec)

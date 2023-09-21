@@ -305,6 +305,7 @@ def test_render_service_template(
     dashboard_policy_default,
     service,
     context,
+    child_view,
 ):
     if service == "dashboard":
         gdp_mock.return_value = {}
@@ -315,6 +316,7 @@ def test_render_service_template(
         gdp_mock.return_value = {f"{service}_rule1": f"{service}_value1"}
     logger.info(f"Rendering service {service} for context {context}")
     spec, kwargs = get_render_kwargs(service, context, common_template_args)
+    kwargs["service_childs"] = child_view.childs
     data = render_helmbundle(service, spec, **kwargs)
     with open(f"{OUTPUT_DIR}/{service}/{context}.yaml") as f:
         output = yaml.safe_load(f)

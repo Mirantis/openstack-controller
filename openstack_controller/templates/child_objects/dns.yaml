@@ -125,6 +125,10 @@ designate:
       pod_labels:
         application: designate
         component: api
+      ports:
+      - name: dns-api
+        port: 9001
+        protocol: TCP
     designate-central:
       connections:
         egress:
@@ -160,6 +164,19 @@ designate:
       pod_labels:
         application: designate
         component: mdns
+      ports:
+        - name: d-mdns
+          port: 5354
+          protocol: TCP
+        - name: d-mdns-udp
+          port: 5354
+          protocol: UDP
+        - port: 53
+          name: pdns-tcp
+          protocol: TCP
+        - port: 53
+          name: pdns-udp
+          protocol: UDP
     designate-producer:
       connections:
         egress:

@@ -1,0 +1,37 @@
+dns:designate:StatefulSet:designate-api:
+- from:
+  - podSelector:
+      matchLabels:
+        application: horizon
+        component: server
+  - podSelector:
+      matchLabels:
+        application: keystone
+        component: client
+  - podSelector:
+      matchLabels:
+        application: ingress
+        component: server
+  - podSelector:
+      matchLabels:
+        application: neutron
+        component: server
+  - podSelector:
+      matchLabels:
+        application: heat
+        component: engine
+  - podSelector:
+      matchLabels:
+        application: heat
+        component: engine
+  - podSelector:
+      matchLabels:
+        application: tempest
+        component: run-tests
+  - podSelector:
+      matchLabels:
+        application: tempest
+        component: bootstrap
+  ports:
+  - port: 9001
+    protocol: TCP
