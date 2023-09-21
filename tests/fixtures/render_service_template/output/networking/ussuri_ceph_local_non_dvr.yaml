@@ -413,7 +413,6 @@ spec:
       manifests:
         job_rabbit_init: false
         network_policy: false
-        network_policy: false
         secret_ca_bundle: true
       network:
         server:

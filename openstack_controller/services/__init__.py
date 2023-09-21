@@ -315,6 +315,7 @@ class RabbitMQ(Service):
             "guest_creds": guest_creds,
             "notifications_creds": notifications_creds,
             "tls_external_certs": tls_external_certs,
+            "network_policies": self.child_view.network_policies,
         }
 
 

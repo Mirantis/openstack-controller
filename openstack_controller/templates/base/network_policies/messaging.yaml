@@ -1,0 +1,18 @@
+{%- from 'macros/connections.j2' import from_pod_networks %}
+{%- from 'macros/connections.j2' import from_namespaces %}
+{%- set ns_list = ["lma_deployment"] | namespaces  %}
+        server:
+          spec:
+            podSelector:
+              matchLabels:
+                application: rabbitmq
+                component: server
+                release_group: openstack-rabbitmq
+            policyTypes:
+            - Ingress
+            ingress:
+{{ network_policies["ingress"]["messaging:rabbitmq:StatefulSet:openstack-rabbitmq-rabbitmq"] | toyaml | indent(14, first=True) }}
+              - from:
+{{ from_pod_networks(pod_networks) | indent(18) }}
+              - from:
+{{ from_namespaces(ns_list) | indent(18) }}

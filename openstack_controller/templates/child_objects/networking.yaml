@@ -6,6 +6,7 @@ neutron:
         egress:
           - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
           - {{ to_child_object("networking", "rabbitmq", "StatefulSet", "openstack-neutron-rabbitmq-rabbitmq", ["amqp"]) | indent(12)}}
+          - {{ to_child_object("messaging", "rabbitmq", "StatefulSet", "openstack-rabbitmq-rabbitmq", ["amqp"]) | indent(12)}}
       hash_fields: []
       images:
       - neutron_bagpipe_bgp
@@ -21,6 +22,7 @@ neutron:
           - {{ to_child_object("networking", "rabbitmq", "StatefulSet", "openstack-neutron-rabbitmq-rabbitmq", ["amqp"]) | indent(12)}}
           - {{ to_child_object("database", "mariadb", "StatefulSet", "mariadb-server", ["mysql"]) | indent(12)}}
           - {{ to_child_object("placement", "placement", "Deployment", "placement-api", ["p-api"]) | indent(12)}}
+          - {{ to_child_object("messaging", "rabbitmq", "StatefulSet", "openstack-rabbitmq-rabbitmq", ["amqp"]) | indent(12)}}
       hash_fields: []
       images:
       - neutron_dhcp
@@ -36,6 +38,7 @@ neutron:
           - {{ to_child_object("networking", "rabbitmq", "StatefulSet", "openstack-neutron-rabbitmq-rabbitmq", ["amqp"]) | indent(12)}}
           - {{ to_child_object("database", "mariadb", "StatefulSet", "mariadb-server", ["mysql"]) | indent(12)}}
           - {{ to_child_object("placement", "placement", "Deployment", "placement-api", ["p-api"]) | indent(12)}}
+          - {{ to_child_object("messaging", "rabbitmq", "StatefulSet", "openstack-rabbitmq-rabbitmq", ["amqp"]) | indent(12)}}
       hash_fields: []
       images:
       - neutron_dr
@@ -51,6 +54,7 @@ neutron:
           - {{ to_child_object("networking", "rabbitmq", "StatefulSet", "openstack-neutron-rabbitmq-rabbitmq", ["amqp"]) | indent(12)}}
           - {{ to_child_object("database", "mariadb", "StatefulSet", "mariadb-server", ["mysql"]) | indent(12)}}
           - {{ to_child_object("placement", "placement", "Deployment", "placement-api", ["p-api"]) | indent(12)}}
+          - {{ to_child_object("messaging", "rabbitmq", "StatefulSet", "openstack-rabbitmq-rabbitmq", ["amqp"]) | indent(12)}}
       hash_fields: []
       images:
       - neutron_l2gw
@@ -66,6 +70,7 @@ neutron:
           - {{ to_child_object("networking", "rabbitmq", "StatefulSet", "openstack-neutron-rabbitmq-rabbitmq", ["amqp"]) | indent(12)}}
           - {{ to_child_object("database", "mariadb", "StatefulSet", "mariadb-server", ["mysql"]) | indent(12)}}
           - {{ to_child_object("placement", "placement", "Deployment", "placement-api", ["p-api"]) | indent(12)}}
+          - {{ to_child_object("messaging", "rabbitmq", "StatefulSet", "openstack-rabbitmq-rabbitmq", ["amqp"]) | indent(12)}}
       hash_fields: []
       images:
       - neutron_l3
@@ -82,6 +87,7 @@ neutron:
           - {{ to_child_object("database", "mariadb", "StatefulSet", "mariadb-server", ["mysql"]) | indent(12)}}
           - {{ to_child_object("compute", "nova", "Deployment", "nova-api-metadata", ["n-metadata"]) | indent(12)}}
           - {{ to_child_object("placement", "placement", "Deployment", "placement-api", ["p-api"]) | indent(12)}}
+          - {{ to_child_object("messaging", "rabbitmq", "StatefulSet", "openstack-rabbitmq-rabbitmq", ["amqp"]) | indent(12)}}
       hash_fields: []
       images:
       - neutron_metadata
@@ -106,6 +112,7 @@ neutron:
           - {{ to_child_object("networking", "rabbitmq", "StatefulSet", "openstack-neutron-rabbitmq-rabbitmq", ["amqp"]) | indent(12)}}
           - {{ to_child_object("database", "mariadb", "StatefulSet", "mariadb-server", ["mysql"]) | indent(12)}}
           - {{ to_child_object("placement", "placement", "Deployment", "placement-api", ["p-api"]) | indent(12)}}
+          - {{ to_child_object("messaging", "rabbitmq", "StatefulSet", "openstack-rabbitmq-rabbitmq", ["amqp"]) | indent(12)}}
       hash_fields: []
       images:
       - neutron_openvswitch_agent
@@ -121,6 +128,7 @@ neutron:
           - {{ to_child_object("networking", "rabbitmq", "StatefulSet", "openstack-neutron-rabbitmq-rabbitmq", ["amqp"]) | indent(12)}}
           - {{ to_child_object("database", "mariadb", "StatefulSet", "mariadb-server", ["mysql"]) | indent(12)}}
           - {{ to_child_object("placement", "placement", "Deployment", "placement-api", ["p-api"]) | indent(12)}}
+          - {{ to_child_object("messaging", "rabbitmq", "StatefulSet", "openstack-rabbitmq-rabbitmq", ["amqp"]) | indent(12)}}
       hash_fields: []
       images:
       - neutron_sriov_agent_init
@@ -140,6 +148,7 @@ neutron:
           - {{ to_child_object("compute", "nova", "Deployment", "nova-api-osapi", ["n-api"]) | indent(12)}}
           - {{ to_child_object("compute", "nova", "Deployment", "nova-api-metadata", ["n-metadata"]) | indent(12)}}
           - {{ to_child_object("placement", "placement", "Deployment", "placement-api", ["p-api"]) | indent(12)}}
+          - {{ to_child_object("messaging", "rabbitmq", "StatefulSet", "openstack-rabbitmq-rabbitmq", ["amqp"]) | indent(12)}}
       hash_fields: []
       images:
       - neutron_server
