@@ -75,15 +75,7 @@ networking:neutron:Deployment:neutron-server:
   - podSelector:
       matchLabels:
         application: ceilometer
-        component: api
-  - podSelector:
-      matchLabels:
-        application: ceilometer
         component: central
-  - podSelector:
-      matchLabels:
-        application: ceilometer
-        component: collector
   - podSelector:
       matchLabels:
         application: ceilometer

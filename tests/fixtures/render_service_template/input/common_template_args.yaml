@@ -285,4 +285,10 @@ network_policies:
     memcached:memcached:StatefulSet:openstack-memcached-memcached:
       - from:
         - default: selector
+    alarming:aodh:Deployment:aodh-api:
+      - from:
+        - default: selector
+    metric:gnocchi:Deployment:gnocchi-api:
+      - from:
+        - default: selector
   egress: {}
