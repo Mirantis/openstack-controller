@@ -276,4 +276,7 @@ network_policies:
     block-storage:cinder:Deployment:cinder-api:
       - from:
         - default: selector
+    baremetal:ironic:Deployment:ironic-api:
+      - from:
+        - default: selector
   egress: {}

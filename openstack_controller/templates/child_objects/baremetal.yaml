@@ -18,6 +18,10 @@ ironic:
       pod_labels:
         application: ironic
         component: api
+      ports:
+      - port: 6385
+        name: m-api
+        protocol: TCP
   Job:
     ironic-bootstrap:
       connections:
@@ -95,6 +99,7 @@ ironic:
       connections:
         egress:
           - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
+          - {{ to_child_object("networking", "neutron", "Deployment", "neutron-server", ["q-api"]) | indent(12)}}
       hash_fields: []
       images:
       - ironic_manage_networks
@@ -107,6 +112,7 @@ ironic:
         egress:
           - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
           - {{ to_child_object("image", "glance", "Deployment", "glance-api", ["g-api"]) | indent(12)}}
+          - {{ to_child_object("baremetal", "ironic", "Deployment", "ironic-api", ["m-api"]) | indent(12)}}
       hash_fields:
       - conf.nodes.*
       images:
