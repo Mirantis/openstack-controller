@@ -282,4 +282,7 @@ network_policies:
     shared-file-system:manila:Deployment:manila-api:
       - from:
         - default: selector
+    memcached:memcached:StatefulSet:openstack-memcached-memcached:
+      - from:
+        - default: selector
   egress: {}

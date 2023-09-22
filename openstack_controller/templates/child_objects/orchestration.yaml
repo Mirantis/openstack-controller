@@ -32,6 +32,7 @@ heat:
           - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
           - {{ to_child_object("database", "mariadb", "StatefulSet", "mariadb-server", ["mysql"]) | indent(12)}}
           - {{ to_child_object("messaging", "rabbitmq", "StatefulSet", "openstack-rabbitmq-rabbitmq", ["amqp"]) | indent(12)}}
+          - {{ to_child_object("memcached", "memcached", "StatefulSet", "openstack-memcached-memcached", ["memcached"]) | indent(12)}}
       hash_fields: []
       images:
       - heat_api
@@ -49,6 +50,7 @@ heat:
           - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
           - {{ to_child_object("database", "mariadb", "StatefulSet", "mariadb-server", ["mysql"]) | indent(12)}}
           - {{ to_child_object("messaging", "rabbitmq", "StatefulSet", "openstack-rabbitmq-rabbitmq", ["amqp"]) | indent(12)}}
+          - {{ to_child_object("memcached", "memcached", "StatefulSet", "openstack-memcached-memcached", ["memcached"]) | indent(12)}}
       hash_fields: []
       images:
       - heat_cfn
@@ -73,6 +75,7 @@ heat:
           - {{ to_child_object("networking", "neutron", "Deployment", "neutron-server", ["q-api"]) | indent(12)}}
           - {{ to_child_object("block-storage", "cinder", "Deployment", "cinder-api", ["c-api"]) | indent(12)}}
           - {{ to_child_object("shared-file-system", "manila", "Deployment", "manila-api", ["m-api"]) | indent(12)}}
+          - {{ to_child_object("memcached", "memcached", "StatefulSet", "openstack-memcached-memcached", ["memcached"]) | indent(12)}}
       hash_fields: []
       images:
       - heat_engine
@@ -191,6 +194,7 @@ heat:
           - {{ to_child_object("block-storage", "cinder", "Deployment", "cinder-api", ["c-api"]) | indent(12)}}
           - {{ to_child_object("shared-file-system", "manila", "Deployment", "manila-api", ["m-api"]) | indent(12)}}
           - {{ to_child_object("baremetal", "ironic", "Deployment", "ironic-api", ["m-api"]) | indent(12)}}
+          - {{ to_child_object("memcached", "memcached", "StatefulSet", "openstack-memcached-memcached", ["memcached"]) | indent(12)}}
       hash_fields: []
       images:
       - heat_engine
