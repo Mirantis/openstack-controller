@@ -25,9 +25,13 @@ spec:
           enabled: true
   {%- endif %}
       manifests:
-        network_policy: false
+        network_policy: {{ spec.get("features", {}).get("network_policies", {}).get("enabled", false) }}
         statefulset: true
         deployment: false
+{%- if spec.get("features", {}).get("network_policies", {}).get("enabled", false) %}
+      network_policy:
+{% include 'base/network_policies/memcached.yaml' %}
+{%- endif %}
       endpoints:
         cluster_domain_suffix: {{ spec.internal_domain_name }}
       pod:

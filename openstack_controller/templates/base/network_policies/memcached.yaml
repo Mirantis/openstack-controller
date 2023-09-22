@@ -1,0 +1,14 @@
+{%- from 'macros/connections.j2' import from_pod_networks %}
+{%- from 'macros/connections.j2' import from_namespaces %}
+        server:
+          spec:
+            podSelector:
+              matchLabels:
+                application: memcached
+                component: server
+            policyTypes:
+            - Ingress
+            ingress:
+{{ network_policies["ingress"]["memcached:memcached:StatefulSet:openstack-memcached-memcached"] | toyaml | indent(14, first=True) }}
+              - from:
+{{ from_pod_networks(pod_networks) | indent(18) }}

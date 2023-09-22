@@ -9,3 +9,7 @@ memcached:
       pod_labels:
         application: memcached
         component: server
+      ports:
+        - port: 11211
+          name: memcached
+          protocol: TCP
