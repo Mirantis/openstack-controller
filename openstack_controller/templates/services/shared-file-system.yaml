@@ -195,8 +195,13 @@ spec:
             {{ ssh_credentials.private|indent(12)|trim }}
           public: |
             {{ ssh_credentials.public }}
+{%- if spec.get("features", {}).get("network_policies", {}).get("enabled", false) %}
+      network_policy:
+{% include 'base/network_policies/shared-file-system.yaml' %}
+{%- endif %}
       manifests:
         secret_ca_bundle: true
         cron_job_db_purge: {{ manila_db_cleanup.enabled }}
         daemonset_share: true
         service_instance_ssh_key: true
+        network_policy: {{ spec.get("features", {}).get("network_policies", {}).get("enabled", false) }}

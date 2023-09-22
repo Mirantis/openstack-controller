@@ -11,6 +11,10 @@ block-storage:cinder:Deployment:cinder-api:
   - podSelector:
       matchLabels:
         application: cinder
+        component: bootstrap
+  - podSelector:
+      matchLabels:
+        application: cinder
         component: drop-default-volume-type
   - podSelector:
       matchLabels:
@@ -28,6 +32,10 @@ block-storage:cinder:Deployment:cinder-api:
       matchLabels:
         application: horizon
         component: server
+  - podSelector:
+      matchLabels:
+        application: keystone
+        component: client
   - podSelector:
       matchLabels:
         application: glance

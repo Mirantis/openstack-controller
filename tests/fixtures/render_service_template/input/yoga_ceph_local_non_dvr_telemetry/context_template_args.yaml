@@ -481,6 +481,44 @@ instance-ha:
         password: KI40mJVQ9fZP3MBZLpgrFSf2nqZIbbqg
         username: testC7BY
   keystone_creds: {}
+shared-file-system:
+  credentials: &credentials_shared-file-system
+  - database:
+      user:
+        password: 8xckAGB149FBiBsPfawjSqRNNF7lvXmM
+        username: manilapn3iEA
+    messaging:
+      user:
+        password: BY5CvE9aGG3jUkQghTCACvcDZbp6VcUI
+        username: manilaHcMEmb
+    notifications:
+      user:
+        password: ptehSf4lZxF0TAs16INhV9XmuVXHbL6R
+        username: manilaYTrhf
+    identity:
+      manila:
+        password: r2YNrW8yvGwtcl9KDY0zSDgE45SZls8b
+        username: manilaUfGLay
+      test:
+        password: FfYMQLEZJ5fLRz32VzawQ9I7ezMJGVw6
+        username: testFrbP
+    memcached: JinzIdQzLdIslgxu
+  keystone_creds:
+    cinder:
+      password: Heh1rJglWv6gZ7DbbemCQEEZedy9eEYa
+      username: cinderAc6HLU
+    glance:
+      password: uk1dAWaEMMH7CE7b3Da6fTjExmLTCaFE
+      username: glancevjNVQP
+    neutron:
+      password: idJHmYN0KNt9hfG9WTkePz8ewZivABm3
+      username: neutronSQgdY7N
+    nova:
+      password: xyE6HLcM9rk815HMIbIcaFCm7HeAPjxR
+      username: novadbtY
+  ssh_credentials:
+    private: MANILA TEST SSH PRIVATE KEY
+    public: MANILA TEST SSH PUBLIC KEY
 messaging:
   credentials:
     alarming: *credentials_alarming

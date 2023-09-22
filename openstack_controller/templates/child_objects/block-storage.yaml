@@ -86,6 +86,7 @@ cinder:
       connections:
         egress:
           - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
+          - {{ to_child_object("block-storage", "cinder", "Deployment", "cinder-api", ["c-api"]) | indent(12)}}
       hash_fields:
       - network.proxy.*
       - bootstrap.*
