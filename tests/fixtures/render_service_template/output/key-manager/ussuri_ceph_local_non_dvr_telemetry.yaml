@@ -183,8 +183,39 @@ spec:
           script:
             config:
               age: 30
+      network_policy:
+        api:
+          spec:
+            ingress:
+              - from:
+                - default: selector
+              - from:
+                - ipBlock:
+                    cidr: 192.168.0.0/16
+                ports:
+                  - port: 9311
+                    protocol: TCP
+              - from:
+                - namespaceSelector:
+                    matchLabels:
+                      kubernetes.io/metadata.name: osh-system
+                - namespaceSelector:
+                    matchLabels:
+                      kubernetes.io/metadata.name: stacklight
+                - namespaceSelector:
+                    matchLabels:
+                      kubernetes.io/metadata.name: tf
+                ports:
+                  - port: 9311
+                    protocol: TCP
+            podSelector:
+              matchLabels:
+                application: barbican
+                component: api
+            policyTypes:
+            - Ingress
       manifests:
         cron_job_db_purge: true
         job_rabbit_init: false
-        network_policy: false
+        network_policy: true
         secret_ca_bundle: true
