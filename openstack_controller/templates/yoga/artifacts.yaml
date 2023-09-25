@@ -195,7 +195,7 @@ frr: '{{ images_base_url }}/general/external/docker.io/frrouting/frr:v8.5.1-2023
 cinder_service_cleaner: '{{ images_base_url }}/openstack/cinder:yoga-jammy-20230921144444'
 strongswan: '{{ images_base_url }}/openstack/extra/strongswan:alpine-5.9.8-20230720054838'
 keystone_init_secrets: '{{ images_base_url }}/openstack/openstack-tools:yoga-jammy-20230921144444'
-rsyslog: '{{ images_base_url }}/openstack/extra/rsyslog:v8.2001.0-20230912122503'
+rsyslog: '{{ images_base_url }}/openstack/extra/rsyslog:v8.2001.0-20230920121951'
 glance_bootstrap: '{{ images_base_url }}/openstack/openstack-tools:yoga-jammy-20230921144444'
 glance_barbican_cert_init: '{{ images_base_url }}/openstack/openstack-tools:yoga-jammy-20230921144444'
 tempest_static_accounts: '{{ images_base_url }}/openstack/heat:yoga-jammy-20230921144444'
