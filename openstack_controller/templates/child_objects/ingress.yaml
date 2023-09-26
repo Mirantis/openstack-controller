@@ -29,6 +29,16 @@ ingress:
       pod_labels:
         application: ingress
         component: server
+      ports:
+        - name: http
+          port: 80
+          protocol: TCP
+        - name: https
+          port: 443
+          protocol: TCP
+        - name: healthz
+          port: 10254
+          protocol: TCP
   Deployment:
     ingress-error-pages:
       hash_fields: []

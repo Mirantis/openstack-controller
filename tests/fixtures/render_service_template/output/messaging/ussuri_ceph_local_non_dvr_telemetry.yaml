@@ -486,6 +486,23 @@ spec:
         job_users_create: true
         network_policy: true
       network_policy:
+        exporter:
+          spec:
+            ingress:
+              - from:
+                - namespaceSelector:
+                    matchLabels:
+                      kubernetes.io/metadata.name: stacklight
+                ports:
+                - port: 9095
+                  protocol: TCP
+            podSelector:
+              matchLabels:
+                application: prometheus_rabbitmq_exporter
+                component: exporter
+                release_group: openstack-rabbitmq
+            policyTypes:
+            - Ingress
         server:
           spec:
             ingress:
@@ -494,6 +511,9 @@ spec:
               - from:
                 - ipBlock:
                     cidr: 192.168.0.0/16
+                ports:
+                - port: 5672
+                  protocol: TCP
               - from:
                 - namespaceSelector:
                     matchLabels:

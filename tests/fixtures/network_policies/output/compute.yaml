@@ -167,3 +167,12 @@ compute:rabbitmq:StatefulSet:openstack-nova-rabbitmq-rabbitmq:
   ports:
   - port: 5672
     protocol: TCP
+- from:
+  - podSelector:
+      matchLabels:
+        application: prometheus_rabbitmq_exporter
+        component: exporter
+        release_group: openstack-nova-rabbitmq
+  ports:
+  - port: 15672
+    protocol: TCP
