@@ -15,3 +15,7 @@ cloudprober:
       pod_labels:
         application: cloudprober
         component: prober
+      ports:
+      - port: 9313
+        name: cloudprober
+        protocol: TCP

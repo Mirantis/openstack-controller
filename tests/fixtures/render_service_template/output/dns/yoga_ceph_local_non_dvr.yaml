@@ -219,7 +219,7 @@ spec:
         job_powerdns_db_init: true
         job_powerdns_db_sync: true
         job_rabbit_init: false
-        network_policy: false
+        network_policy: true
         secret_ca_bundle: true
         secret_powerdns_db: true
         service_powerdns_api: true
@@ -228,3 +228,43 @@ spec:
         mdns:
           node_port:
             enabled: false
+      network_policy:
+        api:
+          spec:
+            ingress:
+              - from:
+                - default: selector
+              - from:
+                - namespaceSelector:
+                    matchLabels:
+                      kubernetes.io/metadata.name: osh-system
+                - namespaceSelector:
+                    matchLabels:
+                      kubernetes.io/metadata.name: stacklight
+                ports:
+                - port: 9001
+                  protocol: TCP
+            podSelector:
+              matchLabels:
+                application: designate
+                component: api
+            policyTypes:
+            - Ingress
+        mdns:
+          spec:
+            ingress:
+              - from:
+                - ipBlock:
+                    cidr: 0.0.0.0/0
+                ports:
+                - port: 53
+                  protocol: TCP
+                - port: 53
+                  protocol: UDP
+            podSelector:
+              matchLabels:
+                application: designate
+                component: mdns
+            policyTypes:
+            - Ingress
+

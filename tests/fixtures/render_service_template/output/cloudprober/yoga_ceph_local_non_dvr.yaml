@@ -38,3 +38,24 @@ spec:
         openstack_discovery:
           os_cloud: cloudprober
           interval: 900
+      network_policy:
+        prober:
+          spec:
+            ingress:
+              - from:
+                - default: selector
+              - from:
+                - namespaceSelector:
+                    matchLabels:
+                      kubernetes.io/metadata.name: stacklight
+                ports:
+                - port: 9313
+                  protocol: TCP
+            podSelector:
+              matchLabels:
+                application: cloudprober
+                component: prober
+            policyTypes:
+            - Ingress
+      manifests:
+        network_policy: true
