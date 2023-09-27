@@ -128,8 +128,12 @@ spec:
           db_init:
             jobs:
               - openstack-mariadb-cluster-wait
+{%- if spec.get("features", {}).get("network_policies", {}).get("enabled", false) %}
+      network_policy:
+{% include 'base/network_policies/metric.yaml' %}
+{%- endif %}
       manifests:
-        network_policy: false
+        network_policy: {{ spec.get("features", {}).get("network_policies", {}).get("enabled", false) }}
         job_rabbit_init: false
         secret_ca_bundle: true
         job_storage_init: false

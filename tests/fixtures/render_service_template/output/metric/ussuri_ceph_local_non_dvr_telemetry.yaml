@@ -92,8 +92,27 @@ spec:
           db_init:
             jobs:
               - openstack-mariadb-cluster-wait
+      network_policy:
+        api:
+          spec:
+            ingress:
+              - from:
+                - default: selector
+              - from:
+                - namespaceSelector:
+                    matchLabels:
+                      name: osh-system
+                - namespaceSelector:
+                    matchLabels:
+                      name: stacklight
+            podSelector:
+              matchLabels:
+                application: gnocchi
+                component: api
+            policyTypes:
+            - Ingress
       manifests:
-        network_policy: false
+        network_policy: true
         job_rabbit_init: false
         secret_ca_bundle: true
         job_storage_init: false

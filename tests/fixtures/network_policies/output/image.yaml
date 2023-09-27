@@ -74,10 +74,6 @@ image:glance:Deployment:glance-api:
         component: central
   - podSelector:
       matchLabels:
-        application: ceilometer
-        component: collector
-  - podSelector:
-      matchLabels:
         application: heat
         component: engine
   - podSelector:

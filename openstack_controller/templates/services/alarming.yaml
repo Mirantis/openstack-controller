@@ -75,9 +75,13 @@ spec:
           db_init:
             jobs:
               - openstack-mariadb-cluster-wait
+{%- if spec.get("features", {}).get("network_policies", {}).get("enabled", false) %}
+      network_policy:
+{% include 'base/network_policies/alarming.yaml' %}
+{%- endif %}
       manifests:
+        network_policy: {{ spec.get("features", {}).get("network_policies", {}).get("enabled", false) }}
         cron_job_db_purge: true
-        network_policy: false
         job_rabbit_init: false
         secret_ca_bundle: true
       endpoints:

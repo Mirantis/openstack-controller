@@ -2,6 +2,9 @@
 gnocchi:
   CronJob:
     gnocchi-resources-cleaner:
+      connections:
+        egress:
+          - {{ to_child_object("metric", "gnocchi", "Deployment", "gnocchi-api", ["gn-api"]) | indent(12)}}
       hash_fields: []
       images:
       - gnocchi_resources_cleaner
@@ -58,6 +61,10 @@ gnocchi:
       pod_labels:
         application: gnocchi
         component: api
+      ports:
+      - port: 8041
+        name: gn-api
+        protocol: TCP
   Job:
     gnocchi-bootstrap:
       connections:
