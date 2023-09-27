@@ -229,3 +229,5 @@ exporter:
           key_name: client_cert
     raw:
       OSCTL_EXPORTER_BIND_PORT: 9102
+  network_policy:
+    enabled: false
