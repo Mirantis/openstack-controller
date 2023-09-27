@@ -204,6 +204,9 @@ spec:
               - from:
                 - ipBlock:
                     cidr: 192.168.0.0/16
+                ports:
+                - port: 5000
+                  protocol: TCP
               - from:
                 - namespaceSelector:
                     matchLabels:
@@ -217,6 +220,9 @@ spec:
                 - namespaceSelector:
                     matchLabels:
                       kubernetes.io/metadata.name: tf
+                ports:
+                - port: 5000
+                  protocol: TCP
             podSelector:
               matchLabels:
                 application: keystone

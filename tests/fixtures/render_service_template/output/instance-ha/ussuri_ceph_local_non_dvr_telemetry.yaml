@@ -171,10 +171,16 @@ spec:
               - from:
                 - ipBlock:
                     cidr: 192.168.0.0/16
+                ports:
+                - port: 15868
+                  protocol: TCP
               - from:
                 - namespaceSelector:
                     matchLabels:
                       kubernetes.io/metadata.name: osh-system
+                ports:
+                - port: 15868
+                  protocol: TCP
             podSelector:
               matchLabels:
                 application: masakari
