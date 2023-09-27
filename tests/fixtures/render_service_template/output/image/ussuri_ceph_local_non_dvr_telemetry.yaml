@@ -301,13 +301,13 @@ spec:
               - from:
                 - namespaceSelector:
                     matchLabels:
-                      name: osh-system
+                      kubernetes.io/metadata.name: osh-system
                 - namespaceSelector:
                     matchLabels:
-                      name: stacklight
+                      kubernetes.io/metadata.name: stacklight
                 - namespaceSelector:
                     matchLabels:
-                      name: tf
+                      kubernetes.io/metadata.name: tf
             podSelector:
               matchLabels:
                 application: glance

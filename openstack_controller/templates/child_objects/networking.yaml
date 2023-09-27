@@ -158,6 +158,7 @@ neutron:
           - {{ to_child_object("placement", "placement", "Deployment", "placement-api", ["p-api"]) | indent(12)}}
           - {{ to_child_object("messaging", "rabbitmq", "StatefulSet", "openstack-rabbitmq-rabbitmq", ["amqp"]) | indent(12)}}
           - {{ to_child_object("memcached", "memcached", "StatefulSet", "openstack-memcached-memcached", ["memcached"]) | indent(12)}}
+          - {{ to_child_object("dns", "designate", "StatefulSet", "designate-api", ["dns-api"]) | indent(12)}}
       hash_fields: []
       images:
       - neutron_server

@@ -36,6 +36,15 @@ class ChildObject:
     def get_pod_labels(self):
         return self.meta["pod_labels"]
 
+    def get_np_ports(self, p_list):
+        ports = []
+        for port in self.meta.get("ports", []):
+            if port["name"] in p_list:
+                ports.append(
+                    {"protocol": port["protocol"], "port": port["port"]}
+                )
+        return ports
+
 
 class ChildObjectConnection:
     def __init__(self, src_ident, dst_ident, ports):

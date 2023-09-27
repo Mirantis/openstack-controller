@@ -104,8 +104,12 @@ spec:
           loglevel: 5
           webserver-loglevel: 'detailed'
       {%- endif %}
+{%- if spec.get("features", {}).get("network_policies", {}).get("enabled", false) %}
+      network_policy:
+{% include 'base/network_policies/dns.yaml' %}
+{%- endif %}
       manifests:
-        network_policy: false
+        network_policy: {{ spec.get("features", {}).get("network_policies", {}).get("enabled", false) }}
         job_rabbit_init: false
       {%- if powerdns_protocol == 'udp' or powerdns_protocol == 'tcp+udp' %}
         service_powerdns_external: true

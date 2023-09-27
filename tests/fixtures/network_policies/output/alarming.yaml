@@ -12,6 +12,10 @@ alarming:aodh:Deployment:aodh-api:
       matchLabels:
         application: heat
         component: engine
+  - podSelector:
+      matchLabels:
+        application: heat
+        component: engine
   ports:
   - port: 8042
     protocol: TCP

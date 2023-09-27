@@ -497,7 +497,7 @@ spec:
               - from:
                 - namespaceSelector:
                     matchLabels:
-                      name: stacklight
+                      kubernetes.io/metadata.name: stacklight
             podSelector:
               matchLabels:
                 application: rabbitmq

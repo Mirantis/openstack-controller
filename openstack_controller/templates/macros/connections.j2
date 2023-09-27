@@ -7,22 +7,34 @@ to_child_object:
   ports: {{ ports }}
 {%- endmacro -%}
 
-{% macro from_pod_networks(pod_networks) %}
+{% macro from_pod_networks(pod_networks, dst_ports=None) %}
 {%- for network in pod_networks %}
 - ipBlock:
     cidr: {{ network["cidr"] }}
 {%- endfor %}
+{% if dst_ports -%}
+ports:
+{{ dst_ports | toyaml }}
+{%- endif -%}
 {%- endmacro -%}
 
-{% macro from_all() %}
+{% macro from_all(dst_ports=None) %}
 - ipBlock:
     cidr: '0.0.0.0/0'
+{% if dst_ports -%}
+ports:
+{{ dst_ports | toyaml }}
+{%- endif -%}
 {%- endmacro -%}
 
-{% macro from_namespaces(ns_list) %}
+{% macro from_namespaces(ns_list, dst_ports=None) %}
   {%- for ns in ns_list %}
 - namespaceSelector:
     matchLabels:
-        name: {{ ns }}
-  {%- endfor -%}
+        kubernetes.io/metadata.name: {{ ns }}
+  {%- endfor %}
+{% if dst_ports -%}
+ports:
+{{ dst_ports | toyaml }}
+{%- endif -%}
 {%- endmacro -%}

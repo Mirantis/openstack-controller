@@ -1,7 +1,7 @@
 {%- from 'macros/connections.j2' import from_pod_networks %}
 {%- from 'macros/connections.j2' import from_namespaces %}
 {%- set ns_list = ["os_controller", "ceph_deployment", "lma_deployment", "tf_deployment"] | namespaces  %}
-        keystine-api:
+        api:
           spec:
             podSelector:
               matchLabels:

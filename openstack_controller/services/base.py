@@ -548,6 +548,7 @@ class Service:
                 f"Set proxy variables for {self.service}: {template_args['proxy_vars']}"
             )
         template_args["network_policies"] = self.child_view.network_policies
+        template_args["service_childs"] = self.child_view.childs
         return template_args
 
     @layers.kopf_exception
@@ -709,7 +710,6 @@ class OpenStackService(Service):
         admin_creds = self._get_admin_creds()
         guest_creds = self._get_guest_creds()
         keystone_creds = self._get_keystone_creds()
-        network_policies = self.child_view.network_policies
 
         template_args.update(
             {
@@ -717,7 +717,6 @@ class OpenStackService(Service):
                 "guest_creds": guest_creds,
                 "keystone_creds": keystone_creds,
                 "is_ceph_enabled": self.is_ceph_enabled,
-                "network_policies": network_policies,
             }
         )
         return template_args
