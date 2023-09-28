@@ -286,14 +286,6 @@ services:
             - (?:tempest.api.compute.servers.test_server_actions.ServerActionsTestJSON.test_shelve_unshelve_server)
             - (?:tempest.api.compute.servers.test_servers_negative.ServersNegativeTestJSON.test_shelve_shelved_server)
             - (?:tempest.scenario.test_shelve_instance.TestShelveInstance.test_shelve_instance)
-            # TODO(vsaienko): remove when PRODX-18763 is fixed
-            - (?:neutron_tempest_plugin.api.admin.test_networks.NetworksTestAdmin.test_create_network_with_project)
-            - (?:neutron_tempest_plugin.api.admin.test_networks.NetworksTestAdmin.test_create_network_with_project_and_tenant)
-            - (?:neutron_tempest_plugin.api.test_security_groups.SecGroupQuotaTest.test_create_sg_when_quota_disabled)
-            - (?:neutron_tempest_plugin.api.test_security_groups.SecGroupRulesQuotaTest.test_create_sg_rules_when_quota_disabled)
-            - (?:neutron_tempest_plugin.api.test_security_groups.SecGroupTest.test_list_security_group_rules_contains_all_rules)
-            - (?:neutron_tempest_plugin.api.test_security_groups_negative.NegativeSecGroupQuotaTest.test_create_excess_sg)
-            - (?:neutron_tempest_plugin.api.test_security_groups_negative.NegativeSecGroupRulesQuotaTest.test_sg_creation_with_insufficient_sg_rules_quota)
             # Skip TESTs failed, that don't work with signature verification enabled
             - (?:tempest.scenario.test_minimum_basic.TestMinimumBasicScenario.test_minimum_basic_scenario)
             - (?:tempest.scenario.test_snapshot_pattern.TestSnapshotPattern.test_snapshot_pattern)
