@@ -61,6 +61,7 @@ nova:
           - {{ to_child_object("block-storage", "cinder", "Deployment", "cinder-api", ["c-api"]) | indent(12)}}
           - {{ to_child_object("baremetal", "ironic", "Deployment", "ironic-api", ["m-api"]) | indent(12)}}
           - {{ to_child_object("memcached", "memcached", "StatefulSet", "openstack-memcached-memcached", ["memcached"]) | indent(12)}}
+          - {{ to_child_object("key-manager", "barbican", "Deployment", "barbican-api", ["b-api"]) | indent(12)}}
       hash_fields: []
       images:
       - nova_compute
@@ -105,6 +106,7 @@ nova:
           - {{ to_child_object("image", "glance", "Deployment", "glance-api", ["g-api"]) | indent(12)}}
           - {{ to_child_object("block-storage", "cinder", "Deployment", "cinder-api", ["c-api"]) | indent(12)}}
           - {{ to_child_object("memcached", "memcached", "StatefulSet", "openstack-memcached-memcached", ["memcached"]) | indent(12)}}
+          - {{ to_child_object("key-manager", "barbican", "Deployment", "barbican-api", ["b-api"]) | indent(12)}}
       hash_fields: []
       images:
       - nova_api

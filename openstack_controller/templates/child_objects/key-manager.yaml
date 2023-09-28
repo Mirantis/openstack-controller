@@ -27,6 +27,10 @@ barbican:
       pod_labels:
         application: barbican
         component: api
+      ports:
+      - name: b-api
+        port: 9311
+        protocol: TCP
   Job:
     barbican-bootstrap:
       hash_fields:

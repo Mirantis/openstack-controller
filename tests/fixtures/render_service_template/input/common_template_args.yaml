@@ -294,4 +294,7 @@ network_policies:
     dns:designate:StatefulSet:designate-api:
       - from:
         - default: selector
+    key-manager:barbican:Deployment:barbican-api:
+      - from:
+        - default: selector
   egress: {}

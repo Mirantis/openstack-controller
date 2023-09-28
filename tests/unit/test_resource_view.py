@@ -4,8 +4,6 @@ import yaml
 
 import pytest
 
-from openstack_controller import resource_view
-
 logger = logging.getLogger(__name__)
 
 OUTPUT_DIR = "tests/fixtures/network_policies/output"
@@ -21,9 +19,8 @@ def get_output_templates():
 @pytest.mark.parametrize("out_template", get_output_templates())
 def test_network_policy_ingress(
     out_template,
-    openstackdeployment_mspec,
+    child_view,
 ):
-    child_view = resource_view.ChildObjectView(openstackdeployment_mspec)
     network_policy = child_view.get_network_policies()
     service = out_template.split("/")[-1].split(".")[0]
     service_policies = {
@@ -39,8 +36,7 @@ def test_network_policy_ingress(
 @pytest.mark.parametrize("out_template", get_output_templates())
 def test_network_policy_eggress(
     out_template,
-    openstackdeployment_mspec,
+    child_view,
 ):
-    child_view = resource_view.ChildObjectView(openstackdeployment_mspec)
     network_policy = child_view.get_network_policies()
     assert {} == network_policy["egress"]
