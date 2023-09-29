@@ -114,6 +114,7 @@ spec:
             level: INFO
           logger_os.brick:
             level: INFO
+        enable_iscsi: true
       dependencies:
         static:
           api:
@@ -303,3 +304,9 @@ spec:
         replicas:
           api: 1
           registry: 1
+        security_context:
+          glance:
+            container:
+              glance_api:
+                allowPrivilegeEscalation: true
+                privileged: true
