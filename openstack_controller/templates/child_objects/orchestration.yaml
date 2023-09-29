@@ -79,6 +79,7 @@ heat:
           - {{ to_child_object("alarming", "aodh", "Deployment", "aodh-api", ["a-api"]) | indent(12)}}
           - {{ to_child_object("dns", "designate", "StatefulSet", "designate-api", ["dns-api"]) | indent(12)}}
           - {{ to_child_object("key-manager", "barbican", "Deployment", "barbican-api", ["b-api"]) | indent(12)}}
+          - {{ to_child_object("load-balancer", "octavia", "Deployment", "octavia-api", ["o-api"]) | indent(12)}}
       hash_fields: []
       images:
       - heat_engine
@@ -201,6 +202,7 @@ heat:
           - {{ to_child_object("alarming", "aodh", "Deployment", "aodh-api", ["a-api"]) | indent(12)}}
           - {{ to_child_object("dns", "designate", "StatefulSet", "designate-api", ["dns-api"]) | indent(12)}}
           - {{ to_child_object("key-manager", "barbican", "Deployment", "barbican-api", ["b-api"]) | indent(12)}}
+          - {{ to_child_object("load-balancer", "octavia", "Deployment", "octavia-api", ["o-api"]) | indent(12)}}
       hash_fields: []
       images:
       - heat_engine
