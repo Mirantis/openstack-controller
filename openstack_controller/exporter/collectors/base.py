@@ -48,6 +48,7 @@ class OsdplMetricsCollector(object):
         LOG.info(f"Starting tasks status thread.")
         future = Thread(target=self.watch_for_tasks, daemon=True)
         future.start()
+        self.status_future = future
 
     def watch_for_tasks(self):
         while True:
@@ -113,6 +114,9 @@ class OsdplMetricsCollector(object):
 
     def collect(self):
         osdpl = kube.get_osdpl()
+        if not self.status_future.is_alive():
+            LOG.error("The status task is not running.")
+            sys.exit(1)
 
         if not osdpl:
             return

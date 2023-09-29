@@ -33,9 +33,7 @@ class OpenStackBaseMetricCollector(base.BaseMetricsCollector):
     def oc(self):
         if self._oc is None:
             try:
-                LOG.info("Start OpenStackClient initialization")
                 self._oc = openstack_utils.OpenStackClientManager()
-                LOG.info("OpenStackClient initialized")
             except Exception as e:
                 LOG.warning("Failed to initialize openstack client manager")
                 LOG.exception(e)
@@ -50,7 +48,6 @@ class OpenStackBaseMetricCollector(base.BaseMetricsCollector):
             endpoints.append(
                 len(list(self.oc.oc.identity.services(type=service_type)))
             )
-            LOG.info(f"Endpoints list for {service_type} is: {endpoints}")
         if not any(endpoints):
             LOG.info(
                 f"Can't find endpoints for service types {self._os_service_types}"
