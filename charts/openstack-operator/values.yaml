@@ -179,6 +179,7 @@ exporter:
    - --threads
    - "128"
    - --http-keepalive
+   - --need-app
   pod:
     liveness:
       params:
