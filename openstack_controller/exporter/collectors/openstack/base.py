@@ -41,18 +41,27 @@ class OpenStackBaseMetricCollector(base.BaseMetricsCollector):
 
     @property
     def is_service_available(self):
-        endpoints = []
+        services = []
+        cached_endpoints = []
         for service_type in self._os_service_types:
-            # NOTE(vsaienko): do not use get_endpoint_for or find_service as
-            # they use cached data from token. Do API call each time.
-            endpoints.append(
+            # NOTE(vsaienko): endpoint_for returns list of endpoints from cache
+            # during client initialization. identity.services returns actual
+            # services from keystone catalog. If they do not mutch, service added
+            # or removed. Reinitialize client to make sure we use updated catalog.
+            cached_endpoints.append(self.oc.oc.endpoint_for(service_type))
+            services.append(
                 len(list(self.oc.oc.identity.services(type=service_type)))
             )
-        if not any(endpoints):
-            LOG.info(
-                f"Can't find endpoints for service types {self._os_service_types}"
-            )
+        if not any(services):
+            LOG.info(f"Service not found for types {self._os_service_types}")
             return False
+        else:
+            if not any(cached_endpoints):
+                LOG.info(
+                    f"Catalog is changed for service types: {self._os_service_types}"
+                )
+                self._oc = None
+                return False
         return True
 
     @property
