@@ -114,7 +114,7 @@ spec:
               command:
                 - curl
                 - http://127.0.0.1:32768/healthz
-            {{- toYaml .Values.osdpl.pod.controller.secrets.liveness.params | nindent 12}}
+            {{- toYaml .Values.osdpl.pod.controller.osdpl.liveness.params | nindent 12}}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           volumeMounts:
@@ -354,7 +354,7 @@ spec:
               command:
                 - curl
                 - http://127.0.0.1:32775/healthz
-            {{- toYaml .Values.osdpl.pod.controller.secrets.liveness.params | nindent 12}}
+            {{- toYaml .Values.osdpl.pod.controller.osdplstatus.liveness.params | nindent 12}}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           volumeMounts:
@@ -394,7 +394,7 @@ spec:
               command:
                 - curl
                 - http://127.0.0.1:32776/healthz
-            {{- toYaml .Values.osdpl.pod.controller.secrets.liveness.params | nindent 12}}
+            {{- toYaml .Values.osdpl.pod.controller.osdplsecret.liveness.params | nindent 12}}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           volumeMounts:

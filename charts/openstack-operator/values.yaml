@@ -59,6 +59,9 @@ osdpl:
            initialDelaySeconds: 120
            periodSeconds: 60
            timeoutSeconds: 5
+           # TODO(vsaienko): refactor resource_view to be initialized once
+           # as reading templates may take some time on loaded nodes.
+           failureThreshold: 10
       osdplstatus:
        liveness:
          params:
