@@ -14,6 +14,7 @@ from openstack_controller import settings  # noqa
 from openstack_controller import version
 from openstack_controller import utils
 from openstack_controller import osdplstatus
+from openstack_controller import resource_view
 
 
 LOG = utils.get_logger(__name__)
@@ -162,12 +163,13 @@ async def _rotate_creds(
     body,
     meta,
     spec,
+    child_view,
     **kwargs,
 ):
     if group_name == "admin":
         secrets.OpenStackAdminSecret(osdplst.namespace).rotate(rotation_id)
         mariadb_instance = services.registry["database"](
-            mspec, logger, osdplst
+            mspec, logger, osdplst, child_view
         )
         task_def = {}
         task_def[
@@ -188,7 +190,7 @@ async def _rotate_creds(
     elif group_name == "service":
         for service in enabled_services:
             service_instance = services.registry[service](
-                mspec, logger, osdplst
+                mspec, logger, osdplst, child_view
             )
             service_secret = service_instance.service_secret
             if service_secret:
@@ -205,6 +207,7 @@ async def rotate_credentials(
     body,
     meta,
     spec,
+    child_view,
     **kwargs,
 ):
     new_credentials = utils.get_in(
@@ -235,6 +238,7 @@ async def rotate_credentials(
                     body,
                     meta,
                     spec,
+                    child_view,
                     **kwargs,
                 )
                 LOG.info(f"Finished rotation for {group_name}")
@@ -284,6 +288,7 @@ async def handle(body, meta, spec, logger, reason, **kwargs):
 
     osdpl = kube.get_osdpl()
     mspec = osdpl.mspec
+    child_view = resource_view.ChildObjectView(mspec)
 
     kwargs["patch"]["status"]["fingerprint"] = layers.spec_hash(mspec)
 
@@ -303,13 +308,14 @@ async def handle(body, meta, spec, logger, reason, **kwargs):
         body,
         meta,
         spec,
+        child_view,
         **kwargs,
     )
 
     if is_openstack_version_changed(kwargs["diff"]):
         # Suspend descheduler cronjob during the upgrade services
         service_instance_descheduler = services.registry["descheduler"](
-            mspec, logger, osdplst
+            mspec, logger, osdplst, child_view
         )
         child_obj_descheduler = service_instance_descheduler.get_child_object(
             "CronJob", "descheduler"
@@ -325,7 +331,7 @@ async def handle(body, meta, spec, logger, reason, **kwargs):
         for service in services_to_upgrade:
             task_def = {}
             service_instance = services.registry[service](
-                mspec, logger, osdplst
+                mspec, logger, osdplst, child_view
             )
             task_def[
                 asyncio.create_task(
@@ -353,7 +359,9 @@ async def handle(body, meta, spec, logger, reason, **kwargs):
     # and environment after upgrade/update are identical.
     task_def = {}
     for service in update:
-        service_instance = services.registry[service](mspec, logger, osdplst)
+        service_instance = services.registry[service](
+            mspec, logger, osdplst, child_view
+        )
         task_def[
             asyncio.create_task(
                 service_instance.apply(
@@ -370,7 +378,9 @@ async def handle(body, meta, spec, logger, reason, **kwargs):
     if delete:
         LOG.info(f"deleting children {' '.join(delete)}")
     for service in delete:
-        service_instance = services.registry[service](mspec, logger, osdplst)
+        service_instance = services.registry[service](
+            mspec, logger, osdplst, child_view
+        )
         task_def[
             asyncio.create_task(
                 service_instance.delete(
@@ -403,12 +413,15 @@ async def delete(name, meta, body, spec, logger, reason, **kwargs):
     namespace = meta["namespace"]
     osdpl = kube.get_osdpl()
     mspec = osdpl.mspec
+    child_view = resource_view.ChildObjectView(mspec)
     osdplst = osdplstatus.OpenStackDeploymentStatus(name, namespace)
     delete_services = layers.services(mspec, logger, **kwargs)[0]
     for service in delete_services:
         LOG.info(f"Deleting {service} service")
         task_def = {}
-        service_instance = services.registry[service](mspec, logger, osdplst)
+        service_instance = services.registry[service](
+            mspec, logger, osdplst, child_view
+        )
         task_def[
             asyncio.create_task(
                 service_instance.delete(

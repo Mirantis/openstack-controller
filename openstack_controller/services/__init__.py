@@ -70,8 +70,8 @@ class Redis(Service):
     version = "v1"
     kind = "RedisFailover"
 
-    def __init__(self, mspec, logger, osdplst):
-        super().__init__(mspec, logger, osdplst)
+    def __init__(self, mspec, logger, osdplst, child_view):
+        super().__init__(mspec, logger, osdplst, child_view)
         self.namespace = settings.OSCTL_REDIS_NAMESPACE
 
     def template_args(self):
@@ -240,7 +240,7 @@ class RabbitMQ(Service):
                 continue
             # NOTE(vsaienko): we need service passwords here.
             secret = Service.registry[s](
-                self.mspec, self.logger, self.osdplst
+                self.mspec, self.logger, self.osdplst, self.child_view
             ).service_secret
             secret.wait()
             credentials[s] = secret.get_all()
@@ -576,7 +576,7 @@ class Cloudprober(Service):
         # TODO: use read-only admin account when it will be implemented
         account = "osctl"
         secret_class = Service.registry["identity"](
-            self.mspec, self.logger, self.osdplst
+            self.mspec, self.logger, self.osdplst, self.child_view
         ).service_secret
         secret_class.wait()
         return {"cloudprober": secret_class.get().identity[account]}
@@ -1592,7 +1592,7 @@ class Placement(OpenStackService):
                 ("Ingress", "placement"),
             ]
             compute_service_instance = Service.registry["compute"](
-                self.mspec, self.logger, self.osdplst
+                self.mspec, self.logger, self.osdplst, self.child_view
             )
             try:
                 LOG.info(
@@ -1797,7 +1797,7 @@ class Tempest(OpenStackService):
             "redis",
         }:
             service_template_args = Service.registry[s](
-                self.mspec, self.logger, self.osdplst
+                self.mspec, self.logger, self.osdplst, self.child_view
             ).template_args()
             try:
                 helmbundles_body[s] = layers.merge_all_layers(

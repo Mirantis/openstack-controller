@@ -19,7 +19,6 @@ from openstack_controller import settings
 from openstack_controller import version
 from openstack_controller import utils
 from openstack_controller import helm
-from openstack_controller import resource_view
 from openstack_controller.osdplstatus import APPLYING, APPLIED, DELETING
 
 
@@ -70,7 +69,7 @@ class Service:
         super().__init_subclass__(*args, **kwargs)
         cls.registry[cls.service] = cls
 
-    def __init__(self, mspec, logger, osdplst):
+    def __init__(self, mspec, logger, osdplst, child_view):
         self.mspec = mspec
         self.logger = logger
 
@@ -82,7 +81,7 @@ class Service:
 
         self.helm_manager = helm.HelmManager(namespace=self.namespace)
         self.osdplst = osdplst
-        self.child_view = resource_view.ChildObjectView(self.mspec)
+        self.child_view = child_view
 
     def _get_admin_creds(self) -> secrets.OpenStackAdminCredentials:
         admin_secret = secrets.OpenStackAdminSecret(self.namespace)
@@ -695,7 +694,7 @@ class OpenStackService(Service):
         result = {}
         for svc, accs in self.required_accounts.items():
             secret_class = Service.registry[svc](
-                self.mspec, self.logger, self.osdplst
+                self.mspec, self.logger, self.osdplst, self.child_view
             ).service_secret
             if secret_class:
                 secret_class.wait()
