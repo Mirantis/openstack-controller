@@ -1,14 +1,14 @@
 import os
 import requests
 import retry
+import logging
 
 from prometheus_client.openmetrics.parser import text_string_to_metric_families
 
 from openstack_controller import kube
-from openstack_controller import utils
 from openstack_controller.tests.functional import base
 
-LOG = utils.get_logger(__name__)
+LOG = logging.getLogger(__name__)
 
 
 class BaseFunctionalExporterTestCase(base.BaseFunctionalTestCase):
@@ -49,6 +49,7 @@ class BaseFunctionalExporterTestCase(base.BaseFunctionalTestCase):
     def get_metric(self, name):
         for metric in self.metric_families:
             if metric.name == name:
+                LOG.info(f"Got metric: {metric}")
                 return metric
 
     def filter_metric_samples(self, metric, labels):
