@@ -8,8 +8,8 @@ global:
   helmBaseUrl: https://binary.mirantis.com
   proxy:
     enabled: false
-  # podNetworks:
-  # - cidr: 172.17.0.0/16
+  podNetworks:
+  - cidr: 192.168.0.0/16
 
 replicaCount: 1
 
@@ -131,6 +131,11 @@ admission:
   enabled: true
   replicaCount: 1
   cluster_domain_suffix: cluster.local
+  network_policy:
+    enabled: false
+  settings:
+    raw:
+      OSCTL_ADMISSION_BIND_PORT: 8443
 
 node_maintenance:
   create_crd: true
