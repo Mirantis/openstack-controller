@@ -303,4 +303,7 @@ network_policies:
     load-balancer:octavia:Deployment:octavia-api:
       - from:
         - default: selector
+    dashboard:horizon:Deployment:horizon:
+      - from:
+        - default: selector
   egress: {}
