@@ -8,6 +8,7 @@ from openstack_controller import kube
 from openstack_controller import utils
 from openstack_controller import osdplstatus
 from openstack_controller import health
+from openstack_controller import resource_view
 
 LOG = utils.get_logger(__name__)
 
@@ -97,6 +98,7 @@ class CredentialsShell(base.OsctlShell):
             osdplst = osdplstatus.OpenStackDeploymentStatus(
                 args.osdpl, args.namespace
             )
+            child_view = resource_view.ChildObjectView(osdpl.mspec)
             loop = asyncio.get_event_loop()
             while True:
                 if osdplst.get_osdpl_status() == osdplstatus.APPLYING:
@@ -106,7 +108,9 @@ class CredentialsShell(base.OsctlShell):
                 if osdplst.get_osdpl_status() == osdplstatus.APPLIED:
                     LOG.info(f"Waiting openstack services are healty.")
                     if loop.run_until_complete(
-                        health.wait_services_healthy(osdpl.mspec, osdplst)
+                        health.wait_services_healthy(
+                            osdpl.mspec, osdplst, child_view
+                        )
                     ):
                         break
                 time.sleep(10)

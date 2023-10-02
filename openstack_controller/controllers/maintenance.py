@@ -9,6 +9,7 @@ from openstack_controller import utils
 from openstack_controller import services
 from openstack_controller import maintenance
 from openstack_controller import osdplstatus
+from openstack_controller import resource_view
 
 
 LOG = utils.get_logger(__name__)
@@ -57,13 +58,14 @@ async def node_maintenance_request_change_handler(body, **kwargs):
     osdplst = osdplstatus.OpenStackDeploymentStatus(
         osdpl.name, osdpl.namespace
     )
+    child_view = resource_view.ChildObjectView(mspec)
 
     if nwl.is_active():
         # Verify if we can handle nmr by specific services.
         active_locks = nwl.maintenance_locks()
         services_can_handle_nmr = {}
         for service_name, service_class in services.ORDERED_SERVICES:
-            service = service_class(mspec, LOG, osdplst)
+            service = service_class(mspec, LOG, osdplst, child_view)
             if service.maintenance_api:
                 services_can_handle_nmr[
                     service_name
@@ -75,7 +77,7 @@ async def node_maintenance_request_change_handler(body, **kwargs):
 
         nwl.set_inner_state_active()
         for service, service_class in services.ORDERED_SERVICES:
-            service = service_class(mspec, LOG, osdplst)
+            service = service_class(mspec, LOG, osdplst, child_view)
             if service.maintenance_api:
                 LOG.info(
                     f"Got moving node {node_name} into maintenance for {service_class.service}"
@@ -114,6 +116,7 @@ async def node_maintenance_request_delete_handler(body, **kwargs):
     osdplst = osdplstatus.OpenStackDeploymentStatus(
         osdpl.name, osdpl.namespace
     )
+    child_view = resource_view.ChildObjectView(mspec)
 
     if nwl.is_maintenance():
         LOG.info(f"Waiting for {node.name} is ready.")
@@ -141,7 +144,7 @@ async def node_maintenance_request_delete_handler(body, **kwargs):
             break
 
         for service, service_class in reversed(services.ORDERED_SERVICES):
-            service = service_class(mspec, LOG, osdplst)
+            service = service_class(mspec, LOG, osdplst, child_view)
             if service.maintenance_api:
                 LOG.info(
                     f"Moving node {node_name} to operational state for {service_class.service}"
@@ -179,6 +182,7 @@ async def cluster_maintenance_request_change_handler(body, **kwargs):
         osdpl_name, osdpl_namespace
     )
     osdplst_status = osdplst.get_osdpl_status()
+    child_view = resource_view.ChildObjectView(mspec)
     cwl = maintenance.ClusterWorkloadLock.get_resource(osdpl_name)
 
     # Do not handle CMR while CWL release string contains old release.
@@ -201,7 +205,7 @@ async def cluster_maintenance_request_change_handler(body, **kwargs):
         # not wait for health
         return
     cwl.set_error_message("Waiting for all OpenStack services are healthy.")
-    await health.wait_services_healthy(mspec, osdplst)
+    await health.wait_services_healthy(mspec, osdplst, child_view)
 
     cwl.set_state_inactive()
     cwl.unset_error_message()
@@ -246,10 +250,11 @@ async def node_deletion_request_change_handler(body, **kwargs):
         osdplst = osdplstatus.OpenStackDeploymentStatus(
             osdpl_name, osdpl_namespace
         )
+        child_view = resource_view.ChildObjectView(mspec)
         node = kube.find(kube.Node, node_name, silent=True)
         if node and node.exists():
             for service, service_class in reversed(services.ORDERED_SERVICES):
-                service = service_class(mspec, LOG, osdplst)
+                service = service_class(mspec, LOG, osdplst, child_view)
                 if service.maintenance_api:
                     LOG.info(
                         f"Handling node deletion for {node_name} by service {service_class.service}"
@@ -288,9 +293,10 @@ async def node_workloadlock_request_delete_handler(body, **kwargs):
         osdplst = osdplstatus.OpenStackDeploymentStatus(
             osdpl_name, osdpl_namespace
         )
+        child_view = resource_view.ChildObjectView(mspec)
 
         for service, service_class in reversed(services.ORDERED_SERVICES):
-            service = service_class(mspec, LOG, osdplst)
+            service = service_class(mspec, LOG, osdplst, child_view)
             if service.maintenance_api:
                 LOG.info(f"Cleaning metadata for node {name}")
                 await service.cleanup_metadata(nwl)
