@@ -297,4 +297,7 @@ network_policies:
     key-manager:barbican:Deployment:barbican-api:
       - from:
         - default: selector
+    cloudprober:cloudprober:Deployment:openstack-cloudprober:
+      - from:
+        - default: selector
   egress: {}

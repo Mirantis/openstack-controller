@@ -1,5 +1,7 @@
 openstack_version: yoga
 features:
+  network_policies:
+    enabled: true
   barbican:
     backends:
       vault:

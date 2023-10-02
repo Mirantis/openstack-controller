@@ -214,11 +214,30 @@ spec:
           restartPolicy: Never
         ks_user:
           restartPolicy: Never
+      network_policy:
+        api:
+          spec:
+            ingress:
+              - from:
+                - default: selector
+              - from:
+                - namespaceSelector:
+                    matchLabels:
+                      kubernetes.io/metadata.name: osh-system
+                - namespaceSelector:
+                    matchLabels:
+                      kubernetes.io/metadata.name: stacklight
+            podSelector:
+              matchLabels:
+                application: manila
+                component: api
+            policyTypes:
+            - Ingress
       manifests:
         secret_ca_bundle: True
         cron_job_db_purge: True
         daemonset_share: True
-        network_policy: False
+        network_policy: True
         service_instance_ssh_key: True
       secrets:
         service_instance_ssh_key:
