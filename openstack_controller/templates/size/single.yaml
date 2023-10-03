@@ -96,6 +96,7 @@ services:
             scheduler: 1
             novncproxy: 1
             placement: 1
+            # Byggy code, give up and use 1 instance
             compute_ironic: 1
           lifecycle:
             upgrades:
