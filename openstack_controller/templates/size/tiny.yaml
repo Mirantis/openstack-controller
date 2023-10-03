@@ -124,7 +124,8 @@ services:
             scheduler: 3
             novncproxy: 3
             placement: 3
-            compute_ironic: 3
+            # Byggy code, give up and use 1 instance
+            compute_ironic: 1
           lifecycle:
             disruption_budget:
               metadata:
