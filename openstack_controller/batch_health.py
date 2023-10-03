@@ -49,6 +49,25 @@ def get_health_statuses(osdpl):
     return health_all
 
 
+def remove_stale_statuses(osdplst, statuses):
+    patch = {}
+    old_statuses = osdplst.get_osdpl_health()
+    for service in old_statuses.keys() - statuses.keys():
+        patch[service] = None
+    for service, components in old_statuses.items():
+        patch_components = {}
+        if service not in statuses:
+            continue
+        for component in components.keys():
+            if component not in statuses[service]:
+                patch_components[component] = None
+        if patch_components:
+            patch[service] = patch_components
+    if patch:
+        LOG.info(f"Removing stale health statuses: {patch}")
+        osdplst.set_osdpl_health(patch)
+
+
 def update_health_statuses():
     osdpl = kube.get_osdpl(settings.OSCTL_OS_DEPLOYMENT_NAMESPACE)
     osdplst = osdplstatus.OpenStackDeploymentStatus(
@@ -56,4 +75,5 @@ def update_health_statuses():
     )
     statuses = get_health_statuses(osdpl)
     health.set_multi_application_health(osdplst, statuses)
+    remove_stale_statuses(osdplst, statuses)
     LOG.info("Health statuses updated %d", len(statuses))
