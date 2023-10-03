@@ -53,63 +53,86 @@ osdpl:
     ceph_secrets: {}
   pod:
     controller:
+      security_context:
+        runAsUser: 42424
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+        # NOTE(vsaienko): The range 32768 60999 is default range used by application
+        # to bind on local ports. Exclude 32768 - 32799 and use them for health probes
+        sysctls:
+        - name: net.ipv4.ip_local_port_range
+          value: 32800 60999
       osdpl:
-       liveness:
-         params:
-           initialDelaySeconds: 120
-           periodSeconds: 60
-           timeoutSeconds: 5
-           # TODO(vsaienko): refactor resource_view to be initialized once
-           # as reading templates may take some time on loaded nodes.
-           failureThreshold: 10
+        liveness:
+          params:
+            initialDelaySeconds: 120
+            periodSeconds: 60
+            timeoutSeconds: 5
+            # TODO(vsaienko): refactor resource_view to be initialized once
+            # as reading templates may take some time on loaded nodes.
+            failureThreshold: 10
+        security_context: &security_context
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - NET_RAW
       osdplstatus:
-       liveness:
-         params:
-           initialDelaySeconds: 120
-           periodSeconds: 60
-           timeoutSeconds: 5
+        liveness:
+          params:
+            initialDelaySeconds: 120
+            periodSeconds: 60
+            timeoutSeconds: 5
+        security_context: *security_context
       osdplsecret:
-       liveness:
-         params:
-           initialDelaySeconds: 120
-           periodSeconds: 60
-           timeoutSeconds: 5
+        liveness:
+          params:
+            initialDelaySeconds: 120
+            periodSeconds: 60
+            timeoutSeconds: 5
+        security_context: *security_context
       health:
         liveness:
           params:
             initialDelaySeconds: 120
             periodSeconds: 60
             timeoutSeconds: 5
+        security_context: *security_context
       node:
         liveness:
           params:
             initialDelaySeconds: 120
             periodSeconds: 60
             timeoutSeconds: 5
+        security_context: *security_context
       secrets:
         liveness:
           params:
             initialDelaySeconds: 120
             periodSeconds: 60
             timeoutSeconds: 5
+        security_context: *security_context
       node_maintenance_request:
         liveness:
           params:
             initialDelaySeconds: 120
             periodSeconds: 60
             timeoutSeconds: 5
+        security_context: *security_context
       ceph_secrets:
         liveness:
           params:
             initialDelaySeconds: 120
             periodSeconds: 60
             timeoutSeconds: 5
+        security_context: *security_context
       tf_secrets:
         liveness:
           params:
             initialDelaySeconds: 120
             periodSeconds: 60
             timeoutSeconds: 5
+        security_context: *security_context
 
 tf:
   createSharedNamespace: true

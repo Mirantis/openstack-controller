@@ -49,6 +49,8 @@ RUN set -ex; \
 FROM $FROM
 ARG HELM_BINARY="https://binary.mirantis.com/openstack/bin/utils/helm/helm-v3.12.1-linux-amd64"
 ARG TEST_IMAGE
+ARG USER=osctl
+ARG UID=42424
 
 COPY --from=builder /tmp/get-pip.py /tmp/get-pip.py
 COPY --from=builder /opt/wheels /opt/wheels
@@ -89,7 +91,9 @@ RUN set -ex; \
     for p in $(ls /tmp/kopf-patches/*.patch); do \
          patch -p1 < $p; \
     done;  \
-    cd -
+    cd -; \
+    groupadd -g ${UID} ${USER}; \
+    useradd -u ${UID} -g ${USER} -m -d /var/lib/${USER} -c "${USER} user" ${USER}
 RUN wget -q -O /usr/local/bin/helm3 ${HELM_BINARY}; \
     chmod +x /usr/local/bin/helm3
 
