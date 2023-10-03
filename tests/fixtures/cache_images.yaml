@@ -1,0 +1,101 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  labels:
+    k8s-app: image-precaching
+  name: image-precaching-0
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: cache
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: cache
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: openstack-control-plane
+                operator: In
+                values:
+                - enabled
+            - matchExpressions:
+              - key: openstack-compute-node
+                operator: In
+                values:
+                - enabled
+            - matchExpressions:
+              - key: openvswitch
+                operator: In
+                values:
+                - enabled
+      containers:
+      - command:
+        - /bin/sleep
+        - '86400000'
+        image: docker-dev-kaas-local.docker.mirantis.net/openstack/neutron:stein-bionic-20230227093206
+        name: image-precaching-neutron-db-sync
+        securityContext:
+          capabilities:
+            drop:
+            - NET_RAW
+      - command:
+        - /bin/sleep
+        - '86400000'
+        image: docker-dev-kaas-local.docker.mirantis.net/openstack/nova:stein-bionic-20230227093206
+        name: image-precaching-nova-api
+        securityContext:
+          capabilities:
+            drop:
+            - NET_RAW
+      - command:
+        - /bin/sleep
+        - '86400000'
+        image: docker-dev-kaas-local.docker.mirantis.net/general/libvirt:4.0.0-bionic-20230914074816
+        name: image-precaching-libvirt
+        securityContext:
+          capabilities:
+            drop:
+            - NET_RAW
+      - command:
+        - /bin/sleep
+        - '86400000'
+        image: docker-dev-kaas-local.docker.mirantis.net/general/openvswitch:2.11-bionic-20230914074816
+        name: image-precaching-openvswitch-db-server
+        securityContext:
+          capabilities:
+            drop:
+            - NET_RAW
+      - command:
+        - /bin/sleep
+        - '86400000'
+        image: docker-dev-kaas-local.docker.mirantis.net/general/mariadb:10.6.14-focal-20230920121405
+        name: image-precaching-mariadb
+        securityContext:
+          capabilities:
+            drop:
+            - NET_RAW
+      - command:
+        - /bin/sleep
+        - '86400000'
+        image: docker-dev-kaas-local.docker.mirantis.net/openstack/extra/nginx-ingress-controller:1.8.2-alpine-20230928053836
+        name: image-precaching-ingress
+        securityContext:
+          capabilities:
+            drop:
+            - NET_RAW
+      - command:
+        - /bin/sleep
+        - '86400000'
+        image: docker-dev-kaas-local.docker.mirantis.net/tungsten/redis:7.2.1-alpine3.18
+        name: image-precaching-redis-failover
+        securityContext:
+          capabilities:
+            drop:
+            - NET_RAW
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65534
