@@ -51,6 +51,11 @@ class BaseFunctionalTestCase(TestCase):
         record.testMethodName = self._testMethodName
         return record
 
+    def is_service_enabled(self, name):
+        return name in self.osdpl.obj["spec"].get("features", {}).get(
+            "services", []
+        )
+
     def check_rabbitmq_connection(
         self, username, password, host, port, vhost, ssl=False
     ):
