@@ -587,8 +587,31 @@ def test_ipsec_tf(client):
 
 def test_ipsec_ovn(client):
     req = copy.deepcopy(ADMISSION_REQ)
+    req["request"]["object"]["spec"]["openstack_version"] = "yoga"
     req["request"]["object"]["spec"]["features"]["neutron"].update(
         {"backend": "ml2/ovn", "ipsec": {"enabled": True}}
+    )
+    response = client.simulate_post("/validate", json=req)
+    assert response.status == falcon.HTTP_OK
+    assert response.json["response"]["allowed"] is False
+    assert response.json["response"]["status"]["code"] == 400
+
+
+def test_tenant_network_type_ovn(client):
+    req = copy.deepcopy(ADMISSION_REQ)
+    req["request"]["object"]["spec"]["openstack_version"] = "yoga"
+    req["request"]["object"]["spec"]["features"]["neutron"].update(
+        {"backend": "ml2/ovn", "tenant_network_types": ["geneve"]}
+    )
+    response = client.simulate_post("/validate", json=req)
+    assert response.status == falcon.HTTP_OK
+    assert response.json["response"]["allowed"] is True
+
+
+def test_tenant_network_type_ml2(client):
+    req = copy.deepcopy(ADMISSION_REQ)
+    req["request"]["object"]["spec"]["features"]["neutron"].update(
+        {"backend": "ml2", "tenant_network_types": ["geneve"]}
     )
     response = client.simulate_post("/validate", json=req)
     assert response.status == falcon.HTTP_OK
