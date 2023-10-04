@@ -59,10 +59,6 @@ memcached:memcached:StatefulSet:openstack-memcached-memcached:
   - podSelector:
       matchLabels:
         application: nova
-        component: conductor
-  - podSelector:
-      matchLabels:
-        application: nova
         component: consoleauth
   - podSelector:
       matchLabels:
@@ -72,10 +68,6 @@ memcached:memcached:StatefulSet:openstack-memcached-memcached:
       matchLabels:
         application: nova
         component: placement
-  - podSelector:
-      matchLabels:
-        application: nova
-        component: scheduler
   - podSelector:
       matchLabels:
         application: nova

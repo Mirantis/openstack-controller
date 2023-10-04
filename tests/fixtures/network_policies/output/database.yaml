@@ -103,10 +103,6 @@ database:mariadb:StatefulSet:mariadb-server:
   - podSelector:
       matchLabels:
         application: nova
-        component: conductor
-  - podSelector:
-      matchLabels:
-        application: nova
         component: consoleauth
   - podSelector:
       matchLabels:
@@ -116,10 +112,6 @@ database:mariadb:StatefulSet:mariadb-server:
       matchLabels:
         application: nova
         component: placement
-  - podSelector:
-      matchLabels:
-        application: nova
-        component: scheduler
   - podSelector:
       matchLabels:
         application: nova

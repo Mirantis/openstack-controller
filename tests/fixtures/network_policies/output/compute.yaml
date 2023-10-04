@@ -132,10 +132,6 @@ compute:rabbitmq:StatefulSet:openstack-nova-rabbitmq-rabbitmq:
   - podSelector:
       matchLabels:
         application: nova
-        component: conductor
-  - podSelector:
-      matchLabels:
-        application: nova
         component: consoleauth
   - podSelector:
       matchLabels:
@@ -146,12 +142,6 @@ compute:rabbitmq:StatefulSet:openstack-nova-rabbitmq-rabbitmq:
         application: nova
         component: placement
   - podSelector:
-      matchLabels: &id003
-        application: nova
-        component: scheduler
-  - podSelector:
-      matchLabels: *id003
-  - podSelector:
       matchLabels:
         application: nova
         component: conductor
@@ -159,11 +149,6 @@ compute:rabbitmq:StatefulSet:openstack-nova-rabbitmq-rabbitmq:
       matchLabels:
         application: nova
         component: scheduler
-  - podSelector:
-      matchLabels:
-        application: rabbitmq
-        component: cluster-wait
-        release_group: openstack-nova-rabbitmq
   ports:
   - port: 5672
     protocol: TCP
@@ -172,6 +157,11 @@ compute:rabbitmq:StatefulSet:openstack-nova-rabbitmq-rabbitmq:
       matchLabels:
         application: prometheus_rabbitmq_exporter
         component: exporter
+        release_group: openstack-nova-rabbitmq
+  - podSelector:
+      matchLabels:
+        application: rabbitmq
+        component: cluster-wait
         release_group: openstack-nova-rabbitmq
   ports:
   - port: 15672

@@ -19,14 +19,6 @@ placement:placement:Deployment:placement-api:
   - podSelector:
       matchLabels:
         application: nova
-        component: conductor
-  - podSelector:
-      matchLabels:
-        application: nova
-        component: scheduler
-  - podSelector:
-      matchLabels:
-        application: nova
         component: compute
   - podSelector:
       matchLabels:

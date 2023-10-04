@@ -118,23 +118,6 @@ nova:
       - port: 8774
         name: n-api
         protocol: TCP
-    nova-conductor:
-      connections:
-        egress:
-          - {{ to_child_object("compute", "rabbitmq", "StatefulSet", "openstack-nova-rabbitmq-rabbitmq", ["amqp"]) | indent(12)}}
-          - {{ to_child_object("coordination", "etcd", "StatefulSet", "etcd-etcd", ["client"]) | indent(12)}}
-          - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
-          - {{ to_child_object("database", "mariadb", "StatefulSet", "mariadb-server", ["mysql"]) | indent(12)}}
-          - {{ to_child_object("placement", "placement", "Deployment", "placement-api", ["p-api"]) | indent(12)}}
-          - {{ to_child_object("messaging", "rabbitmq", "StatefulSet", "openstack-rabbitmq-rabbitmq", ["amqp"]) | indent(12)}}
-          - {{ to_child_object("memcached", "memcached", "StatefulSet", "openstack-memcached-memcached", ["memcached"]) | indent(12)}}
-      hash_fields: []
-      images:
-      - nova_conductor
-      manifest: deployment_conductor
-      pod_labels:
-        application: nova
-        component: conductor
     nova-consoleauth:
       connections:
         egress:
@@ -194,24 +177,6 @@ nova:
           name: p-api
           protocol: TCP
 {%- endif %}
-    nova-scheduler:
-      connections:
-        egress:
-          - {{ to_child_object("compute", "rabbitmq", "StatefulSet", "openstack-nova-rabbitmq-rabbitmq", ["amqp"]) | indent(12)}}
-          - {{ to_child_object("coordination", "etcd", "StatefulSet", "etcd-etcd", ["client"]) | indent(12)}}
-          - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
-          - {{ to_child_object("compute", "rabbitmq", "StatefulSet", "openstack-nova-rabbitmq-rabbitmq", ["amqp"]) | indent(12)}}
-          - {{ to_child_object("database", "mariadb", "StatefulSet", "mariadb-server", ["mysql"]) | indent(12)}}
-          - {{ to_child_object("placement", "placement", "Deployment", "placement-api", ["p-api"]) | indent(12)}}
-          - {{ to_child_object("messaging", "rabbitmq", "StatefulSet", "openstack-rabbitmq-rabbitmq", ["amqp"]) | indent(12)}}
-          - {{ to_child_object("memcached", "memcached", "StatefulSet", "openstack-memcached-memcached", ["memcached"]) | indent(12)}}
-      hash_fields: []
-      images:
-      - nova_scheduler
-      manifest: deployment_scheduler
-      pod_labels:
-        application: nova
-        component: scheduler
   Job:
     nova-bootstrap:
       connections:
@@ -494,4 +459,4 @@ rabbitmq:
         release_group: openstack-nova-rabbitmq
       connections:
         egress:
-          - {{ to_child_object("compute", "rabbitmq", "StatefulSet", "openstack-nova-rabbitmq-rabbitmq", ["amqp"]) | indent(12)}}
+          - {{ to_child_object("compute", "rabbitmq", "StatefulSet", "openstack-nova-rabbitmq-rabbitmq", ["http"]) | indent(12)}}

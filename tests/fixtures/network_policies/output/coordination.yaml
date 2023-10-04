@@ -51,10 +51,6 @@ coordination:etcd:StatefulSet:etcd-etcd:
   - podSelector:
       matchLabels:
         application: nova
-        component: conductor
-  - podSelector:
-      matchLabels:
-        application: nova
         component: consoleauth
   - podSelector:
       matchLabels:
@@ -64,10 +60,6 @@ coordination:etcd:StatefulSet:etcd-etcd:
       matchLabels:
         application: nova
         component: placement
-  - podSelector:
-      matchLabels:
-        application: nova
-        component: scheduler
   - podSelector:
       matchLabels:
         application: nova
