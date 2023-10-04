@@ -216,10 +216,35 @@ spec:
         worker:
           node_selector_key: openstack-gateway
           node_selector_value: enabled
+      network_policy:
+        api:
+          spec:
+            ingress:
+              - from:
+                - default: selector
+              - from:
+                - namespaceSelector:
+                    matchLabels:
+                      kubernetes.io/metadata.name: osh-system
+                - namespaceSelector:
+                    matchLabels:
+                      kubernetes.io/metadata.name: stacklight
+                - namespaceSelector:
+                    matchLabels:
+                      kubernetes.io/metadata.name: tf
+                ports:
+                - port: 9876
+                  protocol: TCP
+            podSelector:
+              matchLabels:
+                application: octavia
+                component: api
+            policyTypes:
+            - Ingress
       manifests:
         job_db_sync_persistence: true
         job_rabbit_init: false
-        network_policy: false
+        network_policy: true
         secret_amphora_ssh_key: true
         secret_ca_bundle: true
         secret_octavia_certs: false

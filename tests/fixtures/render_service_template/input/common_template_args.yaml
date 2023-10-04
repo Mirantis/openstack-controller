@@ -300,4 +300,7 @@ network_policies:
     cloudprober:cloudprober:Deployment:openstack-cloudprober:
       - from:
         - default: selector
+    load-balancer:octavia:Deployment:octavia-api:
+      - from:
+        - default: selector
   egress: {}

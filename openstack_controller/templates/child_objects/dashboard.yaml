@@ -16,6 +16,7 @@ horizon:
           - {{ to_child_object("memcached", "memcached", "StatefulSet", "openstack-memcached-memcached", ["memcached"]) | indent(12)}}
           - {{ to_child_object("dns", "designate", "StatefulSet", "designate-api", ["dns-api"]) | indent(12)}}
           - {{ to_child_object("key-manager", "barbican", "Deployment", "barbican-api", ["b-api"]) | indent(12)}}
+          - {{ to_child_object("load-balancer", "octavia", "Deployment", "octavia-api", ["o-api"]) | indent(12)}}
       hash_fields: []
       images:
       - horizon

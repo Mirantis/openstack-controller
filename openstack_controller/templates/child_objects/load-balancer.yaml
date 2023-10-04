@@ -36,6 +36,10 @@ octavia:
       pod_labels:
         application: octavia
         component: api
+      ports:
+      - port: 9876
+        name: o-api
+        protocol: TCP
     octavia-housekeeping:
       connections:
         egress:
