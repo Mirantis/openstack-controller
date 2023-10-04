@@ -172,7 +172,7 @@ messaging:rabbitmq:StatefulSet:openstack-rabbitmq-rabbitmq:
       matchLabels:
         application: rabbitmq
         component: cluster-wait
-        release_group: openstack-rabbitmq-rabbitmq
+        release_group: openstack-rabbitmq
   - podSelector:
       matchLabels:
         application: gnocchi
@@ -263,4 +263,13 @@ messaging:rabbitmq:StatefulSet:openstack-rabbitmq-rabbitmq:
         component: share
   ports:
   - port: 5672
+    protocol: TCP
+- from:
+  - podSelector:
+      matchLabels:
+        application: prometheus_rabbitmq_exporter
+        component: exporter
+        release_group: openstack-rabbitmq
+  ports:
+  - port: 15672
     protocol: TCP

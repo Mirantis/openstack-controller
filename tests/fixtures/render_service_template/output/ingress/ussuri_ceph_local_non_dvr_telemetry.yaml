@@ -71,9 +71,21 @@ spec:
             policyTypes:
             - Ingress
             ingress:
-             - from:
+              - from:
                 - ipBlock:
                     cidr: 0.0.0.0/0
+                ports:
+                - port: 80
+                  protocol: TCP
+                - port: 443
+                  protocol: TCP
+              - from:
+                - namespaceSelector:
+                    matchLabels:
+                      kubernetes.io/metadata.name: stacklight
+                ports:
+                - port: 10254
+                  protocol: TCP
             podSelector:
               matchLabels:
                 application: ingress

@@ -5,8 +5,7 @@
           spec:
             podSelector:
               matchLabels:
-                application: cloudprober
-                component: prober
+{{ service_childs[prober].get_pod_labels() | toyaml | indent(16, first=True) }}
             policyTypes:
             - Ingress
             ingress:

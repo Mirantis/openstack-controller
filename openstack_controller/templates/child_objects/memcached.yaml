@@ -13,3 +13,6 @@ memcached:
         - port: 11211
           name: memcached
           protocol: TCP
+        - port: 9150
+          name: metrics
+          protocol: TCP
