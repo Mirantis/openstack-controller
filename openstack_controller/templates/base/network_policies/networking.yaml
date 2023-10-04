@@ -1,18 +1,18 @@
 {%- from 'macros/connections.j2' import from_pod_networks %}
 {%- from 'macros/connections.j2' import from_namespaces %}
 {%- set api_ns_list = ["os_controller", "lma_deployment"] | namespaces  %}
+{%- set neutron_server = "networking:neutron:Deployment:neutron-server" %}
         server:
           spec:
             podSelector:
               matchLabels:
-                application: neutron
-                component: server
+{{ service_childs[neutron_server].get_pod_labels() | toyaml | indent(16, first=True) }}
             policyTypes:
             - Ingress
             ingress:
 # Pods with host network such as nova-compute
-{{ network_policies["ingress"]["networking:neutron:Deployment:neutron-server"] | toyaml | indent(14, first=True) }}
+{{ network_policies["ingress"][neutron_server] | toyaml | indent(14, first=True) }}
               - from:
-{{ from_pod_networks(pod_networks) | indent(18) }}
+{{ from_pod_networks(pod_networks, service_childs[neutron_server].get_np_ports(["q-api"])) | indent(16) }}
               - from:
-{{ from_namespaces(api_ns_list) | indent(18) }}
+{{ from_namespaces(api_ns_list, service_childs[neutron_server].get_np_ports(["q-api"])) | indent(16) }}

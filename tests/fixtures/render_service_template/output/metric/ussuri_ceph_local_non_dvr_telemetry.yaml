@@ -105,6 +105,9 @@ spec:
                 - namespaceSelector:
                     matchLabels:
                       kubernetes.io/metadata.name: stacklight
+                ports:
+                - port: 8041
+                  protocol: TCP
             podSelector:
               matchLabels:
                 application: gnocchi
