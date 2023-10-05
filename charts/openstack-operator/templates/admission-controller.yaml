@@ -106,7 +106,7 @@ spec:
             - /opt/operator/uwsgi.ini
           ports:
             - name: https
-              containerPort: 8443
+              containerPort: {{ .Values.admission.settings.raw.OSCTL_ADMISSION_BIND_PORT }}
               protocol: TCP
           livenessProbe:
             httpGet:
