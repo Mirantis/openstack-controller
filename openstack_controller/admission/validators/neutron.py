@@ -42,7 +42,7 @@ class NeutronValidator(base.BaseValidator):
         ovn_enabled = neutron_features.get("backend", "ml2") == "ml2/ovn"
         openstack_version = spec["openstack_version"]
         tungstenfabric_enabled = spec["preset"] == "compute-tf"
-        ngs = neutron_features = (
+        ngs = (
             spec.get("features", {})
             .get("neutron", {})
             .get("baremetal", {})
@@ -126,6 +126,13 @@ class NeutronValidator(base.BaseValidator):
                 raise exception.OsDplValidationFailed(
                     "TungstenFabric and Dynamic Routing are mutually exclusive."
                 )
+        if (
+            "geneve" in neutron_features.get("tenant_network_types", [])
+            and not ovn_enabled
+        ):
+            raise exception.OsDplValidationFailed(
+                "The geneve tenant network type is supported only with ovn"
+            )
 
     def _validate_ngs_hardware(self, ngs):
         ngs_hardware = ngs.get("hardware", {})

@@ -998,6 +998,7 @@ properties:
                 - flat
                 - vlan
                 - vxlan
+                - geneve
           external_networks:
             type: array
             items:
