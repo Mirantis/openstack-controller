@@ -24,3 +24,7 @@ horizon:
       pod_labels:
         application: horizon
         component: server
+      ports:
+        - name: web
+          port: 4999
+          protocol: TCP

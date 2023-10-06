@@ -125,6 +125,18 @@ spec:
           horizon_db_sync: horizon-db-sync:latest
           image_repo_sync: image-repo-sync:latest
           test: test:latest
+      network_policy:
+        horizon:
+          spec:
+            ingress:
+              - from:
+                - default: selector
+            podSelector:
+              matchLabels:
+                application: horizon
+                component: server
+            policyTypes:
+            - Ingress
       manifests:
-        network_policy: false
+        network_policy: true
         secret_ca_bundle: true
