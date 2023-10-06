@@ -1,10 +1,4 @@
           #Horizon
-          7f43197f-ba2c-4962-a07a-43cbf77a779b:
-            reason: PRODX-11370
-            # stepler/horizon/tests/test_volume_backups.py::TestAnyOne::test_volume_backups_pagination[admin]
-          f49eef31-b26a-496c-8f0f-2465a97d04cf:
-            reason: PRODX-11370
-            # stepler/horizon/tests/test_volume_backups.py::TestAnyOne::test_volume_backups_pagination[user]
           e654d077-c645-4eb7-9a7b-763a1cee3a81:
             reason: Test case is depricated - will be removed from repo
             # stepler/horizon/tests/test_flavors.py::TestAdminOnly::test_update_flavor
