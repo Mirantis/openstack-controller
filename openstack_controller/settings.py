@@ -16,6 +16,8 @@ import os
 import glob
 import random
 import sys
+import signal
+import traceback
 import time
 import logging.config
 
@@ -337,3 +339,10 @@ HELM_REPOSITORY_CACHE = os.environ.get(
 # END HELM SETTINGS
 
 CONF = Config()
+
+
+def handler_sigusr2(signum, frame):
+    logger.info(traceback.print_stack(frame))
+
+
+signal.signal(signal.SIGUSR2, handler_sigusr2)
