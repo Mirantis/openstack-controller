@@ -23,13 +23,17 @@ CONF = settings.CONF
 
 
 @contextlib.asynccontextmanager
-async def helm_lock(lock):
+async def helm_lock(lock, cmd):
+    # Add info level logs for locking to debug PRODX-34914
+    # with debug logging enabled issue cannot be reproduced
+    LOG.info(f"Acquiring helm lock {lock} for cmd {cmd}")
     loop = asyncio.get_event_loop()
     await loop.run_in_executor(None, lock.acquire)
     try:
         yield  # the lock is held
     finally:
         lock.release()
+        LOG.info(f"Helm lock {lock} for cmd {cmd} is released")
 
 
 def helm_retry(func):
@@ -186,7 +190,7 @@ class HelmManager:
         return (stdout, stderr)
 
     async def run_cmd(self, cmd, raise_on_error=True, release_name=None):
-        async with helm_lock(HELM_LOCK):
+        async with helm_lock(HELM_LOCK, cmd):
             return await self._run_cmd(cmd, raise_on_error, release_name)
 
     async def exist(self, name, args=None):
