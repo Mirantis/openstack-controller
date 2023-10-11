@@ -33,7 +33,7 @@ class OsdplOctaviaMetricCollector(base.OpenStackBaseMetricCollector):
             "loadbalancers": GaugeMetricFamily(
                 f"{self._name}_loadbalancers",
                 "Number of octavia loadbalancers in environment",
-                labels=["operating_status", "privisioning_status"],
+                labels=["operating_status", "provisioning_status"],
             ),
         }
 
