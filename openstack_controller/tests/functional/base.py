@@ -154,6 +154,51 @@ class BaseFunctionalTestCase(TestCase):
             waiters.wait_for_server_status(self.ocm, server, status=status)
 
     @classmethod
+    def lb_bundle_create(
+        cls,
+        name=None,
+    ):
+        if name is None:
+            name = data_utils.rand_name()
+        network = cls.network_create()
+        subnet = cls.subnet_create(
+            cidr=CONF.TEST_LB_SUBNET_RANGE, network_id=network["id"]
+        )
+        lb = cls.ocm.oc.load_balancer.create_load_balancer(
+            name=name,
+            vip_network_id=network["id"],
+            vip_subnet_id=subnet["id"],
+        )
+        cls.addClassCleanup(
+            waiters.wait_resource_deleted,
+            cls.ocm.oc.load_balancer.get_load_balancer,
+            lb["id"],
+            CONF.LB_OPERATION_TIMEOUT,
+            CONF.LB_OPERATION_INTERVAL,
+        )
+        cls.addClassCleanup(
+            cls.ocm.oc.load_balancer.delete_load_balancer, lb["id"]
+        )
+        cls.ocm.oc.load_balancer.wait_for_load_balancer(
+            lb["id"],
+            interval=CONF.LB_OPERATION_INTERVAL,
+            wait=CONF.LB_OPERATION_TIMEOUT,
+        )
+        return lb
+
+    @classmethod
+    def lb_update(cls, lb_id, admin_state_up=True):
+        lb = cls.ocm.oc.load_balancer.update_load_balancer(
+            lb_id, admin_state_up=admin_state_up
+        )
+        cls.ocm.oc.load_balancer.wait_for_load_balancer(
+            lb["id"],
+            status="ACTIVE",
+            interval=CONF.LB_OPERATION_INTERVAL,
+            wait=CONF.LB_OPERATION_TIMEOUT,
+        )
+
+    @classmethod
     def network_create(
         cls,
         name=None,
