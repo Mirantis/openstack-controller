@@ -1,10 +1,4 @@
           #Horizon
-          e654d077-c645-4eb7-9a7b-763a1cee3a81:
-            reason: Test case is depricated - will be removed from repo
-            # stepler/horizon/tests/test_flavors.py::TestAdminOnly::test_update_flavor
-          e585242-9443-4e78-a7fe-3ee6097459bb:
-            reason: The test will be removed as depricated
-            # stepler/horizon/tests/test_volumes.py::TestAdminOnly::test_migrate_volume
           9acd7607-d72f-4e8c-9b13-1a0728d56975:
             reason: PRODX-11366
             # stepler/horizon/tests/test_projects.py::TestAdminOnly::test_switch_projects
