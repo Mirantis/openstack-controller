@@ -2,6 +2,7 @@ import time
 import logging
 
 from openstack_controller.tests.functional import config as conf
+from openstack_controller import openstack_utils
 
 LOG = logging.getLogger(__name__)
 
@@ -50,6 +51,32 @@ def wait_for_compute_service_status(client, compute_svc, status="enabled"):
         timed_out = int(time.time()) - start_time
         message = "Current service {} has status: {}. Expected status: {}, after {} sec".format(
             service_id, service_status, status, timed_out
+        )
+        if timed_out >= timeout:
+            LOG.error(message)
+            raise TimeoutError(message)
+
+
+def wait_for_volume_service_status(volume_svc, status="enabled"):
+    start_time = int(time.time())
+    timeout = conf.VOLUME_TIMEOUT
+    while True:
+        client = openstack_utils.OpenStackClientManager()
+        service = client.volume_get_services(
+            host=volume_svc["host"], binary=volume_svc["binary"]
+        )
+        service_status = service[0]["status"]
+        if service_status == status:
+            LOG.debug(
+                "Current service {} has status: {}.".format(
+                    volume_svc["binary"], service_status
+                )
+            )
+            return
+        time.sleep(conf.VOLUME_BUILD_INTERVAL)
+        timed_out = int(time.time()) - start_time
+        message = "Current service {} has status: {}. Expected status: {}, after {} sec".format(
+            volume_svc["binary"], service_status, status, timed_out
         )
         if timed_out >= timeout:
             LOG.error(message)
