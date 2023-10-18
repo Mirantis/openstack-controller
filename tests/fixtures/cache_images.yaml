@@ -36,7 +36,7 @@ spec:
       - command:
         - /bin/sleep
         - '86400000'
-        image: docker-dev-kaas-local.docker.mirantis.net/openstack/neutron:stein-bionic-20230227093206
+        image: neutron:latest
         name: image-precaching-neutron-db-sync
         securityContext:
           capabilities:
@@ -45,7 +45,7 @@ spec:
       - command:
         - /bin/sleep
         - '86400000'
-        image: docker-dev-kaas-local.docker.mirantis.net/openstack/nova:stein-bionic-20230227093206
+        image: nova:latest
         name: image-precaching-nova-api
         securityContext:
           capabilities:
@@ -54,7 +54,7 @@ spec:
       - command:
         - /bin/sleep
         - '86400000'
-        image: docker-dev-kaas-local.docker.mirantis.net/general/libvirt:4.0.0-bionic-20230914074816
+        image: libvirt:latest
         name: image-precaching-libvirt
         securityContext:
           capabilities:
@@ -63,35 +63,8 @@ spec:
       - command:
         - /bin/sleep
         - '86400000'
-        image: docker-dev-kaas-local.docker.mirantis.net/general/openvswitch:2.11-bionic-20230914074816
-        name: image-precaching-openvswitch-db-server
-        securityContext:
-          capabilities:
-            drop:
-            - NET_RAW
-      - command:
-        - /bin/sleep
-        - '86400000'
-        image: docker-dev-kaas-local.docker.mirantis.net/general/mariadb:10.6.14-focal-20230920121405
-        name: image-precaching-mariadb
-        securityContext:
-          capabilities:
-            drop:
-            - NET_RAW
-      - command:
-        - /bin/sleep
-        - '86400000'
-        image: docker-dev-kaas-local.docker.mirantis.net/openstack/extra/nginx-ingress-controller:1.8.2-alpine-20230928053836
-        name: image-precaching-ingress
-        securityContext:
-          capabilities:
-            drop:
-            - NET_RAW
-      - command:
-        - /bin/sleep
-        - '86400000'
-        image: docker-dev-kaas-local.docker.mirantis.net/tungsten/redis:7.2.1-alpine3.18
-        name: image-precaching-redis-failover
+        image: openvswitch:latest
+        name: image-precaching-openvswitch
         securityContext:
           capabilities:
             drop:
