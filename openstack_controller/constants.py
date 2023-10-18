@@ -117,6 +117,7 @@ SERVICE_ORDER = {
     "block-storage": 140,
     "database": 150,
     "coordination": 160,
+    "redis": 170,
 }
 
 RGW_KEYSTONE_SECRET = "ceph-keystone-user"

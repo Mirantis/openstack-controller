@@ -101,7 +101,7 @@ class Coordination(Service, MaintenanceApiMixin):
         return server_sts.is_node_locked(node_name)
 
 
-class Redis(Service):
+class Redis(Service, MaintenanceApiMixin):
     service = "redis"
     group = "databases.spotahome.com"
     version = "v1"
@@ -224,6 +224,56 @@ class Redis(Service):
         )
         if redis_failover:
             redis_failover.delete()
+
+    async def remove_node_from_scheduling(self, node):
+        pass
+
+    async def prepare_node_for_reboot(self, node):
+        pass
+
+    async def prepare_node_after_reboot(self, node):
+        pass
+
+    async def add_node_to_scheduling(self, node):
+        pass
+
+    async def can_handle_nmr(self, node, locks):
+        if await self.is_node_locked(node.name):
+            raise kopf.TemporaryError(
+                f"The node {node.name} is hard locked by redis."
+            )
+
+    async def process_ndr(self, node, nwl):
+        node_name = nwl.obj["spec"]["nodeName"]
+        if await self.is_node_locked(node_name):
+            msg = f"The node {node.name} is hard locked by redis."
+            raise kopf.TemporaryError(msg)
+
+    async def cleanup_persistent_data(self, nwl):
+        node_name = nwl.obj["spec"]["nodeName"]
+        if await self.is_node_locked(node_name):
+            msg = f"The node {node_name} is hard locked by redis."
+            nwl.set_error_message(msg)
+            raise kopf.TemporaryError(msg)
+
+        rfr_sts = kube.find(
+            kube.StatefulSet,
+            "rfr-openstack-redis",
+            settings.OSCTL_REDIS_NAMESPACE,
+            silent=True,
+        )
+        if rfr_sts and rfr_sts.exists():
+            rfr_sts.release_persistent_volume_claims(node_name)
+
+    async def is_node_locked(self, node_name):
+        rfr_sts = kube.find(
+            kube.StatefulSet,
+            "rfr-openstack-redis",
+            settings.OSCTL_REDIS_NAMESPACE,
+            silent=True,
+        )
+        if rfr_sts and rfr_sts.exists():
+            return rfr_sts.is_node_locked(node_name)
 
 
 class MariaDB(Service, MaintenanceApiMixin):
