@@ -1392,4 +1392,50 @@ async def test_clustered_cleanup_persisent_data_not_locked(
     get_child_object.return_value.release_persistent_volume_claims.assert_called_once()
 
 
+@pytest.mark.asyncio
+async def test_redis_cleanup_persisent_data_locked(
+    mocker,
+    openstack_client,
+    openstackdeployment_mspec,
+    nwl,
+    child_view,
+    mock_sts,
+    kube_find,
+):
+    osdplstmock = mock.Mock()
+    nwl.obj = _get_nwl_obj("openstack", "host1")
+    openstack_client.return_value.compute_wait_service_state = AsyncMock()
+    service = services.Redis(
+        openstackdeployment_mspec, logging, osdplstmock, child_view
+    )
+    node_locked_mock = AsyncMock()
+    node_locked_mock.return_value = True
+    service.is_node_locked = node_locked_mock
+    with pytest.raises(kopf.TemporaryError):
+        await service.cleanup_persistent_data(nwl)
+
+
+@pytest.mark.asyncio
+async def test_redis_cleanup_persisent_data_not_locked(
+    mocker,
+    openstack_client,
+    openstackdeployment_mspec,
+    nwl,
+    child_view,
+    mock_sts,
+    kube_find,
+):
+    osdplstmock = mock.Mock()
+    nwl.obj = _get_nwl_obj("openstack", "host1")
+    openstack_client.return_value.compute_wait_service_state = AsyncMock()
+    service = services.Redis(
+        openstackdeployment_mspec, logging, osdplstmock, child_view
+    )
+    node_locked_mock = AsyncMock()
+    node_locked_mock.return_value = False
+    service.is_node_locked = node_locked_mock
+    await service.cleanup_persistent_data(nwl)
+    kube_find.return_value.release_persistent_volume_claims.assert_called_once()
+
+
 # vsaienko(TODO): add more tests covering logic in _do_servers_migration()
