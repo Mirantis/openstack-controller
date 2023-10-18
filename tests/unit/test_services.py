@@ -103,6 +103,18 @@ def kube_find(mocker):
     mocker.stopall()
 
 
+@pytest.fixture
+def mock_sts(mocker):
+    sts = mocker.patch("openstack_controller.kube.StatefulSet")
+    sts.return_value = mock.MagicMock()
+    yield sts
+    mocker.stopall()
+
+
+def get_clustered_service_classes():
+    return [services.Coordination, services.MariaDB]
+
+
 @mock.patch("openstack_controller.secrets.generate_name")
 @mock.patch("openstack_controller.secrets.generate_password")
 @mock.patch.object(secrets.OpenStackAdminSecret, "k8s_get_data")
@@ -1324,6 +1336,60 @@ async def test_volume_process_ndr_compute_0volumes(
         openstackdeployment_mspec, logging, osdplstmock, child_view
     ).process_ndr(node3, nwl)
     mock_rnfs.assert_called_once()
+
+
+@pytest.mark.parametrize("service_class", get_clustered_service_classes())
+@pytest.mark.asyncio
+async def test_clustered_cleanup_persisent_data_locked(
+    mocker,
+    openstack_client,
+    openstackdeployment_mspec,
+    nwl,
+    child_view,
+    mock_sts,
+    service_class,
+):
+    osdplstmock = mock.Mock()
+    nwl.obj = _get_nwl_obj("openstack", "host1")
+    openstack_client.return_value.compute_wait_service_state = AsyncMock()
+    service = service_class(
+        openstackdeployment_mspec, logging, osdplstmock, child_view
+    )
+    get_child_object = mock.Mock()
+    get_child_object.return_value = mock_sts
+    service.get_child_object = get_child_object
+    node_locked_mock = AsyncMock()
+    node_locked_mock.return_value = True
+    service.is_node_locked = node_locked_mock
+    with pytest.raises(kopf.TemporaryError):
+        await service.cleanup_persistent_data(nwl)
+
+
+@pytest.mark.parametrize("service_class", get_clustered_service_classes())
+@pytest.mark.asyncio
+async def test_clustered_cleanup_persisent_data_not_locked(
+    mocker,
+    openstack_client,
+    openstackdeployment_mspec,
+    nwl,
+    child_view,
+    mock_sts,
+    service_class,
+):
+    osdplstmock = mock.Mock()
+    nwl.obj = _get_nwl_obj("openstack", "host1")
+    openstack_client.return_value.compute_wait_service_state = AsyncMock()
+    service = service_class(
+        openstackdeployment_mspec, logging, osdplstmock, child_view
+    )
+    get_child_object = mock.Mock()
+    get_child_object.return_value = mock_sts
+    service.get_child_object = get_child_object
+    node_locked_mock = AsyncMock()
+    node_locked_mock.return_value = False
+    service.is_node_locked = node_locked_mock
+    await service.cleanup_persistent_data(nwl)
+    get_child_object.return_value.release_persistent_volume_claims.assert_called_once()
 
 
 # vsaienko(TODO): add more tests covering logic in _do_servers_migration()

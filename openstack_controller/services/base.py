@@ -658,11 +658,10 @@ class MaintenanceApiMixin:
         :param node: the node object
         :param nwl: the nodeworkloadlock object
 
-        :returns True: when node is ready for deletion
         :raises kopf.TemporaryError on errors.
 
         """
-        return True
+        pass
 
     async def cleanup_metadata(self, nwl):
         """Cleanup metadata tied with specific node.
@@ -672,10 +671,36 @@ class MaintenanceApiMixin:
 
         :param nwl: the nodeWorkloadLock object
 
-        :returns True: when node is ready for deletion
         :raises kopf.TemporaryError on errors.
         """
-        return True
+        pass
+
+    async def cleanup_persistent_data(self, nwl):
+        """Cleanup persistent data tied with specific node.
+
+        At this point no pods should be running on the node, and
+        node object may not be present in kubernetes.
+
+        :param nwl: the nodeWorkloadLock object
+
+        :raises kopf.TemporaryError on errors.
+        """
+        pass
+
+    async def is_node_locked(self, node_name):
+        """Check if node is hard locked by application.
+
+        Ensure that clustered application will not loose quorum if
+        node is removed. Is a safer to allow persistant metadata removal.
+
+        :param node_name: The name of the node we want to check.
+
+        :returns True: When node is locked and we will loose quorum.
+        :retruns False: When we are okay to loose data on this node.
+
+        :raises kopf.TemporaryError on errors.
+        """
+        return False
 
 
 class OpenStackService(Service):

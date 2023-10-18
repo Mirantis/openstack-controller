@@ -55,13 +55,50 @@ class Ingress(Service):
         return ["ingress"]
 
 
-class Coordination(Service):
+class Coordination(Service, MaintenanceApiMixin):
     service = "coordination"
     available_releases = ["etcd"]
 
     @property
     def health_groups(self):
         return ["etcd"]
+
+    async def remove_node_from_scheduling(self, node):
+        pass
+
+    async def prepare_node_for_reboot(self, node):
+        pass
+
+    async def prepare_node_after_reboot(self, node):
+        pass
+
+    async def add_node_to_scheduling(self, node):
+        pass
+
+    async def can_handle_nmr(self, node, locks):
+        if await self.is_node_locked(node.name):
+            raise kopf.TemporaryError(
+                f"The node {node.name} is hard locked by etcd."
+            )
+
+    async def process_ndr(self, node, nwl):
+        node_name = nwl.obj["spec"]["nodeName"]
+        if await self.is_node_locked(node_name):
+            msg = f"The node {node.name} is hard locked by etcd."
+            raise kopf.TemporaryError(msg)
+
+    async def cleanup_persistent_data(self, nwl):
+        node_name = nwl.obj["spec"]["nodeName"]
+        if await self.is_node_locked(node_name):
+            msg = f"The node {node_name} is hard locked by etcd."
+            nwl.set_error_message(msg)
+            raise kopf.TemporaryError(msg)
+        server_sts = self.get_child_object("StatefulSet", "etcd-etcd")
+        server_sts.release_persistent_volume_claims(node_name)
+
+    async def is_node_locked(self, node_name):
+        server_sts = self.get_child_object("StatefulSet", "etcd-etcd")
+        return server_sts.is_node_locked(node_name)
 
 
 class Redis(Service):
@@ -189,7 +226,7 @@ class Redis(Service):
             redis_failover.delete()
 
 
-class MariaDB(Service):
+class MariaDB(Service, MaintenanceApiMixin):
     service = "database"
     available_releases = ["openstack-mariadb"]
 
@@ -207,6 +244,43 @@ class MariaDB(Service):
             "network_policies": self.child_view.network_policies,
             "service_childs": self.child_view.childs,
         }
+
+    async def remove_node_from_scheduling(self, node):
+        pass
+
+    async def prepare_node_for_reboot(self, node):
+        pass
+
+    async def prepare_node_after_reboot(self, node):
+        pass
+
+    async def add_node_to_scheduling(self, node):
+        pass
+
+    async def can_handle_nmr(self, node, locks):
+        if await self.is_node_locked(node.name):
+            raise kopf.TemporaryError(
+                f"The node {node.name} is hard locked by mariadb."
+            )
+
+    async def process_ndr(self, node, nwl):
+        node_name = nwl.obj["spec"]["nodeName"]
+        if await self.is_node_locked(node_name):
+            msg = f"The node {node.name} is hard locked by mariadb."
+            raise kopf.TemporaryError(msg)
+
+    async def cleanup_persistent_data(self, nwl):
+        node_name = nwl.obj["spec"]["nodeName"]
+        if await self.is_node_locked(node_name):
+            msg = f"The node {node_name} is hard locked by mariadb."
+            nwl.set_error_message(msg)
+            raise kopf.TemporaryError(msg)
+        server_sts = self.get_child_object("StatefulSet", "mariadb-server")
+        server_sts.release_persistent_volume_claims(node_name)
+
+    async def is_node_locked(self, node_name):
+        server_sts = self.get_child_object("StatefulSet", "mariadb-server")
+        return server_sts.is_node_locked(node_name)
 
 
 class Memcached(Service):

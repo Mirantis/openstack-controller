@@ -111,7 +111,13 @@ OPENSTACK_SERVICES_UPGRADE_ORDER = [
 
 # Higher value means that component's prepare-usage handlers will be called
 # later and prepare-shutdown handlers - sooner
-SERVICE_ORDER = {"compute": 100, "networking": 120, "block-storage": 140}
+SERVICE_ORDER = {
+    "compute": 100,
+    "networking": 120,
+    "block-storage": 140,
+    "database": 150,
+    "coordination": 160,
+}
 
 RGW_KEYSTONE_SECRET = "ceph-keystone-user"
 

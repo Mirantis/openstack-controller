@@ -281,6 +281,10 @@ async def node_workloadlock_request_delete_handler(body, **kwargs):
 
     osdpl = kube.get_osdpl()
     if osdpl and osdpl.exists():
+        # NOTE(vsaienko): later we do destructive calls like
+        # openstack metadata removal and persistent data removal (database PVC removal)
+        # it is important to ensure node is removed to double confirm that we are
+        # doing what was requested.
         node = kube.find(kube.Node, name, silent=True)
         if node and node.exists():
             msg = "The kubernetes node {node_name} still exists. Deffer OpenStack service metadata removal."
@@ -298,8 +302,14 @@ async def node_workloadlock_request_delete_handler(body, **kwargs):
         for service, service_class in reversed(services.ORDERED_SERVICES):
             service = service_class(mspec, LOG, osdplst, child_view)
             if service.maintenance_api:
-                LOG.info(f"Cleaning metadata for node {name}")
+                LOG.info(
+                    f"Cleaning metadata for {service.service} on node {name}"
+                )
                 await service.cleanup_metadata(nwl)
+                LOG.info(
+                    f"Cleaning persistant data for {service.service} on node {name}"
+                )
+                await service.cleanup_persistent_data(nwl)
 
     LOG.info(
         f"The nodeworkloadlock for node {node_name} is ready for deletion."

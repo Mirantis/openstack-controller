@@ -74,10 +74,10 @@ class ChildObjectConnection:
 class ChildObjectView:
     def __init__(self, mspec):
         self.mspec = mspec
-        self.childs = self.get_childs()
+        self.childs = self._init_childs()
         self.network_policies = self.get_network_policies()
 
-    def get_childs(self):
+    def _init_childs(self):
         res = {}
         for service, charts in layers.get_child_tree(self.mspec).items():
             for chart, kinds in charts.items():

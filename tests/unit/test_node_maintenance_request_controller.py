@@ -49,6 +49,8 @@ def nova_registry_service(mocker):
         "prepare_node_for_reboot",
         "process_ndr",
         "cleanup_metadata",
+        "cleanup_persistent_data",
+        "is_node_locked",
     ]
     for attr in methods:
         setattr(mock_service_class.return_value, attr, AsyncMock())
@@ -579,6 +581,7 @@ async def test_nwl_deletion_node_still_exit(
         )
     osdpl.return_value.exists.assert_called_once()
     nova_registry_service.return_value.cleanup_metadata.assert_not_called()
+    nova_registry_service.return_value.cleanup_persistent_data.assert_not_called()
 
 
 @pytest.mark.asyncio
@@ -613,3 +616,4 @@ async def test_nwl_deletion_cleanup(
     )
     osdpl.return_value.exists.assert_called_once()
     nova_registry_service.return_value.cleanup_metadata.assert_called_once()
+    nova_registry_service.return_value.cleanup_persistent_data.assert_called_once()

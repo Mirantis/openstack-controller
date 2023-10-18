@@ -390,6 +390,62 @@ class StatefulSet(pykube.StatefulSet, HelmBundleMixin):
             await asyncio.sleep(seconds)
         raise ValueError("Not ready yet.")
 
+    @property
+    def pods(self):
+        self.reload()
+        pod_labels = self.obj["spec"]["selector"].get("matchLabels", {})
+        selector = {f"{k}__in": [v] for k, v in pod_labels.items()}
+        pods_query = resource_list(
+            Pod, selector=selector, namespace=self.namespace
+        )
+        pods = [x for x in pods_query]
+        return pods
+
+    def is_node_locked(self, node_name):
+        """Check if node is locked by statefulset
+
+        The node is locked when
+        1. Replicas on other nodes are not ready
+        2. Number of ready replicas is less than replicas - 1
+
+        :returns True: When node is locked
+        :returns False: When node is not locked
+        """
+        self.reload()
+        ready_pods = len([pod.ready for pod in self.pods if pod.ready])
+        min_ready_pods = self.obj["spec"]["replicas"] - 1
+        if ready_pods < min_ready_pods:
+            LOG.error(
+                f"Number of ready pods {ready_pods} is not enough. Require at least {min_ready_pods}"
+            )
+            return True
+        other_nodes_pods = []
+        for pod in self.pods:
+            pod_node = pod.obj["spec"].get("nodeName")
+            if pod_node and pod_node != node_name:
+                other_nodes_pods.append(pod)
+        if len(other_nodes_pods) < min_ready_pods:
+            LOG.error(
+                f"Do not have enough ready pods for {self.name} on other nodes. Expected {min_ready_pods}, but found {other_nodes_pods}"
+            )
+            return True
+        if not all([pod.ready for pod in other_nodes_pods if pod.ready]):
+            LOG.error(
+                f"Pods from {self.name} are not ready on other nodes than {node_name}"
+            )
+            return True
+        return False
+
+    def release_persistent_volume_claims(self, node_name):
+        for pod in self.pods:
+            for pvc in pod.pvcs:
+                pv = pvc.pv
+                if pv and pv.is_bound_to_node(node_name):
+                    LOG.info(
+                        f"Deleting PVC {pvc.name} tied to node {node_name}"
+                    )
+                    pvc.delete()
+
 
 class Ingress(pykube.objects.NamespacedAPIObject, HelmBundleMixin):
     version = "extensions/v1beta1"
@@ -667,6 +723,19 @@ class Pod(pykube.Pod):
         self._check_exec_errors(res, raise_on_error)
         return res
 
+    @property
+    def pvcs(self):
+        self.reload()
+        pvcs = []
+        for volume in self.obj["spec"].get("volumes", []):
+            if "persistentVolumeClaim" in volume:
+                pvcs.append(
+                    PersistentVolumeClaim.objects(kube_client())
+                    .filter(namespace=self.namespace)
+                    .get(name=volume["persistentVolumeClaim"]["claimName"])
+                )
+        return pvcs
+
 
 class Node(pykube.Node):
     @property
@@ -700,6 +769,36 @@ class Node(pykube.Node):
         for k, v in settings.OSCTL_OPENSTACK_NODE_LABELS[role].items():
             if self.labels.get(k) == v:
                 return True
+        return False
+
+
+class PersistentVolumeClaim(pykube.PersistentVolumeClaim):
+    @property
+    def pv(self):
+        self.reload()
+        volume_name = self.obj["spec"].get("volumeName")
+        if volume_name:
+            return PersistentVolume.objects(kube_client()).get(
+                name=volume_name
+            )
+        LOG.error(f"No volume is associated with {self.name}")
+
+
+class PersistentVolume(pykube.PersistentVolume):
+    def is_bound_to_node(self, node_name):
+        for node_selector in (
+            self.obj["spec"]
+            .get("nodeAffinity", {})
+            .get("required", {})
+            .get("nodeSelectorTerms", [])
+        ):
+            for expression in node_selector.get("matchExpressions", []):
+                if (
+                    expression.get("key") == "kubernetes.io/hostname"
+                    and expression.get("operator") == "In"
+                    and node_name in expression.get("values", [])
+                ):
+                    return True
         return False
 
 
