@@ -118,6 +118,9 @@ class Config(configparser.ConfigParser):
             logger.info("Reloading configuration.")
             self.read(self.filenames)
 
+    def getString(self, section, option):
+        return self.get(section, option).strip('"')
+
 
 # The name of openstack deployment namespace
 OSCTL_OS_DEPLOYMENT_NAMESPACE = os.environ.get(
