@@ -59,10 +59,6 @@ messaging:rabbitmq:StatefulSet:openstack-rabbitmq-rabbitmq:
   - podSelector:
       matchLabels:
         application: nova
-        component: conductor
-  - podSelector:
-      matchLabels:
-        application: nova
         component: consoleauth
   - podSelector:
       matchLabels:
@@ -72,10 +68,6 @@ messaging:rabbitmq:StatefulSet:openstack-rabbitmq-rabbitmq:
       matchLabels:
         application: nova
         component: placement
-  - podSelector:
-      matchLabels:
-        application: nova
-        component: scheduler
   - podSelector:
       matchLabels:
         application: nova
@@ -168,11 +160,6 @@ messaging:rabbitmq:StatefulSet:openstack-rabbitmq-rabbitmq:
       matchLabels:
         application: octavia
         component: worker
-  - podSelector:
-      matchLabels:
-        application: rabbitmq
-        component: cluster-wait
-        release_group: openstack-rabbitmq
   - podSelector:
       matchLabels:
         application: gnocchi
@@ -269,6 +256,11 @@ messaging:rabbitmq:StatefulSet:openstack-rabbitmq-rabbitmq:
       matchLabels:
         application: prometheus_rabbitmq_exporter
         component: exporter
+        release_group: openstack-rabbitmq
+  - podSelector:
+      matchLabels:
+        application: rabbitmq
+        component: cluster-wait
         release_group: openstack-rabbitmq
   ports:
   - port: 15672

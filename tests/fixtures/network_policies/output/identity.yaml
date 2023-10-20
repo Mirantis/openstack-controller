@@ -135,10 +135,6 @@ identity:keystone:Deployment:keystone-api:
   - podSelector:
       matchLabels:
         application: nova
-        component: conductor
-  - podSelector:
-      matchLabels:
-        application: nova
         component: consoleauth
   - podSelector:
       matchLabels:
@@ -148,10 +144,6 @@ identity:keystone:Deployment:keystone-api:
       matchLabels:
         application: nova
         component: placement
-  - podSelector:
-      matchLabels:
-        application: nova
-        component: scheduler
   - podSelector:
       matchLabels:
         application: nova

@@ -188,7 +188,7 @@ keystone:
       pod_labels:
         application: keystone
         component: fernet-setup
-    keystone-ks-user:
+    test-ks-user:
       connections:
         egress:
           - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}

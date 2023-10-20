@@ -383,4 +383,4 @@ rabbitmq:
         release_group: openstack-neutron-rabbitmq
       connections:
         egress:
-          - {{ to_child_object("networking", "rabbitmq", "StatefulSet", "openstack-neutron-rabbitmq-rabbitmq", ["amqp"]) | indent(12)}}
+          - {{ to_child_object("networking", "rabbitmq", "StatefulSet", "openstack-neutron-rabbitmq-rabbitmq", ["http"]) | indent(12)}}
