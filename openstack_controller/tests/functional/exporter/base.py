@@ -1,11 +1,13 @@
 import os
 import requests
 import retry
+import time
 import logging
 
 from prometheus_client.openmetrics.parser import text_string_to_metric_families
 
 from openstack_controller import kube
+from openstack_controller.tests.functional import config as conf
 from openstack_controller.tests.functional import base
 
 LOG = logging.getLogger(__name__)
@@ -61,6 +63,32 @@ class BaseFunctionalExporterTestCase(base.BaseFunctionalTestCase):
             else:
                 res.append(sample)
         return res
+
+    def wait_service_metric(self, metric_name, labels, value=1.0):
+        metric = self.get_metric(metric_name)
+        service_samples = self.filter_metric_samples(metric, labels)
+        host = service_samples[0].labels["host"]
+        start_time = int(time.time())
+        timeout = conf.METRIC_TIMEOUT
+
+        while True:
+            if service_samples[0].value == value:
+                LOG.debug(
+                    "Current metric {} for host {} has value: {}.".format(
+                        metric_name, host, service_samples[0].value
+                    )
+                )
+                return
+            time.sleep(conf.METRIC_INTERVAL_TIMEOUT)
+            timed_out = int(time.time()) - start_time >= timeout
+            message = "Current metric {} for host {} has value: {}. Expected value: {}, after {} sec".format(
+                metric_name, host, service_samples[0].value, value, timed_out
+            )
+            if timed_out:
+                logging.error(message)
+                raise TimeoutError(message)
+            metric = self.get_metric(metric_name)
+            service_samples = self.filter_metric_samples(metric, labels)
 
     def test_known_metrics_present_and_not_none(self):
         for metric_name in self.known_metrics.keys():

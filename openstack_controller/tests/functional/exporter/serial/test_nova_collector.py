@@ -1,4 +1,6 @@
+from openstack_controller.exporter.constants import ServiceState, ServiceStatus
 from openstack_controller.tests.functional.exporter import base
+from openstack_controller.tests.functional import waiters as wait
 
 
 class NovaCollectorSerialFunctionalTestCase(
@@ -23,66 +25,39 @@ class NovaCollectorSerialFunctionalTestCase(
         self.ocm.compute_ensure_service_force_down(self.compute_svc, False)
         super().tearDown()
 
-    def test_service_status(self):
-        metric = self.get_metric("osdpl_nova_service_status")
-        labels = {
-            "osdpl_nova_service_status": "enabled",
-            "host": self.compute_svc["host"],
-            "binary": self.compute_svc["binary"],
-        }
-        service_samples = self.filter_metric_samples(metric, labels)
-        self.assertEqual(1, len(service_samples))
-        self.assertEqual(1.0, service_samples[0].value)
-        labels["osdpl_nova_service_status"] = "disabled"
-        service_samples = self.filter_metric_samples(metric, labels)
-        self.assertEqual(1, len(service_samples))
-        self.assertEqual(0.0, service_samples[0].value)
-
-    def test_service_status_disable(self):
+    def test_service_status_enabled_disabled(self):
+        metric_name = "osdpl_nova_service_status"
         self.ocm.compute_ensure_service_disabled(
-            self.compute_svc, "Functional test test_service_status_disable"
+            self.compute_svc,
+            "Functional test test_service_status_enabled_disabled",
         )
         labels = {
-            "osdpl_nova_service_status": "enabled",
             "host": self.compute_svc["host"],
             "binary": self.compute_svc["binary"],
         }
-        metric = self.get_metric("osdpl_nova_service_status")
-        service_samples = self.filter_metric_samples(metric, labels)
-        self.assertEqual(1, len(service_samples))
-        self.assertEqual(0.0, service_samples[0].value)
-        labels["osdpl_nova_service_status"] = "disabled"
-        service_samples = self.filter_metric_samples(metric, labels)
-        self.assertEqual(1, len(service_samples))
-        self.assertEqual(1.0, service_samples[0].value)
+        wait.wait_for_compute_service_status(
+            self.ocm, self.compute_svc, status="disabled"
+        )
+        self.wait_service_metric(
+            metric_name, labels, value=ServiceStatus.disabled
+        )
+        self.ocm.compute_ensure_service_enabled(self.compute_svc)
+        wait.wait_for_compute_service_status(self.ocm, self.compute_svc)
+        self.wait_service_metric(
+            metric_name, labels, value=ServiceStatus.enabled
+        )
 
-    def test_service_state(self):
-        metric = self.get_metric("osdpl_nova_service_state")
-        labels = {
-            "osdpl_nova_service_state": "up",
-            "host": self.compute_svc["host"],
-            "binary": self.compute_svc["binary"],
-        }
-        service_samples = self.filter_metric_samples(metric, labels)
-        self.assertEqual(1, len(service_samples))
-        self.assertEqual(1.0, service_samples[0].value)
-        labels["osdpl_nova_service_state"] = "down"
-        service_samples = self.filter_metric_samples(metric, labels)
-        self.assertEqual(1, len(service_samples))
-        self.assertEqual(0.0, service_samples[0].value)
-
-    def test_service_state_down(self):
+    def test_service_state_up_down(self):
+        metric_name = "osdpl_nova_service_state"
         self.ocm.compute_ensure_service_force_down(self.compute_svc, True)
         labels = {
-            "osdpl_nova_service_state": "down",
             "host": self.compute_svc["host"],
             "binary": self.compute_svc["binary"],
         }
-        metric = self.get_metric("osdpl_nova_service_state")
-        service_samples = self.filter_metric_samples(metric, labels)
-        self.assertEqual(1, len(service_samples))
-        self.assertEqual(0.0, service_samples[0].value)
-        labels["osdpl_nova_service_state"] = "up"
-        service_samples = self.filter_metric_samples(metric, labels)
-        self.assertEqual(1, len(service_samples))
-        self.assertEqual(1.0, service_samples[0].value)
+        wait.wait_for_compute_service_state(
+            self.ocm, self.compute_svc, state="down"
+        )
+        self.wait_service_metric(metric_name, labels, value=ServiceState.down)
+        self.ocm.compute_ensure_service_force_down(self.compute_svc, False)
+        wait.wait_for_compute_service_state(self.ocm, self.compute_svc)
+        self.wait_service_metric(metric_name, labels, value=ServiceState.up)
