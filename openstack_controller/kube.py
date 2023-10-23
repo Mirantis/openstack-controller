@@ -374,6 +374,7 @@ class Service(pykube.Service, HelmBundleMixin):
 class StatefulSet(pykube.StatefulSet, HelmBundleMixin):
     @property
     def ready(self):
+        self.reload()
         return (
             self.obj["status"]["observedGeneration"]
             >= self.obj["metadata"]["generation"]
@@ -585,6 +586,7 @@ class CronJob(pykube.CronJob, HelmBundleMixin):
 class Deployment(pykube.Deployment, HelmBundleMixin):
     @property
     def ready(self):
+        self.reload()
         return (
             self.obj["status"]["observedGeneration"]
             >= self.obj["metadata"]["generation"]
@@ -605,6 +607,7 @@ class Deployment(pykube.Deployment, HelmBundleMixin):
 class DaemonSet(pykube.DaemonSet, HelmBundleMixin):
     @property
     def ready(self):
+        self.reload()
         # NOTE(vsaienko): updatedNumberScheduled is not present with have 0
         # pods, return default of 0 to treat this ds as ready.
         return self.obj["status"]["observedGeneration"] >= self.obj[
@@ -616,6 +619,75 @@ class DaemonSet(pykube.DaemonSet, HelmBundleMixin):
         ].get(
             "numberReady"
         )
+
+    @property
+    def pods(self):
+        self.reload()
+        pod_labels = self.obj["spec"]["selector"].get("matchLabels", {})
+        selector = {f"{k}__in": [v] for k, v in pod_labels.items()}
+        pods_query = resource_list(
+            Pod, selector=selector, namespace=self.namespace
+        )
+        pods = [x for x in pods_query]
+        return pods
+
+    def get_pod_on_node(self, node_name):
+        for pod in self.pods:
+            if pod.obj["spec"].get("nodeName") == node_name:
+                return pod
+
+    async def ensure_pod_generation_on_node(self, node_name, wait_ready=True):
+        """Ensure pod template generation on the given node is same as ds.
+
+        If generation does not match restart pod.
+
+        :param node_name: the name of the node
+        :param wait_ready: boolean to wait for pod is ready after restart
+        """
+        pod = self.get_pod_on_node(node_name)
+        pod_generation = pod.obj["metadata"]["labels"].get(
+            "pod-template-generation"
+        )
+        ds_generation = self.obj["metadata"].get("generation")
+        if (
+            pod
+            and pod_generation
+            and ds_generation
+            and pod_generation != ds_generation
+        ):
+            pod.delete()
+        if wait_ready:
+            await self.wait_pod_on_node(node_name)
+
+    async def wait_pod_on_node(self, node_name):
+        LOG.info(f"Waiting pods for {self.name} on {node_name} are ready.")
+        while True:
+            pod = self.get_pod_on_node(node_name)
+            if pod and pod.ready:
+                break
+            await asyncio.sleep(5)
+        LOG.info(f"Pods for {self.name} on {node_name} are ready.")
+
+    async def ensure_pod_generation(self):
+        """Ensure pod template generation matches ds generation"""
+        for pod in self.pods:
+            pod_generation = pod.obj["metadata"]["labels"].get(
+                "pod-template-generation"
+            )
+            ds_generation = self.obj["metadata"].get("generation")
+            if (
+                pod
+                and pod_generation
+                and ds_generation
+                and pod_generation != ds_generation
+            ):
+                LOG.info(
+                    f"Pod {pod.name} generation does not match ds. Restarting..."
+                )
+                pod_node = pod.obj["spec"].get("nodeName")
+                pod.delete()
+                if pod_node:
+                    await self.wait_pod_on_node(pod_node)
 
 
 class Pod(pykube.Pod):
