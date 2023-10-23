@@ -355,6 +355,16 @@ services:
           designate:
             service:api:
               workers: 2
+            service:central:
+              workers: 2
+            service:mdns:
+              workers: 2
+            service:producer:
+              workers: 2
+            service:sink:
+              workers: 2
+            service:worker:
+              workers: 2
   dashboard:
     horizon:
       values:

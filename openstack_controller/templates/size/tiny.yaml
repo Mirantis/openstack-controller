@@ -481,10 +481,20 @@ services:
           software:
             apache2:
               processes:
-                api: 1
+                api: 4
           designate:
             service:api:
-              workers: 1
+              workers: 4
+            service:central:
+              workers: 4
+            service:mdns:
+              workers: 4
+            service:producer:
+              workers: 4
+            service:sink:
+              workers: 4
+            service:worker:
+              workers: 4
   dashboard:
     horizon:
       values:
