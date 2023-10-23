@@ -24,6 +24,10 @@ spec:
       network_policy:
 {% include 'base/network_policies/coordination.yaml' %}
 {%- endif %}
+      conf:
+        etcd:
+          ETCD_ELECTION_TIMEOUT: 5000
+          ETCD_HEARTBEAT_INTERVAL: 500
       endpoints:
         cluster_domain_suffix: {{ spec.internal_domain_name }}
       pod:
