@@ -479,7 +479,7 @@ services:
       values:
         pod:
           replicas:
-            api: 3
+            api: 12
             central: 3
             mdns: 3
             producer: 3
@@ -504,6 +504,16 @@ services:
           designate:
             service:api:
               workers: 4
+            service:central:
+              workers: 16
+            service:mdns:
+              workers: 16
+            service:producer:
+              workers: 16
+            service:sink:
+              workers: 16
+            service:worker:
+              workers: 16
   dashboard:
     horizon:
       values:
