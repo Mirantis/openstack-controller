@@ -94,11 +94,11 @@ spec:
     spec:
       serviceAccountName: openstack-controller-admission-account
       securityContext:
-        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+        {{- toYaml .Values.admission.pod.controller.security_context | nindent 8 }}
       containers:
         - name: {{ .Chart.Name }}
           securityContext:
-            {{- toYaml .Values.securityContext | nindent 12 }}
+            {{- toYaml .Values.admission.pod.controller.admission.security_context | nindent 12 }}
           image: {{ tuple . .Values.image | include "getImageUrl" }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           command:
