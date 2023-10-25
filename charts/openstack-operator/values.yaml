@@ -76,7 +76,7 @@ osdpl:
           allowPrivilegeEscalation: false
           capabilities:
             drop:
-            - NET_RAW
+            - ALL
       osdplstatus:
         liveness:
           params:
@@ -212,6 +212,12 @@ exporter:
    - --http-keepalive
    - --need-app
   pod:
+    exporter:
+      security_context:
+        runAsUser: 42424
+        runAsNonRoot: true
+      exporter:
+        security_context: *security_context
     liveness:
       params:
         # NOTE(vsaienko): this will call metric polling, use 5 min probe to
