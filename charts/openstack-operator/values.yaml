@@ -159,6 +159,17 @@ admission:
   settings:
     raw:
       OSCTL_ADMISSION_BIND_PORT: 8443
+  pod:
+    controller:
+      security_context:
+        runAsUser: 42424
+        runAsNonRoot: true
+      admission:
+        security_context:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
 
 node_maintenance:
   create_crd: true
