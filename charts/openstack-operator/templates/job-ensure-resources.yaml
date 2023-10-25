@@ -103,6 +103,8 @@ spec:
     spec:
       serviceAccountName: {{ include "openstack-controller.fullname" . }}-resources
       restartPolicy: OnFailure
+      securityContext:
+        {{- toYaml .Values.osdpl.pod.ensure_resources.security_context | nindent 8 }}
       containers:
       - name: main
         command:
@@ -116,6 +118,8 @@ spec:
         - mountPath: /etc/resources
           name: deploy-resources-bin
           readOnly: true
+        securityContext:
+          {{- toYaml .Values.osdpl.pod.ensure_resources.ensure_resources.security_context | nindent 10 }}
       volumes:
       - name: deploy-resources-bin
         configMap:

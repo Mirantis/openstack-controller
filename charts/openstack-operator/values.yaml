@@ -133,6 +133,16 @@ osdpl:
             periodSeconds: 60
             timeoutSeconds: 5
         security_context: *security_context
+    ensure_resources:
+      security_context:
+        runAsUser: 42424
+        runAsNonRoot: true
+      ensure_resources:
+        security_context:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
 
 tf:
   createSharedNamespace: true
