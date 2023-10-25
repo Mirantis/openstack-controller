@@ -67,12 +67,16 @@ spec:
         component: exporter
     spec:
       serviceAccountName: openstack-controller-exporter-account
+      securityContext:
+        {{- toYaml .Values.exporter.pod.exporter.security_context | nindent 8 }}
       containers:
         - name: exporter
           image: {{ tuple . .Values.image | include "getImageUrl" }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           command:
             {{- toYaml .Values.exporter.cmd | nindent 10 }}
+          securityContext:
+            {{- toYaml .Values.exporter.pod.exporter.exporter.security_context | nindent 12 }}
           env:
             {{- range $optionName, $optionValue := .Values.exporter.settings.raw }}
             - name: {{ $optionName }}
