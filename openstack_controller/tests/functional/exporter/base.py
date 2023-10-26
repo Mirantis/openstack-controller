@@ -48,8 +48,9 @@ class BaseFunctionalExporterTestCase(base.BaseFunctionalTestCase):
         res = requests.get(self.exporter_url, timeout=60)
         return text_string_to_metric_families(res.text + "# EOF")
 
-    def get_metric(self, name):
-        for metric in self.metric_families:
+    def get_metric(self, name, metric_families=None):
+        metric_families = metric_families or self.metric_families
+        for metric in metric_families:
             if metric.name == name:
                 LOG.info(f"Got metric: {metric}")
                 return metric
@@ -64,31 +65,36 @@ class BaseFunctionalExporterTestCase(base.BaseFunctionalTestCase):
                 res.append(sample)
         return res
 
-    def wait_service_metric(self, metric_name, labels, value=1.0):
-        metric = self.get_metric(metric_name)
-        service_samples = self.filter_metric_samples(metric, labels)
-        host = service_samples[0].labels["host"]
-        start_time = int(time.time())
-        timeout = conf.METRIC_TIMEOUT
-
+    def get_metric_after_refresh(self, metric_name, scrape_collector):
+        current_time = time.time()
+        all_metrics = list(self.metric_families)
+        scrape_collector_metrics = self.get_metric(
+            "osdpl_scrape_collector_start_timestamp", all_metrics
+        )
+        start_time = self.filter_metric_samples(
+            scrape_collector_metrics, {"collector": scrape_collector}
+        )
         while True:
-            if service_samples[0].value == value:
+            if start_time[0].value >= current_time:
                 LOG.debug(
-                    "Current metric {} for host {} has value: {}.".format(
-                        metric_name, host, service_samples[0].value
-                    )
+                    f"Metrics for collector {scrape_collector} were refreshed in exporter after updates in openstack API."
                 )
-                return
+                return self.get_metric(metric_name, all_metrics)
             time.sleep(conf.METRIC_INTERVAL_TIMEOUT)
-            timed_out = int(time.time()) - start_time >= timeout
-            message = "Current metric {} for host {} has value: {}. Expected value: {}, after {} sec".format(
-                metric_name, host, service_samples[0].value, value, timed_out
+            timed_out = (
+                int(time.time()) - int(current_time) >= conf.METRIC_TIMEOUT
             )
+            message = f"Metrics for collector {scrape_collector} were not updated after timeout {conf.METRIC_TIMEOUT}."
             if timed_out:
                 logging.error(message)
                 raise TimeoutError(message)
-            metric = self.get_metric(metric_name)
-            service_samples = self.filter_metric_samples(metric, labels)
+            all_metrics = list(self.metric_families)
+            scrape_collector_metrics = self.get_metric(
+                "osdpl_scrape_collector_start_timestamp", all_metrics
+            )
+            start_time = self.filter_metric_samples(
+                scrape_collector_metrics, {"collector": scrape_collector}
+            )
 
     def test_known_metrics_present_and_not_none(self):
         for metric_name in self.known_metrics.keys():

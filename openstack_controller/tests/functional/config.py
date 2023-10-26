@@ -9,6 +9,11 @@ COMPUTE_BUILD_INTERVAL = 1
 
 
 # Time in seconds to wait for a metric value. Default is 30 seconds.
-METRIC_TIMEOUT = 30
+METRIC_TIMEOUT = 45
 # Interval in seconds to check the metric value. Default is 1 second.
 METRIC_INTERVAL_TIMEOUT = 1
+
+# Time in seconds to wait for a server to change a status. Default is 30 seconds.
+SERVER_TIMEOUT = 30
+# Interval in seconds to check the server status. Default is 1 second.
+SERVER_READY_INTERVAL = 1
