@@ -1,12 +1,16 @@
 import copy
 import json
 import logging
+import yaml
 from unittest import mock
 
 import kopf
 import pytest
 
-from openstack_controller import layers
+from openstack_controller import constants, layers
+from openstack_controller.controllers.openstackdeployment import (
+    discover_images,
+)
 
 
 CREDS_KWARGS = {
@@ -528,3 +532,13 @@ def test_merge_list_with_duplicates():
     ]
     new_list = merger.merge(l, copy.deepcopy(l))
     assert new_list == l
+
+
+def test_render_cache_template(openstackdeployment_mspec):
+    images = discover_images(openstackdeployment_mspec, logging)
+    cache = layers.render_cache_template(
+        openstackdeployment_mspec, f"{constants.CACHE_NAME}-0", images
+    )
+    with open("tests/fixtures/cache_images.yaml") as f:
+        expected = yaml.safe_load(f)
+    assert expected == cache

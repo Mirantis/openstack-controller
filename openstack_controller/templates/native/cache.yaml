@@ -38,4 +38,11 @@ spec:
         image: {{ url }}
 {# not all images support "/bin/sleep infinity" #}
         command: ["/bin/sleep", "86400000"]
+        securityContext:
+          capabilities:
+            drop:
+            - NET_RAW
 {%- endfor %}
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65534
