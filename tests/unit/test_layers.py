@@ -8,9 +8,6 @@ import kopf
 import pytest
 
 from openstack_controller import constants, layers
-from openstack_controller.controllers.openstackdeployment import (
-    discover_images,
-)
 
 
 CREDS_KWARGS = {
@@ -535,7 +532,12 @@ def test_merge_list_with_duplicates():
 
 
 def test_render_cache_template(openstackdeployment_mspec):
-    images = discover_images(openstackdeployment_mspec, logging)
+    images = {
+        "neutron-db-sync": "neutron:latest",
+        "nova-api": "nova:latest",
+        "libvirt": "libvirt:latest",
+        "openvswitch": "openvswitch:latest",
+    }
     cache = layers.render_cache_template(
         openstackdeployment_mspec, f"{constants.CACHE_NAME}-0", images
     )
