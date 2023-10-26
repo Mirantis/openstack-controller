@@ -77,9 +77,9 @@ class Coordination(Service, MaintenanceApiMixin):
 
     async def can_handle_nmr(self, node, locks):
         if await self.is_node_locked(node.name):
-            raise kopf.TemporaryError(
-                f"The node {node.name} is hard locked by etcd."
-            )
+            LOG.error(f"The node {node.name} is hard locked by etcd.")
+            return False
+        return True
 
     async def process_ndr(self, node, nwl):
         node_name = nwl.obj["spec"]["nodeName"]
@@ -239,9 +239,9 @@ class Redis(Service, MaintenanceApiMixin):
 
     async def can_handle_nmr(self, node, locks):
         if await self.is_node_locked(node.name):
-            raise kopf.TemporaryError(
-                f"The node {node.name} is hard locked by redis."
-            )
+            LOG.error(f"The node {node.name} is hard locked by redis.")
+            return False
+        return True
 
     async def process_ndr(self, node, nwl):
         node_name = nwl.obj["spec"]["nodeName"]
@@ -309,9 +309,9 @@ class MariaDB(Service, MaintenanceApiMixin):
 
     async def can_handle_nmr(self, node, locks):
         if await self.is_node_locked(node.name):
-            raise kopf.TemporaryError(
-                f"The node {node.name} is hard locked by mariadb."
-            )
+            LOG.error(f"The node {node.name} is hard locked by mariadb.")
+            return False
+        return True
 
     async def process_ndr(self, node, nwl):
         node_name = nwl.obj["spec"]["nodeName"]
