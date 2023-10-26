@@ -1263,19 +1263,18 @@ class Neutron(OpenStackService, MaintenanceApiMixin):
                         )
 
         await super().apply(event, **kwargs)
-        if CONF.getString("maintenance", "openvswitch_restart_mode") == "auto":
-            cmr = kube.ClusterMaintenanceRequest.objects(
-                kube.kube_client()
-            ).get_or_none()
-            # NOTE(vsaienko): if cluster under maintenance postpone restart when nodemaintenancerequests
-            # are removed.
-            if not cmr:
-                # Restart openvswitch daemonsets
-                for daemonset in ["ovn-controller", "openvswitch-vswitchd"]:
-                    for ovs_ds in self.get_child_objects_dynamic(
-                        "DaemonSet", daemonset
-                    ):
-                        await ovs_ds.ensure_pod_generation()
+        cmr = kube.ClusterMaintenanceRequest.objects(
+            kube.kube_client()
+        ).get_or_none()
+        # NOTE(vsaienko): if cluster under maintenance postpone restart when nodemaintenancerequests
+        # are removed.
+        if not cmr:
+            # Restart openvswitch daemonsets
+            for daemonset in ["ovn-controller", "openvswitch-vswitchd"]:
+                for ovs_ds in self.get_child_objects_dynamic(
+                    "DaemonSet", daemonset
+                ):
+                    await ovs_ds.ensure_pod_generation()
 
     async def remove_node_from_scheduling(self, node):
         pass
