@@ -656,8 +656,8 @@ class DaemonSet(pykube.DaemonSet, HelmBundleMixin):
             and pod_generation != ds_generation
         ):
             pod.delete()
-        if wait_ready:
-            await self.wait_pod_on_node(node_name)
+            if wait_ready:
+                await self.wait_pod_on_node(node_name)
 
     async def wait_pod_on_node(self, node_name):
         LOG.info(f"Waiting pods for {self.name} on {node_name} are ready.")
