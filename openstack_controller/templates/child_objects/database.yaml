@@ -22,7 +22,7 @@ mariadb:
         application: mariadb
         component: controller
   Job:
-    exporter-create-sql-user:
+    mariadb-exporter-create-sql-user:
       hash_fields: []
       images:
       - prometheus_create_mysql_user
