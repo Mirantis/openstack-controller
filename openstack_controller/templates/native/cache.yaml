@@ -41,7 +41,7 @@ spec:
         securityContext:
           capabilities:
             drop:
-            - NET_RAW
+            - ALL
 {%- endfor %}
       securityContext:
         runAsNonRoot: true
