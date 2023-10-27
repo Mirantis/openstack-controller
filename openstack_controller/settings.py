@@ -127,6 +127,11 @@ OSCTL_OS_DEPLOYMENT_NAMESPACE = os.environ.get(
     "OSCTL_OS_DEPLOYMENT_NAMESPACE", "openstack"
 )
 
+# The name of os controller deployment namespace
+OSCTL_CONTROLLER_NAMESPACE = os.environ.get(
+    "OSCTL_CONTROLLER_NAMESPACE", "osh-system"
+)
+
 # The name of openstack deployment namespace
 OSCTL_CEPH_SHARED_NAMESPACE = os.environ.get(
     "OSCTL_CEPH_SHARED_NAMESPACE", "openstack-ceph-shared"

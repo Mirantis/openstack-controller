@@ -16,7 +16,7 @@ def namespaces(names):
         "os_deployment": settings.OSCTL_OS_DEPLOYMENT_NAMESPACE,
         "ceph_shared": settings.OSCTL_CEPH_SHARED_NAMESPACE,
         "redis_deployment": settings.OSCTL_REDIS_NAMESPACE,
-        "os_controller": settings.OSCTL_PROXY_SECRET_NAMESPACE,
+        "os_controller": settings.OSCTL_CONTROLLER_NAMESPACE,
         "ceph_deployment": settings.OSCTL_CEPH_DEPLOYMENT_NAMESPACE,
         "lma_deployment": settings.OSCTL_LMA_DEPLOYMENT_NAMESPACE,
         "tf_deployment": settings.OSCTL_TF_DEPLOYMENT_NAMESPACE,
