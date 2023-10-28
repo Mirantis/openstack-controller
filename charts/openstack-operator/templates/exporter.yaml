@@ -78,6 +78,7 @@ spec:
           securityContext:
             {{- toYaml .Values.exporter.pod.exporter.exporter.security_context | nindent 12 }}
           env:
+{{ tuple . | include "openstack-controller.common_env" | indent 12 }}
             {{- range $optionName, $optionValue := .Values.exporter.settings.raw }}
             - name: {{ $optionName }}
               value: "{{ $optionValue }}"

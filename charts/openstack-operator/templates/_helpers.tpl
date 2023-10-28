@@ -77,6 +77,8 @@ Generate environment variables for osdpl containers
 - name: OSCTL_CLUSTER_RELEASE
   value: {{ $context.Values.global.clusterRelease }}
   {{- end }}
+- name: OSCTL_CONTROLLER_NAMESPACE
+  value: {{ $context.Release.Namespace }}
 {{- end }}
 
 {{/*
