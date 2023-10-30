@@ -46,6 +46,9 @@ rabbitmq:
       - port: 15672
         name: http
         protocol: TCP
+      - port: 5671
+        name: amqp-tls
+        protocol: TCP
       - port: 5672
         name: amqp
         protocol: TCP

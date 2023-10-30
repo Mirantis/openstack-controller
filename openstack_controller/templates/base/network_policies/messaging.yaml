@@ -1,3 +1,4 @@
+{%- from 'macros/connections.j2' import from_all %}
 {%- from 'macros/connections.j2' import from_pod_networks %}
 {%- from 'macros/connections.j2' import from_namespaces %}
 {%- set lma_ns_list = ["lma_deployment"] | namespaces  %}
@@ -13,7 +14,9 @@
             ingress:
 {{ network_policies["ingress"][rabbitmq_server] | toyaml | indent(14, first=True) }}
               - from:
-{{ from_pod_networks(pod_networks, service_childs[rabbitmq_server].get_np_ports(["amqp"])) | indent(16) }}
+{{ from_pod_networks(pod_networks, service_childs[rabbitmq_server].get_np_ports(["amqp", "amqp-tls"])) | indent(16) }}
+              - from:
+{{ from_all(service_childs[rabbitmq_server].get_np_ports(["amqp", "amqp-tls"])) | indent(16) }}
               - from:
 {{ from_namespaces(lma_ns_list) | indent(16) }}
         exporter:

@@ -512,6 +512,16 @@ spec:
                 - ipBlock:
                     cidr: 192.168.0.0/16
                 ports:
+                - port: 5671
+                  protocol: TCP
+                - port: 5672
+                  protocol: TCP
+              - from:
+                - ipBlock:
+                    cidr: 0.0.0.0/0
+                ports:
+                - port: 5671
+                  protocol: TCP
                 - port: 5672
                   protocol: TCP
               - from:
