@@ -645,10 +645,8 @@ class DaemonSet(pykube.DaemonSet, HelmBundleMixin):
         :param wait_ready: boolean to wait for pod is ready after restart
         """
         pod = self.get_pod_on_node(node_name)
-        pod_generation = pod.obj["metadata"]["labels"].get(
-            "pod-template-generation"
-        )
-        ds_generation = self.obj["metadata"].get("generation")
+        pod_generation = pod.generation
+        ds_generation = self.generation
         if (
             pod
             and pod_generation
@@ -663,7 +661,11 @@ class DaemonSet(pykube.DaemonSet, HelmBundleMixin):
         LOG.info(f"Waiting pods for {self.name} on {node_name} are ready.")
         while True:
             pod = self.get_pod_on_node(node_name)
-            if pod and pod.ready:
+            if (
+                pod
+                and "deletionTimestamp" not in pod.obj["metadata"]
+                and pod.ready
+            ):
                 break
             await asyncio.sleep(5)
         LOG.info(f"Pods for {self.name} on {node_name} are ready.")
@@ -671,10 +673,8 @@ class DaemonSet(pykube.DaemonSet, HelmBundleMixin):
     async def ensure_pod_generation(self):
         """Ensure pod template generation matches ds generation"""
         for pod in self.pods:
-            pod_generation = pod.obj["metadata"]["labels"].get(
-                "pod-template-generation"
-            )
-            ds_generation = self.obj["metadata"].get("generation")
+            pod_generation = pod.generation
+            ds_generation = self.generation
             if (
                 pod
                 and pod_generation
@@ -682,12 +682,19 @@ class DaemonSet(pykube.DaemonSet, HelmBundleMixin):
                 and pod_generation != ds_generation
             ):
                 LOG.info(
-                    f"Pod {pod.name} generation does not match ds. Restarting..."
+                    f"Pod {pod.name} generation {pod_generation} does not match ds generation {ds_generation}. Restarting..."
                 )
                 pod_node = pod.obj["spec"].get("nodeName")
                 pod.delete()
                 if pod_node:
                     await self.wait_pod_on_node(pod_node)
+
+    @property
+    def generation(self):
+        generation = self.obj["metadata"].get("generation")
+        if generation:
+            generation = int(generation)
+        return generation
 
 
 class Pod(pykube.Pod):
@@ -807,6 +814,15 @@ class Pod(pykube.Pod):
                     .get(name=volume["persistentVolumeClaim"]["claimName"])
                 )
         return pvcs
+
+    @property
+    def generation(self):
+        generation = self.obj["metadata"]["labels"].get(
+            "pod-template-generation"
+        )
+        if generation:
+            generation = int(generation)
+        return generation
 
 
 class Node(pykube.Node):
