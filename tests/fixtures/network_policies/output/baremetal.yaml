@@ -18,6 +18,10 @@ baremetal:ironic:Deployment:ironic-api:
         component: server
   - podSelector:
       matchLabels:
+        application: neutron
+        component: ironic-agent
+  - podSelector:
+      matchLabels:
         application: heat
         component: engine
   - podSelector:
