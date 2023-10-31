@@ -154,6 +154,17 @@ admission:
   enabled: true
   replicaCount: 1
   cluster_domain_suffix: cluster.local
+  pod:
+    controller:
+      security_context:
+        runAsUser: 42424
+        runAsNonRoot: true
+      admission:
+        security_context:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
 
 node_maintenance:
   create_crd: true
