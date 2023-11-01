@@ -62,6 +62,8 @@ spec:
 {{ tuple . | include "openstack-controller.common_env" | indent 12 }}
           image: {{ tuple . .Values.image | include "getImageUrl" }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          securityContext:
+            {{- toYaml .Values.osdpl.pod.controller.remove_default_finalizer.security_context | nindent 12 }}
         - name: convert-credential-secrets
           command:
           - osctl-convert-credential-secrets
@@ -69,6 +71,8 @@ spec:
 {{ tuple . | include "openstack-controller.common_env" | indent 12 }}
           image: {{ tuple . .Values.image | include "getImageUrl" }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          securityContext:
+            {{- toYaml .Values.osdpl.pod.controller.convert_credentials.security_context | nindent 12 }}
       containers:
         - name: osdpl
           image: {{ tuple . .Values.image | include "getImageUrl" }}
