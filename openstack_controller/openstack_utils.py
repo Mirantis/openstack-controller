@@ -12,6 +12,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 import asyncio
+import socket
 
 from datetime import datetime
 from enum import IntEnum
@@ -22,6 +23,7 @@ import openstack
 
 from openstack_controller import settings
 from openstack_controller import utils
+from openstack_controller import maintenance
 
 LOG = utils.get_logger(__name__)
 
@@ -272,4 +274,77 @@ async def notify_masakari_host_down(node):
                 LOG.warning(e)
                 return
         LOG.warning(f"Failed to notify Masakari - {e}")
+        raise kopf.TemporaryError(f"{e}") from e
+
+
+async def handle_masakari_host_down(node):
+    """Handle down host for masakari.
+
+    :param node: Kubernetes node object to check.
+    :raises TemporaryError: When restart of handler is needed. We are not sure
+            and need to recheck later.
+    """
+    node.reload()
+    if node.ready:
+        LOG.info(f"The node {node.name} is ready. Skip masakari notification")
+        return
+    nwl = maintenance.NodeWorkloadLock.get_resource(node.name)
+    # NOTE(pas-ha): guard against node being in maintenance
+    # when node is already being drained
+    # we assume that at this stage the workflow with NodeWorkloadLocks
+    # and auto-migration of workloads is happening instead of using Masakari
+    if not nwl.is_active():
+        LOG.info(
+            f"The nwl for node {node.name} is inctive. Skip masakari notification."
+        )
+        return
+    if node.unschedulable:
+        LOG.info(
+            f"The scheduling is disabled on node {node.name}, this is intentional, skip masakari notification."
+        )
+        return
+    try:
+        os_client = OpenStackClientManager()
+        compute_services = os_client.compute_get_services(host=node.name)
+        alive_services = [
+            service["state"] == "up" for service in compute_services
+        ]
+        if any(alive_services):
+            raise kopf.TemporaryError(
+                f"Some compute services {compute_services} are still alive. Skip masakari notification, will check later."
+            )
+        alive_network_agents = os_client.network_get_agents(
+            host=node.name, is_alive=True
+        )
+
+        if any(alive_network_agents):
+            raise kopf.TemporaryError(
+                f"Some network agents are alive {alive_network_agents}. Skip masakari notification, will check later."
+            )
+
+        node_internal_ip = []
+        for address in node.obj["status"].get("addresses", []):
+            if address.get("type") == "InternalIP" and "address" in address:
+                node_internal_ip = address["address"]
+                break
+        if node_internal_ip:
+            sock = socket.socket()
+            sock.settimeout(10)
+            try:
+                sock.connect((node_internal_ip, 22))
+            except Exception:
+                LOG.info(
+                    f"Port 22 is not opened on host {node.name} {node_internal_ip}. We should notify masakari that host is down."
+                )
+                await notify_masakari_host_down(node)
+                return
+            finally:
+                sock.close()
+            raise kopf.TemporaryError(
+                f"Port 22 is opened on host {node.name}. Skip masakari notification, will check later."
+            )
+    except ksa_exceptions.EndpointNotFound:
+        LOG.info("Instance-HA service is not deployed, ignore notifying")
+    except Exception as e:
+        LOG.warning(f"Failed to handle host down for Masakari - {e}")
         raise kopf.TemporaryError(f"{e}") from e

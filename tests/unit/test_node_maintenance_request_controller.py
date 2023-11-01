@@ -63,15 +63,6 @@ def osdpl(mocker):
     mocker.stopall()
 
 
-@pytest.fixture
-def node(mocker):
-    node = mocker.patch("openstack_controller.kube.Node")
-    node.return_value = mock.AsyncMock()
-    node.return_value.name = "fake-node"
-    yield node
-    mocker.stopall()
-
-
 def get_maintenance_locks(controller, gateway, compute):
     return {
         "controller": [0] * controller,
