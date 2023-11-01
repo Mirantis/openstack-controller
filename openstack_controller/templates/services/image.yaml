@@ -76,6 +76,14 @@ spec:
         replicas:
           api: 1
           registry: 1
+{%- if 'cinder' in multi_backends %}
+        security_context:
+          glance:
+            container:
+              glance_api:
+                allowPrivilegeEscalation: true
+                privileged: true
+{%- endif %}
 {%- if is_ceph_enabled %}
       storage: rbd
 {%- endif %}
@@ -312,6 +320,9 @@ spec:
             level: {{ spec.get('features', {}).get('logging', {}).get('glance', {}).get('level', 'INFO') }}
           logger_glance:
             level: {{ spec.get('features', {}).get('logging', {}).get('glance', {}).get('level', 'INFO') }}
+{%- if 'cinder' in multi_backends %}
+        enable_iscsi: true
+{%- endif %}
 {%- if is_ceph_enabled %}
       volume:
         class_name: rook-ceph-block
