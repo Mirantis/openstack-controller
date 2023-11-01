@@ -230,3 +230,30 @@ def helm_error_pvc_test():
 def child_view():
     mspec = render_mspec()
     return resource_view.ChildObjectView(mspec)
+
+
+@pytest.fixture
+def node(mocker):
+    node = mocker.patch("openstack_controller.kube.Node")
+    node.return_value = mock.AsyncMock()
+    node.return_value.name = "fake-node"
+    yield node
+    mocker.stopall()
+
+
+@pytest.fixture
+def nwl(mocker):
+    nwl = mocker.patch(
+        "openstack_controller.maintenance.NodeWorkloadLock.get_resource"
+    )
+    nwl.reteurn_value = mock.Mock()
+    yield nwl
+    mocker.stopall()
+
+
+@pytest.fixture
+def socket(mocker):
+    nwl = mocker.patch("socket.socket")
+    nwl.reteurn_value = mock.Mock()
+    yield nwl
+    mocker.stopall()
