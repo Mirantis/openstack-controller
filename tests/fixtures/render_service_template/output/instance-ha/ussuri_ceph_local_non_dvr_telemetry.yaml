@@ -21,6 +21,9 @@ spec:
           oslo_policy:
             enforce_new_defaults: false
             enforce_scope: false
+          host_failure:
+            evacuate_all_instances: false
+            ignore_instances_in_error_state: true
         logging:
           logger_masakari:
             level: INFO
