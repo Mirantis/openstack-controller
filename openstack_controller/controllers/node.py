@@ -49,6 +49,7 @@ async def node_status_update_handler(name, body, old, new, reason, **kwargs):
         seconds=CONF.getint("osctl", "node_not_ready_flapping_timeout")
     )
 
+    # TODO(vsaienko) get last heartbeat time from status
     now = last_transition_time = datetime.datetime.utcnow()
 
     for cond in node.obj["status"]["conditions"]:
@@ -59,27 +60,17 @@ async def node_status_update_handler(name, body, old, new, reason, **kwargs):
     not_ready_for = now - last_transition_time
     if now - not_ready_delta < last_transition_time:
         raise kopf.TemporaryError(
-            f"The node is not ready for {not_ready_for.seconds}s",
+            f"The node is not ready for {not_ready_for.seconds}s out of {not_ready_delta.total_seconds()}s. This may be a flap. Waiting.",
         )
-    LOG.info(f"The node {name} is not ready for {not_ready_for.seconds}s.")
-
-    # NOTE(pas-ha): guard against node being in maintenance
-    # when node is already being drained
-    # we assume that at this stage the workflow with NodeWorkloadLocks
-    # and auto-migration of workloads is happening instead of using Masakari
-    if node.has_role(const.NodeRole.compute):
-        # NOTE(vsaienko): when maintenance is over and node added back to scheduling
-        # there is time frame when nova-compute is still startin. Do not notify
-        # Masakary when node is under maintenance.
-        nwl = maintenance.NodeWorkloadLock.get_resource(name)
-        if not node.unschedulable or nwl.is_maintenance():
-            LOG.info(
-                f"Notifying HA service on OpenStack compute host {name} down."
-            )
-        await ostutils.notify_masakari_host_down(node)
+    LOG.info(
+        f"The node {name} is not ready for {not_ready_for.seconds}s. The node is down permanently."
+    )
 
     LOG.info(f"Removing pods from node {name}")
     node.remove_pods(settings.OSCTL_OS_DEPLOYMENT_NAMESPACE)
+
+    if node.has_role(const.NodeRole.compute):
+        await ostutils.handle_masakari_host_down(node)
 
 
 # NOTE(avolkov): watching for update events covers
