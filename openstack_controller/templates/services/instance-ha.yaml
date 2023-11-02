@@ -59,6 +59,10 @@ spec:
             {%- if spec.openstack_version not in ("queens", "rocky", "stein") %}
             service_type: instance-ha
             {%- endif %}
+          host_failure:
+            # NOTE(vsaienko): Do not evacuate all instances, make sure user added tag explicitly
+            evacuate_all_instances: false
+            ignore_instances_in_error_state: true
 {% include 'base/_oslo_policy_enforce_defaults.yaml' %}
         logging:
           logger_masakari:
