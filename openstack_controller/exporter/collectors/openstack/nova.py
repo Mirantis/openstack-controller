@@ -438,8 +438,6 @@ class OsdplNovaMetricCollector(base.OpenStackBaseMetricCollector):
         for aggregate in self.cache.get("aggregates", []):
             ag_name = aggregate["name"]
             ag_hosts = aggregate["hosts"] or []
-            if aggregate.get("availability_zone") is not None:
-                continue
             aggregate_instances_samples.append(
                 (
                     [ag_name],
