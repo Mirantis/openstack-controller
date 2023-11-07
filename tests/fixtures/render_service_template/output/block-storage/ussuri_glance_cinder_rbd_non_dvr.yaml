@@ -43,6 +43,9 @@ spec:
                 - "10.10.10.1:6789"
                 - "10.10.10.2:6789"
                 - "10.10.10.3:6789"
+          keyrings:
+            cinder:
+              key: AQDLZLJfNPtTOxAAQm248Q9AyoirvELaSyPz5w==
         cinder:
           DEFAULT:
             backup_ceph_pool: backup-hdd

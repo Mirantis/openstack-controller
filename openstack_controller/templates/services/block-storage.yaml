@@ -152,6 +152,9 @@ spec:
     {%- endif %}
   {%- endfor %}
         ceph:
+          keyrings:
+            {{ ceph.cinder.username }}:
+              key: {{ ceph.cinder.keyring }}
           pools:
             backup:
               replication: 1
