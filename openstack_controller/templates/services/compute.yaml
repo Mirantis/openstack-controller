@@ -801,6 +801,9 @@ spec:
             live_migration_wait_for_vif_plug: false
           workarounds:
             skip_migration_revert_events: true
+{%- if spec.openstack_version not in ("queens", "rocky", "stein", "train", "ussuri", "victoria", "wallaby", "xena") %}
+            enable_qemu_monitor_announce_self: true
+{%- endif %}
           os_vif_contrail_vrouter:
             vrouter_port: {{ vrouter_port }}
 {%- else %}
