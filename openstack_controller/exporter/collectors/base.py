@@ -140,6 +140,16 @@ class OsdplMetricsCollector(object):
             "Flag inidicates if collector was able to refresh metrics successfully.",
             labels=["collector"],
         )
+        scrape_start_timestamp = GaugeMetricFamily(
+            "osdpl_scrape_collector_start_timestamp",
+            "Unix timestamp when collector metrics refresh was started.",
+            labels=["collector"],
+        )
+        scrape_end_timestamp = GaugeMetricFamily(
+            "osdpl_scrape_collector_end_timestamp",
+            "Unix timestamp when collector metrics refresh was finished.",
+            labels=["collector"],
+        )
 
         for collector_instance in self.collector_instances:
             if collector_instance.can_collect:
@@ -152,8 +162,18 @@ class OsdplMetricsCollector(object):
                     [collector_instance._name],
                     collector_instance.scrape_success,
                 )
+                scrape_start_timestamp.add_metric(
+                    [collector_instance._name],
+                    collector_instance.scrape_start_timestamp,
+                )
+                scrape_end_timestamp.add_metric(
+                    [collector_instance._name],
+                    collector_instance.scrape_end_timestamp,
+                )
         yield scrape_duration
         yield scrape_sucess
+        yield scrape_start_timestamp
+        yield scrape_end_timestamp
 
 
 class BaseMetricsCollector(object):
@@ -169,6 +189,8 @@ class BaseMetricsCollector(object):
         self.can_collect = False
         self.scrape_duration = 0
         self.scrape_success = False
+        self.scrape_start_timestamp = 0
+        self.scrape_end_timestamp = 0
         self.lock_samples = Lock()
         self.families = self.init_families()
 
@@ -202,6 +224,7 @@ class BaseMetricsCollector(object):
             return
 
         start = datetime.utcnow()
+        self.scrape_start_timestamp = start.timestamp()
         try:
             self.osdpl = kube.get_osdpl()
             self.update_samples()
@@ -209,7 +232,9 @@ class BaseMetricsCollector(object):
         except Exception as e:
             self.scrape_success = False
             LOG.exception(e)
-        self.scrape_duration = (datetime.utcnow() - start).total_seconds()
+        now = datetime.utcnow()
+        self.scrape_end_timestamp = now.timestamp()
+        self.scrape_duration = (now - start).total_seconds()
 
     @property
     @abc.abstractmethod
