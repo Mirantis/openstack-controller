@@ -555,6 +555,14 @@ spec:
                     defaultMode: 0444
         {%- endif %}
       {%- endif %}
+      {%- if ovn_enabled %}
+        security_context:
+          neutron_metadata_agent:
+            container:
+              neutron_metadata_agent:
+                privileged: true
+                allowPrivilegeEscalation: true
+      {%- endif %}
       dependencies:
         static:
           db_init:
