@@ -13,15 +13,6 @@
     {%- do notification_topics.append(topic) %}
   {%- endfor %}
 {%- endif  %}
-{%- set overrides = namespace(enabled=false) %}
-{%- for label, node_features in spec.get("nodes", {}).items() %}
-  {%- if "manila" in node_features.get("features", {}).keys() %}
-    {% set overrides.enabled = true %}
-  {%- endif  %}
-  {%- if node_features.get("features", {}) %}
-    {%- do node_specific.update({label: node_features.features}) %}
-  {%- endif %}
-{%- endfor %}
 {%- set manila_db_cleanup = spec.get('features', {}).get('database', {}).get('cleanup', {}).get('manila', {'enabled': true}) %}
 {%- from 'macros/etcd3.j2' import get_etcd3_endpoint %}
 {%- set cadf_audit = spec.get('features', {}).get('logging', {}).get('cadf', {'enabled': false}) %}
@@ -178,13 +169,6 @@ spec:
 {%- endif %}
           oslo_messaging_notifications:
             topics: {{ notification_topics|join(',') }}
-        {%- if overrides.enabled %}
-        standalone_backends:
-          daemonset:
-            conf:
-              DEFAULT:
-                cluster: ""
-        {%- endif %}
         aux_conf:
           policies:
           - definition:
