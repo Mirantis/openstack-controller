@@ -110,6 +110,7 @@ class OsdplNeutronMetricCollector(base.OpenStackBaseMetricCollector):
         for zone, routers in zone_routers.items():
             zone_routers_samples.append(([zone], zone_routers[zone]))
         self.set_samples("zone_routers", zone_routers_samples)
+        self.set_samples("routers", [([], routers_total)])
 
         ports = {"total": 0, "active": 0, "down": 0}
         for port in self.oc.oc.network.ports():
