@@ -117,7 +117,7 @@ spec:
         prometheus:
           enabled: true
   {%- endif %}
-{%- if spec.get("features", {}).get("network_policies", {}).get("enabled", false) %}
+{%- if spec.features.network_policies.enabled %}
       network_policy:
 {% include 'base/network_policies/networking-rabbitmq.yaml' %}
 {%- endif %}
@@ -137,7 +137,7 @@ spec:
                   timeoutSeconds: 30
       manifests:
         job_users_create: true
-        network_policy: {{ spec.get("features", {}).get("network_policies", {}).get("enabled", false) }}
+        network_policy: {{ spec.features.network_policies.enabled }}
       volume:
         enabled: false
       endpoints:
@@ -668,7 +668,7 @@ spec:
             default: http
             public: https
       {%- endif %}
-{%- if spec.get("features", {}).get("network_policies", {}).get("enabled", false) %}
+{%- if spec.features.network_policies.enabled %}
       network_policy:
 {% include 'base/network_policies/networking.yaml' %}
 {%- endif %}
@@ -699,7 +699,7 @@ spec:
       {%- if dynamic_routing.enabled %}
         daemonset_dr_agent: true
       {%- endif %}
-        network_policy: {{ spec.get("features", {}).get("network_policies", {}).get("enabled", false) }}
+        network_policy: {{ spec.features.network_policies.enabled }}
       network:
         server:
           ingress:

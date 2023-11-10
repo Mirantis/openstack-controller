@@ -46,6 +46,8 @@ features:
               user_mail_attribute: mail
               user_name_attribute: uid
               user_objectclass: inetOrgPerson
+  network_policies:
+    enabled: false
   neutron:
     backend: ml2/ovn
     dns_servers:

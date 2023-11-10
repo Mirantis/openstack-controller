@@ -158,7 +158,8 @@ properties:
             type: boolean
             description: |
               Trigger network policy enforcement for OpenStack related pods.
-              Only ingress policies are applied. Default is False.
+              Only ingress policies are applied. By default is True for OpenStack
+              Yoga or newer. For previous OpenStack versions the default value is False
       policies:
         type: object
         additionalProperties: false

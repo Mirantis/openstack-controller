@@ -169,7 +169,7 @@ admission:
   replicaCount: 1
   cluster_domain_suffix: cluster.local
   network_policy:
-    enabled: false
+    enabled: true
   settings:
     raw:
       OSCTL_ADMISSION_BIND_PORT: 8443
@@ -289,4 +289,4 @@ exporter:
     raw:
       OSCTL_EXPORTER_BIND_PORT: 9102
   network_policy:
-    enabled: false
+    enabled: true

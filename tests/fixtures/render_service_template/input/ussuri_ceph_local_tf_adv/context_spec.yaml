@@ -44,6 +44,8 @@ features:
   messaging:
     components_with_dedicated_messaging:
     - networking
+  network_policies:
+    enabled: false
   neutron:
     backend: tungstenfabric
     dns_servers:

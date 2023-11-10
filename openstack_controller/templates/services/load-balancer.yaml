@@ -209,7 +209,7 @@ spec:
         housekeeping:
           node_selector_key: openstack-gateway
           node_selector_value: enabled
-{%- if spec.get("features", {}).get("network_policies", {}).get("enabled", false) %}
+{%- if spec.features.network_policies.enabled %}
       network_policy:
 {% include 'base/network_policies/load-balancer.yaml' %}
 {%- endif %}
@@ -221,7 +221,7 @@ spec:
         job_create_resources: false
         secret_octavia_certs: false
 {%- endif %}
-        network_policy: {{ spec.get("features", {}).get("network_policies", {}).get("enabled", false) }}
+        network_policy: {{ spec.features.network_policies.enabled }}
         job_rabbit_init: false
         secret_amphora_ssh_key: true
         secret_octavia_certs: false

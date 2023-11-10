@@ -79,8 +79,8 @@ spec:
                   timeoutSeconds: 30
       manifests:
         job_users_create: true
-        network_policy: {{ spec.get("features", {}).get("network_policies", {}).get("enabled", false) }}
-{%- if spec.get("features", {}).get("network_policies", {}).get("enabled", false) %}
+        network_policy: {{ spec.features.network_policies.enabled }}
+{%- if spec.features.network_policies.enabled %}
       network_policy:
 {% include 'base/network_policies/compute-rabbitmq.yaml' %}
 {%- endif %}
@@ -498,7 +498,7 @@ spec:
               - openstack-mariadb-cluster-wait
       manifests:
         cron_job_db_purge: true
-        network_policy: {{ spec.get("features", {}).get("network_policies", {}).get("enabled", false) }}
+        network_policy: {{ spec.features.network_policies.enabled }}
         job_rabbit_init: false
         ceph_conf: true
 {%- if spec.openstack_version not in ['queens', 'rocky'] %}
@@ -522,7 +522,7 @@ spec:
       {%- if vnc_tls_enabled %}
         secret_novncproxy_tls: true
       {%- endif %}
-{%- if spec.get("features", {}).get("network_policies", {}).get("enabled", false) %}
+{%- if spec.features.network_policies.enabled %}
       network_policy:
 {% include 'base/network_policies/compute.yaml' %}
 {%- endif %}
