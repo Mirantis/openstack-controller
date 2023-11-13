@@ -597,5 +597,11 @@ spec:
                   timeoutSeconds: 30
           rpc_retries: 2
           rpc_timeout: 30
+        security_context:
+          neutron_metadata_agent:
+            container:
+              neutron_metadata_agent:
+                privileged: true
+                allowPrivilegeEscalation: true
         use_fqdn:
           neutron_agent: false
