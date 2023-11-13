@@ -373,6 +373,10 @@ class Service(pykube.Service, HelmBundleMixin):
 
 class StatefulSet(pykube.StatefulSet, HelmBundleMixin):
     @property
+    def uid(self):
+        return self.obj["metadata"]["uid"]
+
+    @property
     def ready(self):
         self.reload()
         return (
@@ -399,7 +403,7 @@ class StatefulSet(pykube.StatefulSet, HelmBundleMixin):
         pods_query = resource_list(
             Pod, selector=selector, namespace=self.namespace
         )
-        pods = [x for x in pods_query]
+        pods = [x for x in pods_query if x.is_owned_by(self.uid)]
         return pods
 
     def is_node_locked(self, node_name):
@@ -606,6 +610,10 @@ class Deployment(pykube.Deployment, HelmBundleMixin):
 
 class DaemonSet(pykube.DaemonSet, HelmBundleMixin):
     @property
+    def uid(self):
+        return self.obj["metadata"]["uid"]
+
+    @property
     def ready(self):
         self.reload()
         # NOTE(vsaienko): updatedNumberScheduled is not present with have 0
@@ -628,7 +636,7 @@ class DaemonSet(pykube.DaemonSet, HelmBundleMixin):
         pods_query = resource_list(
             Pod, selector=selector, namespace=self.namespace
         )
-        pods = [x for x in pods_query]
+        pods = [x for x in pods_query if x.is_owned_by(self.uid)]
         return pods
 
     def get_pod_on_node(self, node_name):
@@ -823,6 +831,12 @@ class Pod(pykube.Pod):
         if generation:
             generation = int(generation)
         return generation
+
+    def is_owned_by(self, uid):
+        for ref in self.obj["metadata"].get("ownerReferences", []):
+            if ref.get("uid") == uid:
+                return True
+        return False
 
 
 class Node(pykube.Node):
