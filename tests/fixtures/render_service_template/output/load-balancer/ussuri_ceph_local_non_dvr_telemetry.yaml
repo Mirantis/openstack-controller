@@ -232,6 +232,18 @@ spec:
               pool_start: 10.255.1.0
               range: 10.255.0.0/16
       pod:
+        security_context:
+          octavia_health_manager:
+            container:
+              nic_init:
+                capabilities:
+                  add:
+                   # Add NET_RAW as required for focal 2.13 openvswitch image and kernel on the host PRODX-37293
+                   - NET_RAW
+                   - NET_ADMIN
+                   - DAC_OVERRIDE
+                  drop:
+                   - ALL
         mounts:
           octavia_api:
             octavia_api:

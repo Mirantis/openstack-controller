@@ -93,6 +93,20 @@ spec:
             jobs:
               - openstack-mariadb-cluster-wait
       pod:
+        {%- if spec.openstack_version in ['queens', 'rocky', 'stein', 'train', 'ussuri', 'victoria', 'wallaby', 'xena'] %}
+        security_context:
+          octavia_health_manager:
+            container:
+              nic_init:
+                capabilities:
+                  add:
+                   # Add NET_RAW as required for focal 2.13 openvswitch image and kernel on the host PRODX-37293
+                   - NET_RAW
+                   - NET_ADMIN
+                   - DAC_OVERRIDE
+                  drop:
+                   - ALL
+        {%- endif %}
         replicas:
           worker: 3
           housekeeping: 3
