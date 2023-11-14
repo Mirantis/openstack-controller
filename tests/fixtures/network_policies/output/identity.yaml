@@ -143,6 +143,10 @@ identity:keystone:Deployment:keystone-api:
   - podSelector:
       matchLabels:
         application: nova
+        component: spice-proxy
+  - podSelector:
+      matchLabels:
+        application: nova
         component: placement
   - podSelector:
       matchLabels:

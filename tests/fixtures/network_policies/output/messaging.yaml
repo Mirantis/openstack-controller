@@ -67,6 +67,10 @@ messaging:rabbitmq:StatefulSet:openstack-rabbitmq-rabbitmq:
   - podSelector:
       matchLabels:
         application: nova
+        component: spice-proxy
+  - podSelector:
+      matchLabels:
+        application: nova
         component: placement
   - podSelector:
       matchLabels:

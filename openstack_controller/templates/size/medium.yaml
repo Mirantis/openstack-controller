@@ -161,6 +161,7 @@ services:
             consoleauth: 3
             scheduler: 7
             novncproxy: 3
+            spiceproxy: 3
             placement: 4
             # Byggy code, give up and use 1 instance
             compute_ironic: 1

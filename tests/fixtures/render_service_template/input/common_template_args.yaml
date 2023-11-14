@@ -162,12 +162,10 @@ images:
   nova_db_sync_db: nova-db-sync-db:latest
   nova_db_sync_online: nova-db-sync-online:latest
   nova_novncproxy: nova-novncproxy:latest
-  nova_novncproxy_assets: nova-novncproxy-assets:latest
   nova_placement: nova-placement:latest
   nova_scheduler: nova-scheduler:latest
   nova_service_cleaner: nova-service-cleaner:latest
   nova_spiceproxy: nova-spiceproxy:latest
-  nova_spiceproxy_assets: nova-spiceproxy-assets:latest
   octavia_amphora: https://amphora-image-url/latest
   octavia_amphora_checksum: md5summ
   octavia_api: octavia-api:latest
@@ -241,6 +239,9 @@ network_policies:
       - from:
         - default: selector
     compute:nova:Deployment:nova-novncproxy:
+      - from:
+        - default: selector
+    compute:nova:Deployment:nova-spiceproxy:
       - from:
         - default: selector
     compute:nova:Deployment:nova-api-metadata:

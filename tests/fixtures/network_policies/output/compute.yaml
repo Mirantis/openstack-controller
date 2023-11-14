@@ -115,6 +115,13 @@ compute:nova:Deployment:nova-novncproxy:
   ports:
   - port: 6080
     protocol: TCP
+compute:nova:Deployment:nova-spiceproxy:
+- from:
+  - podSelector:
+      matchLabels: *id001
+  ports:
+  - port: 6082
+    protocol: TCP
 compute:rabbitmq:StatefulSet:openstack-nova-rabbitmq-rabbitmq:
 - from:
   - podSelector:
@@ -137,6 +144,10 @@ compute:rabbitmq:StatefulSet:openstack-nova-rabbitmq-rabbitmq:
       matchLabels:
         application: nova
         component: novnc-proxy
+  - podSelector:
+      matchLabels:
+        application: nova
+        component: spice-proxy
   - podSelector:
       matchLabels:
         application: nova

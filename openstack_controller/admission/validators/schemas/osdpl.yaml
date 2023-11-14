@@ -752,10 +752,24 @@ properties:
             type: object
             additionalProperties: false
             properties:
+              spice:
+                type: object
+                additionalProperties: false
+                properties:
+                  enabled:
+                    type: boolean
+                    description: |
+                      Enable SPICE console feature
+                      default: false
               novnc:
                 type: object
                 additionalProperties: false
                 properties:
+                  enabled:
+                    type: boolean
+                    description: |
+                      Enable VNC console feature
+                      default: true
                   tls:
                     type: object
                     additionalProperties: false

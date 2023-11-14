@@ -67,6 +67,10 @@ memcached:memcached:StatefulSet:openstack-memcached-memcached:
   - podSelector:
       matchLabels:
         application: nova
+        component: spice-proxy
+  - podSelector:
+      matchLabels:
+        application: nova
         component: placement
   - podSelector:
       matchLabels:
