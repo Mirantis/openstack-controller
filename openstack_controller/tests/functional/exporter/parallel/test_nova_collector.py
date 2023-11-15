@@ -1,6 +1,7 @@
 import pytest
 
 from openstack_controller.tests.functional.exporter import base
+from parameterized import parameterized
 
 
 class NovaCollectorFunctionalTestCase(base.BaseFunctionalExporterTestCase):
@@ -77,6 +78,30 @@ class NovaCollectorFunctionalTestCase(base.BaseFunctionalExporterTestCase):
             metric.samples[0].labels.keys(),
         )
 
+    @parameterized.expand(
+        [
+            ("osdpl_nova_hypervisor_vcpu_allocation_ratio", "VCPU"),
+            ("osdpl_nova_hypervisor_disk_gb_allocation_ratio", "DISK_GB"),
+            ("osdpl_nova_hypervisor_memory_mb_allocation_ratio", "MEMORY_MB"),
+        ]
+    )
+    def test_osdpl_nova_hypervisor_allocation_ratio(
+        self, metric_name, resource
+    ):
+        """Hypervisor allocation_ratio for different resources."""
+
+        metric = self.get_metric(metric_name)
+        self.hypervisors = list(self.ocm.oc.placement.resource_providers())
+        for hypervisor in self.hypervisors:
+            for sample in metric.samples:
+                if hypervisor.name.split(".")[0] == sample.labels.get("host"):
+                    value = self.get_allocation_ratio(hypervisor.id, resource)
+                    self.assertEqual(
+                        sample.value,
+                        value,
+                        f"The allocation ratio for {resource} in exporter's metrics is not correct",
+                    )
+
 
 @pytest.mark.xdist_group("exporter-compute-network")
 class NovaCollectorInstancesFunctionalTestCase(
@@ -97,7 +122,7 @@ class NovaCollectorInstancesFunctionalTestCase(
             int(metric.samples[0].value),
             len(servers),
             f"Current numbers of servers in exporter's metric are {int(metric.samples[0].value)}."
-            f"Expected numbers of active servers: {len(servers)}.",
+            f"Expected numbers of servers: {len(servers)}.",
         )
 
     def test_nova_active_instances(self):
@@ -169,7 +194,7 @@ class NovaCollectorInstancesFunctionalTestCase(
             int(initial_metric.samples[0].value),
             len(initial_error_servers),
             f"Current numbers of error servers in exporter's metrics are {int(initial_metric.samples[0].value)}."
-            f"Expected numbers of active servers: {len(initial_error_servers)}.",
+            f"Expected numbers of error servers: {len(initial_error_servers)}.",
         )
 
         error_server = self.server_create()
@@ -183,7 +208,7 @@ class NovaCollectorInstancesFunctionalTestCase(
             int(metric.samples[0].value),
             len(error_servers),
             f"Current numbers of error servers in exporter's metrics are {int(metric.samples[0].value)}."
-            f"Expected numbers of active servers: {len(error_servers)}.",
+            f"Expected numbers of error servers: {len(error_servers)}.",
         )
 
     def test_nova_availability_zone_info(self):
