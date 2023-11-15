@@ -55,6 +55,12 @@ features:
     - load-balancer
     - redis
     - descheduler
+  network_policies:
+{%- if openstack_yoga_plus %}
+    enabled: true
+{%- else %}
+    enabled: false
+{%- endif %}
   neutron:
     backend: tungstenfabric
   database:

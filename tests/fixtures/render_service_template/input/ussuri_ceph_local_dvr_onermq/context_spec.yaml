@@ -11,6 +11,8 @@ features:
   database:
     local_volumes:
       enabled: true
+  network_policies:
+    enabled: false
   neutron:
     backend: ml2
     dns_servers:

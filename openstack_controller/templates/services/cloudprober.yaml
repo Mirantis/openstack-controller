@@ -49,9 +49,9 @@ spec:
         openstack_discovery:
           os_cloud: cloudprober
           interval: {{ clp_options.get('discovery', {}).get('interval', 600) }}
-{%- if spec.get("features", {}).get("network_policies", {}).get("enabled", false) %}
+{%- if spec.features.network_policies.enabled %}
       network_policy:
 {% include 'base/network_policies/cloudprober.yaml' %}
 {%- endif %}
       manifests:
-        network_policy: true
+        network_policy: {{ spec.features.network_policies.enabled }}

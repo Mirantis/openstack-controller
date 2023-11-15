@@ -23,6 +23,8 @@ features:
       base_url: https://binary.mirantis.com/openstack/bin/ironic/tinyipa
       initramfs: tinyipa-stable-ussuri-20201008064914.gz
       kernel: tinyipa-stable-ussuri-20201008064914.vmlinuz
+  network_policies:
+    enabled: false
   neutron:
     backend: ml2
     dns_servers:

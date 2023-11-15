@@ -22,6 +22,8 @@ features:
     - orchestration
     - load-balancer
     - key-manager
+  network_policies:
+    enabled: false
   neutron:
     backend: ml2
     dns_servers:

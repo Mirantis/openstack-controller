@@ -298,7 +298,7 @@ spec:
           backup: {{ ceph.cinder.secrets }}
   {%- endif %}
 {%- endif %}
-{%- if spec.get("features", {}).get("network_policies", {}).get("enabled", false) %}
+{%- if spec.features.network_policies.enabled %}
       network_policy:
 {% include 'base/network_policies/block-storage.yaml' %}
 {%- endif %}
@@ -307,7 +307,7 @@ spec:
         {%- if spec.openstack_version not in ['queens', 'rocky', 'stein', 'train', 'ussuri'] %}
         job_drop_default_volume_type: true
         {%- endif %}
-        network_policy: {{ spec.get("features", {}).get("network_policies", {}).get("enabled", false) }}
+        network_policy: {{ spec.features.network_policies.enabled }}
         job_rabbit_init: false
         job_storage_init: false
         job_backup_storage_init: false

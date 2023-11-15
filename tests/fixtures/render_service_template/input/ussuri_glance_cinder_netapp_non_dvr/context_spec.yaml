@@ -20,6 +20,8 @@ features:
   messaging:
     components_with_dedicated_messaging:
     - networking
+  network_policies:
+    enabled: false
   neutron:
     backend: ml2
     dns_servers:
