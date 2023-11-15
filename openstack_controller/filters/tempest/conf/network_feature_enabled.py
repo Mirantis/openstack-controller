@@ -124,6 +124,11 @@ class NetworkFeatureEnabled(base_section.BaseSection):
                         "qos-pps",
                     ],
                 )
+            if self.os_version_compare("antelope", "ge"):
+                if self.get_values_item(
+                    "neutron", "conf.neutron.DEFAULT.vlan_transparent", False
+                ):
+                    api_extensions_default.append("vlan-transparent")
 
         if self.get_spec_item("features.neutron.bgpvpn.enabled"):
             api_extensions_default.extend(
