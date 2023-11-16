@@ -1,4 +1,9 @@
+import os
+
 from openstack_controller.filters.tempest import base_section
+from openstack_controller.filters.common_filters import (
+    substitute_local_proxy_hostname,
+)
 
 
 class Image(base_section.BaseSection):
@@ -43,7 +48,9 @@ class Image(base_section.BaseSection):
         images = self.get_values_item("glance", "bootstrap.structured.images")
         if images:
             image = list(images.values())[0]
-            return image["source_url"] + image["image_file"]
+            url = image["source_url"] + image["image_file"]
+            url = substitute_local_proxy_hostname(url, os.environ["NODE_IP"])
+            return url
 
     @property
     def region(self):
