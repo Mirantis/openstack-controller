@@ -1,11 +1,14 @@
 from openstack_controller.exporter.constants import ServiceState, ServiceStatus
 from openstack_controller.tests.functional.exporter import base
 from openstack_controller.tests.functional import waiters as wait
+from openstack_controller.tests.functional import config as conf
 
 
 class NovaCollectorSerialFunctionalTestCase(
     base.BaseFunctionalExporterTestCase
 ):
+    scrape_collector = "osdpl_nova"
+
     def setUp(self):
         super().setUp()
         svc = [
@@ -38,13 +41,30 @@ class NovaCollectorSerialFunctionalTestCase(
         wait.wait_for_compute_service_status(
             self.ocm, self.compute_svc, status="disabled"
         )
-        self.wait_service_metric(
-            metric_name, labels, value=ServiceStatus.disabled
+        metric = self.get_metric_after_refresh(
+            metric_name, self.scrape_collector
         )
+        service_samples = self.filter_metric_samples(metric, labels)
+        self.assertEqual(
+            service_samples[0].value,
+            ServiceStatus.disabled,
+            f"Current metric {metric_name} for host {labels['host']} "
+            f"has value: {service_samples[0].value}. "
+            f"Expected value: {ServiceStatus.disabled}, after {conf.METRIC_TIMEOUT} sec.",
+        )
+
         self.ocm.compute_ensure_service_enabled(self.compute_svc)
         wait.wait_for_compute_service_status(self.ocm, self.compute_svc)
-        self.wait_service_metric(
-            metric_name, labels, value=ServiceStatus.enabled
+        metric = self.get_metric_after_refresh(
+            metric_name, self.scrape_collector
+        )
+        service_samples = self.filter_metric_samples(metric, labels)
+        self.assertEqual(
+            service_samples[0].value,
+            ServiceStatus.enabled,
+            f"Current metric {metric_name} for host {labels['host']} "
+            f"has value: {service_samples[0].value}. Expected value: {ServiceStatus.enabled},"
+            f"after {conf.METRIC_TIMEOUT} sec.",
         )
 
     def test_service_state_up_down(self):
@@ -57,7 +77,28 @@ class NovaCollectorSerialFunctionalTestCase(
         wait.wait_for_compute_service_state(
             self.ocm, self.compute_svc, state="down"
         )
-        self.wait_service_metric(metric_name, labels, value=ServiceState.down)
+        metric = self.get_metric_after_refresh(
+            metric_name, self.scrape_collector
+        )
+        service_samples = self.filter_metric_samples(metric, labels)
+        self.assertEqual(
+            service_samples[0].value,
+            ServiceState.down,
+            f"Current metric {metric_name} for host {labels['host']} "
+            f"has value: {service_samples[0].value}. Expected value: {ServiceState.down}, "
+            f"after {conf.METRIC_TIMEOUT} sec.",
+        )
+
         self.ocm.compute_ensure_service_force_down(self.compute_svc, False)
         wait.wait_for_compute_service_state(self.ocm, self.compute_svc)
-        self.wait_service_metric(metric_name, labels, value=ServiceState.up)
+        metric = self.get_metric_after_refresh(
+            metric_name, self.scrape_collector
+        )
+        service_samples = self.filter_metric_samples(metric, labels)
+        self.assertEqual(
+            service_samples[0].value,
+            ServiceState.up,
+            f"Current metric {metric_name} for host {labels['host']} "
+            f"has value: {service_samples[0].value}. Expected value: {ServiceState.up}, "
+            f"after {conf.METRIC_TIMEOUT} sec.",
+        )

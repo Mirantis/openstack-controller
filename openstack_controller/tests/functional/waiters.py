@@ -54,3 +54,22 @@ def wait_for_compute_service_status(client, compute_svc, status="enabled"):
         if timed_out >= timeout:
             LOG.error(message)
             raise TimeoutError(message)
+
+
+def wait_for_server_status(openstack_client, server, status):
+    start_time = int(time.time())
+    timeout = conf.SERVER_TIMEOUT
+    while True:
+        server = openstack_client.oc.get_server(server.id)
+        if server.status.upper() == status.upper():
+            LOG.debug(f"Server {server.id} has status: {server.status}.")
+            return
+        time.sleep(conf.SERVER_READY_INTERVAL)
+        timed_out = int(time.time()) - start_time
+        if timed_out >= timeout:
+            message = (
+                f"Server {server.id} failed to reach {status} "
+                f"status within the required time {timeout}"
+            )
+            LOG.error(message)
+            raise TimeoutError(message)
