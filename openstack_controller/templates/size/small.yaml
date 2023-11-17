@@ -213,11 +213,7 @@ services:
                 dhcp_agent:
                   max_unavailable: 10%
                 l3_agent:
-                {%- if neutron_dvr_enabled %}
-                  max_unavailable: 10%
-                {%- else %}
-                  max_unavailable: 1
-                {%- endif %}
+                  pod_replacement_strategy: OnDelete
                 lb_agent:
                   max_unavailable: 10%
                 metadata_agent:
@@ -264,10 +260,11 @@ services:
           lifecycle:
             upgrades:
               daemonsets:
-                pod_replacement_strategy: OnDelete
-                ovs_db:
+                ovn_controller:
+                  pod_replacement_strategy: OnDelete
                   max_unavailable: 1
                 ovs_vswitchd:
+                  pod_replacement_strategy: OnDelete
                   max_unavailable: 1
   block-storage:
     cinder:

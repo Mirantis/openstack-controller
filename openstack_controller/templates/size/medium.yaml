@@ -245,6 +245,7 @@ services:
                   max_unavailable: 10%
                 l3_agent:
                   max_unavailable: 1
+                  pod_replacement_strategy: OnDelete
                 lb_agent:
                   max_unavailable: 10%
                 metadata_agent:
@@ -293,10 +294,11 @@ services:
           lifecycle:
             upgrades:
               daemonsets:
-                pod_replacement_strategy: OnDelete
-                ovs_db:
+                ovn_controller:
+                  pod_replacement_strategy: OnDelete
                   max_unavailable: 1
                 ovs_vswitchd:
+                  pod_replacement_strategy: OnDelete
                   max_unavailable: 1
     rabbitmq:
       values:

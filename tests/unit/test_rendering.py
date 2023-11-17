@@ -14,6 +14,7 @@ logger = logging.getLogger(__name__)
 
 OUTPUT_DIR = "tests/fixtures/render_service_template/output"
 INPUT_DIR = "tests/fixtures/render_service_template/input"
+SIZES_DIR = "openstack_controller/templates/size"
 CHILD_OBJECTS_DIR = "child_objects"
 CHILD_OBJECTS_SCHEMA = """
 type: object
@@ -237,6 +238,11 @@ def get_render_kwargs(service, context, default_args):
     return spec, service_t_args
 
 
+def get_sizes():
+    sizes = [name for name in os.listdir(SIZES_DIR)]
+    return sizes
+
+
 def get_services_and_contexts():
     all_services = (
         set(constants.OS_SERVICES_MAP.keys())
@@ -321,6 +327,11 @@ def test_render_service_template(
     with open(f"{OUTPUT_DIR}/{service}/{context}.yaml") as f:
         output = yaml.safe_load(f)
         assert data == output, f"Mismatch when comparing to file {f.name}"
+
+
+@pytest.mark.parametrize("size", get_sizes())
+def test_render_sezes(size):
+    layers.render_template(f"size/{size}")
 
 
 @pytest.mark.parametrize(

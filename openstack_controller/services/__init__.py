@@ -1270,7 +1270,12 @@ class Neutron(OpenStackService, MaintenanceApiMixin):
         # are removed.
         if not cmr:
             # Restart openvswitch daemonsets
-            for daemonset in ["ovn-controller", "openvswitch-vswitchd"]:
+            # Prevent restarting l3 agents simulteniously with openvswitch
+            for daemonset in [
+                "ovn-controller",
+                "openvswitch-vswitchd",
+                "neutron-l3-agent",
+            ]:
                 for ovs_ds in self.get_child_objects_dynamic(
                     "DaemonSet", daemonset
                 ):
