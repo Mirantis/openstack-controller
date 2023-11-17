@@ -11,7 +11,7 @@ cinder_volume_daemonset: '{{ images_base_url }}/openstack/cinder:antelope-jammy-
 cinder_volume_usage_audit: '{{ images_base_url }}/openstack/cinder:antelope-jammy-20231110113645'
 cloudprober: '{{ images_base_url }}/openstack/extra/cloudprober:main-rc1'
 cloudprober_openstack_discovery: '{{ images_base_url }}/openstack/openstack-tools:yoga-jammy-20231110113645'
-stepler_run_tests: '{{ images_base_url }}/openstack/stepler:antelope-jammy-20231109062439'
+stepler_run_tests: '{{ images_base_url }}/openstack/stepler:antelope-jammy-20231117084119'
 db_drop: '{{ images_base_url }}/openstack/heat:antelope-jammy-20231110113645'
 db_init: '{{ images_base_url }}/openstack/heat:antelope-jammy-20231110113645'
 dep_check: '{{ images_base_url }}/openstack/extra/kubernetes-entrypoint:v1.0.1-55b02f7-20231019172556'
@@ -146,7 +146,7 @@ placement_db_sync: '{{ images_base_url }}/openstack/placement:antelope-jammy-202
 keystone_db_sync_expand: '{{ images_base_url }}/openstack/keystone:antelope-jammy-20231110113645'
 keystone_db_sync_migrate: '{{ images_base_url }}/openstack/keystone:antelope-jammy-20231110113645'
 keystone_db_sync_contract: '{{ images_base_url }}/openstack/keystone:antelope-jammy-20231110113645'
-octavia_amphora: '{{ binary_base_url }}/openstack/bin/octavia/amphora-x64-haproxy-antelope-20231110120308.qcow2'
+octavia_amphora: '{{ binary_base_url }}/openstack/bin/octavia/amphora-x64-haproxy-antelope-20231116061702.qcow2'
 etcd: '{{ images_base_url }}/openstack/extra/etcd:v3.5.10-alpine-20231031103038'
 etcd_db_compact: '{{ images_base_url }}/openstack/extra/etcd:v3.5.10-alpine-20231031103038'
 cinder_db_sync_online: '{{ images_base_url }}/openstack/cinder:antelope-jammy-20231110113645'
@@ -183,7 +183,7 @@ mariadb_controller: '{{ images_base_url }}/general/mariadb:10.6.14-focal-2023102
 horizon_mirantis_theme_sha256summ: 901891de9cfe77dbf65f1c7cf3161408b4f3229f2426d400039af8e34e2c46ef
 horizon_mirantis_theme_url: '{{ binary_base_url }}/openstack/bin/horizon/mirantis-antelope-18a1377-20230817112356.tar.gz'
 ceph_config_helper: '{{ images_base_url }}/openstack/openstack-tools:yoga-jammy-20231110113645'
-octavia_amphora_checksum: a30121cb83a7bd92240aa99339c5f2ae
+octavia_amphora_checksum: 39faf64932a01fb257e39ae567d48358
 masakari_db_sync: '{{ images_base_url }}/openstack/masakari:antelope-jammy-20231110113645'
 masakari_api: '{{ images_base_url }}/openstack/masakari:antelope-jammy-20231110113645'
 masakari_engine: '{{ images_base_url }}/openstack/masakari:antelope-jammy-20231110113645'
