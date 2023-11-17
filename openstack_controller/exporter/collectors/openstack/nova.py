@@ -413,13 +413,18 @@ class OsdplNovaMetricCollector(base.OpenStackBaseMetricCollector):
         )
 
         hypervisor_instances_samples = []
-        for host, instance_number in hypervisor_instances.items():
-            if host is None:
-                continue
+        for hypervisor in self.cache.get("hypervisors", []):
+            host_name = hypervisor["name"].split(".")[0]
+            total_instances = hypervisor_instances.get(
+                host_name, {"total": 0}
+            )["total"]
             hypervisor_instances_samples.append(
                 (
-                    [host, self.get_host_availability_zone(host) or "None"],
-                    hypervisor_instances[host]["total"],
+                    [
+                        host_name,
+                        self.get_host_availability_zone(host_name) or "None",
+                    ],
+                    total_instances,
                 )
             )
         self.set_samples("hypervisor_instances", hypervisor_instances_samples)

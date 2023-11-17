@@ -97,14 +97,17 @@ class BaseFunctionalExporterTestCase(base.BaseFunctionalTestCase):
             )
 
     def test_known_metrics_present_and_not_none(self):
+        all_metrics = list(self.metric_families)
         for metric_name in self.known_metrics.keys():
-            metric = self.get_metric(metric_name)
+            metric = self.get_metric(metric_name, all_metrics)
             self.assertIsNotNone(metric)
             self.assertTrue(len(metric.samples) > 0)
 
     def test_known_metrics_labels(self):
+        all_metrics = list(self.metric_families)
         for metric_name, data in self.known_metrics.items():
-            metric = self.get_metric(metric_name)
+            metric = self.get_metric(metric_name, all_metrics)
+            self.assertIsNotNone(metric)
             for sample in metric.samples:
                 for label in data.get("labels", []):
                     self.assertTrue(label in sample.labels)

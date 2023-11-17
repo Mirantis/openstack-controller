@@ -26,9 +26,10 @@ class OsdplNeutronMetricCollector(base.OpenStackBaseMetricCollector):
     _name = "osdpl_neutron"
     _description = "OpenStack Networking service metrics"
     _os_service_types = ["network"]
+    port_statuses = ["down", "error", "active"]
 
     def init_families(self):
-        return {
+        res = {
             "networks": GaugeMetricFamily(
                 f"{self._name}_networks",
                 "Number of neutron networks in environment",
@@ -42,21 +43,6 @@ class OsdplNeutronMetricCollector(base.OpenStackBaseMetricCollector):
             "ports": GaugeMetricFamily(
                 f"{self._name}_ports",
                 "Number of neutron ports in environment",
-                labels=[],
-            ),
-            "error_ports": GaugeMetricFamily(
-                f"{self._name}_error_ports",
-                "Number of neutron ports in the ERROR state in environment",
-                labels=[],
-            ),
-            "down_ports": GaugeMetricFamily(
-                f"{self._name}_down_ports",
-                "Number of neutron ports in the DOWN state in environment",
-                labels=[],
-            ),
-            "active_ports": GaugeMetricFamily(
-                f"{self._name}_active_ports",
-                "Number of neutron ports in the ACTIVE state in environment",
                 labels=[],
             ),
             "routers": GaugeMetricFamily(
@@ -90,6 +76,13 @@ class OsdplNeutronMetricCollector(base.OpenStackBaseMetricCollector):
                 labels=["zone"],
             ),
         }
+        for port_status in self.port_statuses:
+            res[f"{port_status}_ports"] = GaugeMetricFamily(
+                f"{self._name}_{port_status}_ports",
+                f"Number of neutron ports in the {port_status.upper()} status in environment",
+                labels=[],
+            )
+        return res
 
     def update_samples(self):
         for resource in ["networks", "subnets"]:
@@ -112,14 +105,16 @@ class OsdplNeutronMetricCollector(base.OpenStackBaseMetricCollector):
         self.set_samples("zone_routers", zone_routers_samples)
         self.set_samples("routers", [([], routers_total)])
 
-        ports = {"total": 0, "active": 0, "down": 0}
+        ports = {"total": 0}
+        for port_status in self.port_statuses:
+            ports[port_status] = 0
         for port in self.oc.oc.network.ports():
             port_status = port["status"].lower()
             if port_status in ports.keys():
                 ports[port_status] += 1
 
         self.set_samples("ports", [([], ports["total"])])
-        for port_status in ["active", "down"]:
+        for port_status in self.port_statuses:
             self.set_samples(
                 f"{port_status}_ports",
                 [([], ports[port_status])],
