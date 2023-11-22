@@ -257,6 +257,62 @@ class BaseFunctionalTestCase(TestCase):
         return res
 
     @classmethod
+    def volume_create(
+        cls,
+        size=conf.VOLUME_SIZE,
+        name=None,
+        wait=True,
+        timeout=None,
+    ):
+        if name is None:
+            name = data_utils.rand_name()
+        if size is None:
+            size = conf.VOLUME_SIZE
+        if timeout is None:
+            timeout = conf.VOLUME_TIMEOUT
+
+        volume = cls.ocm.oc.volume.create_volume(
+            size=size,
+            name=name,
+            wait=wait,
+            timeout=timeout,
+        )
+        cls.addClassCleanup(cls.volume_delete, volume)
+        if wait is True:
+            waiters.wait_resource_field(
+                cls.ocm.oc.block_storage.get_volume,
+                volume.id,
+                {"status": "available"},
+                conf.VOLUME_TIMEOUT,
+                conf.VOLUME_READY_INTERVAL,
+            )
+        return volume
+
+    @classmethod
+    def volume_delete(cls, volume):
+        return cls.ocm.oc.delete_volume(volume.id)
+
+    @classmethod
+    def volume_snapshot_create(
+        cls,
+        volume,
+        name=None,
+        wait=True,
+    ):
+        if name is None:
+            name = data_utils.rand_name()
+
+        snapshot = cls.ocm.oc.create_volume_snapshot(
+            volume.id,
+            wait=wait,
+        )
+        cls.addClassCleanup(cls.snapshot_volume_delete, snapshot)
+        return snapshot
+
+    @classmethod
+    def snapshot_volume_delete(cls, snapshot):
+        return cls.ocm.oc.delete_volume_snapshot(snapshot.id)
+
     def aggregate_delete(cls, name):
         cls.ocm.oc.delete_aggregate(name)
 
