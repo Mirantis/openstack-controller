@@ -4,6 +4,56 @@ from openstack_controller.tests.functional.exporter import base
 
 
 class NovaCollectorFunctionalTestCase(base.BaseFunctionalExporterTestCase):
+    known_metrics = {
+        "osdpl_nova_service_state": {"labels": ["binary", "host", "zone"]},
+        "osdpl_nova_service_status": {"labels": ["binary", "host", "zone"]},
+        "osdpl_nova_instances": {"labels": []},
+        "osdpl_nova_active_instances": {"labels": []},
+        "osdpl_nova_error_instances": {"labels": []},
+        "osdpl_nova_hypervisor_instances": {"labels": ["host", "zone"]},
+        # "osdpl_nova_aggregate_hosts": {"labels": ["name"]},
+        # "osdpl_nova_host_aggregate_info": {"labels": ["hosts", "name"]},
+        # "osdpl_nova_availability_zone_info": {"labels": ["zone"]},
+        # "osdpl_nova_availability_zone_hosts": {"labels": ["zone"]},
+        # "osdpl_nova_availability_zone_instances": {"labels": ["zone"]},
+        # "osdpl_nova_aggregate_instances": {"osdpl_nova_aggregate_instances": ["name"]},
+        "osdpl_nova_hypervisor_vcpu": {"labels": ["host", "zone"]},
+        "osdpl_nova_hypervisor_vcpu_used": {"labels": ["host", "zone"]},
+        "osdpl_nova_hypervisor_vcpu_free": {"labels": ["host", "zone"]},
+        "osdpl_nova_hypervisor_vcpu_allocation_ratio": {
+            "labels": ["host", "zone"]
+        },
+        "osdpl_nova_hypervisor_disk_gb": {"labels": ["host", "zone"]},
+        "osdpl_nova_hypervisor_disk_gb_used": {"labels": ["host", "zone"]},
+        "osdpl_nova_hypervisor_disk_gb_free": {"labels": ["host", "zone"]},
+        "osdpl_nova_hypervisor_disk_gb_allocation_ratio": {
+            "labels": ["host", "zone"]
+        },
+        "osdpl_nova_hypervisor_memory_mb": {"labels": ["host", "zone"]},
+        "osdpl_nova_hypervisor_memory_mb_used": {"labels": ["host", "zone"]},
+        "osdpl_nova_hypervisor_memory_mb_free": {"labels": ["host", "zone"]},
+        "osdpl_nova_hypervisor_memory_mb_allocation_ratio": {
+            "labels": ["host", "zone"]
+        },
+        # "osdpl_nova_aggregate_vcpu": {"labels": ["name"]},
+        # "osdpl_nova_aggregate_vcpu_used": {"labels": ["name"]},
+        # "osdpl_nova_aggregate_vcpu_free": {"labels": ["name"]},
+        # "osdpl_nova_aggregate_disk_gb": {"labels": ["name"]},
+        # "osdpl_nova_aggregate_disk_gb_used": {"labels": ["name"]},
+        # "osdpl_nova_aggregate_disk_gb_free": {"labels": ["name"]},
+        # "osdpl_nova_aggregate_memory_mb": {"labels": ["name"]},
+        # "osdpl_nova_aggregate_memory_mb_used": {"labels": ["name"]},
+        # "osdpl_nova_aggregate_memory_mb_free": {"labels": ["name"]},
+        # "osdpl_nova_availability_zone_vcpu_used": {"labels": ["name"]},
+        # "osdpl_nova_availability_zone_vcpu_free": {"labels": ["name"]},
+        # "osdpl_nova_availability_zone_disk_gb": {"labels": ["name"]},
+        # "osdpl_nova_availability_zone_disk_gb_used": {"labels": ["name"]},
+        # "osdpl_nova_availability_zone_disk_gb_free": {"labels": ["name"]},
+        # "osdpl_nova_availability_zone_memory_mb": {"labels": ["name"]},
+        # "osdpl_nova_availability_zone_memory_mb_used": {"labels": ["name"]},
+        # "osdpl_nova_availability_zone_memory_mb_free": {"labels": ["name"]},
+    }
+
     def setUp(self):
         super().setUp()
         self.compute_svc = self.ocm.compute_get_services(binary=None)
@@ -37,12 +87,6 @@ class NovaCollectorInstancesFunctionalTestCase(
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-
-    known_metrics = {
-        "osdpl_nova_instances": {"labels": []},
-        "osdpl_nova_active_instances": {"labels": []},
-        "osdpl_nova_error_instances": {"labels": []},
-    }
 
     def test_nova_instances(self):
         """Total number of instances in the cluster."""
