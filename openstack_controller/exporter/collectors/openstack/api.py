@@ -71,14 +71,18 @@ class OsdplApiMetricCollector(base.OpenStackBaseMetricCollector):
                     category=InsecureRequestWarning
                 )
                 resp = requests.get(url, timeout=30, verify=False)
-            except Exception as e:
-                LOG.warning(f"Failed to get responce from {url}. Error: {e}")
-                success = False
-            if success:
                 statuses.append(([url, service_type], resp.status_code))
                 latencies.append(
                     ([url, service_type], resp.elapsed.microseconds)
                 )
+                if resp.status_code >= 500:
+                    LOG.warning(
+                        f"Got bad responce code {resp.status_code} from {url}."
+                    )
+                    success = False
+            except Exception as e:
+                LOG.warning(f"Failed to get responce from {url}. Error: {e}")
+                success = False
             successes.append(([url, service_type], int(success)))
         self.set_samples("status", statuses)
         self.set_samples("latency", latencies)
