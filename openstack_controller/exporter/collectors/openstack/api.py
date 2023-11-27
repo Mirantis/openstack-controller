@@ -35,17 +35,17 @@ class OsdplApiMetricCollector(base.OpenStackBaseMetricCollector):
             "status": GaugeMetricFamily(
                 f"{self._name}_status",
                 "API endpoint connection status",
-                labels=["url"],
+                labels=["url", "service_type"],
             ),
             "latency": GaugeMetricFamily(
                 f"{self._name}_latency",
                 "API endpoint connection latency microseconds",
-                labels=["url"],
+                labels=["url", "service_type"],
             ),
             "success": GaugeMetricFamily(
                 f"{self._name}_success",
                 "API endpoint connection success status",
-                labels=["url"],
+                labels=["url", "service_type"],
             ),
         }
 
@@ -54,6 +54,15 @@ class OsdplApiMetricCollector(base.OpenStackBaseMetricCollector):
         latencies = []
         successes = []
         for endpoint in self.oc.oc.identity.endpoints(interface="public"):
+            service = self.oc.oc.identity.get_service(endpoint.service_id)
+            service_type = self.oc.service_type_manager.get_service_type(
+                service.type
+            )
+            if not service_type:
+                LOG.warning(
+                    f"Failed to get service_type for service {service}"
+                )
+                continue
             url = endpoint["url"].split("%")[0]
             success = True
             try:
@@ -66,9 +75,11 @@ class OsdplApiMetricCollector(base.OpenStackBaseMetricCollector):
                 LOG.warning(f"Failed to get responce from {url}. Error: {e}")
                 success = False
             if success:
-                statuses.append(([url], resp.status_code))
-                latencies.append(([url], resp.elapsed.microseconds))
-            successes.append(([url], int(success)))
+                statuses.append(([url, service_type], resp.status_code))
+                latencies.append(
+                    ([url, service_type], resp.elapsed.microseconds)
+                )
+            successes.append(([url, service_type], int(success)))
         self.set_samples("status", statuses)
         self.set_samples("latency", latencies)
         self.set_samples("success", successes)

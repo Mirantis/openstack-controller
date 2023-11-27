@@ -20,6 +20,7 @@ from enum import IntEnum
 from keystoneauth1 import exceptions as ksa_exceptions
 import kopf
 import openstack
+import os_service_types
 
 from openstack_controller import settings
 from openstack_controller import utils
@@ -74,6 +75,7 @@ class OpenStackClientManager:
         self.oc = openstack.connect(
             cloud=cloud, metrics=metrics, api_timeout=300
         )
+        self.service_type_manager = os_service_types.ServiceTypes()
 
     def volume_get_services(self, **kwargs):
         res = []
