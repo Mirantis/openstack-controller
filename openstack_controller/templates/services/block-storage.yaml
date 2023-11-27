@@ -111,6 +111,35 @@ spec:
         useHostNetwork:
           volume: true
 {%- endif %}
+        security_context:
+          # NOTE(vsaienko): run volume and backup with same user
+          # to allow collocate ceph based volume with backups and avoid issues
+          # with /var/lib/cinder shared state directory
+{%- set cinder_user = 42424 %}
+          cinder_volume:
+            pod:
+              runAsUser: {{ cinder_user }}
+          # NOTE(okononenko): set containers to privileged mode to work with
+          # iSCSI/LVM and multipath services
+{%- if overrides.enabled %}
+            container:
+              cinder_volume:
+                privileged: true
+{%- endif %}
+          cinder_backup:
+            pod:
+              runAsUser: {{ cinder_user }}
+{%- if overrides.enabled %}
+            container:
+              cinder_backup:
+                privileged: true
+          cinder_volume_daemonset:
+            pod:
+              runAsUser: {{ cinder_user }}
+            container:
+              cinder_volume:
+                privileged: true
+{%- endif %}
 {%- if is_ceph_enabled %}
       storage: ceph
       ceph_client:
@@ -250,6 +279,8 @@ spec:
           glance:
             verify_glance_signatures: true
 {%- endif %}
+        # NOTE(okononenko): We need to enable iSCSI support when use iSCSI/LVM backend
+        enable_iscsi: {{ overrides.enabled }}
         logging:
           logger_cinder:
             level: {{ spec.get('features', {}).get('logging', {}).get('cinder', {}).get('level', 'INFO') }}

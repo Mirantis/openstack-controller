@@ -80,6 +80,7 @@ spec:
             auth_type: password
           glance:
             verify_glance_signatures: true
+        enable_iscsi: false
         logging:
           logger_cinder:
             level: INFO
@@ -292,6 +293,13 @@ spec:
         replicas:
           api: 1
           registry: 1
+        security_context:
+          cinder_backup:
+            pod:
+              runAsUser: 42424
+          cinder_volume:
+            pod:
+              runAsUser: 42424
       secrets:
         rbd:
           backup: cinder-rbd-keyring

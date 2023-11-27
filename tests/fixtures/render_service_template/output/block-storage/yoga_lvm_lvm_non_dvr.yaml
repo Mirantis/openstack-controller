@@ -85,6 +85,7 @@ spec:
           nova:
             auth_section: keystone_authtoken
             auth_type: password
+        enable_iscsi: true
         logging:
           logger_cinder:
             level: INFO
@@ -311,5 +312,24 @@ spec:
         replicas:
           api: 1
           registry: 1
+        security_context:
+          cinder_backup:
+            pod:
+              runAsUser: 42424
+            container:
+              cinder_backup:
+                privileged: true
+          cinder_volume:
+            pod:
+              runAsUser: 42424
+            container:
+              cinder_volume:
+                privileged: true
+          cinder_volume_daemonset:
+            pod:
+              runAsUser: 42424
+            container:
+              cinder_volume:
+                privileged: true
         useHostNetwork:
           volume: true
