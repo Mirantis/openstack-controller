@@ -10,8 +10,8 @@ common:
   openstack:
     repo: osh
     releases:
-      version: 0.1.0-mcp-4384
+      version: 0.1.0-mcp-4387
   infra:
     repo: osh-infra
     releases:
-      version: 0.1.0-mcp-3029
+      version: 0.1.0-mcp-3033
