@@ -35,17 +35,17 @@ class OsdplApiMetricCollector(base.OpenStackBaseMetricCollector):
             "status": GaugeMetricFamily(
                 f"{self._name}_status",
                 "API endpoint connection status",
-                labels=["url", "service_type"],
+                labels=["url", "service_type", "service_name"],
             ),
             "latency": GaugeMetricFamily(
                 f"{self._name}_latency",
                 "API endpoint connection latency microseconds",
-                labels=["url", "service_type"],
+                labels=["url", "service_type", "service_name"],
             ),
             "success": GaugeMetricFamily(
                 f"{self._name}_success",
                 "API endpoint connection success status",
-                labels=["url", "service_type"],
+                labels=["url", "service_type", "service_name"],
             ),
         }
 
@@ -58,6 +58,7 @@ class OsdplApiMetricCollector(base.OpenStackBaseMetricCollector):
             service_type = self.oc.service_type_manager.get_service_type(
                 service.type
             )
+            service_name = service["name"]
             if not service_type:
                 LOG.warning(
                     f"Failed to get service_type for service {service}"
@@ -71,9 +72,14 @@ class OsdplApiMetricCollector(base.OpenStackBaseMetricCollector):
                     category=InsecureRequestWarning
                 )
                 resp = requests.get(url, timeout=30, verify=False)
-                statuses.append(([url, service_type], resp.status_code))
+                statuses.append(
+                    ([url, service_type, service_name], resp.status_code)
+                )
                 latencies.append(
-                    ([url, service_type], resp.elapsed.microseconds)
+                    (
+                        [url, service_type, service_name],
+                        resp.elapsed.microseconds,
+                    )
                 )
                 if resp.status_code >= 500:
                     LOG.warning(
@@ -83,7 +89,7 @@ class OsdplApiMetricCollector(base.OpenStackBaseMetricCollector):
             except Exception as e:
                 LOG.warning(f"Failed to get responce from {url}. Error: {e}")
                 success = False
-            successes.append(([url, service_type], int(success)))
+            successes.append(([url, service_type, service_name], int(success)))
         self.set_samples("status", statuses)
         self.set_samples("latency", latencies)
         self.set_samples("success", successes)
