@@ -1,0 +1,261 @@
+import pytest
+
+from openstack_controller.tests.functional.exporter import base
+from openstack_controller.tests.functional import config as conf
+
+
+@pytest.mark.xdist_group("exporter-neutron")
+class NeutronCollectorFunctionalTestCase(base.BaseFunctionalExporterTestCase):
+    scrape_collector = "osdpl_neutron"
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        bundle = cls.network_bundle_create()
+        cls.network = bundle["network"]
+        cls.subnet = bundle["subnet"]
+        cls.router = bundle["router"]
+        cls.servers = []
+
+    known_metrics = {
+        "osdpl_neutron_networks": {"labels": []},
+        "osdpl_neutron_subnets": {"labels": []},
+        "osdpl_neutron_down_ports": {"labels": []},
+        "osdpl_neutron_ports": {"labels": []},
+        "osdpl_neutron_routers": {"labels": []},
+        "osdpl_neutron_floating_ips": {"labels": ["state"]},
+    }
+
+    def test_neutron_networks(self):
+        """Total number of networks in the cluster.
+
+
+        **Steps:**
+
+        #. Get exporter metric "osdpl_neutron_networks"  with initial number
+        of networks in the cluster
+        #. Check that number of networks is equal for OS and exporter
+        #. Create additional test network
+        #. Check that number of networks was changed in response from exporter
+        #. Delete the created network
+        #. Check that number of networks was changed in response from exporter
+
+        """
+        metric_name = "osdpl_neutron_networks"
+        metric = self.get_metric(metric_name)
+        networks = list(self.ocm.oc.network.networks())
+        self.assertEqual(
+            int(metric.samples[0].value),
+            len(networks),
+            "The initial number of networks is not correct.",
+        )
+        network = self.network_create()
+        metric = self.get_metric_after_refresh(
+            metric_name, self.scrape_collector
+        )
+        self.assertEqual(
+            int(metric.samples[0].value),
+            len(networks) + 1,
+            "The number of networks after network create is not correct.",
+        )
+        self.network_delete(network)
+        metric = self.get_metric_after_refresh(
+            metric_name, self.scrape_collector
+        )
+        self.assertEqual(
+            int(metric.samples[0].value),
+            len(networks),
+            "The number of networks after network delete is not correct.",
+        )
+
+    def test_neutron_subnets(self):
+        """Total number of subnets in the cluster.
+
+
+        **Steps:**
+
+        #. Get exporter metric "osdpl_neutron_subnets"  with initial number
+        of subnets in the cluster
+        #. Check that number of subnets is equal for OS and exporter
+        #. Create additional test subnet
+        #. Check that number of subnets was changed in response from exporter
+        #. Delete the created subnet
+        #. Check that number of subnets was changed in response from exporter
+
+        """
+        metric_name = "osdpl_neutron_subnets"
+        metric = self.get_metric(metric_name)
+        subnets = list(self.ocm.oc.network.subnets())
+        self.assertEqual(
+            int(metric.samples[0].value),
+            len(subnets),
+            "The initial number of subnets is not correct.",
+        )
+        subnet = self.subnet_create(
+            cidr="192.168.0.0/24", network_id=self.network["id"]
+        )
+        metric = self.get_metric_after_refresh(
+            metric_name, self.scrape_collector
+        )
+        self.assertEqual(
+            int(metric.samples[0].value),
+            len(subnets) + 1,
+            "The number of subnets after subnet create is not correct.",
+        )
+        self.subnet_delete(subnet)
+        metric = self.get_metric_after_refresh(
+            metric_name, self.scrape_collector
+        )
+        self.assertEqual(
+            int(metric.samples[0].value),
+            len(subnets),
+            "The number of subnets after subnet delete is not correct.",
+        )
+
+    def test_neutron_ports(self):
+        """Total number of ports in the cluster."""
+        metric_name = "osdpl_neutron_ports"
+        initial_metric = self.get_metric_after_refresh(
+            metric_name, self.scrape_collector
+        )
+        ports = list(self.ocm.oc.network.ports())
+        self.assertEqual(
+            int(initial_metric.samples[0].value),
+            len(ports),
+            "The initial number of ports is not correct",
+        )
+
+        down_port = self.port_create(self.network["id"])
+        metric = self.get_metric_after_refresh(
+            metric_name, self.scrape_collector
+        )
+        self.assertEqual(
+            int(metric.samples[0].value),
+            len(ports) + 1,
+            "The number of ports after port create is not correct.",
+        )
+
+        self.port_delete(down_port)
+        metric_after_delete_port = self.get_metric_after_refresh(
+            metric_name, self.scrape_collector
+        )
+        self.assertEqual(
+            int(metric_after_delete_port.samples[0].value),
+            len(ports),
+            "The number of ports after port delete is not correct.",
+        )
+
+    def test_neutron_floating_ips(self):
+        """Total number FIPs
+
+
+        **Steps:**
+
+        #. Get exporter metric "osdpl_neutron_floating_ips"  with initial number
+        of fips in the cluster
+        #. Check that number of fips is equal for OS and exporter
+        #. Create additional test fip
+        #. Check that number of not_associated fips was changed in response from exporter
+        #. Associate FIP with port
+        #. Check that number associated fips increased
+
+        """
+        metric_name = "osdpl_neutron_floating_ips"
+        fips = self.ocm.oc.list_floating_ips()
+        metric = self.get_metric_after_refresh(
+            metric_name, self.scrape_collector
+        )
+        not_associated_metric = self.filter_metric_samples(
+            metric, {"state": "not_associated"}
+        )
+        associated_metric = self.filter_metric_samples(
+            metric, {"state": "associated"}
+        )
+        total_fips = int(self.sum_metric_samples(metric))
+        self.assertEqual(
+            int(len(fips)),
+            total_fips,
+            f"Current numbner of Fips is not correct",
+        )
+
+        self.floating_ip_create(conf.PUBLIC_NETWORK_NAME)
+
+        metric_after_create = self.get_metric_after_refresh(
+            metric_name, self.scrape_collector
+        )
+        total_fips = self.sum_metric_samples(metric_after_create)
+        self.assertEqual(
+            int(len(fips) + 1),
+            total_fips,
+            f"Current numbner of Fips is not increased",
+        )
+
+        not_associated_after_create_metric = self.filter_metric_samples(
+            metric_after_create, {"state": "not_associated"}
+        )
+        associated_after_create_metric = self.filter_metric_samples(
+            metric_after_create, {"state": "associated"}
+        )
+        self.assertEqual(
+            not_associated_metric[0].value + 1,
+            not_associated_after_create_metric[0].value,
+            f"Current numbner of not_assisiated Fips is not increased",
+        )
+
+        self.assertEqual(
+            associated_metric[0].value,
+            associated_after_create_metric[0].value,
+            "The number of associated ports is changed.",
+        )
+
+        fixed_ips = [{"subnet_id": self.subnet["id"]}]
+        port = self.port_create(self.network["id"], fixed_ips=fixed_ips)
+        fip = self.floating_ip_create(conf.PUBLIC_NETWORK_NAME)
+        self.ocm.network_floating_ip_update(
+            fip["id"], data={"port_id": port["id"]}
+        )
+        metric_after_fip_create = self.get_metric_after_refresh(
+            metric_name, self.scrape_collector
+        )
+
+        associated_after_fip_create_metric = self.filter_metric_samples(
+            metric_after_fip_create, {"state": "associated"}
+        )
+        self.assertEqual(
+            associated_metric[0].value + 1,
+            associated_after_fip_create_metric[0].value,
+            "The number of associated ports is not changed.",
+        )
+
+    def test_neutron_routers(self):
+        """Total number of routers in the cluster."""
+        metric_name = "osdpl_neutron_routers"
+        initial_metric = self.get_metric_after_refresh(
+            metric_name, self.scrape_collector
+        )
+        routers = list(self.ocm.oc.network.routers())
+        self.assertEqual(
+            int(initial_metric.samples[0].value),
+            len(routers),
+            "The initial number of routers is not correct",
+        )
+
+        router = self.router_create()
+        metric = self.get_metric_after_refresh(
+            metric_name, self.scrape_collector
+        )
+        self.assertEqual(
+            int(metric.samples[0].value),
+            len(routers) + 1,
+            "The number of routers after router create is not correct.",
+        )
+
+        self.router_delete(router)
+        metric_after_delete_router = self.get_metric_after_refresh(
+            metric_name, self.scrape_collector
+        )
+        self.assertEqual(
+            int(metric_after_delete_router.samples[0].value),
+            len(routers),
+            "The number of routers after router delete is not correct.",
+        )

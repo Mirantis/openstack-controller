@@ -1,6 +1,7 @@
 CIRROS_TEST_IMAGE_NAME = "Cirros-6.0"
 TEST_FLAVOR_NAME = "m1.extra_tiny_test"
-TEST_NETWORK_NAME = "heat-net"
+TEST_SUBNET_RANGE = "10.20.30.0/24"
+PUBLIC_NETWORK_NAME = "public"
 
 # Time in seconds to wait for a compute operation to complete. Default is 120 seconds.
 COMPUTE_TIMEOUT = 60 * 2
@@ -10,7 +11,7 @@ COMPUTE_BUILD_INTERVAL = 1
 # Time in seconds to wait for a metric value. Default is 30 seconds.
 METRIC_TIMEOUT = 45
 # Interval in seconds to check the metric value. Default is 1 second.
-METRIC_INTERVAL_TIMEOUT = 1
+METRIC_INTERVAL_TIMEOUT = 5
 
 # Time in seconds to wait for a volume operation to complete. Default is 60 seconds.
 VOLUME_TIMEOUT = 30 * 2
