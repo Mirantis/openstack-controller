@@ -109,6 +109,7 @@ class OsdplNeutronMetricCollector(base.OpenStackBaseMetricCollector):
         for port_status in self.port_statuses:
             ports[port_status] = 0
         for port in self.oc.oc.network.ports():
+            ports["total"] += 1
             port_status = port["status"].lower()
             if port_status in ports.keys():
                 ports[port_status] += 1
