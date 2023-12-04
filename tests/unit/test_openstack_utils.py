@@ -332,6 +332,7 @@ async def test_handle_masakari_host_down_node_nwl_ssh_okay(
     openstack_client_manager.return_value.network_get_agents.assert_called_once()
 
 
+@mock.patch("socket.socket")
 @mock.patch.object(openstack_utils, "OpenStackClientManager")
 @mock.patch.object(openstack_utils, "notify_masakari_host_down")
 @mock.patch("openstack_controller.openstack_utils.LOG")
