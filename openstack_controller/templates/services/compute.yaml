@@ -46,7 +46,10 @@
 {%- set cadf_audit_driver = spec.get('features', {}).get('logging', {}).get('cadf', {}).get('driver', 'messagingv2') %}
 
 {%- set libvirt_server_tls_enabled = spec.get('features', {}).get('nova', {}).get('libvirt', {}).get('tls', {}).get('enabled', false) %}
-{%- set vnc_tls_enabled = spec.get('features', {}).get('nova', {}).get('console', {}).get('novnc', {}).get('tls', {}).get('enabled', false) %}
+{%- set nova_console = spec.get('features', {}).get('nova', {}).get('console', {}) %}
+{%- set spice_enabled = nova_console.get('spice', {}).get('enabled', false) %}
+{%- set vnc_enabled = nova_console.get('novnc', {}).get('enabled', true) %}
+{%- set vnc_tls_enabled = vnc_enabled and nova_console.get('novnc', {}).get('tls', {}).get('enabled', false) %}
 # COMPUTE OVERCOMMITS
 {%- set compute_overcommits = {"cpu": 8.0, "disk": 1.6, "ram": 1.0} %}  # INTERNAL DEFAULTS
 {%- do compute_overcommits.update(spec.get('features', {}).get('nova', {}).get('allocation_ratios', {})) %}
@@ -306,8 +309,6 @@ spec:
     "ks_service",
     "nova_spiceproxy",
     "nova_scheduler",
-    "nova_novncproxy_assets",
-    "nova_spiceproxy_assets",
     "rabbit_init",
     "nova_cell_setup",
     "nova_consoleauth",
@@ -405,6 +406,11 @@ spec:
       {%- if nova_override.get('live_migration_interface') %}
                     compute:
                       vncserver_proxyclient_interface: {{ nova_override.live_migration_interface }}
+                {%- if spice_enabled %}
+                  spice:
+                    compute:
+                      server_proxyclient_interface: {{ nova_override.live_migration_interface }}
+                {%- endif %}
       {%- endif %}
     {%- endif %}
   {%- endfor %}
@@ -419,6 +425,7 @@ spec:
         # update pods with surge (when node hostport is used)
         useHostNetwork:
           novncproxy: false
+          spiceproxy: false
         probes:
           rpc_timeout: 30
           rpc_retries: 2
@@ -474,6 +481,16 @@ spec:
                 enabled: True
                 params:
                   initialDelaySeconds: 0
+          compute-spice-proxy:
+            default:
+              liveness:
+                enabled: True
+                params:
+                  initialDelaySeconds: 0
+              readiness:
+                enabled: True
+                params:
+                  initialDelaySeconds: 0
           scheduler:
             default:
               liveness:
@@ -519,9 +536,11 @@ spec:
       {%- if baremetal_enabled %}
         statefulset_compute_ironic: true
       {%- endif %}
-      {%- if vnc_tls_enabled %}
-        secret_novncproxy_tls: true
-      {%- endif %}
+        secret_novncproxy_tls: {{ vnc_tls_enabled }}
+        service_ingress_novncproxy: {{ vnc_enabled }}
+        ingress_novncproxy: {{ vnc_enabled }}
+        service_ingress_spiceproxy: {{ spice_enabled }}
+        ingress_spiceproxy: {{ spice_enabled }}
 {%- if spec.features.network_policies.enabled %}
       network_policy:
 {% include 'base/network_policies/compute.yaml' %}
@@ -633,6 +652,7 @@ spec:
           scheme:
             default: http
             public: https
+{%- if vnc_enabled %}
         compute_novnc_proxy:
           host_fqdn_override:
           {%- if vnc_tls_enabled %}
@@ -675,6 +695,38 @@ spec:
           scheme:
             default: http
             public: https
+{%- endif %}
+{%- if spice_enabled %}
+        compute_spice_proxy:
+          host_fqdn_override:
+            public:
+              host: spiceproxy.{{ spec.public_domain_name }}
+              tls:
+                ca: |
+{{ spec.features.ssl.public_endpoints.ca_cert | indent(width=18, first=True) }}
+                crt: |
+{{ spec.features.ssl.public_endpoints.api_cert | indent(width=18, first=True) }}
+                key: |
+{{ spec.features.ssl.public_endpoints.api_key | indent(width=18, first=True) }}
+          hosts:
+            default: nova-spiceproxy
+            public:
+              host: spiceproxy
+              tls:
+                ca: |
+{{ spec.features.ssl.public_endpoints.ca_cert | indent(width=18, first=True) }}
+                crt: |
+{{ spec.features.ssl.public_endpoints.api_cert | indent(width=18, first=True) }}
+                key: |
+{{ spec.features.ssl.public_endpoints.api_key | indent(width=18, first=True) }}
+          port:
+            spice_proxy:
+              default: 6082
+              public: 443
+          scheme:
+            default: http
+            public: https
+{%- endif %}
         compute_metadata:
           host_fqdn_override:
             public:
@@ -892,17 +944,20 @@ spec:
         hypervisor:
           host_interface: {{ spec.features.nova.live_migration_interface }}
       {%- endif %}
-    {%- if spec.get('features', {}).get('nova', {}).get('live_migration_interface') or vnc_tls_enabled %}
       console:
-        novnc:
-    {%- endif %}
-        {%- if vnc_tls_enabled %}
-          tls_enabled: true
+        spice:
+          enabled: {{ spice_enabled }}
+        {%- if spec.get('features', {}).get('nova', {}).get('live_migration_interface') %}
+          compute:
+            server_proxyclient_interface: {{ spec.features.nova.live_migration_interface }}
         {%- endif %}
-      {%- if spec.get('features', {}).get('nova', {}).get('live_migration_interface') %}
+        novnc:
+          enabled: {{ vnc_enabled }}
+          tls_enabled: {{ vnc_tls_enabled }}
+        {%- if spec.get('features', {}).get('nova', {}).get('live_migration_interface') %}
           compute:
             vncserver_proxyclient_interface: {{ spec.features.nova.live_migration_interface }}
-      {%- endif %}
+        {%- endif %}
       network:
         core_plugin: {{ neutron_backend }}
         {%- if neutron_backend == 'tungstenfabric' %}

@@ -79,6 +79,11 @@ features:
         pool_start: '192.168.0.1'
         pool_end: '192.168.0.254'
   nova:
+    console:
+      novnc:
+        enabled: false
+      spice:
+        enabled: true
     images:
       backend: local
     live_migration_interface: ens3

@@ -62,8 +62,6 @@ spec:
           ks_service: ks-service:latest
           nova_spiceproxy: nova-spiceproxy:latest
           nova_scheduler: nova-scheduler:latest
-          nova_novncproxy_assets: nova-novncproxy-assets:latest
-          nova_spiceproxy_assets: nova-spiceproxy-assets:latest
           rabbit_init: rabbit-init:latest
           nova_cell_setup: nova-cell-setup:latest
           nova_consoleauth: nova-consoleauth:latest
@@ -79,6 +77,7 @@ spec:
           compute: false
         useHostNetwork:
           novncproxy: false
+          spiceproxy: false
         probes:
           rpc_timeout: 30
           rpc_retries: 2
@@ -134,6 +133,16 @@ spec:
                 enabled: true
                 params:
                   initialDelaySeconds: 0
+          compute-spice-proxy:
+            default:
+              liveness:
+                enabled: true
+                params:
+                  initialDelaySeconds: 0
+              readiness:
+                enabled: true
+                params:
+                  initialDelaySeconds: 0
           scheduler:
             default:
               liveness:
@@ -170,9 +179,14 @@ spec:
         job_ks_placement_user: false
         pdb_placement: false
         secret_keystone_placement: false
+        secret_novncproxy_tls: false
         service_ingress_placement: false
         service_placement: false
         secret_ca_bundle: true
+        ingress_novncproxy: false
+        ingress_spiceproxy: true
+        service_ingress_novncproxy: false
+        service_ingress_spiceproxy: true
       network_policy:
         metadata:
           spec:
@@ -228,12 +242,12 @@ spec:
               ports:
               - port: 8774
                 protocol: TCP
-        novncproxy:
+        spiceproxy:
           spec:
             podSelector:
               matchLabels:
                 application: nova
-                component: novnc-proxy
+                component: spice-proxy
             policyTypes:
             - Ingress
             ingress:
@@ -413,10 +427,10 @@ spec:
           scheme:
             default: http
             public: https
-        compute_novnc_proxy:
+        compute_spice_proxy:
           host_fqdn_override:
             public:
-              host: novncproxy.it.just.works
+              host: spiceproxy.it.just.works
               tls:
                 ca: 'TEST CA
                 
@@ -428,9 +442,9 @@ spec:
                 
                   '
           hosts:
-            default: nova-novncproxy
+            default: nova-spiceproxy
             public:
-              host: novncproxy
+              host: spiceproxy
               tls:
                 ca: 'TEST CA
 
@@ -442,8 +456,8 @@ spec:
 
                   '
           port:
-            novnc_proxy:
-              default: 6080
+            spice_proxy:
+              default: 6082
               public: 443
           scheme:
             default: http
@@ -564,8 +578,14 @@ spec:
           host_interface: ens3
       console:
         novnc:
+          enabled: false
+          tls_enabled: false
           compute:
             vncserver_proxyclient_interface: ens3
+        spice:
+          enabled: true
+          compute:
+            server_proxyclient_interface: ens3
       network:
         core_plugin: ml2
         sshd:

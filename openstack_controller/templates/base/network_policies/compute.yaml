@@ -5,6 +5,10 @@
 {%- set nova_api = "compute:nova:Deployment:nova-api-osapi" %}
 {%- set nova_metadata = "compute:nova:Deployment:nova-api-metadata" %}
 {%- set nova_novnc = "compute:nova:Deployment:nova-novncproxy" %}
+{%- set nova_spice = "compute:nova:Deployment:nova-spiceproxy" %}
+{%- set nova_console = spec.get('features', {}).get('nova', {}).get('console', {}) %}
+{%- set spice_enabled = nova_console.get('spice', {}).get('enabled', false) %}
+{%- set vnc_enabled = nova_console.get('novnc', {}).get('enabled', true) %}
         metadata:
           spec:
             podSelector:
@@ -33,6 +37,7 @@
 {{ from_pod_networks(pod_networks, service_childs[nova_api].get_np_ports(["n-api"])) | indent(16) }}
               - from:
 {{ from_namespaces(api_ns_list, service_childs[nova_api].get_np_ports(["n-api"])) | indent(16) }}
+{%- if vnc_enabled %}
         novncproxy:
           spec:
             podSelector:
@@ -42,3 +47,15 @@
             - Ingress
             ingress:
 {{ network_policies["ingress"][nova_novnc] | toyaml | indent(14, first=True) }}
+{%- endif %}
+{%- if spice_enabled %}
+        spiceproxy:
+          spec:
+            podSelector:
+              matchLabels:
+{{ service_childs[nova_spice].get_pod_labels() | toyaml | indent(16, first=True) }}
+            policyTypes:
+            - Ingress
+            ingress:
+{{ network_policies["ingress"][nova_spice] | toyaml | indent(14, first=True) }}
+{%- endif %}

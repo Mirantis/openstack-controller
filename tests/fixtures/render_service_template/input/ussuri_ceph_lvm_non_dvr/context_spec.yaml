@@ -38,6 +38,11 @@ features:
         range: 10.11.12.0/24
     tunnel_interface: ens3
   nova:
+    console:
+      novnc:
+        enabled: false
+      spice:
+        enabled: false
     images:
       backend: lvm
       lvm:

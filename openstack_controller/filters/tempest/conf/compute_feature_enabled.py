@@ -242,7 +242,7 @@ class ComputeFeatureEnabled(base_section.BaseSection):
 
     @property
     def spice_console(self):
-        pass
+        return self.get_values_item("nova", "console.spice.enabled")
 
     @property
     def suspend(self):
@@ -257,9 +257,7 @@ class ComputeFeatureEnabled(base_section.BaseSection):
 
     @property
     def vnc_console(self):
-        if self.is_service_enabled("ironic"):
-            return False
-        return True
+        return self.get_values_item("nova", "console.novnc.enabled")
 
     @property
     def vnc_server_header(self):

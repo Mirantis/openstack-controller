@@ -416,12 +416,10 @@ spec:
           nova_db_sync_db: nova-db-sync-db:latest
           nova_db_sync_online: nova-db-sync-online:latest
           nova_novncproxy: nova-novncproxy:latest
-          nova_novncproxy_assets: nova-novncproxy-assets:latest
           nova_placement: nova-placement:latest
           nova_scheduler: nova-scheduler:latest
           nova_service_cleaner: nova-service-cleaner:latest
           nova_spiceproxy: nova-spiceproxy:latest
-          nova_spiceproxy_assets: nova-spiceproxy-assets:latest
           rabbit_init: rabbit-init:latest
           test: test:latest
       jobs:
@@ -457,10 +455,15 @@ spec:
         pdb_placement: false
         secret_ca_bundle: true
         secret_keystone_placement: false
+        secret_novncproxy_tls: false
         service_ingress_placement: false
         service_placement: false
         cron_job_db_purge: true
         ceph_conf: true
+        ingress_novncproxy: true
+        ingress_spiceproxy: false
+        service_ingress_novncproxy: true
+        service_ingress_spiceproxy: false
       network:
         core_plugin: ml2
         sshd:
@@ -523,6 +526,16 @@ spec:
                 enabled: true
                 params:
                   initialDelaySeconds: 0
+          compute-spice-proxy:
+            default:
+              liveness:
+                enabled: true
+                params:
+                  initialDelaySeconds: 0
+              readiness:
+                enabled: true
+                params:
+                  initialDelaySeconds: 0
           rpc_retries: 2
           rpc_timeout: 30
           scheduler:
@@ -544,9 +557,16 @@ spec:
           placement: 3
         useHostNetwork:
           novncproxy: false
+          spiceproxy: false
         use_fqdn:
           compute: false
       console:
         novnc:
+          enabled: true
+          tls_enabled: false
           compute:
             vncserver_proxyclient_interface: ens3
+        spice:
+          enabled: false
+          compute:
+            server_proxyclient_interface: ens3

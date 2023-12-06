@@ -145,7 +145,6 @@ nova:
           - {{ to_child_object("memcached", "memcached", "StatefulSet", "openstack-memcached-memcached", ["memcached"]) | indent(12)}}
       hash_fields: []
       images:
-      - nova_novncproxy_assets
       - nova_novncproxy
       manifest: deployment_novncproxy
       pod_labels:
@@ -154,6 +153,26 @@ nova:
       ports:
       - port: 6080
         name: n-novnc
+        protocol: TCP
+    nova-spiceproxy:
+      connections:
+        egress:
+          - {{ to_child_object("compute", "rabbitmq", "StatefulSet", "openstack-nova-rabbitmq-rabbitmq", ["amqp"]) | indent(12)}}
+          - {{ to_child_object("coordination", "etcd", "StatefulSet", "etcd-etcd", ["client"]) | indent(12)}}
+          - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
+          - {{ to_child_object("database", "mariadb", "StatefulSet", "mariadb-server", ["mysql"]) | indent(12)}}
+          - {{ to_child_object("messaging", "rabbitmq", "StatefulSet", "openstack-rabbitmq-rabbitmq", ["amqp"]) | indent(12)}}
+          - {{ to_child_object("memcached", "memcached", "StatefulSet", "openstack-memcached-memcached", ["memcached"]) | indent(12)}}
+      hash_fields: []
+      images:
+      - nova_spiceproxy
+      manifest: deployment_spiceproxy
+      pod_labels:
+        application: nova
+        component: spice-proxy
+      ports:
+      - port: 6082
+        name: n-spice
         protocol: TCP
 {%- if spec.openstack_version in ['queens', 'rocky', 'stein'] %}
     nova-placement-api:
