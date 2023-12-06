@@ -100,3 +100,22 @@ def wait_for_server_status(openstack_client, server, status):
             )
             LOG.error(message)
             raise TimeoutError(message)
+
+
+def wait_for_port_status(openstack_client, port, status):
+    start_time = int(time.time())
+    timeout = conf.SERVER_TIMEOUT
+    while True:
+        port = openstack_client.oc.network.get_port(port.id)
+        if port.status.upper() == status.upper():
+            LOG.debug(f"Port {port.id} has status: {port.status}.")
+            return
+        time.sleep(conf.SERVER_READY_INTERVAL)
+        timed_out = int(time.time()) - start_time
+        if timed_out >= timeout:
+            message = (
+                f"Port {port.id} failed to reach {status} "
+                f"status within the required time {timeout}"
+            )
+            LOG.error(message)
+            raise TimeoutError(message)

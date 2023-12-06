@@ -254,6 +254,11 @@ class OpenStackClientManager:
             if rp["name"].split(".")[0] == host:
                 self.oc.placement.delete_resource_provider(rp)
 
+    def network_floating_ip_update(self, fip_id, data):
+        return self.oc.network.put(
+            f"/floatingips/{fip_id}/", json={"floatingip": data}
+        ).json()
+
 
 async def notify_masakari_host_down(node):
     try:

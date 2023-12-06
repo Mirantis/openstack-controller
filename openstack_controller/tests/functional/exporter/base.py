@@ -67,15 +67,21 @@ class BaseFunctionalExporterTestCase(base.BaseFunctionalTestCase):
 
     def get_metric_after_refresh(self, metric_name, scrape_collector):
         current_time = time.time()
-        all_metrics = list(self.metric_families)
-        scrape_collector_metrics = self.get_metric(
-            "osdpl_scrape_collector_start_timestamp", all_metrics
-        )
-        start_time = self.filter_metric_samples(
-            scrape_collector_metrics, {"collector": scrape_collector}
-        )
         while True:
-            if start_time[0].value >= current_time:
+            all_metrics = list(self.metric_families)
+            scrape_collector_metrics = self.get_metric(
+                "osdpl_scrape_collector_start_timestamp", all_metrics
+            )
+            start_time = self.filter_metric_samples(
+                scrape_collector_metrics, {"collector": scrape_collector}
+            )[0].value
+            end_time = self.filter_metric_samples(
+                self.get_metric(
+                    "osdpl_scrape_collector_end_timestamp", all_metrics
+                ),
+                {"collector": scrape_collector},
+            )[0].value
+            if start_time > current_time and end_time > current_time:
                 LOG.debug(
                     f"Metrics for collector {scrape_collector} were refreshed in exporter after updates in openstack API."
                 )
@@ -88,13 +94,12 @@ class BaseFunctionalExporterTestCase(base.BaseFunctionalTestCase):
             if timed_out:
                 logging.error(message)
                 raise TimeoutError(message)
-            all_metrics = list(self.metric_families)
-            scrape_collector_metrics = self.get_metric(
-                "osdpl_scrape_collector_start_timestamp", all_metrics
-            )
-            start_time = self.filter_metric_samples(
-                scrape_collector_metrics, {"collector": scrape_collector}
-            )
+
+    def sum_metric_samples(self, metric):
+        res = 0
+        for sample in metric.samples:
+            res += sample.value
+        return res
 
     def test_known_metrics_present_and_not_none(self):
         all_metrics = list(self.metric_families)
