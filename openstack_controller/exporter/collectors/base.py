@@ -225,6 +225,7 @@ class BaseMetricsCollector(object):
 
         start = datetime.utcnow()
         self.scrape_start_timestamp = start.timestamp()
+        self.scrape_end_timestamp = 0
         try:
             self.osdpl = kube.get_osdpl()
             self.update_samples()
