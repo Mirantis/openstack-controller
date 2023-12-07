@@ -168,8 +168,6 @@ async def cluster_maintenance_request_change_handler(body, **kwargs):
     LOG.info(
         f"The cluster maintenance request {name} changes are: {kwargs['diff']}"
     )
-    if not settings.OSCTL_NODE_MAINTENANCE_ENABLED:
-        return
     osdpl = kube.get_osdpl()
     if not osdpl or not osdpl.exists():
         LOG.info("Can't find OpenStackDeployment object")
@@ -216,9 +214,6 @@ async def cluster_maintenance_request_change_handler(body, **kwargs):
 async def cluster_maintenance_request_delete_handler(body, **kwargs):
     name = body["metadata"]["name"]
     LOG.info(f"Got cluster maintenance request delete event {name}")
-    # NOTE(vsaienko): we don't care about maintenance, just ignore event.
-    if not settings.OSCTL_NODE_MAINTENANCE_ENABLED:
-        return
 
     osdpl = kube.get_osdpl()
     if not osdpl or not osdpl.exists():
@@ -238,8 +233,6 @@ async def node_deletion_request_change_handler(body, **kwargs):
     name = body["metadata"]["name"]
     node_name = maintenance_node_name(body)
     LOG.info(f"Got node deletion request change event {name}")
-    if not settings.OSCTL_NODE_MAINTENANCE_ENABLED:
-        return
 
     osdpl = kube.get_osdpl()
     nwl = maintenance.NodeWorkloadLock.get_resource(node_name)
@@ -273,8 +266,6 @@ async def node_workloadlock_request_delete_handler(body, **kwargs):
     name = body["metadata"]["name"]
     node_name = body["spec"]["nodeName"]
     LOG.info(f"Got nodeworkloadlock deletion request change event {name}")
-    if not settings.OSCTL_NODE_MAINTENANCE_ENABLED:
-        return
 
     if not body["spec"].get("controllerName") == "openstack":
         return

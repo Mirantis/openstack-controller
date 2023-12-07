@@ -83,9 +83,6 @@ async def node_change_handler(body, reason, **kwargs):
     name = body["metadata"]["name"]
     LOG.info(f"Got event {reason} for node {name}")
     LOG.info(f"The node {name} changes are: {kwargs['diff']}")
-    if not settings.OSCTL_NODE_MAINTENANCE_ENABLED:
-        LOG.warning("The maintenance API is not enabled.")
-        return
     kube_api = kube.kube_client()
     node = kube.Node(kube_api, body)
     nwl = maintenance.NodeWorkloadLock.get_resource(name)

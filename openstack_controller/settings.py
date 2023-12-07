@@ -208,11 +208,6 @@ if OSCTL_HEARTBEAT_INTERVAL:
         CURRENT_NUMBER_OF_TASKS = event_queue_var.get().qsize()
 
 
-# Whether node maintenance controller is enabled or not
-OSCTL_NODE_MAINTENANCE_ENABLED = bool_from_env(
-    "OSCTL_NODE_MAINTENANCE_ENABLED", True
-)
-
 # The version of curren cluster release, example 8.4.0-rc+22.1
 OSCTL_CLUSTER_RELEASE = os.environ.get("OSCTL_CLUSTER_RELEASE", "")
 

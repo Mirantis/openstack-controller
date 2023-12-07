@@ -279,9 +279,6 @@ async def handle(body, meta, spec, logger, reason, **kwargs):
     cwl = maintenance.ClusterWorkloadLock.get_resource(name)
     cwl.present()
 
-    if not settings.OSCTL_NODE_MAINTENANCE_ENABLED:
-        cwl.set_state_inactive()
-
     check_handling_allowed(kwargs["old"], kwargs["new"], reason)
 
     secrets.OpenStackAdminSecret(namespace).ensure()
