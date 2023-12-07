@@ -78,7 +78,7 @@ class NovaCollectorFunctionalTestCase(base.BaseFunctionalExporterTestCase):
         )
 
 
-@pytest.mark.xdist_group("exporter-server")
+@pytest.mark.xdist_group("exporter-compute-network")
 class NovaCollectorInstancesFunctionalTestCase(
     base.BaseFunctionalExporterTestCase
 ):

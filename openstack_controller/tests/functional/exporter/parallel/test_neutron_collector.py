@@ -4,7 +4,7 @@ from openstack_controller.tests.functional.exporter import base
 from openstack_controller.tests.functional import config as conf
 
 
-@pytest.mark.xdist_group("exporter-neutron")
+@pytest.mark.xdist_group("exporter-compute-network")
 class NeutronCollectorFunctionalTestCase(base.BaseFunctionalExporterTestCase):
     scrape_collector = "osdpl_neutron"
 
