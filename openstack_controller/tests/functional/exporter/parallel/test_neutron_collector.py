@@ -145,6 +145,41 @@ class NeutronCollectorFunctionalTestCase(base.BaseFunctionalExporterTestCase):
             "The number of ports after port delete is not correct.",
         )
 
+    def check_fips_metrics(self, total, associated, not_associated, phase):
+        metric_name = "osdpl_neutron_floating_ips"
+        metric = self.get_metric_after_refresh(
+            metric_name, self.scrape_collector
+        )
+        not_associated_metric = self.filter_metric_samples(
+            metric, {"state": "not_associated"}
+        )
+        associated_metric = self.filter_metric_samples(
+            metric, {"state": "associated"}
+        )
+        total_fips = int(self.sum_metric_samples(metric))
+        self.assertEqual(
+            total_fips,
+            total,
+            f"{phase}: The numbner of Fips is not correct",
+        )
+
+        self.assertEqual(
+            not_associated_metric[0].value,
+            not_associated,
+            f"{phase}: The numbner of not associated FIPs is not correct.",
+        )
+
+        self.assertEqual(
+            associated_metric[0].value,
+            associated,
+            f"{phase}: The numbner of associated FIPs is not correct.",
+        )
+        self.assertEqual(
+            associated_metric[0].value + not_associated_metric[0].value,
+            total,
+            f"{phase}: The summ of associated and not associated does not match expected total.",
+        )
+
     def test_neutron_floating_ips(self):
         """Total number FIPs
 
@@ -160,71 +195,28 @@ class NeutronCollectorFunctionalTestCase(base.BaseFunctionalExporterTestCase):
         #. Check that number associated fips increased
 
         """
-        metric_name = "osdpl_neutron_floating_ips"
-        fips = self.ocm.oc.list_floating_ips()
-        metric = self.get_metric_after_refresh(
-            metric_name, self.scrape_collector
-        )
-        not_associated_metric = self.filter_metric_samples(
-            metric, {"state": "not_associated"}
-        )
-        associated_metric = self.filter_metric_samples(
-            metric, {"state": "associated"}
-        )
-        total_fips = int(self.sum_metric_samples(metric))
-        self.assertEqual(
-            int(len(fips)),
-            total_fips,
-            f"Current numbner of Fips is not correct",
+        fips = len(self.ocm.oc.list_floating_ips())
+        fips_associated = self.floating_ips_associated()
+
+        self.check_fips_metrics(
+            fips, fips_associated, fips - fips_associated, "Initial"
         )
 
-        self.floating_ip_create(conf.PUBLIC_NETWORK_NAME)
+        fip = self.floating_ip_create(conf.PUBLIC_NETWORK_NAME)
 
-        metric_after_create = self.get_metric_after_refresh(
-            metric_name, self.scrape_collector
-        )
-        total_fips = self.sum_metric_samples(metric_after_create)
-        self.assertEqual(
-            int(len(fips) + 1),
-            total_fips,
-            f"Current numbner of Fips is not increased",
-        )
-
-        not_associated_after_create_metric = self.filter_metric_samples(
-            metric_after_create, {"state": "not_associated"}
-        )
-        associated_after_create_metric = self.filter_metric_samples(
-            metric_after_create, {"state": "associated"}
-        )
-        self.assertEqual(
-            not_associated_metric[0].value + 1,
-            not_associated_after_create_metric[0].value,
-            f"Current numbner of not_assisiated Fips is not increased",
-        )
-
-        self.assertEqual(
-            associated_metric[0].value,
-            associated_after_create_metric[0].value,
-            "The number of associated ports is changed.",
+        fips = fips + 1
+        self.check_fips_metrics(
+            fips, fips_associated, fips - fips_associated, "Create"
         )
 
         fixed_ips = [{"subnet_id": self.subnet["id"]}]
         port = self.port_create(self.network["id"], fixed_ips=fixed_ips)
-        fip = self.floating_ip_create(conf.PUBLIC_NETWORK_NAME)
         self.ocm.network_floating_ip_update(
             fip["id"], data={"port_id": port["id"]}
         )
-        metric_after_fip_create = self.get_metric_after_refresh(
-            metric_name, self.scrape_collector
-        )
 
-        associated_after_fip_create_metric = self.filter_metric_samples(
-            metric_after_fip_create, {"state": "associated"}
-        )
-        self.assertEqual(
-            associated_metric[0].value + 1,
-            associated_after_fip_create_metric[0].value,
-            "The number of associated ports is not changed.",
+        self.check_fips_metrics(
+            fips, fips_associated + 1, fips - fips_associated - 1, "Associate"
         )
 
     def test_neutron_routers(self):
