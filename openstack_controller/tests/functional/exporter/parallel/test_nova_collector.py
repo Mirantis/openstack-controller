@@ -13,7 +13,7 @@ class NovaCollectorFunctionalTestCase(base.BaseFunctionalExporterTestCase):
         "osdpl_nova_hypervisor_instances": {"labels": ["host", "zone"]},
         # "osdpl_nova_aggregate_hosts": {"labels": ["name"]},
         # "osdpl_nova_host_aggregate_info": {"labels": ["hosts", "name"]},
-        # "osdpl_nova_availability_zone_info": {"labels": ["zone"]},
+        "osdpl_nova_availability_zone_info": {"labels": ["zone"]},
         # "osdpl_nova_availability_zone_hosts": {"labels": ["zone"]},
         # "osdpl_nova_availability_zone_instances": {"labels": ["zone"]},
         # "osdpl_nova_aggregate_instances": {"osdpl_nova_aggregate_instances": ["name"]},
@@ -184,4 +184,50 @@ class NovaCollectorInstancesFunctionalTestCase(
             len(error_servers),
             f"Current numbers of error servers in exporter's metrics are {int(metric.samples[0].value)}."
             f"Expected numbers of active servers: {len(error_servers)}.",
+        )
+
+    def test_nova_availability_zone_info(self):
+        """Information about availability zones in the cluster.
+
+        **Steps**
+
+        #. Get `osdpl_nova_availability_zone_info` metric with initial number
+        #. Add additional availability zone
+        #. Check that new availablity zone appear in the samples
+        """
+        metric_name = "osdpl_nova_availability_zone_info"
+        azs = list(self.ocm.oc.compute.availability_zones())
+        initial_metric = self.get_metric(metric_name)
+        self.assertEqual(
+            len(initial_metric.samples),
+            len(azs),
+            "The initial number of availability zones is not correct.",
+        )
+
+        aggregate = self.aggregate_create(
+            name="test_nova_availability_zone_info",
+            availability_zone="test_nova_availability_zone_info",
+        )
+        metric_after_create = self.get_metric_after_refresh(
+            metric_name, self.scrape_collector
+        )
+
+        # NOTE(vsienko): empty az is not show on API LP: 2045888
+        expected_azs = len(azs)
+        self.assertEqual(
+            len(metric_after_create.samples),
+            expected_azs,
+            "The number of availability zones after create is not correct.",
+        )
+
+        self.aggregate_delete(aggregate["name"])
+
+        metric_after_delete = self.get_metric_after_refresh(
+            metric_name, self.scrape_collector
+        )
+
+        self.assertEqual(
+            len(metric_after_delete.samples),
+            len(azs),
+            "The number of availability zones after delete is not correct.",
         )

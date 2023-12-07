@@ -255,3 +255,24 @@ class BaseFunctionalTestCase(TestCase):
         )
 
         return res
+
+    @classmethod
+    def aggregate_delete(cls, name):
+        cls.ocm.oc.delete_aggregate(name)
+
+    @classmethod
+    def aggregate_create(cls, name, availability_zone=None):
+        aggregate = cls.ocm.oc.compute.create_aggregate(
+            name=name, availability_zone=availability_zone
+        )
+        cls.addClassCleanup(cls.aggregate_delete, name)
+        return aggregate
+
+    @classmethod
+    def aggregate_remove_host(cls, name, host):
+        cls.ocm.oc.compute.remove_host_from_aggregate(name, host)
+
+    @classmethod
+    def aggregate_add_host(cls, name, host):
+        cls.ocm.oc.compute.add_host_to_aggregate(name, host)
+        cls.addClassCleanup(cls.aggregate_remove_host, name, host)
