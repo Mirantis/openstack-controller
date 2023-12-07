@@ -244,6 +244,9 @@ spec:
           config:
             global:
               mon_host: {{ ceph.mon_host }}
+          keyrings:
+            {{ ceph.glance.username }}:
+              key: {{ ceph.glance.keyring }}
 {%- else %}
           enabled: false
 {%- endif %}
