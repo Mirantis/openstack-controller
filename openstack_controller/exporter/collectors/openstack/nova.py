@@ -77,7 +77,7 @@ class OsdplNovaMetricCollector(base.OpenStackBaseMetricCollector):
         res = []
         for service in self.cache.get("services", []):
             if (
-                service.get("zone", "nova") == zone
+                service.get("availability_zone", "nova") == zone
                 and service.get("binary") == "nova-compute"
             ):
                 res.append(service["host"])
