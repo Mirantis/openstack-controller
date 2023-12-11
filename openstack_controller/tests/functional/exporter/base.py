@@ -66,6 +66,23 @@ class BaseFunctionalExporterTestCase(base.BaseFunctionalTestCase):
         return res
 
     def get_metric_after_refresh(self, metric_name, scrape_collector):
+        collector_metrics = self.get_collector_metrics(scrape_collector)
+        return self.get_metric(metric_name, collector_metrics)
+
+    def sum_metric_samples(self, metric):
+        res = 0
+        for sample in metric.samples:
+            res += sample.value
+        return res
+
+    def filter_collector_metrics(self, metrics, scrape_collector):
+        def is_collector_metric(metric):
+            if metric.name.startswith(scrape_collector):
+                return True
+
+        return filter(is_collector_metric, metrics)
+
+    def get_collector_metrics(self, scrape_collector):
         current_time = time.time()
         while True:
             all_metrics = list(self.metric_families)
@@ -85,7 +102,9 @@ class BaseFunctionalExporterTestCase(base.BaseFunctionalTestCase):
                 LOG.debug(
                     f"Metrics for collector {scrape_collector} were refreshed in exporter after updates in openstack API."
                 )
-                return self.get_metric(metric_name, all_metrics)
+                return self.filter_collector_metrics(
+                    all_metrics, scrape_collector
+                )
             time.sleep(conf.METRIC_INTERVAL_TIMEOUT)
             timed_out = (
                 int(time.time()) - int(current_time) >= conf.METRIC_TIMEOUT
@@ -94,12 +113,6 @@ class BaseFunctionalExporterTestCase(base.BaseFunctionalTestCase):
             if timed_out:
                 logging.error(message)
                 raise TimeoutError(message)
-
-    def sum_metric_samples(self, metric):
-        res = 0
-        for sample in metric.samples:
-            res += sample.value
-        return res
 
     def get_resource_provider_inventories(self, hypervisor):
         return self.ocm.oc.placement.get(

@@ -40,6 +40,16 @@ logging_old_factory = logging.getLogRecordFactory()
 LOG = logging.getLogger(__name__)
 
 
+def suppress404(func):
+    def inner(*args, **kwargs):
+        try:
+            func(*args, **kwargs)
+        except openstack.exceptions.ResourceNotFound:
+            pass
+
+    return inner
+
+
 class BaseFunctionalTestCase(TestCase):
     @classmethod
     def setUpClass(cls):
@@ -86,27 +96,33 @@ class BaseFunctionalTestCase(TestCase):
         flavorRef=None,
         imageRef=None,
         networks="none",
+        availability_zone=None,
+        host=None,
     ):
+        kwargs = {"networks": networks}
         if name is None:
-            name = data_utils.rand_name()
+            kwargs["name"] = data_utils.rand_name()
         if flavorRef is None:
-            flavorRef = cls.ocm.oc.compute.find_flavor(conf.TEST_FLAVOR_NAME)
+            kwargs["flavorRef"] = cls.ocm.oc.compute.find_flavor(
+                conf.TEST_FLAVOR_NAME
+            ).id
         if imageRef is None:
-            imageRef = cls.ocm.oc.get_image_id(conf.CIRROS_TEST_IMAGE_NAME)
+            kwargs["imageRef"] = cls.ocm.oc.get_image_id(
+                conf.CIRROS_TEST_IMAGE_NAME
+            )
+        if availability_zone:
+            kwargs["availability_zone"] = availability_zone
+        if host:
+            kwargs["host"] = host
 
-        server = cls.ocm.oc.compute.create_server(
-            name=name,
-            imageRef=imageRef,
-            flavorRef=flavorRef.id,
-            networks=networks,
-            wait=wait,
-        )
+        server = cls.ocm.oc.compute.create_server(**kwargs)
         if wait is True:
             waiters.wait_for_server_status(cls.ocm, server, status="ACTIVE")
         cls.addClassCleanup(cls.server_delete, server)
         return server
 
     @classmethod
+    @suppress404
     def server_delete(cls, server, wait=True):
         return cls.ocm.oc.delete_server(server.id, wait=wait)
 
@@ -128,6 +144,7 @@ class BaseFunctionalTestCase(TestCase):
         return network
 
     @classmethod
+    @suppress404
     def network_delete(cls, network):
         return cls.ocm.oc.network.delete_network(network)
 
@@ -149,6 +166,7 @@ class BaseFunctionalTestCase(TestCase):
         return subnet
 
     @classmethod
+    @suppress404
     def subnet_delete(cls, subnet):
         return cls.ocm.oc.network.delete_subnet(subnet)
 
@@ -177,6 +195,7 @@ class BaseFunctionalTestCase(TestCase):
         return port
 
     @classmethod
+    @suppress404
     def port_delete(cls, port):
         return cls.ocm.oc.network.delete_port(port)
 
@@ -188,6 +207,7 @@ class BaseFunctionalTestCase(TestCase):
         return fip
 
     @classmethod
+    @suppress404
     def floating_ip_delete(cls, fip_id):
         cls.ocm.oc.delete_floating_ip(fip_id)
 
@@ -208,6 +228,7 @@ class BaseFunctionalTestCase(TestCase):
         return res
 
     @classmethod
+    @suppress404
     def router_delete(cls, router_id):
         for port in cls.ocm.oc.network.ports(device_id=router_id):
             try:
@@ -289,6 +310,7 @@ class BaseFunctionalTestCase(TestCase):
         return volume
 
     @classmethod
+    @suppress404
     def volume_delete(cls, volume):
         return cls.ocm.oc.delete_volume(volume.id)
 
@@ -313,6 +335,8 @@ class BaseFunctionalTestCase(TestCase):
     def snapshot_volume_delete(cls, snapshot):
         return cls.ocm.oc.delete_volume_snapshot(snapshot.id)
 
+    @classmethod
+    @suppress404
     def aggregate_delete(cls, name):
         cls.ocm.oc.delete_aggregate(name)
 
@@ -325,8 +349,18 @@ class BaseFunctionalTestCase(TestCase):
         return aggregate
 
     @classmethod
+    @suppress404
     def aggregate_remove_host(cls, name, host):
         cls.ocm.oc.compute.remove_host_from_aggregate(name, host)
+
+    @classmethod
+    @suppress404
+    def aggregate_remove_hosts(cls, name):
+        aggregate = cls.ocm.oc.compute.get_aggregate(name)
+        for host in aggregate["hosts"]:
+            cls.ocm.oc.compute.remove_host_from_aggregate(
+                aggregate["id"], host
+            )
 
     @classmethod
     def aggregate_add_host(cls, name, host):

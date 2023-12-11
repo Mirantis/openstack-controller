@@ -1,7 +1,8 @@
+from parameterized import parameterized
 import pytest
 
 from openstack_controller.tests.functional.exporter import base
-from parameterized import parameterized
+from openstack_controller.tests.functional import data_utils
 
 
 class NovaCollectorFunctionalTestCase(base.BaseFunctionalExporterTestCase):
@@ -15,8 +16,8 @@ class NovaCollectorFunctionalTestCase(base.BaseFunctionalExporterTestCase):
         # "osdpl_nova_aggregate_hosts": {"labels": ["name"]},
         # "osdpl_nova_host_aggregate_info": {"labels": ["hosts", "name"]},
         "osdpl_nova_availability_zone_info": {"labels": ["zone"]},
-        # "osdpl_nova_availability_zone_hosts": {"labels": ["zone"]},
-        # "osdpl_nova_availability_zone_instances": {"labels": ["zone"]},
+        "osdpl_nova_availability_zone_hosts": {"labels": ["zone"]},
+        "osdpl_nova_availability_zone_instances": {"labels": ["zone"]},
         # "osdpl_nova_aggregate_instances": {"osdpl_nova_aggregate_instances": ["name"]},
         "osdpl_nova_hypervisor_vcpu": {"labels": ["host", "zone"]},
         "osdpl_nova_hypervisor_vcpu_used": {"labels": ["host", "zone"]},
@@ -45,14 +46,14 @@ class NovaCollectorFunctionalTestCase(base.BaseFunctionalExporterTestCase):
         # "osdpl_nova_aggregate_memory_mb": {"labels": ["name"]},
         # "osdpl_nova_aggregate_memory_mb_used": {"labels": ["name"]},
         # "osdpl_nova_aggregate_memory_mb_free": {"labels": ["name"]},
-        # "osdpl_nova_availability_zone_vcpu_used": {"labels": ["zone"]},
-        # "osdpl_nova_availability_zone_vcpu_free": {"labels": ["zone"]},
-        # "osdpl_nova_availability_zone_disk_gb": {"labels": ["zone"]},
-        # "osdpl_nova_availability_zone_disk_gb_used": {"labels": ["zone"]},
-        # "osdpl_nova_availability_zone_disk_gb_free": {"labels": ["zone"]},
-        # "osdpl_nova_availability_zone_memory_mb": {"labels": ["zone"]},
-        # "osdpl_nova_availability_zone_memory_mb_used": {"labels": ["zone"]},
-        # "osdpl_nova_availability_zone_memory_mb_free": {"labels": ["zone"]},
+        "osdpl_nova_availability_zone_vcpu_used": {"labels": ["zone"]},
+        "osdpl_nova_availability_zone_vcpu_free": {"labels": ["zone"]},
+        "osdpl_nova_availability_zone_disk_gb": {"labels": ["zone"]},
+        "osdpl_nova_availability_zone_disk_gb_used": {"labels": ["zone"]},
+        "osdpl_nova_availability_zone_disk_gb_free": {"labels": ["zone"]},
+        "osdpl_nova_availability_zone_memory_mb": {"labels": ["zone"]},
+        "osdpl_nova_availability_zone_memory_mb_used": {"labels": ["zone"]},
+        "osdpl_nova_availability_zone_memory_mb_free": {"labels": ["zone"]},
     }
 
     def setUp(self):
@@ -104,14 +105,10 @@ class NovaCollectorFunctionalTestCase(base.BaseFunctionalExporterTestCase):
 
 
 @pytest.mark.xdist_group("exporter-compute-network")
-class NovaCollectorInstancesFunctionalTestCase(
+class NovaInstancesCollectorInstancesFunctionalTestCase(
     base.BaseFunctionalExporterTestCase
 ):
     scrape_collector = "osdpl_nova"
-
-    @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
 
     def test_nova_instances(self):
         """Total number of instances in the cluster."""
@@ -211,6 +208,26 @@ class NovaCollectorInstancesFunctionalTestCase(
             f"Expected numbers of error servers: {len(error_servers)}.",
         )
 
+
+@pytest.mark.xdist_group("exporter-compute-network")
+class NovaAvailabilityZonesTestCase(base.BaseFunctionalExporterTestCase):
+    scrape_collector = "osdpl_nova"
+
+    def setUp(self):
+        super().setUp()
+        self.metrics_initial = self.get_collector_metrics(
+            self.scrape_collector
+        )
+        aggregate_name = data_utils.rand_name()
+        self.aggregate = self.aggregate_create(
+            name=aggregate_name,
+        )
+
+    def tearDown(self):
+        super().tearDown()
+        if self.aggregate:
+            self.aggregate_delete(self.aggregate["name"])
+
     def test_nova_availability_zone_info(self):
         """Information about availability zones in the cluster.
 
@@ -219,19 +236,19 @@ class NovaCollectorInstancesFunctionalTestCase(
         #. Get `osdpl_nova_availability_zone_info` metric with initial number
         #. Add additional availability zone
         #. Check that new availablity zone appear in the samples
+        #. Remove availability zone
+        #. Check availability zone dissappear from the samples
         """
         metric_name = "osdpl_nova_availability_zone_info"
         azs = list(self.ocm.oc.compute.availability_zones())
-        initial_metric = self.get_metric(metric_name)
+        initial_metric = self.get_metric(metric_name, self.metrics_initial)
         self.assertEqual(
             len(initial_metric.samples),
             len(azs),
             "The initial number of availability zones is not correct.",
         )
-
-        aggregate = self.aggregate_create(
-            name="test_nova_availability_zone_info",
-            availability_zone="test_nova_availability_zone_info",
+        self.ocm.oc.compute.update_aggregate(
+            self.aggregate["id"], availability_zone=self.aggregate["name"]
         )
         metric_after_create = self.get_metric_after_refresh(
             metric_name, self.scrape_collector
@@ -245,7 +262,7 @@ class NovaCollectorInstancesFunctionalTestCase(
             "The number of availability zones after create is not correct.",
         )
 
-        self.aggregate_delete(aggregate["name"])
+        self.aggregate_delete(self.aggregate["id"])
 
         metric_after_delete = self.get_metric_after_refresh(
             metric_name, self.scrape_collector
@@ -256,3 +273,236 @@ class NovaCollectorInstancesFunctionalTestCase(
             len(azs),
             "The number of availability zones after delete is not correct.",
         )
+
+
+@pytest.mark.xdist_group("exporter-compute-network")
+class NovaAggregatesTestCase(base.BaseFunctionalExporterTestCase):
+    scrape_collector = "osdpl_nova"
+
+    def setUp(self):
+        super().setUp()
+        self.metrics_initial = self.get_collector_metrics(
+            self.scrape_collector
+        )
+        aggregate_name = data_utils.rand_name()
+        self.aggregate = self.aggregate_create(
+            name=aggregate_name,
+        )
+
+    def tearDown(self):
+        super().tearDown()
+        if self.aggregate:
+            self.aggregate_delete(self.aggregate["name"])
+
+    def _test_osdpl_nova_aggregate_hosts(
+        self, metric_name, aggregate_name, expected_num, phase
+    ):
+        metric = self.get_metric_after_refresh(
+            metric_name, self.scrape_collector
+        )
+        samples = self.filter_metric_samples(metric, {"name": aggregate_name})
+
+        self.assertEqual(
+            samples[0].value,
+            expected_num,
+            f"{phase}: The number of hosts in aggregate is not correct.",
+        )
+
+    def test_osdpl_nova_aggregate_hosts(self):
+        """Information about aggregate hosts mapping
+
+        **Steps**
+
+        #. Add aggregate
+        #. Check we do not have hosts reported in the metric
+        #. Add host to aggregate
+        #. Check host appear in the meteric
+        #. Remove host from host aggregate
+        #. Check host dissapear from the metric
+        """
+        metric_name = "osdpl_nova_aggregate_hosts"
+        self._test_osdpl_nova_aggregate_hosts(
+            metric_name, self.aggregate["name"], 0, "Initial"
+        )
+
+        aggregate_compute = [
+            x for x in self.ocm.oc.compute.services(binary="nova-compute")
+        ][0]["host"]
+        self.aggregate_add_host(self.aggregate["id"], aggregate_compute)
+
+        self._test_osdpl_nova_aggregate_hosts(
+            metric_name, self.aggregate["name"], 1, "After create"
+        )
+
+        self.aggregate_remove_host(self.aggregate["id"], aggregate_compute)
+        self._test_osdpl_nova_aggregate_hosts(
+            metric_name, self.aggregate["name"], 0, "After delete"
+        )
+
+
+@pytest.mark.xdist_group("exporter-compute-network")
+class NovaResourcesStatsTestCase(base.BaseFunctionalExporterTestCase):
+    scrape_collector = "osdpl_nova"
+
+    def setUp(self):
+        super().setUp()
+        self.resources = [
+            "instances",
+            "vcpu",
+            "vcpu_used",
+            "vcpu_free",
+            "disk_gb",
+            "disk_gb_used",
+            "disk_gb_free",
+            "memory_mb",
+            "memory_mb_used",
+            "memory_mb_free",
+        ]
+
+        self.aggregate = None
+        self.aggregate_compute = [
+            x
+            for x in self.ocm.oc.compute.services(binary="nova-compute")
+            if x.get("availability_zone") == "nova"
+        ][0]["host"]
+
+        self.server = None
+
+    def tearDown(self):
+        if self.server:
+            self.server_delete(self.server)
+        if self.aggregate:
+            self.aggregate_remove_hosts(self.aggregate["id"])
+            self.aggregate_delete(self.aggregate["id"])
+        super().tearDown()
+
+    def get_resource_metrics_values(self, resource_type, labels):
+        metrics = self.get_collector_metrics(self.scrape_collector)
+        res = {}
+        for resource in self.resources:
+            metric_name = f"osdpl_nova_{resource_type}_{resource}"
+            metric = self.get_metric(metric_name, metrics)
+            res[resource] = self.filter_metric_samples(metric, labels)[0].value
+        return res
+
+    def _test_osdpl_nova_resource_metrics(self, resource_type):
+        """Check osdpl_nova_<resource_type>_<resource> metrics
+
+        Check resources:
+            "instances"
+            "vcpu"
+            "vcpu_used"
+            "vcpu_free"
+            "disk_gb"
+            "disk_gb_used"
+            "disk_gb_free"
+            "memory_mb"
+            "memory_mb_used"
+            "memory_mb_free"
+
+        #. Check initial samples. For hypervisors should be present, for az/aggregates should be absent.
+        #. Create aggregate with availability zone.
+        #. Get initial metrics.
+        #. Create server in AZ.
+        #. Check metrics are changed comparing to initial
+        #. Remove server
+        #. Check metric samples back to initial
+        #. Remove host from aggregate
+        """
+        aggregate_name = data_utils.rand_name()
+        labels = {"name": aggregate_name}
+        if resource_type == "availability_zone":
+            labels = {"zone": aggregate_name}
+        elif resource_type == "hypervisor":
+            labels = {
+                "zone": aggregate_name,
+                "host": self.aggregate_compute,
+            }
+
+        mecrics_no_resources = self.get_collector_metrics(
+            self.scrape_collector
+        )
+        for resource in self.resources:
+            metric_name = f"osdpl_nova_{resource_type}_{resource}"
+            metric = self.get_metric(metric_name, mecrics_no_resources)
+            samples = self.filter_metric_samples(metric, labels)
+            self.assertEqual(
+                len(samples),
+                0,
+                f"Metric {metric_name} samples with {labels} is invalid.",
+            )
+
+        self.aggregate = self.aggregate_create(
+            name=aggregate_name,
+            availability_zone=aggregate_name,
+        )
+
+        self.aggregate_add_host(self.aggregate["id"], self.aggregate_compute)
+        resources_initial = self.get_resource_metrics_values(
+            resource_type, labels
+        )
+
+        self.server = self.server_create(
+            availability_zone=self.aggregate["name"]
+        )
+        server = self.ocm.oc.compute.get_server(self.server["id"])
+        flavor = server["flavor"]
+        resource_expected_changes = {
+            "instances": 1,
+            "vcpu": 0,
+            "vcpu_used": flavor["vcpus"],
+            "vcpu_free": flavor["vcpus"] * -1,
+            "disk_gb": 0,
+            "disk_gb_used": flavor["disk"] + flavor["ephemeral"],
+            "disk_gb_free": (flavor["disk"] + flavor["ephemeral"]) * -1,
+            "memory_mb": 0,
+            "memory_mb_used": flavor["ram"],
+            "memory_mb_free": flavor["ram"] * -1,
+        }
+
+        resources_after_create = self.get_resource_metrics_values(
+            resource_type, labels
+        )
+
+        resources_expected = {}
+        for resource in self.resources:
+            resources_expected[resource] = (
+                resources_initial[resource]
+                + resource_expected_changes[resource]
+            )
+        self.assertDictEqual(
+            resources_after_create,
+            resources_expected,
+            "Some of resources is not changed correctly after creating server.",
+        )
+
+        self.server_delete(self.server)
+        resources_after_delete_server = self.get_resource_metrics_values(
+            resource_type, labels
+        )
+        self.assertDictEqual(
+            resources_initial,
+            resources_after_delete_server,
+            "Some of resources is not changed correctly after server removal.",
+        )
+
+        self.aggregate_remove_hosts(self.aggregate["id"])
+        self.aggregate_delete(self.aggregate["id"])
+        mecrics_no_resources = self.get_collector_metrics(
+            self.scrape_collector
+        )
+        for resource in self.resources:
+            metric_name = f"osdpl_nova_{resource_type}_{resource}"
+            metric = self.get_metric(metric_name, mecrics_no_resources)
+            samples = self.filter_metric_samples(metric, labels)
+            self.assertEqual(
+                len(samples),
+                0,
+                f"Metric {metric_name} samples with {labels} is invalid after aggregate removal.",
+            )
+
+    @parameterized.expand(
+        [("availability_zone"), ("aggregate"), ("hypervisor")]
+    )
+    def test_osdpl_nova_resources(self, resource_type):
+        self._test_osdpl_nova_resource_metrics(resource_type)
