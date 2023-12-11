@@ -218,3 +218,4 @@ neutron_dr: '{{ images_base_url }}/openstack/neutron:stein-bionic-20230227093206
 requirements: '{{ images_base_url }}/openstack/requirements:stein-bionic-20230227093206'
 designate_pool_manage: '{{ images_base_url }}/openstack/designate:stein-bionic-20230227093206'
 designate_pool_manage_hash: '{{ images_base_url }}/openstack/openstack-tools:yoga-jammy-20230928134535'
+ingress_init_config: '{{ images_base_url }}/openstack/openstack-tools:yoga-jammy-20231110182826'

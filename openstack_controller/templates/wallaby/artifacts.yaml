@@ -223,3 +223,4 @@ neutron_dr: '{{ images_base_url }}/openstack/neutron:wallaby-focal-2023081120052
 requirements: '{{ images_base_url }}/openstack/requirements:wallaby-focal-20230811200526'
 designate_pool_manage: '{{ images_base_url }}/openstack/designate:wallaby-focal-20230811200526'
 designate_pool_manage_hash: '{{ images_base_url }}/openstack/openstack-tools:yoga-jammy-20231006071523'
+ingress_init_config: '{{ images_base_url }}/openstack/openstack-tools:yoga-jammy-20231110182826'

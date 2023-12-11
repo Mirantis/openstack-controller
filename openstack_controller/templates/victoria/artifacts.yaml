@@ -223,3 +223,4 @@ manila-uuids-init: '{{ images_base_url }}/openstack/openstack-tools:yoga-jammy-2
 requirements: '{{ images_base_url }}/openstack/requirements:victoria-focal-20230912131036'
 designate_pool_manage: '{{ images_base_url }}/openstack/designate:victoria-focal-20230912131036'
 designate_pool_manage_hash: '{{ images_base_url }}/openstack/openstack-tools:yoga-jammy-20231006071523'
+ingress_init_config: '{{ images_base_url }}/openstack/openstack-tools:yoga-jammy-20231110182826'

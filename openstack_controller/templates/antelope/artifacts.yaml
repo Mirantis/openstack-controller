@@ -231,3 +231,4 @@ manila_db_purge: '{{ images_base_url }}/openstack/manila:antelope-jammy-20231204
 requirements: '{{ images_base_url }}/openstack/requirements:antelope-jammy-20231204144213'
 designate_pool_manage: '{{ images_base_url }}/openstack/designate:antelope-jammy-20231204144213'
 designate_pool_manage_hash: '{{ images_base_url }}/openstack/openstack-tools:yoga-jammy-20231204144213'
+ingress_init_config: '{{ images_base_url }}/openstack/openstack-tools:yoga-jammy-20231204144213'
