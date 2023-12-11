@@ -28,6 +28,7 @@ spec:
     "ingress_module_init",
     "entrypoint",
     "dep_check",
+    "ingress_init_config",
     "ingress_tls_proxy",] %}
         {%- if image in images %}
           {{ image }}: {{ images[image] }}

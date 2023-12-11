@@ -216,3 +216,4 @@ manila-uuids-init: '{{ images_base_url }}/openstack/openstack-tools:yoga-jammy-2
 requirements: '{{ images_base_url }}/openstack/requirements:queens-bionic-20230227093206'
 designate_pool_manage: '{{ images_base_url }}/openstack/designate:queens-bionic-20230227093206'
 designate_pool_manage_hash: '{{ images_base_url }}/openstack/openstack-tools:yoga-jammy-20231204153029'
+ingress_init_config: '{{ images_base_url }}/openstack/openstack-tools:yoga-jammy-20231204153029'

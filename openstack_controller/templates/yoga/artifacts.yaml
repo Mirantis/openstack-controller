@@ -229,3 +229,4 @@ manila_db_purge: '{{ images_base_url }}/openstack/manila:yoga-jammy-202312041530
 requirements: '{{ images_base_url }}/openstack/requirements:yoga-jammy-20231204153029'
 designate_pool_manage: '{{ images_base_url }}/openstack/designate:yoga-jammy-20231204153029'
 designate_pool_manage_hash: '{{ images_base_url }}/openstack/openstack-tools:yoga-jammy-20231204153029'
+ingress_init_config: '{{ images_base_url }}/openstack/openstack-tools:yoga-jammy-20231204153029'
