@@ -22,3 +22,10 @@ VOLUME_BUILD_INTERVAL = 1
 SERVER_TIMEOUT = 30
 # Interval in seconds to check the server status. Default is 1 second.
 SERVER_READY_INTERVAL = 1
+
+# Time in seconds to wait for a volume create. Default is 30 seconds.
+VOLUME_TIMEOUT = 30
+# Interval in seconds to check the volume status. Default is 1 second.
+VOLUME_READY_INTERVAL = 1
+# Size, in GB of the volume to create.
+VOLUME_SIZE = 1

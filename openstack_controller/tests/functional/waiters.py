@@ -119,3 +119,21 @@ def wait_for_port_status(openstack_client, port, status):
             )
             LOG.error(message)
             raise TimeoutError(message)
+
+
+def wait_resource_field(
+    get_resource_func, resource_id, fields, timeout, interval
+):
+    start_time = time.time()
+    while True:
+        resource = get_resource_func(resource_id)
+        for field, field_value in fields.items():
+            if resource.get(field) != field_value:
+                time.sleep(interval)
+                break
+        else:
+            return
+        if time.time() - start_time >= timeout:
+            message = f"Timed out while waiting required fields '{field}' on resource {resource}"
+            LOG.error(message)
+            raise TimeoutError(message)
