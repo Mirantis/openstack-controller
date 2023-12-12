@@ -244,6 +244,12 @@ class OsdplNovaMetricCollector(base.OpenStackBaseMetricCollector):
         :param host_placement_metrics: Dictionary with placement metadata for hosts.
         """
         aggregate_metrics = {}
+        if not self.cache.get("aggregates"):
+            for resource_class in self.hypervisor_resource_classes:
+                for suffix in ["", "_used", "_free"]:
+                    metric_name = f"aggregate_{resource_class}{suffix}"
+                    self.set_samples(metric_name, [])
+
         for aggregate in self.cache.get("aggregates", []):
             metrics = self.summ_hosts_metrics(
                 host_placement_metrics, aggregate["hosts"]
