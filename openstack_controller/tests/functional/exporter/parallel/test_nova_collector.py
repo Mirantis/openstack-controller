@@ -44,14 +44,14 @@ class NovaCollectorFunctionalTestCase(base.BaseFunctionalExporterTestCase):
         # "osdpl_nova_aggregate_memory_mb": {"labels": ["name"]},
         # "osdpl_nova_aggregate_memory_mb_used": {"labels": ["name"]},
         # "osdpl_nova_aggregate_memory_mb_free": {"labels": ["name"]},
-        # "osdpl_nova_availability_zone_vcpu_used": {"labels": ["name"]},
-        # "osdpl_nova_availability_zone_vcpu_free": {"labels": ["name"]},
-        # "osdpl_nova_availability_zone_disk_gb": {"labels": ["name"]},
-        # "osdpl_nova_availability_zone_disk_gb_used": {"labels": ["name"]},
-        # "osdpl_nova_availability_zone_disk_gb_free": {"labels": ["name"]},
-        # "osdpl_nova_availability_zone_memory_mb": {"labels": ["name"]},
-        # "osdpl_nova_availability_zone_memory_mb_used": {"labels": ["name"]},
-        # "osdpl_nova_availability_zone_memory_mb_free": {"labels": ["name"]},
+        # "osdpl_nova_availability_zone_vcpu_used": {"labels": ["zone"]},
+        # "osdpl_nova_availability_zone_vcpu_free": {"labels": ["zone"]},
+        # "osdpl_nova_availability_zone_disk_gb": {"labels": ["zone"]},
+        # "osdpl_nova_availability_zone_disk_gb_used": {"labels": ["zone"]},
+        # "osdpl_nova_availability_zone_disk_gb_free": {"labels": ["zone"]},
+        # "osdpl_nova_availability_zone_memory_mb": {"labels": ["zone"]},
+        # "osdpl_nova_availability_zone_memory_mb_used": {"labels": ["zone"]},
+        # "osdpl_nova_availability_zone_memory_mb_free": {"labels": ["zone"]},
     }
 
     def setUp(self):

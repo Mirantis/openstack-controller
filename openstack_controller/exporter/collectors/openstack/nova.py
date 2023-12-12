@@ -32,6 +32,10 @@ class OsdplNovaMetricCollector(base.OpenStackBaseMetricCollector):
         self.hypervisor_resource_classes = ["vcpu", "disk_gb", "memory_mb"]
         self.hypervisor_metrics = ["used", "free", "allocation_ratio"]
         self.host_group_types = ["aggregate", "availability_zone"]
+        self.host_group_types_labels = {
+            "aggregate": ["name"],
+            "availability_zone": ["zone"],
+        }
         self.cache = {}
         super().__init__()
 
@@ -215,21 +219,22 @@ class OsdplNovaMetricCollector(base.OpenStackBaseMetricCollector):
                 labels=["host", "zone"],
             )
         for group_type in self.host_group_types:
+            labels = self.host_group_types_labels[group_type]
             for resource_class in self.hypervisor_resource_classes:
                 res[f"{group_type}_{resource_class}"] = GaugeMetricFamily(
                     f"{self._name}_{group_type}_{resource_class}",
                     f"Total number of total available {resource_class} in {group_type}",
-                    labels=["name"],
+                    labels=labels,
                 )
                 res[f"{group_type}_{resource_class}_used"] = GaugeMetricFamily(
                     f"{self._name}_{group_type}_{resource_class}_used",
                     f"Total number of used {resource_class} in {group_type}",
-                    labels=["name"],
+                    labels=labels,
                 )
                 res[f"{group_type}_{resource_class}_free"] = GaugeMetricFamily(
                     f"{self._name}_{group_type}_{resource_class}_free",
                     f"Total number of free {resource_class} in {group_type}",
-                    labels=["name"],
+                    labels=labels,
                 )
         return res
 
