@@ -15,6 +15,7 @@
 import asyncio
 import base64
 import copy
+import datetime
 import logging
 import os
 import re
@@ -60,6 +61,10 @@ def get_logger(name: str) -> logging.Logger:
     logger.setLevel(log_level)
 
     return logger
+
+
+def k8s_timestamp_to_unix(ts):
+    return datetime.datetime.strptime(ts, "%Y-%m-%dT%H:%M:%SZ").timestamp()
 
 
 def to_base64(value: str) -> str:

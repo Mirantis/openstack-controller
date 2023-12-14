@@ -8,6 +8,7 @@ from openstack_controller import settings
 from openstack_controller import version
 from openstack_controller import layers
 from openstack_controller import kube
+from openstack_controller import utils
 
 LOG = logging.getLogger(__name__)
 
@@ -78,6 +79,25 @@ class OpenStackDeploymentStatus(pykube.objects.NamespacedAPIObject):
         patch = self._generate_osdpl_status_generic(mspec)
         patch["state"] = state
         self.patch({"status": {"services": {service_name: patch}}})
+
+    def get_credentials_rotation_status(self, group_name):
+        self.reload()
+        return utils.get_in(
+            self.obj["status"], ["credentials", "rotation", group_name], {}
+        )
+
+    def set_credentials_rotation_status(self, group_name, rotation_ts):
+        """
+        Set credentials rotation timestamp in format %Y-%m-%d %H:%M:%S.%f
+
+        :param group_name: string name of credentials group
+        :param rotation_ts: float unix timestamp
+        """
+        date_obj = datetime.datetime.fromtimestamp(rotation_ts)
+        patch = {"timestamp": date_obj.strftime("%Y-%m-%d %H:%M:%S.%f")}
+        self.patch(
+            {"status": {"credentials": {"rotation": {group_name: patch}}}}
+        )
 
     def set_service_state(self, service_name, state):
         self.patch({"status": {"services": {service_name: {"state": state}}}})
