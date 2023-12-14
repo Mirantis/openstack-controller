@@ -1,6 +1,8 @@
 import time
 import logging
 
+import openstack
+
 from openstack_controller.tests.functional import config as conf
 from openstack_controller import openstack_utils
 
@@ -137,3 +139,16 @@ def wait_resource_field(
             message = f"Timed out while waiting required fields '{field}' on resource {resource}"
             LOG.error(message)
             raise TimeoutError(message)
+
+
+def wait_resource_deleted(get_resource_func, resource_id, timeout, interval):
+    start_time = time.time()
+    try:
+        while get_resource_func(resource_id):
+            if time.time() - start_time >= timeout:
+                message = f"Timed out while waiting for resource {resource_id} is deleted"
+                LOG.error(message)
+                raise TimeoutError(message)
+            time.sleep(interval)
+    except openstack.exceptions.ResourceNotFound:
+        return

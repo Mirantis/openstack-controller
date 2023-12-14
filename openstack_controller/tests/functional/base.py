@@ -311,29 +311,38 @@ class BaseFunctionalTestCase(TestCase):
 
     @classmethod
     @suppress404
-    def volume_delete(cls, volume):
-        return cls.ocm.oc.delete_volume(volume.id)
+    def volume_delete(cls, volume, wait=False):
+        cls.ocm.oc.delete_volume(volume.id)
+        if wait:
+            waiters.wait_resource_deleted(
+                cls.ocm.oc.get_volume, volume.id, conf.VOLUME_TIMEOUT, 5
+            )
 
     @classmethod
     def volume_snapshot_create(
         cls,
         volume,
         name=None,
-        wait=True,
     ):
         if name is None:
             name = data_utils.rand_name()
 
         snapshot = cls.ocm.oc.create_volume_snapshot(
             volume.id,
-            wait=wait,
         )
         cls.addClassCleanup(cls.snapshot_volume_delete, snapshot)
         return snapshot
 
     @classmethod
-    def snapshot_volume_delete(cls, snapshot):
-        return cls.ocm.oc.delete_volume_snapshot(snapshot.id)
+    def snapshot_volume_delete(cls, snapshot, wait=False):
+        cls.ocm.oc.delete_volume_snapshot(snapshot.id)
+        if wait:
+            waiters.wait_resource_deleted(
+                cls.ocm.oc.get_volume_snapshot,
+                snapshot.id,
+                conf.VOLUME_TIMEOUT,
+                5,
+            )
 
     @classmethod
     @suppress404

@@ -46,7 +46,7 @@ class CinderCollectorSnapshotsFunctionalTestCase(
         )
 
         # Delete Volume's snapshot and check that a volume's snapshot metric is changed
-        self.snapshot_volume_delete(snapshot)
+        self.snapshot_volume_delete(snapshot, wait=True)
         metric = self.get_metric_after_refresh(
             metric_name, self.scrape_collector
         )
