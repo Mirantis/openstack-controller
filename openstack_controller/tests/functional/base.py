@@ -366,3 +366,27 @@ class BaseFunctionalTestCase(TestCase):
     def aggregate_add_host(cls, name, host):
         cls.ocm.oc.compute.add_host_to_aggregate(name, host)
         cls.addClassCleanup(cls.aggregate_remove_host, name, host)
+
+    @classmethod
+    def service_create(cls, name, type):
+        service = cls.ocm.oc.identity.create_service(name=name, type=type)
+        cls.addClassCleanup(cls.service_delete, service["id"])
+        return service
+
+    @classmethod
+    def endpoint_create(cls, service_id, interface, url):
+        endpoint = cls.ocm.oc.identity.create_endpoint(
+            service_id=service_id, interface=interface, url=url
+        )
+        cls.addClassCleanup(cls.endpoint_delete, endpoint["id"])
+        return endpoint
+
+    @classmethod
+    @suppress404
+    def service_delete(cls, service_id):
+        cls.ocm.oc.identity.delete_service(service_id)
+
+    @classmethod
+    @suppress404
+    def endpoint_delete(cls, endpoint):
+        cls.ocm.oc.identity.delete_endpoint(endpoint)
