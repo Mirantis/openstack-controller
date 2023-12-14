@@ -18,6 +18,9 @@ class CinderCollectorFunctionalTestCase(base.BaseFunctionalExporterTestCase):
         super().setUpClass()
 
     known_metrics = {
+        "osdpl_cinder_volumes": {"labels": []},
+        "osdpl_cinder_volumes_size": {"labels": []},
+        "osdpl_cinder_zone_volumes": {"labels": []},
         "osdpl_cinder_snapshots": {"labels": []},
         "osdpl_cinder_snapshots_size": {"labels": []},
         "osdpl_cinder_pool_total_capacity": {"labels": ["name"]},
@@ -25,9 +28,63 @@ class CinderCollectorFunctionalTestCase(base.BaseFunctionalExporterTestCase):
         "osdpl_cinder_pool_allocated_capacity": {"labels": ["name"]},
     }
 
+    def _test_cinder_volumes(self, metric_name, expected_value, phase):
+        metric = self.get_metric_after_refresh(
+            metric_name, self.scrape_collector
+        )
+        self.assertEqual(
+            int(metric.samples[0].value),
+            expected_value,
+            f"{phase}: Number of volumes is not correct.",
+        )
+
+    def test_osdpl_cinder_volumes(self):
+        """Total number of volumes in the cluster."""
+
+        metric_name = "osdpl_cinder_volumes"
+        volumes = len(list(self.ocm.oc.volume.volumes(all_tenants=True)))
+        self._test_cinder_volumes(metric_name, volumes, "Before create")
+
+        # Create one test volume
+        created_volume = self.volume_create()
+        self._test_cinder_volumes(metric_name, volumes + 1, "After create")
+
+        # Delete volume and check that the volumes metric is changed
+        self.volume_delete(created_volume)
+        self._test_cinder_volumes(metric_name, volumes, "After delete")
+
+    def _test_cinder_volumes_size(self, expected_value, phase):
+        metric_name = "osdpl_cinder_volumes_size"
+        metric = self.get_metric_after_refresh(
+            metric_name, self.scrape_collector
+        )
+        self.assertEqual(
+            int(metric.samples[0].value),
+            expected_value,
+            f"{phase}: The total volume's size in bytes is not correct.",
+        )
+
+    def test_osdpl_cinder_volumes_size(self):
+        """Total volumes size in the cluster."""
+
+        volumes_size = self.get_volumes_size()
+        self._test_cinder_volumes_size(volumes_size, "Before create")
+
+        # Create one test volume
+        created_volume = self.volume_create(size=1)
+        self._test_cinder_volumes_size(
+            volumes_size + 1 * constants.Gi, "After create"
+        )
+
+        # Delete volume and check that a volume_size metric has changed
+        self.volume_delete(created_volume)
+        self._test_cinder_volumes_size(volumes_size, "After delete")
+
     def _test_volume_snapshots_count(self, expected_value, phase):
         metric_name = "osdpl_cinder_snapshots"
-        metric = self.get_metric(metric_name)
+        metric = self.get_metric_after_refresh(
+            metric_name, self.scrape_collector
+        )
         self.assertEqual(
             int(metric.samples[0].value),
             expected_value,
@@ -52,7 +109,9 @@ class CinderCollectorFunctionalTestCase(base.BaseFunctionalExporterTestCase):
 
     def _test_volume_snapshots_size(self, expected_value, phase):
         metric_name = "osdpl_cinder_snapshots_size"
-        metric = self.get_metric(metric_name)
+        metric = self.get_metric_after_refresh(
+            metric_name, self.scrape_collector
+        )
         self.assertEqual(
             int(metric.samples[0].value),
             expected_value,
@@ -84,9 +143,11 @@ class CinderCollectorFunctionalTestCase(base.BaseFunctionalExporterTestCase):
             ("osdpl_cinder_pool_allocated_capacity"),
         ]
     )
-    def test_openstack_cinder_pool_samples_count(self, metric_name):
+    def test_osdpl_cinder_pool_samples_count(self, metric_name):
         total_pools = len(list(self.ocm.oc.volume.backend_pools()))
-        metric = self.get_metric(metric_name)
+        metric = self.get_metric_after_refresh(
+            metric_name, self.scrape_collector
+        )
         self.assertEqual(
             len(metric.samples),
             total_pools,
@@ -97,7 +158,8 @@ class CinderCollectorFunctionalTestCase(base.BaseFunctionalExporterTestCase):
         self, metric_name, pool_name, expected_value, phase
     ):
         associated_metric = self.filter_metric_samples(
-            self.get_metric(metric_name), {"name": pool_name}
+            self.get_metric_after_refresh(metric_name, self.scrape_collector),
+            {"name": pool_name},
         )
         self.assertEqual(
             associated_metric[0].value,
@@ -179,3 +241,39 @@ class CinderCollectorFunctionalTestCase(base.BaseFunctionalExporterTestCase):
                 capacity - 5 * constants.Gi,
                 "After create",
             )
+
+    def test_osdpl_cinder_zone_volumes(self):
+        """Total number of volumes' zones in the cluster."""
+
+        metric_name = "osdpl_cinder_zone_volumes"
+        availability_zone = list(self.ocm.oc.volume.availability_zones())[0][
+            "name"
+        ]
+
+        volumes = len(
+            list(
+                self.ocm.oc.volume.volumes(availability_zone=availability_zone)
+            )
+        )
+        self._test_cinder_volumes(metric_name, volumes, "Before create")
+
+        # Create one test volume
+        created_volume = self.volume_create(
+            availability_zone=availability_zone
+        )
+        self._test_cinder_volumes(metric_name, volumes + 1, "After create")
+
+        # Delete volume and check that the zone's volumes metric is changed
+        self.volume_delete(created_volume)
+        self._test_cinder_volumes(metric_name, volumes, "After delete")
+
+    def test_osdpl_cinder_zone_volumes_count(self):
+        total_zones = len(list(self.ocm.oc.volume.availability_zones()))
+        metric = self.get_metric_after_refresh(
+            "osdpl_cinder_zone_volumes", self.scrape_collector
+        )
+        self.assertEqual(
+            len(metric.samples),
+            total_zones,
+            "The number of samples for osdpl_cinder_zone_volumes is not correct.",
+        )

@@ -95,6 +95,9 @@ class OsdplCinderMetricCollector(base.OpenStackBaseMetricCollector):
         snapshots_total = 0
         snapshots_size = 0
         volume_zone_total = {}
+        for zone in self.oc.oc.volume.availability_zones():
+            volume_zone_total[zone["name"]] = 0
+
         for volume in self.oc.oc.volume.volumes(all_tenants=True):
             volume_zone = volume.get("availability_zone", "None")
             volumes_total += 1

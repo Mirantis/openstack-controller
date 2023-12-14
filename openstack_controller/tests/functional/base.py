@@ -286,6 +286,7 @@ class BaseFunctionalTestCase(TestCase):
         size=CONF.VOLUME_SIZE,
         name=None,
         image=None,
+        availability_zone=None,
         wait=True,
         timeout=None,
     ):
@@ -300,6 +301,7 @@ class BaseFunctionalTestCase(TestCase):
             size=size,
             name=name,
             image=image,
+            availability_zone=availability_zone,
             wait=wait,
             timeout=timeout,
         )
@@ -322,6 +324,14 @@ class BaseFunctionalTestCase(TestCase):
             waiters.wait_resource_deleted(
                 cls.ocm.oc.get_volume, volume.id, CONF.VOLUME_TIMEOUT, 5
             )
+
+    @classmethod
+    def get_volumes_size(cls):
+        """Calculate the total size of volumes in bytes."""
+        total_bytes = 0
+        for volume in cls.ocm.oc.volume.volumes(all_tenants=True):
+            total_bytes += volume.size * constants.Gi
+        return total_bytes
 
     @classmethod
     def volume_snapshot_create(
