@@ -86,7 +86,7 @@ async def node_change_handler(body, reason, **kwargs):
     kube_api = kube.kube_client()
     node = kube.Node(kube_api, body)
     nwl = maintenance.NodeWorkloadLock.get_resource(name)
-    if nwl.required_for_node(node):
+    if nwl.required_for_node(node.name):
         nwl.present()
     else:
         LOG.info(
@@ -100,7 +100,10 @@ async def node_delete_handler(body, **kwargs):
     name = body["metadata"]["name"]
     LOG.info(f"Got delete event for node {name}")
     nwl = maintenance.NodeWorkloadLock.get_resource(name)
-    # NOTE(vsaienko): we start OpenStack metadata cleanup on nwl removal.
-    # Do not lock node deletion here, as we wait node is deleted and services
-    # are not running anymore before starting to remove them.
-    nwl.absent(propagation_policy="Background")
+    ndn = maintenance.find_ndn(name)
+    # NOTE(vsaienko): when node is disabled do not remove nwl
+    if not (ndn and ndn.exists()):
+        # NOTE(vsaienko): we start OpenStack metadata cleanup on nwl removal.
+        # Do not lock node deletion here, as we wait node is deleted and services
+        # are not running anymore before starting to remove them.
+        nwl.absent(propagation_policy="Background")
