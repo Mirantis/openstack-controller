@@ -26,6 +26,7 @@ class NeutronCollectorFunctionalTestCase(base.BaseFunctionalExporterTestCase):
         "osdpl_neutron_ports": {"labels": []},
         "osdpl_neutron_routers": {"labels": []},
         "osdpl_neutron_floating_ips": {"labels": ["state"]},
+        "osdpl_neutron_zone_routers": {"labels": []},
         "osdpl_neutron_availability_zone_info": {
             "labels": ["zone", "resource"]
         },
@@ -248,6 +249,41 @@ class NeutronCollectorFunctionalTestCase(base.BaseFunctionalExporterTestCase):
         )
 
         self.router_delete(router)
+        metric_after_delete_router = self.get_metric_after_refresh(
+            metric_name, self.scrape_collector
+        )
+        self.assertEqual(
+            int(metric_after_delete_router.samples[0].value),
+            len(routers),
+            "The number of routers after router delete is not correct.",
+        )
+
+    def test_neutron_zone_routers(self):
+        """Total number of routers in the availability zone."""
+        metric_name = "osdpl_neutron_zone_routers"
+        initial_metric = self.get_metric_after_refresh(
+            metric_name, self.scrape_collector
+        )
+        availability_zone = initial_metric.samples[0].labels["zone"]
+        routers = self.routers_availability_zones(availability_zone)
+        self.assertEqual(
+            int(initial_metric.samples[0].value),
+            len(routers),
+            "The initial number of routers is not correct",
+        )
+
+        bundle = self.network_bundle_create()
+        router = bundle["router"]
+        metric = self.get_metric_after_refresh(
+            metric_name, self.scrape_collector
+        )
+        self.assertEqual(
+            int(metric.samples[0].value),
+            len(routers) + 1,
+            "The number of routers after router create is not correct.",
+        )
+
+        self.router_delete(router["id"])
         metric_after_delete_router = self.get_metric_after_refresh(
             metric_name, self.scrape_collector
         )

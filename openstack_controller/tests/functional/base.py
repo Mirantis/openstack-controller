@@ -161,7 +161,6 @@ class BaseFunctionalTestCase(TestCase):
     ):
         if name is None:
             name = data_utils.rand_name()
-
         subnet = cls.ocm.oc.network.create_subnet(
             name=name, cidr=cidr, network_id=network_id, ip_version=ip_version
         )
@@ -176,15 +175,12 @@ class BaseFunctionalTestCase(TestCase):
     @classmethod
     def port_create(
         cls,
-        network_id=None,
+        network_id,
         name=None,
         wait=True,
         status="DOWN",
         fixed_ips=None,
     ):
-        if network_id is None:
-            network_id = cls.ocm.oc.get_network(CONF.TEST_NETWORK_NAME)["id"]
-
         if name is None:
             name = data_utils.rand_name()
         kwargs = {"name": name, "network_id": network_id}
@@ -253,6 +249,14 @@ class BaseFunctionalTestCase(TestCase):
         router = cls.ocm.oc.network.create_router(**kwargs)
         cls.addClassCleanup(cls.router_delete, router["id"])
         return router
+
+    @classmethod
+    def routers_availability_zones(cls, availability_zones):
+        routers = []
+        for router in list(cls.ocm.oc.network.routers()):
+            if router["availability_zones"][0] == availability_zones:
+                routers.append(router)
+        return routers
 
     @classmethod
     def network_bundle_create(cls):
