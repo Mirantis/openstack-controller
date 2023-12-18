@@ -24,6 +24,9 @@ class NeutronCollectorFunctionalTestCase(base.BaseFunctionalExporterTestCase):
         "osdpl_neutron_ports": {"labels": []},
         "osdpl_neutron_routers": {"labels": []},
         "osdpl_neutron_floating_ips": {"labels": ["state"]},
+        "osdpl_neutron_availability_zone_info": {
+            "labels": ["zone", "resource"]
+        },
     }
 
     def test_neutron_networks(self):
@@ -251,3 +254,41 @@ class NeutronCollectorFunctionalTestCase(base.BaseFunctionalExporterTestCase):
             len(routers),
             "The number of routers after router delete is not correct.",
         )
+
+
+class NeutronAvailabilityZoneTestCase(base.BaseFunctionalExporterTestCase):
+    def test_neutron_availability_zone_info(self):
+        """Information about neutron availability zones in the cluster.
+
+        **Steps**
+
+        #. Get `osdpl_neutron_availability_zone_info` metric
+        #. Get info about neutron's availability zones from OS
+        #. Compare exporter's metrics and info from OS
+        """
+        metric_name = "osdpl_neutron_availability_zone_info"
+        neutron_az = list(self.ocm.oc.network.availability_zones())
+        metric = self.get_metric(metric_name)
+
+        self.assertEqual(
+            len(metric.samples),
+            len(neutron_az),
+            "The initial number of neutrone's availability zones is not correct.",
+        )
+
+        for availability_zone in neutron_az:
+            labels = {
+                "resource": availability_zone.resource,
+                "zone": availability_zone.name,
+            }
+            samples = self.filter_metric_samples(metric, labels)
+            self.assertDictEqual(
+                samples[0].labels,
+                labels,
+                "The info about AZ in exporter's metrics is not correct.",
+            )
+            self.assertEqual(
+                samples[0].value,
+                1.0,
+                "The info about AZ in exporter's metrics is not correct.",
+            )
