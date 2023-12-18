@@ -186,6 +186,7 @@ admission:
               - ALL
 
 node_maintenance:
+  enabled: true
   create_crd: true
   # webhook needs to run with TLS. By default certificates are generated automatically,
   # if needed can be overridden manually here
