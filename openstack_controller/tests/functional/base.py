@@ -284,6 +284,7 @@ class BaseFunctionalTestCase(TestCase):
         cls,
         size=CONF.VOLUME_SIZE,
         name=None,
+        image=None,
         wait=True,
         timeout=None,
     ):
@@ -297,6 +298,7 @@ class BaseFunctionalTestCase(TestCase):
         volume = cls.ocm.oc.volume.create_volume(
             size=size,
             name=name,
+            image=image,
             wait=wait,
             timeout=timeout,
         )

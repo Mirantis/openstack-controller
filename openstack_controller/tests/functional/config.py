@@ -17,6 +17,7 @@ class Config(metaclass=SingletonMeta):
         self._osdpl = kube.get_osdpl()
 
         self.CIRROS_TEST_IMAGE_NAME = self.get_cirros_image()
+        self.UBUNTU_TEST_IMAGE_NAME = "Ubuntu-18.04"
         self.TEST_FLAVOR_NAME = "m1.extra_tiny_test"
         self.TEST_SUBNET_RANGE = "10.20.30.0/24"
         self.PUBLIC_NETWORK_NAME = "public"
