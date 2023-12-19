@@ -167,6 +167,9 @@ async def test_handle_masakari_host_down_node_nwl_inactive(
     node.ready = False
     nwl.return_value.is_active.return_value = False
     node.unschedulable = False
+    openstack_client_manager.return_value.compute_get_all_servers.return_value = [
+        {"name": "testSrv1"}
+    ]
     await openstack_utils.handle_masakari_host_down(node)
     notify_masakari.assert_not_called()
     openstack_client_manager.return_value.compute_get_services.assert_not_called()
@@ -185,6 +188,9 @@ async def test_handle_masakari_host_down_node_nwl_active_unschedulable(
     node.ready = False
     nwl.return_value.is_active.return_value = True
     node.unschedulable = True
+    openstack_client_manager.return_value.compute_get_all_servers.return_value = [
+        {"name": "testSrv1"}
+    ]
     await openstack_utils.handle_masakari_host_down(node)
     notify_masakari.assert_not_called()
     openstack_client_manager.return_value.compute_get_services.assert_not_called()
@@ -203,6 +209,9 @@ async def test_handle_masakari_host_down_node_nwl_active_osctl_exception(
     node.ready = False
     nwl.return_value.is_active.return_value = True
     node.unschedulable = False
+    openstack_client_manager.return_value.compute_get_all_servers.return_value = [
+        {"name": "testSrv1"}
+    ]
     openstack_client_manager.side_effect = Exception()
     with pytest.raises(kopf.TemporaryError):
         await openstack_utils.handle_masakari_host_down(node)
@@ -220,6 +229,9 @@ async def test_handle_masakari_host_down_node_nwl_active_compute_up(
     node.ready = False
     nwl.return_value.is_active.return_value = True
     node.unschedulable = False
+    openstack_client_manager.return_value.compute_get_all_servers.return_value = [
+        {"name": "testSrv1"}
+    ]
     compute_services = [{"state": "up"}, {"state": "down"}]
     openstack_client_manager.return_value.compute_get_services.return_value = (
         compute_services
@@ -241,6 +253,9 @@ async def test_handle_masakari_host_down_node_nwl_active_network_agent_up(
     node.ready = False
     nwl.return_value.is_active.return_value = True
     node.unschedulable = False
+    openstack_client_manager.return_value.compute_get_all_servers.return_value = [
+        {"name": "testSrv1"}
+    ]
     compute_services = [{"state": "down"}, {"state": "down"}]
     network_agents = [{"alive": True}]
     openstack_client_manager.return_value.compute_get_services.return_value = (
@@ -266,6 +281,9 @@ async def test_handle_masakari_host_down_node_nwl_no_node_ip(
     node.ready = False
     nwl.return_value.is_active.return_value = True
     node.unschedulable = False
+    openstack_client_manager.return_value.compute_get_all_servers.return_value = [
+        {"name": "testSrv1"}
+    ]
     compute_services = [{"state": "down"}, {"state": "down"}]
     network_agents = []
     openstack_client_manager.return_value.compute_get_services.return_value = (
@@ -294,6 +312,9 @@ async def test_handle_masakari_host_down_node_nwl_ssh_okay(
     node.ready = False
     nwl.return_value.is_active.return_value = True
     node.unschedulable = False
+    openstack_client_manager.return_value.compute_get_all_servers.return_value = [
+        {"name": "testSrv1"}
+    ]
     compute_services = [{"state": "down"}, {"state": "down"}]
     network_agents = []
     openstack_client_manager.return_value.compute_get_services.return_value = (
@@ -326,6 +347,9 @@ async def test_handle_masakari_host_down_node_nwl_ssh_failed(
     node.unschedulable = False
     compute_services = [{"state": "down"}, {"state": "down"}]
     network_agents = []
+    openstack_client_manager.return_value.compute_get_all_servers.return_value = [
+        {"name": "testSrv1"}
+    ]
     openstack_client_manager.return_value.compute_get_services.return_value = (
         compute_services
     )
@@ -340,3 +364,22 @@ async def test_handle_masakari_host_down_node_nwl_ssh_failed(
     notify_masakari.assert_called_once()
     openstack_client_manager.return_value.compute_get_services.assert_called_once()
     openstack_client_manager.return_value.network_get_agents.assert_called_once()
+
+
+@mock.patch.object(openstack_utils, "OpenStackClientManager")
+@mock.patch.object(openstack_utils, "notify_masakari_host_down")
+@mock.patch("openstack_controller.openstack_utils.LOG")
+@pytest.mark.asyncio
+async def test_handle_masakari_host_down_node_no_servers(
+    mock_log, notify_masakari, openstack_client_manager, node, nwl
+):
+    node.ready = False
+    nwl.return_value.is_active.return_value = True
+    node.unschedulable = False
+    openstack_client_manager.return_value.compute_get_all_servers.return_value = (
+        []
+    )
+    await openstack_utils.handle_masakari_host_down(node)
+    notify_masakari.assert_not_called()
+    openstack_client_manager.return_value.compute_get_services.assert_not_called()
+    openstack_client_manager.return_value.network_get_agents.assert_not_called()
