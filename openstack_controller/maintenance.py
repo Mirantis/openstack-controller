@@ -176,6 +176,14 @@ class ClusterWorkloadLock(LockBase):
 
 
 class NodeWorkloadLock(LockBase):
+    """The NodeWorkloadLock object
+
+    Should be present for each node that we care about
+      - openstack application is present on the node
+
+    When removed triggers openstack metadata removal.
+    """
+
     version = "lcm.mirantis.com/v1alpha1"
     endpoint = "nodeworkloadlocks"
     kind = "NodeWorkloadLock"
@@ -189,10 +197,22 @@ class NodeWorkloadLock(LockBase):
         return spec
 
     @staticmethod
-    def required_for_node(node: pykube.Node) -> bool:
-        # We create workloadlock for all nodes we know about.
-        for role in const.NodeRole:
-            if node.has_role(role):
+    def required_for_node(node_name: str) -> bool:
+        """Do we need to keep NodeWorkloadLock for specified node."""
+
+        def has_os_role(node):
+            for role in const.NodeRole:
+                if node.has_role(role):
+                    return True
+
+        node = kube.find(kube.Node, node_name, silent=True)
+        if node and node.exists():
+            # We create workloadlock for all nodes we know about.
+            if has_os_role(node):
+                return True
+        else:
+            ndn = find_ndn(node_name)
+            if ndn and ndn.exists():
                 return True
         return False
 
@@ -267,3 +287,16 @@ class NodeDeletionRequest(pykube.objects.APIObject):
     endpoint = "nodedeletionrequests"
     kind = "NodeDeletioneRequest"
     kopf_on_args = *version.split("/"), endpoint
+
+
+class NodeDisableNotification(pykube.objects.APIObject):
+    version = "lcm.mirantis.com/v1alpha1"
+    endpoint = "nodedisablenotifications"
+    kind = "NodeDisableNotification"
+    kopf_on_args = *version.split("/"), endpoint
+
+
+def find_ndn(node_name):
+    for ndn in NodeDisableNotification.objects(kube.kube_client()):
+        if ndn["spec"]["nodeName"].split(".")[0] == node_name:
+            return ndn

@@ -32,7 +32,7 @@ async def node_maintenance_request_change_handler(body, **kwargs):
     node = kube.find(kube.Node, node_name, silent=True)
     nwl = maintenance.NodeWorkloadLock.get_resource(node_name)
     nmr = maintenance.NodeMaintenanceRequest.get_resource(body)
-    if not node or not nwl.required_for_node(node):
+    if not nwl.required_for_node(node_name):
         return
 
     nwl.present()
@@ -100,7 +100,7 @@ async def node_maintenance_request_delete_handler(body, **kwargs):
     node = kube.find(kube.Node, node_name, silent=True)
     nwl = maintenance.NodeWorkloadLock.get_resource(node_name)
     nmr = maintenance.NodeMaintenanceRequest.get_resource(body)
-    if not node or not nwl.required_for_node(node):
+    if not nwl.required_for_node(node_name):
         nwl.absent(propagation_policy="Background")
         return
 
@@ -256,6 +256,7 @@ async def node_deletion_request_change_handler(body, **kwargs):
                     LOG.info(
                         f"The node {node_name} is ready for deletion by {service_class.service}"
                     )
+
     nwl.set_state_inactive()
     nwl.unset_error_message()
     LOG.info(f"The node {node_name} is ready for deletion.")
@@ -271,37 +272,54 @@ async def node_workloadlock_request_delete_handler(body, **kwargs):
         return
 
     osdpl = kube.get_osdpl()
-    if osdpl and osdpl.exists():
-        # NOTE(vsaienko): later we do destructive calls like
-        # openstack metadata removal and persistent data removal (database PVC removal)
-        # it is important to ensure node is removed to double confirm that we are
-        # doing what was requested.
-        node = kube.find(kube.Node, name, silent=True)
-        if node and node.exists():
-            msg = "The kubernetes node {node_name} still exists. Deffer OpenStack service metadata removal."
-            raise kopf.TemporaryError(msg)
+    if not (osdpl and osdpl.exists()):
+        return
 
-        nwl = maintenance.NodeWorkloadLock.get_resource(node_name)
-        mspec = osdpl.mspec
-        osdpl_name = osdpl.metadata["name"]
-        osdpl_namespace = osdpl.metadata["namespace"]
-        osdplst = osdplstatus.OpenStackDeploymentStatus(
-            osdpl_name, osdpl_namespace
-        )
-        child_view = resource_view.ChildObjectView(mspec)
+    # NOTE(vsaienko): later we do destructive calls like
+    # openstack metadata removal and persistent data removal (database PVC removal)
+    # it is important to ensure node is removed to double confirm that we are
+    # doing what was requested.
+    # It is important to cleanup metadata when node is reamoved and services are
+    # not running anymore, otherwise they will add itself into the service tables.
+    node = kube.find(kube.Node, name, silent=True)
+    if node and node.exists():
+        msg = "The kubernetes node {node_name} still exists. Deffer OpenStack service metadata removal."
+        raise kopf.TemporaryError(msg)
 
-        for service, service_class in reversed(services.ORDERED_SERVICES):
-            service = service_class(mspec, LOG, osdplst, child_view)
-            if service.maintenance_api:
-                LOG.info(
-                    f"Cleaning metadata for {service.service} on node {name}"
-                )
-                await service.cleanup_metadata(nwl)
-                LOG.info(
-                    f"Cleaning persistant data for {service.service} on node {name}"
-                )
-                await service.cleanup_persistent_data(nwl)
+    nwl = maintenance.NodeWorkloadLock.get_resource(node_name)
+    mspec = osdpl.mspec
+    osdpl_name = osdpl.metadata["name"]
+    osdpl_namespace = osdpl.metadata["namespace"]
+    osdplst = osdplstatus.OpenStackDeploymentStatus(
+        osdpl_name, osdpl_namespace
+    )
+    child_view = resource_view.ChildObjectView(mspec)
+
+    for service, service_class in reversed(services.ORDERED_SERVICES):
+        service = service_class(mspec, LOG, osdplst, child_view)
+        if service.maintenance_api:
+            LOG.info(f"Cleaning metadata for {service.service} on node {name}")
+            await service.cleanup_metadata(nwl)
+            LOG.info(
+                f"Cleaning persistant data for {service.service} on node {name}"
+            )
+            await service.cleanup_persistent_data(nwl)
 
     LOG.info(
         f"The nodeworkloadlock for node {node_name} is ready for deletion."
     )
+
+
+@kopf.on.delete(*maintenance.NodeDisableNotification.kopf_on_args)
+async def node_disable_notification_delete_handler(body, **kwargs):
+    name = body["metadata"]["name"]
+    node_name = body["spec"]["nodeName"]
+    LOG.info(
+        f"Got nodedisablenotifications deletion request change event {name}"
+    )
+
+    node = kube.find(kube.Node, node_name, silent=True)
+    if not (node and node.exists()):
+        nwl = maintenance.NodeWorkloadLock.get_resource(node_name)
+        nwl.absent(propagation_policy="Background")
+    LOG.info(f"Finished handling nodedisablenotifications for {node_name}.")
