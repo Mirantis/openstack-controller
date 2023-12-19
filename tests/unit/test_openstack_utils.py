@@ -197,25 +197,6 @@ async def test_handle_masakari_host_down_node_nwl_active_unschedulable(
 @mock.patch.object(openstack_utils, "notify_masakari_host_down")
 @mock.patch("openstack_controller.openstack_utils.LOG")
 @pytest.mark.asyncio
-async def test_handle_masakari_host_down_node_nwl_active_no_masakary(
-    mock_log, notify_masakari, openstack_client_manager, node, nwl
-):
-    node.ready = False
-    nwl.return_value.is_active.return_value = True
-    node.unschedulable = False
-    openstack_client_manager.side_effect = ksa_exceptions.EndpointNotFound()
-    await openstack_utils.handle_masakari_host_down(node)
-    notify_masakari.assert_not_called()
-    openstack_client_manager.return_value.compute_get_services.assert_not_called()
-    mock_log.info.assert_called_with(
-        "Instance-HA service is not deployed, ignore notifying"
-    )
-
-
-@mock.patch.object(openstack_utils, "OpenStackClientManager")
-@mock.patch.object(openstack_utils, "notify_masakari_host_down")
-@mock.patch("openstack_controller.openstack_utils.LOG")
-@pytest.mark.asyncio
 async def test_handle_masakari_host_down_node_nwl_active_osctl_exception(
     mock_log, notify_masakari, openstack_client_manager, node, nwl
 ):

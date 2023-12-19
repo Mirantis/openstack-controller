@@ -235,9 +235,9 @@ def child_view():
 @pytest.fixture
 def node(mocker):
     node = mocker.patch("openstack_controller.kube.Node")
-    node.return_value = mock.AsyncMock()
+    node.return_value = mock.MagicMock()
     node.return_value.name = "fake-node"
-    yield node
+    yield node.return_value
     mocker.stopall()
 
 

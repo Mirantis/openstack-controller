@@ -87,7 +87,7 @@ async def test_nmr_change_not_required_for_node(
         maintenance.NodeWorkloadLock, "get_resource", return_value=nwl
     )
 
-    node.return_value.ready = True
+    node.ready = True
     mocker.patch.object(kube, "find", side_effect=(node,))
     await maintenance_controller.node_maintenance_request_change_handler(
         nmr, diff=()
@@ -126,7 +126,7 @@ async def test_nmr_change_required_for_node_not_maintenance_0_active_lock(
         [("compute", nova_registry_service)],
     )
 
-    node.return_value.ready = True
+    node.ready = True
     mocker.patch.object(kube, "find", side_effect=(node,))
     await maintenance_controller.node_maintenance_request_change_handler(
         nmr, diff=()
@@ -173,7 +173,7 @@ async def test_nmr_change_required_for_node_not_maintenance_0_active_lock_servic
         ],
     )
 
-    node.return_value.ready = True
+    node.ready = True
     mocker.patch.object(kube, "find", side_effect=(node,))
     with pytest.raises(kopf.TemporaryError):
         await maintenance_controller.node_maintenance_request_change_handler(
@@ -205,7 +205,7 @@ async def test_nmr_change_required_for_node_not_maintenance_1_active_lock(
         maintenance.NodeWorkloadLock, "get_resource", return_value=nwl
     )
 
-    node.return_value.ready = True
+    node.ready = True
     mocker.patch.object(kube, "find", side_effect=(node,))
     with pytest.raises(kopf.TemporaryError):
         await maintenance_controller.node_maintenance_request_change_handler(
@@ -237,7 +237,7 @@ async def test_nmr_change_required_for_node_maintenance_1_active_lock(
         maintenance.NodeWorkloadLock, "get_resource", return_value=nwl
     )
 
-    node.return_value.ready = True
+    node.ready = True
     mocker.patch.object(kube, "find", side_effect=(node,))
     await maintenance_controller.node_maintenance_request_change_handler(
         nmr, diff=()
@@ -264,7 +264,7 @@ async def test_nmr_delete_stop_not_required_for_node(
         maintenance.NodeWorkloadLock, "get_resource", return_value=nwl
     )
 
-    node.return_value.ready = True
+    node.ready = True
     osdpl.exists.return_value = True
 
     mocker.patch.object(kube, "find", side_effect=(node,))
@@ -292,7 +292,7 @@ async def test_nmr_delete_nwl_not_in_maintenance(
     )
 
     osdpl.exists.return_value = True
-    node.return_value.ready = True
+    node.ready = True
 
     mocker.patch.object(kube, "find", side_effect=(node,))
     await maintenance_controller.node_maintenance_request_delete_handler(nmr)
@@ -318,7 +318,7 @@ async def test_nmr_delete_nwl_in_maintenance(
         maintenance.NodeWorkloadLock, "get_resource", return_value=nwl
     )
 
-    node.return_value.ready = True
+    node.ready = True
 
     osdpl.exists.return_value = True
     nova_registry_service.return_value.maintenance_api.return_value = True
