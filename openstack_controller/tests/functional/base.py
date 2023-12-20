@@ -7,7 +7,7 @@ import openstack
 
 from openstack_controller import kube
 from openstack_controller import openstack_utils
-from openstack_controller.tests.functional import config as conf
+from openstack_controller.tests.functional import config
 from openstack_controller.tests.functional import data_utils, waiters
 
 LOGGING_CONFIG = {
@@ -39,6 +39,8 @@ logging.config.dictConfig(LOGGING_CONFIG)
 logging_old_factory = logging.getLogRecordFactory()
 LOG = logging.getLogger(__name__)
 
+CONF = config.Config()
+
 
 def suppress404(func):
     def inner(*args, **kwargs):
@@ -54,10 +56,10 @@ class BaseFunctionalTestCase(TestCase):
     @classmethod
     def setUpClass(cls):
         cls.ocm = openstack_utils.OpenStackClientManager()
+        cls.osdpl = kube.get_osdpl()
 
     def setUp(self):
         self.kube_api = kube.kube_client()
-        self.osdpl = kube.get_osdpl()
         self.setup_logging()
 
     def setup_logging(self):
@@ -104,11 +106,11 @@ class BaseFunctionalTestCase(TestCase):
             kwargs["name"] = data_utils.rand_name()
         if flavorRef is None:
             kwargs["flavorRef"] = cls.ocm.oc.compute.find_flavor(
-                conf.TEST_FLAVOR_NAME
+                CONF.TEST_FLAVOR_NAME
             ).id
         if imageRef is None:
             kwargs["imageRef"] = cls.ocm.oc.get_image_id(
-                conf.CIRROS_TEST_IMAGE_NAME
+                CONF.CIRROS_TEST_IMAGE_NAME
             )
         if availability_zone:
             kwargs["availability_zone"] = availability_zone
@@ -180,7 +182,7 @@ class BaseFunctionalTestCase(TestCase):
         fixed_ips=None,
     ):
         if network_id is None:
-            network_id = cls.ocm.oc.get_network(conf.TEST_NETWORK_NAME)["id"]
+            network_id = cls.ocm.oc.get_network(CONF.TEST_NETWORK_NAME)["id"]
 
         if name is None:
             name = data_utils.rand_name()
@@ -260,12 +262,12 @@ class BaseFunctionalTestCase(TestCase):
         res = {}
         network = cls.network_create()
         subnet = cls.subnet_create(
-            cidr=conf.TEST_SUBNET_RANGE, network_id=network["id"]
+            cidr=CONF.TEST_SUBNET_RANGE, network_id=network["id"]
         )
         res["network"] = network
         res["subnet"] = subnet
         public_network = cls.ocm.oc.network.find_network(
-            conf.PUBLIC_NETWORK_NAME
+            CONF.PUBLIC_NETWORK_NAME
         )
         router = cls.router_create(
             external_gateway_info={"network_id": public_network["id"]}
@@ -280,7 +282,7 @@ class BaseFunctionalTestCase(TestCase):
     @classmethod
     def volume_create(
         cls,
-        size=conf.VOLUME_SIZE,
+        size=CONF.VOLUME_SIZE,
         name=None,
         wait=True,
         timeout=None,
@@ -288,9 +290,9 @@ class BaseFunctionalTestCase(TestCase):
         if name is None:
             name = data_utils.rand_name()
         if size is None:
-            size = conf.VOLUME_SIZE
+            size = CONF.VOLUME_SIZE
         if timeout is None:
-            timeout = conf.VOLUME_TIMEOUT
+            timeout = CONF.VOLUME_TIMEOUT
 
         volume = cls.ocm.oc.volume.create_volume(
             size=size,
@@ -304,8 +306,8 @@ class BaseFunctionalTestCase(TestCase):
                 cls.ocm.oc.block_storage.get_volume,
                 volume.id,
                 {"status": "available"},
-                conf.VOLUME_TIMEOUT,
-                conf.VOLUME_READY_INTERVAL,
+                CONF.VOLUME_TIMEOUT,
+                CONF.VOLUME_READY_INTERVAL,
             )
         return volume
 
@@ -315,7 +317,7 @@ class BaseFunctionalTestCase(TestCase):
         cls.ocm.oc.delete_volume(volume.id)
         if wait:
             waiters.wait_resource_deleted(
-                cls.ocm.oc.get_volume, volume.id, conf.VOLUME_TIMEOUT, 5
+                cls.ocm.oc.get_volume, volume.id, CONF.VOLUME_TIMEOUT, 5
             )
 
     @classmethod
@@ -340,7 +342,7 @@ class BaseFunctionalTestCase(TestCase):
             waiters.wait_resource_deleted(
                 cls.ocm.oc.get_volume_snapshot,
                 snapshot.id,
-                conf.VOLUME_TIMEOUT,
+                CONF.VOLUME_TIMEOUT,
                 5,
             )
 
