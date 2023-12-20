@@ -221,6 +221,15 @@ def set_secret_priority(secret, priority):
     )
 
 
+def get_secret_priority_update_ts(metadata):
+    for field in metadata["managedFields"]:
+        # Only one item in managedFields list can contain updated field
+        if f"f:{constants.SECRET_PRIORITY}" in utils.get_in(
+            field, ["fieldsV1", "f:metadata", "f:annotations"], {}
+        ):
+            return field["time"]
+
+
 def get_secrets_sorted(namespace, names):
     """
     Get secret objects by names and sort them by priority
@@ -558,6 +567,16 @@ class MultiSecret(abc.ABC):
     @final
     def get_all(self):
         return [self.get_active(), self.get_backup()]
+
+    @final
+    def get_rotation_timestamp(self):
+        """Get rotation timestamp of k8s active secret and return it as unix timestamp"""
+        metadata = self.k8s_secrets[0].metadata
+        if utils.get_in(metadata, ["annotations", constants.SECRET_PRIORITY]):
+            rotation_ts = get_secret_priority_update_ts(metadata)
+        else:
+            rotation_ts = metadata["creationTimestamp"]
+        return utils.k8s_timestamp_to_unix(rotation_ts)
 
 
 class OpenStackAdminSecret(MultiSecret):

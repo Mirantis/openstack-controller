@@ -11,6 +11,7 @@ from openstack_controller import kube
 from openstack_controller import secrets
 from openstack_controller import settings  # noqa
 from openstack_controller import utils
+from openstack_controller import osdplstatus
 
 LOG = utils.get_logger(__name__)
 
@@ -25,6 +26,35 @@ AUTH_KEYS = [
     "OS_USER_DOMAIN_NAME",
     "OS_USERNAME",
 ]
+
+
+def _handle_credentials_rotation(old, new, group_name, secret_name):
+    new_rotation_id = utils.get_in(
+        new, ["metadata", "annotations", constants.SECRET_PRIORITY], "0"
+    )
+    old_rotation_id = utils.get_in(
+        old, ["metadata", "annotations", constants.SECRET_PRIORITY], "0"
+    )
+    osdpl = kube.get_osdpl()
+    osdplst = osdplstatus.OpenStackDeploymentStatus(
+        osdpl.name, osdpl.namespace
+    )
+    if group_name == "admin":
+        secret = secrets.OpenStackAdminSecret(osdpl.namespace)
+    elif group_name == "service":
+        secret = secrets.OpenStackServiceSecret(osdpl.namespace, "identity")
+
+    # Make handling only for current active secret
+    if secret_name != secret.k8s_secrets[0].name:
+        return
+
+    if (
+        new_rotation_id != old_rotation_id
+        or not osdplst.get_credentials_rotation_status(group_name)
+    ):
+        unix_ts = secret.get_rotation_timestamp()
+        LOG.info(f"Setting status for {group_name} credentials")
+        osdplst.set_credentials_rotation_status(group_name, unix_ts)
 
 
 @kopf.on.resume(
@@ -113,6 +143,74 @@ async def handle_neutron_configmap_secret(
     }
     tfs = secrets.TungstenFabricSecret()
     tfs.save(secret_data)
+
+
+@kopf.on.create(
+    "",
+    "v1",
+    "secrets",
+    when=lambda name, **_: "generated-identity-passwords" in name,
+)
+@kopf.on.resume(
+    "",
+    "v1",
+    "secrets",
+    when=lambda name, **_: "generated-identity-passwords" in name,
+)
+@kopf.on.update(
+    "",
+    "v1",
+    "secrets",
+    when=lambda name, **_: "generated-identity-passwords" in name,
+)
+async def handle_identity_passwords_secret(
+    body,
+    meta,
+    name,
+    status,
+    logger,
+    diff,
+    **kwargs,
+):
+    # On create event old can be None
+    old = kwargs["old"] or {}
+    new = kwargs["new"]
+
+    _handle_credentials_rotation(old, new, "service", name)
+
+
+@kopf.on.create(
+    "",
+    "v1",
+    "secrets",
+    when=lambda name, **_: constants.ADMIN_SECRET_NAME in name,
+)
+@kopf.on.resume(
+    "",
+    "v1",
+    "secrets",
+    when=lambda name, **_: constants.ADMIN_SECRET_NAME in name,
+)
+@kopf.on.update(
+    "",
+    "v1",
+    "secrets",
+    when=lambda name, **_: constants.ADMIN_SECRET_NAME in name,
+)
+async def handle_admin_users_secret(
+    body,
+    meta,
+    name,
+    status,
+    logger,
+    diff,
+    **kwargs,
+):
+    # On create event old can be None
+    old = kwargs["old"] or {}
+    new = kwargs["new"]
+
+    _handle_credentials_rotation(old, new, "admin", name)
 
 
 # NOTE(vsaienko): we do not need to listen for resume event, as it will trigger
