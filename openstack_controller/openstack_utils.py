@@ -312,6 +312,11 @@ async def handle_masakari_host_down(node):
         return
     try:
         os_client = OpenStackClientManager()
+        if len(os_client.compute_get_all_servers(host=node.name)) == 0:
+            LOG.info(
+                f"Do not have servers on the host {node.name}, skip masakari notification."
+            )
+            return
         compute_services = os_client.compute_get_services(host=node.name)
         alive_services = [
             service["state"] == "up" for service in compute_services
