@@ -1,7 +1,9 @@
 import pytest
 
 from openstack_controller.tests.functional.exporter import base
-from openstack_controller.tests.functional import config as conf
+from openstack_controller.tests.functional import config
+
+CONF = config.Config()
 
 
 @pytest.mark.xdist_group("exporter-compute-network")
@@ -205,7 +207,7 @@ class NeutronCollectorFunctionalTestCase(base.BaseFunctionalExporterTestCase):
             fips, fips_associated, fips - fips_associated, "Initial"
         )
 
-        fip = self.floating_ip_create(conf.PUBLIC_NETWORK_NAME)
+        fip = self.floating_ip_create(CONF.PUBLIC_NETWORK_NAME)
 
         fips = fips + 1
         self.check_fips_metrics(

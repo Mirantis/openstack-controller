@@ -7,10 +7,11 @@ import logging
 from prometheus_client.openmetrics.parser import text_string_to_metric_families
 
 from openstack_controller import kube
-from openstack_controller.tests.functional import config as conf
+from openstack_controller.tests.functional import config
 from openstack_controller.tests.functional import base
 
 LOG = logging.getLogger(__name__)
+CONF = config.Config()
 
 
 class BaseFunctionalExporterTestCase(base.BaseFunctionalTestCase):
@@ -105,11 +106,11 @@ class BaseFunctionalExporterTestCase(base.BaseFunctionalTestCase):
                 return self.filter_collector_metrics(
                     all_metrics, scrape_collector
                 )
-            time.sleep(conf.METRIC_INTERVAL_TIMEOUT)
+            time.sleep(CONF.METRIC_INTERVAL_TIMEOUT)
             timed_out = (
-                int(time.time()) - int(current_time) >= conf.METRIC_TIMEOUT
+                int(time.time()) - int(current_time) >= CONF.METRIC_TIMEOUT
             )
-            message = f"Metrics for collector {scrape_collector} were not updated after timeout {conf.METRIC_TIMEOUT}."
+            message = f"Metrics for collector {scrape_collector} were not updated after timeout {CONF.METRIC_TIMEOUT}."
             if timed_out:
                 logging.error(message)
                 raise TimeoutError(message)

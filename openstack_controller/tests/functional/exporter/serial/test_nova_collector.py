@@ -1,7 +1,9 @@
 from openstack_controller.exporter.constants import ServiceState, ServiceStatus
 from openstack_controller.tests.functional.exporter import base
 from openstack_controller.tests.functional import waiters as wait
-from openstack_controller.tests.functional import config as conf
+from openstack_controller.tests.functional import config
+
+CONF = config.Config()
 
 
 class NovaCollectorSerialFunctionalTestCase(
@@ -50,7 +52,7 @@ class NovaCollectorSerialFunctionalTestCase(
             ServiceStatus.disabled,
             f"Current metric {metric_name} for host {labels['host']} "
             f"has value: {service_samples[0].value}. "
-            f"Expected value: {ServiceStatus.disabled}, after {conf.METRIC_TIMEOUT} sec.",
+            f"Expected value: {ServiceStatus.disabled}, after {CONF.METRIC_TIMEOUT} sec.",
         )
 
         self.ocm.compute_ensure_service_enabled(self.compute_svc)
@@ -64,7 +66,7 @@ class NovaCollectorSerialFunctionalTestCase(
             ServiceStatus.enabled,
             f"Current metric {metric_name} for host {labels['host']} "
             f"has value: {service_samples[0].value}. Expected value: {ServiceStatus.enabled},"
-            f"after {conf.METRIC_TIMEOUT} sec.",
+            f"after {CONF.METRIC_TIMEOUT} sec.",
         )
 
     def test_service_state_up_down(self):
@@ -86,7 +88,7 @@ class NovaCollectorSerialFunctionalTestCase(
             ServiceState.down,
             f"Current metric {metric_name} for host {labels['host']} "
             f"has value: {service_samples[0].value}. Expected value: {ServiceState.down}, "
-            f"after {conf.METRIC_TIMEOUT} sec.",
+            f"after {CONF.METRIC_TIMEOUT} sec.",
         )
 
         self.ocm.compute_ensure_service_force_down(self.compute_svc, False)
@@ -100,5 +102,5 @@ class NovaCollectorSerialFunctionalTestCase(
             ServiceState.up,
             f"Current metric {metric_name} for host {labels['host']} "
             f"has value: {service_samples[0].value}. Expected value: {ServiceState.up}, "
-            f"after {conf.METRIC_TIMEOUT} sec.",
+            f"after {CONF.METRIC_TIMEOUT} sec.",
         )
