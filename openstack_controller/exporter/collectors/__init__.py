@@ -18,6 +18,9 @@ from openstack_controller.exporter.collectors.base import OsdplMetricsCollector
 from openstack_controller.exporter.collectors.certificates import (
     OsdplCertsMetricCollector,
 )
+from openstack_controller.exporter.collectors.credentials import (
+    OsdplCredentialsMetricCollector,
+)
 from openstack_controller.exporter.collectors.openstack.nova import (
     OsdplNovaMetricCollector,
 )
@@ -59,6 +62,7 @@ from openstack_controller.exporter.collectors.osdpl import (
 __all__ = (
     OsdplMetricsCollector,
     OsdplCertsMetricCollector,
+    OsdplCredentialsMetricCollector,
     OsdplNovaMetricCollector,
     OsdplIronicMetricCollector,
     OsdplMetricCollector,
