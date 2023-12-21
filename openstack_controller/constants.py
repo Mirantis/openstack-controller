@@ -143,6 +143,9 @@ OPENSTACK_IAM_SECRET = "openstack-iam-shared"
 OPENSTACK_EXTERNAL_NAMESPACE = "openstack-external"
 RABBITMQ_EXTERNAL_SERVICE = "rabbitmq-external"
 RABBITMQ_EXTERNAL_CERTIFICATES_SECRET = "rabbitmq-external-certs"
+RABBITMQ_EXTERNAL_SECRETS_LABELS = {
+    "openstack.lcm.mirantis.com/rabbitmq-external": "true"
+}
 PROXY_VARS_NAMES = {
     "http_proxy",
     "https_proxy",

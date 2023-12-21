@@ -1090,8 +1090,12 @@ class KeycloakSecret(Secret):
 class SecretCopy(Secret):
     """Copies secret from namespace to namespace as is"""
 
+    labels = None
+
     def save(self, secret) -> None:
-        kube.save_secret_data(self.namespace, self.secret_name, secret)
+        kube.save_secret_data(
+            self.namespace, self.secret_name, secret, labels=self.labels
+        )
 
     def create(self):
         pass
@@ -1121,6 +1125,8 @@ class OpenStackControllerOSCloudsSecret(SecretCopy):
 
 
 class ExternalTopicSecret(SecretCopy):
+    labels = constants.RABBITMQ_EXTERNAL_SECRETS_LABELS
+
     def __init__(
         self,
         name,
