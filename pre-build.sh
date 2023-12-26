@@ -2,7 +2,7 @@
 set -e
 GIT_CREDS_ID=${GIT_CREDS_ID:-"mos-ci"}
 OPENSTACK_SDK_REPO=${OPENSTACK_SDK_REPO:-"gerrit.mcp.mirantis.com:29418/packaging/sources/openstacksdk"}
-OPENSTACK_SDK_REPO_BRANCH=${OPENSTACK_SDK_REPO_BRANCH:-"mcp/yoga"}
+OPENSTACK_SDK_REPO_BRANCH=${OPENSTACK_SDK_REPO_BRANCH:-"mcp/antelope"}
 
 WORKDIR=$(pwd)
 mkdir ${WORKDIR}/source_requirements/
