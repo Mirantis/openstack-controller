@@ -55,15 +55,6 @@ spec:
       securityContext:
         {{- toYaml .Values.osdpl.pod.controller.security_context | nindent 8 }}
       initContainers:
-        - name: remove-default-finalizer
-          command:
-          - osctl-remove-default-finalizer
-          env:
-{{ tuple . | include "openstack-controller.common_env" | indent 12 }}
-          image: {{ tuple . .Values.image | include "getImageUrl" }}
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
-          securityContext:
-            {{- toYaml .Values.osdpl.pod.controller.remove_default_finalizer.security_context | nindent 12 }}
         - name: convert-credential-secrets
           command:
           - osctl-convert-credential-secrets
