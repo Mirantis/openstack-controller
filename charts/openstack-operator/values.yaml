@@ -133,8 +133,6 @@ osdpl:
             periodSeconds: 60
             timeoutSeconds: 5
         security_context: *security_context
-      remove_default_finalizer:
-        security_context: *security_context
       convert_credentials:
         security_context: *security_context
     ensure_resources:
