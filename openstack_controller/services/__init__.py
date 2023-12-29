@@ -1136,9 +1136,15 @@ class Neutron(OpenStackService, MaintenanceApiMixin):
 
     @layers.kopf_exception
     async def _upgrade(self, event, **kwargs):
+        neutron_server_deployment_type = "Deployment"
+        if (
+            utils.get_in(self.mspec, ["features", "neutron", "backend"])
+            == "ml2/ovn"
+        ):
+            neutron_server_deployment_type = "Daemonset"
         static_map = [
             ("Job", "neutron-db-sync"),
-            ("Deployment", "neutron-server"),
+            (neutron_server_deployment_type, "neutron-server"),
         ]
 
         dynamic_map = [

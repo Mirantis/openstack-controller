@@ -2,6 +2,9 @@
 {%- from 'macros/connections.j2' import from_namespaces %}
 {%- set api_ns_list = ["os_controller", "lma_deployment"] | namespaces  %}
 {%- set neutron_server = "networking:neutron:Deployment:neutron-server" %}
+{%- if spec.get("features", {}).get("neutron", {}).get("backend") == "ml2/ovn" %}
+{%- set neutron_server = "networking:neutron:DaemonSet:neutron-server" %}
+{%- endif %}
         server:
           spec:
             podSelector:
