@@ -525,11 +525,7 @@ services:
             server: 5
           lifecycle:
             disruption_budget:
-              metadata:
-                min_available: 2
-              placement:
-                min_available: 2
-              osapi:
+              horizon:
                 min_available: 2
             upgrades:
               deployments:
