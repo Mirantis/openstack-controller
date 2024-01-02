@@ -138,6 +138,9 @@ spec:
                   external-ids:
                     ovn-encap-type: 'geneve'
                     ovn-bridge-mappings: 'physnet1:br-ex'
+                    ovn-monitor-all: true
+                    ovn-remote-probe-interval: 60000
+                    ovn-openflow-probe-interval: 60
                   ovs_bridges:
                     br-ex:
                       nics:
@@ -148,6 +151,9 @@ spec:
                   external-ids:
                     ovn-bridge-mappings: 'physnet1:br-ex'
                     ovn-cms-options: 'enable-chassis-as-gw'
+                    ovn-monitor-all: true
+                    ovn-remote-probe-interval: 60000
+                    ovn-openflow-probe-interval: 60
                   ovs_bridges:
                     br-ex:
                       nics:

@@ -314,6 +314,9 @@ spec:
                   external-ids:
                     ovn-cms-options: "enable-chassis-as-gw"
                     ovn-bridge-mappings: {{ ','.join(bridge_mappings) }}
+                    ovn-monitor-all: true
+                    ovn-remote-probe-interval: 60000
+                    ovn-openflow-probe-interval: 60
                   ovs_bridges:
       {%- for network in spec.features.neutron.external_networks %}
                     {{ network.bridge }}:
@@ -326,6 +329,9 @@ spec:
                   external-ids:
                     ovn-encap-type: geneve
                     ovn-bridge-mappings: {{ ','.join(bridge_mappings) }}
+                    ovn-monitor-all: true
+                    ovn-remote-probe-interval: 60000
+                    ovn-openflow-probe-interval: 60
                   ovs_bridges:
         {%- for network in spec.features.neutron.external_networks %}
                    {{ network.bridge }}:
