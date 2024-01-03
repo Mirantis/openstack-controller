@@ -19,48 +19,63 @@ class CinderCollectorFunctionalTestCase(base.BaseFunctionalExporterTestCase):
 
     known_metrics = {
         "osdpl_cinder_snapshots": {"labels": []},
-        "osdpl_cinder_pool_free_capacity": {"labels": ["name"]},
+        "osdpl_cinder_snapshots_size": {"labels": []},
         "osdpl_cinder_pool_total_capacity": {"labels": ["name"]},
+        "osdpl_cinder_pool_free_capacity": {"labels": ["name"]},
+        "osdpl_cinder_pool_allocated_capacity": {"labels": ["name"]},
     }
+
+    def _test_volume_snapshots_count(self, expected_value, phase):
+        metric_name = "osdpl_cinder_snapshots"
+        metric = self.get_metric(metric_name)
+        self.assertEqual(
+            int(metric.samples[0].value),
+            expected_value,
+            "{phase}: The number of snapshots is not correct.",
+        )
 
     @pytest.mark.xdist_group("exporter-volume")
     def test_volume_snapshots(self):
         """Total number of volume snapshots in the cluster."""
 
-        metric_name = "osdpl_cinder_snapshots"
-        initial_metric = self.get_metric(metric_name)
-        snapshots = self.ocm.oc.list_volume_snapshots()
-        self.assertEqual(
-            int(initial_metric.samples[0].value),
-            len(snapshots),
-            "The initial number of snapshots is not correct.",
-        )
+        snapshots = len(self.ocm.oc.list_volume_snapshots())
+        self._test_volume_snapshots_count(snapshots, "Before create")
 
         # Create one test volume and one volume snapshot
         volume = self.volume_create()
         snapshot = self.volume_snapshot_create(volume)
-        active_metric = self.get_metric_after_refresh(
-            metric_name, self.scrape_collector
+        self._test_volume_snapshots_count(snapshots + 1, "After create")
+
+        # Delete Volume's snapshot and check that a volume's snapshot metric is changed
+        self.snapshot_volume_delete(snapshot, wait=True)
+        self._test_volume_snapshots_count(snapshots, "After delete")
+
+    def _test_volume_snapshots_size(self, expected_value, phase):
+        metric_name = "osdpl_cinder_snapshots_size"
+        metric = self.get_metric(metric_name)
+        self.assertEqual(
+            int(metric.samples[0].value),
+            expected_value,
+            "{phase}: The number of snapshots size is not correct.",
         )
 
-        # Check that a volume's snapshot metric is changed
-        snapshots = self.ocm.oc.list_volume_snapshots()
-        self.assertEqual(
-            int(active_metric.samples[0].value),
-            len(snapshots),
-            "The number of volume snapshots after create is not correct",
+    @pytest.mark.xdist_group("exporter-volume")
+    def test_volume_snapshots_size(self):
+        """Total size of volume snapshots in the cluster."""
+
+        snapshots_size = self.get_volume_snapshots_size()
+        self._test_volume_snapshots_size(snapshots_size, "Before create")
+
+        # Create one test volume and one volume snapshot
+        volume = self.volume_create()
+        snapshot = self.volume_snapshot_create(volume)
+        self._test_volume_snapshots_size(
+            snapshots_size + 1 * constants.Gi, "After create"
         )
 
         # Delete Volume's snapshot and check that a volume's snapshot metric is changed
         self.snapshot_volume_delete(snapshot, wait=True)
-        metric = self.get_metric_after_refresh(
-            metric_name, self.scrape_collector
-        )
-        self.assertEqual(
-            int(metric.samples[0].value),
-            len(snapshots) - 1,
-            "The number of volume snapshots after delete is not correct",
-        )
+        self._test_volume_snapshots_size(snapshots_size, "After delete")
 
     @parameterized.expand(
         [

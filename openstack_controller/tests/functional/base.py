@@ -7,6 +7,7 @@ import openstack
 
 from openstack_controller import kube
 from openstack_controller import openstack_utils
+from openstack_controller.exporter import constants
 from openstack_controller.tests.functional import config
 from openstack_controller.tests.functional import data_utils, waiters
 
@@ -347,6 +348,14 @@ class BaseFunctionalTestCase(TestCase):
                 CONF.VOLUME_TIMEOUT,
                 5,
             )
+
+    @classmethod
+    def get_volume_snapshots_size(cls):
+        """Calculate the total size of volume snapshots in bytes."""
+        total_bytes = 0
+        for snapshot in cls.ocm.oc.list_volume_snapshots():
+            total_bytes += snapshot.size * constants.Gi
+        return total_bytes
 
     @classmethod
     @suppress404
