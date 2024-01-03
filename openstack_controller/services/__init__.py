@@ -866,7 +866,11 @@ class Ironic(OpenStackService):
 
     @property
     def required_accounts(self):
-        return {"networking": ["neutron"], "image": ["glance"]}
+        return {
+            "networking": ["neutron"],
+            "image": ["glance"],
+            "compute": ["nova"],
+        }
 
 
 class Keystone(OpenStackService):
