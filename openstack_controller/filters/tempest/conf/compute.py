@@ -25,6 +25,7 @@ class Compute(base_section.BaseSection):
         "build_interval",
         "build_timeout",
         "catalog_type",
+        "compute_volume_common_az",
         "endpoint_type",
         "fixed_network_name",
         "flavor_ref",
@@ -52,6 +53,12 @@ class Compute(base_section.BaseSection):
     @property
     def catalog_type(self):
         pass
+
+    @property
+    def compute_volume_common_az(self):
+        return self.get_values_item(
+            "nova", "conf.nova.DEFAULT.default_schedule_zone", "nova"
+        )
 
     @property
     def endpoint_type(self):
