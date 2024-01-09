@@ -361,6 +361,7 @@ spec:
                 conf:
                   ovs_dpdk:
                     enabled: true
+                    driver: {{ override.dpdk.driver }}
                     hugepages_mountpath: /dev/hugepages
                     socket_memory: {{ socket_memory }}
                     vhostuser_socket_dir: vhostuser
