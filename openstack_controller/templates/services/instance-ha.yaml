@@ -14,6 +14,7 @@
   {%- endfor %}
 {%- endif  %}
 {%- set masakari_db_cleanup = spec.get('features', {}).get('database', {}).get('cleanup', {}).get('masakari', {'enabled': true}) %}
+{%- set libvirt_server_tls_enabled = spec.get('features', {}).get('nova', {}).get('libvirt', {}).get('tls', {}).get('enabled', false) %}
 {%- from 'macros/etcd3.j2' import get_etcd3_endpoint %}
 
 spec:
@@ -43,6 +44,9 @@ spec:
         {%- endif %}
 {%- endfor %}
       conf:
+        libvirt:
+          tls: {{ libvirt_server_tls_enabled }}
+          interface: {{ spec.features.nova.live_migration_interface }}
         policy.d:
           01-controller-default.yaml: {{ service_policy }}
           02-custom.yaml: {{ spec.get("features", {}).get("policies", {}).get("masakari", {}) }}
