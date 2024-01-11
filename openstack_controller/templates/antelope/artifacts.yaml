@@ -146,7 +146,7 @@ placement_db_sync: '{{ images_base_url }}/openstack/placement:antelope-jammy-202
 keystone_db_sync_expand: '{{ images_base_url }}/openstack/keystone:antelope-jammy-20240103193010'
 keystone_db_sync_migrate: '{{ images_base_url }}/openstack/keystone:antelope-jammy-20240103193010'
 keystone_db_sync_contract: '{{ images_base_url }}/openstack/keystone:antelope-jammy-20240103193010'
-octavia_amphora: '{{ binary_base_url }}/openstack/bin/octavia/amphora-x64-haproxy-antelope-20240103200506.qcow2'
+octavia_amphora: '{{ binary_base_url }}/openstack/bin/octavia/amphora-x64-haproxy-antelope-20240109161132.qcow2'
 etcd: '{{ images_base_url }}/openstack/extra/etcd:v3.5.11-alpine-20231211203412'
 etcd_db_compact: '{{ images_base_url }}/openstack/extra/etcd:v3.5.11-alpine-20231211203412'
 cinder_db_sync_online: '{{ images_base_url }}/openstack/cinder:antelope-jammy-20240103193010'
@@ -183,7 +183,7 @@ mariadb_controller: '{{ images_base_url }}/general/mariadb:10.6.14-focal-2023112
 horizon_mirantis_theme_sha256summ: 901891de9cfe77dbf65f1c7cf3161408b4f3229f2426d400039af8e34e2c46ef
 horizon_mirantis_theme_url: '{{ binary_base_url }}/openstack/bin/horizon/mirantis-antelope-18a1377-20230817112356.tar.gz'
 ceph_config_helper: '{{ images_base_url }}/openstack/openstack-tools:yoga-jammy-20240103193010'
-octavia_amphora_checksum: 505bfa23137f47d7f79a0b4eb8e51e8b
+octavia_amphora_checksum: 6d1997895163fb66baea04093fb53416
 masakari_db_sync: '{{ images_base_url }}/openstack/masakari:antelope-jammy-20240103193010'
 masakari_api: '{{ images_base_url }}/openstack/masakari:antelope-jammy-20240103193010'
 masakari_engine: '{{ images_base_url }}/openstack/masakari:antelope-jammy-20240103193010'
