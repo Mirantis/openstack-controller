@@ -553,6 +553,7 @@ spec:
             swtpm_enabled: true
             swtpm_user: tss
             swtpm_group: tss
+            live_migration_permit_auto_converge: true
           audit_middleware_notifications:
             driver: noop
           oslo_messaging_notifications:

@@ -118,6 +118,7 @@ spec:
             images_type: qcow2
             rbd_user: nova
             virt_type: kvm
+            live_migration_permit_auto_converge: true
           neutron:
             metadata_proxy_shared_secret: mN0aLDTcg1AVqyLWNDjCd2Jz6DA61cZJ
           audit_middleware_notifications:

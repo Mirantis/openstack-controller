@@ -550,6 +550,7 @@ spec:
             cpu_mode: host-model
             virt_type: kvm
             images_type: qcow2
+            live_migration_permit_auto_converge: true
           audit_middleware_notifications:
             driver: noop
           oslo_messaging_notifications:
