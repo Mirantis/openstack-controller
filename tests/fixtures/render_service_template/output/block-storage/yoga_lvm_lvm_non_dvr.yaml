@@ -96,18 +96,6 @@ spec:
           db_init:
             jobs:
             - openstack-mariadb-cluster-wait
-          bootstrap:
-            pod:
-              - requireSameNode: false
-                labels:
-                  application: cinder
-                  component: volume_daemonset
-          drop_default_volume_type:
-            pod:
-              - requireSameNode: false
-                labels:
-                  application: cinder
-                  component: volume_daemonset
       network:
         api:
           ingress:
