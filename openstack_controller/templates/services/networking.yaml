@@ -474,6 +474,25 @@ spec:
         probes:
           rpc_timeout: 30
           rpc_retries: 2
+          server:
+            server:
+              readiness:
+                enabled: true
+                params:
+                  periodSeconds: 15
+                  timeoutSeconds: 15
+              liveness:
+                enabled: true
+                params:
+                  initialDelaySeconds: 60
+                  periodSeconds: 30
+                  timeoutSeconds: 30
+              startup:
+                enabled: true
+                params:
+                  periodSeconds: 30
+                  successThreshold: 1
+                  timeoutSeconds: 30
           dhcp_agent:
             dhcp_agent:
               liveness:
