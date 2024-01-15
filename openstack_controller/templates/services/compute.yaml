@@ -878,6 +878,7 @@ spec:
             cpu_mode: custom
             cpu_models: {{ vcpu_type }}
 {%- endif %}
+            live_migration_permit_auto_converge: true
 {%- if libvirt_server_tls_enabled %}
             live_migration_scheme: tls
             live_migration_with_native_tls: true

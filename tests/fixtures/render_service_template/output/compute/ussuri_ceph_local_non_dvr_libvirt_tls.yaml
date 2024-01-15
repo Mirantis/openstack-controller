@@ -143,6 +143,7 @@ spec:
             images_type: qcow2
             rbd_user: nova
             virt_type: kvm
+            live_migration_permit_auto_converge: true
             live_migration_scheme: tls
             live_migration_with_native_tls: true
           neutron:
