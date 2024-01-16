@@ -26,6 +26,7 @@ spec:
             allow_expired_window: 172800
           cache:
             backend: oslo_cache.memcache_pool
+            memcache_pool_flush_on_reconnect: True
           oslo_messaging_notifications:
             topics: notifications,stacklight_notifications
           oslo_policy:
