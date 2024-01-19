@@ -268,6 +268,7 @@ services:
             - (?:tempest.scenario.test_shelve_instance.TestShelveInstance.test_shelve_instance)
             # Skip TESTs failed, that don't work with signature verification enabled
             - (?:tempest.scenario.test_minimum_basic.TestMinimumBasicScenario.test_minimum_basic_scenario)
+            - (?:tempest.scenario.test_minimum_basic.TestMinimumBasicScenario.test_minimum_basic_instance_hard_reboot_after_vol_snap_deletion)
             - (?:tempest.scenario.test_snapshot_pattern.TestSnapshotPattern.test_snapshot_pattern)
             - (?:tempest.scenario.test_stamp_pattern.TestStampPattern.test_stamp_pattern)
             # SKIPPED: multi-cloud feature is not configured in our CI
