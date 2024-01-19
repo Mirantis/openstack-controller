@@ -158,11 +158,16 @@ class BaseFunctionalTestCase(TestCase):
         network_id,
         ip_version=4,
         name=None,
+        **kwargs,
     ):
         if name is None:
             name = data_utils.rand_name()
         subnet = cls.ocm.oc.network.create_subnet(
-            name=name, cidr=cidr, network_id=network_id, ip_version=ip_version
+            name=name,
+            cidr=cidr,
+            network_id=network_id,
+            ip_version=ip_version,
+            **kwargs,
         )
         cls.addClassCleanup(cls.subnet_delete, subnet)
         return subnet
@@ -426,3 +431,10 @@ class BaseFunctionalTestCase(TestCase):
     @suppress404
     def endpoint_delete(cls, endpoint):
         cls.ocm.oc.identity.delete_endpoint(endpoint)
+
+    def get_ports_by_status(self, status):
+        ports = []
+        for port in self.ocm.oc.network.ports():
+            if port["status"] == status:
+                ports.append(port)
+        return ports

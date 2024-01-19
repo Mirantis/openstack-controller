@@ -23,6 +23,7 @@ class NeutronCollectorFunctionalTestCase(base.BaseFunctionalExporterTestCase):
         "osdpl_neutron_networks": {"labels": []},
         "osdpl_neutron_subnets": {"labels": []},
         "osdpl_neutron_down_ports": {"labels": []},
+        "osdpl_neutron_active_ports": {"labels": []},
         "osdpl_neutron_ports": {"labels": []},
         "osdpl_neutron_routers": {"labels": []},
         "osdpl_neutron_floating_ips": {"labels": ["state"]},
@@ -116,39 +117,6 @@ class NeutronCollectorFunctionalTestCase(base.BaseFunctionalExporterTestCase):
             int(metric.samples[0].value),
             len(subnets),
             "The number of subnets after subnet delete is not correct.",
-        )
-
-    def test_neutron_ports(self):
-        """Total number of ports in the cluster."""
-        metric_name = "osdpl_neutron_ports"
-        initial_metric = self.get_metric_after_refresh(
-            metric_name, self.scrape_collector
-        )
-        ports = list(self.ocm.oc.network.ports())
-        self.assertEqual(
-            int(initial_metric.samples[0].value),
-            len(ports),
-            "The initial number of ports is not correct",
-        )
-
-        down_port = self.port_create(self.network["id"])
-        metric = self.get_metric_after_refresh(
-            metric_name, self.scrape_collector
-        )
-        self.assertEqual(
-            int(metric.samples[0].value),
-            len(ports) + 1,
-            "The number of ports after port create is not correct.",
-        )
-
-        self.port_delete(down_port)
-        metric_after_delete_port = self.get_metric_after_refresh(
-            metric_name, self.scrape_collector
-        )
-        self.assertEqual(
-            int(metric_after_delete_port.samples[0].value),
-            len(ports),
-            "The number of ports after port delete is not correct.",
         )
 
     def check_fips_metrics(self, total, associated, not_associated, phase):
@@ -291,6 +259,123 @@ class NeutronCollectorFunctionalTestCase(base.BaseFunctionalExporterTestCase):
             int(metric_after_delete_router.samples[0].value),
             len(routers),
             "The number of routers after router delete is not correct.",
+        )
+
+
+@pytest.mark.xdist_group("exporter-compute-network")
+class NeutronPortsTestCase(base.BaseFunctionalExporterTestCase):
+    scrape_collector = "osdpl_neutron"
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.network = cls.network_create()
+
+    def _test_osdpl_neutron_ports(self, metric_name, expected_num, phase):
+        metric = self.get_metric_after_refresh(
+            metric_name, self.scrape_collector
+        )
+        self.assertEqual(
+            int(metric.samples[0].value),
+            expected_num,
+            f"{phase}: The number of ports in the cluster is not correct.",
+        )
+
+    def test_neutron_ports(self):
+        """Total number of ports in the cluster.
+
+        **Steps:**
+
+        #. Get exporter metric "osdpl_neutron_ports" with initial number
+        of ports in the cluster
+        #. Check that number of ports is equal to OS and exporter
+        #. Create additional port
+        #. Check that total number of ports was changed in response from exporter
+        #. Delete the created port
+        #. Check that total number of ports was changed in response from exporter
+
+        """
+        metric_name = "osdpl_neutron_ports"
+        ports = list(self.ocm.oc.network.ports())
+        self._test_osdpl_neutron_ports(metric_name, len(ports), "Initial")
+
+        port = self.port_create(self.network["id"])
+        self._test_osdpl_neutron_ports(
+            metric_name, len(ports) + 1, "After create"
+        )
+
+        self.port_delete(port)
+        self._test_osdpl_neutron_ports(metric_name, len(ports), "After delete")
+
+    def test_neutron_down_ports(self):
+        """Total number of ports in DOWN status in the cluster.
+
+        **Steps:**
+
+        #. Get exporter metric "osdpl_neutron_down_ports" with initial number
+        of ports in DOWN status in the cluster
+        #. Check that number of ports in DOWN status is equal to OS and exporter
+        #. Create additional port in DOWN status
+        #. Check that number of ports in DOWN status was changed in response from exporter
+        #. Delete the created port
+        #. Check that number of ports in DOWN status was changed in response from exporter
+
+        """
+        metric_name = "osdpl_neutron_down_ports"
+        down_ports = self.get_ports_by_status("DOWN")
+        self._test_osdpl_neutron_ports(metric_name, len(down_ports), "Initial")
+
+        down_port = self.port_create(self.network["id"])
+        self._test_osdpl_neutron_ports(
+            metric_name, len(down_ports) + 1, "After create"
+        )
+
+        self.port_delete(down_port)
+        self._test_osdpl_neutron_ports(
+            metric_name, len(down_ports), "After delete"
+        )
+
+    def test_neutron_active_ports(self):
+        """Total number of ports in ACTIVE status in the cluster.
+
+        **Steps:**
+
+        #. Get exporter metric "osdpl_neutron_active_ports" with initial number
+        of ports in ACTIVE status in the cluster
+        #. Check that number of ports in ACTIVE status is equal to OS and exporter
+        #. Create additional port, attach to server and track the status change from DOWN to ACTIVE
+        #. Check that number of ports in ACTIVE status was changed in response from exporter
+        #. Delete the created port
+        #. Check that number of ports in ACTIVE status was changed in response from exporter
+
+        """
+        metric_name = "osdpl_neutron_active_ports"
+        active_ports = self.get_ports_by_status("ACTIVE")
+        self._test_osdpl_neutron_ports(
+            metric_name, len(active_ports), "Initial"
+        )
+
+        # Gateway IP in this scenario for the subnet set to None
+        # to avoid creating an additional gateway port).
+        # enable_dhcp=False sets the default behavior of not enabling DHCP
+        # for the subnet and not creating unnecessary ports in tests
+        subnet = self.subnet_create(
+            cidr=CONF.TEST_SUBNET_RANGE,
+            network_id=self.network["id"],
+            gateway_ip=None,
+            enable_dhcp=False,
+        )
+        fixed_ips = [{"subnet_id": subnet["id"]}]
+        port = self.port_create(self.network["id"], fixed_ips=fixed_ips)
+        self.server_create(networks=[{"port": port.id}])
+
+        self._test_osdpl_neutron_ports(
+            metric_name, len(active_ports) + 1, "After create"
+        )
+
+        self.port_delete(port)
+        self._test_osdpl_neutron_ports(
+            metric_name, len(active_ports), "After delete"
         )
 
 
