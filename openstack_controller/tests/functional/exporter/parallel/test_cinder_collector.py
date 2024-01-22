@@ -252,7 +252,9 @@ class CinderCollectorFunctionalTestCase(base.BaseFunctionalExporterTestCase):
 
         volumes = len(
             list(
-                self.ocm.oc.volume.volumes(availability_zone=availability_zone)
+                self.ocm.oc.volume.volumes(
+                    availability_zone=availability_zone, all_tenants=True
+                )
             )
         )
         self._test_cinder_volumes(metric_name, volumes, "Before create")
