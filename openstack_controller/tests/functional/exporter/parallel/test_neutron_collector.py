@@ -28,10 +28,23 @@ class NeutronCollectorFunctionalTestCase(base.BaseFunctionalExporterTestCase):
         "osdpl_neutron_routers": {"labels": []},
         "osdpl_neutron_floating_ips": {"labels": ["state"]},
         "osdpl_neutron_zone_routers": {"labels": []},
+        "osdpl_neutron_agent_state": {"labels": ["host", "zone", "binary"]},
         "osdpl_neutron_availability_zone_info": {
             "labels": ["zone", "resource"]
         },
     }
+
+    def test_neutron_agents_state(self):
+        """State of neutron agents in the cluster."""
+
+        metric = self.get_metric("osdpl_neutron_agent_state")
+        self.assertEqual(
+            len(list(self.ocm.network_get_agents())), len(metric.samples)
+        )
+        self.assertCountEqual(
+            ["host", "zone", "binary"],
+            metric.samples[0].labels.keys(),
+        )
 
     def test_neutron_networks(self):
         """Total number of networks in the cluster.
