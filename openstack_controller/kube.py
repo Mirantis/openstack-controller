@@ -699,7 +699,16 @@ class DaemonSet(pykube.DaemonSet, HelmBundleMixin):
 
     @property
     def generation(self):
-        generation = self.obj["metadata"].get("generation")
+        # NOTE(vsaienko): generations may not match, and pod uses
+        # deprecated generation PRODX-38935
+        template_generation = (
+            self.obj["metadata"]
+            .get("annotations", {})
+            .get("deprecated.daemonset.template.generation")
+        )
+        generation = template_generation or self.obj["metadata"].get(
+            "generation"
+        )
         if generation:
             generation = int(generation)
         return generation
