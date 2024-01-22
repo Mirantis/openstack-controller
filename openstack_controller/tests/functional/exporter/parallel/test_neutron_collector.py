@@ -378,6 +378,14 @@ class NeutronPortsTestCase(base.BaseFunctionalExporterTestCase):
             metric_name, len(active_ports), "After delete"
         )
 
+    def test_neutron_error_ports(self):
+        """Total number of ports in ERROR status in the cluster."""
+
+        metric_name = "osdpl_neutron_error_ports"
+        metric = self.get_metric(metric_name)
+        error_ports = self.get_ports_by_status("ERROR")
+        self.assertEqual(int(metric.samples[0].value), len(error_ports))
+
 
 class NeutronAvailabilityZoneTestCase(base.BaseFunctionalExporterTestCase):
     def test_neutron_availability_zone_info(self):
