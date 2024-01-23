@@ -284,7 +284,7 @@ def merge_all_layers(service, mspec, logger, **template_args):
 
 
 @kopf_exception
-def merge_spec(spec, logger, osdplsecret_spec=None):
+def merge_spec(spec, logger):
     """Merge user-defined OsDpl spec with base for preset and OS version
 
     The merging is done in following order, higher overrides. It is important
@@ -294,7 +294,6 @@ def merge_spec(spec, logger, osdplsecret_spec=None):
     3. User defined osdpl spec.
 
     """
-    osdplsecret_spec = osdplsecret_spec or {}
     spec = copy.deepcopy(dict(spec))
     preset = spec["preset"]
     size = spec["size"]
@@ -378,8 +377,7 @@ def merge_spec(spec, logger, osdplsecret_spec=None):
         merger.merge(base, iam_features)
 
     # Merge operator defaults with user context.
-    merger.merge(base, spec)
-    return merger.merge(base, osdplsecret_spec)
+    return merger.merge(base, spec)
 
 
 def render_cache_template(mspec, name, images):

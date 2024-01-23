@@ -64,6 +64,15 @@ spec:
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           securityContext:
             {{- toYaml .Values.osdpl.pod.controller.convert_credentials.security_context | nindent 12 }}
+        - name: check-osdplsecrets
+          command:
+          - osctl-check-osdplsecrets
+          env:
+{{ tuple . | include "openstack-controller.common_env" | indent 12 }}
+          image: {{ tuple . .Values.image | include "getImageUrl" }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          securityContext:
+            {{- toYaml .Values.osdpl.pod.controller.check_osdplsecrets.security_context | nindent 12 }}
       containers:
         - name: osdpl
           image: {{ tuple . .Values.image | include "getImageUrl" }}
@@ -360,48 +369,6 @@ spec:
             {{- toYaml .Values.resources | nindent 12 }}
           securityContext:
             {{- toYaml .Values.osdpl.pod.controller.osdplstatus.security_context | nindent 12 }}
-          volumeMounts:
-            - name: os-clouds
-              mountPath: /etc/openstack/
-            - name: openstack-controller-config
-              mountPath: /etc/openstack-controller/conf.d/
-        - name: osdplsecret
-          image: {{ tuple . .Values.image | include "getImageUrl" }}
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
-          command:
-            - kopf
-            - run
-            - '-n'
-            - {{ .Values.osdpl.namespace }}
-            - '--standalone'
-            - '-m'
-            - openstack_controller.controllers.openstackdeploymentsecret
-            - '-m'
-            - openstack_controller.controllers.probe
-            - '-L'
-            - 'http://0.0.0.0:32776/healthz'
-          env:
-            - name: OSCTL_HEARTBEAT_PEERING_OBJECT_NAME
-              value: openstack-controller.osdplsecret
-            {{- range $optionName, $optionValue := .Values.osdpl.settings.raw }}
-            - name: {{ $optionName }}
-              value: "{{ $optionValue }}"
-            {{- end }}
-            {{- range $optionName, $optionValue := .Values.osdpl.settings.osdplsecret.raw }}
-            - name: {{ $optionName }}
-              value: "{{ $optionValue }}"
-            {{- end }}
-{{ tuple . | include "openstack-controller.common_env" | indent 12 }}
-          livenessProbe:
-            exec:
-              command:
-                - curl
-                - http://127.0.0.1:32776/healthz
-            {{- toYaml .Values.osdpl.pod.controller.osdplsecret.liveness.params | nindent 12}}
-          resources:
-            {{- toYaml .Values.resources | nindent 12 }}
-          securityContext:
-            {{- toYaml .Values.osdpl.pod.controller.osdplsecret.security_context | nindent 12 }}
           volumeMounts:
             - name: os-clouds
               mountPath: /etc/openstack/
