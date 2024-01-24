@@ -35,8 +35,6 @@ osdpl:
       raw: {}
     osdplstatus:
       raw: {}
-    osdplsecret:
-      raw: {}
     node:
       raw: {}
     secrets:
@@ -78,13 +76,6 @@ osdpl:
             drop:
             - ALL
       osdplstatus:
-        liveness:
-          params:
-            initialDelaySeconds: 120
-            periodSeconds: 60
-            timeoutSeconds: 5
-        security_context: *security_context
-      osdplsecret:
         liveness:
           params:
             initialDelaySeconds: 120
@@ -134,6 +125,8 @@ osdpl:
             timeoutSeconds: 5
         security_context: *security_context
       convert_credentials:
+        security_context: *security_context
+      check_osdplsecrets:
         security_context: *security_context
     ensure_resources:
       security_context:

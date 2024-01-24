@@ -96,16 +96,8 @@ class OpenStackDeployment(pykube.objects.NamespacedAPIObject):
 
     @property
     def mspec(self):
-        osdplsecret = OpenStackDeploymentSecret(self.name, self.namespace)
-
-        osdplsecret_spec = None
-        if osdplsecret.exists():
-            osdplsecret.reload()
-            osdplsecret_spec = osdplsecret.obj["spec"]
         subs_spec = layers.substitude_osdpl(self.obj["spec"])
-        mspec = layers.merge_spec(
-            subs_spec, LOG, osdplsecret_spec=osdplsecret_spec
-        )
+        mspec = layers.merge_spec(subs_spec, LOG)
         return mspec
 
 
