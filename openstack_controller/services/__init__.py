@@ -1130,11 +1130,13 @@ class Neutron(OpenStackService, MaintenanceApiMixin):
     @property
     def health_groups(self):
         health_groups = [self.openstack_chart]
-        if (
-            utils.get_in(self.mspec["features"], ["neutron", "backend"])
-            != "tungstenfabric"
-        ):
+        neutron_backend = utils.get_in(
+            self.mspec["features"], ["neutron", "backend"]
+        )
+        if neutron_backend == "ml2":
             health_groups.append("openvswitch")
+        elif neutron_backend == "ml2/ovn":
+            health_groups.append("openvswitch_ovn")
 
         return health_groups
 
@@ -1145,7 +1147,7 @@ class Neutron(OpenStackService, MaintenanceApiMixin):
             utils.get_in(self.mspec, ["features", "neutron", "backend"])
             == "ml2/ovn"
         ):
-            neutron_server_deployment_type = "Daemonset"
+            neutron_server_deployment_type = "DaemonSet"
         static_map = [
             ("Job", "neutron-db-sync"),
             (neutron_server_deployment_type, "neutron-server"),
