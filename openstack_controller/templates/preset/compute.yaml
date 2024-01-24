@@ -285,6 +285,8 @@ services:
           {%- if not openstack_yoga_plus %}
             - (?:tempest.api.image.v2.test_images.ImportImagesTest.test_image_glance_direct_import)
           {%- endif %}
+            # PRODX-38846 - can be unskipped when serial tests will run in a way that doesn't blocks other tests.
+            - (?:tempest.serial_tests)
             # Tests NOT supported by product
 {% include 'base/_tempest_blacklist_no_supported.yaml' %}
           script: |
