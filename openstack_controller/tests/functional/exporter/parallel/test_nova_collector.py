@@ -281,9 +281,6 @@ class NovaAggregatesTestCase(base.BaseFunctionalExporterTestCase):
 
     def setUp(self):
         super().setUp()
-        self.metrics_initial = self.get_collector_metrics(
-            self.scrape_collector
-        )
         aggregate_name = data_utils.rand_name()
         self.aggregate = self.aggregate_create(
             name=aggregate_name,
@@ -301,9 +298,20 @@ class NovaAggregatesTestCase(base.BaseFunctionalExporterTestCase):
             metric_name, self.scrape_collector
         )
         samples = self.filter_metric_samples(metric, {"name": aggregate_name})
-
         self.assertEqual(
-            samples[0].value,
+            int(samples[0].value),
+            expected_num,
+            f"{phase}: The number of hosts in aggregate is not correct.",
+        )
+
+    def _test_osdpl_nova_aggregate_hosts_info(
+        self, metric_name, expected_num, phase
+    ):
+        metric = self.get_metric_after_refresh(
+            metric_name, self.scrape_collector
+        )
+        self.assertEqual(
+            len(metric.samples),
             expected_num,
             f"{phase}: The number of hosts in aggregate is not correct.",
         )
@@ -316,7 +324,7 @@ class NovaAggregatesTestCase(base.BaseFunctionalExporterTestCase):
         #. Add aggregate
         #. Check we do not have hosts reported in the metric
         #. Add host to aggregate
-        #. Check host appear in the meteric
+        #. Check host appear in the metric
         #. Remove host from host aggregate
         #. Check host dissapear from the metric
         """
@@ -337,6 +345,38 @@ class NovaAggregatesTestCase(base.BaseFunctionalExporterTestCase):
         self.aggregate_remove_host(self.aggregate["id"], aggregate_compute)
         self._test_osdpl_nova_aggregate_hosts(
             metric_name, self.aggregate["name"], 0, "After delete"
+        )
+
+    def test_osdpl_nova_host_aggregate_info(self):
+        """Information about host aggregate mapping
+
+        **Steps**
+
+        #. Check initial info about host aggregate in the metric
+        #. Create aggregate and add host to created aggregate
+        #. Check info about created aggregate appears in the metric
+        #. Remove host from host aggregate
+        #. Check host dissapears from the metric
+        """
+        metric_name = "osdpl_nova_host_aggregate_info"
+        self._test_osdpl_nova_aggregate_hosts_info(metric_name, 0, "Initial")
+
+        aggregate_compute = [
+            x for x in self.ocm.oc.compute.services(binary="nova-compute")
+        ][0]["host"]
+        self.aggregate_add_host(self.aggregate["id"], aggregate_compute)
+
+        self._test_osdpl_nova_aggregate_hosts_info(
+            metric_name,
+            1,
+            "After create",
+        )
+
+        self.aggregate_remove_host(self.aggregate["id"], aggregate_compute)
+        self._test_osdpl_nova_aggregate_hosts_info(
+            metric_name,
+            0,
+            "After delete",
         )
 
 
