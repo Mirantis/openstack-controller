@@ -474,6 +474,17 @@ spec:
                 component: server
             policyTypes:
             - Ingress
+      kernel:
+        modules:
+          l3_agent:
+            ip6_tables:
+              enabled: true
+          dhcp_agent:
+            ip6_tables:
+              enabled: true
+          lb_agent:
+            ip6_tables:
+              enabled: true
       manifests:
         job_rabbit_init: false
         network_policy: true

@@ -466,6 +466,22 @@ spec:
           {{ image }}: {{ images[image] }}
         {%- endif %}
 {%- endfor %}
+{%- if spec.openstack_version in openstack_versions[0:openstack_versions.index('yoga')] %}
+# NOTE(mkarpin): In images based on focal and earlier (from queens - to xena) ip6tables
+# utility requires ip6_tables module to be loaded. Starting jammy release (yoga) ip6tables
+# utility doesn't use it.
+      kernel:
+        modules:
+          l3_agent:
+            ip6_tables:
+              enabled: true
+          dhcp_agent:
+            ip6_tables:
+              enabled: true
+          lb_agent:
+            ip6_tables:
+              enabled: true
+{%- endif %}
       pod:
         # NOTE(ohryhorov): use_fqdn is disabled not to use FQDN
         # in agent hostnames
