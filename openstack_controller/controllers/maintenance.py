@@ -67,9 +67,9 @@ async def node_maintenance_request_change_handler(body, **kwargs):
         for service_name, service_class in services.ORDERED_SERVICES:
             service = service_class(mspec, LOG, osdplst, child_view)
             if service.maintenance_api:
-                services_can_handle_nmr[
-                    service_name
-                ] = await service.can_handle_nmr(node, active_locks)
+                services_can_handle_nmr[service_name] = (
+                    await service.can_handle_nmr(node, active_locks)
+                )
         if not all(services_can_handle_nmr.values()):
             msg = f"Some services blocks nmr handling {services_can_handle_nmr}. Deferring processing for node {node.name}"
             nwl.set_error_message(msg)

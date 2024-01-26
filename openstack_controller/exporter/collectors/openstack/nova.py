@@ -211,12 +211,12 @@ class OsdplNovaMetricCollector(base.OpenStackBaseMetricCollector):
                 f"Total number of free {resource_class} on hypervisor",
                 labels=["host", "zone"],
             )
-            res[
-                f"hypervisor_{resource_class}_allocation_ratio"
-            ] = GaugeMetricFamily(
-                f"{self._name}_hypervisor_{resource_class}_allocation_ratio",
-                f"Total number of {resource_class} allocation_ratio on hypervisor",
-                labels=["host", "zone"],
+            res[f"hypervisor_{resource_class}_allocation_ratio"] = (
+                GaugeMetricFamily(
+                    f"{self._name}_hypervisor_{resource_class}_allocation_ratio",
+                    f"Total number of {resource_class} allocation_ratio on hypervisor",
+                    labels=["host", "zone"],
+                )
             )
         for group_type in self.host_group_types:
             labels = self.host_group_types_labels[group_type]
