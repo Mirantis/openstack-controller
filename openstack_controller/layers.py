@@ -33,9 +33,9 @@ ENV = jinja2.Environment(
 LOG.debug(f"found templates {ENV.list_templates()}")
 
 ENV.filters["generate_tempest_config"] = generate_tempest_config
-ENV.filters[
-    "substitute_local_proxy_hostname"
-] = substitute_local_proxy_hostname
+ENV.filters["substitute_local_proxy_hostname"] = (
+    substitute_local_proxy_hostname
+)
 ENV.filters["namespaces"] = namespaces
 ENV.globals["raise_error"] = raise_error
 ENV.filters["b64encode"] = base64.b64encode
