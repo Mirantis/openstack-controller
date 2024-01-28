@@ -616,17 +616,23 @@ class DaemonSet(pykube.DaemonSet, HelmBundleMixin):
     @property
     def ready(self):
         self.reload()
-        # NOTE(vsaienko): updatedNumberScheduled is not present with have 0
-        # pods, return default of 0 to treat this ds as ready.
-        return self.obj["status"]["observedGeneration"] >= self.obj[
-            "metadata"
-        ]["generation"] and self.obj["status"].get(
-            "updatedNumberScheduled", 0
-        ) == self.obj[
-            "status"
-        ].get(
-            "numberReady"
+        if (
+            self.obj["status"]["observedGeneration"]
+            < self.obj["metadata"]["generation"]
+        ):
+            return False
+        desired = self.obj["status"].get("desiredNumberScheduled", 0)
+        ready = self.obj["status"].get("numberReady", 0)
+        update_strategy = (
+            self.obj["spec"].get("updateStrategy", {}).get("type")
         )
+        if update_strategy == "OnDelete":
+            # NOTE(vsaienko): With OnDelete strategy updatedNumberScheduled is not present
+            # and we do not know when pods will be rollout so thread ds as ready when
+            # number of desired replicas and ready are same
+            return desired == ready
+        else:
+            return ready == self.obj["status"].get("updatedNumberScheduled", 0)
 
     @property
     def pods(self):
