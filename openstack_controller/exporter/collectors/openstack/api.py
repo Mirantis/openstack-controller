@@ -66,12 +66,16 @@ class OsdplApiMetricCollector(base.OpenStackBaseMetricCollector):
                 continue
             url = endpoint["url"].split("%")[0]
             success = True
+            token = self.oc.auth_token
+            headers = {"X-Auth-Token": token}
             try:
                 # TODO(vsaienko): mount ssl ca_cert from osdpl and use here.
                 requests.packages.urllib3.disable_warnings(
                     category=InsecureRequestWarning
                 )
-                resp = requests.get(url, timeout=30, verify=False)
+                resp = requests.get(
+                    url, timeout=30, verify=False, headers=headers
+                )
                 statuses.append(
                     ([url, service_type, service_name], resp.status_code)
                 )
