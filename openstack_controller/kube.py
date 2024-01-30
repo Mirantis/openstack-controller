@@ -659,11 +659,12 @@ class DaemonSet(pykube.DaemonSet, HelmBundleMixin):
         :param wait_ready: boolean to wait for pod is ready after restart
         """
         pod = self.get_pod_on_node(node_name)
+        if not pod:
+            return
         pod_generation = pod.generation
         ds_generation = self.generation
         if (
-            pod
-            and pod_generation
+            pod_generation
             and ds_generation
             and pod_generation != ds_generation
         ):
