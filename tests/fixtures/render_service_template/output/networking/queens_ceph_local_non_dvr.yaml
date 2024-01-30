@@ -407,6 +407,17 @@ spec:
           restartPolicy: Never
         ks_user:
           restartPolicy: Never
+      kernel:
+        modules:
+          l3_agent:
+            ip6_tables:
+              enabled: true
+          dhcp_agent:
+            ip6_tables:
+              enabled: true
+          lb_agent:
+            ip6_tables:
+              enabled: true
       manifests:
         job_rabbit_init: false
         network_policy: false
