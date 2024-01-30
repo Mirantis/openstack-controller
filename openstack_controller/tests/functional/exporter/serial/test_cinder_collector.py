@@ -68,7 +68,13 @@ class CinderServiceCollectorFunctionalTestCase(
             "binary": self.cinder_svc["binary"],
         }
 
-        wait.wait_for_volume_service_status(self.cinder_svc, status="disabled")
+        wait.wait_for_service_status_state(
+            self.get_volume_service_status,
+            self.cinder_svc,
+            "disabled",
+            CONF.VOLUME_TIMEOUT,
+            CONF.VOLUME_READY_INTERVAL,
+        )
 
         metric = self.get_metric_after_refresh(
             metric_name, self.scrape_collector
@@ -77,16 +83,20 @@ class CinderServiceCollectorFunctionalTestCase(
         self.assertEqual(
             service_samples[0].value,
             ServiceStatus.disabled,
-            f"Current metric {metric_name} for host {labels['host']} "
-            f"has value: {service_samples[0].value}. "
-            f"Expected value: {ServiceStatus.disabled}, after {CONF.METRIC_TIMEOUT} sec.",
+            f"Status of cinder service in exporter's metrics hasn't changed",
         )
         self.ocm.volume_ensure_service_enabled(
             host=self.cinder_svc_data["host"],
             binary=self.cinder_svc_data["binary"],
         )
 
-        wait.wait_for_volume_service_status(self.cinder_svc, status="enabled")
+        wait.wait_for_service_status_state(
+            self.get_volume_service_status,
+            self.cinder_svc,
+            "enabled",
+            CONF.VOLUME_TIMEOUT,
+            CONF.VOLUME_READY_INTERVAL,
+        )
         metric = self.get_metric_after_refresh(
             metric_name, self.scrape_collector
         )
@@ -94,7 +104,5 @@ class CinderServiceCollectorFunctionalTestCase(
         self.assertEqual(
             service_samples[0].value,
             ServiceStatus.enabled,
-            f"Current metric {metric_name} for host {labels['host']} "
-            f"has value: {service_samples[0].value}. Expected value: {ServiceStatus.enabled},"
-            f"after {CONF.METRIC_TIMEOUT} sec.",
+            f"Status of cinder service in exporter's metrics hasn't changed",
         )
