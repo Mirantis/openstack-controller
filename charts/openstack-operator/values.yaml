@@ -24,6 +24,32 @@ fullnameOverride: "openstack-controller"
 
 osdpl:
   namespace: openstack
+  logging.conf:
+    disable_existing_loggers: false
+    formatters:
+      standard:
+        format: '%(asctime)s [%(levelname)s] %(name)s: %(message)s'
+    handlers:
+      default:
+        class: logging.StreamHandler
+        formatter: standard
+        stream: ext://sys.stdout
+    loggers:
+      openstack_controller:
+        level: INFO
+      aiohttp:
+        level: WARNING
+      kopf:
+        level: INFO
+      kopf.activities.probe:
+        level: WARNING
+      opensearch:
+        level: WARNING
+    root:
+      handlers:
+      - default
+      level: INFO
+    version: 1
   settings:
     raw:
       OSCTL_NODE_NOT_READY_FLAPPING_TIMEOUT: 120
@@ -44,7 +70,6 @@ osdpl:
         PYTHONASYNCIODEBUG: 1
         KOPF_RUN_DEBUG: 1
     node_maintenance_request:
-      OSCTL_LOGGING_CONF: {}
       raw:
         OSCTL_MAINTENANCE_PARALLEL_MAX_COMPUTE: 30
     tf_secrets: {}

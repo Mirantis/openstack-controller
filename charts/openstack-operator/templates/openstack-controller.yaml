@@ -35,6 +35,8 @@ metadata:
     helm.sh/chart: {{ include "openstack-controller.chart" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
+  annotations:
+    openstack-controller-etc-hash: {{ tuple "openstack-controller-configmap-etc.yaml" . | include "opentsack-controller.utils.hash" }}
 spec:
   replicas: {{ .Values.replicaCount }}
   # Make sure old operator gone to prevent that old version start
@@ -122,6 +124,9 @@ spec:
               mountPath: /etc/openstack/
             - name: openstack-controller-config
               mountPath: /etc/openstack-controller/conf.d/
+            - name: openstack-controller-etc
+              mountPath: /etc/openstack-controller/logging.conf
+              subPath: logging.conf
         - name: secrets
           image: {{ tuple . .Values.image | include "getImageUrl" }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
@@ -164,6 +169,9 @@ spec:
               mountPath: /etc/openstack/
             - name: openstack-controller-config
               mountPath: /etc/openstack-controller/conf.d/
+            - name: openstack-controller-etc
+              mountPath: /etc/openstack-controller/logging.conf
+              subPath: logging.conf
         - name: health
           image: {{ tuple . .Values.image | include "getImageUrl" }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
@@ -206,6 +214,9 @@ spec:
               mountPath: /etc/openstack/
             - name: openstack-controller-config
               mountPath: /etc/openstack-controller/conf.d/
+            - name: openstack-controller-etc
+              mountPath: /etc/openstack-controller/logging.conf
+              subPath: logging.conf
         - name: node
           image: {{ tuple . .Values.image | include "getImageUrl" }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
@@ -248,6 +259,9 @@ spec:
               mountPath: /etc/openstack/
             - name: openstack-controller-config
               mountPath: /etc/openstack-controller/conf.d/
+            - name: openstack-controller-etc
+              mountPath: /etc/openstack-controller/logging.conf
+              subPath: logging.conf
 {{ if .Values.node_maintenance.enabled }}
         - name: nodemaintenancerequest
           image: {{ tuple . .Values.image | include "getImageUrl" }}
@@ -267,8 +281,6 @@ spec:
           env:
             - name: OSCTL_HEARTBEAT_PEERING_OBJECT_NAME
               value: openstack-controller.nodemaintenancerequest
-            - name: OSCTL_LOGGING_CONF
-              value: '{{ toJson .Values.osdpl.settings.node_maintenance_request.OSCTL_LOGGING_CONF }}'
             {{- range $optionName, $optionValue := .Values.osdpl.settings.raw }}
             - name: {{ $optionName }}
               value: "{{ $optionValue }}"
@@ -293,6 +305,9 @@ spec:
               mountPath: /etc/openstack/
             - name: openstack-controller-config
               mountPath: /etc/openstack-controller/conf.d/
+            - name: openstack-controller-etc
+              mountPath: /etc/openstack-controller/logging.conf
+              subPath: logging.conf
 {{ end }}
         - name: ceph-secrets
           image: {{ tuple . .Values.image | include "getImageUrl" }}
@@ -332,6 +347,9 @@ spec:
               mountPath: /etc/openstack/
             - name: openstack-controller-config
               mountPath: /etc/openstack-controller/conf.d/
+            - name: openstack-controller-etc
+              mountPath: /etc/openstack-controller/logging.conf
+              subPath: logging.conf
         - name: osdplstatus
           image: {{ tuple . .Values.image | include "getImageUrl" }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
@@ -374,6 +392,9 @@ spec:
               mountPath: /etc/openstack/
             - name: openstack-controller-config
               mountPath: /etc/openstack-controller/conf.d/
+            - name: openstack-controller-etc
+              mountPath: /etc/openstack-controller/logging.conf
+              subPath: logging.conf
         - name: tf-secrets
           image: {{ tuple . .Values.image | include "getImageUrl" }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
@@ -412,6 +433,9 @@ spec:
               mountPath: /etc/openstack/
             - name: openstack-controller-config
               mountPath: /etc/openstack-controller/conf.d/
+            - name: openstack-controller-etc
+              mountPath: /etc/openstack-controller/logging.conf
+              subPath: logging.conf
       volumes:
         - name: openstack-controller-config
           configMap:
@@ -421,6 +445,10 @@ spec:
           secret:
             secretName: keystone-os-clouds
             defaultMode: 365
+        - name: openstack-controller-etc
+          configMap:
+            name: openstack-controller-etc
+            defaultMode: 0555
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
