@@ -17,10 +17,12 @@ import base64
 import copy
 import datetime
 import logging
+import logging.config
 import os
 import re
 import hashlib
 from typing import Dict, List
+import yaml
 
 import deepmerge
 import deepmerge.exception
@@ -51,15 +53,17 @@ def get_in(d: Dict, keys: List, default=None):
         return default
 
 
+OSCTL_LOGGING_CONF_FILE = os.environ.get(
+    "OSCTL_LOGGING_CONF_FILE", "/etc/openstack-controller/logging.conf"
+)
+
+
 def get_logger(name: str) -> logging.Logger:
-    verbose = os.getenv("KOPF_RUN_VERBOSE")
-    debug = os.getenv("KOPF_RUN_DEBUG")
-    quiet = os.getenv("KOPF_RUN_QUIET")
+    with open(OSCTL_LOGGING_CONF_FILE, "r") as f:
+        logging_conf = yaml.safe_load(f)
+        logging.config.dictConfig(logging_conf)
 
-    log_level = "DEBUG" if debug or verbose else "WARNING" if quiet else "INFO"
     logger = logging.getLogger(name)
-    logger.setLevel(log_level)
-
     return logger
 
 

@@ -19,7 +19,6 @@ import sys
 import signal
 import traceback
 import time
-import logging.config
 
 import json
 import kopf
@@ -27,11 +26,12 @@ from kopf._core.engines.posting import event_queue_var
 from pathlib import Path
 
 from openstack_controller import constants as const
-from openstack_controller.utils import merger
+from openstack_controller.utils import get_logger
 
 
 HEARTBEAT = time.time()
 CURRENT_NUMBER_OF_TASKS = -1
+LOG = get_logger(__name__)
 
 
 def bool_from_env(env_name, default):
@@ -115,7 +115,7 @@ class Config(configparser.ConfigParser):
                 self.file_cache["mtime"] = mtime
                 break
         if not reloaded:
-            logger.info("Reloading configuration.")
+            LOG.info("Reloading configuration.")
             self.read(self.filenames)
 
     def getString(self, section, option):
@@ -266,47 +266,6 @@ OSCTL_POD_NETWORKS_DATA = json_from_env(
     "OSCTL_POD_NETWORKS_DATA", [{"cidr": "192.168.0.0/16"}]
 )
 
-LOGGING_CONFIG = {
-    "version": 1,
-    "disable_existing_loggers": False,
-    "formatters": {
-        "standard": {
-            "format": "%(asctime)s [%(levelname)s] %(name)s: %(message)s"
-        },
-    },
-    "handlers": {
-        "default": {
-            "formatter": "standard",
-            "class": "logging.StreamHandler",
-            "stream": "ext://sys.stdout",  # Default is stderr
-        },
-    },
-    "loggers": {
-        "kopf.activities.probe": {
-            "level": "WARNING",
-        },
-        "kopf": {
-            "level": "INFO",
-        },
-        "aiohttp": {
-            "level": "WARNING",
-        },
-        "opensearch": {
-            "level": "WARNING",
-        },
-    },
-    "root": {
-        "handlers": ["default"],
-        "level": "INFO",
-    },
-}
-
-OSCTL_LOGGING_CONF = json_from_env("OSCTL_LOGGING_CONF", {})
-merger.merge(LOGGING_CONFIG, OSCTL_LOGGING_CONF)
-
-logging.config.dictConfig(LOGGING_CONFIG)
-logger = logging.getLogger(__name__)
-
 
 class InfiniteBackoffsWithJitter:
     def __iter__(self):
@@ -345,7 +304,7 @@ CONF = Config()
 
 
 def handler_sigusr2(signum, frame):
-    logger.info(traceback.print_stack(frame))
+    LOG.info(traceback.print_stack(frame))
 
 
 signal.signal(signal.SIGUSR2, handler_sigusr2)
