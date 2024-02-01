@@ -1,5 +1,6 @@
 import asyncio
 import contextlib
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
 import os
 import re
@@ -21,12 +22,14 @@ LOG = utils.get_logger(__name__)
 HELM_LOCK = threading.Lock()
 CONF = settings.CONF
 
+_pool = ThreadPoolExecutor()
+
 
 @contextlib.asynccontextmanager
 async def helm_lock(lock, cmd):
     LOG.debug(f"Acquiring helm lock {lock} for cmd {cmd}")
     loop = asyncio.get_event_loop()
-    await loop.run_in_executor(None, lock.acquire)
+    await loop.run_in_executor(_pool, lock.acquire)
     LOG.debug(f"Acquired helm lock {lock} for cmd {cmd}")
     try:
         yield  # the lock is held
