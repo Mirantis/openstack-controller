@@ -438,3 +438,21 @@ class BaseFunctionalTestCase(TestCase):
             if port["status"] == status:
                 ports.append(port)
         return ports
+
+    def get_volume_service_status(self, svc):
+        service = self.ocm.volume_get_services(
+            host=svc["host"], binary=svc["binary"]
+        )
+        return service[0]["status"]
+
+    def get_compute_service_state(self, svc):
+        service = self.ocm.oc.compute.find_service(name_or_id=svc["id"])
+        return service["state"]
+
+    def get_compute_service_status(self, svc):
+        service = self.ocm.oc.compute.find_service(name_or_id=svc["id"])
+        return service["status"]
+
+    def get_neutron_agent_status(self, svc):
+        agent = self.ocm.oc.network.get_agent(svc["id"])
+        return agent["is_admin_state_up"]

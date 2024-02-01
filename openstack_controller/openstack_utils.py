@@ -212,7 +212,7 @@ class OpenStackClientManager:
         )
 
     def network_get_agents(
-        self, host=None, is_alive=None, is_admin_state_up=None
+        self, host=None, is_alive=None, is_admin_state_up=None, binary=None
     ):
         kwargs = {}
         if host is not None:
@@ -221,11 +221,21 @@ class OpenStackClientManager:
             kwargs["is_alive"] = is_alive
         if is_admin_state_up is not None:
             kwargs["is_admin_state_up"] = is_admin_state_up
+        if binary is not None:
+            kwargs["binary"] = binary
         try:
             yield from self.oc.network.agents(**kwargs)
         except openstack.exceptions.ResourceNotFound:
             pass
         return []
+
+    def network_ensure_agent_enabled(self, agent):
+        if agent["is_admin_state_up"] is False:
+            self.oc.network.update_agent(agent, admin_state_up=True)
+
+    def network_ensure_agent_disabled(self, agent):
+        if agent["is_admin_state_up"] is True:
+            self.oc.network.update_agent(agent, admin_state_up=False)
 
     def network_ensure_agents_absent(self, host):
         for agent in self.network_get_agents(host=host):

@@ -40,8 +40,12 @@ class NovaCollectorSerialFunctionalTestCase(
             "host": self.compute_svc["host"],
             "binary": self.compute_svc["binary"],
         }
-        wait.wait_for_compute_service_status(
-            self.ocm, self.compute_svc, status="disabled"
+        wait.wait_for_service_status_state(
+            self.get_compute_service_status,
+            self.compute_svc,
+            "disabled",
+            CONF.COMPUTE_TIMEOUT,
+            CONF.COMPUTE_BUILD_INTERVAL,
         )
         metric = self.get_metric_after_refresh(
             metric_name, self.scrape_collector
@@ -50,13 +54,17 @@ class NovaCollectorSerialFunctionalTestCase(
         self.assertEqual(
             service_samples[0].value,
             ServiceStatus.disabled,
-            f"Current metric {metric_name} for host {labels['host']} "
-            f"has value: {service_samples[0].value}. "
-            f"Expected value: {ServiceStatus.disabled}, after {CONF.METRIC_TIMEOUT} sec.",
+            f"Status of nova service in exporter's metrics hasn't changed",
         )
 
         self.ocm.compute_ensure_service_enabled(self.compute_svc)
-        wait.wait_for_compute_service_status(self.ocm, self.compute_svc)
+        wait.wait_for_service_status_state(
+            self.get_compute_service_status,
+            self.compute_svc,
+            "enabled",
+            CONF.COMPUTE_TIMEOUT,
+            CONF.COMPUTE_BUILD_INTERVAL,
+        )
         metric = self.get_metric_after_refresh(
             metric_name, self.scrape_collector
         )
@@ -64,9 +72,7 @@ class NovaCollectorSerialFunctionalTestCase(
         self.assertEqual(
             service_samples[0].value,
             ServiceStatus.enabled,
-            f"Current metric {metric_name} for host {labels['host']} "
-            f"has value: {service_samples[0].value}. Expected value: {ServiceStatus.enabled},"
-            f"after {CONF.METRIC_TIMEOUT} sec.",
+            f"Status of nova service in exporter's metrics hasn't changed",
         )
 
     def test_service_state_up_down(self):
@@ -76,8 +82,12 @@ class NovaCollectorSerialFunctionalTestCase(
             "host": self.compute_svc["host"],
             "binary": self.compute_svc["binary"],
         }
-        wait.wait_for_compute_service_state(
-            self.ocm, self.compute_svc, state="down"
+        wait.wait_for_service_status_state(
+            self.get_compute_service_state,
+            self.compute_svc,
+            "down",
+            CONF.COMPUTE_TIMEOUT,
+            CONF.COMPUTE_BUILD_INTERVAL,
         )
         metric = self.get_metric_after_refresh(
             metric_name, self.scrape_collector
@@ -86,13 +96,17 @@ class NovaCollectorSerialFunctionalTestCase(
         self.assertEqual(
             service_samples[0].value,
             ServiceState.down,
-            f"Current metric {metric_name} for host {labels['host']} "
-            f"has value: {service_samples[0].value}. Expected value: {ServiceState.down}, "
-            f"after {CONF.METRIC_TIMEOUT} sec.",
+            f"State of nova service in exporter's metrics hasn't changed",
         )
 
         self.ocm.compute_ensure_service_force_down(self.compute_svc, False)
-        wait.wait_for_compute_service_state(self.ocm, self.compute_svc)
+        wait.wait_for_service_status_state(
+            self.get_compute_service_state,
+            self.compute_svc,
+            "up",
+            CONF.COMPUTE_TIMEOUT,
+            CONF.COMPUTE_BUILD_INTERVAL,
+        )
         metric = self.get_metric_after_refresh(
             metric_name, self.scrape_collector
         )
@@ -100,7 +114,5 @@ class NovaCollectorSerialFunctionalTestCase(
         self.assertEqual(
             service_samples[0].value,
             ServiceState.up,
-            f"Current metric {metric_name} for host {labels['host']} "
-            f"has value: {service_samples[0].value}. Expected value: {ServiceState.up}, "
-            f"after {CONF.METRIC_TIMEOUT} sec.",
+            f"State of nova service in exporter's metrics hasn't changed",
         )

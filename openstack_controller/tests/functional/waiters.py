@@ -4,82 +4,24 @@ import logging
 import openstack
 
 from openstack_controller.tests.functional import config
-from openstack_controller import openstack_utils
 
 LOG = logging.getLogger(__name__)
 CONF = config.Config()
 
 
-def wait_for_compute_service_state(client, compute_svc, state="up"):
-    service_id = compute_svc["id"]
-
+def wait_for_service_status_state(
+    fetch_function, svc, expected_status, timeout, interval
+):
     start_time = int(time.time())
-    timeout = CONF.COMPUTE_TIMEOUT
     while True:
-        service = client.oc.compute.find_service(name_or_id=service_id)
-        service_state = service["state"]
-        if service_state == state:
-            LOG.debug(
-                "Current service has {} state: {}.".format(
-                    service_id, service_state
-                )
-            )
+        current_service_status = fetch_function(svc)
+        if current_service_status == expected_status:
+            LOG.debug(f"Current service status is {current_service_status}.")
             return
-        time.sleep(CONF.COMPUTE_BUILD_INTERVAL)
+        time.sleep(interval)
         timed_out = int(time.time()) - start_time
-        message = "Current service {} has state: {}. Expected state: {}, after {} sec".format(
-            service_id, service_state, state, timed_out
-        )
-        if timed_out >= timeout:
-            LOG.error(message)
-            raise TimeoutError(message)
-
-
-def wait_for_compute_service_status(client, compute_svc, status="enabled"):
-    service_id = compute_svc["id"]
-
-    start_time = int(time.time())
-    timeout = CONF.COMPUTE_TIMEOUT
-    while True:
-        service = client.oc.compute.find_service(name_or_id=service_id)
-        service_status = service["status"]
-        if service_status == status:
-            LOG.debug(
-                "Current service has {} status: {}.".format(
-                    service_id, service_status
-                )
-            )
-            return
-        time.sleep(CONF.COMPUTE_BUILD_INTERVAL)
-        timed_out = int(time.time()) - start_time
-        message = "Current service {} has status: {}. Expected status: {}, after {} sec".format(
-            service_id, service_status, status, timed_out
-        )
-        if timed_out >= timeout:
-            LOG.error(message)
-            raise TimeoutError(message)
-
-
-def wait_for_volume_service_status(volume_svc, status="enabled"):
-    start_time = int(time.time())
-    timeout = CONF.VOLUME_TIMEOUT
-    while True:
-        client = openstack_utils.OpenStackClientManager()
-        service = client.volume_get_services(
-            host=volume_svc["host"], binary=volume_svc["binary"]
-        )
-        service_status = service[0]["status"]
-        if service_status == status:
-            LOG.debug(
-                "Current service {} has status: {}.".format(
-                    volume_svc["binary"], service_status
-                )
-            )
-            return
-        time.sleep(CONF.VOLUME_BUILD_INTERVAL)
-        timed_out = int(time.time()) - start_time
-        message = "Current service {} has status: {}. Expected status: {}, after {} sec".format(
-            volume_svc["binary"], service_status, status, timed_out
+        message = (
+            f"Service status or state hasn't changed after {timed_out} sec."
         )
         if timed_out >= timeout:
             LOG.error(message)
