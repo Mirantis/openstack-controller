@@ -72,6 +72,7 @@ spec:
     "cinder_volume_daemonset",
     "cinder_drop_default_volume_type",
     "cinder_create_internal_tenant",
+    "cinder_wait_for_backends",
     "test",] %}
         {%- if image in images %}
           {{ image }}: {{ images[image] }}
@@ -82,20 +83,6 @@ spec:
           db_init:
             jobs:
               - openstack-mariadb-cluster-wait
-{%- if not is_ceph_enabled %}
-          bootstrap:
-            pod:
-              - requireSameNode: false
-                labels:
-                  application: cinder
-                  component: volume_daemonset
-          drop_default_volume_type:
-            pod:
-              - requireSameNode: false
-                labels:
-                  application: cinder
-                  component: volume_daemonset
-{%- endif %}
       pod:
         replicas:
           api: 1
