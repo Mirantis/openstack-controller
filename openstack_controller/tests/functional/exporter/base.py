@@ -128,8 +128,13 @@ class BaseFunctionalExporterTestCase(base.BaseFunctionalTestCase):
         all_metrics = list(self.metric_families)
         for metric_name in self.known_metrics.keys():
             metric = self.get_metric(metric_name, all_metrics)
-            self.assertIsNotNone(metric)
-            self.assertTrue(len(metric.samples) > 0)
+            self.assertIsNotNone(
+                metric, f"The metric {metric_name} should not be None."
+            )
+            self.assertTrue(
+                len(metric.samples) > 0,
+                f"The metric {metric_name} should have samples.",
+            )
 
     def test_known_metrics_labels(self):
         all_metrics = list(self.metric_families)
@@ -138,4 +143,7 @@ class BaseFunctionalExporterTestCase(base.BaseFunctionalTestCase):
             self.assertIsNotNone(metric)
             for sample in metric.samples:
                 for label in data.get("labels", []):
-                    self.assertTrue(label in sample.labels)
+                    self.assertTrue(
+                        label in sample.labels,
+                        f"Label {label} is not found in metric {metric_name} labels.",
+                    )
