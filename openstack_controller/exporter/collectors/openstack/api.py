@@ -66,7 +66,7 @@ class OsdplApiMetricCollector(base.OpenStackBaseMetricCollector):
                 continue
             url = endpoint["url"].split("%")[0]
             success = True
-            token = self.oc.auth_token
+            token = self.oc.oc.auth_token
             headers = {"X-Auth-Token": token}
             try:
                 # TODO(vsaienko): mount ssl ca_cert from osdpl and use here.
