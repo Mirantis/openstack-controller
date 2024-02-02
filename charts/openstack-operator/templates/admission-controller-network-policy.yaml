@@ -12,6 +12,10 @@ spec:
     - ipBlock:
         cidr: {{ .cidr }}
 {{- end }}
+    # NOTE(vsaienko): for combined CP case when kubeapi reach admission running on
+    # local node PRODX-39369
+    - ipBlock:
+        cidr: 0.0.0.0/0
     ports:
     - port: {{ .Values.admission.settings.raw.OSCTL_ADMISSION_BIND_PORT }}
       protocol: TCP
