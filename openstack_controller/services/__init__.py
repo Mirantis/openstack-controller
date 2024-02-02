@@ -1320,8 +1320,7 @@ class Neutron(OpenStackService, MaintenanceApiMixin):
             for ovs_ds in self.get_child_objects_dynamic(
                 "DaemonSet", daemonset
             ):
-                if ovs_ds and ovs_ds.exists():
-                    await ovs_ds.ensure_pod_generation_on_node(node.name)
+                await ovs_ds.ensure_pod_generation_on_node(node.name)
         try:
             os_client = openstack_utils.OpenStackClientManager()
 
