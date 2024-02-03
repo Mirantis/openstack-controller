@@ -17,8 +17,8 @@ import glob
 import random
 import sys
 import signal
-import traceback
 import time
+import faulthandler
 
 import json
 import kopf
@@ -28,6 +28,9 @@ from pathlib import Path
 from openstack_controller import constants as const
 from openstack_controller.utils import get_logger
 
+
+faulthandler.register(signal.SIGHUP, all_threads=True)
+faulthandler.enable(file=sys.stderr, all_threads=True)
 
 HEARTBEAT = time.time()
 CURRENT_NUMBER_OF_TASKS = -1
@@ -301,10 +304,3 @@ HELM_REPOSITORY_CACHE = os.environ.get(
 # END HELM SETTINGS
 
 CONF = Config()
-
-
-def handler_sigusr2(signum, frame):
-    LOG.info(traceback.print_stack(frame))
-
-
-signal.signal(signal.SIGUSR2, handler_sigusr2)
