@@ -224,3 +224,4 @@ requirements: '{{ images_base_url }}/openstack/requirements:wallaby-focal-202401
 designate_pool_manage: '{{ images_base_url }}/openstack/designate:wallaby-focal-20240112082933'
 designate_pool_manage_hash: '{{ images_base_url }}/openstack/openstack-tools:yoga-jammy-20240129060018'
 ingress_init_config: '{{ images_base_url }}/openstack/openstack-tools:yoga-jammy-20240129060018'
+cinder_wait_for_backends: '{{ images_base_url }}/openstack/openstack-tools:yoga-jammy-20240129060018'
