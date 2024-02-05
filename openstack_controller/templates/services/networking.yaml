@@ -796,6 +796,9 @@ spec:
           {%- if ovn_enabled %}
           ovn:
             enable_distributed_floating_ip: {{ spec.get('features', {}).get('neutron', {}).get('dvr', {}).get('enabled', False) }}
+            {%- if spec.get('features', {}).get('neutron', {}).get('dns_servers', []) %}
+            dns_servers: {{ spec.features.neutron.dns_servers |join(',') }}
+            {%- endif %}
           {%- endif %}
           cache:
             backend: oslo_cache.memcache_pool
