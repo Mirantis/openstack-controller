@@ -230,3 +230,4 @@ requirements: '{{ images_base_url }}/openstack/requirements:yoga-jammy-202402021
 designate_pool_manage: '{{ images_base_url }}/openstack/designate:yoga-jammy-20240202140749'
 designate_pool_manage_hash: '{{ images_base_url }}/openstack/openstack-tools:yoga-jammy-20240202140749'
 ingress_init_config: '{{ images_base_url }}/openstack/openstack-tools:yoga-jammy-20240202140749'
+cinder_wait_for_backends: '{{ images_base_url }}/openstack/openstack-tools:yoga-jammy-20240202140749'

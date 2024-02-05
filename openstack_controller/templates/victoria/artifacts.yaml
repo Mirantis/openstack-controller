@@ -224,3 +224,4 @@ requirements: '{{ images_base_url }}/openstack/requirements:victoria-focal-20240
 designate_pool_manage: '{{ images_base_url }}/openstack/designate:victoria-focal-20240112082932'
 designate_pool_manage_hash: '{{ images_base_url }}/openstack/openstack-tools:yoga-jammy-20240115142802'
 ingress_init_config: '{{ images_base_url }}/openstack/openstack-tools:yoga-jammy-20240115142802'
+cinder_wait_for_backends: '{{ images_base_url }}/openstack/openstack-tools:yoga-jammy-20240115142802'
