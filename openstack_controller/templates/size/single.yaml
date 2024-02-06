@@ -457,7 +457,12 @@ services:
           replicas:
             api: 1
             engine: 1
-
+  coordination:
+    etcd:
+      values:
+        pod:
+          replicas:
+            etcd: 1
 timeouts:
   application_readiness:
     mariadb:
