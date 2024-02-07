@@ -90,6 +90,7 @@ class ComputeFeatureEnabled(base_section.BaseSection):
     def block_migration_for_live_migration(self):
         if self.get_values_item("nova", "conf.nova.libvirt.images_type") in [
             "qcow2",
+            "raw",
         ]:
             return True
         else:

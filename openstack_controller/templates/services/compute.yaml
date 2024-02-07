@@ -360,6 +360,12 @@ spec:
                       disk_allocation_ratio: 0
                       ram_allocation_ratio: 0
       {%- endif %}
+      {%- if nova_override.get("images", {}).get("backend") %}
+        {%- if nova_override.images.backend == 'raw' %}
+                      force_raw_images: true
+                      use_cow_images: false
+        {%- endif %}
+      {%- endif %}
       {%- if vnc_tls_enabled %}
                     # Both auth schemes are enabled in favor of supporting backward compatibility
                     # when VM instances were launched without TLS support.
@@ -383,6 +389,8 @@ spec:
                       images_type: rbd
         {%- elif nova_override.images.backend == 'local' %}
                       images_type: qcow2
+        {%- elif nova_override.images.backend == 'raw' %}
+                      images_type: raw
         {%- elif nova_override.images.backend == 'lvm' %}
                       images_type: lvm
                       images_volume_group: {{ nova_override.images.get('lvm', {}).get("volume_group", "nova-vol") }}
@@ -819,6 +827,10 @@ spec:
             disk_allocation_ratio: 0
             ram_allocation_ratio: 0
 {%- endif %}
+{%- if spec.get('features', {}).get('nova', {}).get('images', {}).get('backend') == 'raw' %}
+            force_raw_images: true
+            use_cow_images: false
+{%- endif %}
 {%- if signature.enabled %}
           glance:
             verify_glance_signatures: true
@@ -899,6 +911,8 @@ spec:
 {%- elif spec.get('features', {}).get('nova', {}).get('images', {}).get('backend') == 'lvm' %}
             images_type: lvm
             images_volume_group: {{ spec.get('features', {}).get('nova', {}).get('images', {}).get('lvm', {}).get("volume_group", "nova-vol") }}
+{%- elif spec.get('features', {}).get('nova', {}).get('images', {}).get('backend') == 'raw' %}
+            images_type: raw
 {%- endif %}
 
 {%- if is_ceph_enabled %}
