@@ -432,6 +432,17 @@ class BaseFunctionalTestCase(TestCase):
     def endpoint_delete(cls, endpoint):
         cls.ocm.oc.identity.delete_endpoint(endpoint)
 
+    @classmethod
+    def create_domain(cls, name, enabled=False):
+        domain = cls.ocm.oc.identity.create_domain(name=name, enabled=enabled)
+        cls.addClassCleanup(cls.delete_domain, domain["id"])
+        return domain
+
+    @classmethod
+    @suppress404
+    def delete_domain(cls, domain_id):
+        cls.ocm.oc.identity.delete_domain(domain_id)
+
     def get_ports_by_status(self, status):
         ports = []
         for port in self.ocm.oc.network.ports():
