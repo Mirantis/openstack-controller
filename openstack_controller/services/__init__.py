@@ -1309,14 +1309,18 @@ class Neutron(OpenStackService, MaintenanceApiMixin):
         ]
         all_neutron_roles = []
         for role in neutron_roles:
-            all_neutron_roles.append(node.has_role(constants.NodeRole.compute))
+            all_neutron_roles.append(node.has_role(role))
         if not any(all_neutron_roles):
             return
 
         nwl = maintenance.NodeWorkloadLock.get_resource(node.name)
 
         # Restart openvswitch daemonsets
-        for daemonset in ["ovn-controller", "openvswitch-vswitchd"]:
+        for daemonset in [
+            "ovn-controller",
+            "openvswitch-vswitchd",
+            "neutron-l3-agent",
+        ]:
             for ovs_ds in self.get_child_objects_dynamic(
                 "DaemonSet", daemonset
             ):
