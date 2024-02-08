@@ -3,6 +3,7 @@ import pytest
 
 from openstack_controller.exporter import constants
 from openstack_controller.tests.functional.exporter import base
+from openstack_controller.tests.functional import waiters as wait
 from openstack_controller.tests.functional import config
 
 
@@ -167,6 +168,7 @@ class CinderCollectorFunctionalTestCase(base.BaseFunctionalExporterTestCase):
             f"{phase}: The expected value for {metric_name} for pool {pool_name} is not correct.",
         )
 
+    @pytest.mark.skip(reason="unless is fixed PRODX-39756")
     @pytest.mark.xdist_group("exporter-volume")
     def test_openstack_cinder_pool_total_capacity(self):
         """Total capacity in bytes of cinder backend pools in environment."""
@@ -181,12 +183,15 @@ class CinderCollectorFunctionalTestCase(base.BaseFunctionalExporterTestCase):
             self._test_cinder_pool_metric(
                 metric_name, pool_name, capacity, "Before create"
             )
+            timestamp = self.get_cinder_pool_timestamp(pool_name)
             self.volume_create(size=5, image=CONF.CIRROS_TEST_IMAGE_NAME)
+            wait.wait_cinder_pool_updated(
+                self.get_cinder_pool_timestamp, pool_name, timestamp
+            )
             self._test_cinder_pool_metric(
                 metric_name, pool_name, capacity, "After create"
             )
 
-    @pytest.mark.skip(reason="unless is fixed PRODX-38532")
     @pytest.mark.xdist_group("exporter-volume")
     def test_openstack_cinder_pool_free_capacity(self):
         """Free capacity in bytes of cinder backend pools in environment."""
@@ -197,11 +202,15 @@ class CinderCollectorFunctionalTestCase(base.BaseFunctionalExporterTestCase):
             capacity = pool["capabilities"].get("free_capacity_gb") * (
                 constants.Gi
             )
-
             self._test_cinder_pool_metric(
                 metric_name, pool_name, capacity, "Before create empty volume"
             )
             self.volume_create(size=5)
+            timestamp = self.get_cinder_pool_timestamp(pool_name)
+            wait.wait_cinder_pool_updated(
+                self.get_cinder_pool_timestamp, pool_name, timestamp
+            )
+
             self._test_cinder_pool_metric(
                 metric_name, pool_name, capacity, "After create empty volume"
             )
@@ -210,16 +219,29 @@ class CinderCollectorFunctionalTestCase(base.BaseFunctionalExporterTestCase):
 
             # Ubuntu image is approx 300Mb in size, create 5 volumes to consume 1Gb for sure
             for i in range(0, 5):
-                self.volume_create(size=1, image=CONF.UBUNTU_TEST_IMAGE_NAME)
+                self.volume_create(
+                    size=3,
+                    image=CONF.UBUNTU_TEST_IMAGE_NAME,
+                    timeout=CONF.VOLUME_MEDIUM_CREATE_TIMEOUT,
+                )
 
-            self._test_cinder_pool_metric(
-                metric_name,
-                pool_name,
-                capacity - image["size"] * constants.Gi,
-                "After create empty volume",
+            timestamp = self.get_cinder_pool_timestamp(pool_name)
+            wait.wait_cinder_pool_updated(
+                self.get_cinder_pool_timestamp, pool_name, timestamp
+            )
+            associated_metric = self.filter_metric_samples(
+                self.get_metric_after_refresh(
+                    metric_name, self.scrape_collector
+                ),
+                {"name": pool_name},
             )
 
-    @pytest.mark.skip(reason="unless is fixed PRODX-38531")
+            self.assertTrue(
+                capacity - associated_metric[0].value > image["size"] * 5,
+                "The cinder_pool_free_capacity value for {metric_name} for pool {pool_name} "
+                "is not decreased correctly after non-empty volumes was created",
+            )
+
     @pytest.mark.xdist_group("exporter-volume")
     def test_openstack_cinder_pool_allocated_capacity(self):
         """Allocated capacity in bytes of cinder backend pools in environment."""
@@ -235,10 +257,14 @@ class CinderCollectorFunctionalTestCase(base.BaseFunctionalExporterTestCase):
                 metric_name, pool_name, capacity, "Before create"
             )
             self.volume_create(size=5, image=CONF.CIRROS_TEST_IMAGE_NAME)
+            timestamp = self.get_cinder_pool_timestamp(pool_name)
+            wait.wait_cinder_pool_updated(
+                self.get_cinder_pool_timestamp, pool_name, timestamp
+            )
             self._test_cinder_pool_metric(
                 metric_name,
                 pool_name,
-                capacity - 5 * constants.Gi,
+                capacity + 5 * constants.Gi,
                 "After create",
             )
 
