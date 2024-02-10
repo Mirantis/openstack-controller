@@ -171,7 +171,7 @@ gnocchi_api: '{{ images_base_url }}/openstack/gnocchi:rocky-bionic-2021020409095
 gnocchi_statsd: '{{ images_base_url }}/openstack/gnocchi:rocky-bionic-20210204090950'
 gnocchi_metricd: '{{ images_base_url }}/openstack/gnocchi:rocky-bionic-20210204090950'
 ironic_retrieve_networks: '{{ images_base_url }}/openstack/heat:rocky-bionic-20230227093206'
-redis-failover: '{{ images_base_url }}/openstack/extra/redis:7.2.4-alpine3.19'
+redis-failover: '{{ images_base_url }}/openstack/extra/redis:7.2.4-alpine3.19-1'
 horizon_clean_cache: '{{ images_base_url }}/openstack/horizon:rocky-bionic-20230227093206'
 octavia_driver_agent: '{{ images_base_url }}/openstack/octavia:rocky-bionic-20230227093206'
 octavia_db_sync_persistence: '{{ images_base_url }}/openstack/octavia:rocky-bionic-20230227093206'

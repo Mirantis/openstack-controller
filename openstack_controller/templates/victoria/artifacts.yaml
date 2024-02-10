@@ -173,7 +173,7 @@ gnocchi_api: '{{ images_base_url }}/openstack/gnocchi:victoria-focal-20240112082
 gnocchi_statsd: '{{ images_base_url }}/openstack/gnocchi:victoria-focal-20240112082932'
 gnocchi_metricd: '{{ images_base_url }}/openstack/gnocchi:victoria-focal-20240112082932'
 gnocchi_resources_cleaner: '{{ images_base_url }}/openstack/heat:victoria-focal-20240112082932'
-redis-failover: '{{ images_base_url }}/openstack/extra/redis:7.2.4-alpine3.19'
+redis-failover: '{{ images_base_url }}/openstack/extra/redis:7.2.4-alpine3.19-1'
 horizon_clean_cache: '{{ images_base_url }}/openstack/horizon:victoria-focal-20240112082932'
 octavia_driver_agent: '{{ images_base_url }}/openstack/octavia:victoria-focal-20240112082932'
 octavia_db_sync_persistence: '{{ images_base_url }}/openstack/octavia:victoria-focal-20240112082932'

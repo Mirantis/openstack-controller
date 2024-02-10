@@ -173,7 +173,7 @@ gnocchi_api: '{{ images_base_url }}/openstack/gnocchi:antelope-jammy-20240125151
 gnocchi_statsd: '{{ images_base_url }}/openstack/gnocchi:antelope-jammy-20240125151130'
 gnocchi_metricd: '{{ images_base_url }}/openstack/gnocchi:antelope-jammy-20240125151130'
 gnocchi_resources_cleaner: '{{ images_base_url }}/openstack/heat:antelope-jammy-20240125151130'
-redis-failover: '{{ images_base_url }}/openstack/extra/redis:7.2.4-alpine3.19'
+redis-failover: '{{ images_base_url }}/openstack/extra/redis:7.2.4-alpine3.19-1'
 horizon_clean_cache: '{{ images_base_url }}/openstack/horizon:antelope-jammy-20240125151130'
 octavia_driver_agent: '{{ images_base_url }}/openstack/octavia:antelope-jammy-20240125151130'
 octavia_db_sync_persistence: '{{ images_base_url }}/openstack/octavia:antelope-jammy-20240125151130'
