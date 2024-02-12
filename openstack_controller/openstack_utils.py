@@ -89,7 +89,9 @@ class OpenStackClientManager:
         def match_host(volume, host=None):
             if host is None:
                 return True
-            volume_host = volume.get("host", "")
+            volume_host = volume.get("host")
+            if volume_host is None:
+                return
             return host == volume_host.split("@")[0]
 
         return [
