@@ -95,3 +95,21 @@ def wait_resource_deleted(get_resource_func, resource_id, timeout, interval):
             time.sleep(interval)
     except openstack.exceptions.ResourceNotFound:
         return
+
+
+def wait_cinder_pool_updated(
+    get_cinder_pool_timestamp, pool_name, last_timestamp
+):
+    start_time = time.time()
+    timeout = CONF.CINDER_POOL_UPDATE_TIMEOUT
+    while True:
+        timestamp = get_cinder_pool_timestamp(pool_name)
+        if timestamp > last_timestamp:
+            LOG.debug(f"Cinder pool {pool_name} has updated")
+            return
+        time.sleep(CONF.CINDER_POOL_UPDATE_INTERVAL)
+        timed_out = int(time.time()) - start_time
+        if timed_out >= timeout:
+            message = f"Pool {pool_name} hasn't updated within {timeout}"
+            LOG.error(message)
+            raise TimeoutError(message)

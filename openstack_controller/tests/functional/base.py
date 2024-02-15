@@ -292,7 +292,7 @@ class BaseFunctionalTestCase(TestCase):
     @classmethod
     def volume_create(
         cls,
-        size=CONF.VOLUME_SIZE,
+        size=None,
         name=None,
         image=None,
         availability_zone=None,
@@ -309,7 +309,7 @@ class BaseFunctionalTestCase(TestCase):
         volume = cls.ocm.oc.volume.create_volume(
             size=size,
             name=name,
-            image=image,
+            image_id=image,
             availability_zone=availability_zone,
             wait=wait,
             timeout=timeout,
@@ -320,7 +320,7 @@ class BaseFunctionalTestCase(TestCase):
                 cls.ocm.oc.block_storage.get_volume,
                 volume.id,
                 {"status": "available"},
-                CONF.VOLUME_TIMEOUT,
+                timeout,
                 CONF.VOLUME_READY_INTERVAL,
             )
         return volume
@@ -467,3 +467,11 @@ class BaseFunctionalTestCase(TestCase):
     def get_neutron_agent_status(self, svc):
         agent = self.ocm.oc.network.get_agent(svc["id"])
         return agent["is_admin_state_up"]
+
+    def get_cinder_pool_timestamp(self, pool_name):
+        pool = [
+            pl
+            for pl in list(self.ocm.oc.volume.backend_pools())
+            if pl["name"] == pool_name
+        ]
+        return pool[0]["capabilities"].get("timestamp")
