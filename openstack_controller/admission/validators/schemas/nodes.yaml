@@ -66,12 +66,18 @@ patternProperties:
                 type: object
                 properties:
                   backend:
-                    description: Backend for nova images can be ceph, local or lvm
+                    description: |
+                      Backend for nova images can be:
+                        - local: qcow2 image type
+                        - ceph: rbd image type
+                        - lvm: lvm image type
+                        - raw: raw image type
                     type: string
                     enum:
                       - local
                       - ceph
                       - lvm
+                      - raw
                   encryption:
                     type: object
                     properties:

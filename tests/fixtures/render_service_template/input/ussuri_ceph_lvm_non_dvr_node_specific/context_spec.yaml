@@ -15,6 +15,11 @@ nodes:
         nova:
           images:
             backend: local
+    compute::raw:
+      features:
+        nova:
+          images:
+            backend: raw
     compute::local_sriov_disabled:
       features:
         nova:
