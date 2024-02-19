@@ -233,7 +233,7 @@ spec:
             allow_automatic_l3agent_failover: false
             l3_ha_network_type: vxlan
             max_l3_agents_per_router: 2
-            service_plugins: router,metering,qos,bgpvpn,vpnaas
+            service_plugins: router,metering,qos,bgpvpn,vpnaas,portprober
           nova:
             live_migration_events: true
           cache:
@@ -452,6 +452,7 @@ spec:
         network_policy: false
         secret_ca_bundle: true
         daemonset_bagpipe_bgp: true
+        daemonset_portprober: true
       network:
         server:
           ingress:

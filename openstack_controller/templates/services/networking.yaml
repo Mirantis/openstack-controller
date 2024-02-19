@@ -17,6 +17,7 @@
 {%- set ipsec = spec.features.neutron.get('ipsec', {'enabled': False}) %}
 {%- set vpnaas = spec.features.neutron.get("extensions", {}).get("vpnaas", {"enabled": False}) %}
 {%- set dynamic_routing = spec.features.neutron.get("extensions", {}).get("dynamic_routing", {"enabled": False}) %}
+{%- set portprober = spec.features.neutron.get("extensions", {}).get("portprober", {"enabled": False}) %}
 {%- set service_providers = [] %}
 {%- set l3_agent_extensions = ["fip_qos", "gateway_ip_qos"] %}
 {%- set notification_topics = ['notifications'] %}
@@ -38,6 +39,7 @@
 {%- do service_providers.append("VPN:strongswan:neutron_vpnaas.services.vpn.service_drivers.ipsec.IPsecVPNDriver:default") if vpnaas.enabled %}
 {%- do service_plugins.append('bgp') if dynamic_routing.enabled %}
 {%- do l3_agent_extensions.append("vpnaas") if  vpnaas.enabled %}
+{%- do service_plugins.append('portprober') if portprober.enabled %}
 {%- do notification_topics.append('stacklight_notifications') if stacklight_enabled %}
 {%- set external_notifications_enabled = spec.get('features', {}).get('messaging', {}).get('notifications', {}).get('external', {}).get('enabled', False) %}
 {%- if external_notifications_enabled %}
@@ -460,6 +462,7 @@ spec:
     "rabbit_init",
     "neutron_server",
     "neutron_rpc_server",
+    "neutron_portprober_agent",
     "purge_test",
     "test",] %}
         {%- if image in images %}
@@ -742,6 +745,9 @@ spec:
         daemonset_dr_agent: true
       {%- endif %}
         network_policy: {{ spec.features.network_policies.enabled }}
+      {%- if portprober.enabled %}
+        daemonset_portprober: true
+      {%- endif %}
       network:
         server:
           ingress:

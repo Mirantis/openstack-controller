@@ -1140,6 +1140,15 @@ properties:
                     description: |
                         [Technology Preview] Enable BGP Dynamic Routing plugin/service
                         default: false
+              portprober:
+                type: object
+                additionalProperties: false
+                properties:
+                  enabled:
+                    type: boolean
+                    description: |
+                        [Technology Preview] Enable PortProber monitoring extension
+                        default: false
           baremetal:
             type: object
             additionalProperties: false

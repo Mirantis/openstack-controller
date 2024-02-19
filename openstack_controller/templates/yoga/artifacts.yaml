@@ -231,3 +231,4 @@ designate_pool_manage: '{{ images_base_url }}/openstack/designate:yoga-jammy-202
 designate_pool_manage_hash: '{{ images_base_url }}/openstack/openstack-tools:yoga-jammy-20240219192832'
 ingress_init_config: '{{ images_base_url }}/openstack/openstack-tools:yoga-jammy-20240219192832'
 cinder_wait_for_backends: '{{ images_base_url }}/openstack/openstack-tools:yoga-jammy-20240219192832'
+neutron_portprober_agent: '{{ images_base_url }}/openstack/neutron:yoga-jammy-20240219192832'
