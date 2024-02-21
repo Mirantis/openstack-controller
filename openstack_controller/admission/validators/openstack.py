@@ -78,7 +78,7 @@ class OpenStackValidator(base.BaseValidator):
         ].value
         if (
             "instance-ha" in openstack_services
-            and os_num_version < constants.OpenStackVersion["ussuri"].value
+            and os_num_version < constants.OpenStackVersion["victoria"].value
         ):
             raise exception.OsDplValidationFailed(
                 "This set of services is not permitted to use with"
