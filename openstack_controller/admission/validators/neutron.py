@@ -39,6 +39,9 @@ class NeutronValidator(base.BaseValidator):
         dynamic_routing = neutron_features.get("extensions", {}).get(
             "dynamic_routing", {"enabled": False}
         )
+        portprober = neutron_features.get("extensions", {}).get(
+            "portprober", {"enabled": False}
+        )
         ovn_enabled = neutron_features.get("backend", "ml2") == "ml2/ovn"
         openstack_version = spec["openstack_version"]
         tungstenfabric_enabled = spec["preset"] == "compute-tf"
@@ -125,6 +128,18 @@ class NeutronValidator(base.BaseValidator):
             if tungstenfabric_enabled:
                 raise exception.OsDplValidationFailed(
                     "TungstenFabric and Dynamic Routing are mutually exclusive."
+                )
+        if portprober["enabled"]:
+            if (
+                constants.OpenStackVersion[openstack_version].value
+                < constants.OpenStackVersion["antelope"]
+            ):
+                raise exception.OsDplValidationFailed(
+                    "PortPorber is supported from Antelope release."
+                )
+            if tungstenfabric_enabled:
+                raise exception.OsDplValidationFailed(
+                    "PortProber is not supported with TungstenFabric."
                 )
         if (
             "geneve" in neutron_features.get("tenant_network_types", [])
