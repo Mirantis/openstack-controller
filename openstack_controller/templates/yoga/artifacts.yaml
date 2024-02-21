@@ -11,7 +11,7 @@ cinder_volume_daemonset: '{{ images_base_url }}/openstack/cinder:yoga-jammy-2024
 cinder_volume_usage_audit: '{{ images_base_url }}/openstack/cinder:yoga-jammy-20240219180933'
 cloudprober: '{{ images_base_url }}/openstack/extra/cloudprober:v0.13.2-20240131075124'
 cloudprober_openstack_discovery: '{{ images_base_url }}/openstack/openstack-tools:yoga-jammy-20240219180933'
-stepler_run_tests: '{{ images_base_url }}/openstack/stepler:yoga-focal-20240218103651'
+stepler_run_tests: '{{ images_base_url }}/openstack/stepler:yoga-focal-20240220093914'
 db_drop: '{{ images_base_url }}/openstack/heat:yoga-jammy-20240219180933'
 db_init: '{{ images_base_url }}/openstack/heat:yoga-jammy-20240219180933'
 dep_check: '{{ images_base_url }}/openstack/extra/kubernetes-entrypoint:v1.0.1-55b02f7-20231019172556'
@@ -207,7 +207,7 @@ barbican_db_purge: '{{ images_base_url }}/openstack/barbican:yoga-jammy-20240219
 neutron_bootstrap: '{{ images_base_url }}/openstack/openstack-tools:yoga-jammy-20240219180933'
 cinder_drop_default_volume_type: '{{ images_base_url }}/openstack/openstack-tools:yoga-jammy-20240219180933'
 cinder_create_internal_tenant: '{{ images_base_url }}/openstack/openstack-tools:yoga-jammy-20240219180933'
-descheduler: '{{ images_base_url }}/openstack/extra/descheduler:v0.28.1'
+descheduler: '{{ images_base_url }}/openstack/extra/descheduler:v0.29.0'
 ironic_agent_kernel: '{{ binary_base_url }}/openstack/bin/ironic/tinyipa/tinyipa-stable-yoga-20231004061110.vmlinuz'
 ironic_agent_initramfs: '{{ binary_base_url }}/openstack/bin/ironic/tinyipa/tinyipa-stable-yoga-20231004061110.gz'
 ironic_agent_kernel_checksum: ab718135381e05da26455c216ca698a3
