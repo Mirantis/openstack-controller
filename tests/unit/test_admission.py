@@ -522,7 +522,7 @@ def test_physnet_required_no_tf(client):
 
 
 def test_instance_ha_allow_in_services(client):
-    allow_in = ["ussuri", "victoria", "wallaby", "xena", "yoga", "antelope"]
+    allow_in = ["victoria", "wallaby", "xena", "yoga", "antelope"]
     for os_version in allow_in:
         req = copy.deepcopy(ADMISSION_REQ)
         req["request"]["object"]["spec"]["openstack_version"] = os_version
@@ -535,7 +535,7 @@ def test_instance_ha_allow_in_services(client):
 
 
 def test_insance_ha_deny_in_services(client):
-    deny_in = ["queens", "rocky", "stein", "train"]
+    deny_in = ["queens", "rocky", "stein", "train", "ussuri"]
     for os_version in deny_in:
         req = copy.deepcopy(ADMISSION_REQ)
         req["request"]["object"]["spec"]["openstack_version"] = os_version
