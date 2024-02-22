@@ -484,6 +484,10 @@ identity:keystone:Deployment:keystone-api:
   - podSelector:
       matchLabels:
         application: neutron
+        component: neutron-portprober-agent
+  - podSelector:
+      matchLabels:
+        application: neutron
         component: server
   - podSelector:
       matchLabels:

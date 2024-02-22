@@ -211,6 +211,10 @@ messaging:rabbitmq:StatefulSet:openstack-rabbitmq-rabbitmq:
   - podSelector:
       matchLabels:
         application: neutron
+        component: neutron-portprober-agent
+  - podSelector:
+      matchLabels:
+        application: neutron
         component: server
   - podSelector:
       matchLabels:
