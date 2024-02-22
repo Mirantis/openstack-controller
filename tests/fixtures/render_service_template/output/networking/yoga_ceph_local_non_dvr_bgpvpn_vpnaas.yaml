@@ -452,7 +452,7 @@ spec:
         network_policy: false
         secret_ca_bundle: true
         daemonset_bagpipe_bgp: true
-        daemonset_portprober: true
+        daemonset_portprober_agent: true
       network:
         server:
           ingress:

@@ -215,6 +215,10 @@ memcached:memcached:StatefulSet:openstack-memcached-memcached:
   - podSelector:
       matchLabels:
         application: neutron
+        component: neutron-portprober-agent
+  - podSelector:
+      matchLabels:
+        application: neutron
         component: server
   - podSelector:
       matchLabels:

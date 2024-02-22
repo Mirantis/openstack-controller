@@ -746,7 +746,7 @@ spec:
       {%- endif %}
         network_policy: {{ spec.features.network_policies.enabled }}
       {%- if portprober.enabled %}
-        daemonset_portprober: true
+        daemonset_portprober_agent: true
       {%- endif %}
       network:
         server:
