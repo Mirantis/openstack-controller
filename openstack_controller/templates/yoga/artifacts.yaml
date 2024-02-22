@@ -146,7 +146,7 @@ placement_db_sync: '{{ images_base_url }}/openstack/placement:yoga-jammy-2024021
 keystone_db_sync_expand: '{{ images_base_url }}/openstack/keystone:yoga-jammy-20240219192832'
 keystone_db_sync_migrate: '{{ images_base_url }}/openstack/keystone:yoga-jammy-20240219192832'
 keystone_db_sync_contract: '{{ images_base_url }}/openstack/keystone:yoga-jammy-20240219192832'
-octavia_amphora: '{{ binary_base_url }}/openstack/bin/octavia/amphora-x64-haproxy-yoga-20240219200531.qcow2'
+octavia_amphora: '{{ binary_base_url }}/openstack/bin/octavia/amphora-x64-haproxy-yoga-20240222062748.qcow2'
 etcd: '{{ images_base_url }}/openstack/extra/etcd:v3.5.11-alpine-20240131112547'
 etcd_db_compact: '{{ images_base_url }}/openstack/extra/etcd:v3.5.11-alpine-20240131112547'
 cinder_db_sync_online: '{{ images_base_url }}/openstack/cinder:yoga-jammy-20240219192832'
@@ -183,7 +183,7 @@ mariadb_controller: '{{ images_base_url }}/general/mariadb:10.6.14-focal-2023112
 horizon_mirantis_theme_sha256summ: 2adc0dbe89c7130df052c97438cdf8106b7e631cee85290e50170fa3351e5384
 horizon_mirantis_theme_url: '{{ binary_base_url }}/openstack/bin/horizon/mirantis-yoga-186584b-20230817112411.tar.gz'
 ceph_config_helper: '{{ images_base_url }}/openstack/openstack-tools:yoga-jammy-20240219192832'
-octavia_amphora_checksum: 20abfec81b1bf64481798f85829fbce0
+octavia_amphora_checksum: abfaa065c5040122d61b585da3196fde
 masakari_db_sync: '{{ images_base_url }}/openstack/masakari:yoga-jammy-20240219192832'
 masakari_api: '{{ images_base_url }}/openstack/masakari:yoga-jammy-20240219192832'
 masakari_engine: '{{ images_base_url }}/openstack/masakari:yoga-jammy-20240219192832'
@@ -207,7 +207,7 @@ barbican_db_purge: '{{ images_base_url }}/openstack/barbican:yoga-jammy-20240219
 neutron_bootstrap: '{{ images_base_url }}/openstack/openstack-tools:yoga-jammy-20240219192832'
 cinder_drop_default_volume_type: '{{ images_base_url }}/openstack/openstack-tools:yoga-jammy-20240219192832'
 cinder_create_internal_tenant: '{{ images_base_url }}/openstack/openstack-tools:yoga-jammy-20240219192832'
-descheduler: '{{ images_base_url }}/openstack/extra/descheduler:v0.28.1'
+descheduler: '{{ images_base_url }}/openstack/extra/descheduler:v0.29.0'
 ironic_agent_kernel: '{{ binary_base_url }}/openstack/bin/ironic/tinyipa/tinyipa-stable-yoga-20231004061110.vmlinuz'
 ironic_agent_initramfs: '{{ binary_base_url }}/openstack/bin/ironic/tinyipa/tinyipa-stable-yoga-20231004061110.gz'
 ironic_agent_kernel_checksum: ab718135381e05da26455c216ca698a3
