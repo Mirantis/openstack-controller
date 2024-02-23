@@ -55,6 +55,20 @@ class Config(metaclass=SingletonMeta):
         # Interval in seconds to check the cinder pool timestamp. Default is 3 second.
         self.CINDER_POOL_UPDATE_INTERVAL = 3
 
+        # The Neutron PortProber exporter port
+        self.PORTPROBER_EXPORTER_PORT = 8000
+
+        # Time in seconds to wait for metric to appear. The cloudprober refreshes targets priodically,
+        # so wait while metrics appear in cloudprober.
+        # TODO(vsaienko): decrease it to 45 when we set it to 30 cloudprober
+        self.PORTPROBER_METRIC_REFRESH_TIMEOUT = 120
+
+        # Time in seconds to wait for metric update. Is the period how often probber sends metrics.
+        self.PORTPROBER_PROBE_INTERVAL = 30
+
+        # Number of portprober agents to host nework
+        self.PORTPROBER_AGENTS_PER_NETWORK = 2
+
     def get_cirros_image(self):
         openstack_version = self._osdpl.obj["spec"]["openstack_version"]
         if (

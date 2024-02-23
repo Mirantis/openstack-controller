@@ -475,3 +475,25 @@ class BaseFunctionalTestCase(TestCase):
             if pl["name"] == pool_name
         ]
         return pool[0]["capabilities"].get("timestamp")
+
+    def get_portprober_agent(self, host=None):
+        return list(
+            self.ocm.oc.network.agents(
+                host=host, binary="neutron-portprober-agent"
+            )
+        )
+
+    def get_portprober_networks(self, agent_id):
+        return self.ocm.oc.network.get(
+            f"/agents/{agent_id}/portprober-networks"
+        ).json()["networks"]
+
+    def get_agents_hosting_portprober_network(self, network_id):
+        res = []
+        for agent in self.get_portprober_agent():
+            agent_nets = self.get_portprober_networks(agent["id"])
+            for network in agent_nets:
+                if network["id"] == network_id:
+                    res.append(agent)
+                    continue
+        return res

@@ -1,6 +1,5 @@
 import os
 import requests
-import retry
 import time
 import logging
 
@@ -14,7 +13,40 @@ LOG = logging.getLogger(__name__)
 CONF = config.Config()
 
 
-class BaseFunctionalExporterTestCase(base.BaseFunctionalTestCase):
+class PrometheusMixin:
+
+    def get_metric_families(self, exporter_url=None):
+        exporter_url = exporter_url or self.exporter_url
+        res = requests.get(exporter_url, timeout=60)
+        return text_string_to_metric_families(res.text + "# EOF")
+
+    def get_metric(self, name, metric_families=None):
+        metric_families = metric_families or self.metric_families
+        for metric in metric_families:
+            if metric.name == name:
+                LOG.info(f"Got metric: {metric}")
+                return metric
+
+    def filter_metric_samples(self, metric, labels):
+        res = []
+        for sample in metric.samples:
+            for label, value in labels.items():
+                if sample.labels.get(label) != value:
+                    break
+            else:
+                res.append(sample)
+        return res
+
+    def sum_metric_samples(self, metric):
+        res = 0
+        for sample in metric.samples:
+            res += sample.value
+        return res
+
+
+class BaseFunctionalExporterTestCase(
+    base.BaseFunctionalTestCase, PrometheusMixin
+):
     known_metrics = {}
     # Dictionary with known metrics for exporter to check.
     #  * that metric is present
@@ -38,43 +70,12 @@ class BaseFunctionalExporterTestCase(base.BaseFunctionalTestCase):
         return f"http://{internal_ip}:9102"
 
     @property
-    @retry.retry(
-        requests.exceptions.ConnectionError,
-        delay=1,
-        tries=7,
-        backoff=2,
-        logger=LOG,
-    )
     def metric_families(self):
-        res = requests.get(self.exporter_url, timeout=60)
-        return text_string_to_metric_families(res.text + "# EOF")
-
-    def get_metric(self, name, metric_families=None):
-        metric_families = metric_families or self.metric_families
-        for metric in metric_families:
-            if metric.name == name:
-                LOG.info(f"Got metric: {metric}")
-                return metric
-
-    def filter_metric_samples(self, metric, labels):
-        res = []
-        for sample in metric.samples:
-            for label, value in labels.items():
-                if sample.labels.get(label) != value:
-                    break
-            else:
-                res.append(sample)
-        return res
+        return self.get_metric_families()
 
     def get_metric_after_refresh(self, metric_name, scrape_collector):
         collector_metrics = self.get_collector_metrics(scrape_collector)
         return self.get_metric(metric_name, collector_metrics)
-
-    def sum_metric_samples(self, metric):
-        res = 0
-        for sample in metric.samples:
-            res += sample.value
-        return res
 
     def filter_collector_metrics(self, metrics, scrape_collector):
         def is_collector_metric(metric):
