@@ -298,5 +298,5 @@ class NodeDisableNotification(pykube.objects.APIObject):
 
 def find_ndn(node_name):
     for ndn in NodeDisableNotification.objects(kube.kube_client()):
-        if ndn["spec"]["nodeName"].split(".")[0] == node_name:
+        if ndn.obj["spec"]["nodeName"].split(".")[0] == node_name:
             return ndn
