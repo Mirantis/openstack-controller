@@ -1,3 +1,5 @@
+import unittest
+
 import pytest
 
 from openstack_controller.tests.functional.exporter import base
@@ -10,15 +12,6 @@ CONF = config.Config()
 class NeutronCollectorFunctionalTestCase(base.BaseFunctionalExporterTestCase):
     scrape_collector = "osdpl_neutron"
 
-    @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
-        bundle = cls.network_bundle_create()
-        cls.network = bundle["network"]
-        cls.subnet = bundle["subnet"]
-        cls.router = bundle["router"]
-        cls.servers = []
-
     known_metrics = {
         "osdpl_neutron_networks": {"labels": []},
         "osdpl_neutron_subnets": {"labels": []},
@@ -27,12 +20,22 @@ class NeutronCollectorFunctionalTestCase(base.BaseFunctionalExporterTestCase):
         "osdpl_neutron_ports": {"labels": []},
         "osdpl_neutron_routers": {"labels": []},
         "osdpl_neutron_floating_ips": {"labels": ["state"]},
-        "osdpl_neutron_zone_routers": {"labels": []},
         "osdpl_neutron_agent_state": {"labels": ["host", "zone", "binary"]},
-        "osdpl_neutron_availability_zone_info": {
-            "labels": ["zone", "resource"]
-        },
     }
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        bundle = cls.network_bundle_create()
+        cls.network = bundle["network"]
+        cls.subnet = bundle["subnet"]
+        cls.router = bundle["router"]
+        cls.servers = []
+        if not cls.is_ovn_enabled():
+            cls.known_metrics["osdpl_neutron_zone_routers"] = {"labels": []}
+            cls.known_metrics["osdpl_neutron_availability_zone_info"] = {
+                "labels": ["zone", "resource"]
+            }
 
     def test_neutron_agents_state(self):
         """State of neutron agents in the cluster."""
@@ -242,6 +245,8 @@ class NeutronCollectorFunctionalTestCase(base.BaseFunctionalExporterTestCase):
     def test_neutron_zone_routers(self):
         """Total number of routers in the availability zone."""
         metric_name = "osdpl_neutron_zone_routers"
+        if self.is_ovn_enabled():
+            raise unittest.SkipTest("OVN does have default AZ configured")
         initial_metric = self.get_metric_after_refresh(
             metric_name, self.scrape_collector
         )
@@ -415,6 +420,8 @@ class NeutronAvailabilityZoneTestCase(base.BaseFunctionalExporterTestCase):
         #. Compare exporter's metrics and info from OS
         """
         metric_name = "osdpl_neutron_availability_zone_info"
+        if self.is_ovn_enabled():
+            raise unittest.SkipTest("OVN does have default AZ configured")
         neutron_az = list(self.ocm.oc.network.availability_zones())
         metric = self.get_metric(metric_name)
 
