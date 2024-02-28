@@ -20,6 +20,8 @@ class Config(metaclass=SingletonMeta):
         self.UBUNTU_TEST_IMAGE_NAME = "Ubuntu-18.04"
         self.TEST_FLAVOR_NAME = "m1.extra_tiny_test"
         self.TEST_SUBNET_RANGE = "10.20.30.0/24"
+        self.TEST_IPV6_SUBNET_RANGE = "2001:db8::/48"
+
         self.PUBLIC_NETWORK_NAME = "public"
 
         # Time in seconds to wait for a compute operation to complete. Default is 120 seconds.

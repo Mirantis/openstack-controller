@@ -91,7 +91,7 @@ class AutoschedulerTestCase(
                     f"The success metric was changed on agent {agent}.",
                 )
 
-    def test_portprober_autoscheduler(self):
+    def test_portprober_autoscheduler_ipv4(self):
         net = self.network_create()
         self._test_network_sits_on_agents(net["id"], 0)
         self.subnet_create(cidr=CONF.TEST_SUBNET_RANGE, network_id=net["id"])
@@ -102,12 +102,22 @@ class AutoschedulerTestCase(
             net["id"], CONF.PORTPROBER_AGENTS_PER_NETWORK
         )
 
-    def test_server_basic_ops(self):
-        bundle = self.network_bundle_create()
-        subnet = bundle["subnet"]
-        network = bundle["network"]
-        fixed_ips = [{"subnet_id": subnet["id"]}]
-        port = self.port_create(network["id"], fixed_ips=fixed_ips)
+    def test_portprober_autoscheduler_ipv6(self):
+        net = self.network_create()
+        self._test_network_sits_on_agents(net["id"], 0)
+        self.subnet_create(
+            cidr=CONF.TEST_IPV6_SUBNET_RANGE,
+            ip_version=6,
+            network_id=net["id"],
+        )
+        # TODO(vsaienko): handle fast network create/delete when portprober did not setup
+        # its port but network is deleted.
+        time.sleep(1)
+        self._test_network_sits_on_agents(
+            net["id"], CONF.PORTPROBER_AGENTS_PER_NETWORK
+        )
+
+    def _test_server_basic_ops(self, network, port):
         server = self.server_create(networks=[{"port": port.id}])
         self.wait_arping_samples_for_port(
             port, CONF.PORTPROBER_METRIC_REFRESH_TIMEOUT, 5
@@ -123,3 +133,21 @@ class AutoschedulerTestCase(
         self._check_arping_sample_value_rates_port(port, host_up=False)
         # TODO(vsaienko): add a case when port is deleted and metrics
         # should disappear
+
+    # TODO(vsaienko): add basic ops with ipv6 when is is implemented
+    def test_server_basic_ops_ipv4_private(self):
+        bundle = self.network_bundle_create()
+        subnet = bundle["subnet"]
+        network = bundle["network"]
+        fixed_ips = [{"subnet_id": subnet["id"]}]
+        port = self.port_create(network["id"], fixed_ips=fixed_ips)
+        self._test_server_basic_ops(network, port)
+
+    def test_server_basic_ops_direct_fip(self):
+        public_net = list(
+            self.ocm.oc.network.networks(name=CONF.PUBLIC_NETWORK_NAME)
+        )[0]
+        subnet = self.ocm.oc.network.get_subnet(public_net["subnets"][0])
+        fixed_ips = [{"subnet_id": subnet["id"]}]
+        port = self.port_create(public_net["id"], fixed_ips=fixed_ips)
+        self._test_server_basic_ops(public_net, port)
