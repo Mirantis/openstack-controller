@@ -392,9 +392,20 @@ class RabbitMQ(Service):
             )
 
         cloudprober_enabled = "cloudprober" in services
+        portprober_enabled = (
+            self.mspec.get("features", {})
+            .get("neutron", {})
+            .get("extensions", {})
+            .get("portprober", {})
+            .get("enabled", False)
+        )
+
         sl_config_data = {
             "conf.json": {
-                "exporters": {"cloudprober": {"enabled": cloudprober_enabled}}
+                "exporters": {
+                    "cloudprober": {"enabled": cloudprober_enabled},
+                    "portprober": {"enabled": portprober_enabled},
+                }
             }
         }
         secrets.StackLightConfigSecret().save(sl_config_data)

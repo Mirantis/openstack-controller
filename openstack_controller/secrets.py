@@ -1236,7 +1236,12 @@ class StackLightConfigSecret(JsonSecret):
                                 "type": "object",
                                 "additionalProperties": False,
                                 "properties": {"enabled": {"type": "boolean"}},
-                            }
+                            },
+                            "portprober": {
+                                "type": "object",
+                                "additionalProperties": False,
+                                "properties": {"enabled": {"type": "boolean"}},
+                            },
                         },
                     }
                 },
