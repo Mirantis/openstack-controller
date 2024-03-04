@@ -185,6 +185,10 @@ neutron:
       pod_labels:
         application: neutron
         component: neutron-portprober-agent
+      ports:
+        - port: 8000
+          name: qpp-exporter
+          protocol: TCP
       type: dynamic
     {%- if spec.get("features", {}).get("neutron", {}).get("backend") != "ml2/ovn" %}
   Deployment:

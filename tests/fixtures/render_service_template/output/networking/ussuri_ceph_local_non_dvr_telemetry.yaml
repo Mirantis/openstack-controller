@@ -447,6 +447,22 @@ spec:
         ks_user:
           restartPolicy: Never
       network_policy:
+        portprober-exporter:
+          spec:
+            ingress:
+              - from:
+                - namespaceSelector:
+                    matchLabels:
+                      kubernetes.io/metadata.name: stacklight
+                ports:
+                - port: 8000
+                  protocol: TCP
+            podSelector:
+              matchLabels:
+                application: neutron
+                component: neutron-portprober-agent
+            policyTypes:
+            - Ingress
         server:
           spec:
             ingress:
