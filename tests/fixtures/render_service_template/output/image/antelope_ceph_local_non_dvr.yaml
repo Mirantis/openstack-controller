@@ -8,39 +8,39 @@ spec:
         ks_user: glance
         structured:
           images:
-            cirros-5.1:
+            cirros-6.0:
               checksum: 050056e630cf
               container_format: bare
-              image_file: cirros-0.5.1-x86_64-disk.img
+              image_file: cirros-0.6.0-x86_64-disk.img
               image_type: qcow2
               min_disk: 1
-              name: Cirros-5.1
+              name: Cirros-6.0
               private: false
               properties:
                 os_distro: cirros
-              source_url: https://artifactory.mcp.mirantis.net/binary-dev-kaas-local/openstack/bin/cirros/0.5.1/
-            cirros-5.1.alt:
+              source_url: https://artifactory.mcp.mirantis.net/binary-dev-kaas-local/openstack/bin/cirros/0.6.0/
+            cirros-6.0.alt:
               checksum: 050056e630cf
               container_format: bare
-              image_file: cirros-0.5.1-x86_64-disk.img
+              image_file: cirros-0.6.0-x86_64-disk.img
               image_type: qcow2
               min_disk: 1
-              name: Cirros-5.1.alt
+              name: Cirros-6.0.alt
               private: false
               properties:
                 os_distro: cirros
-              source_url: https://artifactory.mcp.mirantis.net/binary-dev-kaas-local/openstack/bin/cirros/0.5.1/
-            cirros-5.1.raw:
+              source_url: https://artifactory.mcp.mirantis.net/binary-dev-kaas-local/openstack/bin/cirros/0.6.0/
+            cirros-6.0.raw:
               checksum: 479256d697ca
               container_format: bare
-              image_file: cirros-0.5.1-x86_64-disk.raw
+              image_file: cirros-0.6.0-x86_64-disk.raw
               image_type: raw
               min_disk: 1
-              name: Cirros-5.1.raw
+              name: Cirros-6.0.raw
               private: false
               properties:
                 os_distro: cirros
-              source_url: https://artifactory.mcp.mirantis.net/binary-dev-kaas-local/openstack/bin/cirros/0.5.1/
+              source_url: https://artifactory.mcp.mirantis.net/binary-dev-kaas-local/openstack/bin/cirros/0.6.0/
             fedora:
               checksum: 8bc56d70a3e2
               container_format: bare
@@ -74,9 +74,14 @@ spec:
               source_url: 'https://amphora-image-url/latest'
               tags:
                 - amphora
-      ceph_client:
-        configmap: rook-ceph-config
-        user_secret_name: glance-rbd-keyring
+            manila-service-image:
+              container_format: bare
+              image_type: qcow2
+              name: manila-service-image
+              properties:
+                os_distro: ubuntu
+              private: true
+              source_url: 'https://manila-service-image-url/latest'
       network:
         api:
           ingress:
@@ -92,15 +97,7 @@ spec:
           01-controller-default.yaml: {'image_rule1': 'image_value1'}
           02-custom.yaml: {}
         ceph:
-          config:
-            global:
-              mon_host:
-                - "10.10.10.1:6789"
-                - "10.10.10.2:6789"
-                - "10.10.10.3:6789"
-          keyrings:
-            glance:
-              key: AQDKZLJfoTtgAhAA7f9e8GriyIpFbj8Ez88l2A==
+          enabled: false
         glance:
           DEFAULT:
             enable_v2_registry: true
@@ -303,48 +300,6 @@ spec:
             config:
               age: 30
               max_rows: -1
-      network_policy:
-        api:
-          spec:
-            ingress:
-              - from:
-                - default: selector
-              - from:
-                - ipBlock:
-                    cidr: 192.168.0.0/16
-                ports:
-                - port: 9292
-                  protocol: TCP
-              - from:
-                - namespaceSelector:
-                    matchLabels:
-                      kubernetes.io/metadata.name: osh-system
-                - namespaceSelector:
-                    matchLabels:
-                      kubernetes.io/metadata.name: stacklight
-                - namespaceSelector:
-                    matchLabels:
-                      kubernetes.io/metadata.name: tf
-                ports:
-                - port: 9292
-                  protocol: TCP
-            podSelector:
-              matchLabels:
-                application: glance
-                component: api
-            policyTypes:
-            - Ingress
-        registry:
-          spec:
-            ingress:
-              - from:
-                - default: selector
-            podSelector:
-              matchLabels:
-                application: glance
-                component: registry
-            policyTypes:
-            - Ingress
       manifests:
         cron_job_db_purge: true
         job_rabbit_init: false
@@ -353,13 +308,49 @@ spec:
         secret_ca_bundle: true
         ceph_conf: true
         job_clean: false
+      network_policy:
+        registry:
+          spec:
+            policyTypes:
+            - Ingress
+            ingress:
+            - from:
+              - default: selector
+            podSelector:
+              matchLabels:
+                application: glance
+                component: registry
+        api:
+          spec:
+            podSelector:
+              matchLabels:
+                application: glance
+                component: api
+            policyTypes:
+            - Ingress
+            ingress:
+            - from:
+              - default: selector
+            - from:
+              - ipBlock:
+                  cidr: 192.168.0.0/16
+              ports:
+              - port: 9292
+                protocol: TCP
+            - from:
+              - namespaceSelector:
+                  matchLabels:
+                    kubernetes.io/metadata.name: osh-system
+              - namespaceSelector:
+                  matchLabels:
+                    kubernetes.io/metadata.name: stacklight
+              - namespaceSelector:
+                  matchLabels:
+                    kubernetes.io/metadata.name: tf
+              ports:
+              - port: 9292
+                protocol: TCP
       pod:
         replicas:
           api: 1
           registry: 1
-      secrets:
-        rbd: glance-rbd-keyring
-      storage: rbd
-      volume:
-        class_name: rook-ceph-block
-        size: 2Gi

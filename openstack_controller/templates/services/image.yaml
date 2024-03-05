@@ -117,6 +117,23 @@ spec:
                 hash_method: SHA-256
               {%- endif %}
             {%- endfor %}
+            {%- set cirros_raw_image_name = cirros_image_name ~ '.raw' %}
+            {{ cirros_raw_image_name | lower }}:
+              container_format: bare
+              image_file: cirros-{{ cirros_version }}-x86_64-disk.raw
+              image_type: raw
+              min_disk: 1
+              name: {{ cirros_raw_image_name }}
+              private: false
+              properties:
+                os_distro: cirros
+              source_url: {{ spec.artifacts.binary_base_url }}/openstack/bin/cirros/{{ cirros_version }}/
+              checksum: {{ images["cirros_raw_checksum"] }}
+              {%- if signature.enabled %}
+              signature:
+                enabled: true
+                hash_method: SHA-256
+              {%- endif %}
             fedora:
               container_format: bare
               image_file: Fedora-Cloud-Base-27-1.6.x86_64.qcow2

@@ -30,6 +30,17 @@ spec:
               properties:
                 os_distro: cirros
               source_url: http://127.0.0.1:8282/bin/openstack/bin/cirros/0.5.1/
+            cirros-5.1.raw:
+              checksum: 479256d697ca
+              container_format: bare
+              image_file: cirros-0.5.1-x86_64-disk.raw
+              image_type: raw
+              min_disk: 1
+              name: Cirros-5.1.raw
+              private: false
+              properties:
+                os_distro: cirros
+              source_url: http://127.0.0.1:8282/bin/openstack/bin/cirros/0.5.1/
             fedora:
               checksum: 8bc56d70a3e2
               container_format: bare
