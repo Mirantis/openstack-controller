@@ -9,7 +9,7 @@ cinder_scheduler: '{{ images_base_url }}/openstack/cinder:antelope-jammy-2024030
 cinder_volume: '{{ images_base_url }}/openstack/cinder:antelope-jammy-20240304060018'
 cinder_volume_daemonset: '{{ images_base_url }}/openstack/cinder:antelope-jammy-20240304060018'
 cinder_volume_usage_audit: '{{ images_base_url }}/openstack/cinder:antelope-jammy-20240304060018'
-cloudprober: '{{ images_base_url }}/openstack/extra/cloudprober:v0.13.2-20240131075124'
+cloudprober: '{{ images_base_url }}/openstack/osprober:0.0.1-acc14d6'
 cloudprober_openstack_discovery: '{{ images_base_url }}/openstack/openstack-tools:yoga-jammy-20240226060024'
 stepler_run_tests: '{{ images_base_url }}/openstack/stepler:antelope-jammy-20240304145701'
 db_drop: '{{ images_base_url }}/openstack/heat:antelope-jammy-20240304060018'
