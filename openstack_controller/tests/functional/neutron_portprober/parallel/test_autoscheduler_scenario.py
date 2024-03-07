@@ -30,9 +30,12 @@ class AutoschedulerTestCase(
             f"The network {network_id} binding to agent is not correct.",
         )
 
-    def _check_arping_metrics_for_port(self, port):
+    def _check_arping_metrics_for_port(self, port, present=True):
         self._check_arping_metrics_for_network(port["network_id"])
         agents = self.get_agents_hosting_portprober_network(port["network_id"])
+        expected_samples = 1
+        if present is False:
+            expected_samples = 0
         for agent in agents:
             exporter_url = self.get_exporter_url(agent["host"])
             agent_metric_families = list(
@@ -45,7 +48,7 @@ class AutoschedulerTestCase(
                     m, {"mac": port.mac_address}
                 )
                 self.assertTrue(
-                    len(samples) == 1,
+                    len(samples) == expected_samples,
                     f"Did not find {metric_name} for port mac {port.mac_address}",
                 )
 
@@ -131,8 +134,9 @@ class AutoschedulerTestCase(
         waiters.wait_for_server_status(self.ocm, server, "SHUTOFF")
         time.sleep(CONF.PORTPROBER_PROBE_INTERVAL)
         self._check_arping_sample_value_rates_port(port, host_up=False)
-        # TODO(vsaienko): add a case when port is deleted and metrics
-        # should disappear
+        self.server_delete(server)
+        time.sleep(CONF.PORTPROBER_METRIC_REFRESH_TIMEOUT)
+        self._check_arping_metrics_for_port(port, present=False)
 
     # TODO(vsaienko): add basic ops with ipv6 when is is implemented
     def test_server_basic_ops_ipv4_private(self):
