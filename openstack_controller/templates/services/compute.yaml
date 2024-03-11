@@ -869,6 +869,9 @@ spec:
             live_migration_wait_for_vif_plug: false
           workarounds:
             skip_migration_revert_events: true
+{%- if spec.openstack_version not in ("queens", "rocky", "stein", "train", "ussuri", "victoria", "wallaby", "xena", "yoga") %}
+            pass_hwveb_ports_to_os_vif_plugin: false
+{%- endif %}
           os_vif_contrail_vrouter:
             vrouter_port: {{ vrouter_port }}
 {%- else %}
