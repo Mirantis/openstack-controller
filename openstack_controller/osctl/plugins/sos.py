@@ -72,9 +72,9 @@ class SosReportShell(base.OsctlShell):
         elastic_group.add_argument(
             "--elastic-url",
             required=False,
-            default="http://opensearch-master-headless.stacklight.svc.cluster.local:9200",
+            default="http://opensearch-master.stacklight.svc.cluster.local:9200",
             type=str,
-            help="Url to connect to elasticsearch service. By default is http://opensearch-master-headless.stacklight.svc.cluster.local:9200",
+            help="Url to connect to elasticsearch service. By default is http://opensearch-master.stacklight.svc.cluster.local:9200",
         )
         elastic_group.add_argument(
             "--elastic-username",
@@ -90,7 +90,7 @@ class SosReportShell(base.OsctlShell):
         )
         elastic_group.add_argument(
             "--elastic-index-name",
-            default="logstash-*",
+            default="system*",
             type=str,
             help="Elastic search index name to look logs for.",
         )
