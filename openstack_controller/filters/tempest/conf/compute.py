@@ -33,6 +33,7 @@ class Compute(base_section.BaseSection):
         "hypervisor_type",
         "image_ref",
         "image_ref_alt",
+        "image_ref_raw",
         "max_microversion",
         "min_compute_nodes",
         "min_microversion",
@@ -86,6 +87,10 @@ class Compute(base_section.BaseSection):
 
     @property
     def image_ref_alt(self):
+        pass
+
+    @property
+    def image_ref_raw(self):
         pass
 
     @property
