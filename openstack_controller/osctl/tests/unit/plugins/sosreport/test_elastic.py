@@ -54,19 +54,24 @@ class TestK8sElasticLogsCollector(utils.BaseTestCase):
             {
                 "_source": {
                     "@timestamp": "TIMESTAMP",
-                    "severity_label": "SEVERITY",
+                    "log": {"level": "SEVERITY"},
                     "message": "MESSAGE1",
-                    "kubernetes": {
-                        "pod_name": "POD_NAME",
-                        "container_name": "CONTAINER_NAME",
-                        "host": "HOST",
+                    "orchestrator": {
+                        "pod": "POD_NAME",
+                        "namespace": "openstack",
+                        "type": "kubernetes",
+                        "labels": {"label": "value"},
+                    },
+                    "host": {"hostname": "HOST"},
+                    "container": {
+                        "name": "CONTAINER_NAME",
                     },
                 }
             },
             {
                 "_source": {
                     "@timestamp": "TIMESTAMP",
-                    "severity_label": "SEVERITY",
+                    "log": {"level": "SEVERITY"},
                     "message": "MESSAGE2",
                 },
                 "sort": "123",
@@ -213,7 +218,7 @@ class TestK8sElasticLogsCollector(utils.BaseTestCase):
                 "should": [
                     {
                         "simple_query_string": {
-                            "fields": ["logger"],
+                            "fields": ["event.provider"],
                             "query": f"logger*",
                         }
                     }
@@ -243,7 +248,7 @@ class TestK8sElasticLogsCollector(utils.BaseTestCase):
         res = collector.query_host("host-1")
         expected = {
             "bool": {
-                "should": [{"match_phrase": {"kubernetes.host": "host-1"}}],
+                "should": [{"match_phrase": {"host.hostname": "host-1"}}],
                 "minimum_should_match": 1,
             }
         }

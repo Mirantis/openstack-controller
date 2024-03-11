@@ -51,7 +51,7 @@ class ElasticLogsCollector(base.BaseLogsCollector):
                 "should": [
                     {
                         "simple_query_string": {
-                            "fields": ["logger"],
+                            "fields": ["event.provider"],
                             "query": f"{logger}*",
                         }
                     }
@@ -71,7 +71,7 @@ class ElasticLogsCollector(base.BaseLogsCollector):
     def query_host(self, host):
         return {
             "bool": {
-                "should": [{"match_phrase": {"kubernetes.host": host}}],
+                "should": [{"match_phrase": {"host.hostname": host}}],
                 "minimum_should_match": 1,
             }
         }
@@ -138,17 +138,17 @@ class ElasticLogsCollector(base.BaseLogsCollector):
         )
         while len(response["hits"]["hits"]):
             for hit in response["hits"]["hits"]:
-                ts = hit["_source"]["@timestamp"]
-                level = hit["_source"].get("severity_label", "UNKNOWN")
-                message = hit["_source"].get("message", "UNCNOWN")
-                source_kubernetes = hit["_source"].get("kubernetes")
-                if not source_kubernetes:
+                source = hit["_source"]
+                if source.get("orchestrator", {}).get("type") != "kubernetes":
                     continue
-                pod_name = source_kubernetes.get("pod_name", "UNCNOWN")
-                container_name = source_kubernetes.get(
-                    "container_name", "UNCNOWN"
+                ts = source["@timestamp"]
+                level = source.get("log", {}).get("level", "UNKNOWN")
+                message = source.get("message", "UNCNOWN")
+                pod_name = source.get("orchestrator", {}).get("pod", "UNCNOWN")
+                container_name = source.get("container", {}).get(
+                    "name", "UNCNOWN"
                 )
-                host = source_kubernetes.get("host", "UNKNOWN")
+                host = source.get("host", {}).get("hostname", "UNKNOWN")
                 logs_dst_base = os.path.join(self.workspace, host, pod_name)
                 os.makedirs(logs_dst_base, exist_ok=True)
                 logs_dst = os.path.join(
