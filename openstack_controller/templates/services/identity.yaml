@@ -143,7 +143,6 @@ spec:
             max_active_keys: 7
           cache:
             backend: oslo_cache.memcache_pool
-            memcache_pool_flush_on_reconnect: True
           oslo_messaging_notifications:
             topics: {{ notification_topics|join(',') }}
 {% include 'base/_oslo_policy_enforce_defaults.yaml' %}
