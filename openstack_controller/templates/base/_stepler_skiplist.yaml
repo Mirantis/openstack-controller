@@ -5,6 +5,3 @@
           ea9e9ac5-381d-40cc-b5e0-0393b07c6c5d:
             reason: PRODX-25139
             # stepler/horizon/tests/test_users.py::TestUserOnly::test_unavailable_users_list_for_unprivileged_user
-          439e8ca5-0d87-49aa-9458-a239fa6ff1e1:
-            reason: PRODX-25140
-            # stepler/horizon/tests/test_volumes.py::TestUserOnly::test_launch_volume_as_instance
