@@ -22,8 +22,12 @@ for service in $SERVICES; do
 done
 
 svc_ip=$(get_svc_cluster_ip openstack-controller-exporter osh-system)
-echo "$service: $svc_ip"
-echo "$svc_ip ${service}.osh-system.svc.cluster.local  $HOSTS_FILE_IDENTIFIER" >> /etc/hosts
+echo "openstack-controller-exporter: $svc_ip"
+echo "$svc_ip openstack-controller-exporter.osh-system.svc.cluster.local  $HOSTS_FILE_IDENTIFIER" >> /etc/hosts
+
+svc_ip=$(get_svc_cluster_ip grafana stacklight)
+echo "grafana: $svc_ip"
+echo "$svc_ip grafana.stacklight $HOSTS_FILE_IDENTIFIER" >> /etc/hosts
 
 # Set public IPs
 ingress_ip=$(kubectl -n openstack get svc ingress -o jsonpath='{.status.loadBalancer.ingress[0].ip}')

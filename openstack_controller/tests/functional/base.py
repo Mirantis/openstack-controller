@@ -109,6 +109,7 @@ class BaseFunctionalTestCase(TestCase):
         host=None,
         config_drive=None,
         user_data=None,
+        tags=None,
     ):
         kwargs = {"networks": networks}
         if name is None:
@@ -129,11 +130,12 @@ class BaseFunctionalTestCase(TestCase):
             kwargs["availability_zone"] = availability_zone
         if host:
             kwargs["host"] = host
-        if config_drive:
-            kwargs["config_drive"] = config_drive
         if user_data:
             kwargs["user_data"] = user_data
-
+        if config_drive:
+            kwargs["config_drive"] = True
+        if tags:
+            kwargs["tags"] = tags
         server = cls.ocm.oc.compute.create_server(**kwargs)
         if wait is True:
             waiters.wait_for_server_status(cls.ocm, server, status="ACTIVE")
@@ -512,6 +514,27 @@ class BaseFunctionalTestCase(TestCase):
     @suppress404
     def delete_domain(cls, domain_id):
         cls.ocm.oc.identity.delete_domain(domain_id)
+
+    @classmethod
+    def flavor_create(cls, name=None, disk=None, ram=None, vcpus=None):
+        if name is None:
+            name = data_utils.rand_name(postfix="flavor")
+        if disk is None:
+            disk = CONF.FLAVOR_DISK_SIZE
+        if ram is None:
+            ram = CONF.FLAVOR_RAM_SIZE
+        if vcpus is None:
+            vcpus = 1
+        flavor = cls.ocm.oc.compute.create_flavor(
+            name=name, disk=disk, ram=ram, vcpus=vcpus
+        )
+        cls.addClassCleanup(cls.delete_flavor, flavor["id"])
+        return flavor
+
+    @classmethod
+    @suppress404
+    def delete_flavor(cls, flavor_id):
+        cls.ocm.oc.compute.delete_flavor(flavor_id)
 
     def get_ports_by_status(self, status):
         ports = []

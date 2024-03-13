@@ -126,3 +126,31 @@ def wait_for_ping(ip, timeout=60, interval=5):
     raise TimeoutError(
         "Timed out waiting ping reply in {timeout} seconds from {ip}"
     )
+
+
+def wait_for_instance_migration(openstack_client, server):
+    start_time = time.time()
+    timeout = CONF.SERVER_LIVE_MIGRATION_TIMEOUT
+    initial_server_host = openstack_client.oc.get_server(
+        server.id
+    ).compute_host
+    while True:
+        server = openstack_client.oc.get_server(server.id)
+        if (
+            server.compute_host != initial_server_host
+            and server.status == "ACTIVE"
+        ):
+            LOG.debug(
+                f"Server {server.id} has migrated during dynamic resource rebalancing"
+            )
+            return
+        time.sleep(60)
+        timed_out = int(time.time()) - start_time
+        if timed_out >= timeout:
+            message = (
+                f"Server {server.id} hasn't migrated "
+                f"during dynamic resource rebalancing "
+                f"within the required time {timeout}"
+            )
+            LOG.error(message)
+            raise TimeoutError(message)
