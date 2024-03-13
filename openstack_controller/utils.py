@@ -20,6 +20,7 @@ import logging
 import logging.config
 import os
 import re
+import requests
 import hashlib
 from typing import Dict, List
 import yaml
@@ -356,3 +357,12 @@ def substitute_hidden_field(ref, secrets):
                 f"Specified key {secret_key} not found in secret {secret_name}."
             )
         return from_base64(data)
+
+
+def download_file(url, dst, timeout=60, chunk_size=8192):
+    with requests.get(url, stream=True, timeout=timeout) as r:
+        r.raise_for_status()
+        with open(dst, "wb") as f:
+            for chunk in r.iter_content(chunk_size=chunk_size):
+                f.write(chunk)
+    return dst

@@ -337,3 +337,79 @@ async def test_install_pvc_test(
     with pytest.raises(kopf.TemporaryError):
         await hc.run_cmd("helm upgrade --install test-release")
     kube_find.return_value.delete.assert_not_called()
+
+
+@pytest.mark.asyncio
+@mock.patch("tempfile.NamedTemporaryFile")
+async def test_install_release(mock_mpf):
+    hc = helm.HelmManager()
+    hc.run_cmd = mock.AsyncMock()
+    hc.get_chart_url = mock.MagicMock()
+    hc.get_chart_url.return_value = "http://foo.bar/helm/libvirt-0.1.2.tgz"
+    mock_mpf.return_value.__enter__.return_value.name = "/tmp/123"
+    await hc.install(
+        "test-release", {}, "http://foo.bar/helm", "libvirt", "0.1.2"
+    )
+    hc.run_cmd.assert_called_once_with(
+        [
+            "upgrade",
+            "test-release",
+            "http://foo.bar/helm/libvirt-0.1.2.tgz",
+            "--namespace",
+            "openstack",
+            "--values",
+            "/tmp/123",
+            "--history-max",
+            "1",
+            "--install",
+        ],
+        release_name="test-release",
+    )
+
+
+@pytest.mark.asyncio
+@mock.patch("tempfile.NamedTemporaryFile")
+async def test_install_release_cache(mock_mpf):
+    hc = helm.HelmManager()
+    hc.run_cmd = mock.AsyncMock()
+    hc.get_chart_url = mock.MagicMock()
+    hc.get_chart_url.return_value = (
+        "/opt/operator/charts/infra/libvirt-0.1.2.tgz"
+    )
+    mock_mpf.return_value.__enter__.return_value.name = "/tmp/123"
+    await hc.install(
+        "test-release", {}, "http://foo.bar/helm", "libvirt", "0.1.2"
+    )
+    hc.run_cmd.assert_called_once_with(
+        [
+            "upgrade",
+            "test-release",
+            "/opt/operator/charts/infra/libvirt-0.1.2.tgz",
+            "--namespace",
+            "openstack",
+            "--values",
+            "/tmp/123",
+            "--history-max",
+            "1",
+            "--install",
+        ],
+        release_name="test-release",
+    )
+
+
+@pytest.mark.asyncio
+@mock.patch("os.path.isfile")
+async def test_get_chart_url_no_cache(mock_opif):
+    hc = helm.HelmManager()
+    mock_opif.return_value = False
+    res = hc.get_chart_url("http://foo.bar/helm", "libvirt", "0.1.2")
+    assert res == "http://foo.bar/helm/libvirt-0.1.2.tgz"
+
+
+@pytest.mark.asyncio
+@mock.patch("os.path.isfile")
+async def test_get_charet_url_cache(mock_opif):
+    hc = helm.HelmManager()
+    mock_opif.return_value = True
+    res = hc.get_chart_url("http://foo.bar/helm", "libvirt", "0.1.2")
+    assert res == "/opt/operator/charts/infra/libvirt-0.1.2.tgz"

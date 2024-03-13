@@ -58,6 +58,7 @@ COPY --from=builder /opt/operator/uwsgi.ini /opt/operator/uwsgi.ini
 COPY --from=builder /opt/operator/source-requirements.txt /opt/operator/source-requirements.txt
 COPY --from=builder /opt/operator/image_tag.txt /opt/operator/image_tag.txt
 COPY --from=builder /opt/operator/etc/openstack-controller/ /etc/openstack-controller/
+COPY --from=builder /opt/operator/tools/sync_helm_charts.py /opt/operator/sync_helm_charts.py
 ADD kopf-patches /tmp/kopf-patches
 RUN apt-get update; \
     apt-get -y upgrade
@@ -96,6 +97,8 @@ RUN set -ex; \
     useradd -u ${UID} -g ${USER} -m -d /var/lib/${USER} -c "${USER} user" ${USER}
 RUN wget -q -O /usr/local/bin/helm3 ${HELM_BINARY}; \
     chmod +x /usr/local/bin/helm3
+
+RUN python3.8 /opt/operator/sync_helm_charts.py
 
 RUN rm -rvf /tmp/kopf-patches
 RUN rm -rvf /opt/wheels; \

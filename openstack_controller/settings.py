@@ -301,6 +301,7 @@ HOME = str(Path.home())
 HELM_REPOSITORY_CACHE = os.environ.get(
     "HELM_REPOSITORY_CACHE", os.path.join(HOME, ".cache/helm/repository")
 )
+HELM_CHARTS_DIR = os.environ.get("HELM_CHARTS_DIR", "/opt/operator/charts/")
 # END HELM SETTINGS
 
 CONF = Config()
