@@ -120,8 +120,12 @@ class AutoschedulerTestCase(
             net["id"], CONF.PORTPROBER_AGENTS_PER_NETWORK
         )
 
-    def _test_server_basic_ops(self, network, port):
-        server = self.server_create(networks=[{"port": port.id}])
+    def _test_server_basic_ops(self, network, port, image=None):
+        server = self.server_create(
+            imageRef=image,
+            networks=[{"port": port.id}],
+            config_drive=True,
+        )
         self.wait_arping_samples_for_port(
             port, CONF.PORTPROBER_METRIC_REFRESH_TIMEOUT, 5
         )
@@ -154,4 +158,5 @@ class AutoschedulerTestCase(
         subnet = self.ocm.oc.network.get_subnet(public_net["subnets"][0])
         fixed_ips = [{"subnet_id": subnet["id"]}]
         port = self.port_create(public_net["id"], fixed_ips=fixed_ips)
-        self._test_server_basic_ops(public_net, port)
+        image = self.ocm.oc.get_image_id(CONF.UBUNTU_TEST_IMAGE_NAME)
+        self._test_server_basic_ops(public_net, port, image)

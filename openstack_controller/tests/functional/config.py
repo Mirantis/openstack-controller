@@ -66,7 +66,7 @@ class Config(metaclass=SingletonMeta):
         self.PORTPROBER_METRIC_REFRESH_TIMEOUT = 120
 
         # Time in seconds to wait for metric update. Is the period how often probber sends metrics.
-        self.PORTPROBER_PROBE_INTERVAL = 30
+        self.PORTPROBER_PROBE_INTERVAL = 45
 
         # Number of portprober agents to host nework
         self.PORTPROBER_AGENTS_PER_NETWORK = 2

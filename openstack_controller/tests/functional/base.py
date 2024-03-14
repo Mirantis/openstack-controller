@@ -101,6 +101,8 @@ class BaseFunctionalTestCase(TestCase):
         networks="none",
         availability_zone=None,
         host=None,
+        config_drive=None,
+        user_data=None,
     ):
         kwargs = {"networks": networks}
         if name is None:
@@ -113,10 +115,16 @@ class BaseFunctionalTestCase(TestCase):
             kwargs["imageRef"] = cls.ocm.oc.get_image_id(
                 CONF.CIRROS_TEST_IMAGE_NAME
             )
+        else:
+            kwargs["imageRef"] = imageRef
         if availability_zone:
             kwargs["availability_zone"] = availability_zone
         if host:
             kwargs["host"] = host
+        if config_drive:
+            kwargs["config_drive"] = config_drive
+        if user_data:
+            kwargs["user_data"] = user_data
 
         server = cls.ocm.oc.compute.create_server(**kwargs)
         if wait is True:
