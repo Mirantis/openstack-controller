@@ -340,11 +340,7 @@ def merge_spec(spec, logger):
     binary_base_url = spec.get("artifacts", {}).get(
         "binary_base_url", base["artifacts"]["binary_base_url"]
     )
-    artifacts = yaml.safe_load(
-        ENV.get_template("artifacts.yaml").render(
-            binary_base_url=binary_base_url
-        )
-    )
+    artifacts = render_binary_artifacts(binary_base_url)
     sizing = yaml.safe_load(ENV.get_template(f"size/{size}.yaml").render())
     merger.merge(base, artifacts)
     merger.merge(base, sizing)
@@ -403,6 +399,15 @@ def render_artifacts(spec):
             images_base_url=images_base_url, binary_base_url=binary_base_url
         )
     )
+
+
+def render_binary_artifacts(binary_base_url):
+    artifacts = yaml.safe_load(
+        ENV.get_template("artifacts.yaml").render(
+            binary_base_url=binary_base_url
+        )
+    )
+    return artifacts
 
 
 def substitude_osdpl(obj):

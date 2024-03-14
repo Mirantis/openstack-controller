@@ -90,6 +90,20 @@ class HelmManager:
         node_ip = os.environ["NODE_IP"]
         return utils.substitute_local_proxy_hostname(repo, node_ip)
 
+    def get_chart_url(self, repo, chart, version):
+        chart_name = f"{chart}-{version}.tgz"
+        chart_group = [
+            chart_group
+            for chart_group, charts in constants.CHART_GROUP_MAPPING.items()
+            if chart in charts
+        ][0]
+        cache_file = os.path.join(
+            settings.HELM_CHARTS_DIR, chart_group, chart_name
+        )
+        if os.path.isfile(cache_file):
+            return cache_file
+        return f"{repo}/{chart_name}"
+
     async def _guess_and_delete(self, stderr):
         immutable_pattern = r'cannot patch "(.*?)" with kind ([a-zA-Z]+):'
         for match in re.findall(immutable_pattern, stderr):
@@ -243,6 +257,7 @@ class HelmManager:
     ):
         args = args or []
         repo = self._substitute_local_proxy(repo)
+        chart_url = self.get_chart_url(repo, chart, version)
         # Avoid using --reuse-values, it drops values for overrides related upstream
         # https://github.com/helm/helm/issues/10214
         with tempfile.NamedTemporaryFile(
@@ -254,11 +269,7 @@ class HelmManager:
             cmd = [
                 "upgrade",
                 name,
-                "--repo",
-                repo,
-                chart,
-                "--version",
-                version,
+                chart_url,
                 "--namespace",
                 self.namespace,
                 "--values",
@@ -272,6 +283,7 @@ class HelmManager:
     async def install(self, name, values, repo, chart, version, args=None):
         args = args or []
         repo = self._substitute_local_proxy(repo)
+        chart_url = self.get_chart_url(repo, chart, version)
         with tempfile.NamedTemporaryFile(
             mode="w", prefix=name, delete=True
         ) as tmp:
@@ -279,13 +291,9 @@ class HelmManager:
             cmd = [
                 "upgrade",
                 name,
-                "--repo",
-                repo,
-                chart,
+                chart_url,
                 "--namespace",
                 self.namespace,
-                "--version",
-                version,
                 "--values",
                 tmp.name,
                 "--history-max",
