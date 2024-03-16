@@ -71,6 +71,15 @@ class BaseFunctionalTestCase(TestCase):
         record.testMethodName = self._testMethodName
         return record
 
+    @property
+    def neturon_portprober_enabled(self):
+        return (
+            self.osdpl.obj["spec"]["features"]["neutron"]
+            .get("extensions", {})
+            .get("portprober", {})
+            .get("enabled", False)
+        )
+
     def is_service_enabled(self, name):
         return name in self.osdpl.obj["spec"].get("features", {}).get(
             "services", []
