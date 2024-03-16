@@ -16,13 +16,7 @@ class BaseFunctionalPortProberTestCase(base.BaseFunctionalTestCase):
 
     def setUp(self):
         super().setUp()
-        if (
-            not self.osdpl.obj["spec"]["features"]
-            .get("neutron", {})
-            .get("extensions", {})
-            .get("portprober", {})
-            .get("enabled", False)
-        ):
+        if not self.neturon_portprober_enabled:
             raise unittest.SkipTest(
                 "Neutron PortProber extension is not enabled."
             )
