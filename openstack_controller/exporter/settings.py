@@ -25,8 +25,9 @@ OSCTL_EXPORTER_ENABLED_COLLECTORS = os.getenv(
 ).split(",")
 
 # Number in seconds we allow for polling, when exceeds exporter is stopped.
+# On big clouds with 500+ computes nova may take a while.
 OSCTL_EXPORTER_MAX_POLL_TIMEOUT = int(
-    os.getenv("OSCTL_EXPORTER_MAX_POLL_TIMEOUT", "300")
+    os.getenv("OSCTL_EXPORTER_MAX_POLL_TIMEOUT", "900")
 )
 
 # Number of seconds we can wait for polling tasks before return cached result
