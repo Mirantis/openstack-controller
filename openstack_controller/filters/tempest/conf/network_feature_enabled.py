@@ -35,21 +35,32 @@ class NetworkFeatureEnabled(base_section.BaseSection):
             "project-id",
         ]
 
-        if (
-            self.get_spec_item("features.neutron.dvr.enabled", False)
-            and self.get_spec_item("features.neutron.backend", "ml2") == "ml2"
-        ):
-            api_extensions_default.append("dvr")
-
-        if self.get_spec_item("features.neutron.backend") == "ml2":
+        if self.get_spec_item("features.neutron.backend", "ml2") == "ml2":
             api_extensions_default.extend(
                 [
+                    "filter-validation",
+                    "ip-substring-filtering",
                     "l3-ha",
                     "l3-flavors",
                     "l3_agent_scheduler",
                     "dhcp_agent_scheduler",
                 ]
             )
+            if self.os_version_compare("ussuri", "ge"):
+                api_extensions_default.extend(
+                    [
+                        "rbac-subnetpool",
+                    ]
+                )
+            if self.os_version_compare("wallaby", "ge"):
+                api_extensions_default.extend(
+                    [
+                        "rbac-address-group",
+                    ]
+                )
+
+            if self.get_spec_item("features.neutron.dvr.enabled", False):
+                api_extensions_default.append("dvr")
 
         if self.get_spec_item("features.neutron.backend") in [
             "ml2",
@@ -67,7 +78,6 @@ class NetworkFeatureEnabled(base_section.BaseSection):
                     "subnet-service-types",
                     "standard-attr-revisions",
                     "router_availability_zone",
-                    "filter-validation",
                     "dns-domain-ports",
                     "dns-integration",
                     "default-subnetpools",
@@ -87,7 +97,6 @@ class NetworkFeatureEnabled(base_section.BaseSection):
                     "qos-rules-alias",
                     "subnetpool-prefix-ops",
                     "floatingip-pools",
-                    "ip-substring-filtering",
                 ]
             )
 
@@ -96,7 +105,6 @@ class NetworkFeatureEnabled(base_section.BaseSection):
                     [
                         "rbac-address-scope",
                         "rbac-security-groups",
-                        "rbac-subnetpool",
                         "stateful-security-group",
                         "fip-port-details",
                         "port-mac-address-regenerate",
@@ -109,7 +117,6 @@ class NetworkFeatureEnabled(base_section.BaseSection):
                 api_extensions_default.extend(
                     [
                         "address-group",
-                        "rbac-address-group",
                         "security-groups-remote-address-group",
                     ],
                 )
@@ -147,6 +154,10 @@ class NetworkFeatureEnabled(base_section.BaseSection):
                 api_extensions_default.extend(
                     ["net-mtu", "net-mtu-writable"],
                 )
+        if self.get_spec_item(
+            "features.neutron.extensions.portprober.enabled", False
+        ):
+            api_extensions_default.extend(["portprober"])
 
         return ", ".join(api_extensions_default)
 
