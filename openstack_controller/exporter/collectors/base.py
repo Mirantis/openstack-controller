@@ -106,11 +106,11 @@ class OsdplMetricsCollector(object):
             ]
         ):
             if (datetime.utcnow() - start).total_seconds() >= timeout:
+                LOG.warning(
+                    f"Tasks {self.gather_tasks.copy()} did not complete in {timeout}, return cache result."
+                )
                 return
             time.sleep(1)
-        LOG.warning(
-            f"Tasks did not complete in {timeout}, return cache result."
-        )
 
     def collect(self):
         osdpl = kube.get_osdpl()
@@ -216,6 +216,7 @@ class BaseMetricsCollector(object):
         pass
 
     def refresh_data(self):
+        LOG.info(f"Started refreshing data for {self._name}")
         self.can_collect = self.can_collect_data
         if not self.can_collect:
             LOG.warning(
@@ -236,6 +237,7 @@ class BaseMetricsCollector(object):
         now = datetime.utcnow()
         self.scrape_end_timestamp = now.timestamp()
         self.scrape_duration = (now - start).total_seconds()
+        LOG.info(f"Finished refreshing data for {self._name}")
 
     @property
     @abc.abstractmethod
