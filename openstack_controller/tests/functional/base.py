@@ -120,6 +120,8 @@ class BaseFunctionalTestCase(TestCase):
             kwargs["flavorRef"] = cls.ocm.oc.compute.find_flavor(
                 CONF.TEST_FLAVOR_NAME
             ).id
+        else:
+            kwargs["flavorRef"] = flavorRef
         if imageRef is None:
             kwargs["imageRef"] = cls.ocm.oc.get_image_id(
                 CONF.CIRROS_TEST_IMAGE_NAME

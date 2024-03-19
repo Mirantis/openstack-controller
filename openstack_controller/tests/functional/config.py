@@ -18,6 +18,7 @@ class Config(metaclass=SingletonMeta):
 
         self.CIRROS_TEST_IMAGE_NAME = self.get_cirros_image()
         self.UBUNTU_TEST_IMAGE_NAME = "Ubuntu-18.04"
+        self.TEST_FLAVOR_SMALL_NAME = "m1.small"
         self.TEST_FLAVOR_NAME = "m1.extra_tiny_test"
         self.TEST_SUBNET_RANGE = "10.20.30.0/24"
         self.TEST_IPV6_SUBNET_RANGE = "2001:db8::/48"
@@ -60,13 +61,16 @@ class Config(metaclass=SingletonMeta):
         # The Neutron PortProber exporter port
         self.PORTPROBER_EXPORTER_PORT = 8000
 
+        # Time in seconds to wait for metric update. Is the period how often probber sends metrics.
+        # prometheus scrape inteval 20 + 2 x cloudprober probe interval 15 + file surfacer update timeout 10
+        self.PORTPROBER_PROBE_INTERVAL = 60
+
         # Time in seconds to wait for metric to appear. The cloudprober refreshes targets priodically,
         # so wait while metrics appear in cloudprober.
-        # TODO(vsaienko): decrease it to 45 when we set it to 30 cloudprober
-        self.PORTPROBER_METRIC_REFRESH_TIMEOUT = 120
-
-        # Time in seconds to wait for metric update. Is the period how often probber sends metrics.
-        self.PORTPROBER_PROBE_INTERVAL = 45
+        # PORTPROBER_PROBE_INTERVAL + cloudprober file check interval 30
+        self.PORTPROBER_METRIC_REFRESH_TIMEOUT = (
+            self.PORTPROBER_PROBE_INTERVAL + 30
+        )
 
         # Number of portprober agents to host nework
         self.PORTPROBER_AGENTS_PER_NETWORK = 2

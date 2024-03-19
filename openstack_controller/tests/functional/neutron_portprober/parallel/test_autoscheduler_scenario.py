@@ -60,6 +60,25 @@ class AutoschedulerTestCase(
             )
         return agent_samples
 
+    def _wait_metric_incresing(self, port, metric, timeout):
+        start_time = int(time.time())
+        before = self._get_arping_agent_samples(port)
+        while True:
+            timed_out = int(time.time()) - start_time
+            if timed_out >= timeout:
+                message = f"Metric {metric} for port {port.id} is not changed during {timeout}."
+                raise TimeoutError(message)
+            after = self._get_arping_agent_samples(port)
+            agent_increased = []
+            for agent in before["total"].keys():
+                if (
+                    before[metric][agent][0].value
+                    < after[metric][agent][0].value
+                ):
+                    agent_increased.append(agent)
+            if set(agent_increased) == set(before["total"].keys()):
+                return
+
     def _check_arping_sample_value_rates_port(self, port, host_up=True):
         before = self._get_arping_agent_samples(port)
         time.sleep(CONF.PORTPROBER_PROBE_INTERVAL)
@@ -69,29 +88,29 @@ class AutoschedulerTestCase(
             self.assertTrue(
                 before["total"][agent][0].value
                 < after["total"][agent][0].value,
-                f"The total value not increased on agent {agent}.",
+                f"The total value not increased on agent {agent} with host_up {host_up}.",
             )
             if host_up:
                 self.assertTrue(
                     before["success"][agent][0].value
                     < after["success"][agent][0].value,
-                    f"The success metric is not increased on agent {agent}.",
+                    f"The success metric is not increased on agent {agent} with host_up {host_up}.",
                 )
                 self.assertTrue(
                     before["failure"][agent][0].value
                     == after["failure"][agent][0].value,
-                    f"The failure metric was changed on agent {agent}.",
+                    f"The failure metric was changed on agent {agent} with host_up {host_up}.",
                 )
             else:
                 self.assertTrue(
                     before["failure"][agent][0].value
                     < after["failure"][agent][0].value,
-                    f"The failure metric is not increased on agent {agent}.",
+                    f"The failure metric is not increased on agent {agent} with host_up {host_up}.",
                 )
                 self.assertTrue(
                     before["success"][agent][0].value
                     == after["success"][agent][0].value,
-                    f"The success metric was changed on agent {agent}.",
+                    f"The success metric was changed on agent {agent} with host_up {host_up}.",
                 )
 
     def test_portprober_autoscheduler_ipv4(self):
@@ -120,11 +139,12 @@ class AutoschedulerTestCase(
             net["id"], CONF.PORTPROBER_AGENTS_PER_NETWORK
         )
 
-    def _test_server_basic_ops(self, network, port, image=None):
+    def _test_server_basic_ops(self, network, port, image=None, flavor=None):
         server = self.server_create(
             imageRef=image,
             networks=[{"port": port.id}],
             config_drive=True,
+            flavorRef=flavor,
         )
         self.wait_arping_samples_for_port(
             port, CONF.PORTPROBER_METRIC_REFRESH_TIMEOUT, 5
@@ -133,10 +153,12 @@ class AutoschedulerTestCase(
             network["id"], expected_number=CONF.PORTPROBER_AGENTS_PER_NETWORK
         )
         self._check_arping_metrics_for_port(port)
+        self._wait_metric_incresing(
+            port, "success", CONF.PORTPROBER_PROBE_INTERVAL
+        )
         self._check_arping_sample_value_rates_port(port, host_up=True)
         self.ocm.oc.compute.stop_server(server)
         waiters.wait_for_server_status(self.ocm, server, "SHUTOFF")
-        time.sleep(CONF.PORTPROBER_PROBE_INTERVAL)
         self._check_arping_sample_value_rates_port(port, host_up=False)
         self.server_delete(server)
         time.sleep(CONF.PORTPROBER_METRIC_REFRESH_TIMEOUT)
@@ -159,4 +181,7 @@ class AutoschedulerTestCase(
         fixed_ips = [{"subnet_id": subnet["id"]}]
         port = self.port_create(public_net["id"], fixed_ips=fixed_ips)
         image = self.ocm.oc.get_image_id(CONF.UBUNTU_TEST_IMAGE_NAME)
-        self._test_server_basic_ops(public_net, port, image)
+        flavor = self.ocm.oc.compute.find_flavor(
+            CONF.TEST_FLAVOR_SMALL_NAME
+        ).id
+        self._test_server_basic_ops(public_net, port, image, flavor=flavor)
