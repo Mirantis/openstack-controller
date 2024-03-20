@@ -27,6 +27,7 @@ class OsdplHeatMetricCollector(base.OpenStackBaseMetricCollector):
     _description = "OpenStack Orchestration service metrics"
     _os_service_types = ["orchestration"]
 
+    @utils.timeit
     def init_families(self):
         return {
             "stacks": GaugeMetricFamily(
@@ -36,6 +37,7 @@ class OsdplHeatMetricCollector(base.OpenStackBaseMetricCollector):
             )
         }
 
+    @utils.timeit
     def update_samples(self):
         stacks = len(list(self.oc.oc.orchestration.stacks()))
         self.set_samples("stacks", [([], stacks)])

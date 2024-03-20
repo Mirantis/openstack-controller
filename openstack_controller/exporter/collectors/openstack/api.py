@@ -30,6 +30,7 @@ class OsdplApiMetricCollector(base.OpenStackBaseMetricCollector):
     _description = "OpenStack API endpoints"
     _os_service_types = ["identity"]
 
+    @utils.timeit
     def init_families(self):
         return {
             "status": GaugeMetricFamily(

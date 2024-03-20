@@ -28,6 +28,7 @@ class OsdplNeutronMetricCollector(base.OpenStackBaseMetricCollector):
     _os_service_types = ["network"]
     port_statuses = ["down", "error", "active"]
 
+    @utils.timeit
     def init_families(self):
         res = {
             "networks": GaugeMetricFamily(
@@ -84,6 +85,7 @@ class OsdplNeutronMetricCollector(base.OpenStackBaseMetricCollector):
             )
         return res
 
+    @utils.timeit
     def update_samples(self):
         for resource in ["networks", "subnets"]:
             total = len(list(getattr(self.oc.oc.network, resource)()))

@@ -39,6 +39,7 @@ class OsdplNovaMetricCollector(base.OpenStackBaseMetricCollector):
         self.cache = {}
         super().__init__()
 
+    @utils.timeit
     def update_cache(self):
         """Upadate cache for some API objects
 
@@ -46,7 +47,7 @@ class OsdplNovaMetricCollector(base.OpenStackBaseMetricCollector):
         different places to avoid massive API calls. Should not add resources
         that consume a lot of space like servers.
         """
-
+        self.oc.oc.compute.get("/")
         self.cache["aggregates"] = list(self.oc.oc.compute.aggregates())
         self.cache["availability_zones"] = list(
             self.oc.oc.compute.availability_zones()
@@ -57,26 +58,31 @@ class OsdplNovaMetricCollector(base.OpenStackBaseMetricCollector):
             self.oc.oc.placement.resource_providers()
         )
 
+    @utils.timeit
     def get_host_resource_provider(self, name):
         for resource_provider in self.cache.get("resource_providers", []):
             if resource_provider["name"] == name:
                 return resource_provider
 
+    @utils.timeit
     def get_resource_provider_inventories(self, rp):
         return self.oc.oc.placement.get(
             f"/resource_providers/{rp.id}/inventories"
         ).json()["inventories"]
 
+    @utils.timeit
     def get_resource_provider_usages(self, rp):
         return self.oc.oc.placement.get(
             f"/resource_providers/{rp.id}/usages"
         ).json()["usages"]
 
+    @utils.timeit
     def get_host_availability_zone(self, host):
         for service in self.cache.get("services", []):
             if service["host"] == host:
                 return service["availability_zone"]
 
+    @utils.timeit
     def get_availability_zone_hosts(self, zone):
         res = []
         for service in self.cache.get("services", []):
@@ -87,6 +93,7 @@ class OsdplNovaMetricCollector(base.OpenStackBaseMetricCollector):
                 res.append(service["host"])
         return res
 
+    @utils.timeit
     def get_hosts_placement_metrics(self):
         """Return metrics from placement for hosts
 
@@ -119,6 +126,7 @@ class OsdplNovaMetricCollector(base.OpenStackBaseMetricCollector):
             hosts[host_name] = host
         return hosts
 
+    @utils.timeit
     def summ_hosts_metrics(self, host_placement_metrics, hosts):
         res = {}
         for host in hosts:
@@ -238,6 +246,7 @@ class OsdplNovaMetricCollector(base.OpenStackBaseMetricCollector):
                 )
         return res
 
+    @utils.timeit
     def update_aggregate_samples(self, host_placement_metrics):
         """Update aggregate samples.
 
@@ -269,6 +278,7 @@ class OsdplNovaMetricCollector(base.OpenStackBaseMetricCollector):
         for metric_name, samples in aggregate_metric_samples.items():
             self.set_samples(metric_name, samples)
 
+    @utils.timeit
     def update_availability_zone_samples(self, host_placement_metrics):
         """Update availability_zone samples.
 
@@ -293,6 +303,7 @@ class OsdplNovaMetricCollector(base.OpenStackBaseMetricCollector):
         for metric_name, samples in az_metric_samples.items():
             self.set_samples(metric_name, samples)
 
+    @utils.timeit
     def update_availability_zone_info_samples(self):
         availability_zone_info_samples = []
         for zone in self.cache.get("availability_zones", []):
@@ -308,6 +319,7 @@ class OsdplNovaMetricCollector(base.OpenStackBaseMetricCollector):
             "availability_zone_info", availability_zone_info_samples
         )
 
+    @utils.timeit
     def update_availability_zone_hosts(self):
         availability_zone_hosts_samples = []
         for zone in self.cache.get("availability_zones", []):
@@ -319,6 +331,7 @@ class OsdplNovaMetricCollector(base.OpenStackBaseMetricCollector):
             "availability_zone_hosts", availability_zone_hosts_samples
         )
 
+    @utils.timeit
     def update_host_aggregate_samples(self):
         host_aggregate_info_samples = []
         host_aggregate_hosts_samples = []
@@ -346,6 +359,7 @@ class OsdplNovaMetricCollector(base.OpenStackBaseMetricCollector):
         self.set_samples("host_aggregate_info", host_aggregate_info_samples)
         self.set_samples("aggregate_hosts", host_aggregate_hosts_samples)
 
+    @utils.timeit
     def update_hypervisor_samples(self, host_placement_metrics):
         hypervisors_samples = {}
         for resource_class in self.hypervisor_resource_classes:
@@ -364,6 +378,7 @@ class OsdplNovaMetricCollector(base.OpenStackBaseMetricCollector):
         for metric_name, samples in hypervisors_samples.items():
             self.set_samples(metric_name, samples)
 
+    @utils.timeit
     def update_service_samples(self):
         state_samples = []
         status_samples = []
@@ -393,6 +408,7 @@ class OsdplNovaMetricCollector(base.OpenStackBaseMetricCollector):
         self.set_samples("service_state", state_samples)
         self.set_samples("service_status", status_samples)
 
+    @utils.timeit
     def update_instances_samples(self):
         instances = {"total": 0, "active": 0, "error": 0}
         hypervisor_instances = {}
@@ -441,6 +457,7 @@ class OsdplNovaMetricCollector(base.OpenStackBaseMetricCollector):
         self.set_samples("hypervisor_instances", hypervisor_instances_samples)
         return hypervisor_instances
 
+    @utils.timeit
     def update_aggregate_instances(self, hypervisor_instances):
         def sum_hosts_instances(hypervisor_instances, hosts):
             res = 0
@@ -462,6 +479,7 @@ class OsdplNovaMetricCollector(base.OpenStackBaseMetricCollector):
             )
         self.set_samples("aggregate_instances", aggregate_instances_samples)
 
+    @utils.timeit
     def update_samples(self):
         self.update_cache()
         host_placement_metrics = self.get_hosts_placement_metrics()

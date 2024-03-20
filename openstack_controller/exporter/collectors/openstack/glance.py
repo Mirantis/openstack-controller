@@ -27,6 +27,7 @@ class OsdplGlanceMetricCollector(base.OpenStackBaseMetricCollector):
     _description = "OpenStack Image service metrics"
     _os_service_types = ["image"]
 
+    @utils.timeit
     def init_families(self):
         return {
             "images": GaugeMetricFamily(
@@ -41,6 +42,7 @@ class OsdplGlanceMetricCollector(base.OpenStackBaseMetricCollector):
             ),
         }
 
+    @utils.timeit
     def update_samples(self):
         images_total = 0
         images_size = 0

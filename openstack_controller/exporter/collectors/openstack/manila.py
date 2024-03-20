@@ -27,6 +27,7 @@ class OsdplManilaMetricCollector(base.OpenStackBaseMetricCollector):
     _description = "OpenStack Shared file system service metrics"
     _os_service_types = ["shared-file-system", "sharev2", "share"]
 
+    @utils.timeit
     def init_families(self):
         return {
             "shares": GaugeMetricFamily(
@@ -36,6 +37,7 @@ class OsdplManilaMetricCollector(base.OpenStackBaseMetricCollector):
             ),
         }
 
+    @utils.timeit
     def update_samples(self):
         shares_total = 0
         for share in self.oc.oc.share.shares(all_tenants=True):

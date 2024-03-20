@@ -27,6 +27,7 @@ class OsdplKeystoneMetricCollector(base.OpenStackBaseMetricCollector):
     _description = "OpenStack Identity service metrics"
     _os_service_types = ["identity"]
 
+    @utils.timeit
     def init_families(self):
         return {
             "users": GaugeMetricFamily(
@@ -46,18 +47,21 @@ class OsdplKeystoneMetricCollector(base.OpenStackBaseMetricCollector):
             ),
         }
 
+    @utils.timeit
     def users_total(self, domain_id):
         users_total = 0
         for user in self.oc.oc.identity.users(domain_id=domain_id):
             users_total += 1
         return users_total
 
+    @utils.timeit
     def projects_total(self, domain_id):
         projects_total = 0
         for project in self.oc.oc.identity.projects(domain_id=domain_id):
             projects_total += 1
         return projects_total
 
+    @utils.timeit
     def update_samples(self):
         domains_total = 0
         users_total = 0

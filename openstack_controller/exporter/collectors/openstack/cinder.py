@@ -35,6 +35,7 @@ class OsdplCinderMetricCollector(base.OpenStackBaseMetricCollector):
         "block-store",
     ]
 
+    @utils.timeit
     def init_families(self):
         return {
             "volumes": GaugeMetricFamily(
@@ -89,6 +90,7 @@ class OsdplCinderMetricCollector(base.OpenStackBaseMetricCollector):
             ),
         }
 
+    @utils.timeit
     def update_samples(self):
         volumes_total = 0
         volumes_size = 0

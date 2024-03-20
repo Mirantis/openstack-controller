@@ -28,6 +28,7 @@ class OsdplOctaviaMetricCollector(base.OpenStackBaseMetricCollector):
     _description = "OpenStack Orchestration service metrics"
     _os_service_types = ["load-balancer"]
 
+    @utils.timeit
     def init_families(self):
         return {
             "loadbalancers": GaugeMetricFamily(
@@ -37,6 +38,7 @@ class OsdplOctaviaMetricCollector(base.OpenStackBaseMetricCollector):
             ),
         }
 
+    @utils.timeit
     def update_samples(self):
         loadbalancers_by_status = {}
         for status in constants.LoadbalancerStatus:
