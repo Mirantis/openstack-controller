@@ -27,6 +27,7 @@ class OsdplIronicMetricCollector(base.OpenStackBaseMetricCollector):
     _description = "OpenStack Baremetal service metrics"
     _os_service_types = ["baremetal"]
 
+    @utils.timeit
     def init_families(self):
         return {
             "nodes": GaugeMetricFamily(
@@ -36,6 +37,7 @@ class OsdplIronicMetricCollector(base.OpenStackBaseMetricCollector):
             )
         }
 
+    @utils.timeit
     def update_samples(self):
         nodes_total = len(list(self.oc.baremetal_get_nodes()))
         self.set_samples("nodes", [([], nodes_total)])

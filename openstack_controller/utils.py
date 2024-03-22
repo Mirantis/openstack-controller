@@ -22,6 +22,7 @@ import os
 import re
 import requests
 import hashlib
+import time
 from typing import Dict, List
 import yaml
 
@@ -66,6 +67,9 @@ def get_logger(name: str) -> logging.Logger:
 
     logger = logging.getLogger(name)
     return logger
+
+
+LOG = get_logger(__name__)
 
 
 def k8s_timestamp_to_unix(ts):
@@ -366,3 +370,14 @@ def download_file(url, dst, timeout=60, chunk_size=8192):
             for chunk in r.iter_content(chunk_size=chunk_size):
                 f.write(chunk)
     return dst
+
+
+def timeit(f):
+    def timed(*args, **kw):
+        start = time.time()
+        result = f(*args, **kw)
+        end = time.time()
+        LOG.debug("%s took: %2.4f sec" % (f.__qualname__, end - start))
+        return result
+
+    return timed
