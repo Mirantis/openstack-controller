@@ -415,6 +415,10 @@ database:mariadb:StatefulSet:mariadb-server:
   - podSelector:
       matchLabels:
         application: neutron
+        component: ovn-db-sync-migrate
+  - podSelector:
+      matchLabels:
+        application: neutron
         component: ironic-agent
   - podSelector:
       matchLabels:
