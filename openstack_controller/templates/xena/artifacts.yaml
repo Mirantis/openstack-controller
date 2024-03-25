@@ -227,3 +227,4 @@ designate_pool_manage_hash: '{{ images_base_url }}/openstack/openstack-tools:yog
 ingress_init_config: '{{ images_base_url }}/openstack/openstack-tools:yoga-jammy-20240313141418'
 cinder_wait_for_backends: '{{ images_base_url }}/openstack/openstack-tools:yoga-jammy-20240313141418'
 neutron_portprober_agent: '{{ images_base_url }}/openstack/neutron:xena-focal-20240112082932'
+neutron_ovn_db_sync_migrate: '{{ images_base_url }}/openstack/neutron:xena-focal-20240112082932'
