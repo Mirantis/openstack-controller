@@ -419,7 +419,7 @@ services:
         conf:
           software:
             apache2:
-              processes: 2
+              processes: 5
           octavia:
             database:
               max_pool_size: 10

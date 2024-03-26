@@ -308,6 +308,9 @@ services:
                 health_manager:
                   max_unavailable: 10%
         conf:
+          software:
+            apache2:
+              processes: 5
           octavia:
             database:
               max_pool_size: 10
