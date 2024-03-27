@@ -4,6 +4,10 @@ spec:
     name: openstack-octavia
     values:
       network:
+        api:
+          ingress:
+            annotations:
+              nginx.ingress.kubernetes.io/proxy-read-timeout: "120"
         core_plugin: tungstenfabric
         proxy:
           enabled: true
