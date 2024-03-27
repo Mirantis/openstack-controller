@@ -254,6 +254,18 @@ neutron:
       connections:
         egress:
           - {{ to_child_object("database", "mariadb", "StatefulSet", "mariadb-server", ["mysql"]) | indent(12)}}
+    neutron-ovn-db-sync-migrate:
+      hash_fields:
+      - endpoints.oslo_db.*
+      images:
+      - neutron_ovn_db_sync_migrate
+      manifest: job_ovn_db_sync_migrate
+      pod_labels:
+        application: neutron
+        component: ovn-db-sync-migrate
+      connections:
+        egress:
+          - {{ to_child_object("database", "mariadb", "StatefulSet", "mariadb-server", ["mysql"]) | indent(12)}}
     neutron-ks-endpoints:
       connections:
         egress:

@@ -138,6 +138,7 @@ images:
   memcached: memcached:latest
   neutron_bagpipe_bgp: neutron-bagpipe-bgp:latest
   neutron_db_sync: neutron-db-sync:latest
+  neutron_ovn_db_sync_migrate: neutron-ovn-db-sync-migrate:latest
   neutron_dhcp: neutron-dhcp:latest
   neutron_ironic_agent: neutron-ironic-agent:latest
   neutron_l2gw: neutron-l2gw:latest

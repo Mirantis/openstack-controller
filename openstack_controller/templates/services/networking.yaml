@@ -444,6 +444,7 @@ spec:
     "neutron_bagpipe_bgp",
     "neutron_openvswitch_agent",
     "neutron_db_sync",
+    "neutron_ovn_db_sync_migrate",
     "db_init",
     "neutron_dhcp",
     "dep_check",
