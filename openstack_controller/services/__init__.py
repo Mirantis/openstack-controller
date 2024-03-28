@@ -1289,7 +1289,11 @@ class Neutron(OpenStackService, MaintenanceApiMixin):
         ).get_or_none()
         # NOTE(vsaienko): if cluster under maintenance postpone restart when nodemaintenancerequests
         # are removed.
-        if not cmr:
+        # NOTE(mkarpin): if cluster in process of migration from OVS to OVN neutron backend - do
+        # not update dataplane related daemonsets.
+        if not cmr and not utils.get_in(
+            self.mspec, ["migration", "neutron", "ovs_ovn_migration"]
+        ):
             # Restart openvswitch daemonsets
             # Prevent restarting l3 agents simulteniously with openvswitch
             for daemonset in [

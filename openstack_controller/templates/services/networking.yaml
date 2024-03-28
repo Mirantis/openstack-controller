@@ -184,6 +184,13 @@ spec:
       {%- if ovn_enabled %}
         openvswitch_db_server:
           ptcp_port: 6640
+        external-ids:
+          ovn-bridge: br-int
+          ovn-encap-type: geneve
+          ovn-bridge-mappings: {{ ','.join(bridge_mappings) }}
+          ovn-monitor-all: true
+          ovn-remote-probe-interval: 60000
+          ovn-openflow-probe-interval: 60
       volume:
         ovn_db:
           class_name: {{ spec.get('local_volume_storage_class', 'openstack-operator-bind-mounts') }}
@@ -315,10 +322,6 @@ spec:
                 conf:
                   external-ids:
                     ovn-cms-options: "enable-chassis-as-gw"
-                    ovn-bridge-mappings: {{ ','.join(bridge_mappings) }}
-                    ovn-monitor-all: true
-                    ovn-remote-probe-interval: 60000
-                    ovn-openflow-probe-interval: 60
                   ovs_bridges:
       {%- for network in spec.features.neutron.external_networks %}
                     {{ network.bridge }}:
@@ -328,18 +331,12 @@ spec:
             openstack-compute-node::enabled:
               values:
                 conf:
-                  external-ids:
-                    ovn-encap-type: geneve
-                    ovn-bridge-mappings: {{ ','.join(bridge_mappings) }}
-                    ovn-monitor-all: true
-                    ovn-remote-probe-interval: 60000
-                    ovn-openflow-probe-interval: 60
                   ovs_bridges:
-        {%- for network in spec.features.neutron.external_networks %}
-                   {{ network.bridge }}:
-                     nics:
-                       - name: {{ network.interface }}
-        {%- endfor %}
+      {%- for network in spec.features.neutron.external_networks %}
+                    {{ network.bridge }}:
+                      nics:
+                        - name: {{ network.interface }}
+      {%- endfor %}
     {%- endif %}
     # TODO(vsaienko): implement ovn + dpdk support
     {%- if dpdk.enabled %}

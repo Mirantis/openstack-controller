@@ -99,6 +99,13 @@ spec:
             support_sync_ovs_info: false
         openvswitch_db_server:
           ptcp_port: 6640
+        external-ids:
+          ovn-bridge: 'br-int'
+          ovn-encap-type: 'geneve'
+          ovn-bridge-mappings: 'physnet1:br-ex'
+          ovn-monitor-all: true
+          ovn-remote-probe-interval: 60000
+          ovn-openflow-probe-interval: 60
       volume:
         ovn_db:
           class_name: 'lvp-fake-root'
@@ -135,12 +142,6 @@ spec:
             openstack-compute-node::enabled:
               values:
                 conf:
-                  external-ids:
-                    ovn-encap-type: 'geneve'
-                    ovn-bridge-mappings: 'physnet1:br-ex'
-                    ovn-monitor-all: true
-                    ovn-remote-probe-interval: 60000
-                    ovn-openflow-probe-interval: 60
                   ovs_bridges:
                     br-ex:
                       nics:
@@ -149,11 +150,7 @@ spec:
               values:
                 conf:
                   external-ids:
-                    ovn-bridge-mappings: 'physnet1:br-ex'
                     ovn-cms-options: 'enable-chassis-as-gw'
-                    ovn-monitor-all: true
-                    ovn-remote-probe-interval: 60000
-                    ovn-openflow-probe-interval: 60
                   ovs_bridges:
                     br-ex:
                       nics:
