@@ -159,6 +159,9 @@ class AutoschedulerTestCase(
         self._check_arping_sample_value_rates_port(port, host_up=True)
         self.ocm.oc.compute.stop_server(server)
         waiters.wait_for_server_status(self.ocm, server, "SHUTOFF")
+        self._wait_metric_incresing(
+            port, "failure", CONF.PORTPROBER_PROBE_INTERVAL
+        )
         self._check_arping_sample_value_rates_port(port, host_up=False)
         self.server_delete(server)
         time.sleep(CONF.PORTPROBER_METRIC_REFRESH_TIMEOUT)
