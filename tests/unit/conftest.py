@@ -242,9 +242,18 @@ def node(mocker):
 
 
 @pytest.fixture
+def safe_node(mocker):
+    node = mocker.patch("openstack_controller.kube.safe_get_node")
+    node.return_value = mock.MagicMock()
+    node.return_value.name = "fake-node"
+    yield node.return_value
+    mocker.stopall()
+
+
+@pytest.fixture
 def nwl(mocker):
     nwl = mocker.patch(
-        "openstack_controller.maintenance.NodeWorkloadLock.get_resource"
+        "openstack_controller.maintenance.NodeWorkloadLock.get_by_node"
     )
     nwl.reteurn_value = mock.Mock()
     yield nwl

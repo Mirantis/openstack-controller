@@ -602,7 +602,7 @@ class Cinder(OpenStackServiceWithCeph, MaintenanceApiMixin):
             else:
                 LOG.info(f"Did not found block storage services on the host.")
         except exceptions.SDKException as e:
-            nwl = maintenance.NodeWorkloadLock.get_resource(node.name)
+            nwl = maintenance.NodeWorkloadLock.get_by_node(node.name)
             LOG.error(f"Cannot execute openstack commands, error: {e}")
             msg = (
                 "Can not disable block-storage service on a host to be deleted"
@@ -635,7 +635,7 @@ class Cinder(OpenStackServiceWithCeph, MaintenanceApiMixin):
             else:
                 LOG.info(f"Did not found block storage services on the host.")
         except exceptions.SDKException as e:
-            nwl = maintenance.NodeWorkloadLock.get_resource(node.name)
+            nwl = maintenance.NodeWorkloadLock.get_by_node(node.name)
             LOG.error(f"Cannot execute openstack commands, error: {e}")
             msg = f"Can not enable block-storage service on the host {node.name}."
             nwl.set_error_message(msg)
@@ -1328,7 +1328,7 @@ class Neutron(OpenStackService, MaintenanceApiMixin):
         if not any(all_neutron_roles):
             return
 
-        nwl = maintenance.NodeWorkloadLock.get_resource(node.name)
+        nwl = maintenance.NodeWorkloadLock.get_by_node(node.name)
 
         # Restart openvswitch daemonsets
         for daemonset in [
@@ -1541,7 +1541,7 @@ class Nova(OpenStackServiceWithCeph, MaintenanceApiMixin):
         return True
 
     async def remove_node_from_scheduling(self, node):
-        nwl = maintenance.NodeWorkloadLock.get_resource(node.name)
+        nwl = maintenance.NodeWorkloadLock.get_by_node(node.name)
         if not node.has_role(constants.NodeRole.compute):
             return
         try:
@@ -1643,7 +1643,7 @@ class Nova(OpenStackServiceWithCeph, MaintenanceApiMixin):
         await _check_migration_completed()
 
     async def prepare_node_for_reboot(self, node):
-        nwl = maintenance.NodeWorkloadLock.get_resource(node.name)
+        nwl = maintenance.NodeWorkloadLock.get_by_node(node.name)
         if not node.has_role(constants.NodeRole.compute):
             return
         maintenance_cfg = maintenance.NodeMaintenanceConfig(node)
@@ -1665,7 +1665,7 @@ class Nova(OpenStackServiceWithCeph, MaintenanceApiMixin):
             raise kopf.TemporaryError(msg)
 
     async def prepare_node_after_reboot(self, node):
-        nwl = maintenance.NodeWorkloadLock.get_resource(node.name)
+        nwl = maintenance.NodeWorkloadLock.get_by_node(node.name)
         if not node.has_role(constants.NodeRole.compute):
             return
         try:
@@ -1695,7 +1695,7 @@ class Nova(OpenStackServiceWithCeph, MaintenanceApiMixin):
             raise kopf.TemporaryError(msg)
 
     async def add_node_to_scheduling(self, node):
-        nwl = maintenance.NodeWorkloadLock.get_resource(node.name)
+        nwl = maintenance.NodeWorkloadLock.get_by_node(node.name)
         if not node.has_role(constants.NodeRole.compute):
             return
         try:

@@ -848,6 +848,7 @@ class Pod(pykube.Pod):
 
 
 class Node(pykube.Node):
+
     @property
     def ready(self):
         """
@@ -873,11 +874,14 @@ class Node(pykube.Node):
             pod.delete(propagation_policy="Background", grace_period_seconds=0)
 
     def has_role(self, role: const.NodeRole) -> bool:
-        if role not in const.NodeRole:
-            LOG.warning(f"Unknown node role {role.value}, ignoring...")
-            return False
         for k, v in settings.OSCTL_OPENSTACK_NODE_LABELS[role].items():
             if self.labels.get(k) == v:
+                return True
+        return False
+
+    def has_os_role(self):
+        for role in const.NodeRole:
+            if self.has_role(role):
                 return True
         return False
 
@@ -1065,6 +1069,42 @@ def get_osdpl(namespace=settings.OSCTL_OS_DEPLOYMENT_NAMESPACE):
         )
         return
     return osdpl[0]
+
+
+def safe_get_node(name):
+    """Get node safe
+
+    Returns a node object with estra safity.
+    1. If object exists return it
+    2. If nodeWorkloadLock exists return latest known node
+    3. Return dummy node
+    """
+    node = find(Node, name, silent=True)
+    if node and node.exists():
+        return node
+
+    nwl = find(NodeWorkloadLock, f"openstack-{name}", silent=True)
+    if nwl and nwl.exists():
+        nwl.reload()
+        original_node = json.loads(
+            nwl.obj["metadata"]
+            .get("annotations", {})
+            .get("openstack.lcm.mirantis.com/original-node", {})
+        )
+    else:
+        original_node = {}
+    dummy = {
+        "apiVersion": Node.version,
+        "kind": Node.kind,
+        "metadata": {
+            "name": name,
+            "annotations": original_node.get("metadata", {}).get(
+                "annotations", {}
+            ),
+        },
+        "spec": original_node.get("spec", {}),
+    }
+    return Node(kube_client(), dummy)
 
 
 find_osdpl = functools.partial(find, OpenStackDeployment)

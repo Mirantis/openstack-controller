@@ -2,10 +2,12 @@ import datetime
 import logging
 
 import enum
+import json
 import pykube
 
 from openstack_controller import constants as const
 from openstack_controller import kube
+from openstack_controller.utils import merger
 from openstack_controller import settings
 
 LOG = logging.getLogger(__name__)
@@ -92,20 +94,24 @@ class LockBase(pykube.objects.APIObject):
     workload = "openstack"
 
     @classmethod
-    def _base_spec(cls, name):
-        return {"controllerName": cls.workload}
-
-    @classmethod
-    def get_resource(cls, name):
-        spec = {}
-        spec.update(cls._base_spec(name))
+    def dummy(cls, name):
         dummy = {
             "apiVersion": cls.version,
             "kind": cls.kind,
-            "metadata": {"name": f"{cls.workload}-{name}"},
-            "spec": spec,
+            "metadata": {
+                "name": name,
+                "annotations": {},
+            },
+            "spec": {"controllerName": cls.workload},
         }
-        return cls(kube.kube_client(), dummy)
+        return dummy
+
+    @classmethod
+    def get_by_name(cls, name):
+        obj = kube.find(cls, name, silent=True)
+        if obj and obj.exists():
+            return obj
+        return cls(kube.kube_client(), cls.dummy(name))
 
     def present(self):
         if not self.exists():
@@ -113,6 +119,7 @@ class LockBase(pykube.objects.APIObject):
             # Explicitly set state to active to do not rely on default.
             self.set_state(LockState.active.value)
         else:
+            merger.merge(self.obj, self.dummy(self.name))
             self.update()
         if settings.OSCTL_CLUSTER_RELEASE:
             # NOTE(vsaienko): reset cwl to active if it was set to inactive
@@ -174,6 +181,10 @@ class ClusterWorkloadLock(LockBase):
     endpoint = "clusterworkloadlocks"
     kind = "ClusterWorkloadLock"
 
+    @classmethod
+    def get_by_osdpl(cls, osdpl_name):
+        return cls.get_by_name(f"{cls.workload}-{osdpl_name}")
+
 
 class NodeWorkloadLock(LockBase):
     """The NodeWorkloadLock object
@@ -190,31 +201,29 @@ class NodeWorkloadLock(LockBase):
     kopf_on_args = *version.split("/"), endpoint
 
     @classmethod
-    def _base_spec(cls, name):
-        spec = super()._base_spec(name)
-        spec["nodeName"] = name
-        spec["nodeDeletionRequestSupported"] = True
-        return spec
+    def dummy(cls, name):
+        node_name = "-".join(name.split("-")[1:])
+        dummy = super().dummy(name)
+        dummy["spec"]["nodeName"] = node_name
+        dummy["spec"]["nodeDeletionRequestSupported"] = True
+        node = kube.safe_get_node(node_name)
+        if node.exists():
+            node = node.obj
+            node.pop("status", None)
+            dummy["metadata"]["annotations"].update(
+                {"openstack.lcm.mirantis.com/original-node": json.dumps(node)}
+            )
+        return dummy
+
+    @classmethod
+    def get_by_node(cls, node_name):
+        return cls.get_by_name(f"{cls.workload}-{node_name}")
 
     @staticmethod
     def required_for_node(node_name: str) -> bool:
         """Do we need to keep NodeWorkloadLock for specified node."""
-
-        def has_os_role(node):
-            for role in const.NodeRole:
-                if node.has_role(role):
-                    return True
-
-        node = kube.find(kube.Node, node_name, silent=True)
-        if node and node.exists():
-            # We create workloadlock for all nodes we know about.
-            if has_os_role(node):
-                return True
-        else:
-            ndn = find_ndn(node_name)
-            if ndn and ndn.exists():
-                return True
-        return False
+        node = kube.safe_get_node(node_name)
+        return node.has_os_role()
 
     @classmethod
     def get_all(cls):
@@ -228,10 +237,11 @@ class NodeWorkloadLock(LockBase):
         locks = {role.value: [] for role in const.NodeRole}
         for nwl in self.get_all():
             if nwl.is_maintenance():
-                node = kube.find(kube.Node, nwl.obj["spec"]["nodeName"])
-                for role in const.NodeRole:
-                    if node.has_role(role):
-                        locks[role.value].append(nwl)
+                node = kube.safe_get_node(nwl.obj["spec"]["nodeName"])
+                if node.exists():
+                    for role in const.NodeRole:
+                        if node.has_role(role):
+                            locks[role.value].append(nwl)
         return locks
 
     def can_handle_nmr(self):
