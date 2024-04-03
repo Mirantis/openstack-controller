@@ -307,7 +307,7 @@ async def handle_masakari_host_down(node):
     if node.ready:
         LOG.info(f"The node {node.name} is ready. Skip masakari notification")
         return
-    nwl = maintenance.NodeWorkloadLock.get_resource(node.name)
+    nwl = maintenance.NodeWorkloadLock.get_by_node(node.name)
     # NOTE(pas-ha): guard against node being in maintenance
     # when node is already being drained
     # we assume that at this stage the workflow with NodeWorkloadLocks

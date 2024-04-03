@@ -276,7 +276,7 @@ async def handle(body, meta, spec, logger, reason, **kwargs):
     )
 
     # Always create clusterworkloadlock, but set to inactive when we are not interested
-    cwl = maintenance.ClusterWorkloadLock.get_resource(name)
+    cwl = maintenance.ClusterWorkloadLock.get_by_osdpl(name)
     cwl.present()
 
     check_handling_allowed(kwargs["old"], kwargs["new"], reason)
@@ -428,4 +428,4 @@ async def delete(name, meta, body, spec, logger, reason, **kwargs):
         ] = (service_instance.delete, reason, body, meta, spec, logger, kwargs)
         await run_task(task_def)
     # TODO(dbiletskiy) delete osdpl status
-    maintenance.ClusterWorkloadLock.get_resource(name).absent()
+    maintenance.ClusterWorkloadLock.get_by_osdpl(name).absent()

@@ -402,6 +402,7 @@ async def test_nova_prepare_node_after_reboot(
     openstackdeployment_mspec,
     mock_osdpl,
     child_view,
+    nwl,
 ):
     node = kube.Node(mock.Mock, copy.deepcopy(_get_node()))
     kube_resource_list.return_value.get.return_value = mock.Mock(obj=None)
@@ -425,6 +426,7 @@ async def test_nova_prepare_node_after_reboot_not_compute(
     openstackdeployment_mspec,
     mock_osdpl,
     child_view,
+    nwl,
 ):
     node_obj = copy.deepcopy(NODE_OBJ)
     node_obj["metadata"]["labels"] = {}
@@ -446,6 +448,7 @@ async def test_nova_prepare_node_after_reboot_timeout(
     openstackdeployment_mspec,
     mock_osdpl,
     child_view,
+    nwl,
 ):
     osdplstmock = mock.Mock()
     node = kube.Node(mock.Mock, copy.deepcopy(_get_node()))
@@ -462,6 +465,7 @@ async def test_nova_prepare_node_after_reboot_openstacksdk_exception(
     openstackdeployment_mspec,
     mock_osdpl,
     child_view,
+    nwl,
 ):
     openstack_client.side_effect = openstack.exceptions.SDKException("foo")
     node = kube.Node(mock.Mock, copy.deepcopy(_get_node()))
@@ -478,6 +482,7 @@ async def test_nova_add_node_to_scheduling(
     openstackdeployment_mspec,
     mock_osdpl,
     child_view,
+    nwl,
 ):
     node = kube.Node(mock.Mock, copy.deepcopy(_get_node()))
     osdplstmock = mock.Mock()
@@ -498,7 +503,7 @@ async def test_nova_add_node_to_scheduling(
 
 @pytest.mark.asyncio
 async def test_nova_add_node_to_scheduling_not_compute(
-    openstack_client, openstackdeployment_mspec, mock_osdpl, child_view
+    openstack_client, openstackdeployment_mspec, mock_osdpl, child_view, nwl
 ):
     node_obj = copy.deepcopy(_get_node())
     node_obj["metadata"]["labels"] = {}
@@ -512,7 +517,7 @@ async def test_nova_add_node_to_scheduling_not_compute(
 
 @pytest.mark.asyncio
 async def test_nova_add_node_to_scheduling_cannot_enable_service(
-    openstack_client, openstackdeployment_mspec, mock_osdpl, child_view
+    openstack_client, openstackdeployment_mspec, mock_osdpl, child_view, nwl
 ):
     openstack_client.side_effect = openstack.exceptions.SDKException("foo")
     node = kube.Node(mock.Mock, copy.deepcopy(_get_node()))
@@ -525,7 +530,7 @@ async def test_nova_add_node_to_scheduling_cannot_enable_service(
 
 @pytest.mark.asyncio
 async def test_nova_remove_node_from_scheduling(
-    openstack_client, openstackdeployment_mspec, mock_osdpl, child_view
+    openstack_client, openstackdeployment_mspec, mock_osdpl, child_view, nwl
 ):
     node = kube.Node(mock.Mock, copy.deepcopy(_get_node()))
     osdplstmock = mock.Mock()
@@ -538,7 +543,7 @@ async def test_nova_remove_node_from_scheduling(
 
 @pytest.mark.asyncio
 async def test_nova_remove_node_from_scheduling_not_compute(
-    openstack_client, openstackdeployment_mspec, mock_osdpl, child_view
+    openstack_client, openstackdeployment_mspec, mock_osdpl, child_view, nwl
 ):
     node_obj = copy.deepcopy(_get_node())
     node_obj["metadata"]["labels"] = {}
@@ -552,7 +557,7 @@ async def test_nova_remove_node_from_scheduling_not_compute(
 
 @pytest.mark.asyncio
 async def test_nova_remove_node_from_scheduling_cannot_disable_service(
-    openstack_client, openstackdeployment_mspec, mock_osdpl, child_view
+    openstack_client, openstackdeployment_mspec, mock_osdpl, child_view, nwl
 ):
     node = kube.Node(mock.Mock, copy.deepcopy(_get_node()))
     osdplstmock = mock.Mock()
@@ -573,6 +578,7 @@ async def test_nova_prepare_node_for_reboot(
     openstackdeployment_mspec,
     mock_osdpl,
     child_view,
+    nwl,
 ):
     node = kube.Node(mock.Mock, copy.deepcopy(_get_node()))
     osdplstmock = mock.Mock()
@@ -593,6 +599,7 @@ async def test_nova_prepare_node_for_reboot_not_compute(
     openstackdeployment_mspec,
     mock_osdpl,
     child_view,
+    nwl,
 ):
     node_obj = copy.deepcopy(_get_node())
     node_obj["metadata"]["labels"] = {}
@@ -614,6 +621,7 @@ async def test_nova_prepare_node_for_reboot_sdk_exception(
     openstackdeployment_mspec,
     mock_osdpl,
     child_view,
+    nwl,
 ):
     openstack_client.side_effect = openstack.exceptions.SDKException("foo")
     node = kube.Node(mock.Mock, copy.deepcopy(_get_node()))
@@ -634,6 +642,7 @@ async def test_nova_migrate_servers_no_instances(
     openstackdeployment_mspec,
     mock_osdpl,
     child_view,
+    nwl,
 ):
     osdplstmock = mock.Mock()
     openstack_client.compute_get_servers_valid_for_live_migration.return_value = (
@@ -657,6 +666,7 @@ async def test_nova_migrate_servers_skip(
     openstackdeployment_mspec,
     mock_osdpl,
     child_view,
+    nwl,
 ):
     osdplstmock = mock.Mock()
     node_maintenance_config.instance_migration_mode = "skip"
@@ -726,6 +736,7 @@ async def test_nova_migrate_servers_manual_one_server(
     openstackdeployment_mspec,
     mock_osdpl,
     child_view,
+    nwl,
 ):
     osdplstmock = mock.Mock()
     openstack_client.compute_get_servers_valid_for_live_migration.return_value = (
@@ -736,7 +747,7 @@ async def test_nova_migrate_servers_manual_one_server(
     node_maintenance_config.instance_migration_mode = "manual"
     nwl = mock.Mock()
     mocker.patch.object(
-        maintenance.NodeWorkloadLock, "get_resource", return_value=nwl
+        maintenance.NodeWorkloadLock, "get_by_node", return_value=nwl
     )
     with pytest.raises(kopf.TemporaryError):
         await services.Nova(
@@ -770,7 +781,7 @@ async def test_nova_migrate_servers_live_one_error_server(
     node_maintenance_config.instance_migration_mode = "live"
     nwl = mock.Mock()
     mocker.patch.object(
-        maintenance.NodeWorkloadLock, "get_resource", return_value=nwl
+        maintenance.NodeWorkloadLock, "get_by_node", return_value=nwl
     )
     with pytest.raises(kopf.TemporaryError):
         await services.Nova(
@@ -805,7 +816,7 @@ async def test_nova_migrate_servers_live_ignore_powered_off_server(
     node_maintenance_config.instance_migration_mode = "live"
     nwl = mock.Mock()
     mocker.patch.object(
-        maintenance.NodeWorkloadLock, "get_resource", return_value=nwl
+        maintenance.NodeWorkloadLock, "get_by_node", return_value=nwl
     )
     await services.Nova(
         openstackdeployment_mspec, logging, osdplstmock, child_view
@@ -840,7 +851,7 @@ async def test_nova_migrate_servers_live_one_power_unknown(
     node_maintenance_config.instance_migration_mode = "live"
     nwl = mock.Mock()
     mocker.patch.object(
-        maintenance.NodeWorkloadLock, "get_resource", return_value=nwl
+        maintenance.NodeWorkloadLock, "get_by_node", return_value=nwl
     )
     with pytest.raises(kopf.TemporaryError):
         await services.Nova(
@@ -861,6 +872,7 @@ async def test_nova_can_handle_nmr_controller(
     openstackdeployment_mspec,
     mock_osdpl,
     child_view,
+    nwl,
 ):
     osdplstmock = mock.Mock()
     node = kube.Node(
@@ -880,6 +892,7 @@ async def test_nova_can_handle_nmr_1az_3hosts_0locks(
     openstackdeployment_mspec,
     mock_osdpl,
     child_view,
+    nwl,
 ):
     osdplstmock = mock.Mock()
     node3 = kube.Node(
@@ -910,12 +923,12 @@ async def test_nova_can_handle_nmr_1az_3hosts_1locks_same_az(
     openstackdeployment_mspec,
     mock_osdpl,
     child_view,
+    nwl,
 ):
     osdplstmock = mock.Mock()
     node3 = kube.Node(
         mock.Mock, copy.deepcopy(_get_node(host="host3", role="compute"))
     )
-    nwl = mock.Mock()
     nwl.obj = {"spec": {"nodeName": "host1"}}
     openstack_client.return_value.compute_get_services.return_value = [
         _get_service_obj(
@@ -942,12 +955,12 @@ async def test_nova_can_handle_nmr_1az_3hosts_1locks_different_az(
     openstackdeployment_mspec,
     mock_osdpl,
     child_view,
+    nwl,
 ):
     osdplstmock = mock.Mock()
     node3 = kube.Node(
         mock.Mock, copy.deepcopy(_get_node(host="host3", role="compute"))
     )
-    nwl = mock.Mock()
     nwl.obj = {"spec": {"nodeName": "host1"}}
     openstack_client.return_value.compute_get_services.side_effect = (
         compute_get_services_se
@@ -968,12 +981,12 @@ async def test_nova_can_handle_nmr_1az_3hosts_1locks_skip(
     openstackdeployment_mspec,
     mock_osdpl,
     child_view,
+    nwl,
 ):
     osdplstmock = mock.Mock()
     node3 = kube.Node(
         mock.Mock, copy.deepcopy(_get_node(host="host3", role="compute"))
     )
-    nwl = mock.Mock()
     nwl.obj = {"spec": {"nodeName": "host1"}}
     openstack_client.return_value.compute_get_availability_zones.side_effect = (
         compute_get_services_se
@@ -994,9 +1007,9 @@ async def test_nova_process_ndr_controller(
     openstack_client,
     openstackdeployment_mspec,
     child_view,
+    nwl,
 ):
     osdplstmock = mock.Mock()
-    nwl = mock.Mock()
     node3 = kube.Node(
         mock.Mock, copy.deepcopy(_get_node(host="host3", role="control"))
     )
@@ -1012,9 +1025,9 @@ async def test_nova_process_ndr_compute_1instance(
     openstack_client,
     openstackdeployment_mspec,
     child_view,
+    nwl,
 ):
     osdplstmock = mock.Mock()
-    nwl = mock.Mock()
     node3 = kube.Node(
         mock.Mock, copy.deepcopy(_get_node(host="host3", role="compute"))
     )
@@ -1030,10 +1043,7 @@ async def test_nova_process_ndr_compute_1instance(
 
 @pytest.mark.asyncio
 async def test_nova_process_ndr_compute_no_instances(
-    mocker,
-    openstack_client,
-    openstackdeployment_mspec,
-    child_view,
+    mocker, openstack_client, openstackdeployment_mspec, child_view, nwl
 ):
     osdplstmock = mock.Mock()
     nwl = mock.Mock()
@@ -1051,10 +1061,7 @@ async def test_nova_process_ndr_compute_no_instances(
 
 @pytest.mark.asyncio
 async def test_nova_process_ndr_compute_1instance_ndr_skip_instance_check(
-    mocker,
-    openstack_client,
-    openstackdeployment_mspec,
-    child_view,
+    mocker, openstack_client, openstackdeployment_mspec, child_view, nwl
 ):
     osdplstmock = mock.Mock()
     nwl = mock.Mock()
@@ -1214,6 +1221,7 @@ async def test_volume_remove_node_from_scheduling_one_service_exception(
     openstack_client,
     openstackdeployment_mspec,
     child_view,
+    nwl,
 ):
     osdplstmock = mock.Mock()
     node3 = kube.Node(

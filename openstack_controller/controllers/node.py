@@ -85,7 +85,7 @@ async def node_change_handler(body, reason, **kwargs):
     LOG.info(f"The node {name} changes are: {kwargs['diff']}")
     kube_api = kube.kube_client()
     node = kube.Node(kube_api, body)
-    nwl = maintenance.NodeWorkloadLock.get_resource(name)
+    nwl = maintenance.NodeWorkloadLock.get_by_node(name)
     if nwl.required_for_node(node.name):
         nwl.present()
     else:
@@ -99,7 +99,7 @@ async def node_change_handler(body, reason, **kwargs):
 async def node_delete_handler(body, **kwargs):
     name = body["metadata"]["name"]
     LOG.info(f"Got delete event for node {name}")
-    nwl = maintenance.NodeWorkloadLock.get_resource(name)
+    nwl = maintenance.NodeWorkloadLock.get_by_node(name)
     ndn = maintenance.find_ndn(name)
     # NOTE(vsaienko): when node is disabled do not remove nwl
     if not (ndn and ndn.exists()):

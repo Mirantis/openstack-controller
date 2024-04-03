@@ -75,8 +75,9 @@ def get_maintenance_locks(controller, gateway, compute):
 
 @pytest.mark.asyncio
 async def test_nmr_change_not_required_for_node(
-    mocker, nova_registry_service, node
+    mocker, nova_registry_service, safe_node
 ):
+    node = safe_node
     nmr = {
         "metadata": {"name": "fake-nmr"},
         "spec": {"nodeName": "fake-node"},
@@ -84,7 +85,7 @@ async def test_nmr_change_not_required_for_node(
     nwl = mock.Mock()
     nwl.required_for_node.return_value = False
     mocker.patch.object(
-        maintenance.NodeWorkloadLock, "get_resource", return_value=nwl
+        maintenance.NodeWorkloadLock, "get_by_node", return_value=nwl
     )
 
     node.ready = True
@@ -115,7 +116,7 @@ async def test_nmr_change_required_for_node_not_maintenance_0_active_lock(
     osdpl.exists.return_value = True
 
     mocker.patch.object(
-        maintenance.NodeWorkloadLock, "get_resource", return_value=nwl
+        maintenance.NodeWorkloadLock, "get_by_node", return_value=nwl
     )
     nova_registry_service.return_value.maintenance_api.return_value = True
     nova_registry_service.return_value.can_handle_nmr.return_value = True
@@ -154,7 +155,7 @@ async def test_nmr_change_required_for_node_not_maintenance_0_active_lock_servic
     osdpl.exists.return_value = True
 
     mocker.patch.object(
-        maintenance.NodeWorkloadLock, "get_resource", return_value=nwl
+        maintenance.NodeWorkloadLock, "get_by_node", return_value=nwl
     )
     nova_registry_service.return_value.maintenance_api.return_value = True
     nova_registry_service.return_value.can_handle_nmr.return_value = True
@@ -202,7 +203,7 @@ async def test_nmr_change_required_for_node_not_maintenance_1_active_lock(
     osdpl.exists.return_value = True
 
     mocker.patch.object(
-        maintenance.NodeWorkloadLock, "get_resource", return_value=nwl
+        maintenance.NodeWorkloadLock, "get_by_node", return_value=nwl
     )
 
     node.ready = True
@@ -234,7 +235,7 @@ async def test_nmr_change_required_for_node_maintenance_1_active_lock(
     osdpl.exists.return_value = True
 
     mocker.patch.object(
-        maintenance.NodeWorkloadLock, "get_resource", return_value=nwl
+        maintenance.NodeWorkloadLock, "get_by_node", return_value=nwl
     )
 
     node.ready = True
@@ -261,7 +262,7 @@ async def test_nmr_delete_stop_not_required_for_node(
     nwl = mock.Mock()
     nwl.required_for_node.return_value = False
     mocker.patch.object(
-        maintenance.NodeWorkloadLock, "get_resource", return_value=nwl
+        maintenance.NodeWorkloadLock, "get_by_node", return_value=nwl
     )
 
     node.ready = True
@@ -288,7 +289,7 @@ async def test_nmr_delete_nwl_not_in_maintenance(
     nwl.required_for_node.return_value = True
     nwl.is_maintenance.return_value = False
     mocker.patch.object(
-        maintenance.NodeWorkloadLock, "get_resource", return_value=nwl
+        maintenance.NodeWorkloadLock, "get_by_node", return_value=nwl
     )
 
     osdpl.exists.return_value = True
@@ -315,7 +316,7 @@ async def test_nmr_delete_nwl_in_maintenance(
     nwl.required_for_node.return_value = True
     nwl.is_maintenance.return_value = True
     mocker.patch.object(
-        maintenance.NodeWorkloadLock, "get_resource", return_value=nwl
+        maintenance.NodeWorkloadLock, "get_by_node", return_value=nwl
     )
 
     node.ready = True
@@ -347,7 +348,7 @@ async def test_ndr_osdpl_not_present(
     nwl.required_for_node.return_value = True
     nwl.is_maintenance.return_value = True
     mocker.patch.object(
-        maintenance.NodeWorkloadLock, "get_resource", return_value=nwl
+        maintenance.NodeWorkloadLock, "get_by_node", return_value=nwl
     )
 
     await maintenance_controller.node_deletion_request_change_handler(ndr)
@@ -358,8 +359,9 @@ async def test_ndr_osdpl_not_present(
 
 @pytest.mark.asyncio
 async def test_ndr_node_not_present(
-    mocker, nova_registry_service, node, osdpl
+    mocker, nova_registry_service, safe_node, osdpl
 ):
+    node = safe_node
     ndr = {
         "metadata": {"name": "fake-nmr"},
         "spec": {"nodeName": "fake-node"},
@@ -373,7 +375,7 @@ async def test_ndr_node_not_present(
     nwl.required_for_node.return_value = True
     nwl.is_maintenance.return_value = True
     mocker.patch.object(
-        maintenance.NodeWorkloadLock, "get_resource", return_value=nwl
+        maintenance.NodeWorkloadLock, "get_by_node", return_value=nwl
     )
 
     await maintenance_controller.node_deletion_request_change_handler(ndr)
@@ -383,7 +385,10 @@ async def test_ndr_node_not_present(
 
 
 @pytest.mark.asyncio
-async def test_ndr_nova_service(mocker, nova_registry_service, node, osdpl):
+async def test_ndr_nova_service(
+    mocker, nova_registry_service, safe_node, osdpl
+):
+    node = safe_node
     ndr = {
         "metadata": {"name": "fake-nmr"},
         "spec": {"nodeName": "fake-node"},
@@ -397,7 +402,7 @@ async def test_ndr_nova_service(mocker, nova_registry_service, node, osdpl):
     nwl.required_for_node.return_value = True
     nwl.is_maintenance.return_value = True
     mocker.patch.object(
-        maintenance.NodeWorkloadLock, "get_resource", return_value=nwl
+        maintenance.NodeWorkloadLock, "get_by_node", return_value=nwl
     )
 
     nova_registry_service.return_value.maintenance_api.return_value = True
@@ -435,7 +440,7 @@ async def test_nwl_deletion_no_osdpl(
     nwl.required_for_node.return_value = True
     nwl.is_maintenance.return_value = True
     mocker.patch.object(
-        maintenance.NodeWorkloadLock, "get_resource", return_value=nwl
+        maintenance.NodeWorkloadLock, "get_by_node", return_value=nwl
     )
 
     await maintenance_controller.node_workloadlock_request_delete_handler(
@@ -465,7 +470,7 @@ async def test_nwl_deletion_not_our_nwl(
     nwl.required_for_node.return_value = True
     nwl.is_maintenance.return_value = True
     mocker.patch.object(
-        maintenance.NodeWorkloadLock, "get_resource", return_value=nwl
+        maintenance.NodeWorkloadLock, "get_by_node", return_value=nwl
     )
 
     await maintenance_controller.node_workloadlock_request_delete_handler(
@@ -497,7 +502,7 @@ async def test_nwl_deletion_node_still_exit(
     nwl.required_for_node.return_value = True
     nwl.is_maintenance.return_value = True
     mocker.patch.object(
-        maintenance.NodeWorkloadLock, "get_resource", return_value=nwl
+        maintenance.NodeWorkloadLock, "get_by_node", return_value=nwl
     )
     with pytest.raises(kopf.TemporaryError):
         await maintenance_controller.node_workloadlock_request_delete_handler(
@@ -510,8 +515,9 @@ async def test_nwl_deletion_node_still_exit(
 
 @pytest.mark.asyncio
 async def test_nwl_deletion_cleanup(
-    mocker, nova_registry_service, node, osdpl
+    mocker, nova_registry_service, safe_node, osdpl
 ):
+    node = safe_node
     nwl_obj = {
         "metadata": {"name": "fake-nmr"},
         "spec": {"nodeName": "fake-node", "controllerName": "openstack"},
@@ -530,7 +536,7 @@ async def test_nwl_deletion_cleanup(
     nwl.required_for_node.return_value = True
     nwl.is_maintenance.return_value = True
     mocker.patch.object(
-        maintenance.NodeWorkloadLock, "get_resource", return_value=nwl
+        maintenance.NodeWorkloadLock, "get_by_node", return_value=nwl
     )
     await maintenance_controller.node_workloadlock_request_delete_handler(
         nwl_obj

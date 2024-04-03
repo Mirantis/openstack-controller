@@ -29,8 +29,10 @@ async def node_maintenance_request_change_handler(body, **kwargs):
     LOG.info(
         f"The node maintenance request {name} changes are: {kwargs['diff']}"
     )
-    node = kube.find(kube.Node, node_name, silent=True)
-    nwl = maintenance.NodeWorkloadLock.get_resource(node_name)
+    node = kube.safe_get_node(node_name)
+    if not node.exists():
+        return
+    nwl = maintenance.NodeWorkloadLock.get_by_node(node_name)
     nmr = maintenance.NodeMaintenanceRequest.get_resource(body)
     if not nwl.required_for_node(node_name):
         return
@@ -97,62 +99,63 @@ async def node_maintenance_request_delete_handler(body, **kwargs):
     node_name = maintenance_node_name(body)
     LOG.info(f"Got node maintenance request delete event {name}")
 
-    node = kube.find(kube.Node, node_name, silent=True)
-    nwl = maintenance.NodeWorkloadLock.get_resource(node_name)
-    nmr = maintenance.NodeMaintenanceRequest.get_resource(body)
-    if not nwl.required_for_node(node_name):
-        nwl.absent(propagation_policy="Background")
-        return
+    node = kube.safe_get_node(node_name)
+    nwl = maintenance.NodeWorkloadLock.get_by_node(node_name)
+    if node.exists():
+        nmr = maintenance.NodeMaintenanceRequest.get_resource(body)
+        if not nwl.required_for_node(node_name):
+            nwl.absent(propagation_policy="Background")
+            return
 
-    osdpl = kube.get_osdpl()
-    if not osdpl or not osdpl.exists():
-        LOG.info("Can't find OpenStackDeployment object")
-        nwl.set_inner_state_inactive()
-        nwl.set_state_active()
-        nwl.unset_error_message()
-        return
+        osdpl = kube.get_osdpl()
+        if not osdpl or not osdpl.exists():
+            LOG.info("Can't find OpenStackDeployment object")
+            nwl.set_inner_state_inactive()
+            nwl.set_state_active()
+            nwl.unset_error_message()
+            return
 
-    mspec = osdpl.mspec
-    osdplst = osdplstatus.OpenStackDeploymentStatus(
-        osdpl.name, osdpl.namespace
-    )
-    child_view = resource_view.ChildObjectView(mspec)
+        mspec = osdpl.mspec
+        osdplst = osdplstatus.OpenStackDeploymentStatus(
+            osdpl.name, osdpl.namespace
+        )
+        child_view = resource_view.ChildObjectView(mspec)
 
-    if nwl.is_maintenance():
-        LOG.info(f"Waiting for {node.name} is ready.")
-        while True:
-            if not node.ready:
-                LOG.info(f"The node {node.name} is not ready yet.")
-                await asyncio.sleep(10)
-                continue
-            LOG.info(f"The node {node.name} is ready.")
-            break
+        if nwl.is_maintenance():
+            LOG.info(f"Waiting for {node.name} is ready.")
+            while True:
+                if not node.ready:
+                    LOG.info(f"The node {node.name} is not ready yet.")
+                    await asyncio.sleep(10)
+                    continue
+                LOG.info(f"The node {node.name} is ready.")
+                break
 
-        while True:
-            LOG.info(f"Waiting for pods ready on node {node.name}.")
-            node_pods = node.get_pods(namespace=osdpl.namespace)
-            not_ready_pods = [
-                pod.name
-                for pod in node_pods
-                if not pod.job_child and not pod.ready
-            ]
-            if not_ready_pods:
-                LOG.info(f"The pods {not_ready_pods} are not ready.")
-                await asyncio.sleep(10)
-                continue
-            LOG.info(f"All pods are ready on node {node.name}.")
-            break
+            while True:
+                LOG.info(f"Waiting for pods ready on node {node.name}.")
+                node_pods = node.get_pods(namespace=osdpl.namespace)
+                not_ready_pods = [
+                    pod.name
+                    for pod in node_pods
+                    if not pod.job_child and not pod.ready
+                ]
+                if not_ready_pods:
+                    LOG.info(f"The pods {not_ready_pods} are not ready.")
+                    await asyncio.sleep(10)
+                    continue
+                LOG.info(f"All pods are ready on node {node.name}.")
+                break
 
-        for service, service_class in reversed(services.ORDERED_SERVICES):
-            service = service_class(mspec, LOG, osdplst, child_view)
-            if service.maintenance_api:
-                LOG.info(
-                    f"Moving node {node_name} to operational state for {service_class.service}"
-                )
-                await service.delete_nmr(node, nmr)
-                LOG.info(
-                    f"The node {node_name} is ready for operations for {service_class.service}"
-                )
+            for service, service_class in reversed(services.ORDERED_SERVICES):
+                service = service_class(mspec, LOG, osdplst, child_view)
+                if service.maintenance_api:
+                    LOG.info(
+                        f"Moving node {node_name} to operational state for {service_class.service}"
+                    )
+                    await service.delete_nmr(node, nmr)
+                    LOG.info(
+                        f"The node {node_name} is ready for operations for {service_class.service}"
+                    )
     nwl.set_inner_state_inactive()
     nwl.set_state_active()
     nwl.unset_error_message()
@@ -181,7 +184,7 @@ async def cluster_maintenance_request_change_handler(body, **kwargs):
     )
     osdplst_status = osdplst.get_osdpl_status()
     child_view = resource_view.ChildObjectView(mspec)
-    cwl = maintenance.ClusterWorkloadLock.get_resource(osdpl_name)
+    cwl = maintenance.ClusterWorkloadLock.get_by_osdpl(osdpl_name)
 
     # Do not handle CMR while CWL release string contains old release.
     if cwl.get_release() != settings.OSCTL_CLUSTER_RELEASE:
@@ -220,7 +223,7 @@ async def cluster_maintenance_request_delete_handler(body, **kwargs):
         LOG.info("Can't find OpenStackDeployment object")
         return
     name = osdpl.metadata["name"]
-    cwl = maintenance.ClusterWorkloadLock.get_resource(name)
+    cwl = maintenance.ClusterWorkloadLock.get_by_osdpl(name)
     cwl.set_state_active()
     cwl.unset_error_message()
     LOG.info(f"Acquired ClusterWorkloadLock {name}")
@@ -235,7 +238,7 @@ async def node_deletion_request_change_handler(body, **kwargs):
     LOG.info(f"Got node deletion request change event {name}")
 
     osdpl = kube.get_osdpl()
-    nwl = maintenance.NodeWorkloadLock.get_resource(node_name)
+    nwl = maintenance.NodeWorkloadLock.get_by_node(node_name)
     if osdpl and osdpl.exists():
         mspec = osdpl.mspec
         osdpl_name = osdpl.metadata["name"]
@@ -244,8 +247,8 @@ async def node_deletion_request_change_handler(body, **kwargs):
             osdpl_name, osdpl_namespace
         )
         child_view = resource_view.ChildObjectView(mspec)
-        node = kube.find(kube.Node, node_name, silent=True)
-        if node and node.exists():
+        node = kube.safe_get_node(node_name)
+        if node.exists():
             for service, service_class in reversed(services.ORDERED_SERVICES):
                 service = service_class(mspec, LOG, osdplst, child_view)
                 if service.maintenance_api:
@@ -281,12 +284,12 @@ async def node_workloadlock_request_delete_handler(body, **kwargs):
     # doing what was requested.
     # It is important to cleanup metadata when node is reamoved and services are
     # not running anymore, otherwise they will add itself into the service tables.
-    node = kube.find(kube.Node, name, silent=True)
-    if node and node.exists():
+    node = kube.safe_get_node(name)
+    if node.exists():
         msg = "The kubernetes node {node_name} still exists. Deffer OpenStack service metadata removal."
         raise kopf.TemporaryError(msg)
 
-    nwl = maintenance.NodeWorkloadLock.get_resource(node_name)
+    nwl = maintenance.NodeWorkloadLock.get_by_node(node_name)
     mspec = osdpl.mspec
     osdpl_name = osdpl.metadata["name"]
     osdpl_namespace = osdpl.metadata["namespace"]
@@ -318,8 +321,8 @@ async def node_disable_notification_delete_handler(body, **kwargs):
         f"Got nodedisablenotifications deletion request change event {name}"
     )
 
-    node = kube.find(kube.Node, node_name, silent=True)
-    if not (node and node.exists()):
-        nwl = maintenance.NodeWorkloadLock.get_resource(node_name)
+    node = kube.safe_get_node(node_name)
+    if not node.exists():
+        nwl = maintenance.NodeWorkloadLock.get_by_node(node_name)
         nwl.absent(propagation_policy="Background")
     LOG.info(f"Finished handling nodedisablenotifications for {node_name}.")
