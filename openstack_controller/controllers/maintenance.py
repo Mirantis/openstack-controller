@@ -115,12 +115,6 @@ async def node_maintenance_request_delete_handler(body, **kwargs):
             nwl.unset_error_message()
             return
 
-        mspec = osdpl.mspec
-        osdplst = osdplstatus.OpenStackDeploymentStatus(
-            osdpl.name, osdpl.namespace
-        )
-        child_view = resource_view.ChildObjectView(mspec)
-
         if nwl.is_maintenance():
             LOG.info(f"Waiting for {node.name} is ready.")
             while True:
@@ -145,6 +139,12 @@ async def node_maintenance_request_delete_handler(body, **kwargs):
                     continue
                 LOG.info(f"All pods are ready on node {node.name}.")
                 break
+
+            mspec = osdpl.mspec
+            osdplst = osdplstatus.OpenStackDeploymentStatus(
+                osdpl.name, osdpl.namespace
+            )
+            child_view = resource_view.ChildObjectView(mspec)
 
             for service, service_class in reversed(services.ORDERED_SERVICES):
                 service = service_class(mspec, LOG, osdplst, child_view)
