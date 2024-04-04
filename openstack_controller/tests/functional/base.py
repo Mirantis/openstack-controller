@@ -146,6 +146,15 @@ class BaseFunctionalTestCase(TestCase):
     @classmethod
     @suppress404
     def server_delete(cls, server, wait=True):
+        try:
+            console_out = cls.ocm.oc.compute.get_server_console_output(
+                server.id
+            )
+            LOG.debug(
+                "Console output for server %s is %s", server.id, console_out
+            )
+        except Exception:
+            pass
         return cls.ocm.oc.delete_server(server.id, wait=wait)
 
     def server_reset_state(self, server, status, wait=True):
@@ -559,5 +568,5 @@ class BaseFunctionalTestCase(TestCase):
             for network in agent_nets:
                 if network["id"] == network_id:
                     res.append(agent)
-                    continue
+                    break
         return res

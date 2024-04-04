@@ -150,11 +150,17 @@ class AutoschedulerTestCase(
             port, CONF.PORTPROBER_METRIC_REFRESH_TIMEOUT, 5
         )
         self._test_network_sits_on_agents(
-            network["id"], expected_number=CONF.PORTPROBER_AGENTS_PER_NETWORK
+            network["id"],
+            expected_number=CONF.PORTPROBER_AGENTS_PER_NETWORK,
         )
         self._check_arping_metrics_for_port(port)
+        # NOTE(vsaienko): Ubuntu boots near 30 seconds, give more time
+        # to check metric start increasing.
         self._wait_metric_incresing(
-            port, "success", CONF.PORTPROBER_PROBE_INTERVAL
+            port,
+            "success",
+            CONF.PORTPROBER_PROBE_INTERVAL
+            + CONF.PORTPROBER_METRIC_REFRESH_TIMEOUT,
         )
         self._check_arping_sample_value_rates_port(port, host_up=True)
         self.ocm.oc.compute.stop_server(server)
