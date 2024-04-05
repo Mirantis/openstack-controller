@@ -140,6 +140,12 @@ spec:
                         type: string
                         description: >
                           The timestamp of latest state change operation.
+                      health:
+                        description: |
+                          The overal health of OpenStack deployment. Represents as
+                          <num Ready>/<total number> of components. Component treated
+                          as unhealthy when at least 1 replica is notReady.
+                        type: string
                 health:
                   type: object
                   x-kubernetes-preserve-unknown-fields: true
@@ -154,6 +160,9 @@ spec:
       - name: State
         type: string
         jsonPath: .status.osdpl.state
+      - jsonPath: .status.osdpl.health
+        name: HEALTH
+        type: string
       - name: MOSK Release
         type: string
         jsonPath: .status.osdpl.release
