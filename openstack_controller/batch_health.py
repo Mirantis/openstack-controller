@@ -1,5 +1,6 @@
 import collections
 
+from openstack_controller import constants
 from openstack_controller import health
 from openstack_controller import kube
 from openstack_controller import settings
@@ -68,6 +69,21 @@ def remove_stale_statuses(osdplst, statuses):
         osdplst.set_osdpl_health(patch)
 
 
+def get_overall_health(statuses):
+    not_ready = []
+    total = len(statuses.keys())
+    for service, components in statuses.items():
+        for component, component_status in components.items():
+            if (
+                component_status.get("status")
+                == constants.K8sObjHealth.BAD.value
+            ):
+                not_ready.append(service)
+                continue
+    ready = total - len(not_ready)
+    return f"{ready}/{total}"
+
+
 def update_health_statuses():
     osdpl = kube.get_osdpl(settings.OSCTL_OS_DEPLOYMENT_NAMESPACE)
     osdplst = osdplstatus.OpenStackDeploymentStatus(
@@ -76,4 +92,5 @@ def update_health_statuses():
     statuses = get_health_statuses(osdpl)
     health.set_multi_application_health(osdplst, statuses)
     remove_stale_statuses(osdplst, statuses)
+    osdplst.osdpl_health = get_overall_health(statuses)
     LOG.info("Health statuses updated %d", len(statuses))

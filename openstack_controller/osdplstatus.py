@@ -118,3 +118,12 @@ class OpenStackDeploymentStatus(pykube.objects.NamespacedAPIObject):
     def get_osdpl_fingerprint(self):
         self.reload()
         return self.obj["status"]["osdpl"]["fingerprint"]
+
+    @property
+    def osdpl_health(self):
+        self.reload()
+        return self.obj["status"]["osdpl"]["health"]
+
+    @osdpl_health.setter
+    def osdpl_health(self, value):
+        self.patch({"status": {"osdpl": {"health": value}}})
