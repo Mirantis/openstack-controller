@@ -115,5 +115,14 @@ spec:
 {% include 'base/_stepler_skiplist.yaml' %}
         stepler_env:
           HORIZON_TEST_IMAGE_CIRROS: {{ cirros_image_name }}
+{%- set public_network_name = "public" %}
+{%- if spec.features.neutron.get('floating_network', {}).get('enabled', true) %}
+{%-   set public_network_name = spec.features.neutron.get('floating_network', {}).get('name', 'public') -%}
+{%- else %}
+{%-   if spec.services.get('tempest', {}).get('tempest', {}).get('values', {}).get('conf', {}).get('convert_to_uuid', {}).get('network', {}).get('public_network_id') %}
+{%-     set public_network_name = spec.services.get('tempest', {}).get('tempest', {}).get('values', {}).get('conf', {}).get('convert_to_uuid', {}).get('network', {}).get('public_network_id') %}
+{%-   endif %}
+{%- endif %}
+          PUBLIC_NETWORK_NAME: {{ public_network_name }}
       bootstrap:
         enabled: false
