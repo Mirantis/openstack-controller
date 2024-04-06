@@ -146,6 +146,12 @@ spec:
                           <num Ready>/<total number> of components. Component treated
                           as unhealthy when at least 1 replica is notReady.
                         type: string
+                      lcm_progress:
+                        description: |
+                          The LCM progress of OpenStack Deployment. Is a string with X/Y,
+                          where X - is the number of deployed applications (k8s objects applied)
+                          and Y is the total number of applications we manage.
+                        type: string
                 health:
                   type: object
                   x-kubernetes-preserve-unknown-fields: true
@@ -160,6 +166,9 @@ spec:
       - name: State
         type: string
         jsonPath: .status.osdpl.state
+      - jsonPath: .status.osdpl.lcm_progress
+        name: LCM Progress
+        type: string
       - jsonPath: .status.osdpl.health
         name: HEALTH
         type: string

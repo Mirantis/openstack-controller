@@ -127,3 +127,23 @@ class OpenStackDeploymentStatus(pykube.objects.NamespacedAPIObject):
     @osdpl_health.setter
     def osdpl_health(self, value):
         self.patch({"status": {"osdpl": {"health": value}}})
+
+    @property
+    def osdpl_lcm_progress(self):
+        self.reload()
+        return self.obj["status"]["osdpl"]["lcm_progress"]
+
+    @osdpl_lcm_progress.setter
+    def osdpl_lcm_progress(self, value):
+        self.patch({"status": {"osdpl": {"lcm_progress": value}}})
+
+    def update_osdpl_lcm_progress(self):
+        self.reload()
+        not_ready = []
+        total = len(self.obj["status"]["services"].keys())
+        for service, status in self.obj["status"]["services"].items():
+            if status["state"] != APPLIED:
+                not_ready.append(service)
+        ready = total - len(not_ready)
+        lcm_progress = f"{ready}/{total}"
+        self.patch({"status": {"osdpl": {"lcm_progress": lcm_progress}}})
