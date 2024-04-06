@@ -79,7 +79,7 @@ def get_overall_health(statuses):
                 == constants.K8sObjHealth.BAD.value
             ):
                 not_ready.append(service)
-                continue
+                break
     ready = total - len(not_ready)
     return f"{ready}/{total}"
 

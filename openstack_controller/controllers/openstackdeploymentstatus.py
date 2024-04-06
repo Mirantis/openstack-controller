@@ -22,3 +22,20 @@ async def handle(body, meta, spec, logger, reason, **kwargs):
     LOG.info(f"Got osdplstatus event {reason}")
     LOG.info(f"Changes are: {kwargs['diff']}")
     return {"lastStatus": f"{reason}"}
+
+
+@kopf.on.field(
+    *osdplstatus.OpenStackDeploymentStatus.kopf_on_args,
+    field="status.services",
+)
+@kopf.on.resume(*osdplstatus.OpenStackDeploymentStatus.kopf_on_args)
+async def osdplst_status_services(
+    name, namespace, body, meta, spec, logger, reason, **kwargs
+):
+    LOG.info(f"Got osdplstatus status.services event {reason}")
+    LOG.info(f"Changes are: {kwargs['diff']}")
+    osdplst = osdplstatus.OpenStackDeploymentStatus(name, namespace)
+    if not osdplst.exists():
+        return
+    osdplst.update_osdpl_lcm_progress()
+    return {"lastStatus": f"{reason}"}
