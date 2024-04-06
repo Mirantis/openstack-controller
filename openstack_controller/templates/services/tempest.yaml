@@ -149,8 +149,6 @@ spec:
             openstack subnet pool create --share --default \
             --pool-prefix 10.20.40.0/24 --default-prefix-length 26 \
             default_pool
-          openstack network auto allocated topology create --or-show
-          openstack subnet pool set default_pool --default
 {%- else %}
           openstack network show tempest-fixed-net || openstack network create tempest-fixed-net --share
           openstack subnet show tempest-subnet || openstack subnet create tempest-subnet \
