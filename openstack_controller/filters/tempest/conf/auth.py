@@ -2,6 +2,7 @@ from openstack_controller.filters.tempest import base_section
 
 
 DEFAULT_CREDENTIALS_DOMAIN_NAME = {
+    "caracal": "tempest",
     "antelope": "tempest",
     "yoga": "tempest",
     "xena": "Default",

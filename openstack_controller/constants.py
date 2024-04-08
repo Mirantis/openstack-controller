@@ -158,10 +158,7 @@ PROXY_VARS_NAMES = {
 COMPUTE_NODE_CONTROLLER_SECRET_NAME = "keystone-os-clouds"
 LIBVIRT_SERVER_TLS_SECRET_NAME = "libvirt-server-tls"
 
-SLURP_RELEASES = [
-    "yoga",
-    "antelope",
-]
+SLURP_RELEASES = ["yoga", "antelope", "caracal"]
 
 
 class OpenStackVersion(enum.IntEnum):
@@ -178,6 +175,8 @@ class OpenStackVersion(enum.IntEnum):
     yoga = 9
     zed = 10
     antelope = 11
+    bobcat = 12
+    caracal = 13
     master = sys.maxsize
 
 
