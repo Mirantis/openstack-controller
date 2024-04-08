@@ -146,7 +146,9 @@ services:
               # - AggregateNumInstancesFilter
               - AggregateTypeAffinityFilter
               # - AllHostsFilter
+              {%- if openstack_version in ['queens', 'rocky', 'stein', 'train', 'ussuri', 'victoria', 'xena', 'wallaby', 'zed', 'antelope'] %}
               - AvailabilityZoneFilter
+              {%- endif %}
               - ComputeFilter
               - ComputeCapabilitiesFilter
               - DifferentHostFilter
