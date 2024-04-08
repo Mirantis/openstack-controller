@@ -1,3 +1,4 @@
+import os
 import time
 import logging
 
@@ -113,3 +114,15 @@ def wait_cinder_pool_updated(
             message = f"Pool {pool_name} hasn't updated within {timeout}"
             LOG.error(message)
             raise TimeoutError(message)
+
+
+def wait_for_ping(ip, timeout=60, interval=5):
+    start = int(time.time())
+    while int(time.time()) - start < timeout:
+        res = os.system(f"ping -c1 -w1 {ip}")
+        if res == 0:
+            return
+        time.sleep(interval)
+    raise TimeoutError(
+        "Timed out waiting ping reply in {timeout} seconds from {ip}"
+    )

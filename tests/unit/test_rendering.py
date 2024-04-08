@@ -268,7 +268,7 @@ def get_child_object_templates():
     )
     all_openstack_versions = set(
         [it.name for it in constants.OpenStackVersion]
-    ) - set(["zed", "master"])
+    ) - set(["zed", "bobcat", "master"])
     service_excludes = {
         "shared-file-system": [
             "queens",

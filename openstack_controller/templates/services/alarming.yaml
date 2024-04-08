@@ -48,7 +48,7 @@ spec:
             gnocchi_external_project_owner: service
             gnocchi_external_domain_name: service
           coordination:
-{%- if spec.openstack_version in ("antelope",) %}
+{%- if spec.openstack_version in ("antelope","caracal",) %}
             backend_url: {{ get_etcd3_endpoint(spec.openstack_version, 'etcd3gw') }}
 {%- else %}
             #There are some problems with etcd3+http driver so we shouldn't use it
