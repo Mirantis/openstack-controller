@@ -68,13 +68,15 @@ patternProperties:
                   backend:
                     description: |
                       Backend for nova images can be:
-                        - local: qcow2 image type
+                        - local: qcow2 image type. Option is deprecated and will be replaced to 'qcow2'
+                        - qcow2: qcow2 image type
                         - ceph: rbd image type
                         - lvm: lvm image type
                         - raw: raw image type
                     type: string
                     enum:
                       - local
+                      - qcow2
                       - ceph
                       - lvm
                       - raw

@@ -15,6 +15,11 @@ nodes:
         nova:
           images:
             backend: local
+    compute::qcow2:
+      features:
+        nova:
+          images:
+            backend: qcow2
     compute::raw:
       features:
         nova:

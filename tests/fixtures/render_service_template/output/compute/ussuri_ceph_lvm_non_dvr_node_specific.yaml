@@ -85,6 +85,12 @@ spec:
                   dynamic_options:
                     libvirt:
                       listen_interface: 'ens3'
+            compute::qcow2:
+              values:
+                conf:
+                  dynamic_options:
+                    libvirt:
+                      listen_interface: 'ens3'
             compute::raw:
               values:
                 conf:
@@ -567,6 +573,19 @@ spec:
                     libvirt:
                       images_type: 'qcow2'
             compute::local:
+              values:
+                conf:
+                  nova:
+                    DEFAULT:
+                      initial_cpu_allocation_ratio: 8.0
+                      initial_disk_allocation_ratio: 1.6
+                      initial_ram_allocation_ratio: 1.0
+                      cpu_allocation_ratio: 0
+                      disk_allocation_ratio: 0
+                      ram_allocation_ratio: 0
+                    libvirt:
+                      images_type: 'qcow2'
+            compute::qcow2:
               values:
                 conf:
                   nova:

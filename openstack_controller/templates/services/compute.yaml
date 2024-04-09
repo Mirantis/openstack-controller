@@ -387,7 +387,8 @@ spec:
       {%- if nova_override.get("images", {}).get("backend") %}
         {%- if nova_override.images.backend == 'ceph' %}
                       images_type: rbd
-        {%- elif nova_override.images.backend == 'local' %}
+        # 'local' option is deprecated and will be replaced to 'qcow2'
+        {%- elif nova_override.images.backend in ['local', 'qcow2'] %}
                       images_type: qcow2
         {%- elif nova_override.images.backend == 'raw' %}
                       images_type: raw
@@ -909,7 +910,8 @@ spec:
 {%- endif %}
 {%- if spec.get('features', {}).get('nova', {}).get('images', {}).get('backend') == 'ceph' %}
             images_type: rbd
-{%- elif spec.get('features', {}).get('nova', {}).get('images', {}).get('backend') == 'local' %}
+# 'local' option is deprecated and will be replaced to 'qcow2'
+{%- elif spec.get('features', {}).get('nova', {}).get('images', {}).get('backend') in ['local', 'qcow2'] %}
             images_type: qcow2
 {%- elif spec.get('features', {}).get('nova', {}).get('images', {}).get('backend') == 'lvm' %}
             images_type: lvm
