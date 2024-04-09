@@ -31,8 +31,11 @@ class AutoschedulerTestCase(
         )
 
     def _check_arping_metrics_for_port(self, port, present=True):
-        self._check_arping_metrics_for_network(port["network_id"])
         agents = self.get_agents_hosting_portprober_network(port["network_id"])
+        # NOTE(vsaienko): if port does not exists, other ports may not exists
+        # And whole metric set is empty.
+        if not present:
+            self._check_arping_metrics_for_network(port["network_id"])
         expected_samples = 1
         if present is False:
             expected_samples = 0

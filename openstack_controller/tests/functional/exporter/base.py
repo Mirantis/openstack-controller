@@ -21,7 +21,8 @@ class PrometheusMixin:
         return text_string_to_metric_families(res.text + "# EOF")
 
     def get_metric(self, name, metric_families=None):
-        metric_families = metric_families or self.metric_families
+        if metric_families is None:
+            metric_families = self.metric_families
         for metric in metric_families:
             if metric.name == name:
                 LOG.info(f"Got metric: {metric}")
