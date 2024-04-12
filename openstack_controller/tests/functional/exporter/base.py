@@ -30,6 +30,8 @@ class PrometheusMixin:
 
     def filter_metric_samples(self, metric, labels):
         res = []
+        if metric is None:
+            return res
         for sample in metric.samples:
             for label, value in labels.items():
                 if sample.labels.get(label) != value:

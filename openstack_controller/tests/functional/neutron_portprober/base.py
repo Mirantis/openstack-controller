@@ -50,8 +50,11 @@ class BaseFunctionalPortProberTestCase(base.BaseFunctionalTestCase):
             )
             metric_name = f"portprober_arping_target_{metric}"
             m = self.get_metric(metric_name, agent_metric_families)
-            samples = self.filter_metric_samples(m, {"mac": port.mac_address})
-            res[agent["id"]].extend(samples)
+            if m:
+                samples = self.filter_metric_samples(
+                    m, {"mac": port.mac_address}
+                )
+                res[agent["id"]].extend(samples)
         return res
 
     def wait_arping_samples_for_port(self, port, timeout, interval):

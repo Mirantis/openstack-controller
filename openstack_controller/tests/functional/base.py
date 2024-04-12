@@ -73,12 +73,9 @@ class BaseFunctionalTestCase(TestCase):
 
     @property
     def neturon_portprober_enabled(self):
-        return (
-            self.osdpl.obj["spec"]["features"]["neutron"]
-            .get("extensions", {})
-            .get("portprober", {})
-            .get("enabled", False)
-        )
+        if self.ocm.oc.network.find_extension("portprober"):
+            return True
+        return False
 
     def is_service_enabled(self, name):
         return name in self.osdpl.obj["spec"].get("features", {}).get(
