@@ -214,7 +214,12 @@ class OpenStackClientManager:
         )
 
     def network_get_agents(
-        self, host=None, is_alive=None, is_admin_state_up=None, binary=None
+        self,
+        host=None,
+        is_alive=None,
+        is_admin_state_up=None,
+        binary=None,
+        agent_type=None,
     ):
         kwargs = {}
         if host is not None:
@@ -225,6 +230,8 @@ class OpenStackClientManager:
             kwargs["is_admin_state_up"] = is_admin_state_up
         if binary is not None:
             kwargs["binary"] = binary
+        if agent_type is not None:
+            kwargs["agent_type"] = agent_type
         try:
             yield from self.oc.network.agents(**kwargs)
         except openstack.exceptions.ResourceNotFound:
@@ -259,6 +266,20 @@ class OpenStackClientManager:
         except openstack.exceptions.ResourceNotFound:
             pass
         return []
+
+    def network_get_ports(self, device_owner=None):
+        kwargs = {}
+        if device_owner is not None:
+            kwargs["device_owner"] = device_owner
+        try:
+            yield from self.oc.network.ports(**kwargs)
+        except openstack.exceptions.ResourceNotFound:
+            pass
+        return []
+
+    def network_ensure_ports_absent(self, device_owner):
+        for port in self.network_get_ports(device_owner=device_owner):
+            self.oc.network.delete_port(port)
 
     def placement_resource_provider_absent(self, host):
         rp_list = list(self.oc.placement.resource_providers())

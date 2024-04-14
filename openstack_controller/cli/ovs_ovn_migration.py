@@ -3,6 +3,7 @@ import asyncio
 import argparse
 import traceback
 import json
+import re
 import time
 
 from concurrent.futures import ThreadPoolExecutor, ALL_COMPLETED, wait
@@ -17,6 +18,7 @@ from openstack_controller import osdplstatus
 from openstack_controller import resource_view
 from openstack_controller import services
 from openstack_controller import settings
+from openstack_controller.openstack_utils import OpenStackClientManager
 
 
 LOG = utils.get_logger(__name__)
@@ -349,6 +351,45 @@ def check_nodes_results(results, role, threshold):
     return failed_nodes, threshold_fail
 
 
+def cleanup_api_resources():
+    """Cleanup resources from Openstack API related to neutron ovs backend"""
+    ocm = OpenStackClientManager()
+    LOG.info("Starting Neutron API resources cleanup")
+    for device_owner in [
+        "network:dhcp",
+        "network:router_ha_interface",
+        "network:floatingip_agent_gateway",
+    ]:
+        LOG.info(f"Cleaning Neutron {device_owner} ports")
+        try:
+            ocm.network_ensure_ports_absent(device_owner)
+        except Exception:
+            LOG.exception(f"Failed to clean some {device_owner} ports")
+        LOG.info(f"Finished cleaning Neutron {device_owner} ports")
+    for agent_type in [
+        "Open vSwitch agent",
+        "DHCP agent",
+        "L3 agent",
+        "Metadata agent",
+    ]:
+        LOG.info(f"Cleaning Neutron {agent_type} agents")
+        for agent in ocm.network_get_agents(agent_type=agent_type):
+            try:
+                ocm.oc.network.delete_agent(agent)
+            except Exception:
+                LOG.exception(f"Failed to clean agent {agent}")
+        LOG.info(f"Finished cleaning Neutron {agent_type} agents")
+    for net in ocm.oc.network.networks():
+        if re.match("^HA network tenant\s", net.name):
+            LOG.info(f"Cleaning Neutron HA tenant network {net.name}")
+            try:
+                ocm.oc.network.delete_network(net)
+            except Exception:
+                LOG.exception(f"Failed to clean network {net.name}")
+            LOG.info(f"Finished cleaning Neutron HA tenant network {net.name}")
+    LOG.info("Finished Neutron API resources cleanup")
+
+
 def prepare():
     osdpl = kube.get_osdpl()
     network_svc = get_network_service(osdpl)
@@ -615,7 +656,7 @@ def finalize_migration():
 
 
 def cleanup():
-    pass
+    cleanup_api_resources()
 
 
 WORKFLOW = [
@@ -623,7 +664,8 @@ WORKFLOW = [
         "executable": prepare,
         "name": "10_PREPARE",
         "impact": """
-            WORKLOADS: No downtime expected""",
+            WORKLOADS: No downtime expected.
+            OPENSTACK API: No downtime expected.""",
         "description": """
             Check pre-requisites, backup bridge mappings on nodes.""",
     },
@@ -635,7 +677,7 @@ WORKFLOW = [
             OPENSTACK API: Neutron API downtime starts in this stage.""",
         "description": """
             Deploy OVN with only database components enabled,
-            Disable neutron server and all neutron compinents except L3 agents.""",
+            Disable neutron server and all neutron components except L3 agents.""",
     },
     {
         "executable": deploy_ovn_controllers,
@@ -674,8 +716,8 @@ WORKFLOW = [
         "executable": cleanup,
         "name": "60_CLEANUP",
         "impact": """
-            WORKLOADS: Downtime expected for workloads.
-            OPENSTACK API: Neutron API downtime ends in this stage.""",
+            WORKLOADS: No downtime expected.
+            OPENSTACK API: No downtime expected.""",
         "description": """
             Cleanup OVS leftovers in Openstack API.
             Remove not used OVS interfaces and linux network namespaces.""",
