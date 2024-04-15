@@ -14,6 +14,7 @@ RUN apt-get install -y \
         python3.8-dev \
         libffi-dev \
         libssl-dev \
+        libpcre3-dev \
         git; \
     python3.8 /tmp/get-pip.py
 ADD . /opt/operator
