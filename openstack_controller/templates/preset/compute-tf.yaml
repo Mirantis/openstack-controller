@@ -55,6 +55,7 @@ features:
     - load-balancer
     - redis
     - descheduler
+    - dynamic-resource-balancer
   network_policies:
 {%- if openstack_yoga_plus %}
     enabled: true

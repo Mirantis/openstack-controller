@@ -56,6 +56,7 @@ images:
   designate_worker: designate-worker:latest
   designate_pool_manage: designate-pool-manage:latest
   designate_pool_manage_hash: designate-pool-manage-hash:latest
+  drb_controller: drb-controller:latest
   entrypoint: entrypoint:latest
   error_pages: error-pages:latest
   etcd: etcd:latest

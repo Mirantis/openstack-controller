@@ -194,6 +194,7 @@ infra_services = {
     "redis",
     "coordination",
     "descheduler",
+    "dynamic-resource-balancer",
 }
 
 

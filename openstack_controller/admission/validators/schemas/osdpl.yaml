@@ -690,6 +690,7 @@ properties:
             - metric
             - instance-ha
             - shared-file-system
+            - dynamic-resource-balancer
       cloudprober:
         type: object
         additionalProperties: false

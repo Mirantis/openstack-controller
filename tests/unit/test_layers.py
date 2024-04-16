@@ -63,6 +63,7 @@ def test_apply_list_empty_stein(osdpl_min_stein):
         "coordination",
         "key-manager",
         "redis",
+        "dynamic-resource-balancer",
     }
     ta, td = layers.services(osdpl_min_stein, mock.Mock())
     assert ta == compute_services
@@ -89,6 +90,7 @@ def test_apply_list_empty_train(osdpl_min_train):
         "coordination",
         "key-manager",
         "redis",
+        "dynamic-resource-balancer",
     }
     ta, td = layers.services(osdpl_min_train, mock.Mock())
     assert ta == compute_services
@@ -114,6 +116,7 @@ def test_apply_list_empty_rocky(osdpl_min_rocky):
         "coordination",
         "key-manager",
         "redis",
+        "dynamic-resource-balancer",
     }
     ta, td = layers.services(osdpl_min_rocky, mock.Mock())
     assert ta == compute_services

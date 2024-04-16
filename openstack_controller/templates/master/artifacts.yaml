@@ -20,6 +20,7 @@ designate_mdns: '{{ images_base_url }}/openstack/designate:master-bionic-2021052
 designate_producer: '{{ images_base_url }}/openstack/designate:master-bionic-20210524060023'
 designate_sink: '{{ images_base_url }}/openstack/designate:master-bionic-20210524060023'
 designate_worker: '{{ images_base_url }}/openstack/designate:master-bionic-20210524060023'
+drb_controller: '{{ images_base_url }}/openstack/extra/drb-controller:0.1.0-20240413171732'
 glance_api: '{{ images_base_url }}/openstack/glance:master-bionic-20210524060023'
 glance_db_sync: '{{ images_base_url }}/openstack/glance:master-bionic-20210524060023'
 glance_registry: '{{ images_base_url }}/openstack/glance:master-bionic-20210524060023'

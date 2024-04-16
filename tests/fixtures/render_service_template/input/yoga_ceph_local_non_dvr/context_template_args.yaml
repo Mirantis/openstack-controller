@@ -40,6 +40,11 @@ cloudprober:
     cloudprober:
       password: QXH50EtBVsiCptehSf4l55Y1R3QdGFv8xc
       username: osctlQECh8
+dynamic-resource-balancer:
+  keystone_creds:
+    drb_controller:
+      password: iCptehQXf4l55GFv8xc50EtBVY1HSR3Qds
+      username: osctlKiD31
 compute:
   ceph:
     nova:

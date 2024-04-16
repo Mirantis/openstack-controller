@@ -22,6 +22,7 @@ designate_mdns: '{{ images_base_url }}/openstack/designate:yoga-jammy-2024041808
 designate_producer: '{{ images_base_url }}/openstack/designate:yoga-jammy-20240418082728'
 designate_sink: '{{ images_base_url }}/openstack/designate:yoga-jammy-20240418082728'
 designate_worker: '{{ images_base_url }}/openstack/designate:yoga-jammy-20240418082728'
+drb_controller: '{{ images_base_url }}/openstack/extra/drb-controller:0.1.0-20240413171732'
 glance_api: '{{ images_base_url }}/openstack/glance:yoga-jammy-20240418082728'
 glance_db_sync: '{{ images_base_url }}/openstack/glance:yoga-jammy-20240418082728'
 glance_db_expand: '{{ images_base_url }}/openstack/glance:yoga-jammy-20240418082728'
