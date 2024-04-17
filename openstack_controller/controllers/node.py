@@ -28,7 +28,7 @@ CONF = settings.CONF
 
 
 @kopf.on.field("", "v1", "nodes", field="status.conditions")
-async def node_status_update_handler(name, body, old, new, reason, **kwargs):
+def node_status_update_handler(name, body, old, new, reason, **kwargs):
     LOG.debug(f"Handling node status {reason} event.")
     LOG.info(f"The node {name} changes are: {kwargs['diff']}")
 
@@ -70,7 +70,7 @@ async def node_status_update_handler(name, body, old, new, reason, **kwargs):
     node.remove_pods(settings.OSCTL_OS_DEPLOYMENT_NAMESPACE)
 
     if node.has_role(const.NodeRole.compute):
-        await ostutils.handle_masakari_host_down(node)
+        ostutils.handle_masakari_host_down(node)
 
 
 # NOTE(avolkov): watching for update events covers
@@ -79,7 +79,7 @@ async def node_status_update_handler(name, body, old, new, reason, **kwargs):
 @kopf.on.create("", "v1", "nodes")
 @kopf.on.update("", "v1", "nodes")
 @kopf.on.resume("", "v1", "nodes")
-async def node_change_handler(body, reason, **kwargs):
+def node_change_handler(body, reason, **kwargs):
     name = body["metadata"]["name"]
     LOG.info(f"Got event {reason} for node {name}")
     LOG.info(f"The node {name} changes are: {kwargs['diff']}")
@@ -96,7 +96,7 @@ async def node_change_handler(body, reason, **kwargs):
 
 
 @kopf.on.delete("", "v1", "nodes")
-async def node_delete_handler(body, **kwargs):
+def node_delete_handler(body, **kwargs):
     name = body["metadata"]["name"]
     LOG.info(f"Got delete event for node {name}")
     nwl = maintenance.NodeWorkloadLock.get_resource(name)

@@ -48,8 +48,7 @@ async def test_node_status_update_handler_node_ready(
 
 @mock.patch.object(openstack_utils, "notify_masakari_host_down")
 @mock.patch.object(openstack_utils, "handle_masakari_host_down")
-@pytest.mark.asyncio
-async def test_node_status_update_handler_not_ready(
+def test_node_status_update_handler_not_ready(
     handle_masakari_host_down, notify_masakari_host_down, osdpl, node
 ):
     osdpl.exists.return_value = True
@@ -71,7 +70,7 @@ async def test_node_status_update_handler_not_ready(
             ]
         }
     }
-    await node_controller.node_status_update_handler(
+    node_controller.node_status_update_handler(
         node.name, node.obj, {}, {}, "reason", diff={}
     )
     node.remove_pods.assert_called_once()
@@ -81,8 +80,7 @@ async def test_node_status_update_handler_not_ready(
 
 @mock.patch.object(openstack_utils, "notify_masakari_host_down")
 @mock.patch.object(openstack_utils, "handle_masakari_host_down")
-@pytest.mark.asyncio
-async def test_node_status_update_handler_not_ready_no_role(
+def test_node_status_update_handler_not_ready_no_role(
     handle_masakari_host_down, notify_masakari_host_down, osdpl, node
 ):
     osdpl.exists.return_value = True
@@ -104,7 +102,7 @@ async def test_node_status_update_handler_not_ready_no_role(
             ]
         }
     }
-    await node_controller.node_status_update_handler(
+    node_controller.node_status_update_handler(
         node.name, node.obj, {}, {}, "reason", diff={}
     )
     node.remove_pods.assert_called_once()

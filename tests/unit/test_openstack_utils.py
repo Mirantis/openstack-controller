@@ -53,56 +53,51 @@ async def test_openstack_client_no_creds(mocker, openstack_connect):
 
 
 @mock.patch.object(openstack_utils, "OpenStackClientManager")
-@pytest.mark.asyncio
-async def test_notify_masakari_host_down(
+def test_notify_masakari_host_down(
     openstack_client_manager,
 ):
     node = kube.Node(mock.Mock, copy.deepcopy(_get_node()))
-    await openstack_utils.notify_masakari_host_down(node)
+    openstack_utils.notify_masakari_host_down(node)
     openstack_client_manager.return_value.instance_ha_create_notification.assert_called_once()
 
 
 @mock.patch.object(openstack_utils, "OpenStackClientManager")
-@pytest.mark.asyncio
-async def test_notify_masakari_host_down_exception_unknown(
+def test_notify_masakari_host_down_exception_unknown(
     openstack_client_manager,
 ):
     node = kube.Node(mock.Mock, copy.deepcopy(_get_node()))
     openstack_client_manager.side_effect = Exception("Boom")
     with pytest.raises(kopf.TemporaryError):
-        await openstack_utils.notify_masakari_host_down(node)
+        openstack_utils.notify_masakari_host_down(node)
     openstack_client_manager.return_value.instance_ha_create_notification.assert_not_called()
 
 
 @mock.patch.object(openstack_utils, "OpenStackClientManager")
-@pytest.mark.asyncio
-async def test_notify_masakari_host_down_exception_no_masakari(
+def test_notify_masakari_host_down_exception_no_masakari(
     openstack_client_manager,
 ):
     node = kube.Node(mock.Mock, copy.deepcopy(_get_node()))
     openstack_client_manager.side_effect = ksa_exceptions.EndpointNotFound(
         "Not found"
     )
-    await openstack_utils.notify_masakari_host_down(node)
+    openstack_utils.notify_masakari_host_down(node)
     openstack_client_manager.return_value.instance_ha_create_notification.assert_not_called()
 
 
 @mock.patch.object(openstack_utils, "OpenStackClientManager")
-@pytest.mark.asyncio
-async def test_notify_masakari_host_down_host_not_in_segment_400(
+def test_notify_masakari_host_down_host_not_in_segment_400(
     openstack_client_manager,
 ):
     node = kube.Node(mock.Mock, copy.deepcopy(_get_node()))
     openstack_client_manager.side_effect = openstack.exceptions.HttpException(
         f"Host with name {node.name} could not be found.", http_status=400
     )
-    await openstack_utils.notify_masakari_host_down(node)
+    openstack_utils.notify_masakari_host_down(node)
     openstack_client_manager.return_value.instance_ha_create_notification.assert_not_called()
 
 
 @mock.patch.object(openstack_utils, "OpenStackClientManager")
-@pytest.mark.asyncio
-async def test_notify_masakari_host_down_host_not_in_segment_500(
+def test_notify_masakari_host_down_host_not_in_segment_500(
     openstack_client_manager,
 ):
     node = kube.Node(mock.Mock, copy.deepcopy(_get_node()))
@@ -110,31 +105,29 @@ async def test_notify_masakari_host_down_host_not_in_segment_500(
         f"Host with name {node.name} could not be found.", http_status=500
     )
     with pytest.raises(kopf.TemporaryError):
-        await openstack_utils.notify_masakari_host_down(node)
+        openstack_utils.notify_masakari_host_down(node)
     openstack_client_manager.return_value.instance_ha_create_notification.assert_not_called()
 
 
 @mock.patch.object(openstack_utils, "OpenStackClientManager")
-@pytest.mark.asyncio
-async def test_notify_masakari_host_down_unknown(
+def test_notify_masakari_host_down_unknown(
     openstack_client_manager,
 ):
     node = kube.Node(mock.Mock, copy.deepcopy(_get_node()))
     openstack_client_manager.side_effect = Exception("Error")
     with pytest.raises(kopf.TemporaryError):
-        await openstack_utils.notify_masakari_host_down(node)
+        openstack_utils.notify_masakari_host_down(node)
     openstack_client_manager.return_value.instance_ha_create_notification.assert_not_called()
 
 
 @mock.patch.object(openstack_utils, "OpenStackClientManager")
 @mock.patch.object(openstack_utils, "notify_masakari_host_down")
 @mock.patch("openstack_controller.openstack_utils.LOG")
-@pytest.mark.asyncio
-async def test_handle_masakari_host_down_node_ready(
+def test_handle_masakari_host_down_node_ready(
     mock_log, notify_masakari, openstack_client_manager, node, nwl
 ):
     node.ready = True
-    await openstack_utils.handle_masakari_host_down(node)
+    openstack_utils.handle_masakari_host_down(node)
     notify_masakari.assert_not_called()
     openstack_client_manager.return_value.compute_get_services.assert_not_called()
     nwl.return_value.is_active.assert_not_called()
@@ -146,13 +139,12 @@ async def test_handle_masakari_host_down_node_ready(
 @mock.patch.object(openstack_utils, "OpenStackClientManager")
 @mock.patch.object(openstack_utils, "notify_masakari_host_down")
 @mock.patch("openstack_controller.openstack_utils.LOG")
-@pytest.mark.asyncio
-async def test_handle_masakari_host_down_node_active(
+def test_handle_masakari_host_down_node_active(
     mock_log, notify_masakari, openstack_client_manager, node, nwl
 ):
     node.ready = False
     nwl.return_value.is_active.return_value = True
-    await openstack_utils.handle_masakari_host_down(node)
+    openstack_utils.handle_masakari_host_down(node)
     notify_masakari.assert_not_called()
     openstack_client_manager.return_value.compute_get_services.assert_not_called()
 
@@ -160,8 +152,7 @@ async def test_handle_masakari_host_down_node_active(
 @mock.patch.object(openstack_utils, "OpenStackClientManager")
 @mock.patch.object(openstack_utils, "notify_masakari_host_down")
 @mock.patch("openstack_controller.openstack_utils.LOG")
-@pytest.mark.asyncio
-async def test_handle_masakari_host_down_node_nwl_inactive(
+def test_handle_masakari_host_down_node_nwl_inactive(
     mock_log, notify_masakari, openstack_client_manager, node, nwl
 ):
     node.ready = False
@@ -170,7 +161,7 @@ async def test_handle_masakari_host_down_node_nwl_inactive(
     openstack_client_manager.return_value.compute_get_all_servers.return_value = [
         {"name": "testSrv1"}
     ]
-    await openstack_utils.handle_masakari_host_down(node)
+    openstack_utils.handle_masakari_host_down(node)
     notify_masakari.assert_not_called()
     openstack_client_manager.return_value.compute_get_services.assert_not_called()
     mock_log.info.assert_called_with(
@@ -181,8 +172,7 @@ async def test_handle_masakari_host_down_node_nwl_inactive(
 @mock.patch.object(openstack_utils, "OpenStackClientManager")
 @mock.patch.object(openstack_utils, "notify_masakari_host_down")
 @mock.patch("openstack_controller.openstack_utils.LOG")
-@pytest.mark.asyncio
-async def test_handle_masakari_host_down_node_nwl_active_unschedulable(
+def test_handle_masakari_host_down_node_nwl_active_unschedulable(
     mock_log, notify_masakari, openstack_client_manager, node, nwl
 ):
     node.ready = False
@@ -191,7 +181,7 @@ async def test_handle_masakari_host_down_node_nwl_active_unschedulable(
     openstack_client_manager.return_value.compute_get_all_servers.return_value = [
         {"name": "testSrv1"}
     ]
-    await openstack_utils.handle_masakari_host_down(node)
+    openstack_utils.handle_masakari_host_down(node)
     notify_masakari.assert_not_called()
     openstack_client_manager.return_value.compute_get_services.assert_not_called()
     mock_log.info.assert_called_with(
@@ -202,8 +192,7 @@ async def test_handle_masakari_host_down_node_nwl_active_unschedulable(
 @mock.patch.object(openstack_utils, "OpenStackClientManager")
 @mock.patch.object(openstack_utils, "notify_masakari_host_down")
 @mock.patch("openstack_controller.openstack_utils.LOG")
-@pytest.mark.asyncio
-async def test_handle_masakari_host_down_node_nwl_active_osctl_exception(
+def test_handle_masakari_host_down_node_nwl_active_osctl_exception(
     mock_log, notify_masakari, openstack_client_manager, node, nwl
 ):
     node.ready = False
@@ -214,7 +203,7 @@ async def test_handle_masakari_host_down_node_nwl_active_osctl_exception(
     ]
     openstack_client_manager.side_effect = Exception()
     with pytest.raises(kopf.TemporaryError):
-        await openstack_utils.handle_masakari_host_down(node)
+        openstack_utils.handle_masakari_host_down(node)
     notify_masakari.assert_not_called()
     openstack_client_manager.return_value.compute_get_services.assert_not_called()
 
@@ -222,8 +211,7 @@ async def test_handle_masakari_host_down_node_nwl_active_osctl_exception(
 @mock.patch.object(openstack_utils, "OpenStackClientManager")
 @mock.patch.object(openstack_utils, "notify_masakari_host_down")
 @mock.patch("openstack_controller.openstack_utils.LOG")
-@pytest.mark.asyncio
-async def test_handle_masakari_host_down_node_nwl_active_compute_up(
+def test_handle_masakari_host_down_node_nwl_active_compute_up(
     mock_log, notify_masakari, openstack_client_manager, node, nwl
 ):
     node.ready = False
@@ -237,7 +225,7 @@ async def test_handle_masakari_host_down_node_nwl_active_compute_up(
         compute_services
     )
     with pytest.raises(kopf.TemporaryError):
-        await openstack_utils.handle_masakari_host_down(node)
+        openstack_utils.handle_masakari_host_down(node)
     notify_masakari.assert_not_called()
     openstack_client_manager.return_value.compute_get_services.assert_called_once()
     openstack_client_manager.return_value.network_get_agents.assert_not_called()
@@ -246,8 +234,7 @@ async def test_handle_masakari_host_down_node_nwl_active_compute_up(
 @mock.patch.object(openstack_utils, "OpenStackClientManager")
 @mock.patch.object(openstack_utils, "notify_masakari_host_down")
 @mock.patch("openstack_controller.openstack_utils.LOG")
-@pytest.mark.asyncio
-async def test_handle_masakari_host_down_node_nwl_active_network_agent_up(
+def test_handle_masakari_host_down_node_nwl_active_network_agent_up(
     mock_log, notify_masakari, openstack_client_manager, node, nwl
 ):
     node.ready = False
@@ -265,7 +252,7 @@ async def test_handle_masakari_host_down_node_nwl_active_network_agent_up(
         network_agents
     )
     with pytest.raises(kopf.TemporaryError):
-        await openstack_utils.handle_masakari_host_down(node)
+        openstack_utils.handle_masakari_host_down(node)
     notify_masakari.assert_not_called()
     openstack_client_manager.return_value.compute_get_services.assert_called_once()
     openstack_client_manager.return_value.network_get_agents.assert_called_once()
@@ -274,8 +261,7 @@ async def test_handle_masakari_host_down_node_nwl_active_network_agent_up(
 @mock.patch.object(openstack_utils, "OpenStackClientManager")
 @mock.patch.object(openstack_utils, "notify_masakari_host_down")
 @mock.patch("openstack_controller.openstack_utils.LOG")
-@pytest.mark.asyncio
-async def test_handle_masakari_host_down_node_nwl_no_node_ip(
+def test_handle_masakari_host_down_node_nwl_no_node_ip(
     mock_log, notify_masakari, openstack_client_manager, node, nwl
 ):
     node.ready = False
@@ -295,7 +281,7 @@ async def test_handle_masakari_host_down_node_nwl_no_node_ip(
     node.obj = {
         "status": {"addresses": [{"type": "foo", "address": "1.2.3.4"}]}
     }
-    await openstack_utils.handle_masakari_host_down(node)
+    openstack_utils.handle_masakari_host_down(node)
     notify_masakari.assert_not_called()
     openstack_client_manager.return_value.compute_get_services.assert_called_once()
     openstack_client_manager.return_value.network_get_agents.assert_called_once()
@@ -305,8 +291,7 @@ async def test_handle_masakari_host_down_node_nwl_no_node_ip(
 @mock.patch.object(openstack_utils, "OpenStackClientManager")
 @mock.patch.object(openstack_utils, "notify_masakari_host_down")
 @mock.patch("openstack_controller.openstack_utils.LOG")
-@pytest.mark.asyncio
-async def test_handle_masakari_host_down_node_nwl_ssh_okay(
+def test_handle_masakari_host_down_node_nwl_ssh_okay(
     mock_log, notify_masakari, openstack_client_manager, sock, node, nwl
 ):
     node.ready = False
@@ -328,7 +313,7 @@ async def test_handle_masakari_host_down_node_nwl_ssh_okay(
     }
     sock.connect.return_value = True
     with pytest.raises(kopf.TemporaryError):
-        await openstack_utils.handle_masakari_host_down(node)
+        openstack_utils.handle_masakari_host_down(node)
     notify_masakari.assert_not_called()
     openstack_client_manager.return_value.compute_get_services.assert_called_once()
     openstack_client_manager.return_value.network_get_agents.assert_called_once()
@@ -338,8 +323,7 @@ async def test_handle_masakari_host_down_node_nwl_ssh_okay(
 @mock.patch.object(openstack_utils, "OpenStackClientManager")
 @mock.patch.object(openstack_utils, "notify_masakari_host_down")
 @mock.patch("openstack_controller.openstack_utils.LOG")
-@pytest.mark.asyncio
-async def test_handle_masakari_host_down_node_nwl_ssh_failed(
+def test_handle_masakari_host_down_node_nwl_ssh_failed(
     mock_log, notify_masakari, openstack_client_manager, socket, node, nwl
 ):
     node.ready = False
@@ -360,7 +344,7 @@ async def test_handle_masakari_host_down_node_nwl_ssh_failed(
         "status": {"addresses": [{"type": "InternalIP", "address": "1.2.3.4"}]}
     }
     socket.return_value.connect.side_effect = Exception("Boom")
-    await openstack_utils.handle_masakari_host_down(node)
+    openstack_utils.handle_masakari_host_down(node)
     notify_masakari.assert_called_once()
     openstack_client_manager.return_value.compute_get_services.assert_called_once()
     openstack_client_manager.return_value.network_get_agents.assert_called_once()
@@ -369,8 +353,7 @@ async def test_handle_masakari_host_down_node_nwl_ssh_failed(
 @mock.patch.object(openstack_utils, "OpenStackClientManager")
 @mock.patch.object(openstack_utils, "notify_masakari_host_down")
 @mock.patch("openstack_controller.openstack_utils.LOG")
-@pytest.mark.asyncio
-async def test_handle_masakari_host_down_node_no_servers(
+def test_handle_masakari_host_down_node_no_servers(
     mock_log, notify_masakari, openstack_client_manager, node, nwl
 ):
     node.ready = False
@@ -379,7 +362,7 @@ async def test_handle_masakari_host_down_node_no_servers(
     openstack_client_manager.return_value.compute_get_all_servers.return_value = (
         []
     )
-    await openstack_utils.handle_masakari_host_down(node)
+    openstack_utils.handle_masakari_host_down(node)
     notify_masakari.assert_not_called()
     openstack_client_manager.return_value.compute_get_services.assert_not_called()
     openstack_client_manager.return_value.network_get_agents.assert_not_called()
