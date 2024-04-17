@@ -10,7 +10,7 @@ from . import utils
 LOG = utils.get_logger(__name__)
 
 
-async def _get(namespace, i):
+def _get(namespace, i):
     try:
         return kube.find(
             pykube.DaemonSet, f"{constants.CACHE_NAME}-{i}", namespace
@@ -19,15 +19,15 @@ async def _get(namespace, i):
         return None
 
 
-async def _list(namespace):
+def _list(namespace):
     return kube.resource_list(
         pykube.DaemonSet, {"k8s-app__in": {"image-precaching"}}, namespace
     )
 
 
-async def images(namespace):
+def images(namespace):
     images = {}
-    daemons = await _list(namespace)
+    daemons = _list(namespace)
     for ds in daemons:
         images.update(
             {
@@ -41,10 +41,10 @@ async def images(namespace):
     return images
 
 
-async def restart(images, osdpl, mspec):
+def restart(images, osdpl, mspec):
     namespace = osdpl["metadata"]["namespace"]
     log_showed = False
-    for ds in await _list(namespace):
+    for ds in _list(namespace):
         ds.delete()
         if not log_showed:
             LOG.info("Stopping cache ...")
@@ -75,6 +75,6 @@ async def restart(images, osdpl, mspec):
     return len(image_groups)
 
 
-async def wait_ready(namespace):
-    for ds in await _list(namespace):
+def wait_ready(namespace):
+    for ds in _list(namespace):
         kube.wait_for_daemonset_ready(ds.obj["metadata"]["name"], namespace)

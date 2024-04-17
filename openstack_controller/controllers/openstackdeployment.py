@@ -290,9 +290,9 @@ async def handle(body, meta, spec, logger, reason, **kwargs):
     kwargs["patch"]["status"]["fingerprint"] = layers.spec_hash(mspec)
 
     images = discover_images(mspec, logger)
-    if images != await cache.images(meta["namespace"]):
-        await cache.restart(images, body, mspec)
-    await cache.wait_ready(meta["namespace"])
+    if images != cache.images(meta["namespace"]):
+        cache.restart(images, body, mspec)
+    cache.wait_ready(meta["namespace"])
 
     update, delete = layers.services(mspec, logger, **kwargs)
 
