@@ -15,7 +15,7 @@ LOG = utils.get_logger(__name__)
 @kopf.on.resume(*osdplstatus.OpenStackDeploymentStatus.kopf_on_args)
 @kopf.on.update(*osdplstatus.OpenStackDeploymentStatus.kopf_on_args)
 @kopf.on.create(*osdplstatus.OpenStackDeploymentStatus.kopf_on_args)
-async def handle(body, meta, spec, logger, reason, **kwargs):
+def handle(body, meta, spec, logger, reason, **kwargs):
     # TODO(pas-ha) remove all this kwargs[*] nonsense, accept explicit args,
     # pass further only those that are really needed
     # actual **kwargs form is for forward-compat with kopf itself
@@ -29,7 +29,7 @@ async def handle(body, meta, spec, logger, reason, **kwargs):
     field="status.services",
 )
 @kopf.on.resume(*osdplstatus.OpenStackDeploymentStatus.kopf_on_args)
-async def osdplst_status_services(
+def osdplst_status_services(
     name, namespace, body, meta, spec, logger, reason, **kwargs
 ):
     LOG.info(f"Got osdplstatus status.services event {reason}")
