@@ -20,7 +20,7 @@ LOG = utils.get_logger(__name__)
     "v1",
     "secrets",
 )
-async def handle_ceph_shared_secret(
+def handle_ceph_shared_secret(
     body,
     meta,
     name,
