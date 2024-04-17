@@ -75,7 +75,7 @@ def _handle_credentials_rotation(old, new, group_name, secret_name):
     "secrets",
     labels={"application": "neutron", "component": "server"},
 )
-async def handle_neutron_secret(
+def handle_neutron_secret(
     body,
     meta,
     name,
@@ -116,7 +116,7 @@ async def handle_neutron_secret(
     "secrets",
     labels={"application": "neutron", "component": "configmap_etc"},
 )
-async def handle_neutron_configmap_secret(
+def handle_neutron_configmap_secret(
     body,
     meta,
     name,
@@ -163,7 +163,7 @@ async def handle_neutron_configmap_secret(
     "secrets",
     when=lambda name, **_: "generated-identity-passwords" in name,
 )
-async def handle_identity_passwords_secret(
+def handle_identity_passwords_secret(
     body,
     meta,
     name,
@@ -197,7 +197,7 @@ async def handle_identity_passwords_secret(
     "secrets",
     when=lambda name, **_: constants.ADMIN_SECRET_NAME in name,
 )
-async def handle_admin_users_secret(
+def handle_admin_users_secret(
     body,
     meta,
     name,
@@ -227,7 +227,7 @@ async def handle_admin_users_secret(
     "secrets",
     labels={"application": "frr"},
 )
-async def handle_bgpvpnsecret(
+def handle_bgpvpnsecret(
     body,
     meta,
     name,
@@ -272,7 +272,7 @@ async def handle_bgpvpnsecret(
     "secrets",
     labels={"application": "rabbitmq", "component": "server"},
 )
-async def handle_rabbitmq_external_secret(
+def handle_rabbitmq_external_secret(
     body,
     meta,
     name,
@@ -424,7 +424,7 @@ async def handle_rabbitmq_external_secret(
     "secrets",
     labels={constants.OSCTL_SECRET_LABEL[0]: constants.OSCTL_SECRET_LABEL[1]},
 )
-async def handle_substitution_secrets(
+def handle_substitution_secrets(
     body,
     meta,
     name,
@@ -474,7 +474,7 @@ async def handle_substitution_secrets(
     "secrets",
     labels={"application": "keystone", "component": "os-clouds"},
 )
-async def handle_keystone_osclouds_secret(
+def handle_keystone_osclouds_secret(
     body,
     meta,
     name,
