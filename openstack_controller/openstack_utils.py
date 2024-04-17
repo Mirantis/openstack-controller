@@ -272,7 +272,7 @@ class OpenStackClientManager:
         ).json()
 
 
-async def notify_masakari_host_down(node):
+def notify_masakari_host_down(node):
     try:
         os_client = OpenStackClientManager()
         notification = os_client.instance_ha_create_notification(
@@ -296,7 +296,7 @@ async def notify_masakari_host_down(node):
         raise kopf.TemporaryError(f"{e}") from e
 
 
-async def handle_masakari_host_down(node):
+def handle_masakari_host_down(node):
     """Handle down host for masakari.
 
     :param node: Kubernetes node object to check.
@@ -360,7 +360,7 @@ async def handle_masakari_host_down(node):
                 LOG.info(
                     f"Port 22 is not opened on host {node.name} {node_internal_ip}. We should notify masakari that host is down."
                 )
-                await notify_masakari_host_down(node)
+                notify_masakari_host_down(node)
                 return
             finally:
                 sock.close()
