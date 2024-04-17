@@ -22,7 +22,7 @@ LOG = utils.get_logger(__name__)
     "secrets",
     labels={constants.TF_OST_DATA_LABEL[0]: constants.TF_OST_DATA_LABEL[1]},
 )
-async def handle_tf_shared_secrets(
+def handle_tf_shared_secrets(
     body,
     meta,
     name,
