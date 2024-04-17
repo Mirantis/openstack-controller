@@ -1284,8 +1284,6 @@ class Neutron(OpenStackService, MaintenanceApiMixin):
                         )
 
         await super().apply(event, **kwargs)
-        # NOTE(vsaienko): do not allow simultenious neutron-ovs and openvswitch restarts.
-        await self.wait_service_healthy()
         cmr = kube.ClusterMaintenanceRequest.objects(
             kube.kube_client()
         ).get_or_none()
