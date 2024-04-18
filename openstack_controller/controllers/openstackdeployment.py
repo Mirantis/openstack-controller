@@ -270,9 +270,11 @@ async def handle(body, meta, spec, logger, reason, **kwargs):
     kwargs["patch"]["status"]["version"] = version.release_string
     osdplst = osdplstatus.OpenStackDeploymentStatus(name, namespace)
     osdplst.present(osdpl_obj=body)
+    osdpl = kube.get_osdpl()
+    mspec = osdpl.mspec
 
     osdplst.set_osdpl_status(
-        osdplstatus.APPLYING, body["spec"], kwargs["diff"], reason
+        osdplstatus.APPLYING, mspec, kwargs["diff"], reason
     )
 
     # Always create clusterworkloadlock, but set to inactive when we are not interested
@@ -282,9 +284,6 @@ async def handle(body, meta, spec, logger, reason, **kwargs):
     check_handling_allowed(kwargs["old"], kwargs["new"], reason)
 
     secrets.OpenStackAdminSecret(namespace).ensure()
-
-    osdpl = kube.get_osdpl()
-    mspec = osdpl.mspec
     child_view = resource_view.ChildObjectView(mspec)
 
     kwargs["patch"]["status"]["fingerprint"] = layers.spec_hash(mspec)

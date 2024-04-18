@@ -141,8 +141,14 @@ class OpenStackDeploymentStatus(pykube.objects.NamespacedAPIObject):
         self.reload()
         not_ready = []
         total = len(self.obj["status"]["services"].keys())
+        osdpl_status = self.obj["status"]["osdpl"]
         for service, status in self.obj["status"]["services"].items():
-            if status["state"] != APPLIED:
+            if (
+                osdpl_status["fingerprint"] != status["fingerprint"]
+                or osdpl_status["controller_version"]
+                != status["controller_version"]
+                or status["state"] != APPLIED
+            ):
                 not_ready.append(service)
         ready = total - len(not_ready)
         lcm_progress = f"{ready}/{total}"
