@@ -38,7 +38,6 @@ class NetworkFeatureEnabled(base_section.BaseSection):
         if self.get_spec_item("features.neutron.backend", "ml2") == "ml2":
             api_extensions_default.extend(
                 [
-                    "filter-validation",
                     "ip-substring-filtering",
                     "l3-ha",
                     "l3-flavors",
@@ -73,6 +72,7 @@ class NetworkFeatureEnabled(base_section.BaseSection):
                     "network_availability_zone",
                     "subnet_allocation",
                     "flavors",
+                    "filter-validation",
                     "availability_zone",
                     "multi-provider",
                     "subnet-service-types",
