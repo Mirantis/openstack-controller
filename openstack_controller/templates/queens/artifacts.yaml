@@ -219,3 +219,4 @@ designate_pool_manage_hash: '{{ images_base_url }}/openstack/openstack-tools:yog
 ingress_init_config: '{{ images_base_url }}/openstack/openstack-tools:yoga-jammy-20240115142802'
 cinder_wait_for_backends: '{{ images_base_url }}/openstack/openstack-tools:yoga-jammy-20240115142802'
 neutron_portprober_agent: '{{ images_base_url }}/openstack/neutron:queens-bionic-20230227093206'
+redis-operator: '{{ images_base_url }}/openstack/extra/redis-operator:v1.2.4-20231107105540'
