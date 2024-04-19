@@ -315,3 +315,7 @@ spec:
 {%- endif %}
               tungstenfabric:
                 enabled: {{ neutron_backend == 'tungstenfabric' }}
+{%- if spec.openstack_version not in ['queens', 'rocky', 'stein', 'train', 'ussuri', 'victoria', 'wallaby', 'xena', 'yoga', 'zed', 'antelope'] %}
+              cache:
+                backend: "django.core.cache.backends.memcached.PyMemcacheCache"
+{%- endif %}
