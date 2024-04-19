@@ -61,7 +61,11 @@ class BaseFunctionalPortProberTestCase(base.BaseFunctionalTestCase):
         start_time = time.time()
         while True:
             agent_samples = self.get_arping_samples_for_port(port, "success")
-            if agent_samples and all(agent_samples.values()):
+            if len(
+                agent_samples.keys()
+            ) == CONF.PORTPROBER_AGENTS_PER_NETWORK and all(
+                agent_samples.values()
+            ):
                 return
             time.sleep(interval)
             timed_out = int(time.time()) - start_time
