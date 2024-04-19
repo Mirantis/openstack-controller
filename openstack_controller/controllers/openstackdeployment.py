@@ -252,7 +252,11 @@ async def rotate_credentials(
 @kopf.on.resume(*kube.OpenStackDeployment.kopf_on_args)
 @kopf.on.update(*kube.OpenStackDeployment.kopf_on_args)
 @kopf.on.create(*kube.OpenStackDeployment.kopf_on_args)
-async def handle(body, meta, spec, logger, reason, **kwargs):
+def handle(body, meta, spec, logger, reason, **kwargs):
+    asyncio.run(_handle(body, meta, spec, logger, reason, **kwargs))
+
+
+async def _handle(body, meta, spec, logger, reason, **kwargs):
     # TODO(pas-ha) remove all this kwargs[*] nonsense, accept explicit args,
     # pass further only those that are really needed
     # actual **kwargs form is for forward-compat with kopf itself
@@ -402,7 +406,11 @@ async def handle(body, meta, spec, logger, reason, **kwargs):
 
 
 @kopf.on.delete(*kube.OpenStackDeployment.kopf_on_args)
-async def delete(name, meta, body, spec, logger, reason, **kwargs):
+def delete(name, meta, body, spec, logger, reason, **kwargs):
+    asyncio.run(_delete(name, meta, body, spec, logger, reason, **kwargs))
+
+
+async def _delete(name, meta, body, spec, logger, reason, **kwargs):
     # TODO(pas-ha) wait for children to be deleted
     # TODO(pas-ha) remove secrets and so on?
     LOG.info(f"Deleting {name}")
