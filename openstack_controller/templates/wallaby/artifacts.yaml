@@ -228,3 +228,4 @@ ingress_init_config: '{{ images_base_url }}/openstack/openstack-tools:yoga-jammy
 cinder_wait_for_backends: '{{ images_base_url }}/openstack/openstack-tools:yoga-jammy-20240408060019'
 neutron_portprober_agent: '{{ images_base_url }}/openstack/neutron:wallaby-focal-20240112082933'
 neutron_ovn_db_sync_migrate: '{{ images_base_url }}/openstack/neutron:wallaby-focal-20240112082933'
+redis-operator: '{{ images_base_url }}/openstack/extra/redis-operator:v1.2.4-20231107105540'
