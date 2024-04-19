@@ -392,12 +392,30 @@ class RabbitMQ(Service):
             )
 
         cloudprober_enabled = "cloudprober" in services
+        portprober_default = (
+            self.openstack_version
+            not in [
+                "queens",
+                "rocky",
+                "stein",
+                "train",
+                "ussuri",
+                "victoria",
+                "wallaby",
+                "xena",
+                "yoga",
+                "zed",
+            ]
+            and utils.get_in(self.mspec["features"], ["neutron", "backend"])
+            not in ["tungstenfabric", "ml2/ovn"]
+            and cloudprober_enabled
+        )
         portprober_enabled = (
             self.mspec.get("features", {})
             .get("neutron", {})
             .get("extensions", {})
             .get("portprober", {})
-            .get("enabled", False)
+            .get("enabled", portprober_default)
         )
 
         sl_config_data = {
