@@ -73,8 +73,7 @@ def get_maintenance_locks(controller, gateway, compute):
     }
 
 
-@pytest.mark.asyncio
-async def test_nmr_change_not_required_for_node(
+def test_nmr_change_not_required_for_node(
     mocker, nova_registry_service, safe_node
 ):
     node = safe_node
@@ -90,7 +89,7 @@ async def test_nmr_change_not_required_for_node(
 
     node.ready = True
     mocker.patch.object(kube, "find", side_effect=(node,))
-    await maintenance_controller.node_maintenance_request_change_handler(
+    maintenance_controller.node_maintenance_request_change_handler(
         nmr, diff=()
     )
     nwl.required_for_node.assert_called_once()
@@ -100,8 +99,7 @@ async def test_nmr_change_not_required_for_node(
     nwl.set_state_inactive.assert_not_called()
 
 
-@pytest.mark.asyncio
-async def test_nmr_change_required_for_node_not_maintenance_0_active_lock(
+def test_nmr_change_required_for_node_not_maintenance_0_active_lock(
     mocker, nova_registry_service, osdpl, node
 ):
     nmr = {
@@ -129,7 +127,7 @@ async def test_nmr_change_required_for_node_not_maintenance_0_active_lock(
 
     node.ready = True
     mocker.patch.object(kube, "find", side_effect=(node,))
-    await maintenance_controller.node_maintenance_request_change_handler(
+    maintenance_controller.node_maintenance_request_change_handler(
         nmr, diff=()
     )
     nwl.required_for_node.assert_called_once()
@@ -139,8 +137,7 @@ async def test_nmr_change_required_for_node_not_maintenance_0_active_lock(
     nwl.set_state_inactive.assert_called_once()
 
 
-@pytest.mark.asyncio
-async def test_nmr_change_required_for_node_not_maintenance_0_active_lock_service_rejected(
+def test_nmr_change_required_for_node_not_maintenance_0_active_lock_service_rejected(
     mocker, nova_registry_service, osdpl, node
 ):
     nmr = {
@@ -177,7 +174,7 @@ async def test_nmr_change_required_for_node_not_maintenance_0_active_lock_servic
     node.ready = True
     mocker.patch.object(kube, "find", side_effect=(node,))
     with pytest.raises(kopf.TemporaryError):
-        await maintenance_controller.node_maintenance_request_change_handler(
+        maintenance_controller.node_maintenance_request_change_handler(
             nmr, diff=()
         )
     nwl.required_for_node.assert_called_once()
@@ -187,8 +184,7 @@ async def test_nmr_change_required_for_node_not_maintenance_0_active_lock_servic
     nwl.set_state_inactive.assert_not_called()
 
 
-@pytest.mark.asyncio
-async def test_nmr_change_required_for_node_not_maintenance_1_active_lock(
+def test_nmr_change_required_for_node_not_maintenance_1_active_lock(
     mocker, nova_registry_service, osdpl, node
 ):
     nmr = {
@@ -209,7 +205,7 @@ async def test_nmr_change_required_for_node_not_maintenance_1_active_lock(
     node.ready = True
     mocker.patch.object(kube, "find", side_effect=(node,))
     with pytest.raises(kopf.TemporaryError):
-        await maintenance_controller.node_maintenance_request_change_handler(
+        maintenance_controller.node_maintenance_request_change_handler(
             nmr, diff=()
         )
     nwl.required_for_node.assert_called_once()
@@ -219,8 +215,7 @@ async def test_nmr_change_required_for_node_not_maintenance_1_active_lock(
     nwl.set_state_inactive.assert_not_called()
 
 
-@pytest.mark.asyncio
-async def test_nmr_change_required_for_node_maintenance_1_active_lock(
+def test_nmr_change_required_for_node_maintenance_1_active_lock(
     mocker, nova_registry_service, osdpl, node
 ):
     nmr = {
@@ -240,7 +235,7 @@ async def test_nmr_change_required_for_node_maintenance_1_active_lock(
 
     node.ready = True
     mocker.patch.object(kube, "find", side_effect=(node,))
-    await maintenance_controller.node_maintenance_request_change_handler(
+    maintenance_controller.node_maintenance_request_change_handler(
         nmr, diff=()
     )
     nova_registry_service.return_value.process_nmr.assert_called_once()
@@ -251,8 +246,7 @@ async def test_nmr_change_required_for_node_maintenance_1_active_lock(
     nwl.set_state_inactive.assert_called_once()
 
 
-@pytest.mark.asyncio
-async def test_nmr_delete_stop_not_required_for_node(
+def test_nmr_delete_stop_not_required_for_node(
     mocker, nova_registry_service, osdpl, node
 ):
     nmr = {
@@ -269,7 +263,7 @@ async def test_nmr_delete_stop_not_required_for_node(
     osdpl.exists.return_value = True
 
     mocker.patch.object(kube, "find", side_effect=(node,))
-    await maintenance_controller.node_maintenance_request_delete_handler(nmr)
+    maintenance_controller.node_maintenance_request_delete_handler(nmr)
     nwl.required_for_node.assert_called_once()
     nwl.absent.assert_called_once()
     nwl.is_maintenance.assert_not_called()
@@ -277,8 +271,7 @@ async def test_nmr_delete_stop_not_required_for_node(
     nwl.set_state_active.assert_not_called()
 
 
-@pytest.mark.asyncio
-async def test_nmr_delete_nwl_not_in_maintenance(
+def test_nmr_delete_nwl_not_in_maintenance(
     mocker, nova_registry_service, osdpl, node
 ):
     nmr = {
@@ -296,7 +289,7 @@ async def test_nmr_delete_nwl_not_in_maintenance(
     node.ready = True
 
     mocker.patch.object(kube, "find", side_effect=(node,))
-    await maintenance_controller.node_maintenance_request_delete_handler(nmr)
+    maintenance_controller.node_maintenance_request_delete_handler(nmr)
     nwl.required_for_node.assert_called_once()
     nwl.absent.assert_not_called()
     nwl.is_maintenance.assert_called()
@@ -304,8 +297,7 @@ async def test_nmr_delete_nwl_not_in_maintenance(
     nwl.set_state_active.assert_called_once()
 
 
-@pytest.mark.asyncio
-async def test_nmr_delete_nwl_in_maintenance(
+def test_nmr_delete_nwl_in_maintenance(
     mocker, nova_registry_service, osdpl, node
 ):
     nmr = {
@@ -324,7 +316,7 @@ async def test_nmr_delete_nwl_in_maintenance(
     osdpl.exists.return_value = True
     nova_registry_service.return_value.maintenance_api.return_value = True
     mocker.patch.object(kube, "find", side_effect=(node,))
-    await maintenance_controller.node_maintenance_request_delete_handler(nmr)
+    maintenance_controller.node_maintenance_request_delete_handler(nmr)
     nwl.required_for_node.assert_called_once()
     nova_registry_service.return_value.delete_nmr.assert_called_once()
     nwl.absent.assert_not_called()
@@ -333,10 +325,7 @@ async def test_nmr_delete_nwl_in_maintenance(
     nwl.set_state_active.assert_called_once()
 
 
-@pytest.mark.asyncio
-async def test_ndr_osdpl_not_present(
-    mocker, nova_registry_service, node, osdpl
-):
+def test_ndr_osdpl_not_present(mocker, nova_registry_service, node, osdpl):
     ndr = {
         "metadata": {"name": "fake-nmr"},
         "spec": {"nodeName": "fake-node"},
@@ -351,16 +340,13 @@ async def test_ndr_osdpl_not_present(
         maintenance.NodeWorkloadLock, "get_by_node", return_value=nwl
     )
 
-    await maintenance_controller.node_deletion_request_change_handler(ndr)
+    maintenance_controller.node_deletion_request_change_handler(ndr)
     node.exists.assert_not_called()
     osdpl.return_value.exists.assert_called_once()
     nwl.set_state_inactive.assert_called_once()
 
 
-@pytest.mark.asyncio
-async def test_ndr_node_not_present(
-    mocker, nova_registry_service, safe_node, osdpl
-):
+def test_ndr_node_not_present(mocker, nova_registry_service, safe_node, osdpl):
     node = safe_node
     ndr = {
         "metadata": {"name": "fake-nmr"},
@@ -378,16 +364,13 @@ async def test_ndr_node_not_present(
         maintenance.NodeWorkloadLock, "get_by_node", return_value=nwl
     )
 
-    await maintenance_controller.node_deletion_request_change_handler(ndr)
+    maintenance_controller.node_deletion_request_change_handler(ndr)
     node.exists.assert_called_once()
     osdpl.return_value.exists.assert_called_once()
     nwl.set_state_inactive.assert_called_once()
 
 
-@pytest.mark.asyncio
-async def test_ndr_nova_service(
-    mocker, nova_registry_service, safe_node, osdpl
-):
+def test_ndr_nova_service(mocker, nova_registry_service, safe_node, osdpl):
     node = safe_node
     ndr = {
         "metadata": {"name": "fake-nmr"},
@@ -413,17 +396,14 @@ async def test_ndr_nova_service(
         [("compute", nova_registry_service)],
     )
 
-    await maintenance_controller.node_deletion_request_change_handler(ndr)
+    maintenance_controller.node_deletion_request_change_handler(ndr)
     node.exists.assert_called_once()
     osdpl.return_value.exists.assert_called_once()
     nwl.set_state_inactive.assert_called_once()
     nova_registry_service.return_value.process_ndr.assert_called_once()
 
 
-@pytest.mark.asyncio
-async def test_nwl_deletion_no_osdpl(
-    mocker, nova_registry_service, node, osdpl
-):
+def test_nwl_deletion_no_osdpl(mocker, nova_registry_service, node, osdpl):
     nwl_obj = {
         "metadata": {"name": "fake-nmr"},
         "spec": {"nodeName": "fake-node", "controllerName": "openstack"},
@@ -443,17 +423,12 @@ async def test_nwl_deletion_no_osdpl(
         maintenance.NodeWorkloadLock, "get_by_node", return_value=nwl
     )
 
-    await maintenance_controller.node_workloadlock_request_delete_handler(
-        nwl_obj
-    )
+    maintenance_controller.node_workloadlock_request_delete_handler(nwl_obj)
     osdpl.return_value.exists.assert_called_once()
     nova_registry_service.return_value.cleanup_metadata.assert_not_called()
 
 
-@pytest.mark.asyncio
-async def test_nwl_deletion_not_our_nwl(
-    mocker, nova_registry_service, node, osdpl
-):
+def test_nwl_deletion_not_our_nwl(mocker, nova_registry_service, node, osdpl):
     nwl_obj = {
         "metadata": {"name": "fake-nmr"},
         "spec": {"nodeName": "fake-node", "controllerName": "ceph"},
@@ -473,15 +448,12 @@ async def test_nwl_deletion_not_our_nwl(
         maintenance.NodeWorkloadLock, "get_by_node", return_value=nwl
     )
 
-    await maintenance_controller.node_workloadlock_request_delete_handler(
-        nwl_obj
-    )
+    maintenance_controller.node_workloadlock_request_delete_handler(nwl_obj)
     osdpl.return_value.exists.assert_not_called()
     nova_registry_service.return_value.cleanup_metadata.assert_not_called()
 
 
-@pytest.mark.asyncio
-async def test_nwl_deletion_node_still_exit(
+def test_nwl_deletion_node_still_exit(
     mocker, nova_registry_service, node, osdpl
 ):
     nwl_obj = {
@@ -505,7 +477,7 @@ async def test_nwl_deletion_node_still_exit(
         maintenance.NodeWorkloadLock, "get_by_node", return_value=nwl
     )
     with pytest.raises(kopf.TemporaryError):
-        await maintenance_controller.node_workloadlock_request_delete_handler(
+        maintenance_controller.node_workloadlock_request_delete_handler(
             nwl_obj
         )
     osdpl.return_value.exists.assert_called_once()
@@ -513,10 +485,7 @@ async def test_nwl_deletion_node_still_exit(
     nova_registry_service.return_value.cleanup_persistent_data.assert_not_called()
 
 
-@pytest.mark.asyncio
-async def test_nwl_deletion_cleanup(
-    mocker, nova_registry_service, safe_node, osdpl
-):
+def test_nwl_deletion_cleanup(mocker, nova_registry_service, safe_node, osdpl):
     node = safe_node
     nwl_obj = {
         "metadata": {"name": "fake-nmr"},
@@ -538,9 +507,7 @@ async def test_nwl_deletion_cleanup(
     mocker.patch.object(
         maintenance.NodeWorkloadLock, "get_by_node", return_value=nwl
     )
-    await maintenance_controller.node_workloadlock_request_delete_handler(
-        nwl_obj
-    )
+    maintenance_controller.node_workloadlock_request_delete_handler(nwl_obj)
     osdpl.return_value.exists.assert_called_once()
     nova_registry_service.return_value.cleanup_metadata.assert_called_once()
     nova_registry_service.return_value.cleanup_persistent_data.assert_called_once()
