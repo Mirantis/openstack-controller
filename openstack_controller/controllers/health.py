@@ -1,3 +1,4 @@
+import asyncio
 import kopf
 
 from openstack_controller import batch_health
@@ -33,7 +34,7 @@ DAEMONSET_HOOKS = {
 
 
 @kopf.on.delete("apps", "v1", "deployments")
-async def deployments(name, namespace, meta, status, new, reason, **kwargs):
+def deployments(name, namespace, meta, status, new, reason, **kwargs):
     LOG.debug(f"Deployment {name} status.conditions is {status}")
     osdpl = kube.get_osdpl(namespace)
     if not osdpl:
@@ -46,7 +47,7 @@ async def deployments(name, namespace, meta, status, new, reason, **kwargs):
 
 
 @kopf.on.delete("apps", "v1", "statefulsets")
-async def statefulsets(name, namespace, meta, status, reason, **kwargs):
+def statefulsets(name, namespace, meta, status, reason, **kwargs):
     LOG.debug(f"StatefulSet {name} status is {status}")
     osdpl = kube.get_osdpl(namespace)
     if not osdpl:
@@ -60,7 +61,7 @@ async def statefulsets(name, namespace, meta, status, reason, **kwargs):
 
 @kopf.on.field("apps", "v1", "daemonsets", field="status")
 @kopf.on.delete("apps", "v1", "daemonsets")
-async def daemonsets(name, namespace, meta, status, reason, **kwargs):
+def daemonsets(name, namespace, meta, status, reason, **kwargs):
     LOG.debug(f"DaemonSet {name} status is {status}")
     osdpl = kube.get_osdpl(namespace)
     if not osdpl:
@@ -96,7 +97,7 @@ async def daemonsets(name, namespace, meta, status, reason, **kwargs):
     )
     if hook:
         LOG.debug(f"Daemonset {application}-{component} awaiting hook")
-        await hook(osdpl, name, namespace, meta, **kwargs)
+        asyncio.run(hook(osdpl, name, namespace, meta, **kwargs))
 
 
 @kopf.daemon(*kube.OpenStackDeployment.kopf_on_args)
