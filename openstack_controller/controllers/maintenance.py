@@ -22,7 +22,11 @@ def maintenance_node_name(body):
 @kopf.on.create(*maintenance.NodeMaintenanceRequest.kopf_on_args)
 @kopf.on.update(*maintenance.NodeMaintenanceRequest.kopf_on_args)
 @kopf.on.resume(*maintenance.NodeMaintenanceRequest.kopf_on_args)
-async def node_maintenance_request_change_handler(body, **kwargs):
+def node_maintenance_request_change_handler(body, **kwargs):
+    asyncio.run(_node_maintenance_request_change_handler(body, **kwargs))
+
+
+async def _node_maintenance_request_change_handler(body, **kwargs):
     name = body["metadata"]["name"]
     node_name = maintenance_node_name(body)
     LOG.info(f"Got node maintenance request change event {name}")
@@ -92,7 +96,11 @@ async def node_maintenance_request_change_handler(body, **kwargs):
 
 
 @kopf.on.delete(*maintenance.NodeMaintenanceRequest.kopf_on_args)
-async def node_maintenance_request_delete_handler(body, **kwargs):
+def node_maintenance_request_delete_handler(body, **kwargs):
+    asyncio.run(_node_maintenance_request_delete_handler(body, **kwargs))
+
+
+async def _node_maintenance_request_delete_handler(body, **kwargs):
     name = body["metadata"]["name"]
     node_name = maintenance_node_name(body)
     LOG.info(f"Got node maintenance request delete event {name}")
@@ -162,7 +170,7 @@ async def node_maintenance_request_delete_handler(body, **kwargs):
 @kopf.on.create(*maintenance.ClusterMaintenanceRequest.kopf_on_args)
 @kopf.on.update(*maintenance.ClusterMaintenanceRequest.kopf_on_args)
 @kopf.on.resume(*maintenance.ClusterMaintenanceRequest.kopf_on_args)
-async def cluster_maintenance_request_change_handler(body, **kwargs):
+def cluster_maintenance_request_change_handler(body, **kwargs):
     name = body["metadata"]["name"]
     LOG.info(f"Got cluster maintenance request change event {name}")
     LOG.info(
@@ -203,7 +211,7 @@ async def cluster_maintenance_request_change_handler(body, **kwargs):
         # not wait for health
         return
     cwl.set_error_message("Waiting for all OpenStack services are healthy.")
-    await health.wait_services_healthy(mspec, osdplst, child_view)
+    asyncio.run(health.wait_services_healthy(mspec, osdplst, child_view))
 
     cwl.set_state_inactive()
     cwl.unset_error_message()
@@ -211,7 +219,7 @@ async def cluster_maintenance_request_change_handler(body, **kwargs):
 
 
 @kopf.on.delete(*maintenance.ClusterMaintenanceRequest.kopf_on_args)
-async def cluster_maintenance_request_delete_handler(body, **kwargs):
+def cluster_maintenance_request_delete_handler(body, **kwargs):
     name = body["metadata"]["name"]
     LOG.info(f"Got cluster maintenance request delete event {name}")
 
@@ -229,7 +237,11 @@ async def cluster_maintenance_request_delete_handler(body, **kwargs):
 @kopf.on.create(*maintenance.NodeDeletionRequest.kopf_on_args)
 @kopf.on.update(*maintenance.NodeDeletionRequest.kopf_on_args)
 @kopf.on.resume(*maintenance.NodeDeletionRequest.kopf_on_args)
-async def node_deletion_request_change_handler(body, **kwargs):
+def node_deletion_request_change_handler(body, **kwargs):
+    asyncio.run(_node_deletion_request_change_handler(body, **kwargs))
+
+
+async def _node_deletion_request_change_handler(body, **kwargs):
     name = body["metadata"]["name"]
     node_name = maintenance_node_name(body)
     LOG.info(f"Got node deletion request change event {name}")
@@ -263,7 +275,11 @@ async def node_deletion_request_change_handler(body, **kwargs):
 
 
 @kopf.on.delete(*maintenance.NodeWorkloadLock.kopf_on_args)
-async def node_workloadlock_request_delete_handler(body, **kwargs):
+def node_workloadlock_request_delete_handler(body, **kwargs):
+    asyncio.run(_node_workloadlock_request_delete_handler(body, **kwargs))
+
+
+async def _node_workloadlock_request_delete_handler(body, **kwargs):
     name = body["metadata"]["name"]
     node_name = body["spec"]["nodeName"]
     LOG.info(f"Got nodeworkloadlock deletion request change event {name}")
@@ -311,7 +327,7 @@ async def node_workloadlock_request_delete_handler(body, **kwargs):
 
 
 @kopf.on.delete(*maintenance.NodeDisableNotification.kopf_on_args)
-async def node_disable_notification_delete_handler(body, **kwargs):
+def node_disable_notification_delete_handler(body, **kwargs):
     name = body["metadata"]["name"]
     node_name = body["spec"]["nodeName"]
     LOG.info(
