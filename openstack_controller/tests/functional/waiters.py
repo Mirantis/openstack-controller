@@ -111,7 +111,9 @@ def wait_cinder_pool_updated(
         time.sleep(CONF.CINDER_POOL_UPDATE_INTERVAL)
         timed_out = int(time.time()) - start_time
         if timed_out >= timeout:
-            message = f"Pool {pool_name} hasn't updated within {timeout}"
+            message = (
+                f"Pool {pool_name} hasn't updated within {timeout} seconds"
+            )
             LOG.error(message)
             raise TimeoutError(message)
 

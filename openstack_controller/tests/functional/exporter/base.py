@@ -5,6 +5,7 @@ import logging
 
 from prometheus_client.openmetrics.parser import text_string_to_metric_families
 
+from openstack_controller import constants
 from openstack_controller import kube
 from openstack_controller.tests.functional import config
 from openstack_controller.tests.functional import base
@@ -51,6 +52,7 @@ class BaseFunctionalExporterTestCase(
     base.BaseFunctionalTestCase, PrometheusMixin
 ):
     known_metrics = {}
+
     # Dictionary with known metrics for exporter to check.
     #  * that metric is present
     #  * metric labels are set
@@ -160,3 +162,24 @@ class BaseFunctionalExporterTestCase(
                         label in sample.labels,
                         f"Label {label} is not found in metric {metric_name} labels.",
                     )
+
+    def get_pool_by_volume(self, volume):
+        host = self.ocm.oc.get_volume(volume["id"])["host"]
+        openstack_version = self.osdpl.obj["spec"]["openstack_version"]
+        if volume.volume_type == "lvm" or (
+            constants.OpenStackVersion[openstack_version].value
+            <= constants.OpenStackVersion["rocky"].value
+        ):
+            pool = [
+                pool
+                for pool in list(self.ocm.oc.volume.backend_pools())
+                if pool["name"] == host
+            ][0]
+
+        else:
+            pool = [
+                pool
+                for pool in list(self.ocm.oc.volume.backend_pools())
+                if pool["name"].split("#")[1] == host.split("#")[1]
+            ][0]
+        return pool
