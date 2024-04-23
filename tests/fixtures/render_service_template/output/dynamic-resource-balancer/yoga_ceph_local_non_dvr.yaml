@@ -1,0 +1,37 @@
+spec:
+  releases:
+  - name: openstack-drb-controller
+    chart: osh-infra/drb-controller
+    values:
+      images:
+        tags:
+          drb_controller: drb-controller:latest
+      endpoints:
+        cluster_domain_suffix: cluster.local
+        identity:
+          auth:
+            drb-controller:
+              default_domain_id: default
+              password: iCptehQXf4l55GFv8xc50EtBVY1HSR3Qds
+              username: osctlKiD31
+              project_domain_name: default
+              project_name: admin
+              region_name: RegionOne
+              user_domain_name: default
+          hosts:
+            admin:
+              host: keystone-api
+            default: keystone
+            internal: keystone-api
+          port:
+            api:
+              admin: 5000
+              default: 80
+              internal: 5000
+              public: 443
+          scheme:
+            default: http
+            public: https
+      manifests:
+        job_ensure_resources: false
+        configmap_deploy_resources: false

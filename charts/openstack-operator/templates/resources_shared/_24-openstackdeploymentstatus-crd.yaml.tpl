@@ -105,6 +105,7 @@ spec:
                     redis: *component_status
                     stepler: *component_status
                     tempest: *component_status
+                    dynamic-resource-balancer: *component_status
                 osdpl:
                     type: object
                     properties:

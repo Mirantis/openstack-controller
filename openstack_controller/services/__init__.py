@@ -738,6 +738,24 @@ class Cloudprober(Service):
         return t_args
 
 
+class DynamicResourceBalancer(Service):
+    service = "dynamic-resource-balancer"
+    available_releases = ["openstack-drb-controller"]
+
+    def _get_keystone_creds(self):
+        account = "osctl"
+        secret_class = Service.registry["identity"](
+            self.mspec, self.logger, self.osdplst, self.child_view
+        ).service_secret
+        secret_class.wait()
+        return {"drb_controller": secret_class.get().identity[account]}
+
+    def template_args(self):
+        t_args = super().template_args()
+        t_args["keystone_creds"] = self._get_keystone_creds()
+        return t_args
+
+
 class Stepler(OpenStackService):
     service = "stepler"
     available_releases = ["openstack-stepler"]

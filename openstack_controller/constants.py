@@ -46,6 +46,7 @@ CHART_GROUP_MAPPING = {
         "frr",
         "iscsi",
         "strongswan",
+        "drb-controller",
     ],
 }
 
