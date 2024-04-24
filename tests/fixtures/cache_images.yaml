@@ -39,6 +39,7 @@ spec:
         image: neutron:latest
         name: image-precaching-neutron-db-sync
         securityContext:
+          allowPrivilegeEscalation: false
           capabilities:
             drop:
             - ALL
@@ -48,6 +49,7 @@ spec:
         image: nova:latest
         name: image-precaching-nova-api
         securityContext:
+          allowPrivilegeEscalation: false
           capabilities:
             drop:
             - ALL
@@ -57,6 +59,7 @@ spec:
         image: libvirt:latest
         name: image-precaching-libvirt
         securityContext:
+          allowPrivilegeEscalation: false
           capabilities:
             drop:
             - ALL
@@ -66,6 +69,7 @@ spec:
         image: openvswitch:latest
         name: image-precaching-openvswitch
         securityContext:
+          allowPrivilegeEscalation: false
           capabilities:
             drop:
             - ALL
