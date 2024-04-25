@@ -39,6 +39,7 @@ spec:
 {# not all images support "/bin/sleep infinity" #}
         command: ["/bin/sleep", "86400000"]
         securityContext:
+          allowPrivilegeEscalation: false
           capabilities:
             drop:
             - ALL
