@@ -196,6 +196,17 @@ class KeycloackCreds(Serializer):
     passphrase: str
 
 
+@dataclass
+class DRBCredentials(Serializer):
+    identity: Dict[str, OSSytemCreds]
+
+    def __init__(
+        self,
+        identity=None,
+    ):
+        self.identity = identity or {}
+
+
 def get_secret(namespace: str, name: str, silent: bool = False):
     secret = kube.find(pykube.Secret, name, namespace, silent=silent)
     return secret
@@ -665,6 +676,55 @@ class OpenStackServiceSecret(MultiSecret):
             },
             to_save,
         )
+
+    def ensure(self):
+        super().ensure()
+        for name in self._secret_names:
+            exists_secret = self.get(name=name)
+            to_update = {"identity": {}}
+            for account in self.service_accounts:
+                if account not in exists_secret.identity.keys():
+                    to_update["identity"].update({account: []})
+            if to_update["identity"]:
+                exists_secret = self._fill_new_fields(
+                    exists_secret.to_json(), to_update
+                )
+                self.save(exists_secret, name)
+
+
+class DRBServiceSecret(MultiSecret):
+    secret_class = DRBCredentials
+
+    def __init__(
+        self,
+        namespace: str,
+        service: str,
+        service_accounts: List[str] = None,
+        protected_accounts: List[str] = None,
+    ):
+        self.secret_base_name = f"generated-{service}-passwords"
+        self.service = service
+        self.service_accounts = service_accounts or []
+        self.protected_accounts = protected_accounts or []
+        super().__init__(namespace)
+
+    @property
+    def rotation_fields(self):
+        return (
+            {
+                "identity": {x: ["password"] for x in self.service_accounts},
+            },
+            {},
+        )
+
+    def create(self):
+        secret_data = {"identity": {}}
+        for account in self.service_accounts:
+            secret_data["identity"].update(
+                {account: generate_credentials(account)}
+            )
+        os_creds = self.secret_class(**secret_data)
+        return os_creds
 
     def ensure(self):
         super().ensure()
