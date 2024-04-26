@@ -119,6 +119,10 @@ class OpenStackDeploymentStatus(pykube.objects.NamespacedAPIObject):
         self.reload()
         return self.obj["status"]["osdpl"]["fingerprint"]
 
+    def get_osdpl_controller_version(self):
+        self.reload()
+        return self.obj["status"]["osdpl"]["controller_version"]
+
     @property
     def osdpl_health(self):
         self.reload()
