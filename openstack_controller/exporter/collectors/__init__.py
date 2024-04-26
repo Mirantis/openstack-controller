@@ -58,6 +58,9 @@ from openstack_controller.exporter.collectors.openstack.manila import (
 from openstack_controller.exporter.collectors.osdpl import (
     OsdplMetricCollector,
 )
+from openstack_controller.exporter.collectors.openstack.masakari import (
+    OsdplMasakariMetricCollector,
+)
 
 __all__ = (
     OsdplMetricsCollector,
@@ -75,6 +78,7 @@ __all__ = (
     OsdplAodhMetricCollector,
     OsdplApiMetricCollector,
     OsdplManilaMetricCollector,
+    OsdplMasakariMetricCollector,
 )
 
 registry = base.BaseMetricsCollector.registry
