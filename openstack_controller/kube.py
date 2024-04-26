@@ -1,3 +1,4 @@
+import abc
 import asyncio
 import base64
 from dataclasses import dataclass, field
@@ -342,6 +343,23 @@ class HelmBundleMixin:
         return False
 
 
+class ObjectStatusMixin(abc.ABC):
+
+    @property
+    @abc.abstractmethod
+    def ready(self):
+        pass
+
+    async def _wait_ready(self, interval):
+        while not self.ready:
+            await asyncio.sleep(interval)
+
+    async def wait_ready(self, timeout=None, interval=10):
+        LOG.info(f"Waiting for {timeout} {self.kind}/{self.name} is ready")
+        await asyncio.wait_for(self._wait_ready(interval), timeout=timeout)
+        LOG.info(f"The {self.kind}/{self.name} is ready")
+
+
 class Secret(pykube.Secret, HelmBundleMixin):
     @property
     def data_decoded(self):
@@ -363,7 +381,7 @@ class Service(pykube.Service, HelmBundleMixin):
         return res
 
 
-class StatefulSet(pykube.StatefulSet, HelmBundleMixin):
+class StatefulSet(pykube.StatefulSet, HelmBundleMixin, ObjectStatusMixin):
     @property
     def uid(self):
         return self.obj["metadata"]["uid"]
@@ -450,7 +468,7 @@ class Ingress(pykube.objects.NamespacedAPIObject, HelmBundleMixin):
     kind = "Ingress"
 
 
-class Job(pykube.Job, HelmBundleMixin):
+class Job(pykube.Job, HelmBundleMixin, ObjectStatusMixin):
     immutable = True
 
     @property
@@ -579,7 +597,7 @@ class CronJob(pykube.CronJob, HelmBundleMixin):
         return kube_job
 
 
-class Deployment(pykube.Deployment, HelmBundleMixin):
+class Deployment(pykube.Deployment, HelmBundleMixin, ObjectStatusMixin):
     @property
     def ready(self):
         self.reload()
@@ -600,7 +618,7 @@ class Deployment(pykube.Deployment, HelmBundleMixin):
         raise ValueError("Not ready yet.")
 
 
-class DaemonSet(pykube.DaemonSet, HelmBundleMixin):
+class DaemonSet(pykube.DaemonSet, HelmBundleMixin, ObjectStatusMixin):
     @property
     def uid(self):
         return self.obj["metadata"]["uid"]
@@ -847,7 +865,7 @@ class Pod(pykube.Pod):
         return False
 
 
-class Node(pykube.Node):
+class Node(pykube.Node, ObjectStatusMixin):
 
     @property
     def ready(self):
