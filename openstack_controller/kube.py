@@ -20,6 +20,7 @@ from . import utils
 from . import layers
 from . import websocket_client
 from . import exception
+from . import osdplstatus
 
 LOG = utils.get_logger(__name__)
 CONF = settings.CONF
@@ -100,6 +101,35 @@ class OpenStackDeployment(pykube.objects.NamespacedAPIObject):
         subs_spec = layers.substitude_osdpl(self.obj["spec"])
         mspec = layers.merge_spec(subs_spec, LOG)
         return mspec
+
+    @property
+    def is_applied(self):
+        self.reload()
+        osdplst = osdplstatus.OpenStackDeploymentStatus(
+            self.name, self.namespace
+        )
+        status = self.obj.get("status", {})
+        if osdplst.get_osdpl_status() != osdplstatus.APPLIED:
+            return False
+        if osdplst.get_osdpl_fingerprint() != status.get("fingerprint"):
+            return False
+        if osdplst.get_osdpl_controller_version() != status.get("version"):
+            return False
+        return True
+
+    async def _wait_applied(self, interval):
+        while not self.is_applied:
+            await asyncio.sleep(interval)
+
+    async def wait_applied(self, timeout=600, interval=30):
+        LOG.info(
+            f"Waiting {timeout} seconds {self.kind}/{self.name} status is applied"
+        )
+        await asyncio.wait_for(
+            self._wait_applied(interval),
+            timeout=timeout,
+        )
+        LOG.info(f"{self.kind}/{self.name} is applied")
 
 
 class OpenStackDeploymentSecret(pykube.objects.NamespacedAPIObject):
