@@ -40,17 +40,24 @@ class OsdplMasakariMetricCollector(base.OpenStackBaseMetricCollector):
                 "Number of hosts in specific segment in the environment",
                 labels=["segment"],
             ),
+            "hosts": GaugeMetricFamily(
+                f"{self._name}_hosts",
+                "The total number of hosts in еhe environment",
+                labels=[],
+            ),
         }
 
     @utils.timeit
     def update_samples(self):
         segments_total = 0
+        hosts_total = 0
         segment_hosts_samples = []
         for segment in self.oc.oc.ha.segments():
             segment_uuid = segment["uuid"]
             segment_name = segment["name"]
             segments_total += 1
             segment_hosts = len(list(self.oc.oc.ha.hosts(segment_uuid)))
+            hosts_total += segment_hosts
             segment_hosts_samples.append(
                 (
                     [
@@ -61,3 +68,4 @@ class OsdplMasakariMetricCollector(base.OpenStackBaseMetricCollector):
             )
         self.set_samples("segments", [([], segments_total)])
         self.set_samples("segment_hosts", segment_hosts_samples)
+        self.set_samples("hosts", [([], hosts_total)])
