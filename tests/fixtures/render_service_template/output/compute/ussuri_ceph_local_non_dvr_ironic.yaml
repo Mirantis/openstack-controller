@@ -154,6 +154,9 @@ spec:
             track_instance_changes: false
           scheduler:
             discover_hosts_in_cells_interval: 120
+          ironic:
+            status_code_retries: 15
+            status_code_retry_delay: 15
         ssh_private: 'COMPUTE TEST SSH PRIVATE KEY
 
           '
