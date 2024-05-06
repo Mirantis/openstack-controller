@@ -3,8 +3,10 @@ import asyncio
 import argparse
 import traceback
 import json
+import logging
 import re
 import time
+import yaml
 
 from concurrent.futures import ThreadPoolExecutor, ALL_COMPLETED, wait
 from pykube import ConfigMap
@@ -19,9 +21,6 @@ from openstack_controller import resource_view
 from openstack_controller import services
 from openstack_controller import settings
 from openstack_controller.openstack_utils import OpenStackClientManager
-
-
-LOG = utils.get_logger(__name__)
 
 MIGRATION_FINALIZER = "lcm.mirantis.com/ovs-ovn-migration.finalizer"
 MIGRATION_STATE_CONFIGMAP_NAME = "ovs-ovn-migration-state"
@@ -87,6 +86,52 @@ def set_args():
     if not args.mode:
         parser.error("Run mode does not specified")
     return args
+
+
+def get_logger():
+    logging_conf = yaml.safe_load(
+        f"""
+    disable_existing_loggers: false
+    formatters:
+      standard:
+        format: '%(asctime)s [%(levelname)s] %(name)s: %(message)s'
+    handlers:
+      default:
+        class: logging.StreamHandler
+        formatter: standard
+        stream: ext://sys.stdout
+        level: INFO
+      default_file:
+        class: logging.FileHandler
+        formatter: standard
+        filename: /tmp/ovs-ovn-migration.log
+        level: DEBUG
+    loggers:
+      aiohttp:
+        level: WARNING
+      kopf:
+        level: INFO
+      kopf.activities.probe:
+        level: WARNING
+      opensearch:
+        level: WARNING
+      openstack_controller:
+        level: INFO
+      openstack_controller.cli.ovs_ovn_migration:
+        level: DEBUG
+    root:
+      handlers:
+      - default
+      - default_file
+      level: INFO
+    version: 1
+    """
+    )
+    logging.config.dictConfig(logging_conf)
+    return logging.getLogger(__name__)
+
+
+LOG = get_logger()
 
 
 def check_input(check, msg, error_string="Illegal Input"):
