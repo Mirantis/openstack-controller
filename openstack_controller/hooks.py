@@ -23,7 +23,7 @@ async def run_nova_cell_setup(osdpl, name, namespace, meta, **kwargs):
         return
     cronjob = kube.find(kube.CronJob, "nova-cell-setup", namespace)
     job = await cronjob.run(wait_completion=True)
-    job.delete()
+    job.delete(propagation_policy="Foreground")
 
 
 async def run_octavia_create_resources(osdpl, name, namespace, meta, **kwargs):
