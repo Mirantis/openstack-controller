@@ -24,3 +24,5 @@
             ingress:
               - from:
 {{ from_all(service_childs[mdns_pod].get_np_ports(["pdns-tcp", "pdns-udp"])) | indent(16) }}
+              - from:
+{{ from_namespaces(api_ns_list, service_childs[mdns_pod].get_np_ports(["pdns-api"])) | indent(16) }}
