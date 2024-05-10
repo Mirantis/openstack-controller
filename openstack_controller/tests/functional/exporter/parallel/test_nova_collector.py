@@ -305,13 +305,17 @@ class NovaAggregatesTestCase(base.BaseFunctionalExporterTestCase):
         )
 
     def _test_osdpl_nova_aggregate_hosts_info(
-        self, metric_name, expected_num, phase
+        self, metric_name, expected_num, phase, metric_labels=None
     ):
         metric = self.get_metric_after_refresh(
             metric_name, self.scrape_collector
         )
+        if metric_labels == None:
+            metric_labels = {"name": self.aggregate["name"]}
+
+        samples = self.filter_metric_samples(metric, metric_labels)
         self.assertEqual(
-            len(metric.samples),
+            len(samples),
             expected_num,
             f"{phase}: The number of hosts in aggregate is not correct.",
         )
@@ -359,6 +363,7 @@ class NovaAggregatesTestCase(base.BaseFunctionalExporterTestCase):
         #. Check host dissapears from the metric
         """
         metric_name = "osdpl_nova_host_aggregate_info"
+
         self._test_osdpl_nova_aggregate_hosts_info(metric_name, 0, "Initial")
 
         aggregate_compute = [
@@ -370,13 +375,16 @@ class NovaAggregatesTestCase(base.BaseFunctionalExporterTestCase):
             metric_name,
             1,
             "After create",
+            metric_labels={
+                "name": self.aggregate["name"],
+                "host": aggregate_compute,
+            },
         )
 
         self.aggregate_remove_host(self.aggregate["id"], aggregate_compute)
+
         self._test_osdpl_nova_aggregate_hosts_info(
-            metric_name,
-            0,
-            "After delete",
+            metric_name, 0, "After delete"
         )
 
 
