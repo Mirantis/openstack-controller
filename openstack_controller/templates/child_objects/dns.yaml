@@ -181,6 +181,9 @@ designate:
         - port: 53
           name: pdns-udp
           protocol: UDP
+        - name: pdns-api
+          port: 8081
+          protocol: TCP
     designate-producer:
       connections:
         egress:
