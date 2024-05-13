@@ -252,11 +252,15 @@ class KubernetesWebSocketsClient:
 
     def run_forever(self, timeout=None):
         """Wait till connection is closed or timeout reached. Buffer any input
-        received during this time."""
+        received during this time.
+        :raises TimeoutError: When reached specified timeout.
+        """
         if timeout:
             start = time.time()
             while self.is_open() and time.time() - start < timeout:
                 self.update(timeout=(timeout - time.time() + start))
+            if self.is_open():
+                raise TimeoutError("Timeout reached waiting for socket close")
         else:
             while self.is_open():
                 self.update(timeout=None)

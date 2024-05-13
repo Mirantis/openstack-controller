@@ -793,23 +793,25 @@ class Pod(pykube.Pod):
             return True
         return False
 
-    def _check_exec_errors(self, resp, raise_on_error=False):
-        error = resp.get("stderr")
-        if error:
-            LOG.error(f"Got stderr while running command in pod: {error}")
-            if raise_on_error:
-                raise exception.PodExecCommandFailed(error)
-
     def exec(self, command, container=None, timeout=15, raise_on_error=False):
         """Run command in pod and return output
 
         :param command: List with command to execute
         :param container: The name of container
         :param timeout: Timeout to run command
-        :param raise_on_error: Boolean to raise exception on error.
 
-        :raises PodExecCommandFailed: When stderr is not empty and raise_on_error
-                is set to True
+        :raises PodExecCommandFailed: when resp["error"]["status"] != Success and raise_on_error
+        :returns : dictionary with the following structure
+          {
+              "timed_out": <boolan flag to specify is command timed out>
+              "exception": The exception instnace if got any from k8s API
+                           while communicating
+              "stdout": stdout output
+              "stderr": strder output
+              "error": content of error channel
+              "error_json": content of error channel in json format (if able to convert)
+              <channel_name>: <channel_data>
+          }
         """
         kwargs = {}
         headers = {
@@ -846,24 +848,55 @@ class Pod(pykube.Pod):
         data = self.api.get_kwargs(**api_kwargs)
 
         wsclient = None
-        res = {}
+        res = {
+            "timed_out": False,
+            "exception": None,
+            "stderr": "",
+            "stdout": "",
+            "error_json": {},
+        }
         try:
             wsclient = websocket_client.KubernetesWebSocketsClient(
                 self.api.config, **data
             )
-            wsclient.run_forever(timeout=timeout)
-            res = wsclient.read_all()
-            if "stdout" not in res:
-                res["stdout"] = ""
+            try:
+                wsclient.run_forever(timeout=timeout)
+            except TimeoutError:
+                LOG.error(
+                    "Timed out while runing command %s in %s/%s",
+                    command,
+                    self.name,
+                    container,
+                )
+                res["timed_out"] = True
+            res.update(wsclient.read_all())
         except Exception as e:
             LOG.exception(
-                f"Running command {command} inside pod {self.name}:{container} failed."
+                "Got exception when running command in pod", exc_info=e
             )
-            res = {"stdout": "", "stderr": f"Running command failed: {e}"}
+            res["exception"] = e
         finally:
             if wsclient is not None:
                 wsclient.close()
-        self._check_exec_errors(res, raise_on_error)
+        if "error" in res:
+            try:
+                # k8s returns error in json format, if no error encountered
+                # error field looks like: '{"status": "Success", "metadata":{}}'
+                res["error_json"] = json.loads(res["error"])
+                if res["error_json"].get("status") != "Success":
+                    LOG.error(
+                        "Got error %s while running command %s in pod/container %s/%s",
+                        res["error_json"],
+                        command,
+                        self.name,
+                        container,
+                    )
+                    if raise_on_error:
+                        raise exception.PodExecCommandFailed()
+            except Exception:
+                LOG.error(
+                    "Failed to extract error from response %s", res["error"]
+                )
         return res
 
     @property
