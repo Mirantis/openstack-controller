@@ -649,6 +649,7 @@ class Deployment(pykube.Deployment, HelmBundleMixin, ObjectStatusMixin):
 
 
 class DaemonSet(pykube.DaemonSet, HelmBundleMixin, ObjectStatusMixin):
+
     @property
     def uid(self):
         return self.obj["metadata"]["uid"]
@@ -743,6 +744,30 @@ class DaemonSet(pykube.DaemonSet, HelmBundleMixin, ObjectStatusMixin):
                 pod.delete()
                 if pod_node:
                     await self.wait_pod_on_node(pod_node)
+
+    @property
+    def finalizers(self):
+        self.reload()
+        return self.obj["metadata"].get("finalizers", [])
+
+    @finalizers.setter
+    def finalizers(self, finalizers):
+        self.obj["metadata"]["finalizers"] = finalizers
+        # we use is_strategic=False because if we need to remove
+        # some finalizer strategic merge is unable to do this.
+        self.update(is_strategic=False)
+
+    def ensure_finalizer_present(self, finalizer):
+        finalizers = self.finalizers
+        if finalizer not in finalizers:
+            finalizers.append(finalizer)
+            self.finalizers = finalizers
+
+    def ensure_finalizer_absent(self, finalizer):
+        finalizers = self.finalizers
+        if finalizer in finalizers:
+            finalizers.remove(finalizer)
+            self.finalizers = finalizers
 
     @property
     def generation(self):
