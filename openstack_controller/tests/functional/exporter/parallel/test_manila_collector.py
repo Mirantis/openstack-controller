@@ -4,6 +4,11 @@ from openstack_controller.tests.functional.exporter import base
 
 
 class ManilaCollectorFunctionalTestCase(base.BaseFunctionalExporterTestCase):
+
+    known_metrics = {
+        "osdpl_manila_shares": {"labels": []},
+    }
+
     def setUp(self):
         super().setUp()
         if not self.is_manila_enabled():
