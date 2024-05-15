@@ -132,7 +132,7 @@ def test_nmr_change_required_for_node_not_maintenance_0_active_lock(
     )
     nwl.required_for_node.assert_called_once()
     nwl.present.assert_called_once()
-    nwl.is_maintenance.assert_called_once()
+    nwl.acquire_internal_lock.assert_called_once()
     nwl.is_active.assert_called_once()
     nwl.set_state_inactive.assert_called_once()
 
@@ -179,7 +179,7 @@ def test_nmr_change_required_for_node_not_maintenance_0_active_lock_service_reje
         )
     nwl.required_for_node.assert_called_once()
     nwl.present.assert_called_once()
-    nwl.is_maintenance.assert_called_once()
+    nwl.acquire_internal_lock.assert_called_once()
     nwl.is_active.assert_called_once()
     nwl.set_state_inactive.assert_not_called()
 
@@ -194,6 +194,7 @@ def test_nmr_change_required_for_node_not_maintenance_1_active_lock(
     nwl = mock.Mock()
     nwl.required_for_node.return_value = True
     nwl.is_maintenance.return_value = False
+    nwl.acquire_internal_lock.side_effect = kopf.TemporaryError("BOOM")
     nwl.can_handle_nmr.return_value = False
 
     osdpl.exists.return_value = True
@@ -210,7 +211,7 @@ def test_nmr_change_required_for_node_not_maintenance_1_active_lock(
         )
     nwl.required_for_node.assert_called_once()
     nwl.present.assert_called_once()
-    nwl.is_maintenance.assert_called_once()
+    nwl.acquire_internal_lock.assert_called_once()
     nwl.is_active.assert_not_called()
     nwl.set_state_inactive.assert_not_called()
 
@@ -241,7 +242,7 @@ def test_nmr_change_required_for_node_maintenance_1_active_lock(
     nova_registry_service.return_value.process_nmr.assert_called_once()
     nwl.required_for_node.assert_called_once()
     nwl.present.assert_called_once()
-    nwl.is_maintenance.assert_called_once()
+    nwl.acquire_internal_lock.assert_called_once()
     nwl.is_active.assert_called_once()
     nwl.set_state_inactive.assert_called_once()
 

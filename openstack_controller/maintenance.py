@@ -1,9 +1,11 @@
 import datetime
 import logging
+import threading
 
 import enum
 import json
 import pykube
+import kopf
 
 from openstack_controller import constants as const
 from openstack_controller import kube
@@ -12,6 +14,7 @@ from openstack_controller import settings
 
 LOG = logging.getLogger(__name__)
 CONF = settings.CONF
+MAINTENANCE_LOCK = threading.Lock()
 
 MAINTENANCE_DEFAULT_NODE_CONFIG = {
     # The migration mode for instances present on the host either
@@ -262,6 +265,26 @@ class NodeWorkloadLock(LockBase):
                 )
                 return False
         return True
+
+    def acquire_internal_lock(self):
+        """Acquire internal lock on workloadlock object
+
+        Set internal state to active, which basically means that we start
+        handling the node, but did not change state of workloadlock to active.
+        Should be done under lock to avoid races with parallel nmr handling.
+
+        :raises TemporaryError: when can't handle nmr due to cuncurrent operations.
+        """
+        with MAINTENANCE_LOCK:
+            if not self.is_maintenance() and not self.can_handle_nmr():
+                node_name = self.obj["spec"]["nodeName"]
+                msg = (
+                    f"Number of inactive NodeWorkloadLocks exceeds allowed concurrency. "
+                    f"Deferring processing for node {node_name}"
+                )
+                self.set_error_message(msg)
+                raise kopf.TemporaryError(msg)
+            self.set_inner_state_active()
 
 
 class MaintenanceRequestBase(pykube.objects.APIObject):

@@ -45,13 +45,7 @@ async def _node_maintenance_request_change_handler(body, **kwargs):
 
     # NOTE(vsaienko): check if current node is in maintenance to let
     # retry on Exception here.
-    if not nwl.is_maintenance() and not nwl.can_handle_nmr():
-        msg = (
-            f"Number of inactive NodeWorkloadLocks exceeds allowed concurrency. "
-            f"Deferring processing for node {node.name}"
-        )
-        nwl.set_error_message(msg)
-        raise kopf.TemporaryError(msg)
+    nwl.acquire_internal_lock()
 
     osdpl = kube.get_osdpl()
     if not osdpl or not osdpl.exists():
