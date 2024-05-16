@@ -29,50 +29,64 @@ MIGRATION_STATE_CONFIGMAP_NAME = "ovs-ovn-migration-state"
 # Stage statuses
 STARTED, COMPLETED, FAILED = ("started", "completed", "failed")
 
-parser = argparse.ArgumentParser(
-    prog="osctl-ovs-ovn-migrate",
-    description="Migrate from OVS neutron backend to OVN.",
-)
-parser.add_argument(
-    "--non-interactive",
-    action="store_false",
-    dest="interactive",
-    help=("Run migration in non interactive mode"),
-)
-parser.add_argument(
-    "--max-workers",
-    type=int,
-    default=0,
-    dest="max_workers",
-    help=(
-        """Maximum number of workers to spawn for parallel operations.
-        If set to 0, internal defaults for operations will be used.
-        For example for pods parallel operations (like exec) number of workers will be
-        equal to number of target pods.
-        """
-    ),
-)
-parser.add_argument(
-    "--cmp-threshold",
-    type=int,
-    default=0,
-    dest="cmp_threshold",
-    help="Maximum number of compute nodes allowed to fail migration.",
-)
-parser.add_argument(
-    "--gtw-threshold",
-    type=int,
-    default=0,
-    dest="gtw_threshold",
-    help="Maximum number of gateway nodes allowed to fail migration.",
-)
 
-args = parser.parse_args()
+def set_args():
+    parser = argparse.ArgumentParser(
+        prog="osctl-ovs-ovn-migrate",
+        description="Migrate from OVS neutron backend to OVN.",
+    )
+    subparsers = parser.add_subparsers(
+        help="Parse subcommands of migration script", dest="mode"
+    )
+    subparsers.add_parser(
+        "backup_db", help="Backup Neutron database before migration"
+    )
+    migrate_subparcer = subparsers.add_parser(
+        "migration",
+        help="Start migration process",
+        formatter_class=argparse.RawTextHelpFormatter,
+    )
+    subparsers.add_parser(
+        "preflight_checks", help="OpenStack checks before migration"
+    )
+    migrate_subparcer.add_argument(
+        "--non-interactive",
+        action="store_false",
+        dest="interactive",
+        help=("Run migration in non interactive mode"),
+    )
+    migrate_subparcer.add_argument(
+        "--max-workers",
+        type=int,
+        default=0,
+        dest="max_workers",
+        help=(
+            """Maximum number of workers to spawn for parallel operations.
+            If set to 0, internal defaults for operations will be used.
+            For example for pods parallel operations (like exec) number of workers will be
+            equal to number of target pods.
+            """
+        ),
+    )
+    migrate_subparcer.add_argument(
+        "--cmp-threshold",
+        type=int,
+        default=0,
+        dest="cmp_threshold",
+        help="Maximum number of compute nodes allowed to fail migration.",
+    )
+    migrate_subparcer.add_argument(
+        "--gtw-threshold",
+        type=int,
+        default=0,
+        dest="gtw_threshold",
+        help="Maximum number of gateway nodes allowed to fail migration.",
+    )
 
-INTERACTIVE = args.interactive
-MAX_WORKERS = args.max_workers
-GTW_THRESHOLD = args.gtw_threshold
-CMP_THRESHOLD = args.cmp_threshold
+    args = parser.parse_args()
+    if not args.mode:
+        parser.error("Run mode does not specified")
+    return args
 
 
 def check_input(check, msg, error_string="Illegal Input"):
@@ -390,7 +404,7 @@ def cleanup_api_resources():
     LOG.info("Finished Neutron API resources cleanup")
 
 
-def prepare():
+def prepare(script_args):
     osdpl = kube.get_osdpl()
     network_svc = get_network_service(osdpl)
     LOG.info("Backing up OVS bridge mappings")
@@ -416,11 +430,11 @@ def prepare():
         neutron_ovs_agents,
         ["bash", "-c", backup_bridge_mappings],
         "neutron-ovs-agent",
-        max_workers=MAX_WORKERS,
+        max_workers=script_args.max_workers,
     )
 
 
-def deploy_ovn_db():
+def deploy_ovn_db(script_args):
     osdpl = kube.get_osdpl()
     network_svc = get_network_service(osdpl)
     LOG.info(
@@ -473,7 +487,7 @@ def deploy_ovn_db():
     LOG.info("Deployment OVN db done")
 
 
-def deploy_ovn_controllers():
+def deploy_ovn_controllers(script_args):
     """Deploys ovn controllers in migration mode and syncs ovn db"""
     osdpl = kube.get_osdpl()
     network_svc = get_network_service(osdpl)
@@ -509,7 +523,7 @@ def deploy_ovn_controllers():
     LOG.info("Neutron database sync to OVN database is completed")
 
 
-def migrate_dataplane():
+def migrate_dataplane(script_args):
     osdpl = kube.get_osdpl()
     network_svc = get_network_service(osdpl)
     ovn_daemonsets = get_objects_by_id(network_svc, "ovn-controller")
@@ -521,7 +535,7 @@ def migrate_dataplane():
             ovn_daemonsets,
             ["ovs-vsctl", "--no-wait", "list-br"],
             "controller",
-            max_workers=MAX_WORKERS,
+            max_workers=script_args.max_workers,
         )
     except Exception as e:
         LOG.error(
@@ -539,17 +553,17 @@ def migrate_dataplane():
             ovn_daemonsets,
             ["/tmp/ovn-migrate-dataplane.sh"],
             "controller",
-            max_workers=MAX_WORKERS,
+            max_workers=script_args.max_workers,
             raise_on_error=False,
             timeout=60,
             nodes=failed_nodes,
         )
         failed_nodes = set()
         failed_gtw, gtw_threshold_fail = check_nodes_results(
-            results, constants.NodeRole.gateway, GTW_THRESHOLD
+            results, constants.NodeRole.gateway, script_args.gtw_threshold
         )
         failed_cmp, cmp_threshold_fail = check_nodes_results(
-            results, constants.NodeRole.compute, CMP_THRESHOLD
+            results, constants.NodeRole.compute, script_args.cmp_threshold
         )
         failed_nodes = failed_gtw.union(failed_cmp)
         tries += 1
@@ -572,7 +586,7 @@ def migrate_dataplane():
         )
 
 
-def finalize_migration():
+def finalize_migration(script_args):
     osdpl = kube.get_osdpl()
     network_svc = get_network_service(osdpl)
     LOG.info("Turning off ovn controller pods migration mode")
@@ -655,7 +669,7 @@ def finalize_migration():
     asyncio.run(health.wait_services_healthy(osdpl.mspec, osdplst, child_view))
 
 
-def cleanup():
+def cleanup(script_args):
     cleanup_api_resources()
 
 
@@ -725,7 +739,7 @@ WORKFLOW = [
 ]
 
 
-def main():
+def do_migration(script_args):
     state_cm = StateCM(
         MIGRATION_STATE_CONFIGMAP_NAME,
         settings.OSCTL_OS_DEPLOYMENT_NAMESPACE,
@@ -749,7 +763,7 @@ def main():
             """
             )
             state_cm.update(stage_name, STARTED)
-            stage["executable"]()
+            stage["executable"](script_args)
             state_cm.update(stage_name, COMPLETED)
             LOG.info(f"Completed {stage_name} stage")
         except Exception as e:
@@ -758,7 +772,7 @@ def main():
             LOG.exception(f"Failed to run stage {stage_name}")
         finally:
             current_index = WORKFLOW.index(stage)
-            if INTERACTIVE and current_index != len(WORKFLOW) - 1:
+            if script_args.interactive and current_index != len(WORKFLOW) - 1:
                 next_stage = WORKFLOW[current_index + 1]
                 LOG.info(
                     f"""Next stage to run is {next_stage['name']}
@@ -776,3 +790,25 @@ def main():
                     break
             if error:
                 raise error
+
+
+def do_preflight_checks():
+    pass
+
+
+def do_neutron_db_backup():
+    pass
+
+
+def main():
+    args = set_args()
+    if args.mode == "migration":
+        do_migration(args)
+    elif args.mode == "preflight_checks":
+        do_preflight_checks()
+    elif args.mode == "backup_db":
+        do_neutron_db_backup()
+
+
+if __name__ == "__main__":
+    main()
