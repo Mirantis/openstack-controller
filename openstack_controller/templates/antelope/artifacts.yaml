@@ -236,4 +236,4 @@ cinder_wait_for_backends: '{{ images_base_url }}/openstack/openstack-tools:yoga-
 neutron_portprober_agent: '{{ images_base_url }}/openstack/neutron:antelope-jammy-20240510135923'
 cirros_raw_checksum: f756328a32fad36f7239223b030caab5
 redis-operator: '{{ images_base_url }}/openstack/extra/redis-operator:v1.2.4-20240427152750'
-drb_controller: '{{ images_base_url }}/openstack/extra/drb-controller:0.1.0-20240419201545'
+drb_controller: '{{ images_base_url }}/openstack/extra/drb-controller:0.1.0-20240513102345'
