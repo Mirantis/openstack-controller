@@ -185,6 +185,10 @@ def get_objects_by_id(svc, id):
         return svc.get_child_objects_dynamic("DaemonSet", "neutron-l3-agent")
     elif id == "neutron-ovn-db-sync-migrate":
         return [svc.get_child_object("Job", "neutron-ovn-db-sync-migrate")]
+    elif id == "neutron-metadata-agent":
+        return svc.get_child_objects_dynamic(
+            "DaemonSet", "neutron-metadata-agent"
+        )
     else:
         raise ValueError("Unknown object id {id}")
 
@@ -404,6 +408,92 @@ def cleanup_api_resources():
     LOG.info("Finished Neutron API resources cleanup")
 
 
+def cleanup_ovs_bridges(script_args):
+    """Cleanup OVS interfaces, bridges on nodes"""
+    osdpl = kube.get_osdpl()
+    network_svc = get_network_service(osdpl)
+    metadata_daemonsets = get_objects_by_id(
+        network_svc, "neutron-metadata-agent"
+    )
+    cleanup_ovs_command = """
+    set -ex
+    trap err_trap EXIT
+    function err_trap {
+        local r=$?
+        if [[ $r -ne 0 ]]; then
+            echo "cleanup_ovs FAILED"
+        fi
+        exit $r
+    }
+    OVS_DB_SOCK="--db=tcp:127.0.0.1:6640"
+    ovs-vsctl ${OVS_DB_SOCK} --if-exists del-br br-tun
+    echo "Remove tunnel and migration bridges"
+    ovs-vsctl ${OVS_DB_SOCK} --if-exists del-br br-migration
+    ovs-vsctl ${OVS_DB_SOCK} --if-exists del-port br-int patch-tun
+    echo "Cleaning all migration fake bridges"
+    for br in $(egrep '^migbr-' <(ovs-vsctl ${OVS_DB_SOCK} list-br)); do
+        ovs-vsctl ${OVS_DB_SOCK} del-br $br
+    done
+    """
+    LOG.info("Cleaning OVS bridges")
+    daemonsets_exec_parallel(
+        metadata_daemonsets,
+        ["bash", "-c", cleanup_ovs_command],
+        "neutron-metadata-agent",
+        max_workers=script_args.max_workers,
+        timeout=120,
+    )
+    LOG.info("Finished cleaning OVS bridges")
+
+
+def cleanup_linux_netns(script_args):
+    """Cleanup linux network namespaces and
+    related network interfaces
+    """
+    osdpl = kube.get_osdpl()
+    network_svc = get_network_service(osdpl)
+    metadata_daemonsets = get_objects_by_id(
+        network_svc, "neutron-metadata-agent"
+    )
+    cleanup_netns_command = """
+    set -ex
+    trap err_trap EXIT
+    function err_trap {
+        local r=$?
+        if [[ $r -ne 0 ]]; then
+            echo "cleanup_netns FAILED"
+        fi
+        exit $r
+    }
+    OVS_DB_SOCK="--db=tcp:127.0.0.1:6640"
+    IP_NETNS="sudo neutron-rootwrap /etc/neutron/rootwrap.conf ip netns"
+    EXIT_CODE=0
+    for ns in $(egrep 'qrouter-|qdhcp-|snat-|fip-' <(cut -d' ' -f1 <($IP_NETNS))); do
+        for link in $(cut -d: -f2 <(grep -v LOOPBACK <($IP_NETNS exec $ns ip -o link show))); do
+            $IP_NETNS exec $ns ip l delete $link || ovs-vsctl ${OVS_DB_SOCK} --if-exists del-port br-int $link
+        done
+        if [[ -n $(grep -v LOOPBACK <($IP_NETNS exec $ns ip -o link show)) ]]; then
+            echo "Failed to clean all interfaces in network namespace $ns, namespace will not be removed"
+            EXIT_CODE=1
+        else
+            echo "Cleaned all interfaces in network namespace $ns, removing namespace"
+            $IP_NETNS delete $ns
+        fi
+    done
+    exit "${EXIT_CODE}"
+    """
+    # using timeout 1200 as neutron-rootwrap takes a lot of time
+    LOG.info("Cleaning network namespaces")
+    daemonsets_exec_parallel(
+        metadata_daemonsets,
+        ["bash", "-c", cleanup_netns_command],
+        "neutron-metadata-agent",
+        max_workers=script_args.max_workers,
+        timeout=1200,
+    )
+    LOG.info("Finished cleaning network namespaces")
+
+
 def prepare(script_args):
     osdpl = kube.get_osdpl()
     network_svc = get_network_service(osdpl)
@@ -414,7 +504,7 @@ def prepare(script_args):
     function err_trap {
         local r=$?
         if [[ $r -ne 0 ]]; then
-            echo "${0##*/} FAILED"
+            echo "prepare FAILED"
         fi
         exit $r
     }
@@ -671,6 +761,8 @@ def finalize_migration(script_args):
 
 def cleanup(script_args):
     cleanup_api_resources()
+    cleanup_ovs_bridges(script_args)
+    cleanup_linux_netns(script_args)
 
 
 WORKFLOW = [
