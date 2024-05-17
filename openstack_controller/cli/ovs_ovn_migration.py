@@ -2,9 +2,11 @@
 import asyncio
 import argparse
 import traceback
+import ipaddress
 import json
 import logging
 import re
+import sys
 import time
 import yaml
 
@@ -929,8 +931,88 @@ def do_migration(script_args):
                 raise error
 
 
+class CheckResult:
+
+    def __init__(self, name, status, description):
+        """:param name: the name of the check
+        :param status: boolean true|false
+        :param description: description with issues that are found.
+        """
+        self.name = name
+        self.status = status
+        self.description = description
+
+    @property
+    def is_success(self):
+        return self.status
+
+    def get_report(self):
+        result = "\nCheck name: " + self.name
+        result += "\nState: " + ("Pass\n" if self.status else "Fail\n")
+        result += "Result description:\n" + self.description + "\n"
+        return result
+
+
 def do_preflight_checks():
-    pass
+    general_results = []
+
+    def run_check(check_func):
+        def f(*args, **kwargs):
+            try:
+                return check_func(*args, **kwargs)
+            except Exception as e:
+                function_name = check_func.__name__
+                return CheckResult(
+                    function_name,
+                    False,
+                    f"Check function '{function_name}' throws an exception '{type(e).__name__}: {e}'.",
+                )
+
+        return f
+
+    @run_check
+    def _check_for_free_ip(connect):
+        LOG.info("Process subnets for free IPs.")
+        overfilled_subnets = []
+        for subnet in connect.network.subnets():
+            LOG.debug("Checking free ips in subnet {subnet['name']}.")
+            s_id = subnet["id"]
+            ips_total = ips_in_use = 0
+            for ip_range in subnet["allocation_pools"]:
+                ips_total += (
+                    int(ipaddress.IPv4Address(ip_range["end"]))
+                    - int(ipaddress.IPv4Address(ip_range["start"]))
+                    + 1
+                )
+            for port in connect.network.get_subnet_ports(s_id):
+                for port_ip in port["fixed_ips"]:
+                    if port_ip["subnet_id"] == s_id:
+                        ips_in_use += 1
+            if ips_total == ips_in_use:
+                overfilled_subnets.append(s_id)
+        LOG.info("Finished processing subnets for free IPs.")
+        check_name = "IP address availability check"
+        if overfilled_subnets:
+            return CheckResult(
+                check_name,
+                False,
+                "The following subnets do not have free IP:\n"
+                + "\n".join(overfilled_subnets),
+            )
+        else:
+            return CheckResult(check_name, True, "No issues are found")
+
+    ocm = OpenStackClientManager()
+    general_results.append(_check_for_free_ip(ocm.oc))
+
+    failed_tests = [a for a in general_results if not a.is_success]
+    if failed_tests:
+        LOG.warning("There are failures in the check results.")
+        for test in failed_tests:
+            LOG.warning(test.get_report())
+        sys.exit(1)
+    else:
+        LOG.info("All checks are successful.")
 
 
 def do_neutron_db_backup():
