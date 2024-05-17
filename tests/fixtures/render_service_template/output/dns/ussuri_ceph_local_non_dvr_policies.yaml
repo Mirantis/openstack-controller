@@ -10,6 +10,9 @@ spec:
             designate_custom: value
         powerdns:
           zone-cache-refresh-interval: 120
+          cache_ttl: 20
+          negquery_cache_ttl: 60
+          query_cache_ttl: 20
         designate:
           keystone_authtoken:
             memcache_secret_key: zdLlg6VAsGH6E7tX

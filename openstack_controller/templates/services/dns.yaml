@@ -104,6 +104,10 @@ spec:
           loglevel: 5
           webserver-loglevel: 'detailed'
       {%- endif %}
+          # Do not disable cache, limits performance significantly PRODX-42390
+          cache_ttl: 20
+          negquery_cache_ttl: 60
+          query_cache_ttl: 20
 {%- if spec.features.network_policies.enabled %}
       network_policy:
 {% include 'base/network_policies/dns.yaml' %}
