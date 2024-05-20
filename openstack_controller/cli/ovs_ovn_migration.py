@@ -24,6 +24,9 @@ from openstack_controller.openstack_utils import OpenStackClientManager
 
 MIGRATION_FINALIZER = "lcm.mirantis.com/ovs-ovn-migration.finalizer"
 MIGRATION_STATE_CONFIGMAP_NAME = "ovs-ovn-migration-state"
+BACKUP_NEUTRON_DB_PATH = "/var/lib/mysql"
+MARIADB_FULL_BACKUP_TIMEOUT = 1200
+MARIADB_NEUTRON_BACKUP_TIMEOUT = 600
 
 # Stage statuses
 STARTED, COMPLETED, FAILED = ("started", "completed", "failed")
@@ -199,17 +202,15 @@ class StateCM:
         self.cm.update(is_strategic=False)
 
 
-def get_network_service(osdpl):
+def get_service(osdpl, service):
     osdpl.reload()
     mspec = osdpl.mspec
     child_view = resource_view.ChildObjectView(mspec)
     osdplst = osdplstatus.OpenStackDeploymentStatus(
         osdpl.name, osdpl.namespace
     )
-    network_svc = services.registry["networking"](
-        mspec, LOG, osdplst, child_view
-    )
-    return network_svc
+    svc = services.registry[service](mspec, LOG, osdplst, child_view)
+    return svc
 
 
 def get_objects_by_id(svc, id):
@@ -234,6 +235,8 @@ def get_objects_by_id(svc, id):
         return svc.get_child_objects_dynamic(
             "DaemonSet", "neutron-metadata-agent"
         )
+    elif id == "mariadb-server":
+        return [svc.get_child_object("StatefulSet", "mariadb-server")]
     else:
         raise ValueError("Unknown object id {id}")
 
@@ -456,7 +459,7 @@ def cleanup_api_resources():
 def cleanup_ovs_bridges(script_args):
     """Cleanup OVS interfaces, bridges on nodes"""
     osdpl = kube.get_osdpl()
-    network_svc = get_network_service(osdpl)
+    network_svc = get_service(osdpl, "networking")
     metadata_daemonsets = get_objects_by_id(
         network_svc, "neutron-metadata-agent"
     )
@@ -496,7 +499,7 @@ def cleanup_linux_netns(script_args):
     related network interfaces
     """
     osdpl = kube.get_osdpl()
-    network_svc = get_network_service(osdpl)
+    network_svc = get_service(osdpl, "networking")
     metadata_daemonsets = get_objects_by_id(
         network_svc, "neutron-metadata-agent"
     )
@@ -541,7 +544,7 @@ def cleanup_linux_netns(script_args):
 
 def prepare(script_args):
     osdpl = kube.get_osdpl()
-    network_svc = get_network_service(osdpl)
+    network_svc = get_service(osdpl, "networking")
     LOG.info("Backing up OVS bridge mappings")
     backup_bridge_mappings = """
     set -ex
@@ -571,7 +574,7 @@ def prepare(script_args):
 
 def deploy_ovn_db(script_args):
     osdpl = kube.get_osdpl()
-    network_svc = get_network_service(osdpl)
+    network_svc = get_service(osdpl, "networking")
     LOG.info(
         "Modifying openvswitch and neutron-l3-agent finalizers to prevent early deletion"
     )
@@ -615,7 +618,7 @@ def deploy_ovn_db(script_args):
     # https://mirantis.jira.com/browse/PRODX-42146
     time.sleep(30)
     asyncio.run(osdpl.wait_applied())
-    network_svc = get_network_service(osdpl)
+    network_svc = get_service(osdpl, "networking")
     wait_for_objects_ready(
         network_svc,
         ["openvswitch-ovn-db", "openvswitch-ovn-northd"],
@@ -626,7 +629,7 @@ def deploy_ovn_db(script_args):
 def deploy_ovn_controllers(script_args):
     """Deploys ovn controllers in migration mode and syncs ovn db"""
     osdpl = kube.get_osdpl()
-    network_svc = get_network_service(osdpl)
+    network_svc = get_service(osdpl, "networking")
     ovn_daemonsets = get_objects_by_id(network_svc, "ovn-controller")
     helm_manager = helm.HelmManager(namespace=osdpl.namespace)
     osdpl.patch({"spec": {"draft": True}})
@@ -661,7 +664,7 @@ def deploy_ovn_controllers(script_args):
 
 def migrate_dataplane(script_args):
     osdpl = kube.get_osdpl()
-    network_svc = get_network_service(osdpl)
+    network_svc = get_service(osdpl, "networking")
     ovn_daemonsets = get_objects_by_id(network_svc, "ovn-controller")
     LOG.info(
         "Pre-migration check: Checking ovs db connectivity in ovn controllers"
@@ -724,7 +727,7 @@ def migrate_dataplane(script_args):
 
 def finalize_migration(script_args):
     osdpl = kube.get_osdpl()
-    network_svc = get_network_service(osdpl)
+    network_svc = get_service(osdpl, "networking")
     LOG.info("Turning off ovn controller pods migration mode")
     osdpl.patch(
         {
@@ -935,8 +938,61 @@ def do_preflight_checks():
     pass
 
 
+def do_full_db_backup():
+    LOG.info("Backing up database")
+    backup_cj_name = "mariadb-phy-backup"
+    osdpl = kube.get_osdpl()
+    mspec = osdpl.mspec
+    backup_enabled = (
+        mspec.get("features", {})
+        .get("database", {})
+        .get("backup", {})
+        .get("enabled", False)
+    )
+    if not backup_enabled:
+        LOG.warning(f"Backup database in disabled state")
+        return
+    cronjob = kube.find(
+        kube.CronJob, backup_cj_name, settings.OSCTL_OS_DEPLOYMENT_NAMESPACE
+    )
+    if cronjob.obj["spec"].get("suspend", False):
+        LOG.warning(f"Cronjob {backup_cj_name} in suspended state")
+        return
+    asyncio.run(
+        cronjob.run(wait_completion=True, timeout=MARIADB_FULL_BACKUP_TIMEOUT)
+    )
+    LOG.info(f"Database backup is completed")
+
+
 def do_neutron_db_backup():
-    pass
+    osdpl = kube.get_osdpl()
+    LOG.info("Backing up Neutron database")
+    database_svc = get_service(osdpl, "database")
+    database_obj = get_objects_by_id(database_svc, "mariadb-server")[0]
+    database_pods = database_obj.pods
+    for pod in database_pods:
+        timestamp = time.strftime("%Y%m%d%H%M%S")
+        cmd = (
+            'mysqldump --user=root --password="${MYSQL_DBADMIN_PASSWORD}" --lock-tables '
+            f"--databases neutron --result-file={BACKUP_NEUTRON_DB_PATH}/neutron-ovs-ovn-migration-{timestamp}.sql"
+        )
+        command = ["/bin/sh", "-c", cmd]
+        result = pod.exec(
+            command,
+            container="mariadb",
+            timeout=MARIADB_NEUTRON_BACKUP_TIMEOUT,
+            raise_on_error=True,
+        )
+        if result["timed_out"]:
+            raise RuntimeError(
+                f"Neutron db backup exceeded time out {MARIADB_NEUTRON_BACKUP_TIMEOUT} seconds"
+            )
+        if result["exception"]:
+            raise RuntimeError(
+                f"Failed to do backup because of exception {result['exception']}"
+            )
+        LOG.info(f"Neutron database dump on {pod} is completed")
+    LOG.info(f"Neutron database dumps are completed")
 
 
 def main():
@@ -946,6 +1002,7 @@ def main():
     elif args.mode == "preflight_checks":
         do_preflight_checks()
     elif args.mode == "backup_db":
+        do_full_db_backup()
         do_neutron_db_backup()
 
 
