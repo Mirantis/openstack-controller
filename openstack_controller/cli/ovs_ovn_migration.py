@@ -596,6 +596,7 @@ def deploy_ovn_db(script_args):
                             "values": {
                                 "manifests": {
                                     "deployment_server": False,
+                                    "daemonset_metadata_agent": False,
                                 }
                             }
                         },
@@ -785,6 +786,7 @@ def finalize_migration(script_args):
                             "values": {
                                 "manifests": {
                                     "deployment_server": True,
+                                    "daemonset_metadata_agent": True,
                                 }
                             }
                         },
@@ -825,17 +827,17 @@ WORKFLOW = [
         "name": "20_DEPLOY_OVN_DB",
         "impact": """
             WORKLOADS: No downtime expected.
-            OPENSTACK API: Neutron API downtime starts in this stage.""",
+            OPENSTACK API: Neutron API and Metadata downtime starts in this stage.""",
         "description": """
             Deploy OVN with only database components enabled,
-            Disable neutron server and all neutron components except L3 agents.""",
+            Disable neutron server, metadata agent and all neutron ovs related components except L3 agents.""",
     },
     {
         "executable": deploy_ovn_controllers,
         "name": "30_DEPLOY_OVN_CONTROLLERS",
         "impact": """
             WORKLOADS: No downtime expected.
-            OPENSTACK API: Neutron API downtime continues in this stage.""",
+            OPENSTACK API: Neutron API and Metadata downtime continues in this stage.""",
         "description": """
             Deploy OVN controllers in migration mode.
             Sync neutron database with flag migrate to OVN database
@@ -846,7 +848,7 @@ WORKFLOW = [
         "name": "40_MIGRATE_DATAPLANE",
         "impact": """
             WORKLOADS: Short periods of downtime ARE EXPECTED.
-            OPENSTACK API: Neutron API downtime continues in this stage.""",
+            OPENSTACK API: Neutron API and Metadata downtime continues in this stage.""",
         "description": """
             Deploy OVN controller on the same nodes as openvswitch pods are running.
             Switch dataplane to be managed by OVN controller.""",
@@ -861,7 +863,7 @@ WORKFLOW = [
             Stop openvswitch pods and disbale migration mode (switch ovn
             controllers to start own vswitchd and ovs db containers).
             Remove neutron l3 agent daemonsets.
-            Enable Neutron server.""",
+            Enable Neutron server and metadata agents.""",
     },
     {
         "executable": cleanup,
