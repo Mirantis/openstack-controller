@@ -514,12 +514,10 @@ class Job(pykube.Job, HelmBundleMixin, ObjectStatusMixin):
         ]
         if completed and all(completed):
             LOG.info(
-                f"All conditions for the {self.kind} {self.name} completed."
+                f"All conditions for the {self.kind}/{self.name} completed."
             )
             return True
-        LOG.info(
-            f"Some conditions {conditions} for the {self.kind} {self.name} not completed."
-        )
+        LOG.info(f"The job {self.name} is not Completed yet.")
         return False
 
     def _prepare_for_rerun(self):
