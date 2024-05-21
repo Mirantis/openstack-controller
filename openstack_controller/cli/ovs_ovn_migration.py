@@ -29,6 +29,13 @@ BACKUP_NEUTRON_DB_PATH = "/var/lib/mysql"
 MARIADB_FULL_BACKUP_TIMEOUT = 1200
 MARIADB_NEUTRON_BACKUP_TIMEOUT = 600
 
+TYPE_VXLAN = "vxlan"
+DEFAULT_GENEVE_HEADER_SIZE = 38
+IP_HEADER_LENGTH = {
+    4: 20,
+    6: 40,
+}
+
 # Stage statuses
 STARTED, COMPLETED, FAILED = ("started", "completed", "failed")
 
@@ -979,7 +986,7 @@ def do_preflight_checks():
         LOG.info("Process subnets for free IPs.")
         overfilled_subnets = []
         for net in connect.network.networks():
-            LOG.debug("Checking free ips in subnet of network {net.name}.")
+            LOG.debug(f"Checking free ips in subnet of network {net.name}.")
             for subnet in connect.network.get_network_ip_availability(
                 net.id
             ).subnet_ip_availability:
@@ -997,8 +1004,52 @@ def do_preflight_checks():
         else:
             return CheckResult(check_name, True, "No issues are found")
 
+    @run_check
+    def _check_network_mtu(connect):
+        osdpl = kube.get_osdpl()
+        network_params = (
+            osdpl.obj.get("spec", {})
+            .get("services", {})
+            .get("networking", {})
+            .get("neutron", {})
+            .get("values", {})
+            .get("conf", {})
+            .get("neutron", {})
+        )
+        mtu = []
+        mtu.append(
+            network_params.get("DEFAULT", {}).get("global_physnet_mtu", 1500)
+        )
+        path_mtu = network_params.get("ml2", {}).get("path_mtu", 0)
+        if path_mtu > 0:
+            mtu.append(path_mtu)
+
+        ip_version = network_params.get("ml2", {}).get("overlay_ip_version", 4)
+        max_mtu_for_network = (
+            min(mtu)
+            - IP_HEADER_LENGTH[ip_version]
+            - DEFAULT_GENEVE_HEADER_SIZE
+        )
+        bad_mtu_networks = []
+        LOG.info("Check MTU value for networks.")
+        for net in connect.network.networks(physical_network_type=TYPE_VXLAN):
+            if net.mtu > max_mtu_for_network:
+                bad_mtu_networks.append(net.id)
+        LOG.info("Finished check MTU value for networks.")
+        check_name = "MTU size check"
+        if bad_mtu_networks:
+            return CheckResult(
+                check_name,
+                False,
+                "The following networks have not suitable MTU size for Geneve:\n"
+                + "\n".join(bad_mtu_networks),
+            )
+        else:
+            return CheckResult(check_name, True, "No issues are found")
+
     ocm = OpenStackClientManager()
     general_results.append(_check_for_free_ip(ocm.oc))
+    general_results.append(_check_network_mtu(ocm.oc))
 
     failed_tests = [a for a in general_results if not a.is_success]
     if failed_tests:
