@@ -981,6 +981,16 @@ def do_preflight_checks():
 
         return f
 
+    def _get_check_results(check_name, issues_list, comment):
+        if issues_list:
+            return CheckResult(
+                check_name,
+                False,
+                comment + "\n".join(issues_list),
+            )
+        else:
+            return CheckResult(check_name, True, "No issues are found")
+
     @run_check
     def _check_for_free_ip(connect):
         LOG.info("Process subnets for free IPs.")
@@ -993,16 +1003,11 @@ def do_preflight_checks():
                 if subnet.get("used_ips") == subnet.get("total_ips"):
                     overfilled_subnets.append(subnet.get("subnet_id"))
         LOG.info("Finished processing subnets for free IPs.")
-        check_name = "IP address availability check"
-        if overfilled_subnets:
-            return CheckResult(
-                check_name,
-                False,
-                "The following subnets do not have free IP:\n"
-                + "\n".join(overfilled_subnets),
-            )
-        else:
-            return CheckResult(check_name, True, "No issues are found")
+        return _get_check_results(
+            "IP address availability check",
+            overfilled_subnets,
+            "The following subnets do not have free IP:\n",
+        )
 
     @run_check
     def _check_network_mtu(connect):
@@ -1036,20 +1041,38 @@ def do_preflight_checks():
             if net.mtu > max_mtu_for_network:
                 bad_mtu_networks.append(net.id)
         LOG.info("Finished check MTU value for networks.")
-        check_name = "MTU size check"
-        if bad_mtu_networks:
-            return CheckResult(
-                check_name,
-                False,
-                "The following networks have not suitable MTU size for Geneve:\n"
-                + "\n".join(bad_mtu_networks),
-            )
-        else:
-            return CheckResult(check_name, True, "No issues are found")
+        return _get_check_results(
+            "MTU size check",
+            bad_mtu_networks,
+            "The following networks have not suitable MTU size for Geneve:\n",
+        )
+
+    @run_check
+    def _check_for_no_dhcp_subnet(connect):
+        no_dhcp_subnets = []
+        LOG.info("Check if DHCP is enabled in subnets.")
+        for net in connect.network.networks(physical_network_type=TYPE_VXLAN):
+            for subnet_id in net.subnet_ids:
+                if not connect.network.get_subnet(subnet_id).is_dhcp_enabled:
+                    ports = connect.network.get_subnet_ports(subnet_id)
+                    for port in ports:
+                        if not (
+                            port.device_owner.startswith("network")
+                            or port.device_owner.startswith("neutron")
+                        ):
+                            no_dhcp_subnets.append(subnet_id)
+                            break
+        LOG.info("Finish check for DHCP enabling.")
+        return _get_check_results(
+            "Subnets without enabled DHCP check",
+            no_dhcp_subnets,
+            "The following subnets have no DHCP. You should configure\nthe MTU of instances in these subnets manually:\n",
+        )
 
     ocm = OpenStackClientManager()
     general_results.append(_check_for_free_ip(ocm.oc))
     general_results.append(_check_network_mtu(ocm.oc))
+    general_results.append(_check_for_no_dhcp_subnet(ocm.oc))
 
     failed_tests = [a for a in general_results if not a.is_success]
     if failed_tests:
