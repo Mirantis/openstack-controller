@@ -2,7 +2,6 @@
 import asyncio
 import argparse
 import traceback
-import ipaddress
 import json
 import logging
 import re
@@ -979,22 +978,13 @@ def do_preflight_checks():
     def _check_for_free_ip(connect):
         LOG.info("Process subnets for free IPs.")
         overfilled_subnets = []
-        for subnet in connect.network.subnets():
-            LOG.debug("Checking free ips in subnet {subnet['name']}.")
-            s_id = subnet["id"]
-            ips_total = ips_in_use = 0
-            for ip_range in subnet["allocation_pools"]:
-                ips_total += (
-                    int(ipaddress.IPv4Address(ip_range["end"]))
-                    - int(ipaddress.IPv4Address(ip_range["start"]))
-                    + 1
-                )
-            for port in connect.network.get_subnet_ports(s_id):
-                for port_ip in port["fixed_ips"]:
-                    if port_ip["subnet_id"] == s_id:
-                        ips_in_use += 1
-            if ips_total == ips_in_use:
-                overfilled_subnets.append(s_id)
+        for net in connect.network.networks():
+            LOG.debug("Checking free ips in subnet of network {net.name}.")
+            for subnet in connect.network.get_network_ip_availability(
+                net.id
+            ).subnet_ip_availability:
+                if subnet.get("used_ips") == subnet.get("total_ips"):
+                    overfilled_subnets.append(subnet.get("subnet_id"))
         LOG.info("Finished processing subnets for free IPs.")
         check_name = "IP address availability check"
         if overfilled_subnets:
