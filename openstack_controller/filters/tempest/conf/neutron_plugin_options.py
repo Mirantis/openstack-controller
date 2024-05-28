@@ -131,6 +131,8 @@ class NeutronPluginOptions(base_section.BaseSection):
 
     @property
     def firewall_driver(self):
+        if self.get_spec_item("features.neutron.backend", "ml2") == "ml2/ovn":
+            return "ovn"
         return self.get_values_item(
             "neutron",
             "conf.plugins.openvswitch_agent.securitygroup.firewall_driver",
