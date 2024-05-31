@@ -1,3 +1,5 @@
+import os
+
 from openstack_controller import constants
 from openstack_controller import kube
 
@@ -94,6 +96,14 @@ class Config(metaclass=SingletonMeta):
         self.LB_OPERATION_INTERVAL = 10
         # Time in seconds to wait for a loadbalancer action is completed. Default is 300 second.
         self.LB_OPERATION_TIMEOUT = 300
+
+        # Keycloak env variables
+        self.OSDPL_IAM_KEYCLOAK_IP = os.environ.get(
+            "OSDPL_IAM_KEYCLOAK_IP", ""
+        )
+        self.OSDPL_IAM_KEYCLOAK_USER_WRITER_PWD = os.environ.get(
+            "OSDPL_IAM_KEYCLOAK_USER_WRITER_PWD", ""
+        )
 
     def get_cirros_image(self):
         openstack_version = self._osdpl.obj["spec"]["openstack_version"]
