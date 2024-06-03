@@ -34,7 +34,7 @@ class Compute(base_section.BaseSection):
         "hypervisor_type",
         "image_ref",
         "image_ref_alt",
-        "image_ref_raw",
+        "image_raw_ref",
         "max_microversion",
         "min_compute_nodes",
         "min_microversion",
@@ -91,7 +91,7 @@ class Compute(base_section.BaseSection):
         pass
 
     @property
-    def image_ref_raw(self):
+    def image_raw_ref(self):
         pass
 
     @property
