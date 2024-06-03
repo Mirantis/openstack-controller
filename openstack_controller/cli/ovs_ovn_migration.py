@@ -2,6 +2,7 @@
 import asyncio
 import argparse
 import traceback
+import ipaddress
 import json
 import logging
 import re
@@ -991,6 +992,94 @@ def do_preflight_checks():
         else:
             return CheckResult(check_name, True, "No issues are found")
 
+    def _get_security_group_dhcp_allowed_ipv4(connect):
+        """Return dictionary. The dictionary key corresponds to security group Id and
+        value is a list of IPv4 CIDRs from this security group where access to DHCP is
+        enabled. IPs are stored in IPv4Network format.
+        """
+        dhcp_allowed_sg = {}
+        wildcard_cidr = ipaddress.ip_network("0.0.0.0/0")
+        for sec_group in connect.network.security_groups():
+            networks = []
+            for rule in sec_group.security_group_rules:
+                # Process egress rules for IPv4
+                if (
+                    rule["direction"] == "egress"
+                    and rule["ethertype"] == "IPv4"
+                ):
+                    # The DHCP port has no security group
+                    if not rule["remote_group_id"] is None:
+                        continue
+                    # Rule must be protocol independent
+                    # or allow access to 67 port by UDP
+                    if rule["protocol"] is None or (
+                        rule["protocol"].lower() in ["udp", "17"]
+                        and (
+                            rule["port_range_min"] is None
+                            or rule["port_range_min"] <= 67
+                        )
+                        and (
+                            rule["port_range_max"] is None
+                            or rule["port_range_max"] >= 67
+                        )
+                    ):
+                        if rule["remote_address_group_id"] is None:
+                            # Get CIDR from rule definition
+                            if rule["normalized_cidr"] is None:
+                                networks.append(wildcard_cidr)
+                            else:
+                                networks.append(
+                                    ipaddress.ip_network(
+                                        rule["normalized_cidr"]
+                                    )
+                                )
+                        else:
+                            # Get CIDRs if they are stored in address group
+                            for cidr in connect.network.get_address_group(
+                                rule["remote_address_group_id"]
+                            ).addresses:
+                                net = ipaddress.ip_network(cidr)
+                                if net.version == 4:
+                                    networks.append(net)
+            if networks:
+                dhcp_allowed_sg.update({sec_group.id: networks})
+        return dhcp_allowed_sg
+
+    def _are_addresses_allowed_by_firewall(tested_cidrs, permitted_cidrs):
+        """param: tested_cidrs - list of IPv4Network
+        param: permitted_cidrs - list of IPv4Network
+        return: True if all subnets from tested_cidrs are in
+                networks from permitted_cidrs
+        """
+        if ipaddress.ip_network("0.0.0.0/0") in permitted_cidrs:
+            return True
+        for subnet in tested_cidrs:
+            is_blocked = True
+            for net in permitted_cidrs:
+                if net.prefixlen <= subnet.prefixlen:
+                    if subnet in net.subnets(new_prefix=subnet.prefixlen):
+                        is_blocked = False
+                        break
+            if is_blocked:
+                return False
+        return True
+
+    def _get_port_cidrs_with_dhcp4(connect, port):
+        """param: connect - connection to OS API
+        param: port - openstack.network.v2.port.Port object
+        return: list CIDRs of IPv4 subnets where dhcp is enabled
+                CIDRs are stored in IPv4Network format.
+        """
+        result = []
+        subnet_ids = set()
+        for fip in port.fixed_ips:
+            subnet_ids.add(fip["subnet_id"])
+        for id in subnet_ids:
+            subnet = connect.network.get_subnet(id)
+            if subnet.is_dhcp_enabled and subnet.ip_version == 4:
+                result.append(ipaddress.ip_network(subnet.cidr))
+        return result
+
     @run_check
     def _check_for_free_ip(connect):
         LOG.info("Process subnets for free IPs.")
@@ -1037,7 +1126,7 @@ def do_preflight_checks():
         )
         bad_mtu_networks = []
         LOG.info("Check MTU value for networks.")
-        for net in connect.network.networks(physical_network_type=TYPE_VXLAN):
+        for net in connect.network.networks(provider_network_type=TYPE_VXLAN):
             if net.mtu > max_mtu_for_network:
                 bad_mtu_networks.append(net.id)
         LOG.info("Finished check MTU value for networks.")
@@ -1051,7 +1140,7 @@ def do_preflight_checks():
     def _check_for_no_dhcp_subnet(connect):
         no_dhcp_subnets = []
         LOG.info("Check if DHCP is enabled in subnets.")
-        for net in connect.network.networks(physical_network_type=TYPE_VXLAN):
+        for net in connect.network.networks(provider_network_type=TYPE_VXLAN):
             for subnet_id in net.subnet_ids:
                 if not connect.network.get_subnet(subnet_id).is_dhcp_enabled:
                     ports = connect.network.get_subnet_ports(subnet_id)
@@ -1069,10 +1158,53 @@ def do_preflight_checks():
             "The following subnets have no DHCP. You should configure\nthe MTU of instances in these subnets manually:\n",
         )
 
+    @run_check
+    def _check_port_sg_allowed_dhcp4(connect):
+        """Test VM ports from networks which are not connected to external routers.
+        The test is considered successful if all subnets of the port with enable_dhcp==True
+        param have access to 67 UDP port and allow packets to the 255.255.255.255 address.
+        """
+        allowed_sg = _get_security_group_dhcp_allowed_ipv4(connect)
+        broadcast_ip = ipaddress.ip_network("255.255.255.255/32")
+        ports_blocked = []
+        LOG.info("Check if DHCP is allowed by security groups on the ports.")
+        for net in connect.network.networks(is_router_external=False):
+            for port in connect.network.ports(network_id=net.id):
+                if port.is_port_security_enabled and port.device_owner in [
+                    "compute:nova",
+                    "",
+                ]:
+                    port_cidrs_with_dhcp = _get_port_cidrs_with_dhcp4(
+                        connect, port
+                    )
+                    if len(port_cidrs_with_dhcp) == 0:
+                        continue
+
+                    permitted_cidrs = set()
+                    for sg in port.security_group_ids:
+                        if sg in allowed_sg.keys():
+                            permitted_cidrs.update(allowed_sg[sg])
+
+                    # If port has permissions to broadcast and 67 UDP port it will get IP via DHCP
+                    is_access_allowed = _are_addresses_allowed_by_firewall(
+                        [broadcast_ip], permitted_cidrs
+                    ) and _are_addresses_allowed_by_firewall(
+                        port_cidrs_with_dhcp, permitted_cidrs
+                    )
+                    if not is_access_allowed:
+                        ports_blocked.append(port.id)
+        LOG.info("Finish ports check for access to DHCP.")
+        return _get_check_results(
+            "Checking ports with blocked access to DHCPv4",
+            ports_blocked,
+            "The following ports have no security groups that allow correct connection to DHCPv4 service:\n",
+        )
+
     ocm = OpenStackClientManager()
     general_results.append(_check_for_free_ip(ocm.oc))
     general_results.append(_check_network_mtu(ocm.oc))
     general_results.append(_check_for_no_dhcp_subnet(ocm.oc))
+    general_results.append(_check_port_sg_allowed_dhcp4(ocm.oc))
 
     failed_tests = [a for a in general_results if not a.is_success]
     if failed_tests:
