@@ -230,7 +230,7 @@ services:
             compute:
               image_ref: {{ cirros_image_name }}
               image_ref_alt: {{ cirros_image_name ~ '.alt' }}
-              image_ref_raw: {{ cirros_image_name ~ '.raw' }}
+              image_raw_ref: {{ cirros_image_name ~ '.raw' }}
               flavor_ref:  m1.extra_tiny_test
               flavor_ref_alt: m1.tiny_test
           blacklist:
