@@ -1080,6 +1080,16 @@ def do_preflight_checks():
                 result.append(ipaddress.ip_network(subnet.cidr))
         return result
 
+    def _subnet_has_workload_ports(connect, subnet_id):
+        ports = connect.network.get_subnet_ports(subnet_id)
+        for port in ports:
+            if not (
+                port.device_owner.startswith("network")
+                or port.device_owner.startswith("neutron")
+            ):
+                return True
+        return False
+
     @run_check
     def _check_for_free_ip(connect):
         LOG.info("Process subnets for free IPs.")
@@ -1142,20 +1152,40 @@ def do_preflight_checks():
         LOG.info("Check if DHCP is enabled in subnets.")
         for net in connect.network.networks(provider_network_type=TYPE_VXLAN):
             for subnet_id in net.subnet_ids:
-                if not connect.network.get_subnet(subnet_id).is_dhcp_enabled:
-                    ports = connect.network.get_subnet_ports(subnet_id)
-                    for port in ports:
-                        if not (
-                            port.device_owner.startswith("network")
-                            or port.device_owner.startswith("neutron")
-                        ):
-                            no_dhcp_subnets.append(subnet_id)
-                            break
+                if not connect.network.get_subnet(
+                    subnet_id
+                ).is_dhcp_enabled and _subnet_has_workload_ports(
+                    connect, subnet_id
+                ):
+                    no_dhcp_subnets.append(subnet_id)
         LOG.info("Finish check for DHCP enabling.")
         return _get_check_results(
             "Subnets without enabled DHCP check",
             no_dhcp_subnets,
             "The following subnets have no DHCP. You should configure\nthe MTU of instances in these subnets manually:\n",
+        )
+
+    @run_check
+    def _check_subnets_dns_servers(connect):
+        """
+        Checks whether dhcp enabled subnets have dns_nameservers set. Check
+        is failed if list of dns servers is empty.
+
+        :param connect openstack.connection.Connection
+        :returns CheckResult
+        """
+        no_dns_subnets = []
+        LOG.info("Checking subnets have dns_nameservers set")
+        for subnet in connect.network.subnets(is_dhcp_enabled=True):
+            if not subnet.dns_nameservers and _subnet_has_workload_ports(
+                connect, subnet.id
+            ):
+                no_dns_subnets.append(subnet.id)
+        LOG.info("Finished checking subnets have dns_nameservers set")
+        return _get_check_results(
+            "Subnets without dns_nameservers check",
+            no_dns_subnets,
+            "The following subnets have no dns_nameservers set. You should set\ndns_nameservers in subnets manually:\n",
         )
 
     @run_check
@@ -1204,6 +1234,7 @@ def do_preflight_checks():
     general_results.append(_check_for_free_ip(ocm.oc))
     general_results.append(_check_network_mtu(ocm.oc))
     general_results.append(_check_for_no_dhcp_subnet(ocm.oc))
+    general_results.append(_check_subnets_dns_servers(ocm.oc))
     general_results.append(_check_port_sg_allowed_dhcp4(ocm.oc))
 
     failed_tests = [a for a in general_results if not a.is_success]
