@@ -75,6 +75,21 @@ class Config(metaclass=SingletonMeta):
         # Number of portprober agents to host nework
         self.PORTPROBER_AGENTS_PER_NETWORK = 2
 
+        # Size, in GB of the flavor's disk to create.
+        self.FLAVOR_DISK_SIZE = 1
+        # Size, in MB of the flavor's ram to create.
+        self.FLAVOR_RAM_SIZE = 256
+
+        self.SERVER_LIVE_MIGRATION_TIMEOUT = 750
+        self.NODE_LOAD_STABILIZATION_TIMEOUT = 1200
+        self.NODE_LOAD_ABS_DIFFERENCE = 15
+
+        self.DRB_CONFIG_NAMESPACE = "openstack"
+        self.STABLE_NODE_LOAD = 40
+        self.STACKLIGHT_GRAFANA_HOST = "http://grafana.stacklight"
+        self.GRAFANA_MAX_RETRIES = 3
+        self.GRAFANA_RETRY_INTERVAL = 10
+
         # Interval in seconds to wait for a loadbalancer operation. Default is 10 second.
         self.LB_OPERATION_INTERVAL = 10
         # Time in seconds to wait for a loadbalancer action is completed. Default is 300 second.
