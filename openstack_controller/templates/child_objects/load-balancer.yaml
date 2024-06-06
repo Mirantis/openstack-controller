@@ -13,6 +13,7 @@ octavia:
           - {{ to_child_object("messaging", "rabbitmq", "StatefulSet", "openstack-rabbitmq-rabbitmq", ["amqp"]) | indent(12)}}
           - {{ to_child_object("memcached", "memcached", "StatefulSet", "openstack-memcached-memcached", ["memcached"]) | indent(12)}}
           - {{ to_child_object("key-manager", "barbican", "Deployment", "barbican-api", ["b-api"]) | indent(12)}}
+          - {{ to_child_object("coordination", "etcd", "StatefulSet", "etcd-etcd", ["client"]) | indent(12)}}
       hash_fields: []
       images:
       - openvswitch_vswitchd
@@ -32,6 +33,7 @@ octavia:
           - {{ to_child_object("messaging", "rabbitmq", "StatefulSet", "openstack-rabbitmq-rabbitmq", ["amqp"]) | indent(12)}}
           - {{ to_child_object("memcached", "memcached", "StatefulSet", "openstack-memcached-memcached", ["memcached"]) | indent(12)}}
           - {{ to_child_object("key-manager", "barbican", "Deployment", "barbican-api", ["b-api"]) | indent(12)}}
+          - {{ to_child_object("coordination", "etcd", "StatefulSet", "etcd-etcd", ["client"]) | indent(12)}}
       hash_fields: []
       images:
       - octavia_api
@@ -52,6 +54,7 @@ octavia:
           - {{ to_child_object("messaging", "rabbitmq", "StatefulSet", "openstack-rabbitmq-rabbitmq", ["amqp"]) | indent(12)}}
           - {{ to_child_object("memcached", "memcached", "StatefulSet", "openstack-memcached-memcached", ["memcached"]) | indent(12)}}
           - {{ to_child_object("key-manager", "barbican", "Deployment", "barbican-api", ["b-api"]) | indent(12)}}
+          - {{ to_child_object("coordination", "etcd", "StatefulSet", "etcd-etcd", ["client"]) | indent(12)}}
       hash_fields: []
       images:
       - octavia_housekeeping
@@ -71,6 +74,7 @@ octavia:
           - {{ to_child_object("block-storage", "cinder", "Deployment", "cinder-api", ["c-api"]) | indent(12)}}
           - {{ to_child_object("memcached", "memcached", "StatefulSet", "openstack-memcached-memcached", ["memcached"]) | indent(12)}}
           - {{ to_child_object("key-manager", "barbican", "Deployment", "barbican-api", ["b-api"]) | indent(12)}}
+          - {{ to_child_object("coordination", "etcd", "StatefulSet", "etcd-etcd", ["client"]) | indent(12)}}
       hash_fields: []
       images:
       - octavia_worker

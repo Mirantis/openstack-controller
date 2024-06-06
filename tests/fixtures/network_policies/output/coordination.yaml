@@ -106,6 +106,22 @@ coordination:etcd:StatefulSet:etcd-etcd:
         component: engine
   - podSelector:
       matchLabels:
+        application: octavia
+        component: health_manager
+  - podSelector:
+      matchLabels:
+        application: octavia
+        component: api
+  - podSelector:
+      matchLabels:
+        application: octavia
+        component: housekeeping
+  - podSelector:
+      matchLabels:
+        application: octavia
+        component: worker
+  - podSelector:
+      matchLabels:
         application: ceilometer
         component: compute
   - podSelector:
