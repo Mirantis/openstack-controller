@@ -82,6 +82,16 @@ spec:
             HTTP_PROXY: http://127.0.0.1:3128
             NO_PROXY: .svc.cluster.local
       pod:
+        probes:
+          server:
+            mariadb:
+              readiness:
+                enabled: true
+                disk_usage_percent: 99
+                params:
+                  initialDelaySeconds: 30
+                  periodSeconds: 5 
+                  timeoutSeconds: 5
         affinity:
           anti:
             type:
