@@ -128,6 +128,18 @@ spec:
           cron: "{{ backup_params.get('schedule_time', '0 1 * * *') }}"
           suspend: {{ not backup_params.get('enabled', false) }}
       pod:
+        probes:
+          server:
+            mariadb:
+              readiness:
+                enabled: true
+                disk_usage_percent: 99
+                params:
+                  initialDelaySeconds: 30
+                  # NOTE(vsaienko): ensure we able to recover in powerdns cache time to avoid
+                  # downtimes on powerdns side.
+                  periodSeconds: 5
+                  timeoutSeconds: 5
         replicas:
           server: 3
 {%- if spec.get('features', {}).get('database', {}).get('local_volumes', {}).get('enabled', False) %}
