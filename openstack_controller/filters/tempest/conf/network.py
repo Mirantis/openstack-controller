@@ -21,6 +21,7 @@ class Network(base_section.BaseSection):
         "public_router_id",
         "region",
         "shared_physical_network",
+        "service_ports_number",
     ]
 
     @property
@@ -90,3 +91,12 @@ class Network(base_section.BaseSection):
     @property
     def shared_physical_network(self):
         pass
+
+    @property
+    def service_ports_number(self):
+        if self.get_values_item(
+            "neutron", "manifests.daemonset_portprober_agent", False
+        ):
+            # Neutron Portprober agent creates 2 ports in network,
+            # they have assigned ips even when dhcp is disabled.
+            return 2
