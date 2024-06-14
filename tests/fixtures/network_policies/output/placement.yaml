@@ -11,6 +11,10 @@ placement:placement:Deployment:placement-api:
   - podSelector:
       matchLabels:
         application: nova
+        component: placement-audit
+  - podSelector:
+      matchLabels:
+        application: nova
         component: compute
   - podSelector:
       matchLabels:
