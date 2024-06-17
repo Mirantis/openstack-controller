@@ -113,6 +113,17 @@ designate:
       connections:
         egress:
           - {{ to_child_object("database", "mariadb", "StatefulSet", "mariadb-server", ["mysql"]) | indent(12)}}
+    designate-zone-setup:
+      hash_fields: []
+      images:
+      - designate_zone_setup
+      manifest: job_zone_setup
+      pod_labels:
+        application: designate
+        component: zone_setup
+      connections:
+        egress:
+          - {{ to_child_object("dns", "designate", "StatefulSet", "designate-api", ["dns-api"]) | indent(12)}}
   StatefulSet:
     designate-api:
       connections:

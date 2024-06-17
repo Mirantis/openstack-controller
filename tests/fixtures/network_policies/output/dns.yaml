@@ -6,6 +6,10 @@ dns:designate:StatefulSet:designate-api:
         component: server
   - podSelector:
       matchLabels:
+        application: designate
+        component: zone_setup
+  - podSelector:
+      matchLabels:
         application: keystone
         component: client
   - podSelector:

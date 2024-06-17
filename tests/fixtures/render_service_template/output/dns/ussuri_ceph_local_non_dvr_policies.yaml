@@ -4,6 +4,14 @@ spec:
     name: openstack-designate
     values:
       conf:
+        zones: |
+          mosk.test.:
+            email: test@test.test
+            recordsets:
+              - name: foo.mosk.test.
+                type: A
+                records:
+                  - 1.2.3.4
         policy.d:
           01-controller-default.yaml: {'dns_rule1': 'dns_value1'}
           02-custom.yaml:
@@ -224,6 +232,7 @@ spec:
         secret_powerdns_db: true
         service_powerdns_api: true
         service_powerdns_external: true
+        job_zone_setup: true
       network:
         mdns:
           node_port:
