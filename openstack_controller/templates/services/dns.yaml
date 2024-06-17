@@ -22,7 +22,7 @@
 {%- set cadf_audit = spec.get('features', {}).get('logging', {}).get('cadf', {'enabled': false}) %}
 {%- set cadf_audit_driver = spec.get('features', {}).get('logging', {}).get('cadf', {}).get('driver', 'messagingv2') %}
 
-{%- set test_zone_name = "mosk.test." %}
+{%- set test_zone_name = "test-zone.test." %}
 
 
 spec:
@@ -68,7 +68,7 @@ spec:
           {{ test_zone_name }}:
             email: test@test.test
             recordsets:
-              - name: foo.{{ test_zone_name }}
+              - name: test-record.{{ test_zone_name }}
                 type: A
                 records:
                   - 1.2.3.4

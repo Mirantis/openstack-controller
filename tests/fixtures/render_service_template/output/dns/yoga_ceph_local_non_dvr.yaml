@@ -5,10 +5,10 @@ spec:
     values:
       conf:
         zones: |
-          mosk.test.:
+          test-zone.test.:
             email: test@test.test
             recordsets:
-              - name: foo.mosk.test.
+              - name: test-record.test-zone.test.
                 type: A
                 records:
                   - 1.2.3.4
