@@ -207,14 +207,15 @@ class BaseFunctionalTestCase(TestCase):
         )
 
     @classmethod
-    def network_create(
-        cls,
-        name=None,
-    ):
+    def network_create(cls, name=None, shared=None, external=None):
         if name is None:
             name = data_utils.rand_name()
-
-        network = cls.ocm.oc.network.create_network(name=name)
+        kwargs = {"name": name}
+        if shared:
+            kwargs["shared"] = shared
+        if external:
+            kwargs["router:external"] = external
+        network = cls.ocm.oc.network.create_network(**kwargs)
         cls.addClassCleanup(cls.network_delete, network)
         return network
 
