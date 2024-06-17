@@ -230,3 +230,4 @@ cinder_wait_for_backends: '{{ images_base_url }}/openstack/openstack-tools:yoga-
 neutron_portprober_agent: '{{ images_base_url }}/openstack/neutron:wallaby-focal-20240112082933'
 neutron_ovn_db_sync_migrate: '{{ images_base_url }}/openstack/neutron:wallaby-focal-20240112082933'
 redis-operator: '{{ images_base_url }}/openstack/extra/redis-operator:v1.2.4-20240427152750'
+designate_zone_setup: '{{ images_base_url }}/openstack/openstack-tools:yoga-jammy-20240527060018'
