@@ -53,18 +53,22 @@ spec:
       endpoints:
         cluster_domain_suffix: {{ spec.internal_domain_name }}
 {% include 'base/_admin_identity.yaml' %}
-# Keycloak-related Identity service configuration
-{%- if keystone_keycloak_enabled %}
-        identity:
           host_fqdn_override:
-            default: keystone.{{ spec.public_domain_name }}
-          scheme: https
-          path:
-            default: /v3
+            public:
+              host: keystone.{{ spec.public_domain_name }}
+          hosts:
+            default: keystone
+            internal: keystone-api
+            public:
+              host: keystone
           port:
             api:
-              internal: 443
-{%- endif %}
+              default: 80
+              internal: 5000
+              public: 443
+          scheme:
+            default: http
+            public: https
 {% include 'base/_cache.yaml' %}
         oslo_db:
           auth:
@@ -312,6 +316,11 @@ spec:
                 sso:
                   enabled: true
                   initial_choice: mapped
+              # Need to switch openstack keystone url to public endpoint for web single-sign-on authentication
+              # because the option WEBSSO_KEYSTONE_URL added in version Stein.
+              {%- if OSVer.stein > OSVer[spec.openstack_version] %}
+              keystone_url_endpoint_type: "public"
+              {%- endif %}
 {%- endif %}
               tungstenfabric:
                 enabled: {{ neutron_backend == 'tungstenfabric' }}

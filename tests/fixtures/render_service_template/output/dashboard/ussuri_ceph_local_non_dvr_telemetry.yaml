@@ -104,6 +104,22 @@ spec:
               password: 5Q52SdTD0ern0aJ6AMcraLqh0rbUbGJr
               username: test5JeB
               region_name: 'RegionOne'
+          host_fqdn_override:
+            public:
+              host: keystone.it.just.works
+          hosts:
+            default: keystone
+            internal: keystone-api
+            public:
+              host: keystone
+          port:
+            api:
+              default: 80
+              internal: 5000
+              public: 443
+          scheme:
+            default: http
+            public: https
         oslo_cache:
           statefulset:
             name: openstack-memcached-memcached
