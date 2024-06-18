@@ -311,10 +311,8 @@ spec:
 {%- if 'amphorav2' in provider_map.keys() %}
           task_flow:
             jobboard_enabled: true
-            jobboard_backend_hosts: rfs-openstack-redis.{{ redis_namespace }}
-            jobboard_backend_port: 26379
-            jobboard_backend_password: {{ redis_secret }}
-            jobboard_redis_sentinel: 'mymaster'
+            # Use this option to switch beetwen jobboard redis/etcd backend parameters
+            jobboard_backend_driver: redis_taskflow_driver
             jobboard_expiration_time: 90
 {%- endif %}
           keystone_authtoken:
@@ -415,6 +413,14 @@ spec:
           scheme:
             default: http
             public: https
+{%- if 'amphorav2' in provider_map.keys() %}
+        jobboard_redis:
+          namespace: {{ redis_namespace }}
+          auth:
+            redis:
+              username: 'mymaster'
+              password: {{ redis_secret }}
+{%- endif %}
       jobs:
         create_resources:
           restartPolicy: Never

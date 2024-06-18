@@ -57,11 +57,8 @@ spec:
             memcache_security_strategy: ENCRYPT
           task_flow:
             jobboard_enabled: true
-            jobboard_backend_hosts: rfs-openstack-redis.openstack-redis
-            jobboard_backend_password: cfLDYSsNbuCywa6VmBvZ8h2sJXuZnvqW
-            jobboard_backend_port: 26379
+            jobboard_backend_driver: redis_taskflow_driver
             jobboard_expiration_time: 90
-            jobboard_redis_sentinel: mymaster
       dependencies:
         static:
           db_init:
@@ -179,6 +176,12 @@ spec:
           statefulset:
             name: openstack-rabbitmq-rabbitmq
             replicas: 1
+        jobboard_redis:
+          namespace: openstack-redis
+          auth:
+            redis:
+              username: 'mymaster'
+              password: cfLDYSsNbuCywa6VmBvZ8h2sJXuZnvqW
       images:
         tags:
           bootstrap: bootstrap:latest
