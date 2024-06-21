@@ -13,6 +13,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import keystoneauth1
+
 from openstack_controller import utils
 from openstack_controller.exporter.collectors import base
 from openstack_controller import openstack_utils
@@ -43,15 +45,16 @@ class OpenStackBaseMetricCollector(base.BaseMetricsCollector):
 
     @property
     def is_service_available(self):
-        services = []
         for service_type in self._os_service_types:
-            services.append(
-                len(list(self.oc.oc.identity.services(type=service_type)))
-            )
-        if not any(services):
-            LOG.info(f"Service not found for types {self._os_service_types}")
-            return False
-        return True
+            try:
+                for svc in self.oc.oc.identity.services(type=service_type):
+                    return True
+            except keystoneauth1.exceptions.http.Unauthorized:
+                # NOTE(vsaienko): reset client and let it reinitiate on next run.
+                self._oc = None
+                raise
+        LOG.info(f"Service not found for types {self._os_service_types}")
+        return False
 
     @property
     def can_collect_data(self):
