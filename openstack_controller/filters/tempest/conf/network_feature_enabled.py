@@ -154,6 +154,8 @@ class NetworkFeatureEnabled(base_section.BaseSection):
                 api_extensions_default.extend(
                     ["net-mtu", "net-mtu-writable"],
                 )
+            if self.os_version_compare("antelope", "ge"):
+                api_extensions_default.extend(["trunk"])
         if self.get_spec_item(
             "features.neutron.extensions.portprober.enabled", False
         ):
