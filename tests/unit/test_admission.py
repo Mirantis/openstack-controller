@@ -2301,3 +2301,70 @@ def test_cinder_buckup_drivers_fail(client):
             response.json["response"]["allowed"] is False
         ), "Custom Cinder backup driver is allowed from Yoga release."
         assert response.json["response"]["status"]["code"] == 400
+
+
+def _cinder_extra_backend_specific_request(client, backends_conf, result):
+    req = copy.deepcopy(ADMISSION_REQ)
+    req["request"]["object"]["spec"]["features"]["cinder"] = {
+        "volume": {"backends": backends_conf}
+    }
+    response = client.simulate_post("/validate", json=req)
+    assert response.status == falcon.HTTP_OK
+    if result:
+        assert response.json["response"]["allowed"]
+    else:
+        assert response.json["response"]["allowed"] is False
+
+
+def test_cinder_extra_backends_sts(client):
+    # Configs are valid
+    _cinder_extra_backend_specific_request(
+        client,
+        {
+            "backend-1": {
+                "values": {
+                    "conf": {"foo": "bar"},
+                    "images": {"foo": "bar"},
+                    "labels": {"foo": "bar"},
+                    "pod": {"foo": "bar"},
+                },
+                "enabled": True,
+                "type": "statefulset",
+            },
+        },
+        True,
+    )
+
+    # Configs are invalid
+    _cinder_extra_backend_specific_request(
+        client,
+        {
+            "backend-1": {
+                "values": {
+                    "bootstrap": {"foo": "bar"},
+                    "conf": {"foo": "bar"},
+                    "labels": {"foo": "bar"},
+                    "pod": {"foo": "bar"},
+                },
+                "enabled": True,
+                "type": "statefulset",
+            },
+        },
+        False,
+    )
+
+    _cinder_extra_backend_specific_request(
+        client,
+        {
+            "backend-1": {
+                "values": {
+                    "conf": {"foo": "bar"},
+                    "labels": {"foo": "bar"},
+                    "pod": {"foo": "bar"},
+                },
+                "enabled": True,
+                "type": "deployment",
+            },
+        },
+        False,
+    )

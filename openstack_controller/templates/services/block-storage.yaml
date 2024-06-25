@@ -39,6 +39,13 @@
 {%-     set main_backup_driver = backup_drivers[0] %}
 {%-   endif %}
 {%- endif %}
+{%- set extra_volumes = spec.get('features', {}).get('cinder', {}).get('volume', {}).get('backends', {}) %}
+{%- set extra_volumes_sts = {} %}
+{%- for sts_name, sts_opts in extra_volumes.items() %}
+{%-   if sts_opts.get('enabled', True) %}
+{%-     do extra_volumes_sts.update({sts_name:{'values': sts_opts['values']}}) %}
+{%-   endif %}
+{%- endfor %}
 
 spec:
   releases:
@@ -343,15 +350,16 @@ spec:
             annotations:
               nginx.ingress.kubernetes.io/proxy-body-size: "114688"
       # NODE SPECIFIC START
-      {%- if overrides.enabled %}
+      {%- if overrides.enabled or extra_volumes_sts %}
       overrides:
+        {%- if overrides.enabled %}
         cinder_volume_ds:
           labels:
-        {%- for label, override in node_specific.items() %}
-          {%- set cinder_override = override.get("cinder", {}) %}
-          {%- if cinder_override %}
+          {%- for label, override in node_specific.items() %}
+            {%- set cinder_override = override.get("cinder", {}) %}
+            {%- if cinder_override %}
             {{ label }}:
-          {%- endif %}
+            {%- endif %}
              values:
                conf:
                  standalone_backends:
@@ -392,7 +400,12 @@ spec:
                          {%- endif %}
                        {%- endfor %}
                        {%- endfor %}
-        {%- endfor %}
+          {%- endfor %}
+        {%- endif %}
+      {%- endif %}
+      {%- if extra_volumes_sts %}
+        cinder_volume_sts:
+          {{ extra_volumes_sts | toyaml | indent(10) }}
       {%- endif %}
       # NODE SPECIFIC END
       endpoints:
