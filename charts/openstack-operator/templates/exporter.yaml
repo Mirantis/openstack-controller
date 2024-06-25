@@ -16,6 +16,16 @@ rules:
   - apiGroups: [""]
     resources: [secrets]
     verbs: [list, get, watch]
+  # Application: nova audit collector
+  - apiGroups: [""]
+    resources: [pods]
+    verbs: [list, get, watch]
+  - apiGroups: [""]
+    resources: [pods/log]
+    verbs: [get]
+  - apiGroups: [batch]
+    resources: [jobs, cronjobs]
+    verbs: [list, get, watch]
   # Application: read-only access for watching cluster-wide.
   - apiGroups: [lcm.mirantis.com]
     resources: [openstackdeployments]
