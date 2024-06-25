@@ -217,18 +217,17 @@ class BaseMetricsCollector(object):
 
     def refresh_data(self):
         LOG.info(f"Started refreshing data for {self._name}")
-        self.can_collect = self.can_collect_data
-        if not self.can_collect:
-            LOG.warning(
-                f"Collector {self._name} is enabled, but collection for it is not possible."
-            )
-            return
-
         start = datetime.utcnow()
         self.scrape_start_timestamp = start.timestamp()
         self.scrape_end_timestamp = 0
         try:
             self.osdpl = kube.get_osdpl()
+            self.can_collect = self.can_collect_data
+            if not self.can_collect:
+                LOG.warning(
+                    f"Collector {self._name} is enabled, but collection for it is not possible."
+                )
+                return
             self.update_samples()
             self.scrape_success = True
         except Exception as e:
