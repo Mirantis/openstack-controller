@@ -74,6 +74,11 @@ class Config(metaclass=SingletonMeta):
             self.PORTPROBER_PROBE_INTERVAL + 30
         )
 
+        self.PORTPROBER_METRIC_TIMEOUT = (
+            self.PORTPROBER_PROBE_INTERVAL
+            + self.PORTPROBER_METRIC_REFRESH_TIMEOUT
+        )
+
         # Number of portprober agents to host nework
         self.PORTPROBER_AGENTS_PER_NETWORK = 2
 
@@ -104,6 +109,11 @@ class Config(metaclass=SingletonMeta):
         self.OSDPL_IAM_KEYCLOAK_USER_WRITER_PWD = os.environ.get(
             "OSDPL_IAM_KEYCLOAK_USER_WRITER_PWD", ""
         )
+
+        # Timeout in seconds to wait for port to become ACTIVE.
+        self.PORT_TIMEOUT = 60
+        # Interval in seconds to wait for port to become ACTIVE
+        self.PORT_INTERVAL = 10
 
     def get_cirros_image(self):
         openstack_version = self._osdpl.obj["spec"]["openstack_version"]
