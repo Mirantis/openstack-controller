@@ -147,7 +147,7 @@ placement_db_sync: '{{ images_base_url }}/openstack/placement:caracal-jammy-2024
 keystone_db_sync_expand: '{{ images_base_url }}/openstack/keystone:caracal-jammy-20240617142711'
 keystone_db_sync_migrate: '{{ images_base_url }}/openstack/keystone:caracal-jammy-20240617142711'
 keystone_db_sync_contract: '{{ images_base_url }}/openstack/keystone:caracal-jammy-20240617142711'
-octavia_amphora: '{{ binary_base_url }}/openstack/bin/octavia/amphora-x64-haproxy-caracal-20240617150226.qcow2'
+octavia_amphora: '{{ binary_base_url }}/openstack/bin/octavia/amphora-x64-haproxy-caracal-20240626065859.qcow2'
 etcd: '{{ images_base_url }}/openstack/extra/etcd:v3.5.11-alpine-20240131112547'
 etcd_db_compact: '{{ images_base_url }}/openstack/extra/etcd:v3.5.11-alpine-20240131112547'
 cinder_db_sync_online: '{{ images_base_url }}/openstack/cinder:caracal-jammy-20240617142711'
@@ -184,7 +184,7 @@ mariadb_controller: '{{ images_base_url }}/general/mariadb:10.6.17-focal-2024052
 horizon_mirantis_theme_sha256summ: b2cae3b203801cbdbffa0c98d6807c82e66379729873eb0e486f8730120513b3
 horizon_mirantis_theme_url: '{{ binary_base_url }}/openstack/bin/horizon/mirantis-caracal-1f6ade2-20240408162450.tar.gz'
 ceph_config_helper: '{{ images_base_url }}/openstack/openstack-tools:yoga-jammy-20240617060021'
-octavia_amphora_checksum: ebc5e7b6fb3b22863d4c8a1ceff62c5f
+octavia_amphora_checksum: 8a432138330d300a538f776b6cc5adfb
 masakari_db_sync: '{{ images_base_url }}/openstack/masakari:caracal-jammy-20240617142711'
 masakari_api: '{{ images_base_url }}/openstack/masakari:caracal-jammy-20240617142711'
 masakari_engine: '{{ images_base_url }}/openstack/masakari:caracal-jammy-20240617142711'
