@@ -232,3 +232,4 @@ neutron_ovn_db_sync_migrate: '{{ images_base_url }}/openstack/neutron:victoria-f
 redis-operator: '{{ images_base_url }}/openstack/extra/redis-operator:v1.2.4-20240427152750'
 designate_zone_setup: '{{ images_base_url }}/openstack/openstack-tools:yoga-jammy-20240617060021'
 nova_placement_audit: '{{ images_base_url }}/openstack/nova:victoria-focal-20240112082932'
+libvirt_inhibit: '{{ images_base_url }}/openstack/nova:victoria-focal-20240112082932'
