@@ -132,6 +132,7 @@ spec:
 {%- for image in ["image_repo_sync",
                  "libvirt",
                  "ceph_config_helper",
+                 "libvirt_inhibit",
                  "dep_check",] %}
         {%- if image in images %}
           {{ image }}: {{ images[image] }}
@@ -187,6 +188,10 @@ spec:
         user_secret_name: {{ ceph.nova.secrets }}
 {%- endif %}
       conf:
+{%- if OSVer.yoga <= OSVer[spec.openstack_version] %}
+        inhibit_lock:
+          enabled: true
+{%- endif %}
         ceph:
 {%- if is_ceph_enabled %}
           enabled: true

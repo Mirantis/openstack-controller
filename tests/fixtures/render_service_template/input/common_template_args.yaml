@@ -123,6 +123,7 @@ images:
   ks_user: ks-user:latest
   ks_trusts: ks-trusts:latest
   libvirt: libvirt:latest
+  libvirt_inhibit: nova:latest
   manila_api: manila:latest
   manila_db_sync: manila:latest
   manila_db_purge: manila:latest

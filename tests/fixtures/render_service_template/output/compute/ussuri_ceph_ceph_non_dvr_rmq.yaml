@@ -139,6 +139,7 @@ spec:
           dep_check: dep-check:latest
           image_repo_sync: image-repo-sync:latest
           libvirt: libvirt:latest
+          libvirt_inhibit: nova:latest
       manifests:
         ceph_conf: true
         network_policy: false

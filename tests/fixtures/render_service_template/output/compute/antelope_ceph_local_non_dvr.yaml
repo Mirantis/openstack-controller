@@ -10,10 +10,13 @@ spec:
           libvirt: libvirt:latest
           ceph_config_helper: ceph-config-helper:latest
           dep_check: dep-check:latest
+          libvirt_inhibit: nova:latest
       manifests:
         network_policy: false
         ceph_conf: true
       conf:
+        inhibit_lock:
+          enabled: true
         ceph:
           enabled: false
         qemu:
