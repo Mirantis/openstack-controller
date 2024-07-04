@@ -95,6 +95,10 @@ database:mariadb:StatefulSet:mariadb-server:
   - podSelector:
       matchLabels:
         application: nova
+        component: placement-audit
+  - podSelector:
+      matchLabels:
+        application: nova
         component: metadata
   - podSelector:
       matchLabels:

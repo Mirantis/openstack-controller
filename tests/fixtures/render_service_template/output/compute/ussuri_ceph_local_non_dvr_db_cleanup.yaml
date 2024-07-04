@@ -405,6 +405,7 @@ spec:
           nova_db_sync_online: nova-db-sync-online:latest
           nova_novncproxy: nova-novncproxy:latest
           nova_placement: nova-placement:latest
+          nova_placement_audit: nova-placement-audit:latest
           nova_scheduler: nova-scheduler:latest
           nova_service_cleaner: nova-service-cleaner:latest
           nova_spiceproxy: nova-spiceproxy:latest
@@ -446,6 +447,7 @@ spec:
         service_ingress_placement: false
         service_placement: false
         cron_job_db_purge: true
+        cron_job_placement_audit: true
         ceph_conf: true
         ingress_novncproxy: true
         ingress_spiceproxy: false

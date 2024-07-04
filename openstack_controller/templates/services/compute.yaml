@@ -297,6 +297,7 @@ spec:
 {%- for image in [
     "nova_cell_setup_init",
     "nova_placement",
+    "nova_placement_audit",
     "nova_compute_ironic",
     "nova_db_sync",
     "nova_db_sync_online",
@@ -559,6 +560,9 @@ spec:
         ingress_novncproxy: {{ vnc_enabled }}
         service_ingress_spiceproxy: {{ spice_enabled }}
         ingress_spiceproxy: {{ spice_enabled }}
+{%- if OSVer.ussuri <= OSVer[spec.openstack_version] %}
+        cron_job_placement_audit: true
+{%- endif %}
 {%- if spec.features.network_policies.enabled %}
       network_policy:
 {% include 'base/network_policies/compute.yaml' %}

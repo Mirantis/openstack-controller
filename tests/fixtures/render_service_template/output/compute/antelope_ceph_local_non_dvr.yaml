@@ -45,6 +45,7 @@ spec:
         tags:
           nova_cell_setup_init: nova-cell-setup-init:latest
           nova_placement: nova-placement:latest
+          nova_placement_audit: nova-placement-audit:latest
           nova_compute_ironic: nova-compute-ironic:latest
           nova_db_sync: nova-db-sync:latest
           nova_db_sync_online: nova-db-sync-online:latest
@@ -170,6 +171,7 @@ spec:
             - openstack-mariadb-cluster-wait
       manifests:
         cron_job_db_purge: true
+        cron_job_placement_audit: true
         network_policy: true
         job_rabbit_init: false
         ceph_conf: true

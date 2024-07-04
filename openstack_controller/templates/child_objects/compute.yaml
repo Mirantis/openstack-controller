@@ -51,6 +51,19 @@ nova:
       pod_labels:
         application: nova
         component: service-cleaner
+    nova-placement-audit:
+      connections:
+        egress:
+          - {{ to_child_object("identity", "keystone", "Deployment", "keystone-api", ["ks-pub"]) | indent(12)}}
+          - {{ to_child_object("database", "mariadb", "StatefulSet", "mariadb-server", ["mysql"]) | indent(12)}}
+          - {{ to_child_object("placement", "placement", "Deployment", "placement-api", ["p-api"]) | indent(12)}}
+      hash_fields: []
+      images:
+      - nova_placement_audit
+      manifest: cron_job_placement_audit
+      pod_labels:
+        application: nova
+        component: placement-audit
   DaemonSet:
     nova-compute:
       connections:
