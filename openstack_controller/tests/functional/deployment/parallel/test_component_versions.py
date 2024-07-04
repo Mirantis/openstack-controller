@@ -1,7 +1,9 @@
 import re
+import unittest
 
 from parameterized import parameterized
 from openstack_controller.tests.functional import base
+from openstack_controller import constants
 from openstack_controller import settings
 from openstack_controller import kube
 
@@ -9,6 +11,15 @@ from openstack_controller import kube
 class ComponentVersionsFunctionalTestCase(base.BaseFunctionalTestCase):
     def setUp(self):
         super().setUp()
+        openstack_version = self.osdpl.obj["spec"]["openstack_version"]
+        if (
+            constants.OpenStackVersion[openstack_version]
+            < constants.OpenStackVersion["antelope"]
+        ):
+            raise unittest.SkipTest(
+                "Skip component version checking for releases lower than Antelope"
+            )
+
         self.check_scheme = {
             "ceph": [
                 {
