@@ -1,3 +1,4 @@
+from parameterized import parameterized
 import pytest
 import time
 
@@ -116,8 +117,16 @@ class AutoschedulerTestCase(
                     f"The success metric was changed on agent {agent} with host_up {host_up}.",
                 )
 
-    def test_portprober_autoscheduler_ipv4(self):
-        net = self.network_create()
+    @parameterized.expand(
+        [
+            ("non-shared, internal network", None, None),
+            ("shared, internal network", True, None),
+            ("non-shared, external network", None, True),
+            ("shared, external network", True, True),
+        ]
+    )
+    def test_portprober_autoscheduler_ipv4(self, net_type, shared, external):
+        net = self.network_create(shared=shared, external=external)
         self._test_network_sits_on_agents(net["id"], 0)
         self.subnet_create(cidr=CONF.TEST_SUBNET_RANGE, network_id=net["id"])
         # TODO(vsaienko): handle fast network create/delete when portprober did not setup
@@ -126,9 +135,19 @@ class AutoschedulerTestCase(
         self._test_network_sits_on_agents(
             net["id"], CONF.PORTPROBER_AGENTS_PER_NETWORK
         )
+        self.network_delete(net["id"])
+        self._test_network_sits_on_agents(net["id"], 0)
 
-    def test_portprober_autoscheduler_ipv6(self):
-        net = self.network_create()
+    @parameterized.expand(
+        [
+            ("non-shared, internal network", None, None),
+            ("shared, internal network", True, None),
+            ("non-shared, external network", None, True),
+            ("shared, external network", True, True),
+        ]
+    )
+    def test_portprober_autoscheduler_ipv6(self, net_type, shared, external):
+        net = self.network_create(shared=shared, external=external)
         self._test_network_sits_on_agents(net["id"], 0)
         self.subnet_create(
             cidr=CONF.TEST_IPV6_SUBNET_RANGE,
@@ -141,6 +160,8 @@ class AutoschedulerTestCase(
         self._test_network_sits_on_agents(
             net["id"], CONF.PORTPROBER_AGENTS_PER_NETWORK
         )
+        self.network_delete(net["id"])
+        self._test_network_sits_on_agents(net["id"], 0)
 
     def _test_server_basic_ops(self, network, port, image=None, flavor=None):
         server = self.server_create(
