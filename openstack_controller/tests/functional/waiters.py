@@ -10,6 +10,25 @@ LOG = logging.getLogger(__name__)
 CONF = config.Config()
 
 
+def wait_for_job_status(job, status, timeout, interval):
+    """
+    :param status: string "ready" or "completed"
+    """
+    start_time = int(time.time())
+    while True:
+        if getattr(job, status):
+            LOG.debug(
+                f"Job is {status}. Current job status is {job.obj['status']}."
+            )
+            return
+        time.sleep(interval)
+        timed_out = int(time.time()) - start_time
+        message = f"Job is not {status} after {timed_out} sec."
+        if timed_out >= timeout:
+            LOG.error(message)
+            raise TimeoutError(message)
+
+
 def wait_for_service_status_state(
     fetch_function, svc, expected_status, timeout, interval
 ):

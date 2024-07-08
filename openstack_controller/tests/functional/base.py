@@ -3,6 +3,7 @@ import logging
 from kombu import Connection
 from unittest import TestCase
 
+import asyncio
 import openstack
 
 from openstack_controller import kube
@@ -77,10 +78,55 @@ class BaseFunctionalTestCase(TestCase):
             return True
         return False
 
+    @classmethod
+    def cronjob_run(cls, cronjob, wait=False):
+        cron = kube.find(kube.CronJob, cronjob, namespace=cls.osdpl.namespace)
+        job = asyncio.run(cron.run())
+        LOG.debug(f"Started job {job}")
+        cls.addClassCleanup(cls.job_delete, job)
+        if wait:
+            try:
+                waiters.wait_for_job_status(
+                    job,
+                    "ready",
+                    600,
+                    30,
+                )
+            finally:
+                job_logs = cls.get_job_logs(job)
+                for pod, pod_logs in job_logs.items():
+                    for container, logs in pod_logs.items():
+                        LOG.debug(
+                            f"""Job {job}/{pod}/{container} LOGS:
+                                  {logs}
+                            """
+                        )
+        return job
+
+    @classmethod
+    def get_job_logs(self, job):
+        logs = {}
+        for pod in job.pods:
+            logs[pod] = {}
+            for container in pod.obj["spec"]["containers"]:
+                try:
+                    logs[pod][container["name"]] = pod.logs(
+                        container=container["name"]
+                    )
+                except Exception as e:
+                    LOG.warning(
+                        f"Got exception {e} while getting logs from {pod}/{container['name']}"
+                    )
+        return logs
+
     def is_service_enabled(self, name):
         return name in self.osdpl.obj["spec"].get("features", {}).get(
             "services", []
         )
+
+    @classmethod
+    def job_delete(cls, job, propagation_policy="Foreground"):
+        job.delete(propagation_policy=propagation_policy)
 
     def check_rabbitmq_connection(
         self, username, password, host, port, vhost, ssl=False
@@ -361,6 +407,35 @@ class BaseFunctionalTestCase(TestCase):
         )
 
         return res
+
+    @classmethod
+    def consumer_allocation_delete(cls, csm_id):
+        res = cls.ocm.oc.placement.delete(f"/allocations/{csm_id}")
+        if not res.ok and res.status_code != 404:
+            res.raise_for_status()
+
+    @classmethod
+    def consumer_allocation_create(cls, csm_id, rp_id, resources):
+        # Can be used starting yoga
+        microversion = 1.39
+        allocation = {
+            "consumer_id": csm_id,
+            "data": {
+                "user_id": cls.ocm.oc.current_user_id,
+                "project_id": cls.ocm.oc.current_project_id,
+                "consumer_generation": None,
+                "consumer_type": "INSTANCE",
+                "allocations": {rp_id: {"resources": resources}},
+            },
+        }
+        res = cls.ocm.oc.placement.put(
+            f"/allocations/{csm_id}",
+            json=allocation["data"],
+            microversion=microversion,
+        )
+        cls.addClassCleanup(cls.consumer_allocation_delete, csm_id)
+        res.raise_for_status()
+        return allocation
 
     @classmethod
     def volume_create(
