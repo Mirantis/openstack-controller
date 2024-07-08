@@ -1455,6 +1455,45 @@ properties:
                   When enabled openstack-controller will wait for ceph deployment
                   provided by MOSK Ceph controller. Disable for cephless deployment.
                   default true
+              backends:
+                type: object
+                description: |
+                  Custom additional Cinder backend configuration
+                additionalProperties: False
+                patternProperties:
+                  ".*":
+                    description: |
+                      Backend name
+                    additionalProperties: False
+                    type: object
+                    required:
+                      - type
+                      - values
+                    properties:
+                      enabled:
+                        type: boolean
+                      type:
+                        type: string
+                        enum:
+                          - statefulset
+                      values:
+                        type: object
+                        additionalProperties: False
+                        required:
+                          - conf
+                        properties:
+                          conf:
+                            type: object
+                            additionalProperties: True
+                          images:
+                            type: object
+                            additionalProperties: True
+                          labels:
+                            type: object
+                            additionalProperties: True
+                          pod:
+                            type: object
+                            additionalProperties: True
           backup:
             type: object
             additionalProperties: false
