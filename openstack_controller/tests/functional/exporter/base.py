@@ -5,7 +5,6 @@ import logging
 
 from prometheus_client.openmetrics.parser import text_string_to_metric_families
 
-from openstack_controller import constants
 from openstack_controller import kube
 from openstack_controller.tests.functional import config
 from openstack_controller.tests.functional import base
@@ -165,11 +164,7 @@ class BaseFunctionalExporterTestCase(
 
     def get_pool_by_volume(self, volume):
         host = self.ocm.oc.get_volume(volume["id"])["host"]
-        openstack_version = self.osdpl.obj["spec"]["openstack_version"]
-        if volume.volume_type == "lvm" or (
-            constants.OpenStackVersion[openstack_version].value
-            <= constants.OpenStackVersion["rocky"].value
-        ):
+        if volume.volume_type == "lvm":
             pool = [
                 pool
                 for pool in list(self.ocm.oc.volume.backend_pools())

@@ -1,6 +1,7 @@
 from parameterized import parameterized
 import pytest
 
+from openstack_controller import constants as const
 from openstack_controller.exporter import constants
 from openstack_controller.tests.functional.exporter import base
 from openstack_controller.tests.functional import waiters as wait
@@ -38,6 +39,12 @@ class CinderCollectorFunctionalTestCase(base.BaseFunctionalExporterTestCase):
             expected_value,
             f"{phase}: Number of volumes is not correct.",
         )
+
+    @classmethod
+    def openstack_version(cls, version=None):
+        if version is None:
+            version = cls.osdpl.obj["spec"]["openstack_version"]
+        return const.OpenStackVersion[version.lower()].value
 
     def test_osdpl_cinder_volumes(self):
         """Total number of volumes in the cluster."""
@@ -192,6 +199,8 @@ class CinderCollectorFunctionalTestCase(base.BaseFunctionalExporterTestCase):
     def test_openstack_cinder_pool_free_capacity(self):
         """Free capacity in bytes of cinder backend pools in environment."""
 
+        if self.openstack_version() <= self.openstack_version("queens"):
+            self.skipTest("Disabled for Queens and older")
         # wait until all cinder pool timestamps updated
         pool_list = list(self.ocm.oc.volume.backend_pools())
         for pool in pool_list:
@@ -343,6 +352,8 @@ class CinderCollectorFunctionalTestCase(base.BaseFunctionalExporterTestCase):
     def test_openstack_cinder_pool_allocated_capacity(self):
         """Allocated capacity in bytes of cinder backend pools in environment."""
 
+        if self.openstack_version() <= self.openstack_version("queens"):
+            self.skipTest("Disabled for Queens and older")
         # wait until all cinder pool timestamps updated
         pool_list = list(self.ocm.oc.volume.backend_pools())
         for pool in pool_list:
