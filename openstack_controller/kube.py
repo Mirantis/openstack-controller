@@ -502,6 +502,20 @@ class Job(pykube.Job, HelmBundleMixin, ObjectStatusMixin):
     immutable = True
 
     @property
+    def uid(self):
+        return self.obj["metadata"]["uid"]
+
+    @property
+    def start_time(self):
+        """
+        Timestamp of job start.
+
+        :returns : floating number (unix timestamp)
+        """
+        ts = self.obj["status"]["startTime"]
+        return utils.k8s_timestamp_to_unix(ts)
+
+    @property
     def ready(self):
         self.reload()
         conditions = self.obj.get("status", {}).get("conditions", [])
@@ -517,8 +531,31 @@ class Job(pykube.Job, HelmBundleMixin, ObjectStatusMixin):
                 f"All conditions for the {self.kind}/{self.name} completed."
             )
             return True
+        LOG.info(f"The job {self.name} is not Ready yet.")
+        return False
+
+    @property
+    def completed(self):
+        self.reload()
+        for c in self.obj["status"].get("conditions", []):
+            if (
+                c["type"] in ["Ready", "Complete", "Failed"]
+                and c["status"] == "True"
+            ):
+                return True
         LOG.info(f"The job {self.name} is not Completed yet.")
         return False
+
+    @property
+    def pods(self):
+        self.reload()
+        pod_labels = self.obj["spec"]["selector"].get("matchLabels", {})
+        selector = {f"{k}__in": [v] for k, v in pod_labels.items()}
+        pods_query = resource_list(
+            Pod, selector=selector, namespace=self.namespace
+        )
+        pods = [x for x in pods_query if x.is_owned_by(self.uid)]
+        return pods
 
     def _prepare_for_rerun(self):
         # cleanup the object of runtime stuff
@@ -540,6 +577,12 @@ class Job(pykube.Job, HelmBundleMixin, ObjectStatusMixin):
         )
         self.obj["spec"].pop("selector", None)
 
+    def is_owned_by(self, uid):
+        for ref in self.obj["metadata"].get("ownerReferences", []):
+            if ref.get("uid") == uid:
+                return True
+        return False
+
     async def rerun(self):
         self.delete(propagation_policy="Background")
         if not await wait_for_deleted(self):
@@ -551,6 +594,49 @@ class Job(pykube.Job, HelmBundleMixin, ObjectStatusMixin):
 
 
 class CronJob(pykube.CronJob, HelmBundleMixin):
+
+    @property
+    def jobs(self):
+        self.reload()
+        job_labels = (
+            self.obj["spec"]["jobTemplate"]
+            .get("metadata", {})
+            .get("labels", {})
+        )
+        selector = {f"{k}__in": [v] for k, v in job_labels.items()}
+        jobs_query = resource_list(
+            Job, selector=selector, namespace=self.namespace
+        )
+        jobs = [x for x in jobs_query if x.is_owned_by(self.uid)]
+        return jobs
+
+    def get_latest_job(self, status=None):
+        """
+        Get latest job of cronjob. If status is specified,
+        returns latest job in that status.
+
+        :param status: string "completed" or "ready"
+
+        :returns : Job object or None
+        """
+        jobs = self.jobs
+        if not jobs:
+            LOG.info(f"Cronjob {self.name} has not scheduled jobs yet")
+            return
+        sorted_jobs = sorted(
+            jobs, key=lambda job: job.start_time, reverse=True
+        )
+        if status is None:
+            return sorted_jobs[0]
+        for job in sorted_jobs:
+            if getattr(job, status):
+                return job
+        LOG.info(f"Cronjob {self.name} has no jobs in {status} status")
+
+    @property
+    def uid(self):
+        return self.obj["metadata"]["uid"]
+
     async def _suspend(
         self,
         wait_completion=False,
