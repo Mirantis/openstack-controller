@@ -1,6 +1,7 @@
 from parameterized import parameterized
 import pytest
 import time
+import logging
 
 from openstack_controller.tests.functional.exporter import (
     base as exporter_base,
@@ -10,6 +11,7 @@ from openstack_controller.tests.functional import config
 from openstack_controller.tests.functional import waiters
 
 CONF = config.Config()
+LOG = logging.getLogger(__name__)
 
 
 @pytest.mark.xdist_group("exporter-compute-network")
@@ -117,6 +119,33 @@ class AutoschedulerTestCase(
                     f"The success metric was changed on agent {agent} with host_up {host_up}.",
                 )
 
+    def _get_active_ports(
+        self, subnet_id, timeout=CONF.PORT_TIMEOUT, **kwargs
+    ):
+        start_time = int(time.time())
+        while int(time.time()) - start_time < timeout:
+            all_active = True
+            ports = list(self.ocm.oc.network.ports(**kwargs))
+            active_ports = []
+
+            if ports:
+                for port in ports:
+                    if subnet_id in [ip["subnet_id"] for ip in port.fixed_ips]:
+                        if port.status == "ACTIVE":
+                            active_ports.append(port)
+                        else:
+                            all_active = False
+                            break
+            else:
+                continue
+
+            if all_active:
+                return active_ports
+            time.sleep(CONF.PORT_INTERVAL)
+
+        LOG.debug(f"Not all ports for subnet {subnet_id} become ACTIVE")
+        return []
+
     @parameterized.expand(
         [
             ("non-shared, internal network", None, None),
@@ -163,6 +192,42 @@ class AutoschedulerTestCase(
         self.network_delete(net["id"])
         self._test_network_sits_on_agents(net["id"], 0)
 
+    def test_enable_disable_dhcp_port(self):
+        net = self.network_create()
+        subnet = self.subnet_create(
+            cidr=CONF.TEST_SUBNET_RANGE, network_id=net["id"]
+        )
+
+        dhcp_port = self._get_active_ports(
+            subnet_id=subnet["id"],
+            network_id=net["id"],
+            device_owner="network:dhcp",
+        )[0]
+
+        self.wait_arping_samples_for_port(
+            dhcp_port, CONF.PORTPROBER_METRIC_REFRESH_TIMEOUT, 5
+        )
+        self._check_arping_metrics_for_port(dhcp_port)
+        self._wait_metric_incresing(
+            dhcp_port,
+            "success",
+            CONF.PORTPROBER_METRIC_TIMEOUT,
+        )
+        self.ocm.oc.network.update_port(dhcp_port, admin_state_up=False)
+        time.sleep(CONF.PORTPROBER_METRIC_REFRESH_TIMEOUT)
+        self._check_arping_metrics_for_port(dhcp_port, present=False)
+
+        self.ocm.oc.network.update_port(dhcp_port, admin_state_up=True)
+        self.wait_arping_samples_for_port(
+            dhcp_port, CONF.PORTPROBER_METRIC_REFRESH_TIMEOUT, 5
+        )
+        self._check_arping_metrics_for_port(dhcp_port)
+        self._wait_metric_incresing(
+            dhcp_port,
+            "success",
+            CONF.PORTPROBER_METRIC_TIMEOUT,
+        )
+
     def _test_server_basic_ops(self, network, port, image=None, flavor=None):
         server = self.server_create(
             imageRef=image,
@@ -183,8 +248,7 @@ class AutoschedulerTestCase(
         self._wait_metric_incresing(
             port,
             "success",
-            CONF.PORTPROBER_PROBE_INTERVAL
-            + CONF.PORTPROBER_METRIC_REFRESH_TIMEOUT,
+            CONF.PORTPROBER_METRIC_TIMEOUT,
         )
         self._check_arping_sample_value_rates_port(port, host_up=True)
         self.ocm.oc.compute.stop_server(server)
