@@ -1472,6 +1472,14 @@ properties:
                     properties:
                       enabled:
                         type: boolean
+                        description: |
+                          Enable additional Cinder backend to deploy
+                          default: True
+                      create_volume_type:
+                        type: boolean
+                        description: |
+                          Enable automatic volume type creation for this backend
+                          default: True
                       type:
                         type: string
                         enum:

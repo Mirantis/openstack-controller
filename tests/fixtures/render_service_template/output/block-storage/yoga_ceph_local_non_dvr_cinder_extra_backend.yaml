@@ -32,6 +32,8 @@ spec:
       bootstrap:
         bootstrap_conf_backends: false
         volume_types:
+          netapp:
+            volume_backend_name: netapp
           volumes-hdd:
             volume_backend_name: volumes-hdd
           volumes-hdd_multiattach:
