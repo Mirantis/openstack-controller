@@ -16,7 +16,6 @@ import re
 import json
 from prometheus_client.core import GaugeMetricFamily
 
-from openstack_controller.constants import OpenStackVersion
 from openstack_controller import kube, utils
 from openstack_controller.exporter.collectors.openstack import base
 
@@ -25,7 +24,7 @@ LOG = utils.get_logger(__name__)
 
 def get_latest_cronjob_logs(cronjob, container_name):
     latest_job = cronjob.get_latest_job(status="completed")
-    if latest_job and latest_job.ready:
+    if latest_job.ready:
         for pod in latest_job.pods:
             if pod.obj["status"].get("phase") == "Succeeded":
                 return pod.logs(container=container_name)
@@ -38,15 +37,26 @@ class OsdplNovaAuditMetricCollector(base.OpenStackBaseMetricCollector):
     _description = "OpenStack Compute audit metrics"
     _os_service_types = ["compute", "placement"]
 
+    def get_audit_cronjob(self, silent=False):
+        return kube.find(
+            kube.CronJob,
+            "nova-placement-audit",
+            namespace=self.osdpl.namespace,
+            silent=silent,
+        )
+
     @property
     def can_collect_data(self):
         if not super().can_collect_data:
             return False
-        openstack_version = self.osdpl.obj["spec"]["openstack_version"]
-        return (
-            OpenStackVersion[openstack_version].value
-            >= OpenStackVersion["ussuri"].value
-        )
+        cronjob = self.get_audit_cronjob(silent=True)
+        if not cronjob:
+            LOG.warning("No audit cronjob found, cannot collect")
+            return False
+        if not cronjob.get_latest_job(status="completed"):
+            LOG.warning("No completed audit cronjob found, cannot collect")
+            return False
+        return True
 
     def init_families(self):
         res = {
@@ -70,11 +80,7 @@ class OsdplNovaAuditMetricCollector(base.OpenStackBaseMetricCollector):
 
     @utils.timeit
     def get_audit_report(self):
-        cronjob = kube.find(
-            kube.CronJob,
-            "nova-placement-audit",
-            namespace=self.osdpl.namespace,
-        )
+        cronjob = self.get_audit_cronjob()
         if cronjob.obj["spec"]["suspend"]:
             raise ValueError("Audit cronjob is suspended, cannot get report")
         logs = get_latest_cronjob_logs(cronjob, "placement-audit-report")
