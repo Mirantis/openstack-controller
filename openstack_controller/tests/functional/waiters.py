@@ -118,8 +118,9 @@ def wait_resource_deleted(get_resource_func, resource_id, timeout, interval):
 
 
 def wait_cinder_pool_updated(
-    get_cinder_pool_timestamp, pool_name, last_timestamp
+    get_cinder_pool_timestamp, pool_name, timestamp=None
 ):
+    last_timestamp = timestamp or get_cinder_pool_timestamp(pool_name)
     start_time = time.time()
     timeout = CONF.CINDER_POOL_UPDATE_TIMEOUT
     while True:

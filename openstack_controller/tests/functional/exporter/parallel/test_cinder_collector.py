@@ -163,6 +163,9 @@ class CinderCollectorFunctionalTestCase(base.BaseFunctionalExporterTestCase):
     def _test_cinder_pool_metric(
         self, metric_name, pool_name, expected_value, phase
     ):
+        """
+        Checks that sample for specific metric is equal to expected value
+        """
         associated_metric = self.filter_metric_samples(
             self.get_metric_after_refresh(metric_name, self.scrape_collector),
             {"name": pool_name},
@@ -170,7 +173,8 @@ class CinderCollectorFunctionalTestCase(base.BaseFunctionalExporterTestCase):
         self.assertEqual(
             associated_metric[0].value,
             expected_value,
-            f"{phase}: The expected value for {metric_name} for pool {pool_name} is not correct.",
+            f"{phase}: The expected value for {metric_name} for pool "
+            f"{pool_name} is not correct.",
         )
 
     @pytest.mark.skip(reason="unless is fixed PRODX-39756")
@@ -196,158 +200,121 @@ class CinderCollectorFunctionalTestCase(base.BaseFunctionalExporterTestCase):
                 metric_name, pool_name, capacity, "After create"
             )
 
-    def test_openstack_cinder_pool_free_capacity(self):
+    @parameterized.expand(
+        [
+            ("empty", None, 5),
+            ("3Gb", CONF.UBUNTU_TEST_IMAGE_NAME, 3),
+        ]
+    )
+    def test_openstack_cinder_pool_free_capacity(
+        self, _, image_name, volume_size
+    ):
         """Free capacity in bytes of cinder backend pools in environment."""
+        metric_name = "osdpl_cinder_pool_free_capacity"
 
         if self.openstack_version() <= self.openstack_version("queens"):
             self.skipTest("Disabled for Queens and older")
+
+        create_timeout = (
+            CONF.VOLUME_MEDIUM_CREATE_TIMEOUT if image_name else None
+        )
+
+        image = self.ocm.oc.image.find_image(image_name) if image_name else {}
+        image_size = image.get("size", 0)
+
+        def get_capacity_bytes(_pool: dict):
+            return _pool["capabilities"].get("free_capacity_gb") * constants.Gi
+
         # wait until all cinder pool timestamps updated
-        pool_list = list(self.ocm.oc.volume.backend_pools())
-        for pool in pool_list:
+        pools = list(self.ocm.oc.volume.backend_pools())
+        timestamp = max(
+            _pool["capabilities"].get("timestamp") for _pool in pools
+        )
+        for pool in pools:
             pool_name = pool["name"]
-            timestamp = self.get_cinder_pool_timestamp(pool_name)
             wait.wait_cinder_pool_updated(
                 self.get_cinder_pool_timestamp, pool_name, timestamp
             )
 
-        metric_name = "osdpl_cinder_pool_free_capacity"
-        pool_list = list(self.ocm.oc.volume.backend_pools())
-        pools_free_capacity = {}
-
-        for pool in pool_list:
+        # Check free_capacity metric for each existed pool
+        free_capacity_initial = dict()
+        for pool in list(self.ocm.oc.volume.backend_pools()):
             pool_name = pool["name"]
-            capacity = pool["capabilities"].get("free_capacity_gb") * (
-                constants.Gi
-            )
-            pools_free_capacity[pool_name] = capacity
+            capacity = get_capacity_bytes(pool)
+            free_capacity_initial[pool_name] = capacity
             self._test_cinder_pool_metric(
-                metric_name, pool_name, capacity, "Before create empty volume"
+                metric_name, pool_name, capacity, f"Before create volume "
             )
 
-        # Create empty volume and check metrics
-        empty_volume = self.volume_create(size=5)
-        volume_pool = self.get_pool_by_volume(empty_volume)
-        timestamp = self.get_cinder_pool_timestamp(volume_pool["name"])
+        # Create volume and check metrics
+        volume = self.volume_create(
+            size=volume_size,
+            image=image_name,
+            timeout=create_timeout,
+        )
+        volume_pool = self.get_pool_by_volume(volume)
         wait.wait_cinder_pool_updated(
-            self.get_cinder_pool_timestamp, volume_pool["name"], timestamp
+            self.get_cinder_pool_timestamp, volume_pool["name"]
         )
 
         for pool in list(self.ocm.oc.volume.backend_pools()):
             pool_name = pool["name"]
-            capacity = pool["capabilities"].get("free_capacity_gb") * (
-                constants.Gi
+            capacity_initial = free_capacity_initial[pool_name]
+            capacity_current = get_capacity_bytes(pool)
+            # Check metric for each pool
+            self._test_cinder_pool_metric(
+                metric_name,
+                pool_name,
+                capacity_current,
+                f"After create volume with size {volume_size} Gb ",
             )
-            # Check that Cinder API values didn't change after create empty volume
-            if capacity == pools_free_capacity[pool_name]:
-                self._test_cinder_pool_metric(
-                    metric_name,
-                    pool_name,
-                    capacity,
-                    "After create empty volume",
+            # We expect that allocated capacity will be changed only on target
+            # pool
+            if pool_name == volume_pool["name"]:
+                self.assertLessEqual(
+                    capacity_current,
+                    capacity_initial + image_size,
+                    msg=f"The free_capacity_gb value "
+                    f"has changed from {capacity_initial} "
+                    f"to {capacity_current} after volume was created",
                 )
+            # And other pools should not be changed
             else:
-                self.assertTrue(
-                    capacity == pools_free_capacity[pool_name],
-                    f"The cinder_pool_free_capacity value {capacity} for pool {pool_name} "
-                    "is changed after empty volume was created",
-                )
-
-        # Create non-empty volume and check metrics
-        image = self.ocm.oc.image.find_image(CONF.UBUNTU_TEST_IMAGE_NAME)
-        test_volume = self.volume_create(
-            size=3,
-            image=CONF.UBUNTU_TEST_IMAGE_NAME,
-            timeout=CONF.VOLUME_MEDIUM_CREATE_TIMEOUT,
-        )
-
-        volume_pool = self.get_pool_by_volume(test_volume)
-        timestamp = self.get_cinder_pool_timestamp(volume_pool["name"])
-        wait.wait_cinder_pool_updated(
-            self.get_cinder_pool_timestamp, volume_pool["name"], timestamp
-        )
-
-        for pool in list(self.ocm.oc.volume.backend_pools()):
-            pool_name = pool["name"]
-            capacity = pool["capabilities"].get("free_capacity_gb") * (
-                constants.Gi
-            )
-
-            # Check that cinder API values are changed accordingly
-            if pool["name"] == volume_pool["name"]:
-                self.assertAlmostEqual(
-                    pools_free_capacity[pool_name],
-                    capacity,
-                    None,
-                    f"The cinder_pool_free_capacity API value {capacity} for pool "
-                    f"{pool_name} is not decreased after non-empty volume was created",
-                    image["size"] * 5,
-                )
-                self._test_cinder_pool_metric(
-                    metric_name,
-                    pool_name,
-                    capacity,
-                    "After create non empty volume",
-                )
-            else:
-                self.assertTrue(
-                    capacity == pools_free_capacity[pool_name],
-                    f"The cinder_pool_free_capacity API value {capacity} for pool {pool_name} "
-                    "is changed - not expected",
-                )
-                self._test_cinder_pool_metric(
-                    metric_name,
-                    pool_name,
-                    capacity,
-                    "After create non empty volume",
+                self.assertEqual(
+                    capacity_current,
+                    capacity_initial,
+                    msg=f"The cinder_pool_free_capacity value "
+                    f"{capacity_current} for pool {pool_name} is changed "
+                    f"after volume was created",
                 )
 
         # Remove a test volume
-        self.volume_delete(test_volume)
-        timestamp = self.get_cinder_pool_timestamp(volume_pool["name"])
+        self.volume_delete(volume)
         wait.wait_cinder_pool_updated(
-            self.get_cinder_pool_timestamp, volume_pool["name"], timestamp
+            self.get_cinder_pool_timestamp, volume_pool["name"]
         )
 
         for pool in list(self.ocm.oc.volume.backend_pools()):
             pool_name = pool["name"]
-            capacity_after_remove = pool["capabilities"].get(
-                "free_capacity_gb"
-            ) * (constants.Gi)
-            # Check Cinder API values after remove non-empty volume
-            if pool["name"] == volume_pool["name"]:
-                if (
-                    abs(pools_free_capacity[pool_name] - capacity_after_remove)
-                    < image["size"] / 2
-                ):
-                    self._test_cinder_pool_metric(
-                        metric_name,
-                        pool_name,
-                        capacity_after_remove,
-                        "After remove non-empty volume",
-                    )
-                else:
-                    self.assertTrue(
-                        abs(
-                            pools_free_capacity[pool_name]
-                            - capacity_after_remove
-                        )
-                        < image["size"] / 2,
-                        f"The cinder_pool_free_capacity value {capacity} for pool {pool_name} "
-                        "is incorrect after remove non-empty volume",
-                    )
-            elif capacity_after_remove == pools_free_capacity[pool_name]:
-                self._test_cinder_pool_metric(
-                    metric_name,
-                    pool_name,
-                    capacity_after_remove,
-                    "After remove non-empty volume",
-                )
-            else:
-                self.assertTrue(
-                    capacity_after_remove == pools_free_capacity[pool_name],
-                    f"The cinder_pool_free_capacity value {capacity} for pool {pool_name} "
-                    "is incorrect after remove non-empty volume",
-                )
+
+            capacity_current = get_capacity_bytes(pool)
+            self._test_cinder_pool_metric(
+                metric_name,
+                pool_name,
+                capacity_current,
+                "After remove volume",
+            )
+            self.assertAlmostEqual(
+                capacity_current,
+                free_capacity_initial[pool_name],
+                # allow some leak after deleting volume
+                delta=0.2 * constants.Gi,
+                msg=f"The cinder_pool_free_capacity value doesn't return "
+                f"to initial value "
+                f"{free_capacity_initial[pool_name]} after "
+                f"volume was deleted. "
+                f"Current value is {capacity_current} for pool {pool_name}",
+            )
 
     def test_openstack_cinder_pool_allocated_capacity(self):
         """Allocated capacity in bytes of cinder backend pools in environment."""
@@ -358,9 +325,8 @@ class CinderCollectorFunctionalTestCase(base.BaseFunctionalExporterTestCase):
         pool_list = list(self.ocm.oc.volume.backend_pools())
         for pool in pool_list:
             pool_name = pool["name"]
-            timestamp = self.get_cinder_pool_timestamp(pool_name)
             wait.wait_cinder_pool_updated(
-                self.get_cinder_pool_timestamp, pool_name, timestamp
+                self.get_cinder_pool_timestamp, pool_name
             )
 
         metric_name = "osdpl_cinder_pool_allocated_capacity"
@@ -386,9 +352,8 @@ class CinderCollectorFunctionalTestCase(base.BaseFunctionalExporterTestCase):
         )
 
         volume_pool = self.get_pool_by_volume(test_volume)
-        timestamp = self.get_cinder_pool_timestamp(volume_pool["name"])
         wait.wait_cinder_pool_updated(
-            self.get_cinder_pool_timestamp, volume_pool["name"], timestamp
+            self.get_cinder_pool_timestamp, volume_pool["name"]
         )
 
         for pool in list(self.ocm.oc.volume.backend_pools()):
@@ -421,9 +386,8 @@ class CinderCollectorFunctionalTestCase(base.BaseFunctionalExporterTestCase):
 
         # Remove a test volume
         self.volume_delete(test_volume)
-        timestamp = self.get_cinder_pool_timestamp(volume_pool["name"])
         wait.wait_cinder_pool_updated(
-            self.get_cinder_pool_timestamp, volume_pool["name"], timestamp
+            self.get_cinder_pool_timestamp, volume_pool["name"]
         )
         for pool in list(self.ocm.oc.volume.backend_pools()):
             pool_name = pool["name"]
