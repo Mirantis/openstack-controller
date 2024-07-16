@@ -2328,6 +2328,7 @@ def test_cinder_extra_backends_sts(client):
                     "labels": {"foo": "bar"},
                     "pod": {"foo": "bar"},
                 },
+                "create_volume_type": True,
                 "enabled": True,
                 "type": "statefulset",
             },

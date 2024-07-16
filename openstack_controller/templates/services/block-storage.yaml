@@ -41,11 +41,26 @@
 {%- endif %}
 {%- set extra_volumes = spec.get('features', {}).get('cinder', {}).get('volume', {}).get('backends', {}) %}
 {%- set extra_volumes_sts = {} %}
+{%- set extra_bootstrap = {} %}
 {%- for sts_name, sts_opts in extra_volumes.items() %}
 {%-   if sts_opts.get('enabled', True) %}
 {%-     do extra_volumes_sts.update({sts_name:{'values': sts_opts['values']}}) %}
+{%-     if sts_opts.get("create_volume_type", True) %}
+{%-       set enabled_backends = sts_opts["values"].get("conf", {}).get("cinder", {}).get("DEFAULT", {}).get("enabled_backends").split(',') %}
+{%-       if enabled_backends %}
+{%-         for section, opts in sts_opts["values"]["conf"]["cinder"].items() %}
+{%-           if section in enabled_backends %}
+{%-             set volume_backend_name = opts.get("volume_backend_name") %}
+{%-             if volume_backend_name %}
+{%-                do extra_bootstrap.update({volume_backend_name: {"volume_backend_name": volume_backend_name}}) %}
+{%-             endif %}
+{%-           endif %}
+{%-         endfor %}
+{%-       endif %}
+{%-     endif %}
 {%-   endif %}
 {%- endfor %}
+
 
 spec:
   releases:
@@ -316,6 +331,9 @@ spec:
       {%- endfor %}
     {%- endif %}
 {%- endfor %}
+{%- if extra_bootstrap %}
+          {{ extra_bootstrap | toyaml | indent(10) }}
+{%- endif %}
 {%- if is_ceph_enabled %}
       secrets:
         rbd:
