@@ -99,6 +99,7 @@ spec:
             rbd_secret_uuid: c9543a17-411c-45e1-8a25-3f03e0090dc2
             report_dynamic_total_capacity: false
           nova:
+            interface: internal
             auth_section: keystone_authtoken
             auth_type: password
         enable_iscsi: false
