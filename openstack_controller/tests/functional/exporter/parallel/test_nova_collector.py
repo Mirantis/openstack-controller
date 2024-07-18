@@ -113,7 +113,9 @@ class NovaInstancesCollectorInstancesFunctionalTestCase(
     def test_nova_instances(self):
         """Total number of instances in the cluster."""
 
-        metric = self.get_metric("osdpl_nova_instances")
+        metric = self.get_metric_after_refresh(
+            "osdpl_nova_instances", self.scrape_collector
+        )
         servers = self.ocm.compute_get_all_servers()
         self.assertEqual(
             int(metric.samples[0].value),
@@ -136,7 +138,9 @@ class NovaInstancesCollectorInstancesFunctionalTestCase(
 
         """
         metric_name = "osdpl_nova_active_instances"
-        initial_metric = self.get_metric(metric_name)
+        initial_metric = self.get_metric_after_refresh(
+            metric_name, self.scrape_collector
+        )
         initial_active_servers = self.ocm.compute_get_all_servers(
             status="ACTIVE"
         )
@@ -183,7 +187,9 @@ class NovaInstancesCollectorInstancesFunctionalTestCase(
 
         """
         metric_name = "osdpl_nova_error_instances"
-        initial_metric = self.get_metric(metric_name)
+        initial_metric = self.get_metric_after_refresh(
+            metric_name, self.scrape_collector
+        )
         initial_error_servers = self.ocm.compute_get_all_servers(
             status="ERROR"
         )
