@@ -1,8 +1,7 @@
 import unittest
 
 from openstack_controller.tests.functional import base
-from openstack_controller import settings
-from openstack_controller import kube
+from openstack_controller import constants, kube, settings
 
 
 class TestVncTLSTestCase(base.BaseFunctionalTestCase):
@@ -44,7 +43,15 @@ class TestVncTLSTestCase(base.BaseFunctionalTestCase):
             ):
                 qemu_psline = line
                 break
+        openstack_version = self.osdpl.obj["spec"]["openstack_version"]
+        tls_pattern = (
+            "tls-creds-x509"
+            if constants.OpenStackVersion[openstack_version]
+            > constants.OpenStackVersion["queens"]
+            else "x509verify"
+        )
         self.assertTrue(
-            "tls-creds-x509" in line,
-            f"The tls pattern string tls-creds-x509 not found in qemu-system process line {qemu_psline}",
+            tls_pattern in line,
+            f"The tls pattern string '{tls_pattern}'"
+            f" not found in qemu-system process line {qemu_psline}",
         )
