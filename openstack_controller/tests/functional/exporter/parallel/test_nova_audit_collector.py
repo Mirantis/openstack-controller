@@ -71,8 +71,8 @@ class NovaAuditCollectorFunctionalTestCase(
         )
         return allocation
 
-    def _delete_allocation(cls, allocation):
-        cls.consumer_allocation_delete(allocation["consumer_id"])
+    def _delete_allocation(self, allocation):
+        self.consumer_allocation_delete(allocation["consumer_id"])
 
     def test_orphaned_allocations(self):
         """Test orphaned allocations related metrics.
