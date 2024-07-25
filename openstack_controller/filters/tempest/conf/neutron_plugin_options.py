@@ -143,3 +143,17 @@ class NeutronPluginOptions(base_section.BaseSection):
         if self.tf_enabled():
             return False
         return True
+
+
+class DesignateFeatureEnabled(base_section.BaseSection):
+    name = "designate_feature_enabled"
+    options = [
+        "segmentation_id",
+    ]
+
+    @property
+    def segmentation_id(self):
+        # NOTE(mkarpin): dns integration scenario may require to create
+        # vxlan network with segment id out of configured vni ranges.
+        # So setting segment id to highest possible value for vxlan.
+        return "16777215"
