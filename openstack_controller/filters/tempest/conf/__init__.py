@@ -70,6 +70,7 @@ SECTIONS = [
     network.Network,
     network_feature_enabled.NetworkFeatureEnabled,
     neutron_plugin_options.NeutronPluginOptions,
+    neutron_plugin_options.DesignateFeatureEnabled,
     object_storage.ObjectStorage,
     object_storage_feature_enabled.ObjectStorageFeatureEnabled,
     orchestration.Orchestration,
