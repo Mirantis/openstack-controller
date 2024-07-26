@@ -25,6 +25,7 @@ class CinderValidator(base.BaseValidator):
 
         self._check_custom_backup_driver_allowed(spec)
         self._check_backup_drivers_count(cinder_section)
+        self._check_extra_volume_backend(cinder_section)
 
     def _check_custom_backup_driver_allowed(self, spec):
         openstack_version = spec["openstack_version"]
@@ -57,3 +58,37 @@ class CinderValidator(base.BaseValidator):
                 raise exception.OsDplValidationFailed(
                     "Must be enabled one Cinder backup driver"
                 )
+
+    def _check_extra_volume_backend(self, cinder_section):
+        extra_backend_section = cinder_section.get("volume", {}).get(
+            "backends", {}
+        )
+        for name, opts in extra_backend_section.items():
+            if opts.get("enabled", True):
+                enabled_backends = [
+                    x
+                    for x in (
+                        opts["values"]["conf"]
+                        .get("cinder", {})
+                        .get("DEFAULT", {})
+                        .get("enabled_backends", "")
+                        .split(",")
+                    )
+                    if x
+                ]
+                if not enabled_backends:
+                    raise exception.OsDplValidationFailed(
+                        f"Param 'enabled_backends' should be specified in DEFAULT section for Cinder extra backend {name}."
+                    )
+                for backend in enabled_backends:
+                    backend_conf = opts["values"]["conf"]["cinder"].get(
+                        backend, {}
+                    )
+                    if backend_conf.get("volume_backend_name") is None:
+                        raise exception.OsDplValidationFailed(
+                            f"Param 'volume_backend_name' should be specified in {backend} section for Cinder extra backend {name}."
+                        )
+                    if backend_conf.get("volume_driver") is None:
+                        raise exception.OsDplValidationFailed(
+                            f"Param 'volume_driver' should be specified in {backend} section for Cinder extra backend {name}."
+                        )

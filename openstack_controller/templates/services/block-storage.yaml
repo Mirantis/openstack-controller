@@ -46,17 +46,13 @@
 {%-   if sts_opts.get('enabled', True) %}
 {%-     do extra_volumes_sts.update({sts_name:{'values': sts_opts['values']}}) %}
 {%-     if sts_opts.get("create_volume_type", True) %}
-{%-       set enabled_backends = sts_opts["values"].get("conf", {}).get("cinder", {}).get("DEFAULT", {}).get("enabled_backends").split(',') %}
-{%-       if enabled_backends %}
-{%-         for section, opts in sts_opts["values"]["conf"]["cinder"].items() %}
-{%-           if section in enabled_backends %}
-{%-             set volume_backend_name = opts.get("volume_backend_name") %}
-{%-             if volume_backend_name %}
-{%-                do extra_bootstrap.update({volume_backend_name: {"volume_backend_name": volume_backend_name}}) %}
-{%-             endif %}
-{%-           endif %}
-{%-         endfor %}
-{%-       endif %}
+{%-       set enabled_backends = sts_opts["values"]["conf"]["cinder"]["DEFAULT"]["enabled_backends"].split(',') %}
+{%-       for section, opts in sts_opts["values"]["conf"]["cinder"].items() %}
+{%-         if section in enabled_backends %}
+{%-           set volume_backend_name = opts["volume_backend_name"] %}
+{%-           do extra_bootstrap.update({volume_backend_name: {"volume_backend_name": volume_backend_name}}) %}
+{%-         endif %}
+{%-       endfor %}
 {%-     endif %}
 {%-   endif %}
 {%- endfor %}

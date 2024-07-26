@@ -2323,7 +2323,15 @@ def test_cinder_extra_backends_sts(client):
         {
             "backend-1": {
                 "values": {
-                    "conf": {"foo": "bar"},
+                    "conf": {
+                        "cinder": {
+                            "DEFAULT": {"enabled_backends": "foo"},
+                            "foo": {
+                                "volume_backend_name": "bar",
+                                "volume_driver": "drv",
+                            },
+                        },
+                    },
                     "images": {"foo": "bar"},
                     "labels": {"foo": "bar"},
                     "pod": {"foo": "bar"},
@@ -2337,6 +2345,7 @@ def test_cinder_extra_backends_sts(client):
     )
 
     # Configs are invalid
+    #   Extra key in values
     _cinder_extra_backend_specific_request(
         client,
         {
@@ -2354,6 +2363,7 @@ def test_cinder_extra_backends_sts(client):
         False,
     )
 
+    #   unsupported backend type
     _cinder_extra_backend_specific_request(
         client,
         {
@@ -2365,6 +2375,33 @@ def test_cinder_extra_backends_sts(client):
                 },
                 "enabled": True,
                 "type": "deployment",
+            },
+        },
+        False,
+    )
+
+    #   incorrect backend configuration
+    _cinder_extra_backend_specific_request(
+        client,
+        {
+            "backend-1": {
+                "values": {
+                    "conf": {
+                        "cinder": {
+                            "DEFAULT": {"enabled_backends": "baz"},
+                            "foo": {
+                                "volume_backend_name": "bar",
+                                "volume_driver": "drv",
+                            },
+                        },
+                    },
+                    "images": {"foo": "bar"},
+                    "labels": {"foo": "bar"},
+                    "pod": {"foo": "bar"},
+                },
+                "create_volume_type": True,
+                "enabled": True,
+                "type": "statefulset",
             },
         },
         False,
