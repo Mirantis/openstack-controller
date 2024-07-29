@@ -309,6 +309,7 @@ services:
           {%- endif %}
             dns:
               tld_suffix: test
+              build_timeout: 600
             heat_plugin:
               image_ref: Fedora-27-1.6
               instance_type: m1.tiny_test
