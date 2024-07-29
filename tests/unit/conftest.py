@@ -113,13 +113,6 @@ def kopf_adopt(mocker):
 
 
 @pytest.fixture
-def kubeapi(mocker):
-    mock_api = mocker.patch("openstack_controller.kube.KUBE_API")
-    yield mock_api
-    mocker.stopall()
-
-
-@pytest.fixture
 def kube_resource_list(mocker):
     mock_reslist = mocker.patch("openstack_controller.kube.resource_list")
     yield mock_reslist

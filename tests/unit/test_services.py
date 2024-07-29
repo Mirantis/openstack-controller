@@ -216,7 +216,6 @@ def test_service_nova_with_ceph_render(
     mock_neutron_secret,
     mock_vnc,
     openstackdeployment_mspec,
-    kubeapi,
     mock_osdpl,
     child_view,
 ):

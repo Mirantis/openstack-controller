@@ -106,6 +106,9 @@ async def _node_maintenance_request_delete_handler(body, **kwargs):
     if node.exists():
         nmr = maintenance.NodeMaintenanceRequest.get_resource(body)
         if not nwl.required_for_node(node_name):
+            LOG.info(
+                f"Removing nodeworkloadlock for node {node_name} as its not required."
+            )
             nwl.absent(propagation_policy="Background")
             return
 
@@ -334,5 +337,8 @@ def node_disable_notification_delete_handler(body, **kwargs):
     node = kube.safe_get_node(node_name)
     if not node.exists():
         nwl = maintenance.NodeWorkloadLock.get_by_node(node_name)
+        LOG.info(
+            f"Removing nodeworkloadlock for node {node_name} as node was disabled and was just removed."
+        )
         nwl.absent(propagation_policy="Background")
     LOG.info(f"Finished handling nodedisablenotifications for {node_name}.")

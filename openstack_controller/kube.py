@@ -25,21 +25,16 @@ from . import osdplstatus
 LOG = utils.get_logger(__name__)
 CONF = settings.CONF
 
-KUBE_API = None
-
 
 def kube_client():
-    global KUBE_API
-    if KUBE_API is None:
-        config = pykube.KubeConfig.from_env()
-        client = pykube.HTTPClient(
-            config=config, timeout=settings.OSCTL_PYKUBE_HTTP_REQUEST_TIMEOUT
-        )
-        LOG.info(
-            f"Created k8s api client from context {config.current_context}"
-        )
-        KUBE_API = client
-    return KUBE_API
+    # requests are not thread safe, use uniq sessions for
+    # every request
+    config = pykube.KubeConfig.from_env()
+    client = pykube.HTTPClient(
+        config=config, timeout=settings.OSCTL_PYKUBE_HTTP_REQUEST_TIMEOUT
+    )
+    LOG.debug(f"Created k8s api client from context {config.current_context}")
+    return client
 
 
 def generate_random_name(length):
