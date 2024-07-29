@@ -314,6 +314,7 @@ services:
               production: true
             dns:
               tld_suffix: test
+              build_timeout: 600
             patrole:
               custom_policy_files: /etc/tempest/policies/%s.json
             sdn:
