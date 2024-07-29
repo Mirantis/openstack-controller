@@ -106,4 +106,7 @@ def node_delete_handler(body, **kwargs):
         # NOTE(vsaienko): we start OpenStack metadata cleanup on nwl removal.
         # Do not lock node deletion here, as we wait node is deleted and services
         # are not running anymore before starting to remove them.
+        LOG.info(
+            f"Removing nodeworkloadlock for node {name} as node was deleted."
+        )
         nwl.absent(propagation_policy="Background")
