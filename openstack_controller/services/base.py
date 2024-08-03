@@ -768,6 +768,7 @@ class OpenStackServiceWithCeph(OpenStackService):
         LOG.info("Ceph resources were created successfully.")
 
     def save_ceph_secrets(self, params: ceph_api.OSCephParams):
+        kube_api = kube.kube_client()
         for service in params.services:
             name = ceph_api.get_os_user_keyring_name(service.user)
             secret = {
@@ -777,7 +778,7 @@ class OpenStackServiceWithCeph(OpenStackService):
                 },
             }
             try:
-                pykube.Secret(kube.kube_client(), secret).create()
+                pykube.Secret(kube_api, secret).create()
             except Exception:
                 # TODO check for resource exists exception.
                 pass

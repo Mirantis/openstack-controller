@@ -141,7 +141,8 @@ class OpenStackDeploymentSecret(pykube.objects.NamespacedAPIObject):
             "spec": {},
             "status": {},
         }
-        return super().__init__(kube_client(), self.dummy)
+        kube_api = kube_client()
+        return super().__init__(kube_api, self.dummy)
 
 
 class HelmBundle(pykube.objects.NamespacedAPIObject):
@@ -691,7 +692,8 @@ class CronJob(pykube.CronJob, HelmBundleMixin):
         job["metadata"]["name"] = job_name
         job["metadata"]["namespace"] = self.namespace
         kopf.adopt(job, self.obj)
-        kube_job = Job(kube_client(), job)
+        kube_api = kube_client()
+        kube_job = Job(kube_api, job)
         kube_job.create()
 
         async def _wait_completion(job, delay):
@@ -1007,10 +1009,11 @@ class Pod(pykube.Pod):
     def pvcs(self):
         self.reload()
         pvcs = []
+        kube_api = kube_client()
         for volume in self.obj["spec"].get("volumes", []):
             if "persistentVolumeClaim" in volume:
                 pvcs.append(
-                    PersistentVolumeClaim.objects(kube_client())
+                    PersistentVolumeClaim.objects(kube_api)
                     .filter(namespace=self.namespace)
                     .get(name=volume["persistentVolumeClaim"]["claimName"])
                 )
@@ -1046,7 +1049,8 @@ class Node(pykube.Node, ObjectStatusMixin):
         return False
 
     def get_pods(self, namespace=None):
-        pods = Pod.objects(kube_client()).filter(namespace=namespace)
+        kube_api = kube_client()
+        pods = Pod.objects(kube_api).filter(namespace=namespace)
         pods = [
             pod for pod in pods if pod.obj["spec"].get("nodeName") == self.name
         ]
@@ -1076,10 +1080,9 @@ class PersistentVolumeClaim(pykube.PersistentVolumeClaim):
     def pv(self):
         self.reload()
         volume_name = self.obj["spec"].get("volumeName")
+        kube_api = kube_client()
         if volume_name:
-            return PersistentVolume.objects(kube_client()).get(
-                name=volume_name
-            )
+            return PersistentVolume.objects(kube_api).get(name=volume_name)
         LOG.error(f"No volume is associated with {self.name}")
 
 
@@ -1146,9 +1149,10 @@ def resource(data):
 
 def dummy(klass, name, namespace=None):
     meta = {"name": name}
+    kube_api = kube_client()
     if namespace:
         meta["namespace"] = namespace
-    return klass(kube_client(), {"metadata": meta})
+    return klass(kube_api, {"metadata": meta})
 
 
 def find(klass, name, namespace=None, silent=False, cluster=False):
@@ -1165,7 +1169,8 @@ def find(klass, name, namespace=None, silent=False, cluster=False):
 
 
 def resource_list(klass, selector, namespace=None):
-    return klass.objects(kube_client()).filter(
+    kube_api = kube_client()
+    return klass.objects(kube_api).filter(
         namespace=namespace, selector=selector
     )
 
@@ -1290,7 +1295,8 @@ def safe_get_node(name):
         },
         "spec": original_node.get("spec", {}),
     }
-    return Node(kube_client(), dummy)
+    kube_api = kube_client()
+    return Node(kube_api, dummy)
 
 
 find_osdpl = functools.partial(find, OpenStackDeployment)

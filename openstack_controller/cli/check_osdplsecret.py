@@ -16,8 +16,9 @@ LOG = logging.getLogger(__name__)
 
 
 def main():
+    kube_api = kube.kube_client()
     osdplsecrets = list(
-        kube.OpenStackDeploymentSecret.objects(kube.kube_client()).filter(
+        kube.OpenStackDeploymentSecret.objects(kube_api).filter(
             namespace=namespace
         )
     )
