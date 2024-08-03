@@ -111,10 +111,11 @@ class LockBase(pykube.objects.APIObject):
 
     @classmethod
     def get_by_name(cls, name):
+        kube_api = kube.kube_client()
         obj = kube.find(cls, name, silent=True)
         if obj and obj.exists():
             return obj
-        return cls(kube.kube_client(), cls.dummy(name))
+        return cls(kube_api, cls.dummy(name))
 
     def present(self):
         if not self.exists():
@@ -230,9 +231,10 @@ class NodeWorkloadLock(LockBase):
 
     @classmethod
     def get_all(cls):
+        kube_api = kube.kube_client()
         return [
             o
-            for o in cls.objects(kube.kube_client())
+            for o in cls.objects(kube_api)
             if o.obj["spec"]["controllerName"] == cls.workload
         ]
 
@@ -292,7 +294,8 @@ class MaintenanceRequestBase(pykube.objects.APIObject):
 
     @classmethod
     def get_resource(cls, data):
-        return cls(kube.kube_client(), data)
+        kube_api = kube.kube_client()
+        return cls(kube_api, data)
 
     def get_scope(self):
         return self.obj["spec"]["scope"]
@@ -330,6 +333,7 @@ class NodeDisableNotification(pykube.objects.APIObject):
 
 
 def find_ndn(node_name):
-    for ndn in NodeDisableNotification.objects(kube.kube_client()):
+    kube_api = kube.kube_client()
+    for ndn in NodeDisableNotification.objects(kube_api):
         if ndn.obj["spec"]["nodeName"].split(".")[0] == node_name:
             return ndn

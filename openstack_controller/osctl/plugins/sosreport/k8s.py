@@ -51,6 +51,7 @@ class K8sObjectsCollector(base.BaseLogsCollector):
 
     @osctl_utils.generic_exception
     def collect_objects(self):
+        kube_api = kube.kube_client()
         for namespace, kinds in self.objects.items():
             base_dir = os.path.join(self.workspace, "cluster")
             if namespace is not None:
@@ -67,9 +68,7 @@ class K8sObjectsCollector(base.BaseLogsCollector):
                     )
                     continue
                 for obj in (
-                    kube_class.objects(kube.kube_client()).filter(
-                        namespace=namespace
-                    )
+                    kube_class.objects(kube_api).filter(namespace=namespace)
                     or []
                 ):
                     dst = os.path.join(work_dir, obj.name)

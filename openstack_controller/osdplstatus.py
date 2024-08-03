@@ -30,6 +30,7 @@ class OpenStackDeploymentStatus(pykube.objects.NamespacedAPIObject):
     kopf_on_args = *version.split("/"), endpoint
 
     def __init__(self, name, namespace, *args, **kwargs):
+        kube_api = kube.kube_client()
         self.dummy = {
             "apiVersion": self.version,
             "kind": self.kind,
@@ -37,7 +38,7 @@ class OpenStackDeploymentStatus(pykube.objects.NamespacedAPIObject):
             "spec": {},
             "status": {},
         }
-        return super().__init__(kube.kube_client(), self.dummy)
+        return super().__init__(kube_api, self.dummy)
 
     def present(self, osdpl_obj):
         if not self.exists():

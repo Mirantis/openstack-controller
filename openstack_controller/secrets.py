@@ -1241,7 +1241,8 @@ class JsonSecret:
         self.namespace = namespace
         self.name = name
         meta = {"name": self.name, "namespace": self.namespace}
-        self.kube_obj = pykube.Secret(kube.kube_client(), {"metadata": meta})
+        kube_api = kube.kube_client()
+        self.kube_obj = pykube.Secret(kube_api, {"metadata": meta})
 
     def get(self) -> dict:
         """Get k8s secret secret data and validate it"""
