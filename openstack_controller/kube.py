@@ -1158,13 +1158,14 @@ async def wait_for_deleted(
 
 def get_osdpl(namespace=settings.OSCTL_OS_DEPLOYMENT_NAMESPACE):
     LOG.debug("Getting osdpl object")
+    client = kube_client()
     osdpl = list(
-        OpenStackDeployment.objects(kube_client()).filter(namespace=namespace)
+        OpenStackDeployment.objects(client).filter(namespace=namespace)
     )
     if len(osdpl) != 1:
         LOG.warning(
             f"Could not find unique OpenStackDeployment resource "
-            f"in namespace {namespace}, skipping health report processing."
+            f"in namespace {namespace}, client: {client}, osdpl: {osdpl}"
         )
         return
     return osdpl[0]
