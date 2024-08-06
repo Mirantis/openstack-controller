@@ -964,10 +964,9 @@ class Node(pykube.Node, ObjectStatusMixin):
 
     def get_pods(self, namespace=None):
         kube_api = kube_client()
-        pods = Pod.objects(kube_api).filter(namespace=namespace)
-        pods = [
-            pod for pod in pods if pod.obj["spec"].get("nodeName") == self.name
-        ]
+        pods = Pod.objects(kube_api).filter(
+            namespace=namespace, field_selector={"spec.nodeName": self.name}
+        )
         return pods
 
     def remove_pods(self, namespace=None):
