@@ -21,7 +21,7 @@ class ElasticLogsCollector(base.BaseLogsCollector):
         self.elastic_query_size = args.elastic_query_size
         self.elastic_index_name = args.elastic_index_name
         self.loggers = self.get_loggers(self.components)
-        self.since = args.since
+        self.between = args.between or f"now-{args.since},now"
         self.http_auth = None
         if self.args.elastic_username and self.args.elastic_password:
             self.http_auth = (
@@ -76,26 +76,26 @@ class ElasticLogsCollector(base.BaseLogsCollector):
             }
         }
 
-    def query_timestamp(self, since="1w"):
-        """Returns opensearch timestamp based on input since
+    def query_timestamp(self, between="now-1w,now"):
+        """Returns opensearch timestamp filter expression
 
-        Valid endings:
-           y: Years
-           M: Months
-           w: Weeks
-           d: Days
-           h or H: Hours
-           m: Minutes
-           s: Seconds
+        :param between: string meaning period between absolute or relative
+                        timestamps. Possible formats:
+                        2024-08-12T10:23,2024-08-12T10:30
+                        2024-08-11,2024-08-12
+                        now-2h,now-1h
+
         https://opensearch.org/docs/2.0/opensearch/supported-field-types/date/
         """
-        return {"range": {"@timestamp": {"gte": f"now-{since}"}}}
 
-    def get_query(self, logger, host=None, message=None, since="1w"):
+        start, end = between.split(",")
+        return {"range": {"@timestamp": {"gte": start, "lte": end}}}
+
+    def get_query(self, logger, host=None, message=None, between="now-1w,now"):
         filters = [
             {"match_all": {}},
             self.query_logger(logger),
-            self.query_timestamp(since),
+            self.query_timestamp(between),
         ]
         if host is not None:
             filters.append(self.query_host(host))
@@ -121,7 +121,9 @@ class ElasticLogsCollector(base.BaseLogsCollector):
         }
 
     @osctl_utils.generic_exception
-    def collect_logs(self, logger, host=None, message=None, since="1w"):
+    def collect_logs(
+        self, logger, host=None, message=None, between="now-1w,now"
+    ):
         msg = f"Starting logs collection for {host} {logger}"
         if host is None:
             msg = f"Starting logs collection for all hosts {logger}"
@@ -132,7 +134,9 @@ class ElasticLogsCollector(base.BaseLogsCollector):
             http_auth=self.http_auth,
             http_compress=True,
         )
-        query = self.get_query(logger, host=host, message=message, since=since)
+        query = self.get_query(
+            logger, host=host, message=message, between=between
+        )
         response = client.search(
             body=query, index=self.elastic_index_name, request_timeout=60
         )
@@ -177,7 +181,7 @@ class ElasticLogsCollector(base.BaseLogsCollector):
                         (logger,),
                         {
                             "host": host,
-                            "since": self.since,
+                            "between": self.between,
                             "message": message,
                         },
                     )

@@ -96,12 +96,58 @@ class TestK8sElasticLogsCollector(utils.BaseTestCase):
                 (
                     collector.collect_logs,
                     ("nova",),
-                    {"host": "host-1", "since": "1w", "message": None},
+                    {
+                        "host": "host-1",
+                        "between": "now-1w,now",
+                        "message": None,
+                    },
                 ),
                 (
                     collector.collect_logs,
                     ("libvirt",),
-                    {"host": "host-1", "since": "1w", "message": None},
+                    {
+                        "host": "host-1",
+                        "between": "now-1w,now",
+                        "message": None,
+                    },
+                ),
+            ],
+        )
+
+    def test_get_tasks_logger_nova_between(self):
+        args = self.parser.parse_args(
+            [
+                "sos",
+                "--host",
+                "host-1",
+                "--between",
+                "2024-08-12T10:00:00,2024-08-12T11:00:00",
+                "--component",
+                "nova",
+                "report",
+            ]
+        )
+        collector = elastic.ElasticLogsCollector(args, "/workspace", "report")
+        self.assertCountEqual(
+            collector.get_tasks(),
+            [
+                (
+                    collector.collect_logs,
+                    ("nova",),
+                    {
+                        "host": "host-1",
+                        "between": "2024-08-12T10:00:00,2024-08-12T11:00:00",
+                        "message": None,
+                    },
+                ),
+                (
+                    collector.collect_logs,
+                    ("libvirt",),
+                    {
+                        "host": "host-1",
+                        "between": "2024-08-12T10:00:00,2024-08-12T11:00:00",
+                        "message": None,
+                    },
                 ),
             ],
         )
@@ -128,7 +174,11 @@ class TestK8sElasticLogsCollector(utils.BaseTestCase):
                 (
                     collector.collect_logs,
                     ("custom",),
-                    {"host": "host-1", "since": "1d", "message": "error"},
+                    {
+                        "host": "host-1",
+                        "between": "now-1d,now",
+                        "message": "error",
+                    },
                 ),
             ],
         )
@@ -263,7 +313,9 @@ class TestK8sElasticLogsCollector(utils.BaseTestCase):
             {"hits": {"hits": self._get_hits()}},
             {"hits": {"hits": []}},
         ]
-        collector.collect_logs("logger", host=None, message=None, since="1w")
+        collector.collect_logs(
+            "logger", host=None, message=None, between="now-1w,now"
+        )
         self.mock_log.info.assert_has_calls(
             [mock.call("Starting logs collection for all hosts logger")],
             any_order=True,
@@ -284,7 +336,9 @@ class TestK8sElasticLogsCollector(utils.BaseTestCase):
             {"hits": {"hits": self._get_hits()}},
             {"hits": {"hits": []}},
         ]
-        collector.collect_logs("logger", host=None, message=None, since="1w")
+        collector.collect_logs(
+            "logger", host=None, message=None, between="now-1w,now"
+        )
         self.mock_log.info.assert_has_calls(
             [mock.call("Starting logs collection for all hosts logger")],
             any_order=True,

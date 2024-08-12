@@ -101,7 +101,8 @@ class SosReportShell(base.OsctlShell):
             default=10000,
             help="Number of documents to request from elastic in single query. By default is 10000.",
         )
-        elastic_group.add_argument(
+        elastic_ts_group = elastic_group.add_mutually_exclusive_group()
+        elastic_ts_group.add_argument(
             "--since",
             required=False,
             type=str,
@@ -109,6 +110,17 @@ class SosReportShell(base.OsctlShell):
             help=(
                 "Defines timeframe for which take logs, is relative to current time."
                 "Valid endings are: y: Years, M: Months, w: Weeks, d: Days, h or H: Hours, m: Minutes, s: Seconds. Default is 1w"
+            ),
+        )
+        elastic_ts_group.add_argument(
+            "--between",
+            required=False,
+            type=str,
+            default=None,
+            help=(
+                "Defines timeframe between two absolute or relative timestamps for which to take logs"
+                "Valid formats: 'yyyy-MM-dd,yyyy-MM-dd','yyyy-MM-ddThh:mm:ss,yyyy-MM-ddThh:mm:ss','now-1h,now'"
+                "Default is 'now-1w,now'"
             ),
         )
 
