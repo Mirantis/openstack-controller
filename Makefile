@@ -17,7 +17,11 @@ SHELL := /bin/bash
 TASK  := build
 
 EXCLUDES := ''
-CHARTS := $(filter-out $(EXCLUDES), $(wildcard ./charts/*/))
+
+
+#CHARTS := $(filter-out $(EXCLUDES), $(wildcard ./charts/*/))
+
+CHARTS := $(filter-out $(EXCLUDES), openstack-operator)
 
 .PHONY: $(EXCLUDES) $(CHARTS)
 
@@ -34,20 +38,20 @@ endif
 all: $(CHARTS)
 
 $(CHARTS):
-	@if [ -d $@ ]; then \
+	@if [ -d charts/$@ ]; then \
 		echo; \
 		echo "===== Processing [$@] chart ====="; \
 		make $(TASK)-$@; \
 	fi
 
 init-%:
-	if [ -f $*/Makefile ]; then make -C $*; fi
+	if [ -f $*/Makefile ]; then make -C charts/$*; fi
 
 lint-%: init-%
-	if [ -d $* ]; then helm lint $*; fi
+	if [ -d charts/$* ]; then helm lint charts/$*; fi
 
 build-%: lint-%
-	if [ -d $* ]; then helm package $* $(ARGS); fi
+	if [ -d charts/$* ]; then helm package charts/$* $(ARGS); fi
 
 get-version:
 	@bash ./tools/get_version.sh
