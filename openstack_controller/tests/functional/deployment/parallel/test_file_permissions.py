@@ -65,6 +65,8 @@ class ComponentFilePermissionsFunctionalTestCase(base.BaseFunctionalTestCase):
             ("heat"),
             ("horizon"),
             ("keystone"),
+            ("manila"),
+            ("masakari"),
             ("neutron"),
             ("nova"),
             ("octavia"),
