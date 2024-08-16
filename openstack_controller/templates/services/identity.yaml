@@ -94,12 +94,8 @@ spec:
                     - user:
                         name: "{0}"
                         email: "{1}"
-                        domain:
-                          name: "Default"
                     - groups: "{2}"
                       domain:
-                         name: "Default"
-                    - domain:
                          name: "Default"
                   remote:
                     - type: "OIDC-iam_username"
