@@ -180,6 +180,7 @@ def test_service_keystone_render(
         "admin_creds": admin_creds,
         "guest_creds": guest_creds,
         "keystone_creds": keystone_creds,
+        "federation": {"enabled": False},
     }
     openstackdeployment_mspec["services"]["identity"]["keystone"]["values"] = {
         "pod": {"replicas": {"api": 333}}

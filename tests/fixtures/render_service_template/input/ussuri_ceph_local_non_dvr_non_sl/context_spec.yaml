@@ -18,8 +18,8 @@ features:
       oidc:
         OIDCSSLValidateServer: false
         OIDCOAuthSSLValidateServer: false
-        OIDCClaimDelimiter: ","
         OIDCSessionInactivityTimeout: 1800
+        OIDCClaimDelimiter: ","
     domain_specific_configuration:
       enabled: true
       domains:

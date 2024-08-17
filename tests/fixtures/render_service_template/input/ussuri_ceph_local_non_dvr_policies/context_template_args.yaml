@@ -192,6 +192,8 @@ identity:
   keystone_creds: {}
   credentials_secret_name: keystone-credential-data
   fernet_secret_name: keystone-fernet-data
+  federation:
+    enabled: false
 image:
   is_ceph_enabled: true
   ceph:

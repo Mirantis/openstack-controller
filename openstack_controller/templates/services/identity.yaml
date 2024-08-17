@@ -2,8 +2,6 @@
 #kind: HelmBundle
 
 {%- set service = 'keystone' %}
-{%- set keystone_keycloak = spec.get('features', {}).get('keystone', {}).get('keycloak', {}) %}
-{%- set ssl_validate_server =  keystone_keycloak.get('oidc', {}).get('OIDCSSLValidateServer', True) or keystone_keycloak.get('oidc', {}).get('OIDCOAuthSSLValidateServer', True) %}
 {%- set keystone_domain_specific_config = spec.get('features', {}).get('keystone', {}).get('domain_specific_configuration', {}) %}
 {%- set stacklight_enabled = spec.get('features', {}).get('stacklight', {}).get('enabled', False) %}
 {%- set notification_topics = ['notifications'] %}
@@ -59,7 +57,7 @@ spec:
           ingress:
             annotations:
               nginx.ingress.kubernetes.io/proxy-body-size: "114688"
-{%- if keystone_keycloak.get('enabled', False) %}
+{%- if federation.enabled %}
               nginx.ingress.kubernetes.io/affinity: cookie
               nginx.ingress.kubernetes.io/session-cookie-expires: "1800"
               nginx.ingress.kubernetes.io/session-cookie-max-age: "1800"
@@ -77,34 +75,28 @@ spec:
         policy.d:
           01-controller-default.yaml: {{ service_policy }}
           02-custom.yaml: {{ spec.get("features", {}).get("policies", {}).get("keystone", {}) }}
-{%- if keystone_keycloak.get('enabled', False) %}
+{%- if federation.enabled %}
         ks_federations:
-          oidc:
+{%-   for name, opts in federation.providers.items() %}
+          {{ name }}:
             domain:
-              name: keycloak
+              name: {{ name }}
             identity_provider:
               remote_ids:
-                - "{{ keystone_keycloak.get('oidc', {}).get('OIDCProviderMetadataURL', keystone_keycloak.url + "/auth/realms/iam")}}"
-              id: keycloak
-              domain_id: keycloak
+                - "{{ opts.issuer }}"
+              id: {{ name }}
+              domain_id: {{ name }}
             mapping:
-              id: "keycloak_mapping"
+              id: "{{ name }}_mapping"
               rules:
-                - local:
-                    - user:
-                        name: "{0}"
-                        email: "{1}"
-                    - groups: "{2}"
-                      domain:
-                         name: "Default"
-                  remote:
-                    - type: "OIDC-iam_username"
-                    - type: "OIDC-email"
-                    - type: "OIDC-iam_roles"
+                {{ opts.mapping | toyaml | indent(16) }}
             protocol:
-              mapped:
-                idp_id: "keycloak"
-                mapping_id: "keycloak_mapping"
+              {{ opts["protocol"] }}:
+                idp_id: {{ name }}
+                mapping_id: "{{ name }}_mapping"
+{%-   endfor %}
+        federation:
+          {{ federation | toyaml | indent(10) }}
 {%- endif %}
 {%- if keystone_domain_specific_config.get("enabled", False) %}
         ks_domains:
@@ -154,7 +146,7 @@ spec:
             domain_specific_drivers_enabled: True
             domain_config_dir: /etc/keystonedomains
 {%- endif %}
-{%- if keystone_keycloak.get('enabled', False) %}
+{%- if federation.enabled %}
           federation:
             # TODO: move this logic to keystone helm chart
             trusted_dashboard:
@@ -193,48 +185,30 @@ spec:
               </IfVersion>
               ErrorLog /dev/stdout
               SetEnvIf X-Forwarded-For "^.*\..*\..*\..*" forwarded proxy env=forwarded
-{%- if keystone_keycloak.get('enabled', False) %}
-              OIDCClaimPrefix "OIDC-"
-              OIDCClaimDelimiter "{{ keystone_keycloak.get('oidc', {}).get('OIDCClaimDelimiter', ';') }}"
-              OIDCResponseType "id_token"
-              OIDCScope "{{ keystone_keycloak.get('oidc',{}).get('OIDCScope', 'openid email profile') }}"
-              OIDCProviderMetadataURL {{ keystone_keycloak.get('oidc', {}).get('OIDCProviderMetadataURL', keystone_keycloak.url + "/auth/realms/iam/.well-known/openid-configuration")}}
-              OIDCOAuthVerifyJwksUri {{ keystone_keycloak.get('oidc', {}).get('OIDCProviderMetadataURL', keystone_keycloak.url + "/auth/realms/iam/protocol/openid-connect/certs")}}
-              OIDCClientID {{ keystone_keycloak.get('oidc', {}).get('OIDCClientID', "os") }}
-              OIDCCryptoPassphrase {{ oidc_crypto_passphrase }}
-              OIDCSSLValidateServer {% if keystone_keycloak.get('oidc',{}).get('OIDCSSLValidateServer', true) %}On{%- else %}Off{%- endif %}
-              OIDCOAuthSSLValidateServer {% if keystone_keycloak.get('oidc',{}).get('OIDCOAuthSSLValidateServer', true) %}On{%- else %}Off{%- endif %}
-              OIDCSessionInactivityTimeout "{{ keystone_keycloak.get('oidc', {}).get('OIDCSessionInactivityTimeout', 1800) }}"
-              {%- if ssl_validate_server %}
+{%- if federation.enabled %}
+{%-   for oidc_name, oidc_value in federation.oidc.items() %}
+              {{oidc_name}} {{ oidc_value }}
+{%-   endfor %}
+              {%- if federation.oidc_ca_bundle %}
               OIDCCABundlePath /usr/local/share/ca-certificates/openstack-iam-api.crt
               {%- endif %}
-              OIDCRedirectURLsAllowed {{ keystone_keycloak.get('oidc',{}).get('OIDCRedirectURLsAllowed', "^https://horizon."+ spec.public_domain_name +"/auth/logout$") }}
-              {%- if keystone_keycloak.get('oidc', {}).get('OIDCRedirectURI', []) %}
-              {%- for uri in keystone_keycloak.oidc.OIDCRedirectURI %}
-              OIDCRedirectURI {{ uri }}
-              {%- endfor %}
-              {%- else %}
-              {%- raw %}
-              OIDCRedirectURI {{ $keystoneProtocol }}://{{ $keystoneHost }}/v3/OS-FEDERATION/identity_providers/keycloak/protocols/mapped/auth
-              OIDCRedirectURI {{ $keystoneProtocol }}://{{ $keystoneHost }}/v3/auth/OS-FEDERATION/websso/
-              OIDCRedirectURI {{ $keystoneProtocol }}://{{ $keystoneHost }}/v3/auth/OS-FEDERATION/identity_providers/keycloak/protocols/mapped/websso/
-              {%- endraw %}
-              {%- endif %}
-              <LocationMatch /v3/OS-FEDERATION/identity_providers/.*?/protocols/.*?/auth>
+              <Location /v3/auth/OS-FEDERATION/websso/mapped>
+                  AuthType openid-connect
+                  Require valid-user
+                  LogLevel debug
+              </Location>
+{%-   for name, opts in federation.providers.items() %}
+              <Location /v3/OS-FEDERATION/identity_providers/{{ name }}/protocols/{{ opts["protocol"] }}/auth>
                   AuthType oauth20
                   Require valid-user
                   LogLevel debug
-              </LocationMatch>
-              <Location ~ "/v3/auth/OS-FEDERATION/websso/mapped">
+              </Location>
+              <Location /v3/auth/OS-FEDERATION/identity_providers/{{ name }}/protocols/{{ opts["protocol"] }}/websso>
                   AuthType openid-connect
                   Require valid-user
                   LogLevel debug
               </Location>
-              <Location ~ "/v3/auth/OS-FEDERATION/identity_providers/keycloak/protocols/mapped/websso">
-                  AuthType openid-connect
-                  Require valid-user
-                  LogLevel debug
-              </Location>
+{%-   endfor %}
 {%- endif %}
               </VirtualHost>
 {%- if spec.features.network_policies.enabled %}
@@ -244,7 +218,7 @@ spec:
       manifests:
         network_policy: {{ spec.features.network_policies.enabled }}
         job_credential_cleanup: false
-{%- if keystone_keycloak.get('enabled', False) %}
+{%- if federation.enabled %}
         job_federations_create: true
 {%- endif %}
         job_rabbit_init: false
@@ -307,11 +281,11 @@ spec:
               username: {{ credentials[0].database.user.username }}
               password: {{ credentials[0].database.user.password }}
 {% include 'base/_notifications.yaml' %}
-{%- if keystone_keycloak.get('enabled', False) and ssl_validate_server %}
+{%- if federation.get("oidc_ca_bundle") %}
         oidc:
           auth:
             client:
               tls:
                 ca: |
-{{ oidc_ca | indent(width=18, first=True) }}
+{{ federation.oidc_ca_bundle | indent(width=18, first=True) }}
 {%- endif %}
