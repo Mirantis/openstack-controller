@@ -361,6 +361,7 @@ def substitute_hidden_field(ref, secrets):
                 f"Specified key {secret_key} not found in secret {secret_name}."
             )
         return from_base64(data)
+    return ref
 
 
 def download_file(url, dst, timeout=60, chunk_size=8192):
