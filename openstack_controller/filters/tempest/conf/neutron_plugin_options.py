@@ -156,4 +156,6 @@ class DesignateFeatureEnabled(base_section.BaseSection):
         # NOTE(mkarpin): dns integration scenario may require to create
         # vxlan network with segment id out of configured vni ranges.
         # So setting segment id to highest possible value for vxlan.
+        if self.get_spec_item("features.neutron.backend", "ml2") == "ml2/ovn":
+            return "16711680"
         return "16777215"
