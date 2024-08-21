@@ -929,52 +929,131 @@ class Keystone(OpenStackService):
     available_releases = ["openstack-keystone"]
     _service_accounts = ["osctl"]
 
-    def _get_keycloak_args(self):
+    def _get_keycloak_provider(self, redirect_uris):
         args = {}
-        keycloak_salt = secrets.KeycloakSecret(self.namespace)
-        keycloak_salt.ensure()
-        args["oidc_crypto_passphrase"] = keycloak_salt.get().passphrase
-
-        # Create openstack IAM shared secret
-        oidc_settings = (
+        keycloak_params = (
             self.mspec.get("features", {})
             .get("keystone", {})
             .get("keycloak", {})
-            .get("oidc", {})
         )
-        public_domain = self.mspec["public_domain_name"]
-        keystone_base = f"https://keystone.{public_domain}"
-        redirect_uris_default = [
-            f"{keystone_base}/v3/OS-FEDERATION/identity_providers/keycloak/protocols/mapped/auth",
-            f"{keystone_base}/v3/auth/OS-FEDERATION/websso/",
-            f"{keystone_base}/v3/auth/OS-FEDERATION/identity_providers/keycloak/protocols/mapped/websso/",
-            f"https://horizon.{public_domain}/*",
-        ]
-        redirect_uris = oidc_settings.get(
-            "OIDCRedirectURI", redirect_uris_default
-        )
+        if not keycloak_params.get("enabled", False):
+            return args
 
+        def _normalize_oidc_value(value):
+            if isinstance(value, bool):
+                if value:
+                    return "On"
+                else:
+                    return "Off"
+            return value
+
+        # Actualize OIDC parameters
+        oidc_settings = {
+            "OIDCClientID": "os",
+            "OIDCResponseType": "id_token",
+            "OIDCScope": '"openid email profile"',
+            "OIDCProviderMetadataURL": f"{keycloak_params['url']}/auth/realms/iam/.well-known/openid-configuration",
+            "OIDCOAuthVerifyJwksUri": f"{keycloak_params['url']}/auth/realms/iam/protocol/openid-connect/certs",
+            "OIDCSessionInactivityTimeout": 1800,
+            "OIDCRedirectURLsAllowed": f"^https://horizon.{self.mspec['public_domain_name']}/auth/logout$",
+            "OIDCSSLValidateServer": "On",
+            "OIDCOAuthSSLValidateServer": "On",
+            "OIDCClaimPrefix": '"OIDC-"',
+            "OIDCClaimDelimiter": '";"',
+        }
+        oidc_settings.update(keycloak_params.get("oidc", {}))
+        for k, v in oidc_settings.items():
+            oidc_settings[k] = _normalize_oidc_value(v)
+
+        # Create openstack IAM shared secret
         iam_secret = secrets.IAMSecret(self.namespace)
         iam_data = secrets.OpenStackIAMData(
-            clientId=oidc_settings.get("OIDCClientID", "os"),
+            clientId=oidc_settings["OIDCClientID"],
             redirectUris=redirect_uris,
         )
         iam_secret.save(iam_data)
 
         # Get IAM CA certificate
         oidc_ca_secret = oidc_settings.get("oidcCASecret")
+        oidc_ca_bundle = ""
         if oidc_ca_secret:
             kube.wait_for_secret(
                 self.namespace,
                 oidc_ca_secret,
             )
-            args["oidc_ca"] = base64.b64decode(
+            oidc_ca_bundle = base64.b64decode(
                 secrets.get_secret_data(
                     self.namespace,
                     oidc_ca_secret,
                 )["ca-cert.pem"]
             ).decode()
-        return args
+            oidc_settings.pop("oidcCASecret")
+
+        args.update(
+            {
+                "protocol": "mapped",
+                "type": "openid",
+                "issuer": f"{keycloak_params['url']}/auth/realms/iam",
+                "mapping": [
+                    {
+                        "local": [
+                            {"user": {"name": "{0}", "email": "{1}"}},
+                            {"groups": "{2}"},
+                            {"domain": {"name": "Default"}},
+                        ],
+                        "remote": [
+                            {"type": "OIDC-iam_username"},
+                            {"type": "OIDC-email"},
+                            {"type": "OIDC-iam_roles"},
+                        ],
+                    }
+                ],
+                "metadata": {
+                    "client": {},
+                    "conf": {},
+                    "provider": {
+                        "value_from": {
+                            "from_url": {
+                                "url": oidc_settings["OIDCProviderMetadataURL"]
+                            }
+                        }
+                    },
+                },
+            }
+        )
+        return {
+            "oidc": oidc_settings,
+            "oidc_ca_bundle": oidc_ca_bundle,
+            "providers": {"keycloak": args},
+        }
+
+    def _get_federation_args(self):
+        result = {"enabled": False}
+        public_domain = self.mspec["public_domain_name"]
+        keystone_base = f"https://keystone.{public_domain}"
+        redirect_uri_keystone = f"{keystone_base}/v3/auth/OS-FEDERATION/identity_providers/keycloak/protocols/mapped/websso/"
+        redirect_uris_keycloak = [
+            f"{redirect_uri_keystone}",
+            f"https://horizon.{public_domain}/*",
+        ]
+        providers = self._get_keycloak_provider(redirect_uris_keycloak)
+        if providers:
+            result.update(providers)
+            result.update({"enabled": True})
+
+            # set global parameters
+            keycloak_salt = secrets.KeycloakSecret(self.namespace)
+            keycloak_salt.ensure()
+            result["oidc"][
+                "OIDCCryptoPassphrase"
+            ] = keycloak_salt.get().passphrase
+            result["oidc"]["OIDCRedirectURI"] = redirect_uri_keystone
+            if result["oidc"].get("OIDCRedirectURLsAllowed") is None:
+                result["oidc"][
+                    "OIDCRedirectURLsAllowed"
+                ] = f"^https://horizon.{self.mspec['public_domain_name']}/auth/logout$"
+
+        return {"federation": result}
 
     def _get_object_storage_args(self):
         args = {}
@@ -1042,15 +1121,7 @@ class Keystone(OpenStackService):
         t_args = super().template_args()
         t_args.update(self._get_keystone_args())
 
-        keycloak_enabled = (
-            self.mspec.get("features", {})
-            .get("keystone", {})
-            .get("keycloak", {})
-            .get("enabled", False)
-        )
-
-        if keycloak_enabled:
-            t_args.update(self._get_keycloak_args())
+        t_args.update(self._get_federation_args())
 
         if "object-storage" in self.mspec.get("features", {}).get(
             "services", []
