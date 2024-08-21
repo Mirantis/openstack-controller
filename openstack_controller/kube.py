@@ -506,10 +506,11 @@ class Job(pykube.Job, HelmBundleMixin, ObjectStatusMixin):
         """
         Timestamp of job start.
 
-        :returns : floating number (unix timestamp)
+        :returns : floating number (unix timestamp) or None
         """
-        ts = self.obj["status"]["startTime"]
-        return utils.k8s_timestamp_to_unix(ts)
+        ts = self.obj["status"].get("startTime")
+        if ts:
+            return utils.k8s_timestamp_to_unix(ts)
 
     @property
     def ready(self):
@@ -615,9 +616,10 @@ class CronJob(pykube.CronJob, HelmBundleMixin):
 
         :returns : Job object or None
         """
-        jobs = self.jobs
+        # filter to get jobs which already started
+        jobs = [job for job in self.jobs if job.start_time]
         if not jobs:
-            LOG.info(f"Cronjob {self.name} has not scheduled jobs yet")
+            LOG.info(f"Cronjob {self.name} has not started jobs yet")
             return
         sorted_jobs = sorted(
             jobs, key=lambda job: job.start_time, reverse=True
