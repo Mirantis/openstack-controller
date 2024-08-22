@@ -227,7 +227,11 @@ spec:
           task_flow:
             jobboard_enabled: true
             # Use this option to switch beetwen jobboard redis/etcd backend parameters
+  {%- if OSVer.antelope <= OSVer[spec.openstack_version] %}
+            jobboard_backend_driver: etcd_taskflow_driver
+  {%- else %}
             jobboard_backend_driver: redis_taskflow_driver
+  {%- endif %}
             jobboard_expiration_time: 90
 {%- endif %}
           keystone_authtoken:
