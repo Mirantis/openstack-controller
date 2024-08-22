@@ -117,6 +117,40 @@ VALUE_FROM_DICT = {
     }
 }
 
+OIDC_PROVIDER_GOOD = {
+    "issuer": "https://keycloak.it.just.works/auth/realms/iam",
+    "description": "Good provider",
+    "mapping": [
+        {
+            "local": [
+                {"user": {"email": "{1}", "name": "{0}"}},
+                {"domain": {"name": "Default"}, "groups": "{2}"},
+            ],
+            "remote": [
+                {"type": "OIDC-iam_username"},
+                {"type": "OIDC-email"},
+                {"type": "OIDC-iam_roles"},
+            ],
+        }
+    ],
+    "token_endpoint": "https://keycloak.it.just.works/auth/realms/iam/protocol/openid-connect/certs",
+    "metadata": {
+        "client": {"client_id": "os"},
+        "conf": {
+            "response_type": "id_token",
+            "scope": "openid email profile",
+            "ssl_validate_server": False,
+        },
+        "provider": {
+            "value_from": {
+                "from_url": {
+                    "url": "https://keycloak.it.just.works/auth/realms/iam/.well-known/openid-configuration"
+                }
+            }
+        },
+    },
+}
+
 
 @pytest.fixture
 def client():
@@ -2405,4 +2439,152 @@ def test_cinder_extra_backends_sts(client):
             },
         },
         False,
+    )
+
+
+def test_openstack_keystone_keycloak_providers_not_allowed(client):
+    req = copy.deepcopy(ADMISSION_REQ)
+    provider1 = copy.deepcopy(OIDC_PROVIDER_GOOD)
+    req["request"]["object"]["spec"]["features"]["keystone"] = {
+        "keycloak": {
+            "url": "http://mykeycloak.it.just.works",
+            "enabled": True,
+        },
+        "federation": {
+            "openid": {
+                "enabled": True,
+                "oidc": {"OIDCFOO": "OIDCBAR"},
+                "providers": {"provider1": provider1},
+            }
+        },
+    }
+    response = client.simulate_post("/validate", json=req)
+    assert response.status == falcon.HTTP_OK
+    assert response.json["response"]["allowed"] is False
+    assert (
+        "Use one of keystone:keycloack or keystone:federation section"
+        in response.json["response"]["status"]["message"]
+    )
+
+
+def test_openstack_keystone_keycloak_disabled_providers(client):
+    req = copy.deepcopy(ADMISSION_REQ)
+    provider1 = copy.deepcopy(OIDC_PROVIDER_GOOD)
+    req["request"]["object"]["spec"]["features"]["keystone"] = {
+        "keycloak": {
+            "url": "http://mykeycloak.it.just.works",
+            "enabled": False,
+        },
+        "federation": {
+            "openid": {
+                "enabled": True,
+                "oidc": {"OIDCFOO": "OIDCBAR"},
+                "providers": {"provider1": provider1},
+            }
+        },
+    }
+    response = client.simulate_post("/validate", json=req)
+    assert response.status == falcon.HTTP_OK
+    assert response.json["response"]["allowed"] is True
+
+
+def test_openstack_keystone_providers_one(client):
+    req = copy.deepcopy(ADMISSION_REQ)
+    provider1 = copy.deepcopy(OIDC_PROVIDER_GOOD)
+    req["request"]["object"]["spec"]["features"]["keystone"] = {
+        "federation": {
+            "openid": {
+                "enabled": True,
+                "oidc": {"OIDCFOO": "OIDCBAR"},
+                "providers": {"provider1": provider1},
+            }
+        }
+    }
+    response = client.simulate_post("/validate", json=req)
+    assert response.status == falcon.HTTP_OK
+    assert response.json["response"]["allowed"] is True
+
+
+def test_openstack_keystone_providers_one_optional_fields(client):
+    req = copy.deepcopy(ADMISSION_REQ)
+    provider1 = copy.deepcopy(OIDC_PROVIDER_GOOD)
+    provider1.update(
+        {"mapping": [{"my": "mapping"}], "oauth2": {"foo": "bar"}}
+    )
+    req["request"]["object"]["spec"]["features"]["keystone"] = {
+        "federation": {
+            "openid": {
+                "enabled": True,
+                "oidc": {"OIDCFOO": "OIDCBAR"},
+                "providers": {"provider1": provider1},
+                "oidc_auth_type": "oauth2",
+            }
+        }
+    }
+    response = client.simulate_post("/validate", json=req)
+    assert response.status == falcon.HTTP_OK
+    assert response.json["response"]["allowed"] is True
+
+
+def test_openstack_keystone_two_oauth2_providers(client):
+    req = copy.deepcopy(ADMISSION_REQ)
+    provider1 = copy.deepcopy(OIDC_PROVIDER_GOOD)
+    provider2 = copy.deepcopy(OIDC_PROVIDER_GOOD)
+    req["request"]["object"]["spec"]["features"]["keystone"] = {
+        "federation": {
+            "openid": {
+                "oidc_auth_type": "oauth2",
+                "enabled": True,
+                "oidc": {"OIDCFOO": "OIDCBAR"},
+                "providers": {"provider1": provider1, "provider2": provider2},
+            }
+        },
+    }
+    response = client.simulate_post("/validate", json=req)
+    assert response.status == falcon.HTTP_OK
+    assert response.json["response"]["allowed"] is True
+
+
+def test_openstack_keystone_two_oauth20_providers(client):
+    req = copy.deepcopy(ADMISSION_REQ)
+    provider1 = copy.deepcopy(OIDC_PROVIDER_GOOD)
+    provider2 = copy.deepcopy(OIDC_PROVIDER_GOOD)
+    req["request"]["object"]["spec"]["features"]["keystone"] = {
+        "federation": {
+            "openid": {
+                "oidc_auth_type": "oauth20",
+                "enabled": True,
+                "oidc": {"OIDCFOO": "OIDCBAR"},
+                "providers": {"provider1": provider1, "provider2": provider2},
+            }
+        },
+    }
+    response = client.simulate_post("/validate", json=req)
+    assert response.status == falcon.HTTP_OK
+    assert response.json["response"]["allowed"] is False
+    assert (
+        "Multiple oidc providers supperted only with oauth2 type"
+        in response.json["response"]["status"]["message"]
+    )
+
+
+def test_openstack_keystone_two_providers_default_not_allowed(client):
+    req = copy.deepcopy(ADMISSION_REQ)
+    provider1 = copy.deepcopy(OIDC_PROVIDER_GOOD)
+    provider2 = copy.deepcopy(OIDC_PROVIDER_GOOD)
+    req["request"]["object"]["spec"]["features"]["keystone"] = {
+        "federation": {
+            "openid": {
+                "enabled": True,
+                "oidc": {"OIDCFOO": "OIDCBAR"},
+                "providers": {"provider1": provider1, "provider2": provider2},
+            }
+        },
+    }
+    response = client.simulate_post("/validate", json=req)
+    assert response.status == falcon.HTTP_OK
+    assert response.json["response"]["allowed"] is False
+    assert (
+        "Multiple oidc providers supperted only with oauth2 type"
+        in response.json["response"]["status"]["message"]
     )
