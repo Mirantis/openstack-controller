@@ -654,7 +654,7 @@ class OpenStackServiceSecret(MultiSecret):
             secret_data[service_type] = {"user": generate_credentials(srv)}
         for account in self.service_accounts:
             secret_data["identity"].update(
-                {account: generate_credentials(account)}
+                {account: generate_credentials(account, 32)}
             )
         secret_data["memcached"] = generate_password(length=16)
         os_creds = self.secret_class(**secret_data)
@@ -721,7 +721,7 @@ class DRBServiceSecret(MultiSecret):
         secret_data = {"identity": {}}
         for account in self.service_accounts:
             secret_data["identity"].update(
-                {account: generate_credentials(account)}
+                {account: generate_credentials(account, 32)}
             )
         os_creds = self.secret_class(**secret_data)
         return os_creds
