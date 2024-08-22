@@ -339,7 +339,8 @@ def find_and_substitute(obj, secrets):
         return obj
     for k, v in obj.items():
         if isinstance(v, dict) and "value_from" in v:
-            obj[k] = substitute_hidden_field(v["value_from"], secrets)
+            if "secret_key_ref" in v["value_from"]:
+                obj[k] = substitute_hidden_field(v["value_from"], secrets)
         # do not allow double substitution
         else:
             find_and_substitute(v, secrets)
@@ -361,7 +362,6 @@ def substitute_hidden_field(ref, secrets):
                 f"Specified key {secret_key} not found in secret {secret_name}."
             )
         return from_base64(data)
-    return ref
 
 
 def download_file(url, dst, timeout=60, chunk_size=8192):

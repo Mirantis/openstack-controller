@@ -54,3 +54,32 @@ class KeystoneValidator(base.BaseValidator):
                         raise exception.OsDplValidationFailed(
                             "Section ks_domains fields config and enabled are mandatory"
                         )
+
+        federation = (
+            review_request.get("object", {})
+            .get("spec", {})
+            .get("features", {})
+            .get("keystone", {})
+            .get("federation", {})
+        )
+        if federation:
+            enabled_providers = [
+                x
+                for x in federation["openid"]["providers"].values()
+                if x.get("enabled", True)
+            ]
+            if keycloak_section.get("enabled", False) and federation.get(
+                "enabled", True
+            ):
+                raise exception.OsDplValidationFailed(
+                    "Use one of keystone:keycloack or keystone:federation section"
+                )
+
+            if (
+                federation["openid"].get("oidc_auth_type", "oauth20")
+                == "oauth20"
+            ):
+                if len(enabled_providers) > 1:
+                    raise exception.OsDplValidationFailed(
+                        "Multiple oidc providers supperted only with oauth2 type"
+                    )
