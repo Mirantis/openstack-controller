@@ -117,40 +117,6 @@ VALUE_FROM_DICT = {
     }
 }
 
-OIDC_PROVIDER_GOOD = {
-    "issuer": "https://keycloak.it.just.works/auth/realms/iam",
-    "description": "Good provider",
-    "mapping": [
-        {
-            "local": [
-                {"user": {"email": "{1}", "name": "{0}"}},
-                {"domain": {"name": "Default"}, "groups": "{2}"},
-            ],
-            "remote": [
-                {"type": "OIDC-iam_username"},
-                {"type": "OIDC-email"},
-                {"type": "OIDC-iam_roles"},
-            ],
-        }
-    ],
-    "token_endpoint": "https://keycloak.it.just.works/auth/realms/iam/protocol/openid-connect/certs",
-    "metadata": {
-        "client": {"client_id": "os"},
-        "conf": {
-            "response_type": "id_token",
-            "scope": "openid email profile",
-            "ssl_validate_server": False,
-        },
-        "provider": {
-            "value_from": {
-                "from_url": {
-                    "url": "https://keycloak.it.just.works/auth/realms/iam/.well-known/openid-configuration"
-                }
-            }
-        },
-    },
-}
-
 
 @pytest.fixture
 def client():
@@ -2442,9 +2408,11 @@ def test_cinder_extra_backends_sts(client):
     )
 
 
-def test_openstack_keystone_keycloak_providers_not_allowed(client):
+def test_openstack_keystone_keycloak_providers_not_allowed(
+    client, federation_provider
+):
     req = copy.deepcopy(ADMISSION_REQ)
-    provider1 = copy.deepcopy(OIDC_PROVIDER_GOOD)
+    provider1 = federation_provider
     req["request"]["object"]["spec"]["features"]["keystone"] = {
         "keycloak": {
             "url": "http://mykeycloak.it.just.works",
@@ -2467,9 +2435,11 @@ def test_openstack_keystone_keycloak_providers_not_allowed(client):
     )
 
 
-def test_openstack_keystone_keycloak_disabled_providers(client):
+def test_openstack_keystone_keycloak_disabled_providers(
+    client, federation_provider
+):
     req = copy.deepcopy(ADMISSION_REQ)
-    provider1 = copy.deepcopy(OIDC_PROVIDER_GOOD)
+    provider1 = federation_provider
     req["request"]["object"]["spec"]["features"]["keystone"] = {
         "keycloak": {
             "url": "http://mykeycloak.it.just.works",
@@ -2488,9 +2458,9 @@ def test_openstack_keystone_keycloak_disabled_providers(client):
     assert response.json["response"]["allowed"] is True
 
 
-def test_openstack_keystone_providers_one(client):
+def test_openstack_keystone_providers_one(client, federation_provider):
     req = copy.deepcopy(ADMISSION_REQ)
-    provider1 = copy.deepcopy(OIDC_PROVIDER_GOOD)
+    provider1 = federation_provider
     req["request"]["object"]["spec"]["features"]["keystone"] = {
         "federation": {
             "openid": {
@@ -2505,9 +2475,11 @@ def test_openstack_keystone_providers_one(client):
     assert response.json["response"]["allowed"] is True
 
 
-def test_openstack_keystone_providers_one_optional_fields(client):
+def test_openstack_keystone_providers_one_optional_fields(
+    client, federation_provider
+):
     req = copy.deepcopy(ADMISSION_REQ)
-    provider1 = copy.deepcopy(OIDC_PROVIDER_GOOD)
+    provider1 = federation_provider
     provider1.update(
         {"mapping": [{"my": "mapping"}], "oauth2": {"foo": "bar"}}
     )
@@ -2526,10 +2498,10 @@ def test_openstack_keystone_providers_one_optional_fields(client):
     assert response.json["response"]["allowed"] is True
 
 
-def test_openstack_keystone_two_oauth2_providers(client):
+def test_openstack_keystone_two_oauth2_providers(client, federation_provider):
     req = copy.deepcopy(ADMISSION_REQ)
-    provider1 = copy.deepcopy(OIDC_PROVIDER_GOOD)
-    provider2 = copy.deepcopy(OIDC_PROVIDER_GOOD)
+    provider1 = federation_provider
+    provider2 = copy.deepcopy(federation_provider)
     req["request"]["object"]["spec"]["features"]["keystone"] = {
         "federation": {
             "openid": {
@@ -2545,10 +2517,10 @@ def test_openstack_keystone_two_oauth2_providers(client):
     assert response.json["response"]["allowed"] is True
 
 
-def test_openstack_keystone_two_oauth20_providers(client):
+def test_openstack_keystone_two_oauth20_providers(client, federation_provider):
     req = copy.deepcopy(ADMISSION_REQ)
-    provider1 = copy.deepcopy(OIDC_PROVIDER_GOOD)
-    provider2 = copy.deepcopy(OIDC_PROVIDER_GOOD)
+    provider1 = federation_provider
+    provider2 = copy.deepcopy(federation_provider)
     req["request"]["object"]["spec"]["features"]["keystone"] = {
         "federation": {
             "openid": {
@@ -2568,10 +2540,12 @@ def test_openstack_keystone_two_oauth20_providers(client):
     )
 
 
-def test_openstack_keystone_two_providers_default_not_allowed(client):
+def test_openstack_keystone_two_providers_default_not_allowed(
+    client, federation_provider
+):
     req = copy.deepcopy(ADMISSION_REQ)
-    provider1 = copy.deepcopy(OIDC_PROVIDER_GOOD)
-    provider2 = copy.deepcopy(OIDC_PROVIDER_GOOD)
+    provider1 = copy.deepcopy(federation_provider)
+    provider2 = copy.deepcopy(federation_provider)
     req["request"]["object"]["spec"]["features"]["keystone"] = {
         "federation": {
             "openid": {
