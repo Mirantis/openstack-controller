@@ -48,7 +48,7 @@ RUN set -ex; \
     pip wheel --wheel-dir /opt/wheels --find-links /opt/wheels /opt/operator${OPENSTACK_CONTROLLER_EXTRAS}
 
 FROM $FROM
-ARG HELM_BINARY="https://binary.mirantis.com/openstack/bin/utils/helm/helm-v3.14.4-linux-amd64"
+ARG HELM_BINARY="https://binary.mirantis.com/openstack/bin/utils/helm/helm-v3.15.4-linux-amd64"
 ARG TEST_IMAGE
 ARG USER=osctl
 ARG UID=42424
