@@ -543,4 +543,4 @@ spec:
                 - name: ngs-ssh-private
                   secret:
                     secretName: ngs-ssh-keys
-                    defaultMode: 292
+                    defaultMode: 416
