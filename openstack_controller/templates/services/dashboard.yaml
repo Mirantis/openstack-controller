@@ -1,8 +1,14 @@
 #apiVersion: lcm.mirantis.com/v1alpha1
 #kind: HelmBundle
 
-{%- set keystone_keycloak = spec.get('features', {}).get('keystone', {}).get('keycloak', {}) %}
-{%- set keystone_keycloak_enabled = keystone_keycloak.get('enabled', False) %}
+{%- set openid_providers = {} %}
+{%- for name, opts in federation.get("openid", {}).get("providers", {}).items() %}
+{%-   if opts.get("enabled", True) %}
+{%-      do openid_providers.update({name: opts}) %}
+{%-   endif %}
+{%- endfor %}
+{%- set validate_true_line = "{% if auth_type in \"" + openid_providers.keys() | join(',') + "\" %}" %}
+{%- set validate_false_line = "{% if auth_type not in \"" + openid_providers.keys() | join(',') + "\" %}" %}
 {%- set horizon_features = spec.get('features', {}).get('horizon', {}) %}
 {%- set neutron_backend = spec.features.neutron.get('backend', 'ml2') %}
 {%- set custom_policies = {} %}
@@ -129,7 +135,7 @@ spec:
   {%- for component, component_policy in service_policy.items() %}
             {{ component }}: {{ component_policy }}
   {%- endfor %}
-          {%- if keystone_keycloak_enabled %}
+          {%- if federation.get("openid", {}).get("enabled") %}
           openstack_clouds_yaml_custom_template:
             template: |
               {%- raw %}
@@ -148,7 +154,9 @@ spec:
                   {% endif %}
                   auth:
                     {% if not profile %}
-                    {% if auth_type == 'mapped' %}
+              {%- endraw %}
+                    {{ validate_true_line }}
+              {%- raw %}
                     # v3oidcpassword does not work with unversioned identity endpoint
                     # TODO: remove once LP bug/1998366 is fixed and released
                     auth_url: {{ "{{" }} auth_url {{ "}}/v3" }}
@@ -160,11 +168,17 @@ spec:
                     project_id: {{ "{{" }} tenant_id {{ "}}" }}
                     project_name: "{{ "{{" }} tenant_name {{ "}}" }}"
                     project_domain_id: {{ "{{" }} tenant_id {{ "}}" }}
-                    {% if user_domain_name and auth_type != 'mapped' %}
+              {%- endraw %}
+                    {{ validate_false_line }}
+              {%- raw %}
+                    {% if user_domain_name %}
                     user_domain_name: "{{ "{{" }} user_domain_name {{ "}}" }}"
                     {%  endif %}
-                    {% if auth_type == 'mapped' %}
-                    identity_provider: keycloak
+                    {%  endif %}
+              {%- endraw %}
+                    {{ validate_true_line }}
+              {%- raw %}
+                    identity_provider: {{ "{{" }} auth_type {{ "}}" }}
                     {% endif %}
                   {% if not profile %}
                     {% if regions %}
@@ -180,16 +194,27 @@ spec:
                   interface: "{{ "{{" }} interface {{ "}}" }}"
                   identity_api_version: {{ "{{" }} os_identity_api_version {{ "}}" }}
                   {% endif %}
-                  {% if auth_type == 'mapped' %}
               {%- endraw %}
-                  client_secret: someRandomClientSecretMightBeNull
+                  {{ validate_true_line }}
+            {%- set first_line = {"is": True} %}
+            {%- for name, opts in openid_providers.items() %}
+            {%-   if first_line.is %}
+            {%-     set to_print = "{% if auth_type == '" + name + "' %}" %}
+            {%-     do first_line.update({"is": False}) %}
+            {%-   else %}
+            {%-     set to_print = "{% elif auth_type == '" + name + "' %}" %}
+            {%-   endif %}
+                  {{ to_print }}
+                  client_secret: {{opts["metadata"]["client"].get("client_secret", "someRandomClientSecretMightBeNull") }}
                   protocol: mapped
                   openid_scope: openid
-                  token_endpoint: {{ keystone_keycloak.get('oidc', {}).get('OIDCProviderMetadataURL', keystone_keycloak.url + "/auth/realms/iam/protocol/openid-connect/token")}}
-                  client_id: os
-                  discovery_endpoint: {{ keystone_keycloak.get('oidc', {}).get('OIDCProviderMetadataURL', keystone_keycloak.url + "/auth/realms/iam/.well-known/openid-configuration")}}
-                  auth_type: v3oidcpassword
+                  token_endpoint: {{ opts["token_endpoint"] }}
+                  client_id: {{ opts["metadata"]["client"]["client_id"]}}
+                  discovery_endpoint: {{ opts["metadata"]["provider"]["value_from"]["from_url"]["url"] }}
+            {%- endfor %}
               {%- raw %}
+                  {% endif %}
+                  auth_type: v3oidcpassword
                   {% endif %}
               {%- endraw %}
           openrc_custom_template:
@@ -208,7 +233,9 @@ spec:
               # OpenStack API is version 3. For example, your cloud provider may implement
               # Image API v1.1, Block Storage API v2, and Compute API v2.0. OS_AUTH_URL is
               # only for the Identity API served through keystone.
-              {% if auth_type == 'mapped' %}
+              {%- endraw %}
+              {{ validate_true_line }}
+              {%- raw %}
               # v3oidcpassword does not work with unversioned identity endpoint
               # TODO: remove once LP bug/1998366 is fixed and released
               export OS_AUTH_URL={{ "{{" }} auth_url {{ "}}/v3" }}
@@ -218,7 +245,9 @@ spec:
 
               # With the addition of Keystone we have standardized on the term **project**
               # as the entity that owns the resources.
-              {% if auth_type != 'mapped' %}
+              {%- endraw %}
+              {{ validate_false_line }}
+              {%- raw %}
               export OS_PROJECT_ID={{ "{{" }} tenant_id {{ "}}" }}
               export OS_USER_DOMAIN_NAME="{{ "{{" }} user_domain_name|shellfilter {{ "}}" }}"
               if [ -z "$OS_USER_DOMAIN_NAME" ]; then unset OS_USER_DOMAIN_NAME; fi
@@ -249,17 +278,28 @@ spec:
               export OS_IDENTITY_API_VERSION={{ "{{" }} os_identity_api_version {{ "}}" }}
 
 
-              {% if auth_type == 'mapped' %}
               {%- endraw %}
-              export OS_CLIENT_SECRET=someRandomClientSecretMightBeNull
+              {{ validate_true_line }}
+            {%- set first_line = {"is": True} %}
+            {%- for name, opts in openid_providers.items() %}
+            {%-   if first_line.is %}
+            {%-     set to_print = "{% if auth_type == '" + name + "' %}" %}
+            {%-     do first_line.update({"is": False}) %}
+            {%-   else %}
+            {%-     set to_print = "{% elif auth_type == '" + name + "' %}" %}
+            {%-   endif %}
+              {{ to_print }}
+              export OS_CLIENT_SECRET={{opts["metadata"]["client"].get("client_secret", "someRandomClientSecretMightBeNull") }}
               export OS_PROTOCOL=mapped
               export OS_OPENID_SCOPE=openid
-              export OS_TOKEN_ENDPOINT={{ keystone_keycloak.get('oidc', {}).get('OIDCProviderMetadataURL', keystone_keycloak.url + "/auth/realms/iam/protocol/openid-connect/token")}}
-              export OS_CLIENT_ID=os
-              export OS_DISCOVERY_ENDPOINT={{ keystone_keycloak.get('oidc', {}).get('OIDCProviderMetadataURL', keystone_keycloak.url + "/auth/realms/iam/.well-known/openid-configuration")}}
-              export OS_AUTH_TYPE=v3oidcpassword
-              export OS_IDENTITY_PROVIDER=keycloak
+              export OS_TOKEN_ENDPOINT={{ opts["token_endpoint"] }}
+              export OS_CLIENT_ID={{ opts["metadata"]["client"]["client_id"]}}
+              export OS_DISCOVERY_ENDPOINT={{ opts["metadata"]["provider"]["value_from"]["from_url"]["url"] }}
+              export OS_IDENTITY_PROVIDER={{ name }}
+            {%- endfor %}
               {%- raw %}
+              {% endif %}
+              export OS_AUTH_TYPE=v3oidcpassword
               {% endif %}
               {%- endraw %}
           {%- endif %}
@@ -283,7 +323,7 @@ spec:
             config:
               raw:
                 DEFAULT_THEME: {{ horizon_features.get('default_theme', 'default') }}
-{%- if keystone_keycloak_enabled %}
+{%- if federation.get("openid", {}).get("enabled") %}
 {%- set sso_logout_url = "https://keystone." + spec.public_domain_name + "/v3/auth/OS-FEDERATION/identity_providers/keycloak/protocols/mapped/websso/?logout=https://horizon." + spec.public_domain_name + "/auth/logout" %}
                 LOGOUT_URL: {{ sso_logout_url }}
                 WEBSSO_DEFAULT_REDIRECT_LOGOUT: {{ sso_logout_url }}
@@ -306,16 +346,18 @@ spec:
 {%- endif %}
 
               secure_proxy_ssl_header: true
-{%- if keystone_keycloak_enabled %}
+{%- if federation.get("openid", {}).get("enabled") %}
               auth:
                 idp_mapping:
-                - idp: keycloak
-                  label: External Authentication Service
-                  name: mapped
+{%-   for name, opts in openid_providers.items() %}
+                - idp: {{ name }}
+                  label: {{ opts["description"] }}
+                  name: {{ name }}
                   protocol: mapped
+{%-   endfor %}
                 sso:
                   enabled: true
-                  initial_choice: mapped
+                  initial_choice: {{ openid_providers.keys() | list | first }}
               # Need to switch openstack keystone url to public endpoint for web single-sign-on authentication
               # because the option WEBSSO_KEYSTONE_URL added in version Stein.
               {%- if OSVer.stein > OSVer[spec.openstack_version] %}
