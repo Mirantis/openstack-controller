@@ -325,6 +325,7 @@ dashboard:
         username: test5JeB
     secret_key: kQt7XsbPVNDABuHyngdJuppnzP5i82Mz
   keystone_creds: {}
+  federation: {}
 database:
   galera_creds:
     audit:
