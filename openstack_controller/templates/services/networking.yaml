@@ -597,7 +597,7 @@ spec:
                 - name: ngs-ssh-private
                   secret:
                     secretName: ngs-ssh-keys
-                    defaultMode: 0444
+                    defaultMode: 416
         {%- endif %}
       {%- endif %}
       {%- if ovn_enabled %}
