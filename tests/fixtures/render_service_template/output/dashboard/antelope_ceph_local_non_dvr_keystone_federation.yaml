@@ -16,7 +16,7 @@ spec:
       conf:
         software:
           horizon:
-            dashboard_path: '/var/lib/openstack/lib/python3.6/site-packages/openstack_dashboard'
+            dashboard_path: '/usr/local/share/openstack_dashboard'
         policy.d: {}
         horizon:
           policy:
@@ -52,7 +52,7 @@ spec:
                   {% endif %}
                   auth:
                     {% if not profile %}
-                    {% if auth_type in "keycloak" %}
+                    {% if auth_type in "keycloak,okta" %}
                     # v3oidcpassword does not work with unversioned identity endpoint
                     # TODO: remove once LP bug/1998366 is fixed and released
                     auth_url: {{ "{{" }} auth_url {{ "}}/v3" }}
@@ -64,12 +64,12 @@ spec:
                     project_id: {{ "{{" }} tenant_id {{ "}}" }}
                     project_name: "{{ "{{" }} tenant_name {{ "}}" }}"
                     project_domain_id: {{ "{{" }} tenant_id {{ "}}" }}
-                    {% if auth_type not in "keycloak" %}
+                    {% if auth_type not in "keycloak,okta" %}
                     {% if user_domain_name %}
                     user_domain_name: "{{ "{{" }} user_domain_name {{ "}}" }}"
                     {%  endif %}
                     {%  endif %}
-                    {% if auth_type in "keycloak" %}
+                    {% if auth_type in "keycloak,okta" %}
                     identity_provider: {{ "{{" }} auth_type {{ "}}" }}
                     {% endif %}
                   {% if not profile %}
@@ -86,7 +86,7 @@ spec:
                   interface: "{{ "{{" }} interface {{ "}}" }}"
                   identity_api_version: {{ "{{" }} os_identity_api_version {{ "}}" }}
                   {% endif %}
-                  {% if auth_type in "keycloak" %}
+                  {% if auth_type in "keycloak,okta" %}
                   {% if auth_type == 'keycloak' %}
                   client_secret: someRandomClientSecretMightBeNull
                   protocol: mapped
@@ -94,6 +94,13 @@ spec:
                   token_endpoint: https://keycloak.it.just.works/auth/realms/iam/protocol/openid-connect/token
                   client_id: os
                   discovery_endpoint: https://keycloak.it.just.works/auth/realms/iam/.well-known/openid-configuration
+                  {% elif auth_type == 'okta' %}
+                  client_secret: HencsGagyfmQ
+                  protocol: mapped
+                  openid_scope: openid
+                  token_endpoint: https://dev-xxxx.okta.com/oauth2/default/v1/token
+                  client_id: cdid
+                  discovery_endpoint: https://dev-xxxx.okta.com/oauth2/default/.well-known/openid-configuration
                   {% endif %}
                   auth_type: v3oidcpassword
                   {% endif %}
@@ -112,7 +119,7 @@ spec:
               # OpenStack API is version 3. For example, your cloud provider may implement
               # Image API v1.1, Block Storage API v2, and Compute API v2.0. OS_AUTH_URL is
               # only for the Identity API served through keystone.
-              {% if auth_type in "keycloak" %}
+              {% if auth_type in "keycloak,okta" %}
               # v3oidcpassword does not work with unversioned identity endpoint
               # TODO: remove once LP bug/1998366 is fixed and released
               export OS_AUTH_URL={{ "{{" }} auth_url {{ "}}/v3" }}
@@ -122,7 +129,7 @@ spec:
 
               # With the addition of Keystone we have standardized on the term **project**
               # as the entity that owns the resources.
-              {% if auth_type not in "keycloak" %}
+              {% if auth_type not in "keycloak,okta" %}
               export OS_PROJECT_ID={{ "{{" }} tenant_id {{ "}}" }}
               export OS_USER_DOMAIN_NAME="{{ "{{" }} user_domain_name|shellfilter {{ "}}" }}"
               if [ -z "$OS_USER_DOMAIN_NAME" ]; then unset OS_USER_DOMAIN_NAME; fi
@@ -151,7 +158,7 @@ spec:
 
               export OS_INTERFACE={{ "{{" }} interface {{ "}}" }}
               export OS_IDENTITY_API_VERSION={{ "{{" }} os_identity_api_version {{ "}}" }}
-              {% if auth_type in "keycloak" %}
+              {% if auth_type in "keycloak,okta" %}
               {% if auth_type == 'keycloak' %}
               export OS_CLIENT_SECRET=someRandomClientSecretMightBeNull
               export OS_PROTOCOL=mapped
@@ -160,6 +167,14 @@ spec:
               export OS_CLIENT_ID=os
               export OS_DISCOVERY_ENDPOINT=https://keycloak.it.just.works/auth/realms/iam/.well-known/openid-configuration
               export OS_IDENTITY_PROVIDER=keycloak
+              {% elif auth_type == 'okta' %}
+              export OS_CLIENT_SECRET=HencsGagyfmQ
+              export OS_PROTOCOL=mapped
+              export OS_OPENID_SCOPE=openid
+              export OS_TOKEN_ENDPOINT=https://dev-xxxx.okta.com/oauth2/default/v1/token
+              export OS_CLIENT_ID=cdid
+              export OS_DISCOVERY_ENDPOINT=https://dev-xxxx.okta.com/oauth2/default/.well-known/openid-configuration
+              export OS_IDENTITY_PROVIDER=okta
               {% endif %}
               export OS_AUTH_TYPE=v3oidcpassword
               {% endif %}
@@ -186,8 +201,12 @@ spec:
               auth:
                 idp_mapping:
                 - idp: keycloak
-                  label: External Authentication Service
+                  label: Keycloak provider
                   name: keycloak
+                  protocol: mapped
+                - idp: okta
+                  label: OKTA provider
+                  name: okta
                   protocol: mapped
                 sso:
                   enabled: true

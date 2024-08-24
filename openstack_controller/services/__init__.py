@@ -151,6 +151,10 @@ class FederationMixin:
         args["oauth2"][
             "OAuth2TokenVerify"
         ] = f"jwks_uri {keycloak_params['url']}/auth/realms/iam/protocol/openid-connect/certs jwks_uri.ssl_verify=false"
+        args["token_endpoint"] = (
+            f"{keycloak_params['url']}/auth/realms/iam/protocol/openid-connect/token"
+        )
+        args["description"] = "External Authentication Service"
 
         return args
 
@@ -1115,7 +1119,7 @@ class Heat(OpenStackService):
         return t_args
 
 
-class Horizon(OpenStackService):
+class Horizon(OpenStackService, FederationMixin):
     service = "dashboard"
     openstack_chart = "horizon"
     available_releases = ["openstack-horizon"]
@@ -1143,6 +1147,7 @@ class Horizon(OpenStackService):
                 ).decode()
                 t_args["rgw_internal_cacert"] = rgw_internal_cacert
         t_args["os_policy_services"] = constants.OS_POLICY_SERVICES.values()
+        t_args.update(self.get_federation_args())
 
         return t_args
 
