@@ -57,7 +57,7 @@ spec:
           ingress:
             annotations:
               nginx.ingress.kubernetes.io/proxy-body-size: "114688"
-{%- if federation.enabled %}
+{%- if federation.get("openid", {}).get("enabled") %}
               nginx.ingress.kubernetes.io/affinity: cookie
               nginx.ingress.kubernetes.io/session-cookie-expires: "1800"
               nginx.ingress.kubernetes.io/session-cookie-max-age: "1800"
@@ -75,9 +75,10 @@ spec:
         policy.d:
           01-controller-default.yaml: {{ service_policy }}
           02-custom.yaml: {{ spec.get("features", {}).get("policies", {}).get("keystone", {}) }}
-{%- if federation.enabled %}
+{%- if federation.get("openid", {}).get("enabled") %}
         ks_federations:
-{%-   for name, opts in federation.providers.items() %}
+{%-   for name, opts in federation.get("openid", {}).get("providers", {}).items() %}
+{%-     if opts.get("enabled", True) %}
           {{ name }}:
             domain:
               name: {{ name }}
@@ -91,9 +92,10 @@ spec:
               rules:
                 {{ opts.mapping | toyaml | indent(16) }}
             protocol:
-              {{ opts["protocol"] }}:
+              mapped:
                 idp_id: {{ name }}
                 mapping_id: "{{ name }}_mapping"
+{%-     endif %}
 {%-   endfor %}
         federation:
           {{ federation | toyaml | indent(10) }}
@@ -146,7 +148,7 @@ spec:
             domain_specific_drivers_enabled: True
             domain_config_dir: /etc/keystonedomains
 {%- endif %}
-{%- if federation.enabled %}
+{%- if federation.get("openid", {}).get("enabled") %}
           federation:
             # TODO: move this logic to keystone helm chart
             trusted_dashboard:
@@ -185,29 +187,57 @@ spec:
               </IfVersion>
               ErrorLog /dev/stdout
               SetEnvIf X-Forwarded-For "^.*\..*\..*\..*" forwarded proxy env=forwarded
-{%- if federation.enabled %}
-{%-   for oidc_name, oidc_value in federation.oidc.items() %}
-              {{oidc_name}} {{ oidc_value }}
-{%-   endfor %}
-              {%- if federation.oidc_ca_bundle %}
+{%- if federation.get("openid", {}).get("enabled") %}
+{%-   if federation.get("openid", {}).get("oidc_auth_type") == "oauth2" %}
+              OIDCMetadataDir /var/www/federation_metadata
+{%-   endif %}
+{%-   if federation.get("openid", {}).get("oidc_ca_bundle") %}
               OIDCCABundlePath /usr/local/share/ca-certificates/openstack-iam-api.crt
-              {%- endif %}
+{%-   endif %}
+{%    set squote_opts = ["OIDCScope", "OIDCResponseType", "OIDCClaimPrefix", "OIDCClaimDelimiter"] %}
+{%-   for oidc_name, oidc_value in federation.get("openid", {}).get("oidc", {}).items() %}
+{%-   if oidc_name in squote_opts %}
+              {{oidc_name}} "{{oidc_value}}"
+{%-   else %}
+              {{oidc_name}} {{ oidc_value }}
+{%-   endif %}
+{%-   endfor %}
               <Location /v3/auth/OS-FEDERATION/websso/mapped>
                   AuthType openid-connect
                   Require valid-user
                   LogLevel debug
               </Location>
-{%-   for name, opts in federation.providers.items() %}
-              <Location /v3/OS-FEDERATION/identity_providers/{{ name }}/protocols/{{ opts["protocol"] }}/auth>
-                  AuthType oauth20
-                  Require valid-user
-                  LogLevel debug
-              </Location>
-              <Location /v3/auth/OS-FEDERATION/identity_providers/{{ name }}/protocols/{{ opts["protocol"] }}/websso>
+              # TODO(vsaienko): change redirect URI to match with this
+              <Location /v3/auth/OS-FEDERATION/identity_providers/>
                   AuthType openid-connect
                   Require valid-user
                   LogLevel debug
               </Location>
+{%-   for name, opts in federation.get("openid", {}).get("providers", {}).items() %}
+{%-     if opts.get("enabled", True) %}
+              <Location /v3/OS-FEDERATION/identity_providers/{{ name }}/protocols/mapped/auth>
+{%-       if federation.get("openid", {}).get("oidc_auth_type") == "oauth2" %}
+                  AuthType oauth2
+{%-         if opts.oauth2 is defined %}
+{%-           for k, v in opts.oauth2.items() %}
+                  {{ k }} {{ v }}
+{%-           endfor %}
+{%-         endif %}
+{%-       else %}
+                  AuthType oauth20
+{%-       endif %}
+                  Require valid-user
+                  LogLevel debug
+              </Location>
+              <Location /v3/auth/OS-FEDERATION/identity_providers/{{ name }}/protocols/mapped/websso>
+{%-  if federation.get("openid", {}).get("oidc_auth_type") == "oauth2" %}
+                  OIDCDiscoverURL {{ federation.openid.oidc.OIDCRedirectURI }}?iss={{ opts.issuer | urlencode | replace("/", "%2F") }}
+{%-  endif %}
+                  AuthType openid-connect
+                  Require valid-user
+                  LogLevel debug
+              </Location>
+{%-     endif %}
 {%-   endfor %}
 {%- endif %}
               </VirtualHost>
@@ -218,7 +248,7 @@ spec:
       manifests:
         network_policy: {{ spec.features.network_policies.enabled }}
         job_credential_cleanup: false
-{%- if federation.enabled %}
+{%- if federation.get("openid", {}).get("enabled") %}
         job_federations_create: true
 {%- endif %}
         job_rabbit_init: false
@@ -281,11 +311,11 @@ spec:
               username: {{ credentials[0].database.user.username }}
               password: {{ credentials[0].database.user.password }}
 {% include 'base/_notifications.yaml' %}
-{%- if federation.get("oidc_ca_bundle") %}
+{%- if federation.get("openid", {}).get("oidc_ca_bundle") %}
         oidc:
           auth:
             client:
               tls:
                 ca: |
-{{ federation.oidc_ca_bundle | indent(width=18, first=True) }}
+{{ federation.openid.oidc_ca_bundle | indent(width=18, first=True) }}
 {%- endif %}

@@ -55,6 +55,244 @@ class Ingress(Service):
         return ["ingress"]
 
 
+class FederationMixin:
+
+    @property
+    def federation_redirect_uri(self):
+        public_domain = self.mspec["public_domain_name"]
+        keystone_base = f"https://keystone.{public_domain}"
+        redirect_uri = f"{keystone_base}/v3/auth/OS-FEDERATION/identity_providers/keycloak/protocols/mapped/websso/"
+        return redirect_uri
+
+    def _get_federation_default_provider_mapping(self):
+        return [
+            {
+                "local": [
+                    {"user": {"email": "{1}", "name": "{0}"}},
+                    {"domain": {"name": "Default"}, "groups": "{2}"},
+                ],
+                "remote": [
+                    {"type": "OIDC-iam_username"},
+                    {"type": "OIDC-email"},
+                    {"type": "OIDC-iam_roles"},
+                ],
+            }
+        ]
+
+    def _get_federation_provider_defaults(self, issuer):
+        well_known = f"{issuer}/.well-known/openid-configuration"
+        return {
+            # Do not specify mapping here, since its list we will not able to merge correctly
+            "enabled": True,
+            "issuer": issuer,
+            "metadata": {
+                "client": {"client_id": "os"},
+                "conf": {
+                    "response_type": "id_token",
+                    "scope": "openid email profile",
+                    "ssl_validate_server": False,
+                },
+                "provider": {"value_from": {"from_url": {"url": well_known}}},
+            },
+            "oauth2": {"OAuth2TargetPass": "prefix=OIDC-"},
+        }
+
+    def _get_federation_keycloak_provider(self):
+        keycloak_params = (
+            self.mspec.get("features", {})
+            .get("keystone", {})
+            .get("keycloak", {})
+        )
+        issuer = f"{keycloak_params['url']}/auth/realms/iam"
+        args = self._get_federation_provider_defaults(issuer)
+
+        if keycloak_params["enabled"]:
+            # Get IAM CA certificate
+            oidc_ca_secret = (
+                self.mspec["features"]
+                .get("keystone", {})
+                .get("keycloak", {})
+                .get("oidc")
+                .get("oidcCASecret")
+            )
+            if oidc_ca_secret:
+                kube.wait_for_secret(
+                    self.namespace,
+                    oidc_ca_secret,
+                )
+                oidc_ca_bundle = base64.b64decode(
+                    secrets.get_secret_data(
+                        self.namespace,
+                        oidc_ca_secret,
+                    )["ca-cert.pem"]
+                ).decode()
+                args["oidc_ca"] = oidc_ca_bundle
+
+        if "OIDCClientID" in keycloak_params:
+            args["metadata"]["client"]["client_id"] = keycloak_params[
+                "OIDCClientID"
+            ]
+        for global_opt, conf_opt in [
+            ("OIDCSSLValidateServer", "ssl_validate_server"),
+            ("OIDCScope", "scope"),
+        ]:
+            if keycloak_params.get(global_opt):
+                args["metadata"]["conf"][conf_opt] = keycloak_params[
+                    global_opt
+                ]
+
+        args["metadata"]["conf"][
+            "oauth_verify_jwks_uri"
+        ] = f"{keycloak_params['url']}/auth/realms/iam/protocol/openid-connect/certs"
+        args["metadata"]["conf"]["verify_jwks_uri"] = args["metadata"]["conf"][
+            "oauth_verify_jwks_uri"
+        ]
+
+        args["oauth2"][
+            "OAuth2TokenVerify"
+        ] = f"jwks_uri {keycloak_params['url']}/auth/realms/iam/protocol/openid-connect/certs jwks_uri.ssl_verify=false"
+
+        return args
+
+    def get_federation_args(self):
+
+        def _normalize_oidc_value(settings):
+            for opt, value in settings.items():
+                if isinstance(value, bool):
+                    if value:
+                        settings[opt] = "On"
+                    else:
+                        settings[opt] = "Off"
+
+        mspec_federation = (
+            self.mspec["features"].get("keystone", {}).get("federation", {})
+        )
+
+        # Supported auth types oauth20 (legacy) or oauth2
+        federation_openid = {
+            "enabled": mspec_federation.get("openid", {}).get(
+                "enabled",
+                self.mspec["features"]
+                .get("keystone", {})
+                .get("keycloak", {})
+                .get("enabled", False),
+            ),
+            "oidc_auth_type": mspec_federation.get("openid", {}).get(
+                "oidc_auth_type", "oauth2"
+            ),
+            "oidc": {
+                "OIDCClaimPrefix": "OIDC-",
+                "OIDCClaimDelimiter": ";",
+                "OIDCOAuthSSLValidateServer": False,
+                "OIDCSessionInactivityTimeout": "1800",
+                "OIDCRedirectURI": self.federation_redirect_uri,
+            },
+        }
+
+        providers = {}
+        for provider_name, provider_opts in (
+            mspec_federation.get("openid", {}).get("providers", {}).items()
+        ):
+            if provider_name == "keycloak":
+                provider = self._get_federation_keycloak_provider()
+            else:
+                provider = self._get_federation_provider_defaults(
+                    provider_opts["issuer"]
+                )
+            utils.merger.merge(provider, provider_opts)
+            provider["mapping"] = provider_opts.get(
+                "mapping", self._get_federation_default_provider_mapping()
+            )
+            providers[provider_name] = provider
+
+        if len(providers.keys()) == 0:
+            if (
+                self.mspec["features"]
+                .get("keystone", {})
+                .get("keycloak", {})
+                .get("enabled", False)
+            ):
+                providers["keycloak"] = (
+                    self._get_federation_keycloak_provider()
+                )
+                providers["keycloak"][
+                    "mapping"
+                ] = self._get_federation_default_provider_mapping()
+                federation_openid["oidc_auth_type"] = "oauth20"
+
+        federation_openid["providers"] = providers
+
+        # TODO(vsaienko): remove when keystone:keycloack is removed
+        if federation_openid["oidc_auth_type"] == "oauth20":
+            provider_opts = {}
+            for opts in providers.values():
+                if opts["enabled"]:
+                    provider_opts = opts
+                    break
+            if provider_opts:
+                oidc_provider_opts = {
+                    "OIDCClientID": provider_opts["metadata"]["client"][
+                        "client_id"
+                    ],
+                    "OIDCResponseType": provider_opts["metadata"]["conf"][
+                        "response_type"
+                    ],
+                    "OIDCScope": provider_opts["metadata"]["conf"]["scope"],
+                    "OIDCSSLValidateServer": provider_opts["metadata"]["conf"][
+                        "ssl_validate_server"
+                    ],
+                    "OIDCOAuthSSLValidateServer": provider_opts["metadata"][
+                        "conf"
+                    ]["ssl_validate_server"],
+                    "OIDCProviderMetadataURL": f"{provider_opts['issuer']}/.well-known/openid-configuration",
+                    "OIDCOAuthVerifyJwksUri": provider_opts["metadata"][
+                        "conf"
+                    ]["oauth_verify_jwks_uri"],
+                }
+                utils.merger.merge(
+                    federation_openid["oidc"], oidc_provider_opts
+                )
+
+        federation_openid["oidc"].update(
+            self.mspec["features"]
+            .get("keystone", {})
+            .get("federation", {})
+            .get("openid", {})
+            .get("oidc", {})
+        )
+        oidc_ca_bundle = ""
+        for provider_opts in federation_openid["providers"].values():
+            if provider_opts["enabled"]:
+                oidc_ca = provider_opts.get("oidc_ca")
+                if oidc_ca:
+                    oidc_ca_bundle += oidc_ca
+
+        if oidc_ca_bundle:
+            federation_openid["oidc_ca_bundle"] = oidc_ca_bundle
+
+        if federation_openid["enabled"]:
+            # set global parameters
+            keycloak_salt = secrets.KeycloakSecret(self.namespace)
+            keycloak_salt.ensure()
+            federation_openid["oidc"][
+                "OIDCCryptoPassphrase"
+            ] = keycloak_salt.get().passphrase
+            federation_openid["oidc"][
+                "OIDCRedirectURI"
+            ] = self.federation_redirect_uri
+            if (
+                federation_openid["oidc"].get("OIDCRedirectURLsAllowed")
+                is None
+            ):
+                federation_openid["oidc"][
+                    "OIDCRedirectURLsAllowed"
+                ] = f"^https://horizon.{self.mspec['public_domain_name']}/auth/logout$"
+
+        _normalize_oidc_value(federation_openid["oidc"])
+
+        return {"federation": {"openid": federation_openid}}
+
+
 class Coordination(Service, MaintenanceApiMixin):
     service = "coordination"
     available_releases = ["etcd"]
@@ -923,137 +1161,30 @@ class Ironic(OpenStackService):
         }
 
 
-class Keystone(OpenStackService):
+class Keystone(OpenStackService, FederationMixin):
     service = "identity"
     openstack_chart = "keystone"
     available_releases = ["openstack-keystone"]
     _service_accounts = ["osctl"]
 
-    def _get_keycloak_provider(self, redirect_uris):
-        args = {}
-        keycloak_params = (
-            self.mspec.get("features", {})
-            .get("keystone", {})
-            .get("keycloak", {})
-        )
-        if not keycloak_params.get("enabled", False):
-            return args
-
-        def _normalize_oidc_value(value):
-            if isinstance(value, bool):
-                if value:
-                    return "On"
-                else:
-                    return "Off"
-            return value
-
-        # Actualize OIDC parameters
-        oidc_settings = {
-            "OIDCClientID": "os",
-            "OIDCResponseType": "id_token",
-            "OIDCScope": '"openid email profile"',
-            "OIDCProviderMetadataURL": f"{keycloak_params['url']}/auth/realms/iam/.well-known/openid-configuration",
-            "OIDCOAuthVerifyJwksUri": f"{keycloak_params['url']}/auth/realms/iam/protocol/openid-connect/certs",
-            "OIDCSessionInactivityTimeout": 1800,
-            "OIDCRedirectURLsAllowed": f"^https://horizon.{self.mspec['public_domain_name']}/auth/logout$",
-            "OIDCSSLValidateServer": "On",
-            "OIDCOAuthSSLValidateServer": "On",
-            "OIDCClaimPrefix": '"OIDC-"',
-            "OIDCClaimDelimiter": '";"',
-        }
-        oidc_settings.update(keycloak_params.get("oidc", {}))
-        for k, v in oidc_settings.items():
-            oidc_settings[k] = _normalize_oidc_value(v)
-
-        # Create openstack IAM shared secret
-        iam_secret = secrets.IAMSecret(self.namespace)
-        iam_data = secrets.OpenStackIAMData(
-            clientId=oidc_settings["OIDCClientID"],
-            redirectUris=redirect_uris,
-        )
-        iam_secret.save(iam_data)
-
-        # Get IAM CA certificate
-        oidc_ca_secret = oidc_settings.get("oidcCASecret")
-        oidc_ca_bundle = ""
-        if oidc_ca_secret:
-            kube.wait_for_secret(
-                self.namespace,
-                oidc_ca_secret,
-            )
-            oidc_ca_bundle = base64.b64decode(
-                secrets.get_secret_data(
-                    self.namespace,
-                    oidc_ca_secret,
-                )["ca-cert.pem"]
-            ).decode()
-            oidc_settings.pop("oidcCASecret")
-
-        args.update(
-            {
-                "protocol": "mapped",
-                "type": "openid",
-                "issuer": f"{keycloak_params['url']}/auth/realms/iam",
-                "mapping": [
-                    {
-                        "local": [
-                            {"user": {"name": "{0}", "email": "{1}"}},
-                            {"groups": "{2}"},
-                            {"domain": {"name": "Default"}},
-                        ],
-                        "remote": [
-                            {"type": "OIDC-iam_username"},
-                            {"type": "OIDC-email"},
-                            {"type": "OIDC-iam_roles"},
-                        ],
-                    }
-                ],
-                "metadata": {
-                    "client": {},
-                    "conf": {},
-                    "provider": {
-                        "value_from": {
-                            "from_url": {
-                                "url": oidc_settings["OIDCProviderMetadataURL"]
-                            }
-                        }
-                    },
-                },
-            }
-        )
-        return {
-            "oidc": oidc_settings,
-            "oidc_ca_bundle": oidc_ca_bundle,
-            "providers": {"keycloak": args},
-        }
-
     def _get_federation_args(self):
-        result = {"enabled": False}
-        public_domain = self.mspec["public_domain_name"]
-        keystone_base = f"https://keystone.{public_domain}"
-        redirect_uri_keystone = f"{keystone_base}/v3/auth/OS-FEDERATION/identity_providers/keycloak/protocols/mapped/websso/"
-        redirect_uris_keycloak = [
-            f"{redirect_uri_keystone}",
-            f"https://horizon.{public_domain}/*",
-        ]
-        providers = self._get_keycloak_provider(redirect_uris_keycloak)
-        if providers:
-            result.update(providers)
-            result.update({"enabled": True})
-
-            # set global parameters
-            keycloak_salt = secrets.KeycloakSecret(self.namespace)
-            keycloak_salt.ensure()
-            result["oidc"][
-                "OIDCCryptoPassphrase"
-            ] = keycloak_salt.get().passphrase
-            result["oidc"]["OIDCRedirectURI"] = redirect_uri_keystone
-            if result["oidc"].get("OIDCRedirectURLsAllowed") is None:
-                result["oidc"][
-                    "OIDCRedirectURLsAllowed"
-                ] = f"^https://horizon.{self.mspec['public_domain_name']}/auth/logout$"
-
-        return {"federation": result}
+        federation = self.get_federation_args()
+        providers = federation.get("providers", {})
+        if providers.get("keycloak", {}).get("enabled"):
+            public_domain = self.mspec["public_domain_name"]
+            redirect_uris_keycloak = [
+                f"{self.federation_redirect_uri}",
+                f"https://horizon.{public_domain}/*",
+            ]
+            keycloak_provider = providers["keycloak"]
+            # Create openstack IAM shared secret
+            iam_secret = secrets.IAMSecret(self.namespace)
+            iam_data = secrets.OpenStackIAMData(
+                clientId=keycloak_provider["metadata"]["client"]["client_id"],
+                redirectUris=redirect_uris_keycloak,
+            )
+            iam_secret.save(iam_data)
+        return federation
 
     def _get_object_storage_args(self):
         args = {}
@@ -1120,7 +1251,6 @@ class Keystone(OpenStackService):
     def template_args(self):
         t_args = super().template_args()
         t_args.update(self._get_keystone_args())
-
         t_args.update(self._get_federation_args())
 
         if "object-storage" in self.mspec.get("features", {}).get(

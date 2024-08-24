@@ -889,6 +889,104 @@ properties:
                       Domain ID for admin of OpenStack deployment
                       default: "default"
                     type: string
+          federation:
+            type: object
+            additionalProperties: False
+            required:
+            - openid
+            properties:
+              openid:
+                type: object
+                required:
+                - providers
+                - enabled
+                properties:
+                  enabled:
+                    type: boolean
+                    description: |
+                      Trigger to enable federation providers in keystone.
+                      default: true
+                  oidc:
+                    type: object
+                    additionalProperties: True
+                  oidc_auth_type:
+                    type: string
+                    description: |
+                      Authenticaion type used by Apache to validate OAuth2.0
+                      access tokens. To configure multiple providers should be
+                      switched to oauth2. The oauth20 will be removed in next releases.
+                      default: oauth20
+                    enum:
+                    - oauth20
+                    - oauth2
+                  providers:
+                    type: object
+                    additionalProperties: False
+                    patternProperties:
+                      ".*":
+                        type: object
+                        additionalProperties: False
+                        required:
+                          - issuer
+                          - description
+                          - token_endpoint
+                        properties:
+                          issuer:
+                            type: string
+                            description: "Provider issuer url"
+                          oidc_ca:
+                            type: string
+                            description: "CA bundle to connect to certificate"
+                          description:
+                            type: string
+                            description: |
+                              The description of provider to show on horizon web page.
+                          token_endpoint:
+                            type: string
+                            description: Provider token endpoint
+                          enabled:
+                            type: boolean
+                            description: |
+                              Trigger to enable specific provider.
+                              default: true
+                          mapping:
+                            type: array
+                            description: Keystone mapping to use for provider
+                            items:
+                              type: object
+                              additionalProperties: True
+                          oauth2:
+                            description: |
+                              Specific OAuth2 module parameters
+                            type: object
+                            additionalProperties: True
+                          metadata:
+                            type: object
+                            properties:
+                              client:
+                                type: object
+                                additionalProperties: True
+                              conf:
+                                type: object
+                                additionalProperties: True
+                              provider:
+                                type: object
+                                required:
+                                - value_from
+                                properties:
+                                  value_from:
+                                    type: object
+                                    required:
+                                    - from_url
+                                    properties:
+                                      from_url:
+                                        type: object
+                                        required:
+                                        - url
+                                        properties:
+                                          url:
+                                            type: string
+                                            description: URL to well know properties of provider
           keycloak:
             type: object
             additionalProperties: false

@@ -73,8 +73,9 @@ spec:
               </IfVersion>
               ErrorLog /dev/stdout
               SetEnvIf X-Forwarded-For "^.*\..*\..*\..*" forwarded proxy env=forwarded
-              OIDCResponseType id_token
-              OIDCScope openid
+
+              OIDCResponseType "id_token"
+              OIDCScope "openid"
               OIDCProviderMetadataURL https://keycloak.it.just.works/auth/realms/iam/.well-known/openid-configuration
               OIDCOAuthVerifyJwksUri https://keycloak.it.just.works/auth/realms/iam/protocol/openid-connect/certs
               OIDCClientID os
@@ -91,6 +92,12 @@ spec:
                   Require valid-user
                   LogLevel debug
               </Location>
+              # TODO(vsaienko): change redirect URI to match with this
+              <Location /v3/auth/OS-FEDERATION/identity_providers/>
+                  AuthType openid-connect
+                  Require valid-user
+                  LogLevel debug
+              </Location>
               <Location /v3/OS-FEDERATION/identity_providers/keycloak/protocols/mapped/auth>
                   AuthType oauth20
                   Require valid-user
@@ -103,47 +110,46 @@ spec:
               </Location>
               </VirtualHost>
         federation:
-          enabled: true
-          oidc:
-            OIDCClientID: os
-            OIDCCryptoPassphrase: zQGr6LP7k9wgTBjGF6uJr8Bw0bwKbN1Z
-            OIDCOAuthSSLValidateServer: "Off"
-            OIDCOAuthVerifyJwksUri: https://keycloak.it.just.works/auth/realms/iam/protocol/openid-connect/certs
-            OIDCProviderMetadataURL: https://keycloak.it.just.works/auth/realms/iam/.well-known/openid-configuration
-            OIDCRedirectURI: https://keystone.it.just.works/v3/auth/OS-FEDERATION/identity_providers/keycloak/protocols/mapped/websso/
-            OIDCRedirectURLsAllowed: ^https://horizon.it.just.works/auth/logout$
-            OIDCResponseType: id_token
-            OIDCSSLValidateServer: "Off"
-            OIDCScope: openid
-            OIDCSessionInactivityTimeout: 1800
-            OIDCClaimDelimiter: '","'
-            OIDCClaimPrefix: '"OIDC-"'
-          providers:
-            keycloak:
-              mapping:
-              - local:
-                - user:
-                    email: "{1}"
-                    name: "{0}"
-                - groups: "{2}"
-                - domain:
-                    name: Default
-                remote:
-                - type: OIDC-iam_username
-                - type: OIDC-email
-                - type: OIDC-iam_roles
-              protocol: mapped
-              type: openid
-              issuer: https://keycloak.it.just.works/auth/realms/iam
-              metadata:
-                client:
-                  key: value
-                conf:
-                  key: value
-                provider:
-                  value_from:
-                    from_url:
-                      url: https://keycloak.it.just.works/auth/realms/iam/.well-known/openid-configuration
+          openid:
+            enabled: true
+            oidc:
+              OIDCClientID: os
+              OIDCCryptoPassphrase: zQGr6LP7k9wgTBjGF6uJr8Bw0bwKbN1Z
+              OIDCOAuthSSLValidateServer: "Off"
+              OIDCOAuthVerifyJwksUri: https://keycloak.it.just.works/auth/realms/iam/protocol/openid-connect/certs
+              OIDCProviderMetadataURL: https://keycloak.it.just.works/auth/realms/iam/.well-known/openid-configuration
+              OIDCRedirectURI: https://keystone.it.just.works/v3/auth/OS-FEDERATION/identity_providers/keycloak/protocols/mapped/websso/
+              OIDCRedirectURLsAllowed: ^https://horizon.it.just.works/auth/logout$
+              OIDCResponseType: id_token
+              OIDCSSLValidateServer: "Off"
+              OIDCScope: openid
+              OIDCSessionInactivityTimeout: 1800
+              OIDCClaimDelimiter: ","
+              OIDCClaimPrefix: "OIDC-"
+            providers:
+              keycloak:
+                mapping:
+                - local:
+                  - user:
+                      email: "{1}"
+                      name: "{0}"
+                  - groups: "{2}"
+                  - domain:
+                      name: Default
+                  remote:
+                  - type: OIDC-iam_username
+                  - type: OIDC-email
+                  - type: OIDC-iam_roles
+                issuer: https://keycloak.it.just.works/auth/realms/iam
+                metadata:
+                  client:
+                    key: value
+                  conf:
+                    key: value
+                  provider:
+                    value_from:
+                      from_url:
+                        url: https://keycloak.it.just.works/auth/realms/iam/.well-known/openid-configuration
         ks_federations:
           keycloak:
             domain:
