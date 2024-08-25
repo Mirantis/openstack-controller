@@ -205,6 +205,441 @@ def test_service_keystone_render(
     ]
 
 
+def test_service_keystone_federation_redirect_uri(
+    openstackdeployment_mspec, mock_osdpl, child_view
+):
+    osdplstmock = mock.MagicMock()
+    service = services.Keystone(
+        openstackdeployment_mspec, logging, osdplstmock, child_view
+    )
+    assert (
+        service.federation_redirect_uri
+        == "https://keystone.it.just.works/v3/auth/OS-FEDERATION/identity_providers/keycloak/protocols/mapped/websso/"
+    )
+
+
+def test_service_keystone_get_federation_default_provider_mapping(
+    openstackdeployment_mspec, mock_osdpl, child_view
+):
+    osdplstmock = mock.MagicMock()
+    service = services.Keystone(
+        openstackdeployment_mspec, logging, osdplstmock, child_view
+    )
+    default_mapping_expected = [
+        {
+            "local": [
+                {"user": {"email": "{1}", "name": "{0}"}},
+                {"domain": {"name": "Default"}, "groups": "{2}"},
+            ],
+            "remote": [
+                {"type": "OIDC-iam_username"},
+                {"type": "OIDC-email"},
+                {"type": "OIDC-iam_roles"},
+            ],
+        }
+    ]
+
+    assert (
+        default_mapping_expected
+        == service._get_federation_default_provider_mapping()
+    )
+
+
+def test_service_keystone_get_federation_provider_defaults(
+    openstackdeployment_mspec, mock_osdpl, child_view
+):
+    osdplstmock = mock.MagicMock()
+    service = services.Keystone(
+        openstackdeployment_mspec, logging, osdplstmock, child_view
+    )
+    default_provider_expected = {
+        "enabled": True,
+        "issuer": "https://my.provider/issuer",
+        "metadata": {
+            "client": {"client_id": "os"},
+            "conf": {
+                "response_type": "id_token",
+                "scope": "openid email profile",
+                "ssl_validate_server": False,
+            },
+            "provider": {
+                "value_from": {
+                    "from_url": {
+                        "url": "https://my.provider/issuer/.well-known/openid-configuration"
+                    }
+                }
+            },
+        },
+        "oauth2": {"OAuth2TargetPass": "prefix=OIDC-"},
+    }
+
+    assert (
+        default_provider_expected
+        == service._get_federation_provider_defaults(
+            "https://my.provider/issuer"
+        )
+    )
+
+
+def test_service_keystone_get_federation_keycloak_provider(
+    openstackdeployment_mspec, mock_osdpl, child_view
+):
+    osdplstmock = mock.MagicMock()
+    openstackdeployment_mspec["features"]["keystone"]["keycloak"].update(
+        {
+            "client": "os",
+            "enabled": True,
+            "oidcCASecret": "oidc-cert",
+            "url": "https://keycloak.it.just.works",
+        }
+    )
+
+    service = services.Keystone(
+        openstackdeployment_mspec, logging, osdplstmock, child_view
+    )
+
+    res = service._get_federation_keycloak_provider()
+    expected = {
+        "enabled": True,
+        "issuer": "https://keycloak.it.just.works/auth/realms/iam",
+        "token_endpoint": "https://keycloak.it.just.works/auth/realms/iam/protocol/openid-connect/token",
+        "description": "External Authentication Service",
+        "metadata": {
+            "client": {"client_id": "os"},
+            "conf": {
+                "response_type": "id_token",
+                "scope": "openid email profile",
+                "ssl_validate_server": False,
+                "oauth_verify_jwks_uri": "https://keycloak.it.just.works/auth/realms/iam/protocol/openid-connect/certs",
+                "verify_jwks_uri": "https://keycloak.it.just.works/auth/realms/iam/protocol/openid-connect/certs",
+            },
+            "provider": {
+                "value_from": {
+                    "from_url": {
+                        "url": "https://keycloak.it.just.works/auth/realms/iam/.well-known/openid-configuration"
+                    }
+                }
+            },
+        },
+        "oauth2": {
+            "OAuth2TargetPass": "prefix=OIDC-",
+            "OAuth2TokenVerify": "jwks_uri https://keycloak.it.just.works/auth/realms/iam/protocol/openid-connect/certs jwks_uri.ssl_verify=false",
+        },
+    }
+    assert res == expected
+
+
+@mock.patch.object(secrets.KeycloakSecret, "get")
+def test_service_keystone_get_federation_args(
+    keycloak_mock, openstackdeployment_mspec, mock_osdpl, child_view
+):
+    osdplstmock = mock.MagicMock()
+    keycloak_mock.return_value = secrets.KeycloackCreds("passphrase")
+    openstackdeployment_mspec["features"]["keystone"]["keycloak"].update(
+        {
+            "client": "os",
+            "enabled": True,
+            "oidcCASecret": "oidc-cert",
+            "url": "https://keycloak.it.just.works",
+        }
+    )
+
+    service = services.Keystone(
+        openstackdeployment_mspec, logging, osdplstmock, child_view
+    )
+
+    res = service.get_federation_args()
+    expected = {
+        "federation": {
+            "openid": {
+                "enabled": True,
+                "oidc_auth_type": "oauth20",
+                "oidc": {
+                    "OIDCClaimPrefix": "OIDC-",
+                    "OIDCClaimDelimiter": ";",
+                    "OIDCOAuthSSLValidateServer": "Off",
+                    "OIDCSessionInactivityTimeout": "1800",
+                    "OIDCRedirectURI": "https://keystone.it.just.works/v3/auth/OS-FEDERATION/identity_providers/keycloak/protocols/mapped/websso/",
+                    "OIDCClientID": "os",
+                    "OIDCResponseType": "id_token",
+                    "OIDCScope": "openid email profile",
+                    "OIDCSSLValidateServer": "Off",
+                    "OIDCProviderMetadataURL": "https://keycloak.it.just.works/auth/realms/iam/.well-known/openid-configuration",
+                    "OIDCOAuthVerifyJwksUri": "https://keycloak.it.just.works/auth/realms/iam/protocol/openid-connect/certs",
+                    "OIDCCryptoPassphrase": "passphrase",
+                    "OIDCRedirectURLsAllowed": "^https://horizon.it.just.works/auth/logout$",
+                },
+                "providers": {
+                    "keycloak": {
+                        "enabled": True,
+                        "issuer": "https://keycloak.it.just.works/auth/realms/iam",
+                        "token_endpoint": "https://keycloak.it.just.works/auth/realms/iam/protocol/openid-connect/token",
+                        "description": "External Authentication Service",
+                        "metadata": {
+                            "client": {"client_id": "os"},
+                            "conf": {
+                                "response_type": "id_token",
+                                "scope": "openid email profile",
+                                "ssl_validate_server": False,
+                                "oauth_verify_jwks_uri": "https://keycloak.it.just.works/auth/realms/iam/protocol/openid-connect/certs",
+                                "verify_jwks_uri": "https://keycloak.it.just.works/auth/realms/iam/protocol/openid-connect/certs",
+                            },
+                            "provider": {
+                                "value_from": {
+                                    "from_url": {
+                                        "url": "https://keycloak.it.just.works/auth/realms/iam/.well-known/openid-configuration"
+                                    }
+                                }
+                            },
+                        },
+                        "oauth2": {
+                            "OAuth2TargetPass": "prefix=OIDC-",
+                            "OAuth2TokenVerify": "jwks_uri https://keycloak.it.just.works/auth/realms/iam/protocol/openid-connect/certs jwks_uri.ssl_verify=false",
+                        },
+                        "mapping": [
+                            {
+                                "local": [
+                                    {"user": {"email": "{1}", "name": "{0}"}},
+                                    {
+                                        "domain": {"name": "Default"},
+                                        "groups": "{2}",
+                                    },
+                                ],
+                                "remote": [
+                                    {"type": "OIDC-iam_username"},
+                                    {"type": "OIDC-email"},
+                                    {"type": "OIDC-iam_roles"},
+                                ],
+                            }
+                        ],
+                    }
+                },
+            }
+        }
+    }
+    assert res == expected
+
+
+@mock.patch.object(secrets.KeycloakSecret, "get")
+def test_service_keystone_get_federation_args_keycloak_disabled_1provider(
+    keycloak_mock,
+    openstackdeployment_mspec,
+    mock_osdpl,
+    child_view,
+    federation_provider,
+):
+    osdplstmock = mock.MagicMock()
+    keycloak_mock.return_value = secrets.KeycloackCreds("passphrase")
+    openstackdeployment_mspec["features"]["keystone"]["keycloak"].update(
+        {
+            "client": "os",
+            "enabled": False,
+            "oidcCASecret": "oidc-cert",
+            "url": "https://keycloak.it.just.works",
+        }
+    )
+
+    openstackdeployment_mspec["features"]["keystone"]["federation"] = {
+        "openid": {
+            "enabled": True,
+            "oidc": {"OIDCFOO": "OIDCBAR"},
+            "providers": {"provider1": federation_provider},
+        }
+    }
+
+    service = services.Keystone(
+        openstackdeployment_mspec, logging, osdplstmock, child_view
+    )
+
+    res = service.get_federation_args()
+    expected = {
+        "federation": {
+            "openid": {
+                "enabled": True,
+                "oidc_auth_type": "oauth2",
+                "oidc": {
+                    "OIDCClaimPrefix": "OIDC-",
+                    "OIDCClaimDelimiter": ";",
+                    "OIDCOAuthSSLValidateServer": "Off",
+                    "OIDCSessionInactivityTimeout": "1800",
+                    "OIDCRedirectURI": "https://keystone.it.just.works/v3/auth/OS-FEDERATION/identity_providers/keycloak/protocols/mapped/websso/",
+                    "OIDCFOO": "OIDCBAR",
+                    "OIDCCryptoPassphrase": "passphrase",
+                    "OIDCRedirectURLsAllowed": "^https://horizon.it.just.works/auth/logout$",
+                },
+                "providers": {
+                    "provider1": {
+                        "enabled": True,
+                        "issuer": "https://keycloak.it.just.works/auth/realms/iam",
+                        "metadata": {
+                            "client": {"client_id": "os"},
+                            "conf": {
+                                "response_type": "id_token",
+                                "scope": "openid email profile",
+                                "ssl_validate_server": False,
+                            },
+                            "provider": {
+                                "value_from": {
+                                    "from_url": {
+                                        "url": "https://keycloak.it.just.works/auth/realms/iam/.well-known/openid-configuration"
+                                    }
+                                }
+                            },
+                        },
+                        "oauth2": {"OAuth2TargetPass": "prefix=OIDC-"},
+                        "description": "Good provider",
+                        "mapping": [
+                            {
+                                "local": [
+                                    {"user": {"email": "{1}", "name": "{0}"}},
+                                    {
+                                        "domain": {"name": "Default"},
+                                        "groups": "{2}",
+                                    },
+                                ],
+                                "remote": [
+                                    {"type": "OIDC-iam_username"},
+                                    {"type": "OIDC-email"},
+                                    {"type": "OIDC-iam_roles"},
+                                ],
+                            }
+                        ],
+                        "token_endpoint": "https://keycloak.it.just.works/auth/realms/iam/protocol/openid-connect/certs",
+                    }
+                },
+            }
+        }
+    }
+    assert res == expected
+
+
+@mock.patch.object(secrets.KeycloakSecret, "get")
+def test_service_keystone_get_federation_args_2provider(
+    keycloak_mock,
+    openstackdeployment_mspec,
+    mock_osdpl,
+    child_view,
+    federation_provider,
+):
+    osdplstmock = mock.MagicMock()
+    keycloak_mock.return_value = secrets.KeycloackCreds("passphrase")
+    provider2 = copy.deepcopy(federation_provider)
+    provider2["issuer"] = "https://keycloak2.it.just.works/auth/realms/iam/"
+    openstackdeployment_mspec["features"]["keystone"]["federation"] = {
+        "openid": {
+            "enabled": True,
+            "oidc": {"OIDCFOO": "OIDCBAR"},
+            "providers": {
+                "provider1": federation_provider,
+                "provider2": federation_provider,
+            },
+        }
+    }
+
+    service = services.Keystone(
+        openstackdeployment_mspec, logging, osdplstmock, child_view
+    )
+
+    res = service.get_federation_args()
+    expected = {
+        "federation": {
+            "openid": {
+                "enabled": True,
+                "oidc_auth_type": "oauth2",
+                "oidc": {
+                    "OIDCClaimPrefix": "OIDC-",
+                    "OIDCClaimDelimiter": ";",
+                    "OIDCOAuthSSLValidateServer": "Off",
+                    "OIDCSessionInactivityTimeout": "1800",
+                    "OIDCRedirectURI": "https://keystone.it.just.works/v3/auth/OS-FEDERATION/identity_providers/keycloak/protocols/mapped/websso/",
+                    "OIDCFOO": "OIDCBAR",
+                    "OIDCCryptoPassphrase": "passphrase",
+                    "OIDCRedirectURLsAllowed": "^https://horizon.it.just.works/auth/logout$",
+                },
+                "providers": {
+                    "provider1": {
+                        "enabled": True,
+                        "issuer": "https://keycloak.it.just.works/auth/realms/iam",
+                        "metadata": {
+                            "client": {"client_id": "os"},
+                            "conf": {
+                                "response_type": "id_token",
+                                "scope": "openid email profile",
+                                "ssl_validate_server": False,
+                            },
+                            "provider": {
+                                "value_from": {
+                                    "from_url": {
+                                        "url": "https://keycloak.it.just.works/auth/realms/iam/.well-known/openid-configuration"
+                                    }
+                                }
+                            },
+                        },
+                        "oauth2": {"OAuth2TargetPass": "prefix=OIDC-"},
+                        "description": "Good provider",
+                        "mapping": [
+                            {
+                                "local": [
+                                    {"user": {"email": "{1}", "name": "{0}"}},
+                                    {
+                                        "domain": {"name": "Default"},
+                                        "groups": "{2}",
+                                    },
+                                ],
+                                "remote": [
+                                    {"type": "OIDC-iam_username"},
+                                    {"type": "OIDC-email"},
+                                    {"type": "OIDC-iam_roles"},
+                                ],
+                            }
+                        ],
+                        "token_endpoint": "https://keycloak.it.just.works/auth/realms/iam/protocol/openid-connect/certs",
+                    },
+                    "provider2": {
+                        "enabled": True,
+                        "issuer": "https://keycloak.it.just.works/auth/realms/iam",
+                        "metadata": {
+                            "client": {"client_id": "os"},
+                            "conf": {
+                                "response_type": "id_token",
+                                "scope": "openid email profile",
+                                "ssl_validate_server": False,
+                            },
+                            "provider": {
+                                "value_from": {
+                                    "from_url": {
+                                        "url": "https://keycloak.it.just.works/auth/realms/iam/.well-known/openid-configuration"
+                                    }
+                                }
+                            },
+                        },
+                        "oauth2": {"OAuth2TargetPass": "prefix=OIDC-"},
+                        "description": "Good provider",
+                        "mapping": [
+                            {
+                                "local": [
+                                    {"user": {"email": "{1}", "name": "{0}"}},
+                                    {
+                                        "domain": {"name": "Default"},
+                                        "groups": "{2}",
+                                    },
+                                ],
+                                "remote": [
+                                    {"type": "OIDC-iam_username"},
+                                    {"type": "OIDC-email"},
+                                    {"type": "OIDC-iam_roles"},
+                                ],
+                            }
+                        ],
+                        "token_endpoint": "https://keycloak.it.just.works/auth/realms/iam/protocol/openid-connect/certs",
+                    },
+                },
+            }
+        }
+    }
+    assert res == expected
+
+
 @mock.patch.object(secrets.SignedCertificatePackSecret, "get")
 @mock.patch.object(secrets.NeutronSecret, "get")
 @mock.patch.object(services.base.OpenStackServiceWithCeph, "ceph_config")

@@ -259,3 +259,40 @@ def socket(mocker):
     nwl.reteurn_value = mock.Mock()
     yield nwl
     mocker.stopall()
+
+
+@pytest.fixture
+def federation_provider():
+    yield {
+        "issuer": "https://keycloak.it.just.works/auth/realms/iam",
+        "description": "Good provider",
+        "mapping": [
+            {
+                "local": [
+                    {"user": {"email": "{1}", "name": "{0}"}},
+                    {"domain": {"name": "Default"}, "groups": "{2}"},
+                ],
+                "remote": [
+                    {"type": "OIDC-iam_username"},
+                    {"type": "OIDC-email"},
+                    {"type": "OIDC-iam_roles"},
+                ],
+            }
+        ],
+        "token_endpoint": "https://keycloak.it.just.works/auth/realms/iam/protocol/openid-connect/certs",
+        "metadata": {
+            "client": {"client_id": "os"},
+            "conf": {
+                "response_type": "id_token",
+                "scope": "openid email profile",
+                "ssl_validate_server": False,
+            },
+            "provider": {
+                "value_from": {
+                    "from_url": {
+                        "url": "https://keycloak.it.just.works/auth/realms/iam/.well-known/openid-configuration"
+                    }
+                }
+            },
+        },
+    }
