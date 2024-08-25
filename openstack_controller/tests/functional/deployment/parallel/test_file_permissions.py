@@ -4,18 +4,24 @@ from parameterized import parameterized
 from openstack_controller.tests.functional import base
 from openstack_controller import settings
 from openstack_controller import kube
+from packaging.version import Version
 
 
 class ComponentFilePermissionsFunctionalTestCase(base.BaseFunctionalTestCase):
     def setUp(self):
         super().setUp()
+        if Version(self.osdpl.obj["status"]["version"]) < Version("0.17.1"):
+            self.skipTest(
+                "This test requires openstack-controller version "
+                "0.17.2 and greater"
+            )
         self.maxDiff = None
 
     def _container_files_with_wrong_prems(
         self, pod, container, application, target_directories=None
     ):
         res = []
-        search_pattern = f"^-rw-r----- [\d]+ [\S]+ {application} .*$"
+        search_pattern = rf"^-rw-r----- [\d]+ [\S]+ {application} .*$"
         target_directories = target_directories or [f"/etc/{application}"]
         dirs = " ".join(target_directories)
         command = [
