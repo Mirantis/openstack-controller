@@ -136,8 +136,8 @@ class FederationMixin:
             ("OIDCSSLValidateServer", "ssl_validate_server"),
             ("OIDCScope", "scope"),
         ]:
-            if keycloak_params.get(global_opt):
-                args["metadata"]["conf"][conf_opt] = keycloak_params[
+            if global_opt in keycloak_params.get("oidc", {}):
+                args["metadata"]["conf"][conf_opt] = keycloak_params["oidc"][
                     global_opt
                 ]
 

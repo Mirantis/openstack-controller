@@ -329,6 +329,58 @@ def test_service_keystone_get_federation_keycloak_provider(
     assert res == expected
 
 
+def test_service_keystone_get_federation_keycloak_provider_overrides(
+    openstackdeployment_mspec, mock_osdpl, child_view
+):
+    osdplstmock = mock.MagicMock()
+    openstackdeployment_mspec["features"]["keystone"]["keycloak"].update(
+        {
+            "client": "os",
+            "enabled": True,
+            "oidcCASecret": "oidc-cert",
+            "url": "https://keycloak.it.just.works",
+            "oidc": {
+                "OIDCSSLValidateServer": True,
+                "OIDCScope": "openid email profile groups",
+            },
+        }
+    )
+
+    service = services.Keystone(
+        openstackdeployment_mspec, logging, osdplstmock, child_view
+    )
+
+    res = service._get_federation_keycloak_provider()
+    expected = {
+        "enabled": True,
+        "issuer": "https://keycloak.it.just.works/auth/realms/iam",
+        "token_endpoint": "https://keycloak.it.just.works/auth/realms/iam/protocol/openid-connect/token",
+        "description": "External Authentication Service",
+        "metadata": {
+            "client": {"client_id": "os"},
+            "conf": {
+                "response_type": "id_token",
+                "scope": "openid email profile groups",
+                "ssl_validate_server": True,
+                "oauth_verify_jwks_uri": "https://keycloak.it.just.works/auth/realms/iam/protocol/openid-connect/certs",
+                "verify_jwks_uri": "https://keycloak.it.just.works/auth/realms/iam/protocol/openid-connect/certs",
+            },
+            "provider": {
+                "value_from": {
+                    "from_url": {
+                        "url": "https://keycloak.it.just.works/auth/realms/iam/.well-known/openid-configuration"
+                    }
+                }
+            },
+        },
+        "oauth2": {
+            "OAuth2TargetPass": "prefix=OIDC-",
+            "OAuth2TokenVerify": "jwks_uri https://keycloak.it.just.works/auth/realms/iam/protocol/openid-connect/certs jwks_uri.ssl_verify=false",
+        },
+    }
+    assert res == expected
+
+
 @mock.patch.object(secrets.KeycloakSecret, "get")
 def test_service_keystone_get_federation_args(
     keycloak_mock, openstackdeployment_mspec, mock_osdpl, child_view
