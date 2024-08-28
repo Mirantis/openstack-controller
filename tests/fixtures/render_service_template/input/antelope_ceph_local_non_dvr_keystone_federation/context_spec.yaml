@@ -48,7 +48,6 @@ features:
             oauth2:
               OAuth2TokenVerify: jwks_uri https://keycloak.it.just.works/auth/realms/iam/protocol/openid-connect/certs jwks_uri.ssl_verify=false
               OAuth2TargetPass: prefix=OIDC-
-            token_endpoint: https://keycloak.it.just.works/auth/realms/iam/protocol/openid-connect/token
           okta:
             description: OKTA provider
             enabled: true
@@ -76,7 +75,6 @@ features:
             oauth2:
               OAuth2TokenVerify: jwks_uri https://dev-xxxx.okta.com/oauth2/default/v1/keys
               OAuth2TargetPass: prefix=OIDC-
-            token_endpoint: https://dev-xxxx.okta.com/oauth2/default/v1/token
     domain_specific_configuration:
       enabled: true
       ks_domains:

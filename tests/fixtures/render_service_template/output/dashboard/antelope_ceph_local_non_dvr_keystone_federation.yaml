@@ -91,14 +91,12 @@ spec:
                   client_secret: someRandomClientSecretMightBeNull
                   protocol: mapped
                   openid_scope: openid
-                  token_endpoint: https://keycloak.it.just.works/auth/realms/iam/protocol/openid-connect/token
                   client_id: os
                   discovery_endpoint: https://keycloak.it.just.works/auth/realms/iam/.well-known/openid-configuration
                   {% elif auth_type == 'okta' %}
                   client_secret: HencsGagyfmQ
                   protocol: mapped
                   openid_scope: openid
-                  token_endpoint: https://dev-xxxx.okta.com/oauth2/default/v1/token
                   client_id: cdid
                   discovery_endpoint: https://dev-xxxx.okta.com/oauth2/default/.well-known/openid-configuration
                   {% endif %}
@@ -163,7 +161,6 @@ spec:
               export OS_CLIENT_SECRET=someRandomClientSecretMightBeNull
               export OS_PROTOCOL=mapped
               export OS_OPENID_SCOPE=openid
-              export OS_TOKEN_ENDPOINT=https://keycloak.it.just.works/auth/realms/iam/protocol/openid-connect/token
               export OS_CLIENT_ID=os
               export OS_DISCOVERY_ENDPOINT=https://keycloak.it.just.works/auth/realms/iam/.well-known/openid-configuration
               export OS_IDENTITY_PROVIDER=keycloak
@@ -171,7 +168,6 @@ spec:
               export OS_CLIENT_SECRET=HencsGagyfmQ
               export OS_PROTOCOL=mapped
               export OS_OPENID_SCOPE=openid
-              export OS_TOKEN_ENDPOINT=https://dev-xxxx.okta.com/oauth2/default/v1/token
               export OS_CLIENT_ID=cdid
               export OS_DISCOVERY_ENDPOINT=https://dev-xxxx.okta.com/oauth2/default/.well-known/openid-configuration
               export OS_IDENTITY_PROVIDER=okta

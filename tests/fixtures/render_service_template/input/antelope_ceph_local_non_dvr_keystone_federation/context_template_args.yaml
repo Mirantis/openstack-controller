@@ -138,7 +138,6 @@ dashboard:
               value_from:
                 from_url:
                   url: https://keycloak.it.just.works/auth/realms/iam/.well-known/openid-configuration
-          token_endpoint: https://keycloak.it.just.works/auth/realms/iam/protocol/openid-connect/token
         okta:
           enabled: true
           description: OKTA provider
@@ -150,7 +149,6 @@ dashboard:
               value_from:
                 from_url:
                   url: https://dev-xxxx.okta.com/oauth2/default/.well-known/openid-configuration
-          token_endpoint: https://dev-xxxx.okta.com/oauth2/default/v1/token
 database:
   galera_creds:
     audit:
