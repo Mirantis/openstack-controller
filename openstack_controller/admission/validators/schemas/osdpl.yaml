@@ -929,7 +929,6 @@ properties:
                         required:
                           - issuer
                           - description
-                          - token_endpoint
                         properties:
                           issuer:
                             type: string
@@ -941,9 +940,6 @@ properties:
                             type: string
                             description: |
                               The description of provider to show on horizon web page.
-                          token_endpoint:
-                            type: string
-                            description: Provider token endpoint
                           enabled:
                             type: boolean
                             description: |

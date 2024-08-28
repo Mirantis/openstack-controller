@@ -208,7 +208,6 @@ spec:
                   client_secret: {{opts["metadata"]["client"].get("client_secret", "someRandomClientSecretMightBeNull") }}
                   protocol: mapped
                   openid_scope: openid
-                  token_endpoint: {{ opts["token_endpoint"] }}
                   client_id: {{ opts["metadata"]["client"]["client_id"]}}
                   discovery_endpoint: {{ opts["metadata"]["provider"]["value_from"]["from_url"]["url"] }}
             {%- endfor %}
@@ -292,7 +291,6 @@ spec:
               export OS_CLIENT_SECRET={{opts["metadata"]["client"].get("client_secret", "someRandomClientSecretMightBeNull") }}
               export OS_PROTOCOL=mapped
               export OS_OPENID_SCOPE=openid
-              export OS_TOKEN_ENDPOINT={{ opts["token_endpoint"] }}
               export OS_CLIENT_ID={{ opts["metadata"]["client"]["client_id"]}}
               export OS_DISCOVERY_ENDPOINT={{ opts["metadata"]["provider"]["value_from"]["from_url"]["url"] }}
               export OS_IDENTITY_PROVIDER={{ name }}

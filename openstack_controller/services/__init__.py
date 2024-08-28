@@ -151,9 +151,6 @@ class FederationMixin:
         args["oauth2"][
             "OAuth2TokenVerify"
         ] = f"jwks_uri {keycloak_params['url']}/auth/realms/iam/protocol/openid-connect/certs jwks_uri.ssl_verify=false"
-        args["token_endpoint"] = (
-            f"{keycloak_params['url']}/auth/realms/iam/protocol/openid-connect/token"
-        )
         args["description"] = "External Authentication Service"
 
         return args

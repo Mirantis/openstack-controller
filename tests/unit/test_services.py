@@ -302,7 +302,6 @@ def test_service_keystone_get_federation_keycloak_provider(
     expected = {
         "enabled": True,
         "issuer": "https://keycloak.it.just.works/auth/realms/iam",
-        "token_endpoint": "https://keycloak.it.just.works/auth/realms/iam/protocol/openid-connect/token",
         "description": "External Authentication Service",
         "metadata": {
             "client": {"client_id": "os"},
@@ -354,7 +353,6 @@ def test_service_keystone_get_federation_keycloak_provider_overrides(
     expected = {
         "enabled": True,
         "issuer": "https://keycloak.it.just.works/auth/realms/iam",
-        "token_endpoint": "https://keycloak.it.just.works/auth/realms/iam/protocol/openid-connect/token",
         "description": "External Authentication Service",
         "metadata": {
             "client": {"client_id": "os"},
@@ -425,7 +423,6 @@ def test_service_keystone_get_federation_args(
                     "keycloak": {
                         "enabled": True,
                         "issuer": "https://keycloak.it.just.works/auth/realms/iam",
-                        "token_endpoint": "https://keycloak.it.just.works/auth/realms/iam/protocol/openid-connect/token",
                         "description": "External Authentication Service",
                         "metadata": {
                             "client": {"client_id": "os"},
@@ -556,7 +553,6 @@ def test_service_keystone_get_federation_args_keycloak_disabled_1provider(
                                 ],
                             }
                         ],
-                        "token_endpoint": "https://keycloak.it.just.works/auth/realms/iam/protocol/openid-connect/certs",
                     }
                 },
             }
@@ -645,7 +641,6 @@ def test_service_keystone_get_federation_args_2provider(
                                 ],
                             }
                         ],
-                        "token_endpoint": "https://keycloak.it.just.works/auth/realms/iam/protocol/openid-connect/certs",
                     },
                     "provider2": {
                         "enabled": True,
@@ -683,7 +678,6 @@ def test_service_keystone_get_federation_args_2provider(
                                 ],
                             }
                         ],
-                        "token_endpoint": "https://keycloak.it.just.works/auth/realms/iam/protocol/openid-connect/certs",
                     },
                 },
             }

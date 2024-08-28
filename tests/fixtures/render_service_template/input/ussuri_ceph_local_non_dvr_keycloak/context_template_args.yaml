@@ -138,7 +138,6 @@ dashboard:
               value_from:
                 from_url:
                   url: https://keycloak.it.just.works/auth/realms/iam/.well-known/openid-configuration
-          token_endpoint: https://keycloak.it.just.works/auth/realms/iam/protocol/openid-connect/token
 database:
   galera_creds:
     audit:

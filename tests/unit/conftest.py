@@ -279,7 +279,6 @@ def federation_provider():
                 ],
             }
         ],
-        "token_endpoint": "https://keycloak.it.just.works/auth/realms/iam/protocol/openid-connect/certs",
         "metadata": {
             "client": {"client_id": "os"},
             "conf": {
