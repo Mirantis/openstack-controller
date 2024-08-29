@@ -8,6 +8,7 @@ import openstack
 
 from openstack_controller import kube
 from openstack_controller import openstack_utils
+from openstack_controller import settings
 from openstack_controller.exporter import constants
 from openstack_controller.tests.functional import config
 from openstack_controller.tests.functional import data_utils, waiters
@@ -71,6 +72,14 @@ class BaseFunctionalTestCase(TestCase):
         record = logging_old_factory(*args, **kwargs)
         record.testMethodName = self._testMethodName
         return record
+
+    @property
+    def keystone_client_pod(self):
+        pods = kube.Pod.objects(self.kube_api).filter(
+            namespace=settings.OSCTL_OS_DEPLOYMENT_NAMESPACE,
+            selector={"application": "keystone", "component": "client"},
+        )
+        return [x for x in pods][0]
 
     @property
     def neturon_portprober_enabled(self):

@@ -3,16 +3,32 @@ import requests
 import unittest
 
 import openstack
+from parameterized import parameterized
 
 from openstack_controller.tests.functional import base, config
-from openstack_controller import settings
 from openstack_controller import kube
 
 LOG = logging.getLogger(__name__)
 CONF = config.Config()
 
 
-class TestKeystoneIamIntegration(base.BaseFunctionalTestCase):
+def get_enabled_providers():
+    osdpl = kube.get_osdpl()
+    enabled_providers = []
+    for provider_name, provider in (
+        osdpl.obj["spec"]["features"]
+        .get("keystone", {})
+        .get("federation", {})
+        .get("openid", {})
+        .get("providers", {})
+        .items()
+    ):
+        if provider.get("enabled", True):
+            enabled_providers.append(provider_name)
+    return enabled_providers
+
+
+class TestKeystoneFederation(base.BaseFunctionalTestCase):
 
     @classmethod
     def setUpClass(cls):
@@ -20,62 +36,61 @@ class TestKeystoneIamIntegration(base.BaseFunctionalTestCase):
         if (
             not cls.osdpl.obj["spec"]["features"]
             .get("keystone", {})
-            .get("keycloak", {})
+            .get("federation", {})
+            .get("openid", {})
             .get("enabled", False)
         ):
-            raise unittest.SkipTest("Keycloak is not enabled.")
+            raise unittest.SkipTest("Keystone federation is not enabled.")
 
-        if not all(
-            (
-                CONF.OSDPL_IAM_KEYCLOAK_USER_WRITER_PWD,
-                CONF.OSDPL_IAM_KEYCLOAK_IP,
-            )
-        ):
-            raise unittest.SkipTest("Keycloak env vars are not set.")
+    def setUp(self):
+        super().setUp()
+        self.providers = self.osdpl.obj["spec"]["features"]["keystone"][
+            "federation"
+        ]["openid"]["providers"]
 
-    keycloak_ip = CONF.OSDPL_IAM_KEYCLOAK_IP
-    writer_password = CONF.OSDPL_IAM_KEYCLOAK_USER_WRITER_PWD
-
-    fed_auth = {
-        "os_auth_type": "v3oidcpassword",
-        "os_identity_provider": "keycloak",
-        "os_protocol": "mapped",
-        "os_openid_scope": "openid",
-        "os_password": f"{writer_password}",
-        "os_project_domain_name": "Default",
-        "os_project_name": "admin",
-        "os_discovery_endpoint": f"https://{keycloak_ip}/auth/realms/iam/.well-known/openid-configuration",
-        "os_auth_url": "http://keystone-api.openstack.svc.cluster.local:5000/v3",
-        "os_insecure": True,
-        "os_client_secret": "NotNeeded",
-        "os_client_id": "os",
-        "os_username": "writer",
-        "os_interface": "internal",
-        "os_endpoint_type": "internal",
-        "api_timeout": 60,
-    }
-
-    def test_keystone_keycloak_integration(self):
-        kube_api = kube.kube_client()
-        pods = kube.Pod.objects(kube_api).filter(
-            namespace=settings.OSCTL_OS_DEPLOYMENT_NAMESPACE,
-            selector={"application": "keystone", "component": "client"},
+    def get_auth_data(self, provider_name):
+        provider = self.providers[provider_name]
+        auth = {
+            "k1": {"username": "writer", "password": "password"},
+            "k2": {"username": "writer2", "password": "password"},
+        }
+        discovery_endpoint = (
+            f"{provider['issuer']}/.well-known/openid-configuration"
         )
-        assert len(pods) > 0, "POD <keystone-client-*> not found"
-        keystone_pod = pods.query_cache["objects"][0]
+        return {
+            "os_auth_type": "v3oidcpassword",
+            "os_identity_provider": provider_name,
+            "os_protocol": "mapped",
+            "os_openid_scope": "openid",
+            "os_password": auth[provider_name]["password"],
+            "os_project_domain_name": "Default",
+            "os_project_name": "admin",
+            "os_discovery_endpoint": discovery_endpoint,
+            "os_auth_url": "http://keystone-api.openstack.svc.cluster.local:5000/v3",
+            "os_insecure": True,
+            "os_client_secret": "NotNeeded",
+            "os_client_id": provider["metadata"]["client"]["client_id"],
+            "os_username": auth[provider_name]["username"],
+            "os_interface": "internal",
+            "os_endpoint_type": "internal",
+            "api_timeout": 60,
+        }
+
+    @parameterized.expand(get_enabled_providers())
+    def test_keystone_federation(self, provider_name):
+        auth_data = self.get_auth_data(provider_name)
         envs = (
             f"OS_CLIENT_SECRET=someRandomClientSecretMightBeNull "
             f"OS_PROJECT_DOMAIN_ID=default "
             f"OS_INTERFACE=public "
-            f"OS_USERNAME=writer "
-            f"OS_PASSWORD={self.writer_password} "
+            f"OS_USERNAME={auth_data['os_username']} "
+            f"OS_PASSWORD={auth_data['os_password']} "
             f"OS_CACERT=/etc/ssl/certs/openstack-ca-bundle.pem "
             f"OS_AUTH_URL=http://keystone-api.openstack.svc.cluster.local:5000/v3 "
-            f"OS_CLIENT_ID=os "
+            f"OS_CLIENT_ID={auth_data['os_client_id']} "
             f"OS_PROTOCOL=mapped "
-            f"OS_IDENTITY_PROVIDER=keycloak "
-            f"OS_DISCOVERY_ENDPOINT=https://{self.keycloak_ip}/"
-            f"auth/realms/iam/.well-known/openid-configuration "
+            f"OS_IDENTITY_PROVIDER={auth_data['os_identity_provider']} "
+            f"OS_DISCOVERY_ENDPOINT={auth_data['os_discovery_endpoint']} "
             f"OS_AUTH_TYPE=v3oidcpassword "
             f"OS_PROJECT_NAME=admin "
             f"OS_CLOUD="
@@ -83,9 +98,11 @@ class TestKeystoneIamIntegration(base.BaseFunctionalTestCase):
         error_msg = "===ERROR==="
         LOG.info(
             "\n",
-            keystone_pod.exec(["/bin/bash", "-c", f"{envs} env|grep OS_"]),
+            self.keystone_client_pod.exec(
+                ["/bin/bash", "-c", f"{envs} env|grep OS_"]
+            ),
         )
-        server_list = keystone_pod.exec(
+        server_list = self.keystone_client_pod.exec(
             [
                 "/bin/bash",
                 "-c",
@@ -97,35 +114,39 @@ class TestKeystoneIamIntegration(base.BaseFunctionalTestCase):
         if error_msg in server_list["stdout"]:
             raise Exception(f"\n{server_list}")
 
-    def test_keystone_keycloak_integration_sdk(self):
-        fed = openstack.connect(load_yaml_config=False, **self.fed_auth)
+    @parameterized.expand(get_enabled_providers())
+    def test_keystone_federation_sdk(self, provider_name):
+        auth_data = self.get_auth_data(provider_name)
+        fed = openstack.connect(load_yaml_config=False, **auth_data)
         fed.authorize()
         assert (
             len(list(fed.network.networks())) > 0
         ), "List of networks is empty"
 
         assert (
-            self.fed_auth["os_username"]
+            auth_data["os_username"]
             == fed.identity.get_user(fed.current_user_id).name
         ), "User name doesn't match"
 
         assert (
-            self.fed_auth["os_project_name"]
+            auth_data["os_project_name"]
             == fed.identity.get_project(fed.current_project_id).name
         ), "Project name doesn't match"
 
-    def test_keystone_keycloak_integration_req(self):
+    @parameterized.expand(get_enabled_providers())
+    def test_keystone_federation_req(self, provider_name):
+        auth_data = self.get_auth_data(provider_name)
         verify = None
 
-        if self.fed_auth.get("os_cacert"):
-            verify = self.fed_auth["os_cacert"]
-        elif self.fed_auth.get("os_insecure") is True:
+        if auth_data.get("os_cacert"):
+            verify = auth_data["os_cacert"]
+        elif auth_data.get("os_insecure") is True:
             verify = False
 
-        timeout = self.fed_auth.get("api_timeout", 60)
+        timeout = auth_data.get("api_timeout", 60)
 
         discovery_resp = requests.get(
-            self.fed_auth["os_discovery_endpoint"],
+            auth_data["os_discovery_endpoint"],
             verify=verify,
             timeout=timeout,
         )
@@ -134,15 +155,15 @@ class TestKeystoneIamIntegration(base.BaseFunctionalTestCase):
         access_req_data = (
             "username={os_username}&password={os_password}&scope={os_openid_scope}&grant_type"
             "=password"
-        ).format(**self.fed_auth)
+        ).format(**auth_data)
 
         access_resp = requests.post(
             token_endpoint,
             headers={"Content-Type": "application/x-www-form-urlencoded"},
             data=access_req_data,
             auth=(
-                self.fed_auth["os_client_id"],
-                self.fed_auth["os_client_secret"],
+                auth_data["os_client_id"],
+                auth_data["os_client_secret"],
             ),
             verify=verify,
             timeout=timeout,
@@ -152,7 +173,7 @@ class TestKeystoneIamIntegration(base.BaseFunctionalTestCase):
 
         unscoped_token_resp = requests.post(
             "{os_auth_url}/OS-FEDERATION/identity_providers/{os_identity_provider}/protocols/{os_protocol}/auth".format(
-                **self.fed_auth
+                **auth_data
             ),
             headers={"Authorization": f"Bearer {access_token}"},
             verify=verify,
@@ -170,16 +191,16 @@ class TestKeystoneIamIntegration(base.BaseFunctionalTestCase):
                 "scope": {
                     "project": {
                         "domain": {
-                            "name": self.fed_auth["os_project_domain_name"]
+                            "name": auth_data["os_project_domain_name"]
                         },
-                        "name": self.fed_auth["os_project_name"],
+                        "name": auth_data["os_project_name"],
                     }
                 },
             }
         }
 
         scoped_token_resp = requests.post(
-            "{os_auth_url}/auth/tokens".format(**self.fed_auth),
+            "{os_auth_url}/auth/tokens".format(**auth_data),
             headers={"Content-Type": "application/json"},
             json=scoped_auth_req,
             verify=verify,
@@ -190,7 +211,7 @@ class TestKeystoneIamIntegration(base.BaseFunctionalTestCase):
         scoped_token = scoped_token_resp.headers.get("x-subject-token")
 
         catalog = scoped_token_resp.json()["token"]["catalog"]
-        interface = self.fed_auth.get("os_interface", "public")
+        interface = auth_data.get("os_interface", "public")
 
         network_service = [s for s in catalog if s["type"] == "network"]
         if network_service:
