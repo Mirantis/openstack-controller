@@ -76,7 +76,7 @@ class TestKeystoneFederation(base.BaseFunctionalTestCase):
             "api_timeout": 60,
         }
 
-    @parameterized.expand(get_enabled_providers())
+    @parameterized.expand(get_enabled_providers(), skip_on_empty=True)
     def test_keystone_federation(self, provider_name):
         auth_data = self.get_auth_data(provider_name)
         envs = (
@@ -114,7 +114,7 @@ class TestKeystoneFederation(base.BaseFunctionalTestCase):
         if error_msg in server_list["stdout"]:
             raise Exception(f"\n{server_list}")
 
-    @parameterized.expand(get_enabled_providers())
+    @parameterized.expand(get_enabled_providers(), skip_on_empty=True)
     def test_keystone_federation_sdk(self, provider_name):
         auth_data = self.get_auth_data(provider_name)
         fed = openstack.connect(load_yaml_config=False, **auth_data)
@@ -133,7 +133,7 @@ class TestKeystoneFederation(base.BaseFunctionalTestCase):
             == fed.identity.get_project(fed.current_project_id).name
         ), "Project name doesn't match"
 
-    @parameterized.expand(get_enabled_providers())
+    @parameterized.expand(get_enabled_providers(), skip_on_empty=True)
     def test_keystone_federation_req(self, provider_name):
         auth_data = self.get_auth_data(provider_name)
         verify = None
