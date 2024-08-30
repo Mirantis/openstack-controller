@@ -123,6 +123,8 @@ class TypeConflictFail(
         raise deepmerge.exception.InvalidMerge(
             f"Trying to merge different types of objects, {type(base)} and "
             f"{type(nxt)} at path {':'.join(path)}",
+            config,
+            path,
             base,
             nxt,
         )
