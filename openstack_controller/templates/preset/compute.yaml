@@ -95,6 +95,14 @@ services:
   dashboard:
     horizon:
       values:
+        {%- if OSVer.antelope <= OSVer[openstack_version] %}
+        conf:
+          policy.d:
+            nova:
+              01-controller-default.yaml:
+                "os_compute_api:os-migrate-server:migrate": "rule:project_member_or_admin"
+                "os_compute_api:os-migrate-server:migrate_live": "rule:project_member_or_admin"
+        {%- endif %}
         network:
           dashboard:
             ingress:
