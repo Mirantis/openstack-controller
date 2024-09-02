@@ -161,7 +161,7 @@ services:
               # - AggregateNumInstancesFilter
               - AggregateTypeAffinityFilter
               # - AllHostsFilter
-              {%- if openstack_version in ['queens', 'rocky', 'stein', 'train', 'ussuri', 'victoria', 'xena', 'wallaby', 'yoga', 'zed', 'antelope'] %}
+              {%- if openstack_version in ['queens', 'rocky', 'stein', 'train', 'ussuri', 'victoria', 'xena', 'wallaby', 'yoga', 'zed', 'antelope', 'caracal'] %}
               - AvailabilityZoneFilter
               {%- endif %}
               - ComputeFilter
