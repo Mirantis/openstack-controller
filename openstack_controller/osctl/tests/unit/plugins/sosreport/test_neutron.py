@@ -80,7 +80,7 @@ class TestK8sNeutronObjectsCollector(utils.BaseTestCase):
             args, "/workspace", "report"
         )
         collector.hosts = ["host-1"]
-        self.assertEquals(
+        self.assertEqual(
             collector.get_tasks(),
             [
                 (collector.collect_ovs_info, ("host-1",), {}),
@@ -102,7 +102,7 @@ class TestK8sNeutronObjectsCollector(utils.BaseTestCase):
             args, "/workspace", "report"
         )
         collector.hosts = ["host-1"]
-        self.assertEquals(collector.get_tasks(), [])
+        self.assertEqual(collector.get_tasks(), [])
 
     def test_collect_namespaces_info_no_pods(self):
         args = self.parser.parse_args(
@@ -118,7 +118,7 @@ class TestK8sNeutronObjectsCollector(utils.BaseTestCase):
         )
         self.mock_pod_objects.return_value.filter.return_value = []
         res = collector.collect_namespaces_info("host-1")
-        self.assertEquals(None, res)
+        self.assertEqual(None, res)
 
     @mock.patch.object(json, "loads")
     def test_collect_namespaces_info_pod_no_namespaces(self, mock_json_loads):

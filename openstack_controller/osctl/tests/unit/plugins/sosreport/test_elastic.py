@@ -276,7 +276,7 @@ class TestK8sElasticLogsCollector(utils.BaseTestCase):
                 "minimum_should_match": 1,
             }
         }
-        self.assertEquals(expected, res)
+        self.assertEqual(expected, res)
 
     def test_query_message(self):
         collector = elastic.ElasticLogsCollector(
@@ -289,7 +289,7 @@ class TestK8sElasticLogsCollector(utils.BaseTestCase):
                 "minimum_should_match": 1,
             }
         }
-        self.assertEquals(expected, res)
+        self.assertEqual(expected, res)
 
     def test_query_host(self):
         collector = elastic.ElasticLogsCollector(
@@ -302,7 +302,7 @@ class TestK8sElasticLogsCollector(utils.BaseTestCase):
                 "minimum_should_match": 1,
             }
         }
-        self.assertEquals(expected, res)
+        self.assertEqual(expected, res)
 
     @mock.patch("builtins.open", new_callable=mock.mock_open)
     def test_collect_logs_all_hosts_no_search_after(self, mock_open):
@@ -324,7 +324,7 @@ class TestK8sElasticLogsCollector(utils.BaseTestCase):
             [mock.call("TIMESTAMP SEVERITY MESSAGE1")], any_order=True
         )
         self.mock_os_makedirs.assert_called_once()
-        self.assertEquals(2, self.mock_opensearch_client.search.call_count)
+        self.assertEqual(2, self.mock_opensearch_client.search.call_count)
 
     @mock.patch("builtins.open", new_callable=mock.mock_open)
     def test_collect_logs_all_hosts_search_after(self, mock_open):
@@ -346,5 +346,5 @@ class TestK8sElasticLogsCollector(utils.BaseTestCase):
         mock_open.return_value.write.assert_has_calls(
             [mock.call("TIMESTAMP SEVERITY MESSAGE1")], any_order=True
         )
-        self.assertEquals(2, self.mock_os_makedirs.call_count)
-        self.assertEquals(3, self.mock_opensearch_client.search.call_count)
+        self.assertEqual(2, self.mock_os_makedirs.call_count)
+        self.assertEqual(3, self.mock_opensearch_client.search.call_count)

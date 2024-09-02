@@ -73,7 +73,7 @@ class TestK8sNovaObjectsCollector(utils.BaseTestCase):
         )
         collector = nova.NovaObjectsCollector(args, "/workspace", "report")
         collector.hosts = ["host-1"]
-        self.assertEquals(
+        self.assertEqual(
             collector.get_tasks(),
             [
                 (collector.collect_instances_info, ("host-1",), {}),
@@ -92,7 +92,7 @@ class TestK8sNovaObjectsCollector(utils.BaseTestCase):
         )
         collector = nova.NovaObjectsCollector(args, "/workspace", "report")
         collector.hosts = ["host-1"]
-        self.assertEquals(collector.get_tasks(), [])
+        self.assertEqual(collector.get_tasks(), [])
 
     def test_collect_instances_info_no_pods(self):
         args = self.parser.parse_args(
@@ -106,7 +106,7 @@ class TestK8sNovaObjectsCollector(utils.BaseTestCase):
         collector = nova.NovaObjectsCollector(args, "/workspace", "repor")
         self.mock_pod_objects.return_value.filter.return_value = []
         res = collector.collect_instances_info("host-1")
-        self.assertEquals(None, res)
+        self.assertEqual(None, res)
 
     def test_collect_instances_info_pod_no_instances(self):
         args = self.parser.parse_args(

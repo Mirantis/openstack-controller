@@ -72,7 +72,7 @@ class TestK8sCinderObjectsCollector(utils.BaseTestCase):
             ]
         )
         collector = cinder.CinderObjectsCollector(args, "/workspace", "report")
-        self.assertEquals(
+        self.assertEqual(
             collector.get_tasks(),
             [
                 (collector.collect_ceph_general_info, (), {}),
@@ -90,7 +90,7 @@ class TestK8sCinderObjectsCollector(utils.BaseTestCase):
             ]
         )
         collector = cinder.CinderObjectsCollector(args, "/workspace", "report")
-        self.assertEquals(collector.get_tasks(), [])
+        self.assertEqual(collector.get_tasks(), [])
 
     def test_collect_ceph_general_info_no_pods(self):
         args = self.parser.parse_args(
@@ -104,7 +104,7 @@ class TestK8sCinderObjectsCollector(utils.BaseTestCase):
         collector = cinder.CinderObjectsCollector(args, "/workspace", "report")
         self.mock_pod_objects.return_value = None
         res = collector.collect_ceph_general_info()
-        self.assertEquals(None, res)
+        self.assertEqual(None, res)
         self.mock_dump_exec_result.assert_not_called()
 
     def test_collect_ceph_general_info_pod_no_keyrings(self):

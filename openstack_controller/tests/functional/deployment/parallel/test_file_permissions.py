@@ -81,7 +81,7 @@ class ComponentFilePermissionsFunctionalTestCase(base.BaseFunctionalTestCase):
     )
     def test_check_file_permissions(self, application):
         failed_files = self._get_files_with_wrong_perms(application)
-        self.assertEquals(
+        self.assertEqual(
             failed_files,
             {},
             f"Detected files with wrong permissions for {application}",
@@ -92,7 +92,7 @@ class ComponentFilePermissionsFunctionalTestCase(base.BaseFunctionalTestCase):
         failed_files = self._get_files_with_wrong_perms(
             application, ["designate-powerdns"]
         )
-        self.assertEquals(
+        self.assertEqual(
             failed_files,
             {},
             f"Detected files with wrong permissions for {application}",

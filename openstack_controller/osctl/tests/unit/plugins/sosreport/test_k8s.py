@@ -69,7 +69,7 @@ class TestK8sObjectsCollector(utils.BaseTestCase):
             ]
         )
         collector = k8s.K8sObjectsCollector(args, "/workspace", "report")
-        self.assertEquals(
+        self.assertEqual(
             collector.get_tasks(), [(collector.collect_objects, (), {})]
         )
 
