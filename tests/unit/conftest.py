@@ -205,7 +205,7 @@ def helm_error_rollout_restart():
 @pytest.fixture
 def substitute_mock(mocker):
     substitute_mock = mocker.patch(
-        f"openstack_controller.layers.substitude_osdpl",
+        "openstack_controller.layers.substitude_osdpl",
     )
     yield substitute_mock
     mocker.stopall()

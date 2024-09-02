@@ -2,8 +2,7 @@
 # appended during merging
 {%- set ironic_enabled = 'baremetal' in services %}
 {%- set nginx_ingress_namespace_class = "openstack-ingress-nginx" %}
-{%- set openstack_yoga_plus = openstack_version not in ("queens", "rocky", "stein", "train", "ussuri", "victoria", "wallaby", "xena") %}
-{%- if openstack_yoga_plus %}
+{%- if OSVer[openstack_version] >= OSVer.yoga %}
   {%- set cirros_image_name = "Cirros-6.0" %}
   {%- set dhcp_client = "dhcpcd" %}
 {%- else %}
@@ -48,7 +47,7 @@ features:
     - orchestration
     - messaging
     - load-balancer
-{%- if openstack_version not in ['queens', 'rocky'] %}
+{%- if OSVer[openstack_version] >= OSVer.stein %}
     - placement
 {%- endif %}
     - coordination
@@ -57,7 +56,7 @@ features:
     - descheduler
     - dynamic-resource-balancer
   network_policies:
-{%- if openstack_yoga_plus %}
+{%- if OSVer[openstack_version] >= OSVer.yoga %}
     enabled: true
 {%- else %}
     enabled: false
@@ -95,7 +94,7 @@ services:
   dashboard:
     horizon:
       values:
-        {%- if OSVer.antelope <= OSVer[openstack_version] %}
+        {%- if OSVer[openstack_version] >= OSVer.antelope %}
         conf:
           policy.d:
             nova:
@@ -132,7 +131,7 @@ services:
     nova:
       values:
         conf:
-          {%- if OSVer.antelope <= OSVer[openstack_version] %}
+          {%- if OSVer[openstack_version] >= OSVer.antelope %}
           policy.d:
             01-controller-default.yaml:
               "os_compute_api:os-migrate-server:migrate": "rule:project_member_or_admin"
@@ -148,7 +147,7 @@ services:
               # - AggregateNumInstancesFilter
               - AggregateTypeAffinityFilter
               # - AllHostsFilter
-              {%- if openstack_version in ['queens', 'rocky', 'stein', 'train', 'ussuri', 'victoria', 'xena', 'wallaby', 'yoga', 'zed', 'antelope', 'caracal'] %}
+              {%- if OSVer[openstack_version] <= OSVer.caracal %}
               - AvailabilityZoneFilter
               {%- endif %}
               - ComputeFilter
@@ -166,7 +165,7 @@ services:
               # - NumInstancesFilter
               - PciPassthroughFilter
             libvirt:
-            {%- if openstack_version in ['queens', 'rocky', 'stein', 'train', 'ussuri'] %}
+            {%- if OSVer[openstack_version] <= OSVer.ussuri %}
               live_migration_use_ip_to_scp_configdrive: true
             {%- else %}
               migrations_use_ip_to_scp: true
@@ -270,7 +269,7 @@ services:
             - (?:neutron_tempest_plugin.bgpvpn.scenario.test_bgpvpn_basic.TestBGPVPNBasic.test_bgpvpn_negative_delete_net_association)
             # Skip bgpvpn tempest tests until PRODX-34493 will be resolved
             - (?:neutron_tempest_plugin.bgpvpn.scenario.test_bgpvpn_basic.TestBGPVPNBasic.test_bgpvpn_port_association_local_pref)
-          {%- if openstack_version in ['queens', 'rocky', 'stein', 'train', 'ussuri'] %}
+          {%- if OSVer[openstack_version] <= OSVer.ussuri %}
             # Skip because of PRODX-9184 has won't fix resolution. Should be executed only for victoria and upper environments.
             - (?:octavia_tempest_plugin.tests.scenario.v2.test_traffic_ops.TrafficOperationsScenarioTest.test_basic_traffic)
           {%- endif %}
@@ -301,7 +300,7 @@ services:
             # PRODX-28571 - ipv6 metadata doesn't work in DVR case
             - (?:neutron_tempest_plugin.scenario.test_metadata.MetadataTest.test_metadata_routed)
           {%- endif %}
-          {%- if not openstack_yoga_plus %}
+          {%- if OSVer[openstack_version] >= OSVer.yoga %}
             - (?:tempest.api.image.v2.test_images.ImportImagesTest.test_image_glance_direct_import)
           {%- endif %}
             # Tests NOT supported by product
@@ -352,7 +351,7 @@ services:
             # NOTE(vsaienko): let nova scheduler pick destination host
             compute-feature-enabled:
               can_migrate_between_any_hosts: false
-            {%- if OSVer.antelope <= OSVer[openstack_version] %}
+            {%- if OSVer[openstack_version] >= OSVer.antelope %}
               cold_migration_nonadmin: true
               live_migration_nonadmin: true
             {%- endif %}
@@ -431,7 +430,7 @@ services:
         conf:
           policy.d:
             01-controller-default.yaml:
-            {%- if openstack_version not in ['queens', 'rocky'] %}
+            {%- if OSVer[openstack_version] >= OSVer.stein %}
               # TODO(vsaienko): drop policy settings in upstream values.yaml to ensure in-code policy
               # defaults are used.
               secret_project_match: project_id:%(target.secret.project_id)s
@@ -452,9 +451,9 @@ services:
                 rule:secret_decrypt_non_private_read or rule:secret_project_creator or
                 rule:secret_project_admin or rule:secret_acl_read or
                 role:global-secret-decoder
-            {%- if openstack_version in ['queens', 'rocky', 'stein'] %}
+            {%- if OSVer[openstack_version] <= OSVer.stein %}
               'order:delete': rule:admin_or_creator
-            {%- elif openstack_version in ['train', 'ussuri', 'victoria'] %}
+            {%- elif OSVer[openstack_version] <= OSVer.victoria %}
               'order:delete': rule:admin_or_creator and project_id:%(target.order.project_id)s
             {%- else %}
               # TODO(pas-ha): re-check validity for 2023.1

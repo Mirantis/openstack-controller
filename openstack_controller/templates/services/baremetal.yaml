@@ -15,7 +15,7 @@
 {%- set enabled_boot_interfaces = ['pxe', 'fake'] %}
 {%- set default_binary_base_url = spec.artifacts.binary_base_url | substitute_local_proxy_hostname("${NODE_IP}") %}
 
-{%- if spec.openstack_version not in ['queens', 'rocky'] %}
+{%- if OSVer[spec.openstack_version] >= OSVer.stein %}
 # NOTE(vsaienko): we prefer to use chainloading to ipxe as it is much faster
 # and stable for file downloads that UDP based pxe, and most of the hardware
 # types give it higher priority than pxe already through the
@@ -27,7 +27,7 @@
 {%- endif %}
 {%- set network = spec.features.ironic.networks.baremetal %}
 {%- set enabled_management_interfaces = ['fake', 'ipmitool'] %}
-{%- if spec.openstack_version not in ["queens"] %}
+{%- if OSVer[spec.openstack_version] >= OSVer.rocky %}
 {%- do enabled_management_interfaces.append('noop') %}
 {%- endif %}
 {%- set cadf_audit = spec.get('features', {}).get('logging', {}).get('cadf', {'enabled': false}) %}
@@ -118,7 +118,7 @@ spec:
           device: {{ spec.get('features', {}).get('ironic', {}).get('provisioning_interface', 'ironic-pxe') }}
           convert_cleaning_network_name_to_uuid: false
           # TODO(vsaienko): drop when switch to images with jammy
-          {%- if spec.openstack_version in openstack_versions[openstack_versions.index('yoga'):-1] %}
+          {%- if OSVer.yoga <= OSVer[spec.openstack_version] < OSVer.master %}
           loader_file_paths: snponly.efi:/usr/lib/ipxe/ipxe.efi
           {%- endif %}
       conf:
@@ -172,7 +172,7 @@ spec:
           keystone_authtoken:
             memcache_security_strategy: ENCRYPT
             memcache_secret_key: {{ credentials[0].memcached }}
-            {%- if spec.openstack_version not in ("queens", "rocky", "stein") %}
+            {%- if OSVer[spec.openstack_version] >= OSVer.train %}
             service_type: baremetal
             {%- endif %}
           neutron:

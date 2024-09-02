@@ -61,6 +61,7 @@ def nova_registry_service(mocker):
 @pytest.fixture
 def osdpl(mocker):
     osdpl = mocker.patch("openstack_controller.kube.get_osdpl")
+    osdpl.return_value.mspec = {"openstack_version": "antelope"}
     yield osdpl
     mocker.stopall()
 

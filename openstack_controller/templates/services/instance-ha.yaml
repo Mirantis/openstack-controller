@@ -60,7 +60,7 @@ spec:
           keystone_authtoken:
             memcache_security_strategy: ENCRYPT
             memcache_secret_key: {{ credentials[0].memcached }}
-            {%- if spec.openstack_version not in ("queens", "rocky", "stein") %}
+            {%- if OSVer[spec.openstack_version] >= OSVer.train %}
             service_type: instance-ha
             {%- endif %}
           host_failure:

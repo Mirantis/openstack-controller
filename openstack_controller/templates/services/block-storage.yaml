@@ -206,7 +206,7 @@ spec:
           keystone_authtoken:
             memcache_security_strategy: ENCRYPT
             memcache_secret_key: {{ credentials[0].memcached }}
-            {%- if spec.openstack_version not in ("queens", "rocky", "stein") %}
+            {%- if OSVer[spec.openstack_version] >= OSVer.train %}
             # TODO(pas-ha) register block-storage service type and catalog entry as well
             service_type: volumev3
             {%- endif %}
@@ -218,7 +218,7 @@ spec:
 # NOTE(vsaienko): active/active mode is supported by rbd starting from Rocky
 # but in rocky it is not stable, so apply only from stein
 {%- if is_ceph_enabled %}
-  {%- if spec.openstack_version not in ['queens', 'rocky'] %}
+  {%- if OSVer[spec.openstack_version] >= OSVer.stein %}
             cluster: "cinder-ceph-cluster"
   {%- endif %}
 {%- endif %}
@@ -242,7 +242,7 @@ spec:
             backup_driver: cinder.backup.drivers.nfs.NFSBackupDriver
             backup_share: {{ main_backup_driver["backup_share"] }}
   {%- endif %}
-{%- elif spec.openstack_version not in ("queens", "rocky", "stein", "train", "ussuri", "victoria", "wallaby", "xena") %}
+{%- elif OSVer[spec.openstack_version] >= OSVer.yoga %}
             backup_api_class: cinder.backup.api.NoOp
 {%- endif %}
             control_exchange: cinder
@@ -345,7 +345,7 @@ spec:
 {%- endif %}
       manifests:
         cron_job_db_purge: true
-        {%- if spec.openstack_version not in ['queens', 'rocky', 'stein', 'train', 'ussuri'] %}
+        {%- if OSVer[spec.openstack_version] >= OSVer.victoria %}
         job_drop_default_volume_type: true
         {%- endif %}
         network_policy: {{ spec.features.network_policies.enabled }}
@@ -440,7 +440,7 @@ spec:
         volume:
           enabled: false
         volumev2:
-{%- if spec.openstack_version not in ['queens', 'rocky', 'stein', 'train', 'ussuri', 'victoria', 'wallaby'] %}
+{%- if OSVer[spec.openstack_version] >= OSVer.xena %}
           state:  absent
 {%- endif %}
           host_fqdn_override:

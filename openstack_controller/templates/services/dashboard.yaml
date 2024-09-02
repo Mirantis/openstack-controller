@@ -121,11 +121,11 @@ spec:
         policy.d: {{ custom_policies }}
         software:
           horizon:
-{%- if spec.openstack_version == 'queens' %}
+{%- if OSVer[spec.openstack_version] <= OSVer.queens %}
             dashboard_path: /var/lib/openstack/lib/python2.7/site-packages/openstack_dashboard
-{%- elif spec.openstack_version in ['rocky', 'stein', 'train', 'ussuri'] %}
+{%- elif OSVer[spec.openstack_version] <= OSVer.ussuri %}
             dashboard_path: /var/lib/openstack/lib/python3.6/site-packages/openstack_dashboard
-{%- elif spec.openstack_version in ['victoria', 'wallaby', 'xena'] %}
+{%- elif OSVer[spec.openstack_version] <= OSVer.xena %}
             dashboard_path: /var/lib/openstack/lib/python3.8/site-packages/openstack_dashboard
 {%- else %}
             dashboard_path: /usr/local/share/openstack_dashboard
@@ -304,7 +304,7 @@ spec:
           local_settings:
             custom_themes:
 {%- set horizon_themes = horizon_features.get('themes', []) %}
-{%- if spec.openstack_version not in ['queens', 'rocky', 'stein', 'train'] %}
+{%- if OSVer[spec.openstack_version] >= OSVer.ussuri %}
 {%- do horizon_themes.append({'url': images["horizon_mirantis_theme_url"],
                               'name': 'mirantis',
                               'description': 'Mirantis',
@@ -358,13 +358,13 @@ spec:
                   initial_choice: {{ openid_providers.keys() | list | first }}
               # Need to switch openstack keystone url to public endpoint for web single-sign-on authentication
               # because the option WEBSSO_KEYSTONE_URL added in version Stein.
-              {%- if OSVer.stein > OSVer[spec.openstack_version] %}
+              {%- if OSVer[spec.openstack_version] < OSVer.stein %}
               keystone_url_endpoint_type: "public"
               {%- endif %}
 {%- endif %}
               tungstenfabric:
                 enabled: {{ neutron_backend == 'tungstenfabric' }}
-{%- if spec.openstack_version not in ['queens', 'rocky', 'stein', 'train', 'ussuri', 'victoria', 'wallaby', 'xena', 'yoga', 'zed', 'antelope'] %}
+{%- if OSVer[spec.openstack_version] >= OSVer.caracal %}
               cache:
                 backend: "django.core.cache.backends.memcached.PyMemcacheCache"
 {%- endif %}

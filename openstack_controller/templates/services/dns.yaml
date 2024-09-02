@@ -79,7 +79,7 @@ spec:
           keystone_authtoken:
             memcache_security_strategy: ENCRYPT
             memcache_secret_key: {{ credentials[0].memcached }}
-            {%- if spec.openstack_version not in ("queens", "rocky", "stein") %}
+            {%- if OSVer[spec.openstack_version] >= OSVer.train %}
             service_type: dns
             {%- endif %}
           service:api:
@@ -94,14 +94,14 @@ spec:
           oslo_messaging_notifications:
             topics: {{ notification_topics|join(',') }}
 {% include 'base/_oslo_policy_enforce_defaults.yaml' %}
-      {%- if spec.openstack_version not in ["queens", "rocky", "stein", "train", "ussuri"] %}
+      {%- if OSVer[spec.openstack_version] >= OSVer.victoria %}
           coordination:
             backend_url: {{ get_etcd3_endpoint(spec.openstack_version, 'etcd3gw') }}
       {%- endif %}
         logging:
           logger_designate:
             level: {{ designate_log_level }}
-      {%- if spec.openstack_version not in ["queens", "rocky", "stein", "train", "ussuri"] %}
+      {%- if OSVer[spec.openstack_version] >= OSVer.victoria %}
         software:
           apache2:
             enabled: true

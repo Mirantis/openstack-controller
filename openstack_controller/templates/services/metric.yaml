@@ -104,7 +104,7 @@ spec:
 {%- else %}
             debug: false
 {%- endif %}
-{%- if spec.openstack_version in ("antelope", "caracal",) %}
+{%- if OSVer.antelope <= OSVer[spec.openstack_version] < OSVer.master %}
             coordination_url: {{ get_etcd3_endpoint(spec.openstack_version, 'etcd3gw') }}
 {%- else %}
             #There are some problems with etcd3+http driver so we shouldn't use it
@@ -117,7 +117,7 @@ spec:
           keystone_authtoken:
             memcache_security_strategy: ENCRYPT
             memcache_secret_key: {{ credentials[0].memcached }}
-            {%- if spec.openstack_version not in ("queens", "rocky", "stein") %}
+            {%- if OSVer[spec.openstack_version] >= OSVer.train %}
             service_type: metric
             {%- endif %}
           indexer:

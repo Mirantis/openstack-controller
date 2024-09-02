@@ -13,7 +13,7 @@
 {%- endif %}
 {%- set amphora_enabled = (not tungstenfabric_enabled) or (tungstenfabric_enabled and octavia_hm_list|length != 0) %}
 # NOTE: amphorav2 is supported only from Ussuri
-{%- if spec.openstack_version not in ['queens', 'rocky', 'stein', 'train'] and amphora_enabled %}
+{%- if OSVer[spec.openstack_version] >= OSVer.ussuri and amphora_enabled %}
   {%- do provider_map.update({'amphorav2': 'amphorav2:Extented Octavia Amphora driver with jobboard support.'})%}
 {%- endif %}
 {%- if ovn_enabled %}
@@ -93,7 +93,7 @@ spec:
             jobs:
               - openstack-mariadb-cluster-wait
       pod:
-        {%- if spec.openstack_version in ['queens', 'rocky', 'stein', 'train', 'ussuri', 'victoria', 'wallaby', 'xena'] %}
+        {%- if OSVer[spec.openstack_version] <= OSVer.xena %}
         security_context:
           octavia_health_manager:
             container:
@@ -155,7 +155,7 @@ spec:
         secret_amphora_ssh_key: true
         secret_octavia_certs: false
         secret_ca_bundle: true
-{%- if spec.openstack_version not in ['queens', 'rocky'] and tungstenfabric_enabled %}
+{%- if OSVer[spec.openstack_version] >= OSVer.stein and tungstenfabric_enabled %}
         octavia_driver_agent: true
 {%- endif %}
 {%- if 'amphorav2' in provider_map.keys() %}
@@ -186,9 +186,9 @@ spec:
           02-custom.yaml: {{ spec.get("features", {}).get("policies", {}).get("octavia", {}) }}
         octavia:
 {% set _default_provider_driver = 'amphorav2' %}
-{%- if spec.openstack_version in ['queens'] %}
+{%- if OSVer[spec.openstack_version] <= OSVer.queens %}
   {% set _default_provider_driver = 'octavia' %}
-{%- elif spec.openstack_version in ['rocky', 'stein', 'train', 'ussuri'] %}
+{%- elif OSVer[spec.openstack_version] <= OSVer.ussuri %}
   {% set _default_provider_driver = 'amphora' %}
 {%- elif tungstenfabric_enabled %}
   {% set _default_provider_driver = 'tungstenfabric' %}
@@ -227,7 +227,7 @@ spec:
           task_flow:
             jobboard_enabled: true
             # Use this option to switch beetwen jobboard redis/etcd backend parameters
-  {%- if OSVer.antelope <= OSVer[spec.openstack_version] %}
+  {%- if OSVer[spec.openstack_version] >= OSVer.antelope %}
             jobboard_backend_driver: etcd_taskflow_driver
   {%- else %}
             jobboard_backend_driver: redis_taskflow_driver
@@ -237,7 +237,7 @@ spec:
           keystone_authtoken:
             memcache_security_strategy: ENCRYPT
             memcache_secret_key: {{ credentials[0].memcached }}
-            {%- if spec.openstack_version not in ("queens", "rocky", "stein") %}
+            {%- if OSVer[spec.openstack_version] >= OSVer.train %}
             service_type: load-balancer
             {%- endif %}
           service_auth:

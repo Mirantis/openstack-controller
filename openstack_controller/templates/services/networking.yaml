@@ -21,7 +21,7 @@
 {%- set l3_agent_extensions = ["fip_qos", "gateway_ip_qos"] %}
 {%- set notification_topics = ['notifications'] %}
 {%- if tungstenfabric_enabled %}
-  {%- if spec.openstack_version not in ['queens', 'rocky', 'stein', 'train', 'ussuri'] %}
+  {%- if OSVer[spec.openstack_version] >= OSVer.victoria %}
     {%- set service_plugins = ['neutron_plugin_contrail.plugins.opencontrail.services.tag.tag_plugin.TagPlugin,neutron_plugin_contrail.plugins.opencontrail.services.timestamp.timestamp_plugin.TimeStampPlugin,neutron_plugin_contrail.plugins.opencontrail.services.trunk.plugin.TrunkPlugin'] %}
   {%- else %}
     {%- set service_plugins = ['<None>'] %}
@@ -32,7 +32,7 @@
     {%- set service_plugins = ['ovn-router', 'metering', 'qos'] %}
   {%- endif %}
 {%- endif %}
-{%- set portprober_enabled_default = "cloudprober" in spec.features.services and spec.openstack_version in openstack_versions[openstack_versions.index('antelope'):] and not tungstenfabric_enabled and not ovn_enabled %}
+{%- set portprober_enabled_default = "cloudprober" in spec.features.services and OSVer[spec.openstack_version] >= OSVer.antelope and not tungstenfabric_enabled and not ovn_enabled %}
 {%- set portprober_enabled = spec.features.neutron.get("extensions", {}).get("portprober", {}).get("enabled", portprober_enabled_default) %}
 
 {%- do service_plugins.append('bgpvpn') if bgpvpn.enabled %}
@@ -90,7 +90,7 @@
 {%- endfor %}
 
 {%- set support_sync_ovs_info = True %}
-{%- if spec.openstack_version in ["master"] or ovn_enabled %}
+{%- if OSVer[spec.openstack_version] >= OSVer.master or ovn_enabled %}
 {%- set support_sync_ovs_info = False %}
 {%- endif %}
 {%- set cadf_audit = spec.get('features', {}).get('logging', {}).get('cadf', {'enabled': false}) %}
@@ -469,7 +469,7 @@ spec:
           {{ image }}: {{ images[image] }}
         {%- endif %}
 {%- endfor %}
-{%- if spec.openstack_version in openstack_versions[0:openstack_versions.index('yoga')] %}
+{%- if OSVer[spec.openstack_version] <= OSVer.xena %}
 # NOTE(mkarpin): In images based on focal and earlier (from queens - to xena) ip6tables
 # utility requires ip6_tables module to be loaded. Starting jammy release (yoga) ip6tables
 # utility doesn't use it.
@@ -811,7 +811,7 @@ spec:
           keystone_authtoken:
             memcache_security_strategy: ENCRYPT
             memcache_secret_key: {{ credentials[0].memcached }}
-            {%- if spec.openstack_version not in ("queens", "rocky", "stein") %}
+            {%- if OSVer[spec.openstack_version] >= OSVer.train %}
             service_type: network
             {%- endif %}
           DEFAULT:
@@ -873,7 +873,7 @@ spec:
               values: {{ service_providers }}
           {%- endif %}
           # TODO: option will be removed in Yoga, it will be default behavior.
-          {%- if spec.openstack_version not in ['queens', 'rocky', 'stein', 'train', 'ussuri'] %}
+          {%- if OSVer[spec.openstack_version] >= OSVer.victoria %}
           nova:
             live_migration_events: true
           {%- endif %}
@@ -896,7 +896,7 @@ spec:
           {%- if spec.get('features', {}).get('neutron', {}).get('dvr', {}).get('enabled', False) %}
           DEFAULT:
             agent_mode: dvr_snat
-          {%- elif spec.openstack_version in openstack_versions[openstack_versions.index('ussuri'):] %}
+          {%- elif OSVer[spec.openstack_version] >= OSVer.ussuri %}
           DEFAULT:
             cleanup_on_shutdown: True
           {%- endif %}
@@ -1022,7 +1022,7 @@ spec:
             vxlan_dst_port: {{ bgpvpn.get('evpn_vxlan_port', vxlan_udp_port) }}
       {%- endif %}
       # turn on option for versions starting from victoria besides master
-      {%- if spec.openstack_version in openstack_versions[openstack_versions.index('victoria'):-1] %}
+      {%- if OSVer.victoria <= OSVer[spec.openstack_version] < OSVer.master %}
         netns_cleanup:
           orphaned_ports: true
       {%- endif %}

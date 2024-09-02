@@ -191,7 +191,7 @@ nova:
       - port: 6082
         name: n-spice
         protocol: TCP
-{%- if spec.openstack_version in ['queens', 'rocky', 'stein'] %}
+{%- if OSVer[spec.openstack_version] <= OSVer.stein %}
     nova-placement-api:
       connections:
         egress:
@@ -336,7 +336,7 @@ nova:
       pod_labels:
         application: nova
         component: ks-user
-{%- if spec.openstack_version in ['queens', 'rocky', 'stein'] %}
+{%- if OSVer[spec.openstack_version] <= OSVer.stein %}
     placement-ks-endpoints:
       connections:
         egress:

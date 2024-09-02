@@ -51,7 +51,7 @@
 {%- set vnc_enabled = nova_console.get('novnc', {}).get('enabled', true) %}
 {%- set vnc_tls_enabled = vnc_enabled and nova_console.get('novnc', {}).get('tls', {}).get('enabled', false) %}
 {%- set swtpm_enabled = false %}
-{%- if spec.openstack_version in openstack_versions[openstack_versions.index('antelope'):-1] %}
+{%- if OSVer.antelope <= OSVer[spec.openstack_version] < OSVer.master %}
   {%- set swtpm_enabled = true %}
 {%- endif %}
 # COMPUTE OVERCOMMITS
@@ -275,7 +275,7 @@ spec:
                   initialDelaySeconds: 30
                   periodSeconds: 10
                   timeoutSeconds: 5
-{%- if spec.openstack_version in ['queens', 'rocky', 'stein', 'train'] %}
+{%- if OSVer[spec.openstack_version] <= OSVer.train %}
       # in libvirt 4.0.0 there is no support of admin protocol to check virtlogd health
             virtlogd:
               readiness:
@@ -349,7 +349,7 @@ spec:
                 conf:
                   nova:
                     DEFAULT:
-      {%- if spec.openstack_version in ("queens", "rocky") %}
+      {%- if OSVer[spec.openstack_version] <= OSVer.rocky %}
                       cpu_allocation_ratio: {{ nova_override.get("allocation_ratios", {}).get("cpu", compute_overcommits["cpu"]) }}
                       disk_allocation_ratio: {{ nova_override.get("allocation_ratios", {}).get("disk", compute_overcommits["disk"]) }}
                       ram_allocation_ratio: {{ nova_override.get("allocation_ratios", {}).get("ram", compute_overcommits["ram"]) }}
@@ -378,7 +378,7 @@ spec:
       {%- endif %}
       {%- if nova_override.get("vcpu_type") in ("host-model", "host-passthrough") %}
                       cpu_mode: {{ nova_override.vcpu_type }}
-      {%- elif nova_override.get("vcpu_type") and spec.openstack_version in ("queens", "rocky", "stein") %}
+      {%- elif nova_override.get("vcpu_type") and OSVer[spec.openstack_version] <= OSVer.stein %}
                       cpu_mode: custom
                       cpu_model: {{ vcpu_type }}
       {%- elif nova_override.get("vcpu_type") %}
@@ -532,7 +532,7 @@ spec:
         network_policy: {{ spec.features.network_policies.enabled }}
         job_rabbit_init: false
         ceph_conf: true
-{%- if spec.openstack_version not in ['queens', 'rocky'] %}
+{%- if OSVer[spec.openstack_version] >= OSVer.stein %}
         deployment_consoleauth: false
 # Since Rocky placemnt is deployed as separate service
         deployment_placement: false
@@ -555,7 +555,7 @@ spec:
         ingress_novncproxy: {{ vnc_enabled }}
         service_ingress_spiceproxy: {{ spice_enabled }}
         ingress_spiceproxy: {{ spice_enabled }}
-{%- if OSVer.ussuri <= OSVer[spec.openstack_version] %}
+{%- if OSVer[spec.openstack_version] >= OSVer.ussuri %}
         cron_job_placement_audit: true
 {%- endif %}
 {%- if spec.features.network_policies.enabled %}
@@ -779,7 +779,7 @@ spec:
         user_secret_name: {{ ceph.nova.secrets }}
 {%- endif %}
       conf:
-{%- if OSVer.yoga <= OSVer[spec.openstack_version] %}
+{%- if OSVer[spec.openstack_version] >= OSVer.yoga %}
         inhibit_lock:
           enabled: true
 {%- endif %}
@@ -803,7 +803,7 @@ spec:
           enabled: false
 {%- endif %}
 # NOTE(pas-ha) see https://review.opendev.org/c/openstack/nova/+/685181
-{%- if spec.openstack_version not in ['queens', 'rocky', 'stein', 'train'] %}
+{%- if OSVer[spec.openstack_version] >= OSVer.ussuri %}
         paste:
           composite:osapi_compute:
             /v2: oscomputeversion_legacy_v2
@@ -824,7 +824,7 @@ spec:
             # deployed as well.
             default_schedule_zone: nova
             allow_resize_to_same_host: true
-{%- if spec.openstack_version in ("queens", "rocky") %}
+{%- if OSVer[spec.openstack_version] <= OSVer.rocky %}
             cpu_allocation_ratio: {{ compute_overcommits.cpu }}
             disk_allocation_ratio: {{ compute_overcommits.disk }}
             ram_allocation_ratio: {{ compute_overcommits.ram }}
@@ -850,7 +850,7 @@ spec:
           keystone_authtoken:
             memcache_security_strategy: ENCRYPT
             memcache_secret_key: {{ credentials[0].memcached }}
-            {%- if spec.openstack_version not in ("queens", "rocky", "stein") %}
+            {%- if OSVer[spec.openstack_version] >= OSVer.train %}
             service_type: compute
             {%- endif %}
           ironic:
@@ -878,13 +878,13 @@ spec:
             live_migration_wait_for_vif_plug: false
           workarounds:
             skip_migration_revert_events: true
-{%- if spec.openstack_version not in ("queens", "rocky", "stein", "train", "ussuri", "victoria", "wallaby", "xena", "yoga") %}
+{%- if OSVer[spec.openstack_version] >= OSVer.antelope %}
             pass_hwveb_ports_to_os_vif_plugin: false
 {%- endif %}
           os_vif_contrail_vrouter:
             vrouter_port: {{ vrouter_port }}
 {%- else %}
-{%- if spec.openstack_version not in ("queens", "rocky", "stein", "train", "ussuri", "victoria", "wallaby", "xena") %}
+{%- if OSVer[spec.openstack_version] >= OSVer.yoga %}
           workarounds:
             enable_qemu_monitor_announce_self: true
 {%- endif %}
@@ -895,7 +895,7 @@ spec:
 {%- set vcpu_type = spec.get("features", {}).get("nova", {}).get("vcpu_type", "host-model") %}  # INTERNAL DEFAULT
 {%- if vcpu_type in ("host-model", "host-passthrough") %}
             cpu_mode: {{ vcpu_type }}
-{%- elif spec.openstack_version in ("queens", "rocky", "stein") %}
+{%- elif OSVer[spec.openstack_version] <= OSVer.stein %}
             cpu_mode: custom
             cpu_model: {{ vcpu_type }}
 {%- else %}

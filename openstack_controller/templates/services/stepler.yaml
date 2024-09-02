@@ -2,7 +2,7 @@
 #kind: HelmBundle
 
 {%- set service = 'stepler' %}
-{%- if spec.openstack_version not in ("queens", "rocky", "stein", "train", "ussuri", "victoria", "wallaby", "xena") %}
+{%- if OSVer[spec.openstack_version] >= OSVer.yoga %}
   {%- set cirros_image_name = "Cirros-6.0" %}
 {%- else %}
     {%- set cirros_image_name = "Cirros-5.1" %}

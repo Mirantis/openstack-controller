@@ -75,7 +75,7 @@ spec:
           keystone_authtoken:
             memcache_security_strategy: ENCRYPT
             memcache_secret_key: {{ credentials[0].memcached }}
-            {%- if spec.openstack_version not in ("queens", "rocky", "stein") %}
+            {%- if OSVer[spec.openstack_version] >= OSVer.train %}
             service_type: orchestration
             {%- endif %}
           clients_swift:
@@ -95,7 +95,7 @@ spec:
             level: {{ spec.get('features', {}).get('logging', {}).get('heat', {}).get('level', 'INFO') }}
 {%- set enabled_plugins = [] %}
 {%- if tungstenfabric_enabled %}
-  {%- if spec.openstack_version not in ['queens', 'rocky', 'stein', 'train'] %}
+  {%- if OSVer[spec.openstack_version] >= OSVer.ussuri %}
     {%- do enabled_plugins.append('vnc_api/gen/heat') %}
   {%- endif %}
 {%- endif %}

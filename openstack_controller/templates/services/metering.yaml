@@ -55,7 +55,7 @@ spec:
               values:
                 - gnocchi
           coordination:
-{%- if spec.openstack_version in ("antelope","caracal",) %}
+{%- if OSVer.antelope <= OSVer[spec.openstack_version] < OSVer.master %}
             backend_url: {{ get_etcd3_endpoint(spec.openstack_version, 'etcd3gw') }}
 {%- else %}
             #There are some problems with etcd3+http driver so we shouldn't use it

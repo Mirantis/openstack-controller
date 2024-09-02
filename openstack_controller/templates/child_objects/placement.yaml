@@ -32,7 +32,7 @@ placement:
       connections:
         egress:
           - {{ to_child_object("database", "mariadb", "StatefulSet", "mariadb-server", ["mysql"]) | indent(12)}}
-{%- if spec["openstack_version"] in ['stein'] %}
+{%- if OSVer[spec.openstack_version] == OSVer.stein %}
     placement-db-migrate:
       hash_fields: []
       images:

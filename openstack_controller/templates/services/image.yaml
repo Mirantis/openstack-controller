@@ -92,7 +92,7 @@ spec:
         ks_user: glance
         structured:
           images:
-            {%- if spec.openstack_version in openstack_versions[openstack_versions.index('yoga'):] %}
+            {%- if OSVer[spec.openstack_version] >= OSVer.yoga %}
                 {%- set cirros_version = "0.6.0" %}
                 {%- set cirros_image_name = "Cirros-6.0" %}
             {%- else %}
@@ -273,7 +273,7 @@ spec:
           keystone_authtoken:
             memcache_security_strategy: ENCRYPT
             memcache_secret_key: {{ credentials[0].memcached }}
-            {%- if spec.openstack_version not in ("queens", "rocky", "stein") %}
+            {%- if OSVer[spec.openstack_version] >= OSVer.train %}
             service_type: image
             {%- endif %}
       {%- if multi_backends %}
@@ -332,7 +332,7 @@ spec:
           keystone_authtoken:
             memcache_security_strategy: ENCRYPT
             memcache_secret_key: {{ credentials[0].memcached }}
-            {%- if spec.openstack_version not in ("queens", "rocky", "stein") %}
+            {%- if OSVer[spec.openstack_version] >= OSVer.train %}
             service_type: image
             {%- endif %}
         logging:
