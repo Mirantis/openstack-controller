@@ -173,7 +173,7 @@ gnocchi_api: '{{ images_base_url }}/openstack/gnocchi:wallaby-focal-202401120829
 gnocchi_statsd: '{{ images_base_url }}/openstack/gnocchi:wallaby-focal-20240112082933'
 gnocchi_metricd: '{{ images_base_url }}/openstack/gnocchi:wallaby-focal-20240112082933'
 gnocchi_resources_cleaner: '{{ images_base_url }}/openstack/heat:wallaby-focal-20240112082933'
-redis-failover: '{{ images_base_url }}/openstack/extra/redis:7.2.4-alpine3.19-1'
+redis-failover: '{{ images_base_url }}/openstack/extra/redis:7.2.x-alpine-20240902055724'
 horizon_clean_cache: '{{ images_base_url }}/openstack/horizon:wallaby-focal-20240112082933'
 octavia_driver_agent: '{{ images_base_url }}/openstack/octavia:wallaby-focal-20240112082933'
 octavia_db_sync_persistence: '{{ images_base_url }}/openstack/octavia:wallaby-focal-20240112082933'
