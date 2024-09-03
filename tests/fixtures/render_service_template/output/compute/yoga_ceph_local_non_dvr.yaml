@@ -435,13 +435,13 @@ spec:
               host: spiceproxy.it.just.works
               tls:
                 ca: 'TEST CA
-                
+
                   '
                 crt: 'TEST CRT
-                
+
                   '
                 key: 'TEST KEY
-                
+
                   '
           hosts:
             default: nova-spiceproxy
@@ -484,13 +484,13 @@ spec:
               host: metadata
               tls:
                 ca: 'TEST CA
-                
+
                   '
                 crt: 'TEST CRT
-                
+
                   '
                 key: 'TEST KEY
-                
+
                   '
           port:
             metadata:
@@ -547,6 +547,7 @@ spec:
           filter_scheduler:
             build_failure_weight_multiplier: 2.0
           workarounds:
+            disable_fallback_pcpu_query: true
             enable_qemu_monitor_announce_self: true
           os_vif_ovs:
             isolate_vif: true
@@ -575,7 +576,7 @@ spec:
 
           '
         ssh_public: 'COMPUTE TEST SSH PUBLIC KEY
-        
+
           '
         libvirt:
           live_migration_interface: ens3

@@ -876,20 +876,29 @@ spec:
 {%- if neutron_backend == 'tungstenfabric' %}
           compute:
             live_migration_wait_for_vif_plug: false
-          workarounds:
-            skip_migration_revert_events: true
-{%- if OSVer[spec.openstack_version] >= OSVer.antelope %}
-            pass_hwveb_ports_to_os_vif_plugin: false
 {%- endif %}
+{%- if neutron_backend == 'tungstenfabric' %}
           os_vif_contrail_vrouter:
             vrouter_port: {{ vrouter_port }}
 {%- else %}
-{%- if OSVer[spec.openstack_version] >= OSVer.yoga %}
-          workarounds:
-            enable_qemu_monitor_announce_self: true
-{%- endif %}
           os_vif_ovs:
             isolate_vif: true
+{%- endif %}
+{%- if neutron_backend == 'tungstenfabric' or OSVer[spec.openstack_version] >= OSVer.ussuri %}
+          workarounds:
+  {%- if OSVer[spec.openstack_version] >= OSVer.ussuri %}
+            disable_fallback_pcpu_query: true
+  {%- endif %}
+  {%- if neutron_backend == 'tungstenfabric' %}
+            skip_migration_revert_events: true
+    {%- if OSVer[spec.openstack_version] >= OSVer.antelope %}
+            pass_hwveb_ports_to_os_vif_plugin: false
+    {%- endif %}
+  {%- else %}
+    {%- if OSVer[spec.openstack_version] >= OSVer.yoga %}
+            enable_qemu_monitor_announce_self: true
+    {%- endif %}
+  {%- endif %}
 {%- endif %}
           libvirt:
 {%- set vcpu_type = spec.get("features", {}).get("nova", {}).get("vcpu_type", "host-model") %}  # INTERNAL DEFAULT
