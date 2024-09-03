@@ -1,5 +1,7 @@
 from openstack_controller import constants
 from openstack_controller import kube
+import json
+import pykube
 
 
 class SingletonMeta(type):
@@ -104,6 +106,25 @@ class Config(metaclass=SingletonMeta):
         self.PORT_TIMEOUT = 60
         # Interval in seconds to wait for port to become ACTIVE
         self.PORT_INTERVAL = 10
+
+        self.FEDERATION_USERS = {
+            "k1": {"username": "writer", "password": "password"},
+            "k2": {"username": "writer2", "password": "password"},
+        }
+
+        configmap = kube.find(
+            pykube.ConfigMap,
+            "openstack-controller-functional-config",
+            "osh-system",
+            silent=True,
+        )
+        if configmap:
+            for k, v in configmap.obj["data"].items():
+                try:
+                    val = json.loads(v)
+                except:
+                    val = v
+                setattr(self, k, val)
 
     def get_cirros_image(self):
         openstack_version = self._osdpl.obj["spec"]["openstack_version"]
