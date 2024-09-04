@@ -92,6 +92,9 @@ class Service:
         guest_secret.ensure()
         return guest_secret.get()
 
+    def is_service_enabled(self, service):
+        return service in self.mspec["features"]["services"]
+
     @property
     def resource_name(self):
         return f"openstack-{self.service}"

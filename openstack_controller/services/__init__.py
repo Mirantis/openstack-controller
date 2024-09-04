@@ -1289,7 +1289,9 @@ class Neutron(OpenStackService, MaintenanceApiMixin):
 
     @property
     def required_accounts(self):
-        r_accounts = {"dns": ["designate"]}
+        r_accounts = {}
+        if self.is_service_enabled("dns"):
+            r_accounts["dns"] = ["designate"]
         compute_accounts = ["nova"]
         if self.openstack_version in [
             "queens",
@@ -1300,8 +1302,7 @@ class Neutron(OpenStackService, MaintenanceApiMixin):
             r_accounts["placement"] = ["placement"]
 
         r_accounts["compute"] = compute_accounts
-        services = self.mspec["features"]["services"]
-        if "baremetal" in services:
+        if self.is_service_enabled("baremetal"):
             r_accounts["baremetal"] = ["ironic"]
         return r_accounts
 
