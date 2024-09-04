@@ -74,7 +74,7 @@ function mcp2_import_cinder_backends_config {
         default_volume_type="${default_volume_type_from_configmap}"
     fi
 
-    backends_map="${resulting_map}"
+    backends_map=${resulting_map}
 
     info "MCP1 backends map is:"
     info "${backends_map}"
@@ -123,7 +123,7 @@ function mcp2_import_cinder_backends_config {
 
     if [ "${1}" != '--dry-run' ]; then
         info "Applying MCP2 backends configuration. Openstack deployment object ${OPENSTACK_DEPLOYMENT_OBJECT_NAME} will be patched"
-        kubectl -n openstack patch osdpl "${OPENSTACK_DEPLOYMENT_OBJECT_NAME}" -p $(cat cinder_conf.json) --type merge
+        kubectl -n openstack patch osdpl "${OPENSTACK_DEPLOYMENT_OBJECT_NAME}" --patch-file cinder_conf.json --type merge
     fi
 }
 
