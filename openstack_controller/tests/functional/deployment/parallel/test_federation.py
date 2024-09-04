@@ -49,11 +49,13 @@ class TestKeystoneFederation(base.BaseFunctionalTestCase):
         ]["openid"]["providers"]
 
     def get_auth_data(self, provider_name):
+        auth = CONF.FEDERATION_USERS
+        if provider_name not in auth.keys():
+            raise unittest.SkipTest(
+                f"No user credentials for provider '{provider_name}'."
+            )
+
         provider = self.providers[provider_name]
-        auth = {
-            "k1": {"username": "writer", "password": "password"},
-            "k2": {"username": "writer2", "password": "password"},
-        }
         discovery_endpoint = (
             f"{provider['issuer']}/.well-known/openid-configuration"
         )
@@ -68,7 +70,9 @@ class TestKeystoneFederation(base.BaseFunctionalTestCase):
             "os_discovery_endpoint": discovery_endpoint,
             "os_auth_url": "http://keystone-api.openstack.svc.cluster.local:5000/v3",
             "os_insecure": True,
-            "os_client_secret": "NotNeeded",
+            "os_client_secret": provider["metadata"]["client"].get(
+                "client_secret", "NotNeeded"
+            ),
             "os_client_id": provider["metadata"]["client"]["client_id"],
             "os_username": auth[provider_name]["username"],
             "os_interface": "internal",
@@ -80,7 +84,7 @@ class TestKeystoneFederation(base.BaseFunctionalTestCase):
     def test_keystone_federation(self, provider_name):
         auth_data = self.get_auth_data(provider_name)
         envs = (
-            f"OS_CLIENT_SECRET=someRandomClientSecretMightBeNull "
+            f"OS_CLIENT_SECRET={auth_data['os_client_secret']} "
             f"OS_PROJECT_DOMAIN_ID=default "
             f"OS_INTERFACE=public "
             f"OS_USERNAME={auth_data['os_username']} "
