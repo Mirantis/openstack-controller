@@ -45,6 +45,7 @@ properties:
     enum:
       - compute
       - compute-tf
+      - core
   size:
     description: timeout and sizing parameters
     type: string
