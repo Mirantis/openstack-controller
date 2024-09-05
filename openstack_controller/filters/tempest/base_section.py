@@ -16,8 +16,18 @@ class BaseSection(object):
         """ """
 
     @abc.abstractproperty
-    def options():
+    def options(self):
         """ """
+
+    @abc.abstractproperty
+    def enabled(self):
+        """Flag to add section into config
+
+        :returns True: When section should be added to config
+        :returns False: When section is not needed for example when service
+                        is not enabled at all.
+        """
+        return True
 
     def tf_enabled(self):
         try:
