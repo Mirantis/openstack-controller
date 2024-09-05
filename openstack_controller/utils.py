@@ -16,6 +16,7 @@ import asyncio
 import base64
 import copy
 import datetime
+import functools
 import logging
 import logging.config
 import os
@@ -384,3 +385,15 @@ def timeit(f):
         return result
 
     return timed
+
+
+def log_exception_and_raise(f):
+    @functools.wraps(f)
+    def wrapper(*args, **kwargs):
+        try:
+            return f(*args, **kwargs)
+        except Exception as e:
+            LOG.exception(e)
+            raise
+
+    return wrapper

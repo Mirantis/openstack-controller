@@ -3,6 +3,7 @@ from openstack_controller import settings
 from jinja2.exceptions import TemplateRuntimeError
 
 
+@utils.log_exception_and_raise
 def substitute_local_proxy_hostname(url, hostname):
     return utils.substitute_local_proxy_hostname(url, hostname)
 
@@ -11,6 +12,7 @@ def raise_error(msg):
     raise TemplateRuntimeError(msg)
 
 
+@utils.log_exception_and_raise
 def namespaces(names):
     all_namespaces = {
         "os_deployment": settings.OSCTL_OS_DEPLOYMENT_NAMESPACE,

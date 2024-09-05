@@ -16,6 +16,10 @@ class LoadBalancerFeatureEnabled(base_section.BaseSection):
         "force_cleanup_enabled",
     ]
 
+    @property
+    def enabled(self):
+        return self.is_service_enabled("octavia")
+
     def _ovn_enabled(self):
         return "ovn" in self.get_values_item(
             "octavia",
