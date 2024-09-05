@@ -34,7 +34,6 @@ features:
     octavia:
       level: DEBUG
   services:
-    - block-storage
     - compute
     - identity
     - dashboard
@@ -48,7 +47,6 @@ features:
     - placement
 {%- endif %}
     - coordination
-    - descheduler
   network_policies:
 {%- if OSVer[openstack_version] >= OSVer.yoga %}
     enabled: true
