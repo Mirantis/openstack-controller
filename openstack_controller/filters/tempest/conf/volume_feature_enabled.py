@@ -20,6 +20,10 @@ class VolumeFeatureEnabled(base_section.BaseSection):
     ]
 
     @property
+    def enabled(self):
+        return self.is_service_enabled("cinder")
+
+    @property
     def api_extensions(self):
         pass
 

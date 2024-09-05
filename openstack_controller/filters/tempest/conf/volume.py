@@ -37,6 +37,10 @@ class Volume(base_section.BaseSection):
     ]
 
     @property
+    def enabled(self):
+        return self.is_service_enabled("cinder")
+
+    @property
     def backend_names(self):
         pass
 
