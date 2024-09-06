@@ -165,6 +165,8 @@ spec:
             auth_schemes: vencrypt,none
           coordination:
             backend_url: 'etcd3+http://etcd:2379'
+          workarounds:
+            disable_fallback_pcpu_query: true
         ssh_private: 'COMPUTE TEST SSH PRIVATE KEY
 
           '
