@@ -311,6 +311,7 @@ spec:
         cron_job_db_purge: true
         ceph_conf: true
         job_clean: false
+        pvc_images: false
       pod:
         replicas:
           api: 1
@@ -318,6 +319,3 @@ spec:
       secrets:
         rbd: glance-rbd-keyring
       storage: rbd
-      volume:
-        class_name: rook-ceph-block
-        size: 2Gi

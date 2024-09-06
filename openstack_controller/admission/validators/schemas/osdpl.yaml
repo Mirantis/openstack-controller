@@ -222,14 +222,47 @@ properties:
             properties:
               cinder:
                 type: object
-                additionalProperties: true
-                description: |
-                  Section to configure cinder backends.
+                additionalProperties: false
+                patternProperties:
+                  ".*":
+                    description: |
+                      Section to configure cinder backends.
+                    type: object
+                    additionalProperties: true
+                    properties: &glance_common_backend_properties
+                      default:
+                        type: boolean
+                        description: Make backend default. Only one backend may be marked as default.
               rbd:
                 type: object
-                additionalProperties: true
-                description: |
-                  Section to configure rbd (Ceph) backends
+                additionalProperties: false
+                patternProperties:
+                   ".*":
+                    type: object
+                    description: |
+                      Section to configure rbd (Ceph) backends
+                    additionalProperties: true
+                    properties:
+                      <<: *glance_common_backend_properties
+              file:
+                type: object
+                additionalProperties: false
+                patternProperties:
+                  ".*":
+                    type: object
+                    required:
+                    - pvc
+                    properties:
+                      <<: *glance_common_backend_properties
+                      pvc:
+                        type: object
+                        properties:
+                          size:
+                            type: string
+                            description: Size of PVC to create.
+                          storage_class_name:
+                            type: string
+                            description: The name of storage clas to use for glance file backend. Should support multiattach.
           signature:
             type: object
             additionalProperties: false
