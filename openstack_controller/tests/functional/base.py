@@ -7,6 +7,7 @@ import asyncio
 import openstack
 
 from openstack_controller import kube
+from openstack_controller import layers
 from openstack_controller import openstack_utils
 from openstack_controller import settings
 from openstack_controller.exporter import constants
@@ -60,6 +61,7 @@ class BaseFunctionalTestCase(TestCase):
     def setUpClass(cls):
         cls.ocm = openstack_utils.OpenStackClientManager()
         cls.osdpl = kube.get_osdpl()
+        cls.osdpl_spec = layers.substitude_osdpl(cls.osdpl.obj["spec"])
 
     def setUp(self):
         self.kube_api = kube.kube_client()
