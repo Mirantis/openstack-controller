@@ -1537,6 +1537,44 @@ def test_glance_features_cinder_missing_default(client):
     assert response.json["response"]["allowed"] is False
 
 
+def test_glance_features_file_good(client):
+    req = copy.deepcopy(ADMISSION_REQ)
+    req["request"]["object"]["spec"]["features"]["glance"] = {
+        "backends": {
+            "file": {
+                "backend1": {
+                    "default": True,
+                    "pvc": {
+                        "size": "1Gi",
+                        "storage_class_name": "foo",
+                    },
+                }
+            }
+        }
+    }
+    response = client.simulate_post("/validate", json=req)
+    assert response.status == falcon.HTTP_OK
+    assert response.json["response"]["allowed"] is True
+
+
+def test_glance_features_file_good_missing_madatory(client):
+    req = copy.deepcopy(ADMISSION_REQ)
+    req["request"]["object"]["spec"]["features"]["glance"] = {
+        "backends": {
+            "file": {
+                "backend1": {
+                    "default": True,
+                    "pvc": {"size": "1Gi"},
+                }
+            }
+        }
+    }
+    response = client.simulate_post("/validate", json=req)
+    assert response.status == falcon.HTTP_OK
+    assert response.json["response"]["status"]["code"] == 400
+    assert response.json["response"]["allowed"] is False
+
+
 def test_barbican_features_namespace_before_victoria(client):
     req = copy.deepcopy(ADMISSION_REQ)
     req["request"]["object"]["spec"]["features"]["barbican"] = {

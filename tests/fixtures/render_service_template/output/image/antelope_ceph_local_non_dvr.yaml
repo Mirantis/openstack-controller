@@ -308,6 +308,7 @@ spec:
         secret_ca_bundle: true
         ceph_conf: true
         job_clean: false
+        pvc_images: false
       network_policy:
         registry:
           spec:

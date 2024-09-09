@@ -12,6 +12,7 @@
   {%- endfor %}
 {%- endif  %}
 {%- set multi_backends = spec.get('features', {}).get('glance', {}).get('backends', {}) %}
+{%- set file_backends = multi_backends.get("file", {}) %}
 {%- set default_backend = namespace(name='') %}
 
 {%- set signature = spec.get('features', {}).get('glance', {}).get("signature", {"enabled": false}) %}
@@ -285,14 +286,14 @@ spec:
           {%- set default_backend.name = store_ident %}
         {%- endif %}
           {{store_ident}}:
+{% include 'base/_' + type + '_store_opts.yaml' %}
           {%- for key,val in ident_opts.items() %}
             {%- if type == 'cinder' and key == 'backend_name' %}
             cinder_volume_type: {{ val.split(':')[0] ~ '_multiattach' }}
-            {%- else %}
+            {%- elif type != 'file' %}
             {{ key }}: {{ val }}
             {%- endif %}
           {%- endfor %}
-{% include 'base/_' + type + '_store_opts.yaml' %}
         {%- endfor %}
       {%- endfor %}
       {%- endif %}
@@ -343,10 +344,16 @@ spec:
 {%- if 'cinder' in multi_backends %}
         enable_iscsi: true
 {%- endif %}
-{%- if is_ceph_enabled %}
+{%- if file_backends %}
+{%-   set file_backend_name = file_backends.keys() | list %}
+{%-   set file_backend = file_backends[file_backend_name[0]] %}
+{%-   if file_backend.get("pvc", {}) %}
       volume:
-        class_name: rook-ceph-block
-        size: 2Gi
+        class_name: {{ file_backend["pvc"]["storage_class_name"] }}
+        size: {{ file_backend["pvc"]["size"] }}
+{%-   endif %}
+{%- endif %}
+{%- if is_ceph_enabled %}
       ceph_client:
         configmap: rook-ceph-config
         user_secret_name: {{ ceph.glance.secrets }}
@@ -368,6 +375,7 @@ spec:
 {%- if signature.enabled %}
         job_barbican_cert_init: true
 {%- endif %}
+        pvc_images: {{ "file" in multi_backends }}
       network:
         proxy:
 {% include 'base/_proxy_vars.yaml' %}
