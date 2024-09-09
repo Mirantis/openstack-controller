@@ -1,4 +1,4 @@
-ARG FROM=docker-remote.docker.mirantis.net/ubuntu:focal
+ARG FROM=docker-remote.docker.mirantis.net/ubuntu:jammy
 
 FROM $FROM as builder
 ARG TEST_IMAGE
@@ -11,12 +11,12 @@ RUN apt-get update; \
 RUN apt-get install -y \
         python3-distutils \
         build-essential \
-        python3.8-dev \
+        python3-dev \
         libffi-dev \
         libssl-dev \
         libpcre3-dev \
         git; \
-    python3.8 /tmp/get-pip.py
+    python3 /tmp/get-pip.py
 ADD . /opt/operator
 
 RUN set -ex; \
@@ -26,8 +26,8 @@ RUN set -ex; \
         for req in $(ls -d /opt/operator/source_requirements/*/); do \
             EXTRA_DEPS="${EXTRA_DEPS} $req"; \
             pushd $req; \
-                req_name=$(python3.8 setup.py --name 2>/dev/null |grep -v "Generating ChangeLog"); \ 
-                req_version=$(python3.8 setup.py --version 2>/dev/null |grep -v "Generating ChangeLog"); \
+                req_name=$(python3 setup.py --name 2>/dev/null |grep -v "Generating ChangeLog"); \ 
+                req_version=$(python3 setup.py --version 2>/dev/null |grep -v "Generating ChangeLog"); \
             popd; \
             echo "$req_name==$req_version" >> /opt/operator/source-requirements.txt; \
         done; \
@@ -69,9 +69,9 @@ RUN apt-get update; \
 RUN set -ex; \
     apt-get -q update; \
     apt-get install -q -y --no-install-recommends --no-upgrade \
-        python3.8 \
-        python3.8-dbg \
-        libpython3.8 \
+        python3 \
+        python3-dbg \
+        libpython3.10 \
         net-tools \
         gdb \
         patch \
@@ -82,14 +82,14 @@ RUN set -ex; \
     apt-get download python3-distutils; \
     dpkg-deb -x python3-distutils*.deb /; \
     rm -vf python3-distutils*.deb; \
-    python3.8 /tmp/get-pip.py; \
+    python3 /tmp/get-pip.py; \
     pip install --no-index --no-cache --find-links /opt/wheels --pre -r /opt/operator/source-requirements.txt; \
     OPENSTACK_CONTROLLER_PKG=openstack-controller; \
     if [[ "${TEST_IMAGE}" == "True" ]]; then \
         OPENSTACK_CONTROLLER_PKG=openstack-controller[test]; \
     fi; \
     pip install --no-index --no-cache --find-links /opt/wheels ${OPENSTACK_CONTROLLER_PKG}; \
-    cd /usr/local/lib/python3.8/dist-packages; \
+    cd /usr/local/lib/python3.10/dist-packages; \
     for p in $(ls /tmp/kopf-patches/*.patch); do \
          patch -p1 < $p; \
     done;  \
@@ -99,7 +99,7 @@ RUN set -ex; \
 RUN wget -q -O /usr/local/bin/helm3 ${HELM_BINARY}; \
     chmod +x /usr/local/bin/helm3
 
-RUN python3.8 /opt/operator/sync_helm_charts.py
+RUN python3 /opt/operator/sync_helm_charts.py
 
 RUN rm -rvf /tmp/kopf-patches
 RUN rm -rvf /opt/wheels; \
