@@ -371,6 +371,10 @@ services:
   dashboard:
     horizon:
       values:
+        endpoints:
+          oslo_cache:
+            statefulset:
+              replicas: 1
         pod:
           replicas:
             server: 1
