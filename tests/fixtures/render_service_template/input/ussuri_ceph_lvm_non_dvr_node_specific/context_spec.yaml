@@ -59,6 +59,10 @@ nodes:
               enabled: true
               cipher: "foo"
               key_size: 123
+    compute::cpu-custom:
+      features:
+        nova:
+          vcpu_type: model1,model2
 features:
   barbican:
     backends:

@@ -380,10 +380,10 @@ spec:
                       cpu_mode: {{ nova_override.vcpu_type }}
       {%- elif nova_override.get("vcpu_type") and spec.openstack_version in ("queens", "rocky", "stein") %}
                       cpu_mode: custom
-                      cpu_model: {{ vcpu_type }}
+                      cpu_model: {{ nova_override.vcpu_type }}
       {%- elif nova_override.get("vcpu_type") %}
                       cpu_mode: custom
-                      cpu_models: {{ vcpu_type }}
+                      cpu_models: {{ nova_override.vcpu_type }}
       {%- endif %}
       {%- if nova_override.get("images", {}).get("backend") %}
         {%- if nova_override.images.backend == 'ceph' %}
