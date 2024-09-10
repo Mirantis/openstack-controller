@@ -109,6 +109,12 @@ spec:
                   dynamic_options:
                     libvirt:
                       listen_interface: 'ens3'
+            compute::cpu-custom:
+              values:
+                conf:
+                  dynamic_options:
+                    libvirt:
+                      listen_interface: 'ens3'
   - chart: osh/nova
     name: openstack-nova
     values:
@@ -647,6 +653,20 @@ spec:
                       enabled: true
                       cipher: "foo"
                       key_size: 123
+            compute::cpu-custom:
+              values:
+                conf:
+                  nova:
+                    DEFAULT:
+                      initial_cpu_allocation_ratio: 8.0
+                      initial_disk_allocation_ratio: 1.6
+                      initial_ram_allocation_ratio: 1.0
+                      cpu_allocation_ratio: 0
+                      disk_allocation_ratio: 0
+                      ram_allocation_ratio: 0
+                    libvirt:
+                      cpu_mode: custom
+                      cpu_models: model1,model2
       pod:
         probes:
           compute:
