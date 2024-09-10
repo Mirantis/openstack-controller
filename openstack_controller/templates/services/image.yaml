@@ -59,7 +59,7 @@ spec:
           db_init:
             jobs:
               - openstack-mariadb-cluster-wait
-{%- if multi_backends %}
+{%- if 'cinder' in multi_backends %}
           api:
             services:
               - endpoint: internal

@@ -1647,9 +1647,10 @@ class Nova(OpenStackServiceWithCeph, MaintenanceApiMixin):
     def required_accounts(self):
         r_accounts = {
             "networking": ["neutron"],
-            "block-storage": ["cinder"],
             "identity": ["osctl"],
         }
+        if self.is_service_enabled("block-storage"):
+            r_accounts["block-storage"] = (["cinder"],)
         if self.openstack_version not in [
             "queens",
             "rocky",
@@ -1722,7 +1723,7 @@ class Nova(OpenStackServiceWithCeph, MaintenanceApiMixin):
 
     @property
     def is_ceph_enabled(self):
-        if utils.get_in(
+        if self.is_service_enabled("block-storage") and utils.get_in(
             self.mspec, ["features", "cinder", "volume", "enabled"], True
         ):
             return True
