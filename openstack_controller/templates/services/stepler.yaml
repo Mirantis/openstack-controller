@@ -114,6 +114,9 @@ spec:
         skiplist: |
 {% include 'base/_stepler_skiplist.yaml' %}
         stepler_env:
+{%- if spec.features.get("policies", {}).get("strict_admin", {}).get("enabled", False) %}
+          ROLE_ADMIN: service
+%{- endif %}
           HORIZON_TEST_IMAGE_CIRROS: {{ cirros_image_name }}
 {%- set public_network_name = "public" %}
 {%- if spec.features.neutron.get('floating_network', {}).get('enabled', true) %}
