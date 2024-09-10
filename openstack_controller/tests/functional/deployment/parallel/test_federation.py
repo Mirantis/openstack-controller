@@ -44,9 +44,9 @@ class TestKeystoneFederation(base.BaseFunctionalTestCase):
 
     def setUp(self):
         super().setUp()
-        self.providers = self.osdpl.obj["spec"]["features"]["keystone"][
-            "federation"
-        ]["openid"]["providers"]
+        self.providers = self.osdpl_spec["features"]["keystone"]["federation"][
+            "openid"
+        ]["providers"]
 
     def get_auth_data(self, provider_name):
         auth = CONF.FEDERATION_USERS
