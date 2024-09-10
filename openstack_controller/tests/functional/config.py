@@ -55,9 +55,9 @@ class Config(metaclass=SingletonMeta):
         self.VOLUME_READY_INTERVAL = 1
         # Size, in GB of the volume to create.
         self.VOLUME_SIZE = 1
-        # Time in seconds to wait for a cinder pool timestamp updated. Default is 60 seconds
+        # Time in seconds to wait for a cinder pool timestamp updated
         self.CINDER_POOL_UPDATE_TIMEOUT = 120
-        # Interval in seconds to check the cinder pool timestamp. Default is 3 second.
+        # Interval in seconds to check the cinder pool timestamp
         self.CINDER_POOL_UPDATE_INTERVAL = 3
 
         # The Neutron PortProber exporter port
