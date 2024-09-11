@@ -176,18 +176,18 @@ services:
           neutron:
             DEFAULT:
               dhcp_lease_duration: 86400
-              rpc_workers: 8
-              api_workers: 8
+              rpc_workers: 4
+              api_workers: 4
               rpc_state_report_workers: 2
               agent_down_time: 95
               max_l3_agents_per_router: 2
-              executor_thread_pool_size: 70
+              executor_thread_pool_size: 20
             agent:
               report_interval: 30
             database:
               max_pool_size: 10
               max_retries: -1
-              max_overflow: 70
+              max_overflow: 10
               connection_recycle_time: 300
             oslo_messaging_rabbit:
               rabbit_qos_prefetch_count: 64
