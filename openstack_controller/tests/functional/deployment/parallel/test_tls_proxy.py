@@ -41,10 +41,12 @@ class TlsProxyFunctionalTestCase(base.BaseFunctionalTestCase):
             .split("\n")[0]
             .lower()
         )
-        res = re.search(r".*fips\s\[.*enabled\s*=\s*(\w+),\s*.*]", proxy_info)
-        if res is None:
-            assert False, "FIPS not activated for TLS-proxy."
-        else:
-            assert (
-                res.group(len(res.groups())) == "true"
-            ), "FIPS not activated for TLS-proxy."
+        res = None
+        for pattern in [
+            r".*fips \[.*enabled=true.*",
+            r".*fips enabled=true.*",
+        ]:
+            res = re.search(pattern, proxy_info)
+            if res:
+                break
+        assert res, "FIPS not activated for TLS-proxy."
