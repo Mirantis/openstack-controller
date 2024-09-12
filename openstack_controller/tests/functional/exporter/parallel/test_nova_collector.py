@@ -418,6 +418,7 @@ class NovaResourcesStatsTestCase(base.BaseFunctionalExporterTestCase):
             x
             for x in self.ocm.oc.compute.services(binary="nova-compute")
             if x.get("availability_zone") == "nova"
+            and "nova-compute-ironic" not in x["host"]
         ][0]["host"]
 
         self.server = None
