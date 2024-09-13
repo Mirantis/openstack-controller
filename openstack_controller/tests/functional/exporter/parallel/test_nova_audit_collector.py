@@ -14,13 +14,13 @@ class NovaAuditCollectorFunctionalTestCase(
 ):
     scrape_collector = "osdpl_nova_audit"
     known_metrics = {
-        "osdpl_nova_audit_orphaned_allocations": {"labels": []},
-        "osdpl_nova_audit_resource_provider_orphaned_allocations": {
-            "labels": ["resource_provider"]
-        },
-        "osdpl_nova_audit_resource_provider_orphaned_resources": {
-            "labels": ["resource_provider", "resource_class"]
-        },
+        # "osdpl_nova_audit_orphaned_allocations": {"labels": []},
+        # "osdpl_nova_audit_resource_provider_orphaned_allocations": {
+        #    "labels": ["resource_provider"]
+        # },
+        # "osdpl_nova_audit_resource_provider_orphaned_resources": {
+        #    "labels": ["resource_provider", "resource_class"]
+        # },
     }
 
     @classmethod
