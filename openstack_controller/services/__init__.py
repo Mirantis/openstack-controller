@@ -1650,7 +1650,7 @@ class Nova(OpenStackServiceWithCeph, MaintenanceApiMixin):
             "identity": ["osctl"],
         }
         if self.is_service_enabled("block-storage"):
-            r_accounts["block-storage"] = (["cinder"],)
+            r_accounts["block-storage"] = ["cinder"]
         if self.openstack_version not in [
             "queens",
             "rocky",
