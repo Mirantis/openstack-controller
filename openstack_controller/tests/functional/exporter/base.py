@@ -58,6 +58,7 @@ class BaseFunctionalExporterTestCase(
     #  * metric has at least one sample
     #
     # {'<metric_name>': {"labels": []}}
+    # Only metrics that are always present on environment should be added
 
     def setUp(self):
         super().setUp()
