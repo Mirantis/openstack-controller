@@ -111,7 +111,7 @@ tempest_run_tests: '{{ images_base_url }}/openstack/tempest:yoga-jammy-202408190
 tempest-uuids-init: '{{ images_base_url }}/openstack/heat:yoga-jammy-20240819060021'
 glance_metadefs_load: '{{ images_base_url }}/openstack/glance:yoga-jammy-20240819060021'
 memcached: '{{ images_base_url }}/general/memcached:v1.6.23-alpine-20240905100031'
-ingress: '{{ images_base_url }}/openstack/extra/nginx-ingress-controller:1.11.2-alpine-20240905122143'
+ingress: '{{ images_base_url }}/openstack/extra/nginx-ingress-controller:1.11.2-alpine-20240913100326'
 error_pages: '{{ images_base_url }}/openstack/extra/defaultbackend:v1.19.2-77af1ef-20240910090142'
 ironic_manage_networks: '{{ images_base_url }}/openstack/heat:yoga-jammy-20240819060021'
 ironic_retrieve_networks: '{{ images_base_url }}/openstack/heat:yoga-jammy-20240819060021'
