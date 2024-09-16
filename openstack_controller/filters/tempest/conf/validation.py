@@ -10,6 +10,8 @@ class Validation(base_section.BaseSection):
         "floating_ip_range",
         "image_ssh_password",
         "image_ssh_user",
+        "image_alt_ssh_password",
+        "image_alt_ssh_user",
         "ip_version_for_ssh",
         "network_for_ssh",
         "ping_count",
@@ -44,6 +46,14 @@ class Validation(base_section.BaseSection):
 
     @property
     def image_ssh_user(self):
+        pass
+
+    @property
+    def image_alt_ssh_password(self):
+        pass
+
+    @property
+    def image_alt_ssh_user(self):
         pass
 
     @property

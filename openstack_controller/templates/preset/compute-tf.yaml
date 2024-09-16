@@ -358,6 +358,8 @@ services:
             validation:
               image_ssh_password: gocubsgo
               image_ssh_user: cirros
+              image_alt_ssh_password: gocubsgo
+              image_alt_ssh_user: cirros
             network:
               shared_physical_network: false
               floating_network_name: public
