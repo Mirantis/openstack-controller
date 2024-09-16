@@ -11,7 +11,7 @@ cinder_volume_daemonset: '{{ images_base_url }}/openstack/cinder:caracal-jammy-2
 cinder_volume_usage_audit: '{{ images_base_url }}/openstack/cinder:caracal-jammy-20240911095741'
 cloudprober: '{{ images_base_url }}/openstack/osprober:0.0.1-eae04fb'
 cloudprober_openstack_discovery: '{{ images_base_url }}/openstack/openstack-tools:yoga-jammy-20240819060021'
-stepler_run_tests: '{{ images_base_url }}/openstack/stepler:caracal-jammy-20240912101758'
+stepler_run_tests: '{{ images_base_url }}/openstack/stepler:caracal-jammy-20240913184739'
 db_drop: '{{ images_base_url }}/openstack/heat:caracal-jammy-20240911095741'
 db_init: '{{ images_base_url }}/openstack/heat:caracal-jammy-20240911095741'
 dep_check: '{{ images_base_url }}/openstack/extra/kubernetes-entrypoint:v1.0.1-34a4f54-20240910081335'
@@ -111,7 +111,7 @@ tempest_run_tests: '{{ images_base_url }}/openstack/tempest:antelope-jammy-20240
 tempest-uuids-init: '{{ images_base_url }}/openstack/heat:caracal-jammy-20240911095741'
 glance_metadefs_load: '{{ images_base_url }}/openstack/glance:caracal-jammy-20240911095741'
 memcached: '{{ images_base_url }}/general/memcached:v1.6.23-alpine-20240905100031'
-ingress: '{{ images_base_url }}/openstack/extra/nginx-ingress-controller:1.11.2-alpine-20240905122143'
+ingress: '{{ images_base_url }}/openstack/extra/nginx-ingress-controller:1.11.2-alpine-20240913100326'
 error_pages: '{{ images_base_url }}/openstack/extra/defaultbackend:v1.19.2-77af1ef-20240910090142'
 ironic_manage_networks: '{{ images_base_url }}/openstack/heat:caracal-jammy-20240911095741'
 ironic_retrieve_networks: '{{ images_base_url }}/openstack/heat:caracal-jammy-20240911095741'
@@ -147,7 +147,7 @@ placement_db_sync: '{{ images_base_url }}/openstack/placement:caracal-jammy-2024
 keystone_db_sync_expand: '{{ images_base_url }}/openstack/keystone:caracal-jammy-20240911095741'
 keystone_db_sync_migrate: '{{ images_base_url }}/openstack/keystone:caracal-jammy-20240911095741'
 keystone_db_sync_contract: '{{ images_base_url }}/openstack/keystone:caracal-jammy-20240911095741'
-octavia_amphora: '{{ binary_base_url }}/openstack/bin/octavia/amphora-x64-haproxy-caracal-20240911102703.qcow2'
+octavia_amphora: '{{ binary_base_url }}/openstack/bin/octavia/amphora-x64-haproxy-caracal-20240914070102.qcow2'
 etcd: '{{ images_base_url }}/openstack/extra/etcd:v3.5.16-alpine-20240911082430'
 etcd_db_compact: '{{ images_base_url }}/openstack/extra/etcd:v3.5.16-alpine-20240911082430'
 cinder_db_sync_online: '{{ images_base_url }}/openstack/cinder:caracal-jammy-20240911095741'
@@ -184,7 +184,7 @@ mariadb_controller: '{{ images_base_url }}/general/mariadb:10.6.17-focal-2024090
 horizon_mirantis_theme_sha256summ: b2cae3b203801cbdbffa0c98d6807c82e66379729873eb0e486f8730120513b3
 horizon_mirantis_theme_url: '{{ binary_base_url }}/openstack/bin/horizon/mirantis-caracal-1f6ade2-20240408162450.tar.gz'
 ceph_config_helper: '{{ images_base_url }}/openstack/openstack-tools:yoga-jammy-20240819060021'
-octavia_amphora_checksum: 311173f577a35bc970f0e834f430c480
+octavia_amphora_checksum: 1a0d8709a77c6b89adc62ec86af96ca0
 masakari_db_sync: '{{ images_base_url }}/openstack/masakari:caracal-jammy-20240911095741'
 masakari_api: '{{ images_base_url }}/openstack/masakari:caracal-jammy-20240911095741'
 masakari_engine: '{{ images_base_url }}/openstack/masakari:caracal-jammy-20240911095741'
