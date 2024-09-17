@@ -19,6 +19,12 @@ spec:
             dashboard_path: '/usr/local/share/openstack_dashboard'
         policy.d: {}
         horizon:
+          motd:
+            test.json:
+              level: info
+              message: test
+              afterLogin: true
+              beforeLogin: false
           policy:
             aodh: {'alarming_rule1': 'alarming_value1'}
             barbican: {'key-manager_rule1': 'key-manager_value1'}

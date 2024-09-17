@@ -891,6 +891,33 @@ properties:
                 description:
                   type: string
                   description: Theme description showed to user
+          motd:
+            type: object
+            description: Message of the Day files to show to users
+            additionalProperties: false
+            patternProperties:
+              ".*":
+                type: object
+                additionalProperties: false
+                required:
+                - level
+                - message
+                properties:
+                  level:
+                    type: string
+                    enum:
+                    - success
+                    - info
+                    - warning
+                    - error
+                  message:
+                    type: string
+                  beforeLogin:
+                    type: boolean
+                    default: false
+                  afterLogin:
+                    type: boolean
+                    default: true
       keystone:
         type: object
         additionalProperties: false

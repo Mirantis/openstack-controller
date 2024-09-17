@@ -11,6 +11,13 @@ features:
   database:
     local_volumes:
       enabled: true
+  horizon:
+    motd:
+      test:
+        level: info
+        message: test
+        afterLogin: true
+        beforeLogin: false
   messaging:
     components_with_dedicated_messaging:
     - networking
