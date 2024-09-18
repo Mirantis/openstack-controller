@@ -4,6 +4,9 @@ spec:
     name: openstack-neutron-rabbitmq
     values:
       conf:
+        enabled_plugins:
+          - rabbitmq_management
+          - rabbitmq_prometheus
         aux_conf:
           policies:
           - definition:
@@ -71,6 +74,11 @@ spec:
       manifests:
         job_users_create: true
         network_policy: false
+        monitoring:
+          prometheus:
+            configmap_bin: true
+            deployment_exporter: true
+            service_exporter: true
       monitoring:
         prometheus:
           enabled: true

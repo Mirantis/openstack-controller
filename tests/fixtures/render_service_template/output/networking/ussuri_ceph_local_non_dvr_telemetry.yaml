@@ -4,6 +4,9 @@ spec:
     name: openstack-neutron-rabbitmq
     values:
       conf:
+        enabled_plugins:
+          - rabbitmq_management
+          - rabbitmq_prometheus
         aux_conf:
           policies:
           - definition:
@@ -71,6 +74,11 @@ spec:
       manifests:
         job_users_create: true
         network_policy: true
+        monitoring:
+          prometheus:
+            configmap_bin: true
+            deployment_exporter: true
+            service_exporter: true
       network_policy:
         exporter:
           spec:
@@ -82,6 +90,7 @@ spec:
                 ports:
                 - port: 9095
                   protocol: TCP
+
             podSelector:
               matchLabels:
                 application: prometheus_rabbitmq_exporter
@@ -99,6 +108,13 @@ spec:
                      cidr: 192.168.0.0/16
                 ports:
                 - port: 5672
+                  protocol: TCP
+              - from:
+                - namespaceSelector:
+                    matchLabels:
+                      kubernetes.io/metadata.name: stacklight
+                ports:
+                - port: 15692
                   protocol: TCP
             podSelector:
               matchLabels:
