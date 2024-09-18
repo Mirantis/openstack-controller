@@ -249,6 +249,9 @@ spec:
             pattern: ^tasks\.
             priority: 1
             vhost: masakari
+        enabled_plugins:
+          - rabbitmq_management
+          - rabbitmq_prometheus
         prometheus_exporter:
           rabbit_exporters: overview,exchange,node
         users:
@@ -419,6 +422,11 @@ spec:
       manifests:
         job_users_create: true
         network_policy: false
+        monitoring:
+          prometheus:
+            configmap_bin: true
+            deployment_exporter: true
+            service_exporter: true
       monitoring:
         prometheus:
           enabled: true

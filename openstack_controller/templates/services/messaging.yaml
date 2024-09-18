@@ -49,6 +49,13 @@ spec:
         {%- if external_notifications_enabled %}
         service_external: true
         {%- endif %}
+        {%- if stacklight_enabled %}
+        monitoring:
+          prometheus:
+            configmap_bin: true
+            deployment_exporter: true
+            service_exporter: true
+        {%- endif %}
 {%- if spec.features.network_policies.enabled %}
       network_policy:
 {% include 'base/network_policies/messaging.yaml' %}
@@ -56,6 +63,11 @@ spec:
       volume:
         enabled: false
       conf:
+        enabled_plugins:
+          - rabbitmq_management
+        {%- if stacklight_enabled %}
+          - rabbitmq_prometheus
+        {%- endif %}
         users:
           {%- if 'identity' in services %}
           {%- do enabled_vhosts.append('keystone') %}

@@ -285,6 +285,9 @@ spec:
             pattern: ^tasks\.
             priority: 1
             vhost: masakari
+        enabled_plugins:
+          - rabbitmq_management
+          - rabbitmq_prometheus
         prometheus_exporter:
           rabbit_exporters: overview,exchange,node
         users:
@@ -485,6 +488,11 @@ spec:
       manifests:
         job_users_create: true
         network_policy: true
+        monitoring:
+          prometheus:
+            configmap_bin: true
+            deployment_exporter: true
+            service_exporter: true
       network_policy:
         exporter:
           spec:
@@ -528,6 +536,9 @@ spec:
                 - namespaceSelector:
                     matchLabels:
                       kubernetes.io/metadata.name: stacklight
+                ports:
+                - port: 15692
+                  protocol: TCP
             podSelector:
               matchLabels:
                 application: rabbitmq

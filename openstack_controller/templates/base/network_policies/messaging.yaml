@@ -18,7 +18,7 @@
               - from:
 {{ from_all(service_childs[rabbitmq_server].get_np_ports(["amqp", "amqp-tls"])) | indent(16) }}
               - from:
-{{ from_namespaces(lma_ns_list) | indent(16) }}
+{{ from_namespaces(lma_ns_list, service_childs[rabbitmq_server].get_np_ports(["metrics"])) | indent(16) }}
         exporter:
           spec:
             podSelector:
