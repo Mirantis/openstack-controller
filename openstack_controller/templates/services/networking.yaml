@@ -142,12 +142,24 @@ spec:
       manifests:
         job_users_create: true
         network_policy: {{ spec.features.network_policies.enabled }}
+        {%- if stacklight_enabled %}
+        monitoring:
+          prometheus:
+            configmap_bin: true
+            deployment_exporter: true
+            service_exporter: true
+        {%- endif %}
       volume:
         enabled: false
       endpoints:
         cluster_domain_suffix: {{ spec.internal_domain_name }}
 {% include 'base/_messaging_dedicated.yaml' %}
       conf:
+        enabled_plugins:
+          - rabbitmq_management
+        {%- if stacklight_enabled %}
+          - rabbitmq_prometheus
+        {%- endif %}
         users:
          {{ messaging_service_creds(credentials, "neutron", ["/neutron"], enable_notifications=False)  }}
         aux_conf:

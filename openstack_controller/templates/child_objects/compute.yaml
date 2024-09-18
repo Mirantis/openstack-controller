@@ -482,6 +482,9 @@ rabbitmq:
       - port: 25672
         name: clustering
         protocol: TCP
+      - port: 15692
+        name: metrics
+        protocol: TCP
   Job:
     openstack-nova-rabbitmq-cluster-wait:
       hash_fields:

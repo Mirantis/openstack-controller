@@ -87,6 +87,13 @@ spec:
       manifests:
         job_users_create: true
         network_policy: {{ spec.features.network_policies.enabled }}
+        {%- if stacklight_enabled %}
+        monitoring:
+          prometheus:
+            configmap_bin: true
+            deployment_exporter: true
+            service_exporter: true
+        {%- endif %}
 {%- if spec.features.network_policies.enabled %}
       network_policy:
 {% include 'base/network_policies/compute-rabbitmq.yaml' %}
@@ -97,6 +104,11 @@ spec:
         cluster_domain_suffix: {{ spec.internal_domain_name }}
 {% include 'base/_messaging_dedicated.yaml' %}
       conf:
+        enabled_plugins:
+          - rabbitmq_management
+        {%- if stacklight_enabled %}
+          - rabbitmq_prometheus
+        {%- endif %}
         users:
           {{ messaging_service_creds(credentials, "nova", ["/nova"], enable_notifications=False)  }}
         aux_conf:

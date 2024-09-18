@@ -14,6 +14,8 @@
 {{ network_policies["ingress"][rabbitmq_server] | toyaml | indent(14, first=True) }}
               - from:
 {{ from_pod_networks(pod_networks, service_childs[rabbitmq_server].get_np_ports(["amqp"])) | indent(16) }}
+              - from:
+{{ from_namespaces(lma_ns_list, service_childs[rabbitmq_server].get_np_ports(["metrics"])) | indent(16) }}
         exporter:
           spec:
             podSelector:
