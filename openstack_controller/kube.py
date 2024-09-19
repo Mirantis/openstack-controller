@@ -582,12 +582,27 @@ class Job(pykube.Job, HelmBundleMixin, ObjectStatusMixin):
 
     async def rerun(self):
         self.delete(propagation_policy="Background")
-        if not await wait_for_deleted(self):
-            LOG.warning("Failed to delete job %s", self.name)
-            return
-        self._prepare_for_rerun()
-        self.create()
-        LOG.info("New job created: %s", self.name)
+        tries = 10
+        for i in range(tries):
+            try:
+                if not await wait_for_deleted(self):
+                    LOG.warning("Failed to delete job %s", self.name)
+                    return
+                self._prepare_for_rerun()
+                self.create()
+                LOG.info("New job created: %s", self.name)
+                return
+            except Exception as e:
+                LOG.warning(
+                    "Got exception %s while trying to rerun job %s. Retyring %s out of %s",
+                    e,
+                    self.name,
+                    i,
+                    tries,
+                )
+                if i == tries - 1:
+                    raise e
+            await asyncio.sleep(10)
 
 
 class CronJob(pykube.CronJob, HelmBundleMixin):
