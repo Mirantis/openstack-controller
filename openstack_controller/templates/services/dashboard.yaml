@@ -131,6 +131,13 @@ spec:
             dashboard_path: /usr/local/share/openstack_dashboard
 {%- endif %}
         horizon:
+  {%- if horizon_features.get("motd", {}) %}
+          motd:
+          {%- for fname, fcontent in horizon_features.motd.items() %}
+            {{ fname }}.json:
+              {{ fcontent | toyaml | indent(14) }}
+          {%- endfor %}
+  {%- endif %}
           policy:
   {%- for component, component_policy in service_policy.items() %}
             {{ component }}: {{ component_policy }}
