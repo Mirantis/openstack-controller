@@ -102,7 +102,7 @@ prometheus_mysql_exporter_helm_tests: '{{ images_base_url }}/openstack/heat:yoga
 mariadb_backup: '{{ images_base_url }}/general/mariadb:10.6.17-focal-20240909113408'
 mariadb_scripted_test: '{{ images_base_url }}/general/mariadb:10.6.17-focal-20240909113408'
 rabbit_init: '{{ images_base_url }}/openstack/extra/rabbitmq-management:3.12.12-jammy-20240829072728'
-powerdns: '{{ images_base_url }}/openstack/extra/powerdns:4.8-alpine-20240905182339'
+powerdns: '{{ images_base_url }}/openstack/extra/powerdns:4.8-alpine-20240923091141'
 prometheus_rabbitmq_exporter_helm_tests: '{{ images_base_url }}/openstack/heat:yoga-jammy-20240917152059'
 rabbitmq_init: '{{ images_base_url }}/openstack/heat:yoga-jammy-20240917152059'
 rabbitmq: '{{ images_base_url }}/openstack/extra/rabbitmq:3.12.12-jammy-20240829072728'
@@ -121,7 +121,7 @@ ironic_api: '{{ images_base_url }}/openstack/ironic:yoga-jammy-20240917152059'
 ironic_conductor: '{{ images_base_url }}/openstack/ironic:yoga-jammy-20240917152059'
 ironic_pxe: '{{ images_base_url }}/openstack/ironic:yoga-jammy-20240917152059'
 ironic_pxe_init: '{{ images_base_url }}/openstack/ironic:yoga-jammy-20240917152059'
-powerdns_db_sync: '{{ images_base_url }}/openstack/extra/powerdns:4.8-alpine-20240905182339'
+powerdns_db_sync: '{{ images_base_url }}/openstack/extra/powerdns:4.8-alpine-20240923091141'
 neutron_ironic_agent: '{{ images_base_url }}/openstack/neutron:yoga-jammy-20240917152059'
 neutron_bagpipe_bgp: '{{ images_base_url }}/openstack/neutron:yoga-jammy-20240917152059'
 neutron_l2gw: '{{ images_base_url }}/openstack/neutron:yoga-jammy-20240917152059'
@@ -215,7 +215,7 @@ ironic_agent_kernel_checksum: ab718135381e05da26455c216ca698a3
 ironic_agent_initramfs_checksum: 10079f158eb64e837e64cbda34fdee72
 ironic_update_nodes_metadata: '{{ images_base_url }}/openstack/openstack-tools:yoga-jammy-20240917152059'
 ironic_pxe_http: '{{ images_base_url }}/openstack/extra/nginx:1.25.3-20240905140249'
-ingress_tls_proxy: '{{ images_base_url }}/openstack/tls-proxy:jammy-fipster-1.0.0'
+ingress_tls_proxy: '{{ images_base_url }}/openstack/tls-proxy:jammy-fipster-1.0.0.dev1'
 cirros_checksum: f4027b89e99e238184e13089a3155b74
 cirros_raw_checksum: f756328a32fad36f7239223b030caab5
 fedora_checksum: e0713a4f26427691da90701ff7a823da
