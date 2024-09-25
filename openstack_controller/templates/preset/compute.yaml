@@ -244,9 +244,6 @@ services:
             # Kubernetes but the modes is supported from 1.16 version of Kubernetes. The test will be removed from the list once Kubernetes server
             # will be at or later than version v1.16. The bug is described more comprehensively in PRODX-2330
             - (?:octavia_tempest_plugin.tests.scenario.v2.test_ipv6_traffic_ops.IPv6TrafficOperationsScenarioTest)
-            # These tests require four pre-created compute availability zones in a cluster
-            - (?:octavia_tempest_plugin.tests.api.v2.test_availability_zone)
-            - (?:octavia_tempest_plugin.tests.api.v2.test_availability_zone_profile)
            {%- if ovn_enabled  %}
             # Use HTTP scheme that is not supported by OVN
             - (?:heat_tempest_plugin.tests.scenario.test_octavia_lbaas.LoadBalancerTest)
@@ -262,8 +259,6 @@ services:
           {%- endif %}
             # The test below is skipped while upstream bug (https://bugs.launchpad.net/tempest/+bug/1317133) is not fixed.
             - (?:tempest.api.object_storage.test_container_sync_middleware.ContainerSyncMiddlewareTest.test_container_synchronization)
-            # Do not run test that plays plugs real computes to agregates on the fly, dengerous for production PRODX-14770
-            - (?:tempest.scenario.test_aggregates_basic_ops.TestAggregatesBasicOps.test_aggregate_basic_ops)
             # Skip bgpvpn tempest tests until PRODX-34492 will be resolved
             - (?:neutron_tempest_plugin.bgpvpn.scenario.test_bgpvpn_basic.TestBGPVPNBasic.test_bgpvpn_negative_delete_bgpvpn)
             - (?:neutron_tempest_plugin.bgpvpn.scenario.test_bgpvpn_basic.TestBGPVPNBasic.test_bgpvpn_negative_delete_net_association)
@@ -299,9 +294,6 @@ services:
           {%- if neutron_dvr_enabled %}
             # PRODX-28571 - ipv6 metadata doesn't work in DVR case
             - (?:neutron_tempest_plugin.scenario.test_metadata.MetadataTest.test_metadata_routed)
-          {%- endif %}
-          {%- if OSVer[openstack_version] >= OSVer.yoga %}
-            - (?:tempest.api.image.v2.test_images.ImportImagesTest.test_image_glance_direct_import)
           {%- endif %}
             # Tests NOT supported by product
 {% include 'base/_tempest_blacklist_no_supported.yaml' %}
