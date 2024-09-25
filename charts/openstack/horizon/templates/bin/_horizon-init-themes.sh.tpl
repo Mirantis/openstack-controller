@@ -25,15 +25,23 @@ function download_theme() {
   local sha256summ="$3"
 
   local theme_file="${CACHE_DIRECTORY}/${theme_name}/${url##*/}"
+  local theme_folder="${CACHE_DIRECTORY}/${theme_name}/${sha256summ}"
 
-  if ! ls ${CACHE_DIRECTORY}/${theme_name}/${sha256summ}; then
+  if [[ -d ${theme_folder} && ! -f ${theme_folder}.completed ]]; then
+      echo "Download of ${theme_name} was not finished successfully. Redownloading."
+      rm -rf ${CACHE_DIRECTORY}/${theme_name}
+  fi
+
+  if ! ls ${theme_folder}; then
     mkdir -p ${CACHE_DIRECTORY}/${theme_name}
     curl --connect-timeout 10 --retry 10 --retry-delay 60 -sSL $url -o $theme_file
     if [[ "$(sha256sum $theme_file | awk '{print $1}')" == "${sha256summ}" ]]; then
         mkdir -p ${CACHE_DIRECTORY}/${theme_name}/${sha256summ}
         tar -xf $theme_file -C ${CACHE_DIRECTORY}/${theme_name}/${sha256summ}
+        touch ${theme_folder}.completed
     else
       echo "Downloades theme checksumm mismach."
+      rm -f $theme_file
       exit 1
     fi
   fi
