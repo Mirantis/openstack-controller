@@ -90,19 +90,13 @@ class HelmManager:
         node_ip = os.environ["NODE_IP"]
         return utils.substitute_local_proxy_hostname(repo, node_ip)
 
-    def get_chart_url(self, repo, chart, version):
-        chart_name = f"{chart}-{version}.tgz"
+    def get_chart_url(self, chart):
         chart_group = [
             chart_group
             for chart_group, charts in constants.CHART_GROUP_MAPPING.items()
             if chart in charts
         ][0]
-        cache_file = os.path.join(
-            settings.HELM_CHARTS_DIR, chart_group, chart_name
-        )
-        if os.path.isfile(cache_file):
-            return cache_file
-        return f"{repo}/{chart_name}"
+        return os.path.join(settings.HELM_CHARTS_DIR, chart_group, chart)
 
     async def _guess_and_delete(self, stderr):
         immutable_pattern = r'cannot patch "(.*?)" with kind ([a-zA-Z]+):'
@@ -256,8 +250,7 @@ class HelmManager:
         self, name, values, repo, chart, version, args=None
     ):
         args = args or []
-        repo = self._substitute_local_proxy(repo)
-        chart_url = self.get_chart_url(repo, chart, version)
+        chart_url = self.get_chart_url(chart)
         # Avoid using --reuse-values, it drops values for overrides related upstream
         # https://github.com/helm/helm/issues/10214
         with tempfile.NamedTemporaryFile(
@@ -282,8 +275,7 @@ class HelmManager:
 
     async def install(self, name, values, repo, chart, version, args=None):
         args = args or []
-        repo = self._substitute_local_proxy(repo)
-        chart_url = self.get_chart_url(repo, chart, version)
+        chart_url = self.get_chart_url(chart)
         with tempfile.NamedTemporaryFile(
             mode="w", prefix=name, delete=True
         ) as tmp:

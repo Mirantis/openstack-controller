@@ -29,6 +29,10 @@ fi
 
 . tools/fill_internal_svc_ips.sh
 
+echo "Building helm charts and dependencies"
+for req in $(ls -d charts/{openstack,infra}/*/); do pushd $req; helm3 dep up; popd; done > /dev/null 2>&1
+
+
 available_controllers=(
     "-m openstack_controller.controllers.node"
     "-m openstack_controller.controllers.openstackdeployment"

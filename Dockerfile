@@ -1,7 +1,10 @@
 ARG FROM=docker-remote.docker.mirantis.net/ubuntu:jammy
 
 FROM $FROM as builder
+SHELL ["/bin/bash", "-c"]
 ARG TEST_IMAGE
+ARG HELM_BINARY="https://binary.mirantis.com/openstack/bin/utils/helm/helm-v3.16.1-linux-amd64"
+
 # NOTE(pas-ha) need Git for pbr to install from source checkout w/o sdist
 ADD https://bootstrap.pypa.io/get-pip.py /tmp/get-pip.py
 
@@ -15,6 +18,7 @@ RUN apt-get install -y \
         libffi-dev \
         libssl-dev \
         libpcre3-dev \
+        wget \
         git; \
     python3 /tmp/get-pip.py
 ADD . /opt/operator
@@ -31,6 +35,8 @@ RUN set -ex; \
             popd; \
             echo "$req_name==$req_version" >> /opt/operator/source-requirements.txt; \
         done; \
+    else \
+        touch /opt/operator/source-requirements.txt; \
     fi; \
     if [[ -n "${EXTRA_DEPS}" ]]; then \
         pip wheel --wheel-dir /opt/wheels --find-links /opt/wheels $EXTRA_DEPS; \
@@ -47,8 +53,18 @@ RUN set -ex; \
     fi; \
     pip wheel --wheel-dir /opt/wheels --find-links /opt/wheels /opt/operator${OPENSTACK_CONTROLLER_EXTRAS}
 
+RUN wget -q -O /usr/local/bin/helm3 ${HELM_BINARY}; \
+    chmod +x /usr/local/bin/helm3
+
+RUN set -ex; \
+    for req in $(ls -d /opt/operator/charts/{openstack,infra}/*/); do \
+        pushd $req; \
+        helm3 dep up; \
+        popd; \
+    done
+
 FROM $FROM
-ARG HELM_BINARY="https://binary.mirantis.com/openstack/bin/utils/helm/helm-v3.16.1-linux-amd64"
+SHELL ["/bin/bash", "-c"]
 ARG TEST_IMAGE
 ARG USER=osctl
 ARG UID=42424
@@ -59,7 +75,10 @@ COPY --from=builder /opt/operator/uwsgi.ini /opt/operator/uwsgi.ini
 COPY --from=builder /opt/operator/source-requirements.txt /opt/operator/source-requirements.txt
 COPY --from=builder /opt/operator/image_tag.txt /opt/operator/image_tag.txt
 COPY --from=builder /opt/operator/etc/openstack-controller/ /etc/openstack-controller/
-COPY --from=builder /opt/operator/tools/sync_helm_charts.py /opt/operator/sync_helm_charts.py
+COPY --from=builder /opt/operator/charts/openstack/ /opt/operator/charts/openstack/
+COPY --from=builder /opt/operator/charts/infra/ /opt/operator/charts/infra/
+COPY --from=builder /usr/local/bin/helm3 /usr/local/bin/helm3
+
 ADD kopf-patches /tmp/kopf-patches
 RUN apt-get update; \
     apt-get -y upgrade
@@ -96,10 +115,6 @@ RUN set -ex; \
     cd -; \
     groupadd -g ${UID} ${USER}; \
     useradd -u ${UID} -g ${USER} -m -d /var/lib/${USER} -c "${USER} user" ${USER}
-RUN wget -q -O /usr/local/bin/helm3 ${HELM_BINARY}; \
-    chmod +x /usr/local/bin/helm3
-
-RUN python3 /opt/operator/sync_helm_charts.py
 
 RUN rm -rvf /tmp/kopf-patches
 RUN rm -rvf /opt/wheels; \
