@@ -112,3 +112,9 @@ venv.bak/
 #vim
 *.swo
 *.swp
+
+charts/openstack/*/charts
+charts/infra/*/charts
+charts/openstack/*/requirements.lock
+charts/infra/*/requirements.lock
+
