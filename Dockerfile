@@ -60,6 +60,7 @@ RUN set -ex; \
     for req in $(ls -d /opt/operator/charts/{openstack,infra}/*/); do \
         pushd $req; \
         helm3 dep up; \
+        helm3 lint; \
         popd; \
     done
 
