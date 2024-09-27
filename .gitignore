@@ -117,4 +117,5 @@ charts/openstack/*/charts
 charts/infra/*/charts
 charts/openstack/*/requirements.lock
 charts/infra/*/requirements.lock
+virtual_lab/ansible/inventory/artifacts/
 

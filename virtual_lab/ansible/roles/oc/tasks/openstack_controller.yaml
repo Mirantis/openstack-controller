@@ -1,0 +1,22 @@
+- name: Make openstack controller chart dependencies
+  ansible.builtin.shell:
+    cmd: helm dep up
+    chdir: /root/openstack-controller/charts/openstack-operator
+
+- name: Deploy openstack-controller
+  kubernetes.core.helm:
+    kubeconfig: "{{ kubeconfig }}"
+    name: openstack-controller
+    chart_ref: /root/openstack-controller/charts/openstack-operator
+    release_namespace: osh-system
+    create_namespace: true
+    values:
+      global:
+        dockerBaseUrl: "{{ oc_images_base_url }}"
+        helmBaseUrl: "{{ oc_binary_base_url }}"
+        podNetworks:
+          - cidr: 192.168.0.0/16
+      image:
+        fullName: "{{ oc_images_base_url }}/openstack/openstack-controller:{{ oc_image_tag }}"
+  tags:
+   - oc

@@ -1,0 +1,54 @@
+---
+- name: Setup ansible dependencies
+  hosts: controllers[0]
+  become: true
+  become_user: root
+  tasks:
+    - name: install pre-requisites
+      pip:
+        name:
+          - kubernetes
+
+- name: Setup infrastructure requirements
+  hosts: controllers:computes
+  become: true
+  become_user: root
+  pre_tasks:
+    - name: Set node role fact
+      set_fact:
+        oc_k8s_controller_node: "{%- if ansible_hostname in groups.controllers %}True{%- endif %}"
+        oc_k8s_compute_node: "{%- if ansible_hostname in groups.computes %}True{%- endif %}"
+    - name: Setup networking
+      include_role:
+        name: oc
+        tasks_from: network
+
+- name: Deploy initial controllers
+  hosts: controllers[0]
+  become: true
+  become_user: root
+  tasks:
+  - name: Initialize clients
+    include_role:
+      name: oc
+      tasks_from: clients
+  - name: Label nodes
+    include_role:
+      name: oc
+      tasks_from: k8s-label-nodes
+  - name: Setup LVP
+    include_role:
+      name: oc
+      tasks_from: lvp
+  - name: Setup openstack controller
+    include_role:
+      name: oc
+      tasks_from: openstack_controller
+  - name: Setup osdpl certs
+    include_role:
+      name: oc
+      tasks_from: certs
+  - name: Setup osdpl
+    include_role:
+      name: oc
+      tasks_from: osdpl

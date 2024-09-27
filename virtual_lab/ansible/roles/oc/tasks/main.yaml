@@ -1,0 +1,55 @@
+- name: Create a directory if it does not exist
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: '0750'
+  loop:
+    - "{{ oc_k8s_objects_path }}"
+    - "{{ oc_ca_certs_path }}"
+  delegate_to: initial_controller
+
+- name: Include network tasks
+  ansible.builtin.include_tasks:
+    file: network.yaml
+  tags:
+  - oc_network
+
+- name: Include clients tasks
+  ansible.builtin.include_tasks:
+    file: clients.yaml
+  tags:
+  - oc_clients
+  delegate_to: initial_controller
+
+- name: Label k8s nodes
+  ansible.builtin.include_tasks:
+    file: k8s-label-nodes.yaml
+  delegate_to: initial_controller
+
+- name: Include lvp tasks
+  ansible.builtin.include_tasks:
+    file: lvp.yaml
+  tags:
+  - oc_lvp
+  delegate_to: initial_controller
+
+- name: Deploy openstack-controller
+  ansible.builtin.include_tasks:
+    file: openstack_controller.yaml
+  tags:
+  - oc
+  delegate_to: initial_controller
+
+- name: Include certs tasks
+  ansible.builtin.include_tasks:
+    file: certs.yaml
+  tags:
+  - oc_osdpl_certs
+  delegate_to: initial_controller
+
+- name: Include osdpl tasks
+  ansible.builtin.include_tasks:
+    file: osdpl.yaml
+  tags:
+  - oc_osdpl
+  delegate_to: initial_controller
