@@ -108,10 +108,6 @@ pod:
           capabilities:
             drop:
               - ALL
-            # nginx-ingress-controller image has cap NET_BIND_SERVICE set
-            # on binaries
-            add:
-              - NET_BIND_SERVICE
         ingress_vip:
           capabilities:
             add:
