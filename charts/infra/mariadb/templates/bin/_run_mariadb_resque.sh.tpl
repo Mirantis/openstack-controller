@@ -235,8 +235,13 @@ function unlock {
 function post_operation_info(){
     SPENT=$(( $(date +%s) - START ))
     echo "Took ${SPENT} seconds. Completed: $(date)"
-    echo "Backup directories tree:"
-    tree -d "${BACKDIR}"
+    for d in ${BACKDIR} /var/lib/mysql; do
+        if [[ -d ${d} ]]; then
+            echo "${d} directories tree:"
+            tree -d "${d}"
+            du -sh ${d}
+        fi
+    done
 }
 
 function set_global_variables(){
