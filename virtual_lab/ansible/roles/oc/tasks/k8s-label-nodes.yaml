@@ -1,21 +1,21 @@
-- name: label k8s controllers
+- name: label OS controllers
   kubernetes.core.k8s:
     kubeconfig: "{{ kubeconfig }}"
     definition:
       apiVersion: v1
       kind: Node
       metadata:
-        name: "{{ ansible_hostname }}"
+        name: "{{ item }}"
         labels: "{{ oc_k8s_node_labels['controller'] }}"
-  when: oc_k8s_controller_node
+  loop: "{{ groups.controllers }}"
 
-- name: label k8s computes
+- name: label OS computes
   kubernetes.core.k8s:
     kubeconfig: "{{ kubeconfig }}"
     definition:
       apiVersion: v1
       kind: Node
       metadata:
-        name: "{{ ansible_hostname }}"
+        name: "{{ item }}"
         labels: "{{ oc_k8s_node_labels['compute'] }}"
-  when: oc_k8s_compute_node
+  loop: "{{ groups.computes }}"
