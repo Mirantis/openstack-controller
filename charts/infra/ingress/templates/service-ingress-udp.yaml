@@ -14,6 +14,8 @@ limitations under the License.
 
 {{- if .Values.manifests.service_ingress }}
 {{- $envAll := . }}
+
+{{- if not (empty $envAll.Values.conf.services.udp) }}
 {{- $serviceName := tuple "ingress" "internal" . | include "helm-toolkit.endpoints.hostname_short_endpoint_lookup" }}
 ---
 apiVersion: v1
@@ -27,42 +29,22 @@ metadata:
   annotations:
 {{ tuple $envAll "ingress_external" | include "helm-toolkit.snippets.kubernetes_metadata_annotations" | indent 4 }}
     metallb.universe.tf/allow-shared-ip: {{ $serviceName }}
-  name: {{ $serviceName }}
+  name: {{ $serviceName }}-udp
 spec:
 {{- if and .Values.network.host_namespace .Values.network.vip.manage }}
   clusterIP: None
 {{- end }}
   ports:
-{{- if .Values.manifests.tls_proxy }}
-  - name: https
-    port: {{ tuple "tls_proxy" "internal" "proxy" . | include "helm-toolkit.endpoints.endpoint_port_lookup" }}
-    protocol: TCP
-    targetPort: {{ tuple "tls_proxy" "internal" "proxy" . | include "helm-toolkit.endpoints.endpoint_port_lookup" }}
-{{- else }}
-  - name: http
-    port: {{ tuple "ingress" "internal" "http" . | include "helm-toolkit.endpoints.endpoint_port_lookup" }}
-    protocol: TCP
-    targetPort: {{ tuple "ingress" "internal" "http" . | include "helm-toolkit.endpoints.endpoint_port_lookup" }}
-  - name: https
-    port: {{ tuple "ingress" "internal" "https" . | include "helm-toolkit.endpoints.endpoint_port_lookup" }}
-    protocol: TCP
-    targetPort: {{ tuple "ingress" "internal" "https" . | include "helm-toolkit.endpoints.endpoint_port_lookup" }}
-{{- end }}
-  - name: status
-    port: {{ tuple "ingress" "internal" "status" . | include "helm-toolkit.endpoints.endpoint_port_lookup" }}
-    protocol: TCP
-    targetPort: {{ tuple "ingress" "internal" "status" . | include "helm-toolkit.endpoints.endpoint_port_lookup" }}
-  {{- if not (empty $envAll.Values.conf.services.tcp) }}
-  {{range $key, $value := $envAll.Values.conf.services.tcp -}}
+  {{range $key, $value := $envAll.Values.conf.services.udp -}}
   - name: {{ cat ((( $value | split "/" )._1 | split ":" )._0  | trunc 8 ) $key | nospace | quote }}
     port: {{ $key }}
-    protocol: TCP
+    protocol: UDP
     targetPort: {{ $key }}
-  {{ end -}}
   {{- end }}
 {{- if not (and .Values.network.host_namespace .Values.network.vip.manage) }}
   selector:
 {{ tuple $envAll "ingress" "server" | include "helm-toolkit.snippets.kubernetes_metadata_labels" | indent 4 }}
 {{- end }}
 {{ .Values.network | include "helm-toolkit.snippets.service_params" | indent 2 }}
+{{- end }}
 {{- end }}
