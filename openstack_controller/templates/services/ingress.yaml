@@ -46,6 +46,13 @@ spec:
           bind-address: "127.0.0.1"
           use-proxy-protocol: "true"
 {%- endif %}
+{%- if 'dns' in spec.features.services %}
+        services:
+          tcp:
+            "53": openstack/designate-powerdns:53
+          udp:
+            "53": openstack/designate-powerdns:53
+{%- endif %}
       pod:
         probes:
           server:
