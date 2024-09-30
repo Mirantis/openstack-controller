@@ -3,8 +3,11 @@ all:
   vars:
     ansible_ssh_user: ubuntu
     k0s_worker_on_controller: true
+    k0s_no_taints: true
+    ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
     oc_binary_base_url: https://artifactory.mcp.mirantis.net/artifactory/binary-dev-kaas-virtual
     oc_images_base_url: docker-dev-kaas-virtual.docker.mirantis.net
+
   hosts:
     oc-virtual-lab-server-ctl-01:
       ansible_host: 127.0.0.1
@@ -16,6 +19,8 @@ all:
     controllers:
       hosts:
         oc-virtual-lab-server-ctl-01:
-    k0s_controllers:
+    k8s_controllers:
       hosts:
         oc-virtual-lab-server-ctl-01:
+    k8s_workers:
+      hosts:
