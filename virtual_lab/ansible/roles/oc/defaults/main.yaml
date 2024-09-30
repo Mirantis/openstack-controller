@@ -1,0 +1,29 @@
+oc_k8s_node_labels:
+  controller:
+    openstack-control-plane: enabled
+    openvswitch: enabled
+  compute:
+    openstack-compute-node: enabled
+    openvswitch: enabled
+kubeconfig: "{{ inventory_dir }}/artifacts/k0s-kubeconfig.yml"
+oc_k8s_objects_path: /src/k8s
+oc_ca_certs_path: /src/ca
+oc_images_base_url: mirantis.azurecr.io
+oc_binary_base_url: https://binary.mirantis.com
+oc_clients_helm_release: v3.16.1
+oc_clients_kubectl_release: v1.31.0
+oc_osdpl_live_migration_interface: ens3
+oc_osdpl_tunnel_interface: ens3
+oc_osdpl_floating_network:
+  enabled: True
+  physnet: physnet1
+  subnet:
+    range: 10.11.12.0/24
+    pool_start: 10.11.12.100
+    pool_end: 10.11.12.200
+    gateway: 10.11.12.11
+oc_osdpl_openstack_version: caracal
+oc_image_tag: "0.17.2-79de3d7c"
+oc_repo: null
+oc_version: master
+oc_refspec: null

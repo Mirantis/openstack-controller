@@ -1,0 +1,55 @@
+- name: Read osdpl ca
+  slurp:
+    src: "{{ oc_ca_certs_path }}/ca-certificate.pem"
+  register: osdpl_ca_certificate_result
+
+- name: Read osdpl key
+  slurp:
+    src: "{{ oc_ca_certs_path }}/osdpl.key"
+  register: osdpl_api_key_result
+
+- name: Read osdpl cert
+  slurp:
+    src: "{{ oc_ca_certs_path }}/osdpl.pem"
+  register: osdpl_api_cert_result
+
+- name: Template a file secret /src/k8s/secret-osdpl-hidden.yaml
+  ansible.builtin.template:
+    src: secret-osdpl-hidden.j2
+    dest: /src/k8s/secret-osdpl-hidden.yaml
+    owner: bin
+    group: root
+    mode: '0644'
+  vars:
+    api_key: "{{ osdpl_api_key_result.content }}"
+    ca_cert: "{{ osdpl_ca_certificate_result.content }}"
+    api_cert: "{{ osdpl_api_cert_result.content }}"
+  register: osdpl_hidden
+
+- name: Create osdpl-hiden secret
+  kubernetes.core.k8s:
+    kubeconfig: "{{ kubeconfig }}"
+    state: present
+    src: "{{oc_k8s_objects_path }}/secret-osdpl-hidden.yaml"
+  when: osdpl_hidden is changed
+
+- name: Template a file osdpl /src/k8s/osdpl.yaml
+  ansible.builtin.template:
+    src: osdpl.j2
+    dest: "{{oc_k8s_objects_path }}/osdpl.yaml"
+    owner: bin
+    group: root
+    mode: '0644'
+  vars:
+    openstack_controller:
+      osdpl:
+        binary_base_url: "{{ oc_binary_base_url }}"
+        images_base_url: "{{ oc_images_base_url }}"
+  register: osdpl
+
+- name: Create OpenStackDeployment
+  kubernetes.core.k8s:
+    kubeconfig: "{{ kubeconfig }}"
+    state: present
+    src: "{{oc_k8s_objects_path }}/osdpl.yaml"
+  when: osdpl is changed
