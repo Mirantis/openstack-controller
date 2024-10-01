@@ -33,21 +33,21 @@ spec:
   clusterIP: None
 {{- end }}
   ports:
-{{- if .Values.manifests.tls_proxy }}
-  - name: https
-    port: {{ tuple "tls_proxy" "internal" "proxy" . | include "helm-toolkit.endpoints.endpoint_port_lookup" }}
-    protocol: TCP
-    targetPort: {{ tuple "tls_proxy" "internal" "proxy" . | include "helm-toolkit.endpoints.endpoint_port_lookup" }}
-{{- else }}
+{{- if not .Values.manifests.tls_proxy }}
   - name: http
     port: {{ tuple "ingress" "internal" "http" . | include "helm-toolkit.endpoints.endpoint_port_lookup" }}
     protocol: TCP
     targetPort: {{ tuple "ingress" "internal" "http" . | include "helm-toolkit.endpoints.endpoint_port_lookup" }}
+{{- end }}
   - name: https
+{{- if .Values.manifests.tls_proxy }}
+    port: {{ tuple "tls_proxy" "internal" "proxy" . | include "helm-toolkit.endpoints.endpoint_port_lookup" }}
+    targetPort: {{ tuple "tls_proxy" "internal" "proxy" . | include "helm-toolkit.endpoints.endpoint_port_lookup" }}
+{{- else }}
     port: {{ tuple "ingress" "internal" "https" . | include "helm-toolkit.endpoints.endpoint_port_lookup" }}
-    protocol: TCP
     targetPort: {{ tuple "ingress" "internal" "https" . | include "helm-toolkit.endpoints.endpoint_port_lookup" }}
 {{- end }}
+    protocol: TCP
   - name: status
     port: {{ tuple "ingress" "internal" "status" . | include "helm-toolkit.endpoints.endpoint_port_lookup" }}
     protocol: TCP

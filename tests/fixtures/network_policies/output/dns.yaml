@@ -9,7 +9,7 @@ dns:designate:StatefulSet:designate-api:
         application: keystone
         component: client
   - podSelector:
-      matchLabels:
+      matchLabels: &id001
         application: ingress
         component: server
   - podSelector:
@@ -35,3 +35,12 @@ dns:designate:StatefulSet:designate-api:
   ports:
   - port: 9001
     protocol: TCP
+dns:designate:StatefulSet:designate-mdns:
+- from:
+  - podSelector:
+      matchLabels: *id001
+  ports:
+  - port: 53
+    protocol: TCP
+  - port: 53
+    protocol: UDP

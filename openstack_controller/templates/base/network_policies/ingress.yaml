@@ -11,6 +11,6 @@
             - Ingress
             ingress:
               - from:
-{{ from_all(service_childs[ingress_server].get_np_ports(["http","https"])) | indent(16) }}
+{{ from_all(service_childs[ingress_server].get_np_ports(["http","https","pdns-tcp", "pdns-udp", "tls-proxy"])) | indent(16) }}
               - from:
 {{ from_namespaces(lma_ns_list, service_childs[ingress_server].get_np_ports(["healthz"])) | indent(16) }}
