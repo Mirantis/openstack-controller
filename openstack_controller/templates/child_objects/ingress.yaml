@@ -20,6 +20,7 @@ ingress:
           - {{ to_child_object("baremetal", "ironic", "Deployment", "ironic-api", ["m-api"]) | indent(12)}}
           - {{ to_child_object("shared-file-system", "manila", "Deployment", "manila-api", ["m-api"]) | indent(12)}}
           - {{ to_child_object("dns", "designate", "StatefulSet", "designate-api", ["dns-api"]) | indent(12)}}
+          - {{ to_child_object("dns", "designate", "StatefulSet", "designate-mdns", ["pdns-tcp", "pdns-udp"]) | indent(12)}}
           - {{ to_child_object("key-manager", "barbican", "Deployment", "barbican-api", ["b-api"]) | indent(12)}}
           - {{ to_child_object("load-balancer", "octavia", "Deployment", "octavia-api", ["o-api"]) | indent(12)}}
           - {{ to_child_object("dashboard", "horizon", "Deployment", "horizon", ["web"]) | indent(12)}}
@@ -41,6 +42,12 @@ ingress:
           protocol: TCP
         - name: healthz
           port: 10254
+          protocol: TCP
+        - name: pdns-udp
+          port: 53
+          protocol: UDP
+        - name: pdns-tcp
+          port: 53
           protocol: TCP
   Deployment:
     ingress-error-pages:
