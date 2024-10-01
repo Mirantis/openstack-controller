@@ -421,6 +421,18 @@ spec:
             {{- if .Values.network.host_namespace }}
               hostPort: {{ tuple "ingress" "internal" "server" . | include "helm-toolkit.endpoints.endpoint_port_lookup" }}
             {{- end }}
+            {{- if not (empty $envAll.Values.conf.services.tcp) }}
+            {{range $key, $value := $envAll.Values.conf.services.tcp -}}
+            - containerPort: {{ $key }}
+              protocol: TCP
+            {{ end -}}
+            {{- end }}
+            {{- if not (empty .Values.conf.services.udp) }}
+            {{range $key, $value := .Values.conf.services.udp -}}
+            - containerPort: {{ $key }}
+              protocol: UDP
+            {{ end -}}
+            {{- end }}
           command:
             - /tmp/ingress-controller.sh
             - start
