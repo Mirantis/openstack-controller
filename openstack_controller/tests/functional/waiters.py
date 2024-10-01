@@ -104,17 +104,29 @@ def wait_resource_field(
             raise TimeoutError(message)
 
 
-def wait_resource_deleted(get_resource_func, resource_id, timeout, interval):
-    start_time = time.time()
-    try:
-        while get_resource_func(resource_id):
-            if time.time() - start_time >= timeout:
-                message = f"Timed out while waiting for resource {resource_id} is deleted"
-                LOG.error(message)
-                raise TimeoutError(message)
-            time.sleep(interval)
-    except openstack.exceptions.ResourceNotFound:
-        return
+def wait_resource_deleted(
+    get_resource_func,
+    resource_id,
+    timeout,
+    interval,
+    deleted_key=None,
+    deleted_value="DELETED",
+):
+    start_time = int(time.time())
+    while int(time.time()) - start_time < timeout:
+        try:
+            responce = get_resource_func(resource_id)
+        except openstack.exceptions.ResourceNotFound:
+            return
+        if (responce is None) or (
+            deleted_key and responce.get(deleted_key) == deleted_value
+        ):
+            return
+        time.sleep(interval)
+
+    message = f"Timed out while waiting for resource {resource_id} is deleted"
+    LOG.error(message)
+    raise TimeoutError(message)
 
 
 def wait_cinder_pool_updated(

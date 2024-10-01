@@ -240,6 +240,7 @@ class BaseFunctionalTestCase(TestCase):
             lb["id"],
             CONF.LB_OPERATION_TIMEOUT,
             CONF.LB_OPERATION_INTERVAL,
+            "provisioning_status",
         )
         cls.addClassCleanup(
             cls.ocm.oc.load_balancer.delete_load_balancer, lb["id"]
