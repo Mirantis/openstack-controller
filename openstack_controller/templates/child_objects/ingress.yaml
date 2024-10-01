@@ -20,6 +20,7 @@ ingress:
           - {{ to_child_object("baremetal", "ironic", "Deployment", "ironic-api", ["m-api"]) | indent(12)}}
           - {{ to_child_object("shared-file-system", "manila", "Deployment", "manila-api", ["m-api"]) | indent(12)}}
           - {{ to_child_object("dns", "designate", "StatefulSet", "designate-api", ["dns-api"]) | indent(12)}}
+          - {{ to_child_object("dns", "designate", "StatefulSet", "designate-mdns", ["pdns-tcp", "pdns-udp"]) | indent(12)}}
           - {{ to_child_object("key-manager", "barbican", "Deployment", "barbican-api", ["b-api"]) | indent(12)}}
           - {{ to_child_object("load-balancer", "octavia", "Deployment", "octavia-api", ["o-api"]) | indent(12)}}
           - {{ to_child_object("dashboard", "horizon", "Deployment", "horizon", ["web"]) | indent(12)}}
@@ -37,10 +38,19 @@ ingress:
           port: 80
           protocol: TCP
         - name: https
-          port: 443
+          port: 5443
           protocol: TCP
         - name: healthz
           port: 10254
+          protocol: TCP
+        - name: pdns-udp
+          port: 53
+          protocol: UDP
+        - name: pdns-tcp
+          port: 53
+          protocol: TCP
+        - name: tls-proxy
+          port: 443
           protocol: TCP
   Deployment:
     ingress-error-pages:
