@@ -41,10 +41,17 @@ spec:
           # NOTE(vsaienko) jwt tokens might be too big
           client-header-buffer-size: 10k
           large-client-header-buffers: 4 16k
+          bind-address: "0.0.0.0"
 {%- if is_tls_proxy_enabled %}
           ssl-redirect: "false"
-          bind-address: "127.0.0.1"
           use-proxy-protocol: "true"
+{%- endif %}
+{%- if 'dns' in spec.features.services %}
+        services:
+          tcp:
+            "53": openstack/designate-powerdns:53
+          udp:
+            "53": openstack/designate-powerdns:53
 {%- endif %}
       pod:
         probes:

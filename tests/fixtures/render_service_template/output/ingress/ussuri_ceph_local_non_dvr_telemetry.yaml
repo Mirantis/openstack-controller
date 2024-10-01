@@ -10,10 +10,15 @@ spec:
           nginx-status-ipv4-whitelist: 0.0.0.0/0
           client-header-buffer-size: 10k
           large-client-header-buffers: 4 16k
-          bind-address: 127.0.0.1
+          bind-address: 0.0.0.0
           large-client-header-buffers: 4 16k
           ssl-redirect: "false"
           use-proxy-protocol: "true"
+        services:
+          tcp:
+            "53": openstack/designate-powerdns:53
+          udp:
+            "53": openstack/designate-powerdns:53
       endpoints:
         cluster_domain_suffix: cluster.local
         ingress:
@@ -76,6 +81,12 @@ spec:
                     cidr: 0.0.0.0/0
                 ports:
                 - port: 80
+                  protocol: TCP
+                - port: 5443
+                  protocol: TCP
+                - port: 53
+                  protocol: UDP
+                - port: 53
                   protocol: TCP
                 - port: 443
                   protocol: TCP
