@@ -13,11 +13,6 @@ spec:
           large-client-header-buffers: 4 16k
           ssl-redirect: "false"
           use-proxy-protocol: "true"
-        services:
-          tcp:
-            "53": openstack/designate-powerdns:53
-          udp:
-            "53": openstack/designate-powerdns:53
       endpoints:
         cluster_domain_suffix: cluster.local
         ingress:
