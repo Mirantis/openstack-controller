@@ -12,4 +12,4 @@
           controllers: "{{ groups.k8s_controllers[1:] }}"
           workers: "{{ groups.k8s_workers }}"
   roles:
-    - role: k0s
+    - role: bodsch.k0s
