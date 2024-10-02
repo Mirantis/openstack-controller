@@ -4,6 +4,7 @@ from uuid import uuid4
 
 from openstack_controller import constants
 from openstack_controller.tests.functional.exporter import base
+from packaging.version import Version
 
 RESOURCES = {"VCPU": 1, "MEMORY_MB": 64, "DISK_GB": 1}
 
@@ -26,6 +27,11 @@ class NovaAuditCollectorFunctionalTestCase(
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
+        if Version(cls.osdpl.obj["status"]["version"]) < Version("0.17.1"):
+            raise unittest.SkipTest(
+                "This nova audit tests require openstack-controller version "
+                "0.17.1 and greater"
+            )
         openstack_version = cls.osdpl.obj["spec"]["openstack_version"]
         if (
             constants.OpenStackVersion[openstack_version]
