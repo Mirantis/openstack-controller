@@ -57,3 +57,5 @@
     include_role:
       name: oc
       tasks_from: osdpl
+    tags:
+      - wait

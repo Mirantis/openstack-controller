@@ -53,3 +53,19 @@
     state: present
     src: "{{oc_k8s_objects_path }}/osdpl.yaml"
   when: osdpl is changed
+
+- name: Install the latest jq
+  ansible.builtin.package:
+    name:
+      - jq
+    state: latest
+
+- name: Wait OpenStackDeployment is applied
+  environment:
+    KUBECONFIG: "{{ kubeconfig }}"
+    NAMESPACE: openstack
+    OSDPL_NAME: osh-dev
+  ansible.builtin.script: osdpl-wait.sh
+  tags:
+  - never
+  - wait
