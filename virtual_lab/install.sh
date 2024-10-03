@@ -27,4 +27,5 @@ ansible-playbook -i  ${INVENTORY_FILE} k0s-install.yaml -vvv
 
 mkdir -p /root/.kube; cp ${OPENSTACK_CONTROLLER_DIR}/virtual_lab/ansible/inventory/artifacts/k0s-kubeconfig.yml /root/.kube/config
 
+ansible-playbook -i  ${INVENTORY_FILE} oc-install.yaml -vvv
 ansible-playbook -i  ${INVENTORY_FILE} oc-install.yaml -vvv --tags wait
