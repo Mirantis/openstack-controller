@@ -2446,6 +2446,113 @@ def test_cinder_extra_backends_sts(client):
     )
 
 
+def _manila_backend_specific_request(client, backends_conf, result):
+    req = copy.deepcopy(ADMISSION_REQ)
+    req["request"]["object"]["spec"]["features"]["manila"] = {
+        "share": {"backends": backends_conf}
+    }
+    req["request"]["object"]["spec"]["features"]["services"].append(
+        "shared-file-system"
+    )
+    req["request"]["object"]["spec"]["openstack_version"] = "caracal"
+    response = client.simulate_post("/validate", json=req)
+    assert response.status == falcon.HTTP_OK
+    if result:
+        assert response.json["response"]["allowed"]
+    else:
+        assert response.json["response"]["allowed"] is False
+
+
+def test_manila_backends_sts(client):
+    # Configs are valid
+    _manila_backend_specific_request(
+        client,
+        {
+            "backend-1": {
+                "values": {
+                    "conf": {
+                        "manila": {
+                            "DEFAULT": {"enabled_share_backends": "foo"},
+                            "foo": {
+                                "share_backend_name": "bar",
+                                "share_driver": "drv",
+                            },
+                        },
+                    },
+                    "images": {"foo": "bar"},
+                    "labels": {"foo": "bar"},
+                    "pod": {"foo": "bar"},
+                },
+                "enabled": True,
+                "type": "statefulset",
+            },
+        },
+        True,
+    )
+
+    # Configs are invalid
+    #   Extra key in values
+    _manila_backend_specific_request(
+        client,
+        {
+            "backend-1": {
+                "values": {
+                    "bootstrap": {"foo": "bar"},
+                    "conf": {"foo": "bar"},
+                    "labels": {"foo": "bar"},
+                    "pod": {"foo": "bar"},
+                },
+                "enabled": True,
+                "type": "statefulset",
+            },
+        },
+        False,
+    )
+
+    #   unsupported backend type
+    _manila_backend_specific_request(
+        client,
+        {
+            "backend-1": {
+                "values": {
+                    "conf": {"foo": "bar"},
+                    "labels": {"foo": "bar"},
+                    "pod": {"foo": "bar"},
+                },
+                "enabled": True,
+                "type": "deployment",
+            },
+        },
+        False,
+    )
+
+    #   incorrect backend configuration
+    _manila_backend_specific_request(
+        client,
+        {
+            "backend-1": {
+                "values": {
+                    "conf": {
+                        "manila": {
+                            "DEFAULT": {"enabled_share_backends": "baz"},
+                            "foo": {
+                                "share_backend_name": "bar",
+                                "share_driver": "drv",
+                            },
+                        },
+                    },
+                    "images": {"foo": "bar"},
+                    "labels": {"foo": "bar"},
+                    "pod": {"foo": "bar"},
+                },
+                "enabled": True,
+                "type": "statefulset",
+            },
+        },
+        False,
+    )
+
+
 def test_openstack_keystone_keycloak_providers_not_allowed(
     client, federation_provider
 ):

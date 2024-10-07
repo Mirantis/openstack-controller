@@ -6,8 +6,32 @@ spec:
       bootstrap:
         share_types:
           default:
-            driver_handles_share_servers: true
+            driver_handles_share_servers: false
+      overrides:
+        manila_share_sts:
+          cephfs:
+            values:
+              conf:
+                manila:
+                  DEFAULT:
+                    enabled_share_backends: cephfs
+                  cephfs:
+                    cephfs_auth_id: manila
+                    cephfs_protocol_helper_type: CEPHFS
+                    driver_handles_share_servers: false
+                    share_backend_name: cephfs
+                    share_driver: manila.share.drivers.cephfs.driver.CephFSDriver
       conf:
+        ceph:
+          config:
+            global:
+              mon_host:
+                - "10.10.10.1:6789"
+                - "10.10.10.2:6789"
+                - "10.10.10.3:6789"
+          keyrings:
+            manila:
+              key: AQDLZLJfNPtTOxAAQm248Q9AyoirvELaSyPy1w==
         aux_conf:
           policies:
           - definition:
@@ -32,6 +56,8 @@ spec:
           logger_manila:
             level: INFO
         manila:
+          DEFAULT:
+            enabled_share_protocols: CEPHFS
           keystone_authtoken:
             memcache_security_strategy: ENCRYPT
             memcache_secret_key: JinzIdQzLdIslgxu
@@ -51,22 +77,6 @@ spec:
           02-custom.yaml: {}
         prometheus_exporter:
           rabbit_exporters: overview,exchange,node
-        standalone_backends:
-          daemonset:
-            conf:
-              generic:
-                driver_handles_share_servers: True
-                share_backend_name: GENERIC
-                share_driver: manila.share.drivers.generic.GenericShareDriver
-                service_image_name: manila-service-image
-                service_instance_user: manila
-                interface_driver: manila.network.linux.interface.OVSInterfaceDriver
-                service_network_name: fs-mgmt-net
-                service_network_cidr: 10.254.0.0/16
-                path_to_private_key: /etc/manila/ssh/manila
-                path_to_public_key: /etc/manila/ssh/manila.pub
-              DEFAULT:
-                enabled_share_backends: generic
       dependencies:
         static:
           db_init:
@@ -218,14 +228,36 @@ spec:
           restartPolicy: Never
         ks_user:
           restartPolicy: Never
+      network_policy:
+        api:
+          spec:
+            ingress:
+              - from:
+                - default: selector
+              - from:
+                - namespaceSelector:
+                    matchLabels:
+                      kubernetes.io/metadata.name: osh-system
+                - namespaceSelector:
+                    matchLabels:
+                      kubernetes.io/metadata.name: stacklight
+                ports:
+                - port: 8786
+                  protocol: TCP
+            podSelector:
+              matchLabels:
+                application: manila
+                component: api
+            policyTypes:
+            - Ingress
       manifests:
         secret_ca_bundle: True
         cron_job_db_purge: True
-        daemonset_share: True
-        network_policy: False
+        daemonset_share: False
+        network_policy: True
         service_instance_ssh_key: True
-        ceph_conf: False
-        daemonset_share: True
+        ceph_conf: True
+        daemonset_share: False
       secrets:
         service_instance_ssh_key:
           private: 'MANILA TEST SSH PRIVATE KEY

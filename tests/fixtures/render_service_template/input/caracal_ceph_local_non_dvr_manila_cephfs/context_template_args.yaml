@@ -134,7 +134,6 @@ database:
     sst:
       password: RbLblzhS7yNE8WQ4nY829uRQpvTegI87
       username: sstybw
-    openssl_kek: opensslkek
 dns:
   credentials: &credentials_dns
   - database:
@@ -421,7 +420,19 @@ baremetal:
       password: KBecvsPZsWBFzDqYnevHWArm7tFycZKr
       username: neutronLeRjiDsyT
 shared-file-system:
-  is_ceph_enabled: false
+  is_ceph_enabled: true
+  ceph:
+    manila:
+      keyring: 'AQDLZLJfNPtTOxAAQm248Q9AyoirvELaSyPy1w==
+
+        '
+      pools: {}
+      secrets: manila-rbd-keyring
+      username: manila
+    mon_host:
+      - "10.10.10.1:6789"
+      - "10.10.10.2:6789"
+      - "10.10.10.3:6789"
   credentials: &credentials_shared-file-system
   - database:
       user:

@@ -23,6 +23,7 @@ CEPH_POOL_ROLE_SERVICES_MAP = {
     "cinder": ["volumes", "backup"],
     "nova": ["ephemeral", "vms"],
     "glance": ["images"],
+    "manila": [],
 }
 
 
@@ -30,6 +31,7 @@ class OSUser(Enum):
     nova = auto()
     cinder = auto()
     glance = auto()
+    manila = auto()
 
 
 class PoolRole(Enum):

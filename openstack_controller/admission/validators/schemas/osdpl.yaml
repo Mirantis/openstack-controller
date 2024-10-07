@@ -1740,6 +1740,56 @@ properties:
                         then:
                           required:
                             - backup_share
+      manila:
+        type: object
+        additionalProperties: false
+        properties:
+          share:
+            type: object
+            additionalProperties: false
+            properties:
+              backends:
+                type: object
+                description: |
+                  Manila backends configuration
+                additionalProperties: False
+                patternProperties:
+                  ".*":
+                    description: |
+                      Backend name
+                    additionalProperties: False
+                    type: object
+                    required:
+                      - type
+                      - values
+                    properties:
+                      enabled:
+                        type: boolean
+                        description: |
+                          Enable Manila backend to deploy
+                          default: True
+                      type:
+                        type: string
+                        enum:
+                          - statefulset
+                      values:
+                        type: object
+                        additionalProperties: False
+                        required:
+                          - conf
+                        properties:
+                          conf:
+                            type: object
+                            additionalProperties: True
+                          images:
+                            type: object
+                            additionalProperties: True
+                          labels:
+                            type: object
+                            additionalProperties: True
+                          pod:
+                            type: object
+                            additionalProperties: True
       logging:
         type: object
         additionalProperties: false
