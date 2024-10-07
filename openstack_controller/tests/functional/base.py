@@ -532,7 +532,7 @@ class BaseFunctionalTestCase(TestCase):
     def get_volume_snapshots_size(cls):
         """Calculate the total size of volume snapshots in bytes."""
         total_bytes = 0
-        for snapshot in cls.ocm.oc.list_volume_snapshots():
+        for snapshot in cls.ocm.oc.volume.snapshots(all_tenants=True):
             total_bytes += snapshot.size * constants.Gi
         return total_bytes
 
