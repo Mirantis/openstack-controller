@@ -86,7 +86,7 @@ return: |
     {{- $context_novalues := omit $context "Values" }}
     {{- $merged_dict := mergeOverwrite $context_novalues $current_dict.nodeData }}
     {{- $_ := set $current_dict "nodeData" $merged_dict }}
-    {{- $backends := $merged_dict.Values.conf.cinder }}
+    {{- $backends := index $merged_dict.Values.conf $context.Chart.Name }}
     {{- $sts_name := printf "%s-%s-%s" $context.Chart.Name $statefulset $current_dict.name | replace "_" "-" }}
     {{- $statefulset_yaml := list $sts_name "backends.conf" $serviceAccountName $merged_dict $backends | include $statefulsetTemplateName | toString | fromYaml }}
     {{- $_ := set $context.Values.__overrides "statefulset_yaml" ($statefulset_yaml | toYaml | fromYaml) }}
