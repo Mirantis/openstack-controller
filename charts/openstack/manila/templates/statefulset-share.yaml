@@ -35,13 +35,12 @@ exec:
   {{- $backendConfName := index . 1 }}
   {{- $serviceAccountName := index . 2 }}
   {{- $envAll := index . 3 }}
+  {{- $envBackend := index . 4 }}
 
   {{- with $envAll }}
 
 {{- $mounts_manila_share := .Values.pod.mounts.manila_share.manila_share }}
 {{- $mounts_manila_share_init := .Values.pod.mounts.manila_share.init_container }}
-
-{{ tuple $envAll "share" $serviceAccountName | include "helm-toolkit.snippets.kubernetes_pod_rbac_serviceaccount" }}
 ---
 apiVersion: apps/v1
 kind: StatefulSet
@@ -50,19 +49,19 @@ metadata:
   annotations:
     {{ tuple $envAll | include "helm-toolkit.snippets.release_uuid" }}
   labels:
-{{ tuple $envAll "manila" "share" | include "helm-toolkit.snippets.kubernetes_metadata_labels" | indent 4 }}
+{{ dict "envAll" $envAll "application" "manila" "component" "share" "managed-by" $statefulset | include "helm-toolkit.snippets.kubernetes_metadata_labels_bundle" | indent 4 }}
 spec:
   serviceName: {{ $statefulset }}
   podManagementPolicy: "Parallel"
   replicas: {{ .Values.pod.replicas.share }}
   selector:
     matchLabels:
-{{ tuple $envAll "manila" "share" | include "helm-toolkit.snippets.kubernetes_metadata_labels" | indent 6 }}
+{{ dict "envAll" $envAll "application" "manila" "component" "share" "managed-by" $statefulset | include "helm-toolkit.snippets.kubernetes_metadata_labels_bundle" | indent 6 }}
 {{ tuple $envAll | include "helm-toolkit.snippets.kubernetes_upgrades_statefulset" | indent 2 }}
   template:
     metadata:
       labels:
-{{ tuple $envAll "manila" "share" | include "helm-toolkit.snippets.kubernetes_metadata_labels" | indent 8 }}
+{{ dict "envAll" $envAll "application" "manila" "component" "share" "managed-by" $statefulset | include "helm-toolkit.snippets.kubernetes_metadata_labels_bundle" | indent 8 }}
       annotations:
 {{ tuple $envAll | include "helm-toolkit.snippets.release_uuid" | indent 8 }}
         configmap-bin-hash: {{ tuple "configmap-bin.yaml" . | include "helm-toolkit.utils.hash" }}
@@ -75,7 +74,7 @@ spec:
       serviceAccountName: {{ $serviceAccountName }}
 {{ dict "envAll" $envAll "application" "manila_share" | include "helm-toolkit.snippets.kubernetes_pod_security_context" | indent 6 }}
       affinity:
-{{ tuple $envAll "manila" "share" | include "helm-toolkit.snippets.kubernetes_pod_anti_affinity" | indent 8 }}
+{{ dict "envAll" $envAll "application" "manila" "component" "share" "managed-by" $statefulset | include "helm-toolkit.snippets.kubernetes_pod_anti_affinity_bundle" | indent 8 }}
       nodeSelector:
         {{ .Values.labels.share.node_selector_key }}: {{ .Values.labels.share.node_selector_value }}
       initContainers:
@@ -136,10 +135,13 @@ spec:
             {{- end }}
             - name: etcmanila
               mountPath: /etc/manila/manila.conf.d
+            {{/* For backward compatibility with standalone_backends */}}
+            {{- if and .Values.manifests.statefulset_share (hasKey .Values.conf.standalone_backends "statefulsets") }}
             - name: manila-etc
               mountPath: /etc/manila/manila.conf.d/99_backends.conf
               subPath: {{ $backendConfName }}
               readOnly: true
+            {{- end }}
             - name: manila-etc
               # NOTE (Portdirect): We mount here to override Kollas
               # custom sudoers file when using Kolla images, this
@@ -181,7 +183,7 @@ spec:
               subPath: manila_ssh_key_pub
               readOnly: true
             {{- end }}
-            {{- if .Values.manifests.ceph_conf }}
+            {{- if ( eq "true" ( list $envBackend | include "manila.utils.has_cephfs_backend")) }}
             - name: manila-etc
               mountPath: /etc/ceph/ceph.conf
               subPath: ceph.conf
@@ -222,16 +224,18 @@ spec:
 {{- end }}
 {{- end }}
 
-{{- if .Values.manifests.statefulset_share }}
-{{- if .Values.conf.standalone_backends }}
-  {{- if hasKey .Values.conf.standalone_backends "statefulsets" }}
-    {{- $envAll := . }}
-    {{- range $name, $standalone_backend := .Values.conf.standalone_backends.statefulsets }}
+{{- $envAll := . }}
+{{- if hasKey (index .Values "overrides" | default dict) "manila_share_sts" }}
+  {{- $serviceAccountName := "manila-share-sts" }}
+  {{- tuple $envAll "share" $serviceAccountName | include "helm-toolkit.snippets.kubernetes_pod_rbac_serviceaccount" }}
+  {{- list "share" "manila.share.statefulset" $serviceAccountName "manila.configmap.etc" "manila-etc" "manila.configmap.bin" "manila-bin" $envAll | include "helm-toolkit.utils.statefulset_overrides_root" }}
+{{- else if and .Values.manifests.statefulset_share (hasKey .Values.conf.standalone_backends "statefulsets") }}
+  {{- range $name, $standalone_backend := .Values.conf.standalone_backends.statefulsets }}
     {{- $statefulset := printf "manila-share-%s" $name }}
     {{- $backendConfName := printf "backend_%s_sts.conf" $name }}
     {{- $serviceAccountName := printf "manila-share--%s" $name }}
-      {{- list $statefulset $backendConfName $serviceAccountName $envAll | include "manila.share.statefulset" }}
-    {{- end }}
+    {{- $envBackend := index $standalone_backend.conf }}
+    {{ tuple $envAll "share" $serviceAccountName | include "helm-toolkit.snippets.kubernetes_pod_rbac_serviceaccount" }}
+    {{- list $statefulset $backendConfName $serviceAccountName $envAll $envBackend | include "manila.share.statefulset" }}
   {{- end }}
-{{- end }}
 {{- end }}
