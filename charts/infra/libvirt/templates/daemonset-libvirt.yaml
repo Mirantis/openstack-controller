@@ -13,19 +13,21 @@ limitations under the License.
 */}}
 
 {{- define "libvirtProbe" }}
+{{- $probeType := . }}
 exec:
   command:
-    - bash
-    - -c
-    - /usr/bin/virsh connect
+    - /tmp/health-probe.sh
+    - libvirt
+    - {{ $probeType }}
 {{- end }}
 
 {{- define "virtlogdProbe" }}
+{{- $probeType := . }}
 exec:
   command:
-    - bash
-    - -c
-    - /usr/bin/virt-admin -c virtlogd:///system server-list
+    - /tmp/health-probe.sh
+    - virtlogd
+    - {{ $probeType }}
 {{- end }}
 
 {{- define "libvirt.daemonset" }}
@@ -162,8 +164,8 @@ spec:
 {{ tuple $envAll "libvirt" | include "helm-toolkit.snippets.image" | indent 10 }}
 {{ tuple $envAll $envAll.Values.pod.resources.libvirt | include "helm-toolkit.snippets.kubernetes_resources" | indent 10 }}
 {{ dict "envAll" $envAll "application" "libvirt" "container" "libvirt" | include "helm-toolkit.snippets.kubernetes_container_security_context" | indent 10 }}
-{{ dict "envAll" . "component" "libvirt" "container" "libvirt" "type" "readiness" "probeTemplate" (include "libvirtProbe" $envAll | fromYaml) | include "helm-toolkit.snippets.kubernetes_probe" | indent 10 }}
-{{ dict "envAll" . "component" "libvirt" "container" "libvirt" "type" "liveness" "probeTemplate" (include "libvirtProbe" $envAll | fromYaml) | include "helm-toolkit.snippets.kubernetes_probe" | indent 10 }}
+{{ dict "envAll" . "component" "libvirt" "container" "libvirt" "type" "readiness" "probeTemplate" (include "libvirtProbe" "readiness" | fromYaml) | include "helm-toolkit.snippets.kubernetes_probe" | indent 10 }}
+{{ dict "envAll" . "component" "libvirt" "container" "libvirt" "type" "liveness" "probeTemplate" (include "libvirtProbe" "liveness" | fromYaml) | include "helm-toolkit.snippets.kubernetes_probe" | indent 10 }}
           terminationMessagePath: /var/log/termination-log
           command:
             - /tmp/libvirt.sh
@@ -259,13 +261,18 @@ spec:
               subPath: ceph.conf
               readOnly: true
             {{- end }}
+            - name: libvirt-bin
+              mountPath: /tmp/health-probe.sh
+              subPath: health-probe.sh
+              readOnly: true
+
 {{ if $mounts_libvirt.volumeMounts }}{{ toYaml $mounts_libvirt.volumeMounts | indent 12 }}{{ end }}
         - name: virtlogd
 {{ tuple $envAll "libvirt" | include "helm-toolkit.snippets.image" | indent 10 }}
 {{ tuple $envAll $envAll.Values.pod.resources.virtlogd | include "helm-toolkit.snippets.kubernetes_resources" | indent 10 }}
 {{ dict "envAll" $envAll "application" "libvirt" "container" "virtlogd" | include "helm-toolkit.snippets.kubernetes_container_security_context" | indent 10 }}
-{{ dict "envAll" . "component" "libvirt" "container" "virtlogd" "type" "readiness" "probeTemplate" (include "virtlogdProbe" $envAll | fromYaml) | include "helm-toolkit.snippets.kubernetes_probe" | indent 10 }}
-{{ dict "envAll" . "component" "libvirt" "container" "virtlogd" "type" "liveness" "probeTemplate" (include "virtlogdProbe" $envAll | fromYaml) | include "helm-toolkit.snippets.kubernetes_probe" | indent 10 }}
+{{ dict "envAll" . "component" "libvirt" "container" "virtlogd" "type" "readiness" "probeTemplate" (include "virtlogdProbe" "readiness" | fromYaml) | include "helm-toolkit.snippets.kubernetes_probe" | indent 10 }}
+{{ dict "envAll" . "component" "libvirt" "container" "virtlogd" "type" "liveness" "probeTemplate" (include "virtlogdProbe" "liveness" | fromYaml) | include "helm-toolkit.snippets.kubernetes_probe" | indent 10 }}
           command:
             - /tmp/virtlogd.sh
           terminationMessagePath: /var/log/termination-log
@@ -301,6 +308,10 @@ spec:
               mountPropagation: HostToContainer
             - name: logs
               mountPath: /var/log/libvirt
+            - name: libvirt-bin
+              mountPath: /tmp/health-probe.sh
+              subPath: health-probe.sh
+              readOnly: true
 {{ if $mounts_virtlogd.volumeMounts }}{{ toYaml $mounts_virtlogd.volumeMounts | indent 12 }}{{ end }}
       volumes:
         {{ dict "envAll" $envAll "objectType" "volume" "secretPrefix" "libvirt" | include "helm-toolkit.snippets.kubernetes_ssl_objects" | indent 8 }}
