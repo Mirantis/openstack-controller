@@ -102,7 +102,7 @@ class CinderCollectorFunctionalTestCase(base.BaseFunctionalExporterTestCase):
     def test_volume_snapshots(self):
         """Total number of volume snapshots in the cluster."""
 
-        snapshots = len(self.ocm.oc.list_volume_snapshots())
+        snapshots = len(list(self.ocm.oc.volume.snapshots(all_tenants=True)))
         self._test_volume_snapshots_count(snapshots, "Before create")
 
         # Create one test volume and one volume snapshot
