@@ -36,6 +36,8 @@ data:
   init-tls-certs.sh: |
 {{ tuple "bin/_init-tls-certs.sh.tpl" . | include "helm-toolkit.utils.template" | indent 4 }}
 {{- end }}
+  health-probe.sh: |
+{{ tuple "bin/_health-probe.sh.tpl" . | include "helm-toolkit.utils.template" | indent 4 }}
 {{- include "helm-toolkit.snippets.values_template_renderer" (dict "envAll" $envAll "template" .Values.conf.dynamic_options.script "key" "init-dynamic-options.sh") | indent 2 }}
 {{- end }}
 {{- end }}
