@@ -13,7 +13,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from prometheus_client.core import GaugeMetricFamily
+from prometheus_client.core import GaugeMetricFamily, InfoMetricFamily
 
 from openstack_controller import utils
 from openstack_controller.exporter.collectors.openstack import base
@@ -34,10 +34,35 @@ class OsdplIronicMetricCollector(base.OpenStackBaseMetricCollector):
                 f"{self._name}_nodes",
                 "The number of baremetal nodes",
                 labels=[],
-            )
+            ),
+            "node_info": InfoMetricFamily(
+                f"{self._name}_node",
+                "The baremetal node info",
+                labels=[],
+            ),
         }
 
     @utils.timeit
     def update_samples(self):
-        nodes_total = len(list(self.oc.baremetal_get_nodes()))
+
+        nodes = list(self.oc.baremetal_get_nodes())
+        nodes_total = len(nodes)
         self.set_samples("nodes", [([], nodes_total)])
+
+        baremetal_node_info_samples = []
+        for node in nodes:
+            baremetal_node_info_samples.append(
+                (
+                    [],
+                    {
+                        "uuid": node["uuid"],
+                        "name": node["name"],
+                        "maintenance": str(node["maintenance"]),
+                        "provision_state": node["provision_state"],
+                    },
+                )
+            )
+        self.set_samples(
+            "node_info",
+            baremetal_node_info_samples,
+        )
