@@ -10,7 +10,7 @@
           - kubernetes
 
 - name: Setup infrastructure requirements
-  hosts: controllers:computes
+  hosts: k8s_controllers:controllers:computes
   become: true
   become_user: root
   pre_tasks:
@@ -18,6 +18,7 @@
       set_fact:
         oc_controller_node: "{%- if ansible_hostname in groups.controllers %}True{%- endif %}"
         oc_compute_node: "{%- if ansible_hostname in groups.computes %}True{%- endif %}"
+        oc_controller_node_main: "{%- if ansible_hostname in groups.k8s_controllers[0] %}True{%- endif %}"
     - name: Setup networking
       include_role:
         name: oc

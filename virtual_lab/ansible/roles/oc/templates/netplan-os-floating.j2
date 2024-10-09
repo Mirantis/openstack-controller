@@ -3,3 +3,11 @@ network:
   ethernets:
       {{ veth.src }}: {}
       {{ veth.dst }}: {}
+{% if oc_controller_node_main %}
+  bridges:
+    br-fip:
+      interfaces:
+        - {{ veth.dst }}
+      addresses:
+        - 10.11.12.11/24
+{% endif %}
