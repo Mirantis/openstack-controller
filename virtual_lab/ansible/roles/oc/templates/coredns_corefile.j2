@@ -1,0 +1,15 @@
+.:{{ listen_port }} {
+    bind {{ listen_ip }}
+    errors
+    ready
+    forward . {{ oc_dns_nameservers | join(' ') }}
+    cache 30
+    loop
+    reload
+    loadbalance
+}
+
+it.just.works:{{ listen_port }} {
+    bind {{ listen_ip }}
+    file /etc/coredns/zones/it.just.works.db
+}

@@ -53,3 +53,16 @@
   tags:
   - oc_osdpl
   delegate_to: initial_controller
+
+- name: Include coredns tasks
+  ansible.builtin.include_tasks:
+    file: dns/coredns.yaml
+  tags:
+  - oc_dns
+  delegate_to: initial_controller
+
+- name: Include resolver tasks
+  ansible.builtin.include_tasks:
+    file: dns/resolver.yaml
+  tags:
+  - oc_dns
