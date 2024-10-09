@@ -20,6 +20,7 @@ pip3 install ansible git-review
 ansible-galaxy collection install bodsch.core
 ansible-galaxy collection install bodsch.scm
 ansible-galaxy role install bodsch.k0s
+ansible-galaxy role install cloudalchemy.coredns
 
 cd ${OPENSTACK_CONTROLLER_DIR}/virtual_lab/ansible/
 

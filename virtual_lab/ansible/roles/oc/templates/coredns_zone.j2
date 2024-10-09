@@ -1,0 +1,4 @@
+it.just.works.            IN      SOA     ns.it.just.works. username.it.just.works. 2015082541 7200 3600 1209600 3600
+it.just.works.            IN      NS      ns
+it.just.works.            IN      A       {{ ingress_service_ip }}
+*.it.just.works.           IN      A      {{ ingress_service_ip }}

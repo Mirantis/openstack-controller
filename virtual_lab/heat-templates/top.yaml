@@ -64,3 +64,6 @@ outputs:
   k8s_controller_ips:
     description: Private IP addresses of the deployed k8s controllers instances
     value: { get_attr: [k8s_controllers, server_public_ip] }
+  dns_nameservers:
+    description: List of configured DNS nameservers
+    value: { get_param: dns_nameservers}
