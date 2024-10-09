@@ -10,6 +10,7 @@ spec:
     binary_base_url: {{ openstack_controller.osdpl.binary_base_url }}
     images_base_url: {{ openstack_controller.osdpl.images_base_url }}
   local_volume_storage_class: lvp-fake-root
+  persistent_volume_storage_class: lvp-fake-root
   openstack_version: {{ oc_osdpl_openstack_version }}
   preset: core
   size: single
