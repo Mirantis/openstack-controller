@@ -1,6 +1,7 @@
 oc_k8s_node_labels:
   controller:
     openstack-control-plane: enabled
+    openstack-gateway: enabled
     openvswitch: enabled
   compute:
     openstack-compute-node: enabled
