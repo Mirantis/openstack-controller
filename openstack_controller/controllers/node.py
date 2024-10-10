@@ -30,7 +30,7 @@ CONF = settings.CONF
 @kopf.on.field("", "v1", "nodes", field="status.conditions")
 def node_status_update_handler(name, body, old, new, reason, **kwargs):
     LOG.debug(f"Handling node status {reason} event.")
-    LOG.info(f"The node {name} changes are: {kwargs['diff']}")
+    utils.log_changes(kwargs.get("old", {}), kwargs.get("new", {}))
 
     osdpl = kube.get_osdpl()
     if not osdpl or not osdpl.exists():
@@ -82,7 +82,8 @@ def node_status_update_handler(name, body, old, new, reason, **kwargs):
 def node_change_handler(body, reason, **kwargs):
     name = body["metadata"]["name"]
     LOG.info(f"Got event {reason} for node {name}")
-    LOG.info(f"The node {name} changes are: {kwargs['diff']}")
+    utils.log_changes(kwargs.get("old", {}), kwargs.get("new", {}))
+
     kube_api = kube.kube_client()
     node = kube.Node(kube_api, body)
     nwl = maintenance.NodeWorkloadLock.get_by_node(name)

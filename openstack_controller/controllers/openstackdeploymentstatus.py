@@ -20,7 +20,7 @@ def handle(body, meta, spec, logger, reason, **kwargs):
     # pass further only those that are really needed
     # actual **kwargs form is for forward-compat with kopf itself
     LOG.info(f"Got osdplstatus event {reason}")
-    LOG.info(f"Changes are: {kwargs['diff']}")
+    utils.log_changes(kwargs.get("old", {}), kwargs.get("new", {}))
     return {"lastStatus": f"{reason}"}
 
 
@@ -33,7 +33,7 @@ def osdplst_status_services(
     name, namespace, body, meta, spec, logger, reason, **kwargs
 ):
     LOG.info(f"Got osdplstatus status.services event {reason}")
-    LOG.info(f"Changes are: {kwargs['diff']}")
+    utils.log_changes(kwargs.get("old", {}), kwargs.get("new", {}))
     osdplst = osdplstatus.OpenStackDeploymentStatus(name, namespace)
     if not osdplst.exists():
         return

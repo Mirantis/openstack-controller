@@ -32,6 +32,8 @@ def handle_ceph_shared_secret(
     if name != ceph_api.OPENSTACK_KEYS_SECRET:
         return
     LOG.debug(f"Handling secret create/update {name}")
+    utils.log_changes(kwargs.get("old", {}), kwargs.get("new", {}))
+
     osdpl = kube.get_osdpl(settings.OSCTL_OS_DEPLOYMENT_NAMESPACE)
 
     hasher = hashlib.sha256()

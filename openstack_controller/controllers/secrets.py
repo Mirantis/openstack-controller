@@ -29,6 +29,7 @@ AUTH_KEYS = [
 
 
 def _handle_credentials_rotation(old, new, group_name, secret_name):
+    utils.log_changes(old, new)
     new_rotation_id = utils.get_in(
         new, ["metadata", "annotations", constants.SECRET_PRIORITY], "0"
     )
@@ -88,7 +89,7 @@ def handle_neutron_secret(
         return
 
     LOG.debug(f"Handling secret create/update {name}")
-    LOG.info(f"The secret {name} changes are: {diff}")
+    utils.log_changes(kwargs.get("old", {}), kwargs.get("new", {}))
 
     secret_data = {}
     for key in AUTH_KEYS:
@@ -132,7 +133,8 @@ def handle_neutron_configmap_secret(
     )
 
     LOG.debug(f"Handling secret create {name}")
-    LOG.info(f"The secret {name} changes are: {diff}")
+    utils.log_changes(kwargs.get("old", {}), kwargs.get("new", {}))
+
     metadata = base64.b64decode(body["data"]["metadata_agent.ini"]).decode()
     config = configparser.ConfigParser(strict=False)
     config.read_string(metadata)
@@ -173,8 +175,8 @@ def handle_identity_passwords_secret(
     **kwargs,
 ):
     # On create event old can be None
-    old = kwargs["old"] or {}
-    new = kwargs["new"]
+    old = kwargs.get("old", {}) or {}
+    new = kwargs.get("new", {})
 
     _handle_credentials_rotation(old, new, "service", name)
 
@@ -207,8 +209,8 @@ def handle_admin_users_secret(
     **kwargs,
 ):
     # On create event old can be None
-    old = kwargs["old"] or {}
-    new = kwargs["new"]
+    old = kwargs.get("old", {}) or {}
+    new = kwargs.get("new", {})
 
     _handle_credentials_rotation(old, new, "admin", name)
 
@@ -238,7 +240,7 @@ def handle_bgpvpnsecret(
 ):
     if name != settings.OSCTL_BGPVPN_NEIGHBOR_INFO_SECRET_NAME:
         return
-    LOG.info(f"The secret {name} changes are: {diff}")
+    utils.log_changes(kwargs.get("old", {}), kwargs.get("new", {}))
 
     osdpl = kube.get_osdpl(settings.OSCTL_OS_DEPLOYMENT_NAMESPACE)
 
@@ -312,7 +314,7 @@ def handle_rabbitmq_external_secret(
         return
 
     LOG.debug(f"Handling secret create {name}")
-    LOG.info(f"The secret {name} changes are: {diff}")
+    utils.log_changes(kwargs.get("old", {}), kwargs.get("new", {}))
 
     secret_data = json.loads(
         base64.b64decode(body["data"]["RABBITMQ_USERS"]).decode()
@@ -434,6 +436,8 @@ def handle_substitution_secrets(
     **kwargs,
 ):
     LOG.debug(f"Handling secret create/update {name}")
+    utils.log_changes(kwargs.get("old", {}), kwargs.get("new", {}))
+
     osdpl = kube.get_osdpl(settings.OSCTL_OS_DEPLOYMENT_NAMESPACE)
     if not osdpl:
         return
@@ -487,6 +491,8 @@ def handle_keystone_osclouds_secret(
         return
 
     LOG.debug(f"Handling secret create/update {name}")
+    utils.log_changes(kwargs.get("old", {}), kwargs.get("new", {}))
+
     osdpl = kube.get_osdpl(settings.OSCTL_OS_DEPLOYMENT_NAMESPACE)
     public_domain_name = osdpl.obj["spec"]["public_domain_name"]
     public_auth_url = f"https://keystone.{public_domain_name}/"
