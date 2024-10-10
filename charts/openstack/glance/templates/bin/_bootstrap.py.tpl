@@ -73,7 +73,7 @@ def substitute_local_proxy_hostname(url, hostname):
 
 @retry(requests.exceptions.RequestException, delay=1, tries=7, backoff=2, logger=LOG)
 def download_file(url, dst_file, checksum=None):
-    r = requests.get(url, stream=True)
+    r = requests.get(url, stream=True, timeout=60)
     r.raise_for_status()
     actual_image_checksum = hashlib.md5()
 
