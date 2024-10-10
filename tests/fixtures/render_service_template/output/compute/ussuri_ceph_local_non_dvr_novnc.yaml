@@ -31,6 +31,9 @@ spec:
         dynamic_options:
           libvirt:
             listen_interface: ens3
+        libvirt:
+          keepalive_count: 9
+          keepalive_interval: 10
       pod:
         probes:
           libvirt:

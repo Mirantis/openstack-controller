@@ -217,8 +217,10 @@ spec:
 {%- else %}
           enabled: false
 {%- endif %}
-        {%- if libvirt_server_tls_enabled %}
         libvirt:
+          keepalive_count: 9
+          keepalive_interval: 10
+        {%- if libvirt_server_tls_enabled %}
           listen_tcp: "0"
           listen_tls: "1"
         tls:
