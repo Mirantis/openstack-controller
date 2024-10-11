@@ -16,6 +16,7 @@ import asyncio
 import base64
 import copy
 import datetime
+import difflib
 import functools
 import logging
 import logging.config
@@ -397,3 +398,17 @@ def log_exception_and_raise(f):
             raise
 
     return wrapper
+
+
+def log_changes(old, new):
+    old = old or {}
+    new = new or {}
+    old_yaml = yaml.dump(old, sort_keys=True)
+    new_yaml = yaml.dump(new, sort_keys=True)
+    diff = "\n" + "\n".join(
+        difflib.unified_diff(
+            old_yaml.splitlines(),
+            new_yaml.splitlines(),
+        )
+    )
+    LOG.info("Changes are: %s", diff)

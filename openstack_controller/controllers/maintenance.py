@@ -30,9 +30,8 @@ async def _node_maintenance_request_change_handler(body, **kwargs):
     name = body["metadata"]["name"]
     node_name = maintenance_node_name(body)
     LOG.info(f"Got node maintenance request change event {name}")
-    LOG.info(
-        f"The node maintenance request {name} changes are: {kwargs['diff']}"
-    )
+    utils.log_changes(kwargs.get("old", {}), kwargs.get("new", {}))
+
     node = kube.safe_get_node(node_name)
     if not node.exists():
         return
@@ -173,9 +172,8 @@ async def _node_maintenance_request_delete_handler(body, **kwargs):
 def cluster_maintenance_request_change_handler(body, **kwargs):
     name = body["metadata"]["name"]
     LOG.info(f"Got cluster maintenance request change event {name}")
-    LOG.info(
-        f"The cluster maintenance request {name} changes are: {kwargs['diff']}"
-    )
+    utils.log_changes(kwargs.get("old", {}), kwargs.get("new", {}))
+
     osdpl = kube.get_osdpl()
     if not osdpl or not osdpl.exists():
         LOG.info("Can't find OpenStackDeployment object")

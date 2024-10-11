@@ -211,7 +211,7 @@ async def rotate_credentials(
     **kwargs,
 ):
     new_credentials = utils.get_in(
-        kwargs["new"], ["status", "credentials"], {}
+        kwargs.get("new", {}), ["status", "credentials"], {}
     )
     for group_name in ["admin", "service"]:
         new_rotation_id = utils.get_in(
@@ -263,7 +263,7 @@ async def _handle(body, meta, spec, logger, reason, **kwargs):
     namespace = meta["namespace"]
     name = meta["name"]
     LOG.info(f"Got osdpl event {reason}")
-    LOG.info(f"Changes are: {kwargs['diff']}")
+    utils.log_changes(kwargs.get("old", {}), kwargs.get("new", {}))
 
     if spec.get("draft"):
         LOG.info("OpenStack deployment is in draft mode, skipping handling...")

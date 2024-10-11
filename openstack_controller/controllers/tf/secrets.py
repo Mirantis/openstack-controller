@@ -32,6 +32,8 @@ def handle_tf_shared_secrets(
     **kwargs,
 ):
     LOG.debug(f"Handling secret create/update {name}")
+    utils.log_changes(kwargs.get("old", {}), kwargs.get("new", {}))
+
     osdpl = kube.get_osdpl(settings.OSCTL_OS_DEPLOYMENT_NAMESPACE)
     if not osdpl:
         return
