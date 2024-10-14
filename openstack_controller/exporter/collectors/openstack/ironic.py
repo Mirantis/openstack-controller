@@ -56,9 +56,7 @@ class OsdplIronicMetricCollector(base.OpenStackBaseMetricCollector):
                     [],
                     {
                         "uuid": node["uuid"],
-                        "name": node["name"],
-                        "maintenance": str(node["maintenance"]),
-                        "provision_state": node["provision_state"],
+                        "name": str(node["name"]),
                     },
                 )
             )
