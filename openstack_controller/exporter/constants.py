@@ -29,5 +29,46 @@ class LoadbalancerProvisioningStatus(IntEnum):
     PENDING_DELETE = 5
 
 
+BAREMETAL_NODE_PROVISION_STATE = {
+    "unknown": 0,
+    "enroll": 1,
+    "verifying": 2,
+    "manageable": 3,
+    "available": 4,
+    "active": 5,
+    "deploy": 6,
+    "wait call-back": 7,
+    "deploying": 8,
+    "deploy failed": 9,
+    "deploy complete": 10,
+    "deploy hold": 11,
+    "deleting": 12,
+    "deleted": 13,
+    "cleaning": 14,
+    "undeploy": 15,
+    "clean wait": 16,
+    "clean failed": 17,
+    "clean hold": 18,
+    "error": 19,
+    "rebuild": 20,
+    "inspecting": 21,
+    "inspect failed": 22,
+    "inspect wait": 23,
+    "adopting": 24,
+    "adopt failed": 25,
+    "rescue": 26,
+    "rescue failed": 27,
+    "rescue wait": 28,
+    "rescuing": 29,
+    "unrescue failed": 30,
+    "unrescuing": 31,
+    "service": 32,
+    "servicing": 33,
+    "service wait": 34,
+    "service failed": 35,
+    "service hold": 36,
+}
+
+
 "Binary giga unit"
 Gi = 1024**3
