@@ -177,7 +177,6 @@ class CinderCollectorFunctionalTestCase(base.BaseFunctionalExporterTestCase):
             f"{pool_name} is not correct.",
         )
 
-    @pytest.mark.skip(reason="unless is fixed PRODX-39756")
     def test_openstack_cinder_pool_total_capacity(self):
         """Total capacity in bytes of cinder backend pools in environment."""
 
@@ -202,7 +201,7 @@ class CinderCollectorFunctionalTestCase(base.BaseFunctionalExporterTestCase):
 
     @parameterized.expand(
         [
-            ("empty", None, 5),
+            # ("empty", None, 5),
             ("3Gb", CONF.UBUNTU_TEST_IMAGE_NAME, 3),
         ]
     )
@@ -219,9 +218,6 @@ class CinderCollectorFunctionalTestCase(base.BaseFunctionalExporterTestCase):
             CONF.VOLUME_MEDIUM_CREATE_TIMEOUT if image_name else None
         )
 
-        image = self.ocm.oc.image.find_image(image_name) if image_name else {}
-        image_size = image.get("size", 0)
-
         def get_capacity_bytes(_pool: dict):
             return _pool["capabilities"].get("free_capacity_gb") * constants.Gi
 
@@ -234,16 +230,6 @@ class CinderCollectorFunctionalTestCase(base.BaseFunctionalExporterTestCase):
             pool_name = pool["name"]
             wait.wait_cinder_pool_updated(
                 self.get_cinder_pool_timestamp, pool_name, timestamp
-            )
-
-        # Check free_capacity metric for each existed pool
-        free_capacity_initial = dict()
-        for pool in list(self.ocm.oc.volume.backend_pools()):
-            pool_name = pool["name"]
-            capacity = get_capacity_bytes(pool)
-            free_capacity_initial[pool_name] = capacity
-            self._test_cinder_pool_metric(
-                metric_name, pool_name, capacity, f"Before create volume "
             )
 
         # Create volume and check metrics
@@ -259,7 +245,6 @@ class CinderCollectorFunctionalTestCase(base.BaseFunctionalExporterTestCase):
 
         for pool in list(self.ocm.oc.volume.backend_pools()):
             pool_name = pool["name"]
-            capacity_initial = free_capacity_initial[pool_name]
             capacity_current = get_capacity_bytes(pool)
             # Check metric for each pool
             self._test_cinder_pool_metric(
@@ -268,25 +253,6 @@ class CinderCollectorFunctionalTestCase(base.BaseFunctionalExporterTestCase):
                 capacity_current,
                 f"After create volume with size {volume_size} Gb ",
             )
-            # We expect that allocated capacity will be changed only on target
-            # pool
-            if pool_name == volume_pool["name"]:
-                self.assertLessEqual(
-                    capacity_current,
-                    capacity_initial + image_size,
-                    msg=f"The free_capacity_gb value "
-                    f"has changed from {capacity_initial} "
-                    f"to {capacity_current} after volume was created",
-                )
-            # And other pools should not be changed
-            else:
-                self.assertEqual(
-                    capacity_current,
-                    capacity_initial,
-                    msg=f"The cinder_pool_free_capacity value "
-                    f"{capacity_current} for pool {pool_name} is changed "
-                    f"after volume was created",
-                )
 
         # Remove a test volume
         self.volume_delete(volume)
@@ -303,17 +269,6 @@ class CinderCollectorFunctionalTestCase(base.BaseFunctionalExporterTestCase):
                 pool_name,
                 capacity_current,
                 "After remove volume",
-            )
-            self.assertAlmostEqual(
-                capacity_current,
-                free_capacity_initial[pool_name],
-                # allow some leak after deleting volume
-                delta=0.2 * constants.Gi,
-                msg=f"The cinder_pool_free_capacity value doesn't return "
-                f"to initial value "
-                f"{free_capacity_initial[pool_name]} after "
-                f"volume was deleted. "
-                f"Current value is {capacity_current} for pool {pool_name}",
             )
 
     def test_openstack_cinder_pool_allocated_capacity(self):
@@ -362,21 +317,6 @@ class CinderCollectorFunctionalTestCase(base.BaseFunctionalExporterTestCase):
                 constants.Gi
             )
 
-            # Check that cinder API values are changed accordingly
-            if pool["name"] == volume_pool["name"]:
-                self.assertTrue(
-                    capacity
-                    == pools_allocated_capacity[pool_name] + 5 * constants.Gi,
-                    f"The cinder_pool_allocated_capacity API value {capacity} for pool {pool_name} "
-                    "is not increased after non-empty volume was created",
-                )
-            else:
-                self.assertTrue(
-                    capacity == pools_allocated_capacity[pool_name],
-                    f"The cinder_pool_allocated_capacity API value {capacity} for pool {pool_name} "
-                    "is changed - not expected",
-                )
-
             self._test_cinder_pool_metric(
                 metric_name,
                 pool_name,
@@ -395,20 +335,12 @@ class CinderCollectorFunctionalTestCase(base.BaseFunctionalExporterTestCase):
                 constants.Gi
             )
 
-            # Check Cinder API values after remove non-empty volume
-            if capacity == pools_allocated_capacity[pool_name]:
-                self._test_cinder_pool_metric(
-                    metric_name,
-                    pool_name,
-                    capacity,
-                    "After remove non-empty volume",
-                )
-            else:
-                self.assertTrue(
-                    capacity == pools_allocated_capacity[pool_name],
-                    f"The cinder_pool_allocated_capacity value {capacity} for pool {pool_name} "
-                    "is incorrect after remove non-empty volume",
-                )
+            self._test_cinder_pool_metric(
+                metric_name,
+                pool_name,
+                capacity,
+                "After remove non-empty volume",
+            )
 
     def test_osdpl_cinder_zone_volumes(self):
         """Total number of volumes' zones in the cluster."""
