@@ -43,6 +43,20 @@ images:
 
 pod:
   probes:
+    error_pages:
+      error_pages:
+        readiness:
+          enabled: true
+          params:
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+        liveness:
+          enabled: true
+          params:
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
     server:
       ingress:
         readiness:
