@@ -2125,7 +2125,7 @@ pod:
   probes:
     rpc_timeout: 30
     compute:
-      default:
+      compute:
         liveness:
           enabled: True
           params:
@@ -2138,6 +2138,28 @@ pod:
             initialDelaySeconds: 80
             periodSeconds: 90
             timeoutSeconds: 70
+      compute_ssh:
+        liveness:
+          enabled: True
+          params:
+            initialDelaySeconds: 120
+            periodSeconds: 90
+            timeoutSeconds: 70
+        readiness:
+          enabled: True
+          params:
+            initialDelaySeconds: 80
+            periodSeconds: 90
+            timeoutSeconds: 70
+      compute_inhibit:
+        liveness:
+          enabled: True
+          params:
+            periodSeconds: 3600
+        readiness:
+          enabled: True
+          params:
+            periodSeconds: 20
     api-metadata:
       default:
         liveness:
