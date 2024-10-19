@@ -679,6 +679,16 @@ pod:
             initialDelaySeconds: 50
             periodSeconds: 20
             timeoutSeconds: 5
+    client:
+      client:
+        readiness:
+          enabled: true
+          params:
+            periodSeconds: 3600
+        liveness:
+          enabled: true
+          params:
+            periodSeconds: 3600
 jobs:
   fernet_setup:
     user: keystone

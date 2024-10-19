@@ -13,6 +13,11 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */}}
+{{- define "clientProbeTemplate" }}
+exec:
+  command:
+    - "true"
+{{- end }}
 
 {{- if .Values.manifests.deployment_client }}
 {{- $envAll := . }}
@@ -61,6 +66,8 @@ spec:
 {{ tuple $envAll "keystone_client" | include "helm-toolkit.snippets.image" | indent 10 }}
 {{ tuple $envAll $envAll.Values.pod.resources.client| include "helm-toolkit.snippets.kubernetes_resources" | indent 10 }}
 {{ dict "envAll" $envAll "application" "keystone" "container" "keystone_client" | include "helm-toolkit.snippets.kubernetes_container_security_context" | indent 10 }}
+{{ dict "envAll" $envAll "component" "client" "container" "client" "type" "readiness" "probeTemplate" (include "clientProbeTemplate" $envAll | fromYaml) | include "helm-toolkit.snippets.kubernetes_probe" | trim | indent 10 }}
+{{ dict "envAll" $envAll "component" "client" "container" "client" "type" "liveness" "probeTemplate" (include "clientProbeTemplate" $envAll | fromYaml) | include "helm-toolkit.snippets.kubernetes_probe" | trim | indent 10 }}
           command:
             - /bin/sleep
             - infinity
