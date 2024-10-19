@@ -2863,7 +2863,7 @@ manifests:
   daemonset_l2gw_agent: false
   daemonset_bagpipe_bgp: false
   daemonset_dragent: false
-  daemonset_netns_cleanup_cron: true
+  daemonset_netns_cleanup_cron: false
   deployment_ironic_agent: false
   deployment_server: true
   ingress_server: true
