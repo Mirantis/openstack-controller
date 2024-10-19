@@ -22,8 +22,12 @@ import logging
 import os
 import sys
 import time
+import threading
+import json
 
 import pykube
+
+from http.server import BaseHTTPRequestHandler, HTTPServer
 
 MARIADB_CONTROLLER_DEBUG = os.getenv("MARIADB_CONTROLLER_DEBUG")
 MARIADB_CONTROLLER_CHECK_PODS_DELAY = int(
@@ -49,6 +53,31 @@ LOG = logging.getLogger("mariadb-controller")
 
 LOG.setLevel(log_level)
 
+last_master_check = 0
+
+class HealthServer(BaseHTTPRequestHandler):
+    def do_GET(self):
+        status = {"status": "Ok", "last_master_check": last_master_check}
+        if time.time() - last_master_check > MARIADB_CONTROLLER_CHECK_PODS_DELAY * 2:
+            self.send_response(500)
+            status["status"] = "Fail"
+        else:
+            self.send_response(200)
+        self.send_header("Content-type", "application/json")
+        self.end_headers()
+        self.wfile.write(bytes(json.dumps(status), "utf-8"))
+
+def health_server():
+    webServer = HTTPServer(("localhost", 8080), HealthServer)
+    LOG.info("Start health check server.")
+    webServer.serve_forever()
+
+health_server_thread = threading.Thread(target=health_server, args=())
+health_server_thread.daemon = True
+
+def health_server_start():
+    if not health_server_thread.is_alive():
+        health_server_thread.start()
 
 def login():
     config = pykube.KubeConfig.from_env()
@@ -99,6 +128,8 @@ def is_ready(pod):
 
 
 def main():
+    global last_master_check
+    health_server_start()
     while True:
         for pod in get_mariadb_pods():
             pod.reload()
@@ -106,6 +137,7 @@ def main():
                 link_master_service(pod)
                 break
         LOG.debug(f"Sleeping for {MARIADB_CONTROLLER_CHECK_PODS_DELAY}")
+        last_master_check = time.time()
         time.sleep(MARIADB_CONTROLLER_CHECK_PODS_DELAY)
 
 

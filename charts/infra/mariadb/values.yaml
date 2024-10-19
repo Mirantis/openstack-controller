@@ -83,6 +83,33 @@ pod:
             # NOTE(vsaienko) the periodSeconds * failureThreshold should be higher than master election
             # The election mechanism migh pause for cluster_leader_ttl=120 defined in start.py
             failureThreshold: 3
+      mariadb_exporter:
+        readiness:
+          enabled: true
+          params:
+            initialDelaySeconds: 5
+            periodSeconds: 60
+            timeoutSeconds: 10
+        liveness:
+          enabled: true
+          params:
+            initialDelaySeconds: 15
+            periodSeconds: 60
+            timeoutSeconds: 10
+    controller:
+      controller:
+        readiness:
+          enabled: true
+          params:
+            initialDelaySeconds: 5
+            periodSeconds: 20
+            timeoutSeconds: 5
+        liveness:
+          enabled: true
+          params:
+            initialDelaySeconds: 15
+            periodSeconds: 60
+            timeoutSeconds: 5
   security_context:
     server:
       pod:
@@ -718,6 +745,11 @@ endpoints:
       dns:
         default: 53
         protocol: UDP
+  mariadb_controller:
+    name: mariadb-controller
+    port:
+      health:
+        default: 8080
 
 network_policy: {}
 

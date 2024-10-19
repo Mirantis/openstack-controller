@@ -12,6 +12,10 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */}}
 
+{{- define "mariadbProbeTemplate" }}
+{{ dict "probe_type" "curl" "scheme" "HTTP" "host" "localhost" "path" "/" "port" (tuple "mariadb_controller" "default" "health" . | include "helm-toolkit.endpoints.endpoint_port_lookup") | include "helm-toolkit.snippets.probe_template" }}
+{{- end }}
+
 {{- if .Values.manifests.deployment_controller }}
 {{- $envAll := . }}
 
@@ -91,6 +95,8 @@ spec:
 {{ tuple $envAll "mariadb_controller" | include "helm-toolkit.snippets.image" | indent 10 }}
 {{ dict "envAll" $envAll "application" "controller" "container" "controller" | include "helm-toolkit.snippets.kubernetes_container_security_context" | indent 10 }}
 {{ tuple $envAll $envAll.Values.pod.resources.controller | include "helm-toolkit.snippets.kubernetes_resources" | indent 10 }}
+{{ dict "envAll" $envAll "component" "controller" "container" "controller" "type" "liveness" "probeTemplate" (include "mariadbProbeTemplate" $envAll | fromYaml) | include "helm-toolkit.snippets.kubernetes_probe" | indent 10 }}
+{{ dict "envAll" $envAll "component" "controller" "container" "controller" "type" "readiness" "probeTemplate" (include "mariadbProbeTemplate" $envAll | fromYaml) | include "helm-toolkit.snippets.kubernetes_probe" | indent 10 }}
           command:
             - /tmp/mariadb_controller.py
           env:
