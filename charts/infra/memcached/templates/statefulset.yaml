@@ -72,6 +72,7 @@ spec:
 {{ tuple $envAll $envAll.Values.pod.resources.server | include "helm-toolkit.snippets.kubernetes_resources" | indent 10 }}
 {{ dict "envAll" $envAll "application" "server" "container" "memcached" | include "helm-toolkit.snippets.kubernetes_container_security_context" | indent 10 }}
 {{ dict "envAll" $envAll "component" "memcached" "container" "memcached" "type" "readiness" "probeTemplate" (include "memcachedProbeTemplate" $envAll | fromYaml) | include "helm-toolkit.snippets.kubernetes_probe" | indent 10 }}
+{{ dict "envAll" $envAll "component" "memcached" "container" "memcached" "type" "liveness" "probeTemplate" (include "memcachedProbeTemplate" $envAll | fromYaml) | include "helm-toolkit.snippets.kubernetes_probe" | indent 10 }}
           env:
             - name: MEMCACHED_PORT
               value: {{ tuple "oslo_cache" "internal" "memcache" . | include "helm-toolkit.endpoints.endpoint_port_lookup" | quote }}
