@@ -14,6 +14,22 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */}}
 
+{{- define "housekeepingProbeTemplate" }}
+{{- $probeType := . }}
+exec:
+  command:
+    - python
+    - /tmp/health-probe.py
+    - --config-file
+    - /etc/octavia/octavia.conf
+    - --process-name
+    - octavia-housekeeping
+    - --probe-type
+    - {{ $probeType }}
+    - --check
+    - database_sockets
+{{- end }}
+
 {{- if .Values.manifests.deployment_housekeeping }}
 {{- $envAll := . }}
 
@@ -70,6 +86,8 @@ spec:
 {{ tuple $envAll "octavia_housekeeping" | include "helm-toolkit.snippets.image" | indent 10 }}
 {{ tuple $envAll $envAll.Values.pod.resources.housekeeping | include "helm-toolkit.snippets.kubernetes_resources" | indent 10 }}
 {{ dict "envAll" $envAll "application" "octavia_housekeeping" "container" "octavia_housekeeping" | include "helm-toolkit.snippets.kubernetes_container_security_context" | indent 10 }}
+{{ dict "envAll" $envAll "component" "octavia_housekeeping" "container" "octavia_housekeeping" "type" "liveness" "probeTemplate" (include "housekeepingProbeTemplate" "liveness" | fromYaml) | include "helm-toolkit.snippets.kubernetes_probe" | indent 10 }}
+{{ dict "envAll" $envAll "component" "octavia_housekeeping" "container" "octavia_housekeeping" "type" "readiness" "probeTemplate" (include "housekeepingProbeTemplate" "readiness" | fromYaml) | include "helm-toolkit.snippets.kubernetes_probe" | indent 10 }}
           command:
             - /tmp/octavia-housekeeping.sh
             - start
@@ -106,9 +124,17 @@ spec:
             - name: octavia-certs
               mountPath: /etc/octavia/certs/client.pem
               subPath: cert_all
+            - name: pod-tmp
+              mountPath: /tmp
+            - name: octavia-bin
+              mountPath: /tmp/health-probe.py
+              subPath: health-probe.py
+              readOnly: true
 {{ if $mounts_octavia_housekeeping.volumeMounts }}{{ toYaml $mounts_octavia_housekeeping.volumeMounts | indent 12 }}{{ end }}
       volumes:
 {{ dict "envAll" $envAll "objectType" "volume" "secretPrefix" "octavia" | include "helm-toolkit.snippets.kubernetes_ssl_objects" | indent 8 }}
+        - name: pod-tmp
+          emptyDir: {}
         - name: pod-etc-octavia
           emptyDir: {}
         - name: octavia-bin
