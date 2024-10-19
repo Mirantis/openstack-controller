@@ -447,6 +447,11 @@ pod:
             periodSeconds: 10
             successThreshold: 1
             timeoutSeconds: 5
+        liveness:
+          enabled: true
+          params:
+            periodSeconds: 15
+            timeoutSeconds: 5
     powerdns:
       powerdns:
         readiness:
@@ -456,6 +461,11 @@ pod:
             periodSeconds: 10
             successThreshold: 1
             timeoutSeconds: 5
+        liveness:
+          enabled: true
+          params:
+            periodSeconds: 15
+            timeoutSeconds: 10
     mdns:
       mdns:
         readiness:
@@ -465,6 +475,11 @@ pod:
             periodSeconds: 10
             successThreshold: 1
             timeoutSeconds: 5
+        liveness:
+          enabled: true
+          params:
+            periodSeconds: 15
+            timeoutSeconds: 10
       worker:
         liveness:
           enabled: True
