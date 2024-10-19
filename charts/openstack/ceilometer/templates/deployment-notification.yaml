@@ -12,6 +12,22 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */}}
 
+{{- define "notificationProbeTemplate" }}
+{{- $probeType := . }}
+exec:
+  command:
+    - python
+    - /tmp/health-probe.py
+    - --config-file
+    - /etc/ceilometer/ceilometer.conf
+    - --process-name
+    - ceilometer-agent-notification
+    - --probe-type
+    - {{ $probeType }}
+    - --check
+    - rabbitmq_sockets
+{{- end }}
+
 {{- if .Values.manifests.deployment_notification }}
 {{- $envAll := . }}
 
@@ -58,6 +74,8 @@ spec:
 {{ tuple $envAll "ceilometer_notification" | include "helm-toolkit.snippets.image" | indent 10 }}
 {{ dict "envAll" $envAll "application" "ceilometer_notification" "container" "ceilometer_notification" | include "helm-toolkit.snippets.kubernetes_container_security_context" | indent 10 }}
 {{ tuple $envAll $envAll.Values.pod.resources.notification | include "helm-toolkit.snippets.kubernetes_resources" | indent 10 }}
+{{ dict "envAll" $envAll "component" "notification" "container" "notification" "type" "liveness" "probeTemplate" (include "notificationProbeTemplate" "liveness" | fromYaml) | include "helm-toolkit.snippets.kubernetes_probe" | indent 10 }}
+{{ dict "envAll" $envAll "component" "notification" "container" "notification" "type" "readiness" "probeTemplate" (include "notificationProbeTemplate" "readiness" | fromYaml) | include "helm-toolkit.snippets.kubernetes_probe" | indent 10 }}
           command:
             - /tmp/ceilometer-notification.sh
           volumeMounts:
@@ -110,6 +128,10 @@ spec:
               subPath: {{ base .Values.conf.ceilometer.DEFAULT.log_config_append }}
               readOnly: true
             {{- end }}
+            - name: ceilometer-bin
+              mountPath: /tmp/health-probe.py
+              subPath: health-probe.py
+              readOnly: true
 {{ if $mounts_ceilometer_notification.volumeMounts }}{{ toYaml $mounts_ceilometer_notification.volumeMounts | indent 12 }}{{ end }}
       volumes:
 {{ dict "envAll" $envAll "objectType" "volume" "secretPrefix" "ceilometer" | include "helm-toolkit.snippets.kubernetes_ssl_objects" | indent 8 }}

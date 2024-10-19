@@ -2348,6 +2348,42 @@ pod:
             timeoutSeconds: 30
             successThreshold: 1
             failureThreshold: 5
+    central:
+      central:
+        readiness:
+          enabled: true
+          params:
+            initialDelaySeconds: 60
+            periodSeconds: 30
+            timeoutSeconds: 30
+            successThreshold: 1
+            failureThreshold: 5
+        liveness:
+          enabled: true
+          params:
+            initialDelaySeconds: 60
+            periodSeconds: 30
+            timeoutSeconds: 30
+            successThreshold: 1
+            failureThreshold: 5
+    notification:
+      notification:
+        readiness:
+          enabled: true
+          params:
+            initialDelaySeconds: 60
+            periodSeconds: 30
+            timeoutSeconds: 30
+            successThreshold: 1
+            failureThreshold: 5
+        liveness:
+          enabled: true
+          params:
+            initialDelaySeconds: 60
+            periodSeconds: 30
+            timeoutSeconds: 30
+            successThreshold: 1
+            failureThreshold: 5
 
 network_policy: {}
 
