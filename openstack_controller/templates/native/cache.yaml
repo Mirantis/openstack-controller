@@ -38,6 +38,16 @@ spec:
         image: {{ url }}
 {# not all images support "/bin/sleep infinity" #}
         command: ["/bin/sleep", "86400000"]
+        livenessProbe:
+          exec:
+            command:
+              - "true"
+          periodSeconds: 3600
+        readinessProbe:
+          exec:
+            command:
+              - "true"
+          periodSeconds: 3600
         securityContext:
           allowPrivilegeEscalation: false
           capabilities:

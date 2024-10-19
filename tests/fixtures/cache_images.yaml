@@ -37,6 +37,16 @@ spec:
         - /bin/sleep
         - '86400000'
         image: neutron:latest
+        livenessProbe:
+          exec:
+            command:
+            - "true"
+          periodSeconds: 3600
+        readinessProbe:
+          exec:
+            command:
+            - "true"
+          periodSeconds: 3600
         name: image-precaching-neutron-db-sync
         securityContext:
           allowPrivilegeEscalation: false
@@ -47,6 +57,16 @@ spec:
         - /bin/sleep
         - '86400000'
         image: nova:latest
+        livenessProbe:
+          exec:
+            command:
+            - "true"
+          periodSeconds: 3600
+        readinessProbe:
+          exec:
+            command:
+            - "true"
+          periodSeconds: 3600
         name: image-precaching-nova-api
         securityContext:
           allowPrivilegeEscalation: false
@@ -57,6 +77,16 @@ spec:
         - /bin/sleep
         - '86400000'
         image: libvirt:latest
+        livenessProbe:
+          exec:
+            command:
+            - "true"
+          periodSeconds: 3600
+        readinessProbe:
+          exec:
+            command:
+            - "true"
+          periodSeconds: 3600
         name: image-precaching-libvirt
         securityContext:
           allowPrivilegeEscalation: false
@@ -67,6 +97,16 @@ spec:
         - /bin/sleep
         - '86400000'
         image: openvswitch:latest
+        livenessProbe:
+          exec:
+            command:
+            - "true"
+          periodSeconds: 3600
+        readinessProbe:
+          exec:
+            command:
+            - "true"
+          periodSeconds: 3600
         name: image-precaching-openvswitch
         securityContext:
           allowPrivilegeEscalation: false
