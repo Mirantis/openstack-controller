@@ -113,6 +113,12 @@ pod:
             timeoutSeconds: 65
     backup:
       default:
+        readiness:
+          enabled: true
+          params:
+            initialDelaySeconds: 80
+            periodSeconds: 90
+            timeoutSeconds: 65
         liveness:
           enabled: true
           params:

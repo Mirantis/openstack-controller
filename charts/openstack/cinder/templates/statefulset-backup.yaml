@@ -106,6 +106,7 @@ spec:
           command:
             - /tmp/cinder-backup.sh
 {{ dict "envAll" $envAll "component" "backup" "container" "default" "type" "liveness" "probeTemplate" (include "backupProbeTemplate" "liveness" | fromYaml) | include "helm-toolkit.snippets.kubernetes_probe" | indent 10 }}
+{{ dict "envAll" $envAll "component" "backup" "container" "default" "type" "readiness" "probeTemplate" (include "backupProbeTemplate" "readiness" | fromYaml) | include "helm-toolkit.snippets.kubernetes_probe" | indent 10 }}
           terminationMessagePath: /var/log/termination-log
           volumeMounts:
 {{ dict "envAll" $envAll "objectType" "mountpoint" "secretPrefix" "cinder" | include "helm-toolkit.snippets.kubernetes_ssl_objects" | indent 12 }}
