@@ -1,8 +1,11 @@
 from parameterized import parameterized
 import pytest
 
+from retry import retry
+
 from openstack_controller.tests.functional.exporter import base
 from openstack_controller.tests.functional import data_utils
+from openstack_controller.tests.functional.base import LOG
 
 
 class NovaCollectorFunctionalTestCase(base.BaseFunctionalExporterTestCase):
@@ -440,6 +443,20 @@ class NovaResourcesStatsTestCase(base.BaseFunctionalExporterTestCase):
             res[resource] = self.filter_metric_samples(metric, labels)[0].value
         return res
 
+    @retry(AssertionError, tries=3, delay=5, logger=LOG)
+    def check_resource_metrics_values(
+        self, resource_type, labels, resources_expected, message
+    ):
+        LOG.debug(f"Checking {resource_type} {labels} metrics values")
+        resources_actual = self.get_resource_metrics_values(
+            resource_type, labels
+        )
+        self.assertDictEqual(
+            resources_expected,
+            resources_actual,
+            message,
+        )
+
     def _test_osdpl_nova_resource_metrics(self, resource_type):
         """Check osdpl_nova_<resource_type>_<resource> metrics
 
@@ -532,12 +549,10 @@ class NovaResourcesStatsTestCase(base.BaseFunctionalExporterTestCase):
         )
 
         self.server_delete(self.server)
-        resources_after_delete_server = self.get_resource_metrics_values(
-            resource_type, labels
-        )
-        self.assertDictEqual(
+        self.check_resource_metrics_values(
+            resource_type,
+            labels,
             resources_initial,
-            resources_after_delete_server,
             "Some of resources is not changed correctly after server removal.",
         )
 
