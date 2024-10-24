@@ -684,7 +684,7 @@ pod:
         readiness:
           enabled: true
           params:
-            periodSeconds: 3600
+            periodSeconds: 20
         liveness:
           enabled: true
           params:

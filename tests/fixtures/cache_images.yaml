@@ -46,7 +46,7 @@ spec:
           exec:
             command:
             - "true"
-          periodSeconds: 3600
+          periodSeconds: 20
         name: image-precaching-neutron-db-sync
         securityContext:
           allowPrivilegeEscalation: false
@@ -66,7 +66,7 @@ spec:
           exec:
             command:
             - "true"
-          periodSeconds: 3600
+          periodSeconds: 20
         name: image-precaching-nova-api
         securityContext:
           allowPrivilegeEscalation: false
@@ -86,7 +86,7 @@ spec:
           exec:
             command:
             - "true"
-          periodSeconds: 3600
+          periodSeconds: 20
         name: image-precaching-libvirt
         securityContext:
           allowPrivilegeEscalation: false
@@ -106,7 +106,7 @@ spec:
           exec:
             command:
             - "true"
-          periodSeconds: 3600
+          periodSeconds: 20
         name: image-precaching-openvswitch
         securityContext:
           allowPrivilegeEscalation: false

@@ -47,7 +47,7 @@ spec:
           exec:
             command:
               - "true"
-          periodSeconds: 3600
+          periodSeconds: 20
         securityContext:
           allowPrivilegeEscalation: false
           capabilities:
