@@ -9,11 +9,14 @@ common:
 
 services:
   redis:
-    redisfailover:
-      redis:
-        replicas: 1
-      sentinel:
-        replicas: 1
+    redisoperator:
+      values:
+        redisfailover:
+          spec:
+            redis:
+              replicas: 1
+            sentinel:
+              replicas: 1
   database:
     mariadb:
       values:

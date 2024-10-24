@@ -219,6 +219,7 @@ images:
   cirros_raw_checksum: 479256d697ca
   fedora_checksum: 8bc56d70a3e2
   ubuntu_checksum: 3fb7422b5843
+  redis-operator: redis-operator:latest
 proxy_vars:
   HTTP_PROXY: http://127.0.0.1:3128
   NO_PROXY: .svc.cluster.local

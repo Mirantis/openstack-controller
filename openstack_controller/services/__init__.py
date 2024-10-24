@@ -24,6 +24,7 @@ import pykube
 
 from openstack_controller import ceph_api
 from openstack_controller import constants
+from openstack_controller import helm
 from openstack_controller import layers
 from openstack_controller import kube
 from openstack_controller import maintenance
@@ -341,45 +342,34 @@ class Coordination(Service, MaintenanceApiMixin):
 
 
 class Redis(Service, MaintenanceApiMixin):
-    service = "redis"
-    group = "databases.spotahome.com"
-    version = "v1"
-    kind = "RedisFailover"
 
-    def __init__(self, mspec, logger, osdplst, child_view):
-        super().__init__(mspec, logger, osdplst, child_view)
-        self.namespace = settings.OSCTL_REDIS_NAMESPACE
+    service = "redis"
+    available_releases = ["openstack-redis-operator"]
+
+    @property
+    def namespace(self):
+        return settings.OSCTL_REDIS_NAMESPACE
+
+    @property
+    def health_groups(self):
+        return ["redis"]
 
     def template_args(self):
         redis_secret = secrets.RedisSecret(self.namespace)
         redis_secret.ensure()
         return {"redis_creds": redis_secret.get()}
 
-    def render(self, openstack_version=""):
-        template_args = self.template_args()
-        images = layers.render_artifacts(self.mspec)
-        data = layers.render_service_template(
-            self.service,
-            self.mspec,
-            self.logger,
-            images=images,
-            **template_args,
-        )
-        data = layers.merge_service_layer(
-            self.service,
-            self.mspec,
-            self.kind.lower(),
-            data,
-        )
-        data.update(self.resource_def)
-
-        return data
-
     async def apply(self, event, **kwargs):
         # ensure child ref exists in the current status of osdpl object
         self.set_children_status("Applying")
         LOG.info(f"Applying config for {self.service}")
         data = self.render()
+
+        # TODO(vsaienko): remove in 25.2 release
+        helm_manager = helm.HelmManager(namespace=self.namespace)
+        if await helm_manager.exist("os-redis-operator"):
+            LOG.info(f"Purging os-redis-operator helm release")
+            await helm_manager.delete("os-redis-operator")
 
         rfs_deployment = kube.find(
             kube.Deployment,
@@ -389,18 +379,20 @@ class Redis(Service, MaintenanceApiMixin):
         )
         operator_deployment = kube.find(
             kube.Deployment,
-            "os-redis-operator",
+            "openstack-redis-operator",
             settings.OSCTL_REDIS_NAMESPACE,
             silent=True,
         )
         # PRODX-34488: to avoid races when image of sentinel is changed use cold start
         if rfs_deployment and rfs_deployment.exists():
-            new_image = data["spec"]["sentinel"]["image"]
+            new_image = data["spec"]["releases"][0]["values"]["redisfailover"][
+                "spec"
+            ]["sentinel"]["image"]
             if not rfs_deployment.image_applied(new_image):
                 LOG.info(f"Redis sentinel image is changed.")
                 operator_deployment = kube.find(
                     kube.Deployment,
-                    "os-redis-operator",
+                    "openstack-redis-operator",
                     settings.OSCTL_REDIS_NAMESPACE,
                     silent=True,
                 )
@@ -418,51 +410,7 @@ class Redis(Service, MaintenanceApiMixin):
                     obj.reload()
                     obj.scale(0)
                     await obj.wait_for_replicas(0)
-
-        # kopf.adopt is not used as kubernetes doesn't allow to use
-        # cross namespace ownerReference
-        data["apiVersion"] = "{0}/{1}".format(self.group, self.version)
-        data["kind"] = self.kind
-        data["name"] = "openstack-{0}".format(self.service)
-        data["metadata"]["namespace"] = self.namespace
-        redisfailover_obj = kube.resource(data)
-
-        # apply state of the object
-        if redisfailover_obj.exists():
-            redisfailover_obj.reload()
-            redisfailover_obj.set_obj(data)
-            redisfailover_obj.update()
-            LOG.debug(
-                f"{redisfailover_obj.kind} child is updated: %s",
-                redisfailover_obj.obj,
-            )
-        else:
-            redisfailover_obj.create()
-            LOG.debug(
-                f"{redisfailover_obj.kind} child is created: %s",
-                redisfailover_obj.obj,
-            )
-        if operator_deployment and operator_deployment.exists():
-            operator_deployment.scale(1)
-        LOG.info(f"Config applied for {self.service}")
-        kopf.info(
-            self.osdpl.obj,
-            reason=event.capitalize(),
-            message=f"{event}d {redisfailover_obj.kind} for {self.service}",
-        )
-        self.set_children_status(True)
-
-    async def delete(self, **kwargs):
-        name = "openstack-{0}".format(self.service)
-        namespace = settings.OSCTL_REDIS_NAMESPACE
-        redis_failover = kube.find(
-            kube.RedisFailover,
-            name,
-            namespace,
-            silent=True,
-        )
-        if redis_failover:
-            redis_failover.delete()
+        await super().apply(event, **kwargs)
 
     async def remove_node_from_scheduling(self, node):
         pass

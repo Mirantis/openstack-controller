@@ -47,6 +47,7 @@ CHART_GROUP_MAPPING = {
         "iscsi",
         "strongswan",
         "drb-controller",
+        "redisoperator",
     ],
 }
 

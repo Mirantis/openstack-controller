@@ -28,7 +28,6 @@ CONF = settings.CONF
 
 class Service:
     service = None
-    namespace = None
     group = "lcm.mirantis.com"
     version = "v1alpha1"
     kind = "HelmBundle"
@@ -69,6 +68,10 @@ class Service:
         super().__init_subclass__(*args, **kwargs)
         cls.registry[cls.service] = cls
 
+    @property
+    def namespace(self):
+        return settings.OSCTL_OS_DEPLOYMENT_NAMESPACE
+
     def __init__(self, mspec, logger, osdplst, child_view):
         self.mspec = mspec
         self.logger = logger
@@ -76,7 +79,6 @@ class Service:
         # The osdpl object is used only to send events. Should not be
         # changed. For any source of data mspec should be used.
         self.osdpl = kube.get_osdpl()
-        self.namespace = settings.OSCTL_OS_DEPLOYMENT_NAMESPACE
         self.openstack_version = mspec["openstack_version"]
 
         self.helm_manager = helm.HelmManager(namespace=self.namespace)
