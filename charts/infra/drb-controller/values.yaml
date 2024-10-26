@@ -50,6 +50,12 @@ pod:
             initialDelaySeconds: 120
             periodSeconds: 60
             timeoutSeconds: 5
+        readiness:
+          enabled: true
+          params:
+            initialDelaySeconds: 60
+            periodSeconds: 60
+            timeoutSeconds: 5
   security_context:
     drb_controller:
       pod:

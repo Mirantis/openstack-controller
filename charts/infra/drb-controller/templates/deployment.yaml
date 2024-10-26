@@ -12,7 +12,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */}}
 
-{{- define "drbControllerLivenessProbeTemplate" }}
+{{- define "drbControllerProbeTemplate" }}
 {{ dict "probe_type" "httpGet" "scheme" "HTTP" "path" "/healthz" "port" (tuple "drb_controller" "internal" "healthz" . | include "helm-toolkit.endpoints.endpoint_port_lookup") | include "helm-toolkit.snippets.probe_template" }}
 {{- end }}
 
@@ -58,7 +58,8 @@ spec:
 {{ tuple $envAll "drb_controller" | include "helm-toolkit.snippets.image" | indent 10 }}
 {{ tuple $envAll $envAll.Values.pod.resources.drb_controller | include "helm-toolkit.snippets.kubernetes_resources" | indent 10 }}
 {{ dict "envAll" $envAll "application" "drb_controller" "container" "drb_controller" | include "helm-toolkit.snippets.kubernetes_container_security_context" | indent 10 }}
-{{ dict "envAll" $envAll "component" "drb_controller" "container" "drb_controller" "type" "liveness" "probeTemplate" (include "drbControllerLivenessProbeTemplate" $envAll | fromYaml) | include "helm-toolkit.snippets.kubernetes_probe" | indent 10 }}
+{{ dict "envAll" $envAll "component" "drb_controller" "container" "drb_controller" "type" "liveness" "probeTemplate" (include "drbControllerProbeTemplate" $envAll | fromYaml) | include "helm-toolkit.snippets.kubernetes_probe" | indent 10 }}
+{{ dict "envAll" $envAll "component" "drb_controller" "container" "drb_controller" "type" "readiness" "probeTemplate" (include "drbControllerProbeTemplate" $envAll | fromYaml) | include "helm-toolkit.snippets.kubernetes_probe" | indent 10 }}
           env:
 {{- include "helm-toolkit.snippets.keystone_os_cloud_vars" ( dict "osCloudName" "drb-controller" ) | indent 12 }}
           command:
