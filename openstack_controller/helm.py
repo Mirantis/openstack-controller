@@ -246,9 +246,7 @@ class HelmManager:
         stdout, stderr = await self.run_cmd(cmd)
         return yaml.safe_load(stdout)
 
-    async def set_release_values(
-        self, name, values, repo, chart, version, args=None
-    ):
+    async def set_release_values(self, name, values, chart, args=None):
         args = args or []
         chart_url = self.get_chart_url(chart)
         # Avoid using --reuse-values, it drops values for overrides related upstream
@@ -273,7 +271,7 @@ class HelmManager:
             ]
             return await self.run_cmd(cmd, release_name=name)
 
-    async def install(self, name, values, repo, chart, version, args=None):
+    async def install(self, name, values, chart, args=None):
         args = args or []
         chart_url = self.get_chart_url(chart)
         with tempfile.NamedTemporaryFile(
@@ -296,16 +294,12 @@ class HelmManager:
             return await self.run_cmd(cmd, release_name=name)
 
     async def install_bundle(self, data):
-        repos = {r["name"]: r["url"] for r in data["spec"]["repositories"]}
         for release in data["spec"]["releases"]:
-            repo, chart = release["chart"].split("/")
-            repo = self._substitute_local_proxy(repo)
+            chart = release["chart"]
             await self.install(
                 release["name"],
                 release["values"],
-                repos[repo],
                 chart,
-                release["version"],
             )
 
     async def delete(self, name, args=None):

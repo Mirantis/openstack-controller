@@ -1,6 +1,6 @@
 spec:
   releases:
-  - chart: osh/horizon
+  - chart: horizon
     name: openstack-horizon
     values:
       network:

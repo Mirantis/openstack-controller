@@ -1,6 +1,6 @@
 spec:
   releases:
-  - chart: osh-infra/rabbitmq
+  - chart: rabbitmq
     name: openstack-neutron-rabbitmq
     values:
       conf:
@@ -98,7 +98,7 @@ spec:
                   timeoutSeconds: 30
       volume:
         enabled: false
-  - chart: osh/neutron
+  - chart: neutron
     name: openstack-neutron
     values:
       bootstrap:

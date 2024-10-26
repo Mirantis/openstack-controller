@@ -10,7 +10,7 @@
 spec:
   releases:
   - name: openstack-stepler
-    chart: {{spec.common.openstack.repo}}/stepler
+    chart: stepler
     values:
       images:
         tags:

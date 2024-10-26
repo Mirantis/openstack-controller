@@ -1,6 +1,6 @@
 spec:
   releases:
-  - chart: osh/heat
+  - chart: heat
     name: openstack-heat
     values:
       conf:

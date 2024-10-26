@@ -9,7 +9,7 @@
 spec:
   releases:
   - name: openstack-mariadb
-    chart: {{spec.common.infra.repo}}/mariadb
+    chart: mariadb
     values:
       conf:
         database_conf:

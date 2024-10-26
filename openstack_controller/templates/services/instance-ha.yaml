@@ -20,7 +20,7 @@
 spec:
   releases:
   - name: openstack-masakari
-    chart: {{spec.common.openstack.repo}}/masakari
+    chart: masakari
     values:
       images:
         tags:

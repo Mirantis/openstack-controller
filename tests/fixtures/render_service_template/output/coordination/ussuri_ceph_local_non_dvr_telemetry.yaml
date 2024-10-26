@@ -1,6 +1,6 @@
 spec:
   releases:
-  - chart: osh-infra/etcd
+  - chart: etcd
     name: etcd
     values:
       endpoints:

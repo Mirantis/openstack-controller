@@ -1,6 +1,6 @@
 spec:
   releases:
-  - chart: osh/designate
+  - chart: designate
     name: openstack-designate
     values:
       conf:

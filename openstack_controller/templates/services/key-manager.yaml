@@ -20,7 +20,7 @@ spec:
   releases:
 {%- if spec.get('migration', {}).get('barbican', {}).get('deploy_main_service', True) %}
   - name: openstack-barbican
-    chart: {{spec.common.openstack.repo}}/barbican
+    chart: barbican
     values:
       images:
         tags:

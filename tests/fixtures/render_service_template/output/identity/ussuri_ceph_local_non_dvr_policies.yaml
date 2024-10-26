@@ -1,6 +1,6 @@
 spec:
   releases:
-  - chart: osh/keystone
+  - chart: keystone
     name: openstack-keystone
     values:
       objects:

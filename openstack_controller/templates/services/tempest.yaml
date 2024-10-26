@@ -7,7 +7,7 @@
 spec:
   releases:
   - name: openstack-tempest
-    chart: {{spec.common.openstack.repo}}/tempest
+    chart: tempest
     values:
       images:
         tags:

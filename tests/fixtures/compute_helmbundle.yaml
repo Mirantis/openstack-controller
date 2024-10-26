@@ -4,9 +4,9 @@ metadata:
   name: openstack-compute
 spec:
   releases:
-  - chart: /rabbitmq
+  - chart: rabbitmq
     name: openstack-nova-rabbitmq
-    version: 0.1.0-infra-0
+    namespace: openstack
     values:
       conf:
         users:
@@ -33,9 +33,9 @@ spec:
           server: 1
       volume:
         enabled: false
-  - chart: /libvirt
+  - chart: libvirt
     name: openstack-libvirt
-    version: 0.1.0-infra-0
+    namespace: openstack
     values:
       ceph_client:
         configmap: rook-ceph-config
@@ -58,9 +58,9 @@ spec:
           libvirt: docker-prod-virtual.docker.mirantis.net/mcp/libvirt:4.0.0-bionic-1554881274591
       manifests:
         network_policy: false
-  - chart: /nova
+  - chart: nova
     name: openstack-nova
-    version: 0.1.0-os-0
+    namespace: openstack
     values:
       conf:
         ceph:

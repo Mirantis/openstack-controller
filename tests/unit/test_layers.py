@@ -189,12 +189,9 @@ def test_merge_all_no_modification(
     rst, openstackdeployment_mspec, compute_helmbundle
 ):
     compute_helmbundle["spec"]["repositories"] = []
-    openstackdeployment_mspec["common"]["charts"]["repositories"] = []
 
     # nullify merge points for openstackdeployment
-    openstackdeployment_mspec["common"]["charts"]["releases"] = {}
     openstackdeployment_mspec["common"]["openstack"]["values"] = {}
-    openstackdeployment_mspec["common"]["openstack"]["releases"] = {}
     openstackdeployment_mspec["services"]["compute"] = {}
 
     rst.return_value = compute_helmbundle

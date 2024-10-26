@@ -1,6 +1,6 @@
 spec:
   releases:
-  - chart: osh/cinder
+  - chart: cinder
     name: openstack-cinder
     values:
       overrides:

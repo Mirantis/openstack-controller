@@ -1,6 +1,6 @@
 spec:
   releases:
-  - chart: osh-infra/libvirt
+  - chart: libvirt
     name: openstack-libvirt
     values:
       ceph_client:

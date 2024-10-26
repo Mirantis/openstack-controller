@@ -37,7 +37,7 @@ spec:
   releases:
 {%- if spec.get('migration', {}).get('ironic', {}).get('deploy_main_service', True) %}
   - name: openstack-ironic
-    chart: {{spec.common.openstack.repo}}/ironic
+    chart: ironic
     values:
       images:
         tags:

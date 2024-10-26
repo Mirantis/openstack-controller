@@ -1,6 +1,6 @@
 spec:
   releases:
-  - chart: osh-infra/memcached
+  - chart: memcached
     name: openstack-memcached
     values:
       endpoints:

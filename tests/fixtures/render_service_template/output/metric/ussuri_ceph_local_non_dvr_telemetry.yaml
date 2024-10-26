@@ -1,7 +1,7 @@
 spec:
   releases:
   - name: openstack-gnocchi
-    chart: osh-infra/gnocchi
+    chart: gnocchi
     values:
       images:
         tags:

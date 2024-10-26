@@ -4,7 +4,7 @@
 spec:
   releases:
   - name: etcd
-    chart: {{spec.common.infra.repo}}/etcd
+    chart: etcd
     values:
       images:
         tags:

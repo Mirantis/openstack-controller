@@ -1,6 +1,6 @@
 spec:
   releases:
-  - chart: osh/placement
+  - chart: placement
     name: openstack-placement
     values:
       conf:

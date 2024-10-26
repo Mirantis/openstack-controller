@@ -23,7 +23,7 @@ spec:
   releases:
 {%- if spec.get('migration', {}).get('heat', {}).get('deploy_main_service', True) %}
   - name: openstack-heat
-    chart: {{spec.common.openstack.repo}}/heat
+    chart: heat
     values:
       images:
         tags:

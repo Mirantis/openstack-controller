@@ -1,7 +1,7 @@
 spec:
   releases:
   - name: openstack-panko
-    chart: osh/panko
+    chart: panko
     values:
       images:
         tags:

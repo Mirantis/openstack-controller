@@ -1,6 +1,6 @@
 spec:
   releases:
-  - chart: osh/octavia
+  - chart: octavia
     name: openstack-octavia
     values:
       network:

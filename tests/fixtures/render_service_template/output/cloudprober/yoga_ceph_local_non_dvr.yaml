@@ -1,7 +1,7 @@
 spec:
   releases:
   - name: openstack-cloudprober
-    chart: osh-infra/cloudprober
+    chart: cloudprober
     values:
       images:
         tags:

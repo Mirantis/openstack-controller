@@ -24,7 +24,7 @@ spec:
   releases:
 {%- if spec.get('migration', {}).get('glance', {}).get('deploy_main_service', True) %}
   - name: openstack-glance
-    chart: {{spec.common.openstack.repo}}/glance
+    chart: glance
     values:
       images:
         tags:

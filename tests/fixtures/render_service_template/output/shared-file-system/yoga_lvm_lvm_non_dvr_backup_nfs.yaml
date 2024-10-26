@@ -1,6 +1,6 @@
 spec:
   releases:
-  - chart: osh/manila
+  - chart: manila
     name: openstack-manila
     values:
       conf:

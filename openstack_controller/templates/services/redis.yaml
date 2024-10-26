@@ -1,7 +1,7 @@
 spec:
   releases:
   - name: openstack-redis-operator
-    chart: {{spec.common.infra.repo}}/redisoperator
+    chart: redisoperator
     values:
       image:
         fullName: {{ images["redis-operator"] }}

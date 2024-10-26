@@ -1,7 +1,7 @@
 spec:
   releases:
   - name: openstack-aodh
-    chart: osh/aodh
+    chart: aodh
     values:
       images:
         tags:

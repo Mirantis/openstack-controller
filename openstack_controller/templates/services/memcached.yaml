@@ -6,7 +6,7 @@
 spec:
   releases:
   - name: openstack-memcached
-    chart: {{spec.common.infra.repo}}/memcached
+    chart: memcached
     values:
       images:
         tags:

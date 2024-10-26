@@ -4,7 +4,7 @@ metadata:
   name: openstack-compute
 spec:
   releases:
-  - chart: osh-infra/rabbitmq
+  - chart: rabbitmq
     name: openstack-nova-rabbitmq
     namespace: openstack
     values:
@@ -121,8 +121,7 @@ spec:
           server: 1
       volume:
         enabled: false
-    version: 0.1.0
-  - chart: osh-infra/libvirt
+  - chart: libvirt
     name: openstack-libvirt
     namespace: openstack
     values:
@@ -233,8 +232,7 @@ spec:
           tempest_run_tests: docker-dev-virtual.docker.mirantis.net/mirantis/oscore/oh/tempest:stein-bionic-20190827193015
       manifests:
         network_policy: false
-    version: 0.1.0
-  - chart: osh/nova
+  - chart: nova
     name: openstack-nova
     namespace: openstack
     values:
@@ -315,14 +313,3 @@ spec:
       pod:
         replicas:
           api: 3
-    version: 0.1.0
-  repositories:
-  - name: osh
-    url: https://harbor.mcp.mirantis.net/chartrepo/mcp-openstack-helm-20190828110147
-  - name: osh-infra
-    url: https://harbor.mcp.mirantis.net/chartrepo/mcp-openstack-helm-infra-20190827075122
-  - name: osh
-    url: https://harbor.mcp.mirantis.net/chartrepo/mcp-openstack-helm-20190828110147
-  - name: osh-infra
-    url: https://harbor.mcp.mirantis.net/chartrepo/mcp-openstack-helm-infra-20190827075122
-

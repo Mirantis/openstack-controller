@@ -196,7 +196,7 @@ def merge_osdpl_into_helmbundle(service, spec, service_helmbundle):
 
     # The values are merged in this specific order.
     for release in service_helmbundle["spec"]["releases"]:
-        chart_name = release["chart"].split("/")[-1]
+        chart_name = release["chart"]
         merger.merge(
             release,
             spec.get("common", {}).get("charts", {}).get("releases", {}),
@@ -271,12 +271,6 @@ def merge_all_layers(service, mspec, logger, **template_args):
         service, mspec, logger, images=images, **template_args
     )
 
-    # FIXME(pas-ha) either move to dict merging stage before,
-    # or move to the templates themselves
-    service_helmbundle["spec"]["repositories"] = mspec["common"]["charts"][
-        "repositories"
-    ]
-
     # and than an "original" osdpl on top of that
     service_helmbundle = merge_osdpl_into_helmbundle(
         service, mspec, service_helmbundle
@@ -338,12 +332,7 @@ def merge_spec(spec, logger):
         "binary_base_url": settings.OSCTL_BINARY_BASE_URL,
         "images_base_url": settings.OSCTL_IMAGES_BASE_URL,
     }
-    binary_base_url = spec.get("artifacts", {}).get(
-        "binary_base_url", base["artifacts"]["binary_base_url"]
-    )
-    artifacts = render_binary_artifacts(binary_base_url)
     sizing = yaml.safe_load(ENV.get_template(f"size/{size}.yaml").render())
-    merger.merge(base, artifacts)
     merger.merge(base, sizing)
 
     # Merge IAM data defined via values, the user defined via spec
@@ -400,15 +389,6 @@ def render_artifacts(spec):
             images_base_url=images_base_url, binary_base_url=binary_base_url
         )
     )
-
-
-def render_binary_artifacts(binary_base_url):
-    artifacts = yaml.safe_load(
-        ENV.get_template("artifacts.yaml").render(
-            binary_base_url=binary_base_url
-        )
-    )
-    return artifacts
 
 
 def substitude_osdpl(obj):

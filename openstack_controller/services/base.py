@@ -147,39 +147,10 @@ class Service:
         return res
 
     async def set_release_values(self, chart, values):
-        release_name = f"openstack-{chart}"
-        current_values = await self.helm_manager.get_release_values(
-            release_name
-        )
-        helm_metadata = (
-            current_values.get(f"{self.group}/{self.version}", {})
-            .get("openstack-controller", {})
-            .get("helm", {})
-            .get(chart, {})
-        )
-        repo_url = helm_metadata.get("repo_url")
-        version = helm_metadata.get("version")
-
-        if repo_url is None or version is None:
-            kopf.TemporaryError(
-                f"Not enough information to set release value. repo_url: {repo_url}, version: {version}"
-            )
-
         await self.helm_manager.set_release_values(
-            f"openstack-{chart}", values, repo_url, chart, version
+            f"openstack-{chart}", values, chart
         )
         LOG.info(f"Update {self.service} with {values}")
-
-    def _genenrate_helm_metadata(self, data):
-        res = {}
-        repos = {r["name"]: r["url"] for r in data["spec"]["repositories"]}
-        for release in data["spec"]["releases"]:
-            repo, chart_name = release["chart"].split("/")
-            res[chart_name] = {
-                "repo_url": repos[repo],
-                "version": release["version"],
-            }
-        return res
 
     def get_child_objects_dynamic(self, kind, abstract_name):
         res = []
@@ -286,7 +257,7 @@ class Service:
         res = {}
         release_mapping = {}
         for release in data["spec"]["releases"]:
-            chart_name = release["chart"].split("/")[1]
+            chart_name = release["chart"]
 
             release_mapping[chart_name] = {
                 "new_values": release["values"],
@@ -345,7 +316,7 @@ class Service:
         for release in new_obj["spec"]["releases"]:
             if not release["name"] in installed_releases:
                 break
-            chart_name = release["chart"].split("/")[1]
+            chart_name = release["chart"]
             old_values = await self.helm_manager.get_release_values(
                 release["name"]
             )
@@ -573,7 +544,6 @@ class Service:
         # Add internal data to helm release
 
         fingerprint = layers.spec_hash(self.mspec)
-        helm_data = self._genenrate_helm_metadata(data)
         child_hashes = self.generate_child_object_hashes(data)
         internal_data = {
             f"{self.group}/{self.version}": {
@@ -582,7 +552,6 @@ class Service:
                     "fingerprint": fingerprint,
                     "child-objects": child_hashes,
                     "ownerReferences": data["metadata"]["ownerReferences"],
-                    "helm": helm_data,
                     "helmbundle": {"name": self.resource_name},
                 }
             }
@@ -598,7 +567,7 @@ class Service:
         data = self.render(openstack_version)
         value = None
         for release in data["spec"]["releases"]:
-            if release["chart"].endswith(f"/{chart}"):
+            if release["chart"] == chart:
                 value = release["values"]
                 try:
                     for path_link in path:

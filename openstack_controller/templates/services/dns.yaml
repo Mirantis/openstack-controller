@@ -29,7 +29,7 @@ spec:
   releases:
 {%- if spec.get('migration', {}).get('designate', {}).get('deploy_main_service', True) %}
   - name: openstack-designate
-    chart: {{spec.common.openstack.repo}}/designate
+    chart: designate
     values:
       images:
         tags:

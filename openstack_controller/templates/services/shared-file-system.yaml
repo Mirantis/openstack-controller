@@ -20,7 +20,7 @@
 spec:
   releases:
   - name: openstack-manila
-    chart: {{spec.common.openstack.repo}}/manila
+    chart: manila
     values:
       images:
         tags:
