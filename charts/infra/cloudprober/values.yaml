@@ -209,6 +209,12 @@ pod:
             initialDelaySeconds: 30
             periodSeconds: 120
             timeoutSeconds: 5
+        readiness:
+          enabled: True
+          params:
+            initialDelaySeconds: 30
+            periodSeconds: 120
+            timeoutSeconds: 5
   security_context:
     cloudprober:
       pod:

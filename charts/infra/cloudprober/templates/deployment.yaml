@@ -100,6 +100,7 @@ spec:
             - /tmp/openstack_discovery.py
             - --daemon
 {{ dict "envAll" $envAll "component" "cloudprober" "container" "openstack_discovery" "type" "liveness" "probeTemplate" (include "discoveryProbeTemplate" $envAll | fromYaml) | include "helm-toolkit.snippets.kubernetes_probe" | indent 10 }}
+{{ dict "envAll" $envAll "component" "cloudprober" "container" "openstack_discovery" "type" "readiness" "probeTemplate" (include "discoveryProbeTemplate" $envAll | fromYaml) | include "helm-toolkit.snippets.kubernetes_probe" | indent 10 }}
           volumeMounts:
             - mountPath: /tmp
               name: pod-tmp
