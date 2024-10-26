@@ -78,6 +78,7 @@ spec:
             - name: dns-api
               containerPort: {{ tuple "dns" "internal" "api" . | include "helm-toolkit.endpoints.endpoint_port_lookup" }}
 {{ dict "envAll" $envAll "component" "api" "container" "api" "type" "readiness" "probeTemplate" (include "apiProbeTemplate" $envAll | fromYaml) | include "helm-toolkit.snippets.kubernetes_probe" | trim | indent 10 }}
+{{ dict "envAll" $envAll "component" "api" "container" "api" "type" "liveness" "probeTemplate" (include "apiProbeTemplate" $envAll | fromYaml) | include "helm-toolkit.snippets.kubernetes_probe" | trim | indent 10 }}
           volumeMounts:
 {{ dict "envAll" $envAll "objectType" "mountpoint" "secretPrefix" "designate" | include "helm-toolkit.snippets.kubernetes_ssl_objects" | indent 12 }}
             - name: designate-bin

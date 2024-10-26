@@ -73,6 +73,7 @@ spec:
 {{ tuple $envAll $envAll.Values.pod.resources.server | include "helm-toolkit.snippets.kubernetes_resources" | indent 10 }}
 {{ dict "envAll" $envAll "application" "designate" "container" "designate_powerdns" | include "helm-toolkit.snippets.kubernetes_container_security_context" | indent 10 }}
 {{ dict "envAll" $envAll "component" "powerdns" "container" "powerdns" "type" "readiness" "probeTemplate" (include "powerdnsProbeTemplate" $envAll | fromYaml) | include "helm-toolkit.snippets.kubernetes_probe" | trim | indent 10 }}
+{{ dict "envAll" $envAll "component" "powerdns" "container" "powerdns" "type" "liveness" "probeTemplate" (include "powerdnsProbeTemplate" $envAll | fromYaml) | include "helm-toolkit.snippets.kubernetes_probe" | trim | indent 10 }}
           command:
             - pdns_server
           ports:
@@ -96,6 +97,7 @@ spec:
 {{ tuple $envAll $envAll.Values.pod.resources.mdns | include "helm-toolkit.snippets.kubernetes_resources" | indent 10 }}
 {{ dict "envAll" $envAll "application" "designate" "container" "designate_mdns" | include "helm-toolkit.snippets.kubernetes_container_security_context" | indent 10 }}
 {{ dict "envAll" $envAll "component" "mdns" "container" "mdns" "type" "readiness" "probeTemplate" (include "mdnsProbeTemplate" $envAll | fromYaml) | include "helm-toolkit.snippets.kubernetes_probe" | trim | indent 10 }}
+{{ dict "envAll" $envAll "component" "mdns" "container" "mdns" "type" "liveness" "probeTemplate" (include "mdnsProbeTemplate" $envAll | fromYaml) | include "helm-toolkit.snippets.kubernetes_probe" | trim | indent 10 }}
           ports:
             - name: d-mdns
               containerPort: {{ tuple "mdns" "internal" "ipc" . | include "helm-toolkit.endpoints.endpoint_port_lookup" }}
