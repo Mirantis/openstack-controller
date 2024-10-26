@@ -204,9 +204,14 @@ volume_type_name={{ .Values.conf.tempest.volume.volume_type }}
 if [[ -z "$volume_type_name" ]]; then
     volume_type_name=$(openstack volume type list  --default -f value -c Name)
 fi
-if openstack volume type show ${volume_type_name} |grep -q lvm; then
+volume_type_details=$(openstack volume type show ${volume_type_name})
+
+if [[ ${volume_type_details} == *"lvm"* ]]; then
     iniset $TEMPEST_CONF compute-feature-enabled  block_migrate_cinder_iscsi True
     iniset $TEMPEST_CONF volume storage_protocol "iSCSI"
+fi
+if [[ ${volume_type_details} == *"-nfs"* ]]; then
+    iniset $TEMPEST_CONF volume-feature-enabled extend_attached_volume False
 fi
 {{-   end }}
 {{- end }}
