@@ -37,7 +37,7 @@ spec:
   releases:
 {%- if spec.get('migration', {}).get('octavia', {}).get('deploy_main_service', True) %}
   - name: openstack-octavia
-    chart: {{spec.common.openstack.get('repo', spec.common.charts.repo)}}/octavia
+    chart: octavia
     values:
       octavia:
         settings:

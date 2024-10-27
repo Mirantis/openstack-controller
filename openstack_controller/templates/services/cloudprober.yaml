@@ -7,7 +7,7 @@
 spec:
   releases:
   - name: openstack-cloudprober
-    chart: {{spec.common.infra.repo}}/cloudprober
+    chart: cloudprober
     values:
       images:
         tags:

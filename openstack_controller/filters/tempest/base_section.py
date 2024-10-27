@@ -39,7 +39,7 @@ class BaseSection(object):
     def get_values_item(self, service_name, item_path, item_default=None):
         for component_name, component in self.helmbundles_body.items():
             for release in component.get("spec", {}).get("releases", []):
-                chart_name = release["chart"].split("/")[-1]
+                chart_name = release["chart"]
                 if chart_name == service_name:
                     res = parse(item_path).find(release["values"])
                     if res:
@@ -71,7 +71,7 @@ class BaseSection(object):
         """
         for component_name, component in self.helmbundles_body.items():
             for release in component.get("spec", {}).get("releases", []):
-                chart_name = release["chart"].split("/")[-1]
+                chart_name = release["chart"]
                 if chart_name == service:
                     return True
         return False

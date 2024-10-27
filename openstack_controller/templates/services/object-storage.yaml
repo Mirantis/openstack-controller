@@ -6,7 +6,7 @@
 spec:
   releases:
   - name: openstack-ceph-rgw
-    chart: {{spec.common.infra.repo}}/ceph-rgw
+    chart: ceph-rgw
     values:
       images:
         tags:

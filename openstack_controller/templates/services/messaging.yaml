@@ -21,7 +21,7 @@
 spec:
   releases:
   - name: openstack-rabbitmq
-    chart: {{spec.common.infra.get('repo', spec.common.charts.repo)}}/rabbitmq
+    chart: rabbitmq
     values:
 {% include 'base/_rabbitmq_images.yaml' %}
   {%- if stacklight_enabled %}

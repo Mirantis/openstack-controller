@@ -62,7 +62,7 @@ spec:
   releases:
 {%- if spec.get('migration', {}).get('cinder', {}).get('deploy_main_service', True) %}
   - name: openstack-cinder
-    chart: {{spec.common.openstack.repo}}/cinder
+    chart: cinder
     values:
       images:
         tags:

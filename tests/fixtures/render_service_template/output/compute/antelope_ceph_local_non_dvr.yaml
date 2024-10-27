@@ -2,7 +2,7 @@
 spec:
   releases:
   - name: openstack-libvirt
-    chart: osh-infra/libvirt
+    chart: libvirt
     values:
       images:
         tags:
@@ -39,7 +39,7 @@ spec:
                   periodSeconds: 10
                   timeoutSeconds: 5
   - name: openstack-nova
-    chart: osh/nova
+    chart: nova
     values:
       images:
         tags:

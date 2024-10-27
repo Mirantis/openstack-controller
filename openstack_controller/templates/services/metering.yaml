@@ -11,7 +11,7 @@ spec:
   releases:
 {%- if spec.get('migration', {}).get('telemetry', {}).get('deploy_main_service', True) %}
   - name: openstack-ceilometer
-    chart: {{spec.common.openstack.repo}}/ceilometer
+    chart: ceilometer
     values:
       images:
         tags:

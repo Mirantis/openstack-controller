@@ -62,7 +62,7 @@ spec:
   releases:
 {%- if 'compute' in components_with_dedicated_messaging %}
   - name: openstack-nova-rabbitmq
-    chart: {{spec.common.infra.repo}}/rabbitmq
+    chart: rabbitmq
     values:
 {% include 'base/_rabbitmq_images.yaml' %}
   {%- if stacklight_enabled %}
@@ -137,7 +137,7 @@ spec:
   {%- endif %}
 {%- endif %}
   - name: openstack-libvirt
-    chart: {{spec.common.infra.repo}}/libvirt
+    chart: libvirt
     values:
       images:
         tags:
@@ -299,7 +299,7 @@ spec:
 {%- endif %}
 {%- if spec.get('migration', {}).get('nova', {}).get('deploy_main_service', True) %}
   - name: openstack-nova
-    chart: {{spec.common.openstack.repo}}/nova
+    chart: nova
     values:
       images:
         tags:

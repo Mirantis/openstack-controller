@@ -1,6 +1,6 @@
 spec:
   releases:
-  - chart: osh/masakari
+  - chart: masakari
     name: openstack-masakari
     values:
       conf:

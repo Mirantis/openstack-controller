@@ -6,7 +6,7 @@
 spec:
   releases:
   - name: openstack-drb-controller
-    chart: {{spec.common.infra.repo}}/drb-controller
+    chart: drb-controller
     values:
       images:
         tags:

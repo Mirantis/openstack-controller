@@ -5,7 +5,7 @@
 spec:
   releases:
   - name: ingress-openstack
-    chart: {{spec.common.infra.repo}}/ingress
+    chart: ingress
     values:
       deployment:
         type: DaemonSet

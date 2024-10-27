@@ -1,6 +1,6 @@
 spec:
   releases:
-  - chart: osh-infra/libvirt
+  - chart: libvirt
     name: openstack-libvirt
     values:
       ceph_client:
@@ -75,7 +75,7 @@ spec:
         ceph_conf: true
         secret_libvirt_vnc_server_tls: true
         secret_ca_bundle: true
-  - chart: osh/nova
+  - chart: nova
     name: openstack-nova
     values:
       ceph_client:

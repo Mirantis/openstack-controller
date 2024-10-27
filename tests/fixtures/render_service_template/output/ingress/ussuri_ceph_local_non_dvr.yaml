@@ -1,6 +1,6 @@
 spec:
   releases:
-  - chart: osh-infra/ingress
+  - chart: ingress
     name: ingress-openstack
     values:
       deployment:

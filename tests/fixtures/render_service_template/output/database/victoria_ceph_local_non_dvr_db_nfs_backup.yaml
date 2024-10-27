@@ -1,6 +1,6 @@
 spec:
   releases:
-  - chart: osh-infra/mariadb
+  - chart: mariadb
     name: openstack-mariadb
     values:
       conf:

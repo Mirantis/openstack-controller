@@ -1,6 +1,6 @@
 spec:
   releases:
-  - chart: osh/barbican
+  - chart: barbican
     name: openstack-barbican
     values:
       conf:

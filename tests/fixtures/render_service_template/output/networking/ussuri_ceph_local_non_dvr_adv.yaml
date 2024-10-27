@@ -1,6 +1,6 @@
 spec:
   releases:
-  - chart: osh-infra/rabbitmq
+  - chart: rabbitmq
     name: openstack-neutron-rabbitmq
     values:
       conf:
@@ -98,7 +98,7 @@ spec:
                   timeoutSeconds: 30
       volume:
         enabled: false
-  - chart: osh-infra/openvswitch
+  - chart: openvswitch
     name: openstack-openvswitch
     values:
       conf:
@@ -191,7 +191,7 @@ spec:
                      hugepages_mountpath: /dev/hugepages
                      socket_memory: 1024
                      vhostuser_socket_dir: vhostuser
-  - chart: osh/neutron
+  - chart: neutron
     name: openstack-neutron
     values:
       bootstrap:

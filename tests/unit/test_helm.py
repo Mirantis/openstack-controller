@@ -350,9 +350,7 @@ async def test_install_release(mock_mpf):
     await hc.install(
         "test-release",
         {},
-        "/opt/operator/charts/infra/libvirt",
         "libvirt",
-        "0.1.2",
     )
     hc.run_cmd.assert_called_once_with(
         [
@@ -382,9 +380,7 @@ async def test_install_release_cache(mock_mpf):
     await hc.install(
         "test-release",
         {},
-        "/opt/operator/charts/infra/libvirt",
         "libvirt",
-        "0.1.2",
     )
     hc.run_cmd.assert_called_once_with(
         [

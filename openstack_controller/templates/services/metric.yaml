@@ -19,7 +19,7 @@ spec:
   releases:
 {%- if spec.get('migration', {}).get('telemetry', {}).get('deploy_main_service', True) %}
   - name: openstack-gnocchi
-    chart: {{spec.common.infra.get('repo', spec.common.charts.repo)}}/gnocchi
+    chart: gnocchi
     values:
       images:
         tags:

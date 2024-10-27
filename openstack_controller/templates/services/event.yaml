@@ -17,7 +17,7 @@ spec:
   releases:
 {%- if spec.get('migration', {}).get('telemetry', {}).get('deploy_main_service', True) %}
   - name: openstack-panko
-    chart: {{spec.common.openstack.repo}}/panko
+    chart: panko
     values:
       images:
         tags:

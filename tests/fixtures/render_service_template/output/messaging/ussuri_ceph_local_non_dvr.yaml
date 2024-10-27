@@ -1,6 +1,6 @@
 spec:
   releases:
-  - chart: osh-infra/rabbitmq
+  - chart: rabbitmq
     name: openstack-rabbitmq
     values:
       conf:

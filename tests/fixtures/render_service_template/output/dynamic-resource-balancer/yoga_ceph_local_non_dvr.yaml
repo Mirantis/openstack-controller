@@ -1,7 +1,7 @@
 spec:
   releases:
   - name: openstack-drb-controller
-    chart: osh-infra/drb-controller
+    chart: drb-controller
     values:
       images:
         tags:

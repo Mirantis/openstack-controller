@@ -1,6 +1,6 @@
 spec:
   releases:
-  - chart: osh/glance
+  - chart: glance
     name: openstack-glance
     values:
       bootstrap:

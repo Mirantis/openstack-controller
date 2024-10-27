@@ -113,7 +113,7 @@ spec:
   releases:
 {%- if 'networking' in components_with_dedicated_messaging %}
   - name: openstack-neutron-rabbitmq
-    chart: {{spec.common.infra.repo}}/rabbitmq
+    chart: rabbitmq
     values:
 {% include 'base/_rabbitmq_images.yaml' %}
   {%- if stacklight_enabled %}
@@ -189,7 +189,7 @@ spec:
 {%- endif %}
   {%- if not tungstenfabric_enabled %}
   - name: openstack-openvswitch
-    chart: {{spec.common.infra.repo}}/openvswitch
+    chart: openvswitch
     values:
       conf:
         neutron:
@@ -386,7 +386,7 @@ spec:
 {%- if spec.get('migration', {}).get('neutron', {}).get('deploy_main_service', true) %}
 {%- if bgpvpn.get("route_reflector", {}).get("enabled", False) %}
   - name: openstack-neutron-frrouting
-    chart: {{spec.common.infra.repo}}/frr
+    chart: frr
     values:
       images:
         tags:
@@ -410,7 +410,7 @@ spec:
 {%- endif %}
 {%- if ipsec.enabled %}
   - name: openstack-ipsec
-    chart: {{spec.common.infra.repo}}/strongswan
+    chart: strongswan
     values:
       images:
         tags:
@@ -443,7 +443,7 @@ spec:
                 interfaces_ignore: {{ spec.features.neutron.tunnel_interface }}
 {%- endif %}
   - name: openstack-neutron
-    chart: {{spec.common.openstack.repo}}/neutron
+    chart: neutron
     values:
       images:
         tags:

@@ -1,7 +1,7 @@
 spec:
   releases:
   - name: openstack-ceilometer
-    chart: osh/ceilometer
+    chart: ceilometer
     values:
       images:
         tags:

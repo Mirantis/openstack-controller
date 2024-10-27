@@ -7,20 +7,6 @@ metadata:
   namespace: openstack
   generation: 123
 spec:
-  common:
-    charts:
-      releases:
-        namespace: openstack
-        version: 0.1.0
-      repositories:
-      - name: osh
-        url: https://harbor.mcp.mirantis.net/chartrepo/mcp-openstack-helm-20190923113658
-      - name: osh-infra
-        url: https://harbor.mcp.mirantis.net/chartrepo/mcp-openstack-helm-infra-20190920155405
-    infra:
-      repo: osh-infra
-    openstack:
-      repo: osh
   internal_domain_name: kaas-kubernetes-3af5ae538cf411e9a6c7fa163e5a4837
   public_domain_name: it.just.works
   artifacts:

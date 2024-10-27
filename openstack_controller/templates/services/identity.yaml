@@ -16,7 +16,7 @@
 spec:
   releases:
   - name: openstack-keystone
-    chart: {{spec.common.openstack.repo}}/keystone
+    chart: keystone
     values:
       images:
         tags:

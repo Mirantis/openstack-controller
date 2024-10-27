@@ -46,9 +46,6 @@ def openstackdeployment():
 def render_mspec():
     osdpl = yaml.safe_load(open("tests/fixtures/openstackdeployment.yaml"))
     mspec = layers.merge_spec(osdpl["spec"], LOG)
-    # Set explicit version for tests
-    mspec["common"]["openstack"]["releases"]["version"] = "0.1.0-os-0"
-    mspec["common"]["infra"]["releases"]["version"] = "0.1.0-infra-0"
     return mspec
 
 

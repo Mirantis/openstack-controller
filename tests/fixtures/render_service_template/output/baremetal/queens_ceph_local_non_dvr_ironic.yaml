@@ -1,6 +1,6 @@
 spec:
   releases:
-  - chart: osh/ironic
+  - chart: ironic
     name: openstack-ironic
     values:
       bootstrap:

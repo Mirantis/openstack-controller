@@ -1,6 +1,6 @@
 spec:
   releases:
-  - chart: osh-infra/libvirt
+  - chart: libvirt
     name: openstack-libvirt
     values:
       ceph_client:
@@ -64,7 +64,7 @@ spec:
                   dynamic_options:
                     libvirt:
                       listen_interface: ens3
-  - chart: osh/nova
+  - chart: nova
     name: openstack-nova
     values:
       overrides:
