@@ -12,7 +12,9 @@ class ManilaCollectorFunctionalTestCase(base.BaseFunctionalExporterTestCase):
     def setUp(self):
         super().setUp()
         if not self.is_manila_enabled():
-            raise unittest.SkipTest("Alarming service is not enabled")
+            raise unittest.SkipTest(
+                "Shared file system service is not enabled"
+            )
 
     def is_manila_enabled(self):
         return "shared-file-system" in self.osdpl.obj["spec"]["features"].get(
