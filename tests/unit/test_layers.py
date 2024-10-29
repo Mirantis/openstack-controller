@@ -186,7 +186,11 @@ def test_render_template(openstackdeployment_mspec):
 
 @mock.patch.object(layers, "render_service_template")
 def test_merge_all_no_modification(
-    rst, openstackdeployment_mspec, compute_helmbundle
+    rst,
+    openstackdeployment_mspec,
+    compute_helmbundle,
+    mock_kube_artifacts_configmap,
+    mock_kube_get_osdpl,
 ):
     compute_helmbundle["spec"]["repositories"] = []
 
@@ -207,7 +211,11 @@ def test_merge_all_no_modification(
 
 @mock.patch.object(layers, "render_service_template")
 def test_merge_all_prioritize_service_values_over_common_group_values(
-    rst, openstackdeployment_mspec, compute_helmbundle
+    rst,
+    openstackdeployment_mspec,
+    compute_helmbundle,
+    mock_kube_artifacts_configmap,
+    mock_kube_get_osdpl,
 ):
     # let's nova chart has some config values
     compute_helmbundle["spec"]["releases"][2]["values"] = {"test0": 0}
@@ -247,7 +255,11 @@ def test_merge_all_prioritize_service_values_over_common_group_values(
 
 @mock.patch.object(layers, "render_service_template")
 def test_merge_all_prioritize_group_releases_over_chart_releases(
-    rst, openstackdeployment_mspec, compute_helmbundle
+    rst,
+    openstackdeployment_mspec,
+    compute_helmbundle,
+    mock_kube_artifacts_configmap,
+    mock_kube_get_osdpl,
 ):
     # let's nova chart has some config values
     compute_helmbundle["spec"]["releases"][2]["values"] = {
@@ -297,7 +309,11 @@ def test_merge_all_prioritize_group_releases_over_chart_releases(
 
 @mock.patch.object(layers, "render_service_template")
 def test_merge_all_type_conflict(
-    rst, openstackdeployment_mspec, compute_helmbundle
+    rst,
+    openstackdeployment_mspec,
+    compute_helmbundle,
+    mock_kube_artifacts_configmap,
+    mock_kube_get_osdpl,
 ):
     openstackdeployment_mspec["services"]["compute"]["nova"]["values"][
         "conf"
@@ -313,7 +329,11 @@ def test_merge_all_type_conflict(
 
 @mock.patch.object(layers, "LOG")
 def test_merge_all_float_int(
-    mock_log, openstackdeployment_mspec, compute_helmbundle
+    mock_log,
+    openstackdeployment_mspec,
+    compute_helmbundle,
+    mock_kube_artifacts_configmap,
+    mock_kube_get_osdpl,
 ):
     openstackdeployment_mspec["common"]["charts"]["releases"]["values"] = {
         "conf": {"nova": {"scheduler": {"ram_weight_multiplier": 1.0}}}
@@ -338,7 +358,11 @@ def test_merge_all_float_int(
 
 @mock.patch.object(layers, "LOG")
 def test_merge_all_nodes(
-    mock_log, openstackdeployment_mspec, compute_helmbundle
+    mock_log,
+    openstackdeployment_mspec,
+    compute_helmbundle,
+    mock_kube_artifacts_configmap,
+    mock_kube_get_osdpl,
 ):
     openstackdeployment_mspec["nodes"] = {
         "mylabel::myvalue": {
@@ -373,7 +397,11 @@ def test_merge_all_nodes(
 
 @mock.patch.object(layers, "LOG")
 def test_merge_all_nodes_multiple_labels(
-    mock_log, openstackdeployment_mspec, compute_helmbundle
+    mock_log,
+    openstackdeployment_mspec,
+    compute_helmbundle,
+    mock_kube_artifacts_configmap,
+    mock_kube_get_osdpl,
 ):
     openstackdeployment_mspec["nodes"] = {
         "mylabel::myvalue": {
@@ -531,7 +559,11 @@ def test_merge_list_with_duplicates():
     assert new_list == l
 
 
-def test_render_cache_template(openstackdeployment_mspec):
+def test_render_cache_template(
+    openstackdeployment_mspec,
+    mock_kube_artifacts_configmap,
+    mock_kube_get_osdpl,
+):
     images = {
         "neutron-db-sync": "neutron:latest",
         "nova-api": "nova:latest",

@@ -15,6 +15,9 @@
 import asyncio
 import logging
 from unittest import mock
+
+import pykube
+
 from openstack_controller import kube
 from openstack_controller import layers
 from openstack_controller import resource_view
@@ -43,6 +46,11 @@ def openstackdeployment():
     yield yaml.safe_load(open("tests/fixtures/openstackdeployment.yaml"))
 
 
+@pytest.fixture
+def artifacts_cm():
+    yield yaml.safe_load(open("tests/fixtures/artifacts_cm.yaml"))
+
+
 def render_mspec():
     osdpl = yaml.safe_load(open("tests/fixtures/openstackdeployment.yaml"))
     mspec = layers.merge_spec(osdpl["spec"], LOG)
@@ -52,6 +60,24 @@ def render_mspec():
 @pytest.fixture
 def openstackdeployment_mspec():
     return render_mspec()
+
+
+@pytest.fixture
+def mock_kube_get_osdpl(mocker, fake_osdpl):
+    osdpl = mocker.patch("openstack_controller.kube.get_osdpl")
+    osdpl.return_value = fake_osdpl
+    yield osdpl
+    mocker.stopall()
+
+
+@pytest.fixture
+def mock_kube_artifacts_configmap(mocker, fake_artifacts_configmap):
+    artifacts_cm = mocker.patch(
+        "openstack_controller.kube.artifacts_configmap"
+    )
+    artifacts_cm.return_value = fake_artifacts_configmap
+    yield artifacts_cm
+    mocker.stopall()
 
 
 @pytest.fixture
@@ -157,6 +183,12 @@ def override_setting(request, mocker):
 def fake_osdpl(openstackdeployment):
     osdpl = kube.OpenStackDeployment(kube.kube_client(), openstackdeployment)
     yield osdpl
+
+
+@pytest.fixture
+def fake_artifacts_configmap(artifacts_cm):
+    res = pykube.ConfigMap(kube.kube_client(), artifacts_cm)
+    yield res
 
 
 @pytest.fixture

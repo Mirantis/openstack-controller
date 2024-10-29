@@ -1184,6 +1184,16 @@ def find(klass, name, namespace=None, silent=False, cluster=False):
             raise
 
 
+def artifacts_configmap(osdpl_name):
+    cm_name = f"{osdpl_name}-artifacts"
+    return find(
+        pykube.ConfigMap,
+        cm_name,
+        namespace=settings.OSCTL_OS_DEPLOYMENT_NAMESPACE,
+        silent=True,
+    )
+
+
 def resource_list(klass, selector, namespace=None):
     kube_api = kube_client()
     return klass.objects(kube_api).filter(
