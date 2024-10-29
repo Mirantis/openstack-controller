@@ -25,7 +25,7 @@ oc_osdpl_floating_network:
     pool_end: 10.11.12.200
     gateway: 10.11.12.11
 oc_osdpl_openstack_version: caracal
-oc_image_tag: "0.17.2-79de3d7c"
+oc_image_tag: "0.17.2-4b3aeaba"
 oc_repo: null
 oc_version: master
 oc_refspec: null
