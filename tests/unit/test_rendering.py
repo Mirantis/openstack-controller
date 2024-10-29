@@ -9,6 +9,7 @@ import pytest
 
 from openstack_controller import constants
 from openstack_controller import layers
+from openstack_controller import kube
 
 logger = logging.getLogger(__name__)
 
@@ -338,12 +339,16 @@ def test_render_sezes(size):
 @pytest.mark.parametrize(
     "service,template,openstack_version", get_child_object_templates()
 )
+@mock.patch.object(kube, "artifacts_configmap")
 def test_render_child_object_template(
+    artifacts_cm,
     service,
     template,
     openstack_version,
     openstackdeployment_mspec,
+    mock_kube_get_osdpl,
 ):
+    artifacts_cm.return_value = None
     schema = yaml.safe_load(CHILD_OBJECTS_SCHEMA)
     data = layers.render_template(template, spec=openstackdeployment_mspec)
     validate(data, schema)
@@ -352,12 +357,16 @@ def test_render_child_object_template(
 @pytest.mark.parametrize(
     "service,template,openstack_version", get_child_object_templates()
 )
+@mock.patch.object(kube, "artifacts_configmap")
 def test_render_child_object_template_ensure_images(
+    artifacts_cm,
     service,
     template,
     openstack_version,
     openstackdeployment_mspec,
+    mock_kube_get_osdpl,
 ):
+    artifacts_cm.return_value = None
     osdpl = copy.deepcopy(openstackdeployment_mspec)
     osdpl["openstack_version"] = openstack_version
     data = layers.render_template(template, spec=osdpl)

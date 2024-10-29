@@ -384,11 +384,21 @@ def render_artifacts(spec):
     # values from preset were earlier merged to spec.
     images_base_url = spec["artifacts"]["images_base_url"]
     binary_base_url = spec["artifacts"]["binary_base_url"]
-    return yaml.safe_load(
+
+    artifacts = yaml.safe_load(
         ENV.get_template(f"{os_release}/artifacts.yaml").render(
             images_base_url=images_base_url, binary_base_url=binary_base_url
         )
     )
+    osdpl = kube.get_osdpl()
+    artifacts_cm = kube.artifacts_configmap(osdpl.obj["metadata"]["name"])
+    if artifacts_cm:
+        LOG.info("Applying artifact overrides from %s", artifacts_cm.name)
+        custom_artifacts = (
+            yaml.safe_load(artifacts_cm.obj["data"].get(os_release, "")) or {}
+        )
+        merger.merge(artifacts, custom_artifacts)
+    return artifacts
 
 
 def substitude_osdpl(obj):

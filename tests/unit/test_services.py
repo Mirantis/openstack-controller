@@ -86,14 +86,6 @@ def _get_nwl_obj(controller, host):
 
 
 @pytest.fixture
-def mock_osdpl(mocker):
-    osdpl = mocker.patch("openstack_controller.kube.get_osdpl")
-    osdpl.return_value = mock.MagicMock()
-    yield osdpl
-    mocker.stopall()
-
-
-@pytest.fixture
 def kube_find(mocker):
     mock_get_obj = mocker.patch(
         "openstack_controller.kube.find",
@@ -125,14 +117,14 @@ def test_get_admin_creds(
     mock_password,
     mock_name,
     openstackdeployment_mspec,
-    mock_osdpl,
+    mock_kube_get_osdpl,
     child_view,
 ):
     osdplstmock = mock.MagicMock()
     service = services.Nova(
         openstackdeployment_mspec, logging, osdplstmock, child_view
     )
-    mock_osdpl.assert_called_once()
+    mock_kube_get_osdpl.assert_called_once()
 
     mock_name.return_value = "admin1234"
     mock_password.return_value = "password"
@@ -158,7 +150,11 @@ def test_get_admin_creds(
 
 @mock.patch.object(services.Keystone, "template_args")
 def test_service_keystone_render(
-    mock_template_args, openstackdeployment_mspec, mock_osdpl, child_view
+    mock_template_args,
+    openstackdeployment_mspec,
+    mock_kube_get_osdpl,
+    child_view,
+    mock_kube_artifacts_configmap,
 ):
     osdplstmock = mock.MagicMock()
     creds = secrets.OSSytemCreds("test", "test")
@@ -206,7 +202,7 @@ def test_service_keystone_render(
 
 
 def test_service_keystone_federation_redirect_uri(
-    openstackdeployment_mspec, mock_osdpl, child_view
+    openstackdeployment_mspec, mock_kube_get_osdpl, child_view
 ):
     osdplstmock = mock.MagicMock()
     service = services.Keystone(
@@ -219,7 +215,7 @@ def test_service_keystone_federation_redirect_uri(
 
 
 def test_service_keystone_get_federation_default_provider_mapping(
-    openstackdeployment_mspec, mock_osdpl, child_view
+    openstackdeployment_mspec, mock_kube_get_osdpl, child_view
 ):
     osdplstmock = mock.MagicMock()
     service = services.Keystone(
@@ -246,7 +242,7 @@ def test_service_keystone_get_federation_default_provider_mapping(
 
 
 def test_service_keystone_get_federation_provider_defaults(
-    openstackdeployment_mspec, mock_osdpl, child_view
+    openstackdeployment_mspec, mock_kube_get_osdpl, child_view
 ):
     osdplstmock = mock.MagicMock()
     service = services.Keystone(
@@ -282,7 +278,7 @@ def test_service_keystone_get_federation_provider_defaults(
 
 
 def test_service_keystone_get_federation_keycloak_provider(
-    openstackdeployment_mspec, mock_osdpl, child_view
+    openstackdeployment_mspec, mock_kube_get_osdpl, child_view
 ):
     osdplstmock = mock.MagicMock()
     openstackdeployment_mspec["features"]["keystone"]["keycloak"].update(
@@ -329,7 +325,7 @@ def test_service_keystone_get_federation_keycloak_provider(
 
 
 def test_service_keystone_get_federation_keycloak_provider_overrides(
-    openstackdeployment_mspec, mock_osdpl, child_view
+    openstackdeployment_mspec, mock_kube_get_osdpl, child_view
 ):
     osdplstmock = mock.MagicMock()
     openstackdeployment_mspec["features"]["keystone"]["keycloak"].update(
@@ -381,7 +377,7 @@ def test_service_keystone_get_federation_keycloak_provider_overrides(
 
 @mock.patch.object(secrets.KeycloakSecret, "get")
 def test_service_keystone_get_federation_args(
-    keycloak_mock, openstackdeployment_mspec, mock_osdpl, child_view
+    keycloak_mock, openstackdeployment_mspec, mock_kube_get_osdpl, child_view
 ):
     osdplstmock = mock.MagicMock()
     keycloak_mock.return_value = secrets.KeycloackCreds("passphrase")
@@ -473,7 +469,7 @@ def test_service_keystone_get_federation_args(
 def test_service_keystone_get_federation_args_keycloak_disabled_1provider(
     keycloak_mock,
     openstackdeployment_mspec,
-    mock_osdpl,
+    mock_kube_get_osdpl,
     child_view,
     federation_provider,
 ):
@@ -565,7 +561,7 @@ def test_service_keystone_get_federation_args_keycloak_disabled_1provider(
 def test_service_keystone_get_federation_args_2provider(
     keycloak_mock,
     openstackdeployment_mspec,
-    mock_osdpl,
+    mock_kube_get_osdpl,
     child_view,
     federation_provider,
 ):
@@ -698,8 +694,9 @@ def test_service_nova_with_ceph_render(
     mock_neutron_secret,
     mock_vnc,
     openstackdeployment_mspec,
-    mock_osdpl,
+    mock_kube_get_osdpl,
     child_view,
+    mock_kube_artifacts_configmap,
 ):
     creds = secrets.OSSytemCreds("test", "test")
     admin_creds = secrets.OpenStackAdminCredentials(creds, creds, creds)
@@ -783,7 +780,7 @@ async def test_service_apply(
     mocker,
     openstackdeployment_mspec,
     compute_helmbundle_all,
-    mock_osdpl,
+    mock_kube_get_osdpl,
     child_view,
 ):
     osdplstmock = mock.MagicMock()
@@ -819,30 +816,30 @@ async def test_service_apply(
     mock_ceph_secrets.assert_called_once()
     mock_info.assert_called_once()
     helm_run_cmd.assert_called()
-    mock_osdpl.assert_called_once()
+    mock_kube_get_osdpl.assert_called_once()
 
 
 def test_default_service_account_list(
-    openstackdeployment_mspec, mock_osdpl, child_view
+    openstackdeployment_mspec, mock_kube_get_osdpl, child_view
 ):
     osdplstmock = mock.MagicMock()
     service = services.Nova(
         openstackdeployment_mspec, logging, osdplstmock, child_view
     )
-    mock_osdpl.assert_called_once()
+    mock_kube_get_osdpl.assert_called_once()
     accounts = [constants.OS_SERVICES_MAP[service.service], "test"]
     assert accounts == service.service_accounts
 
 
 def test_heat_service_account_list(
-    openstackdeployment_mspec, mock_osdpl, child_view
+    openstackdeployment_mspec, mock_kube_get_osdpl, child_view
 ):
     osdplstmock = mock.MagicMock()
     service = services.Heat(
         openstackdeployment_mspec, logging, osdplstmock, child_view
     )
     accounts = ["heat_trustee", "heat_stack_user", "heat", "test"]
-    mock_osdpl.assert_called_once()
+    mock_kube_get_osdpl.assert_called_once()
     assert accounts == service.service_accounts
 
 
@@ -881,7 +878,7 @@ async def test_nova_prepare_node_after_reboot(
     kube_resource_list,
     kopf_adopt,
     openstackdeployment_mspec,
-    mock_osdpl,
+    mock_kube_get_osdpl,
     child_view,
     nwl,
 ):
@@ -905,7 +902,7 @@ async def test_nova_prepare_node_after_reboot_not_compute(
     kube_resource_list,
     kopf_adopt,
     openstackdeployment_mspec,
-    mock_osdpl,
+    mock_kube_get_osdpl,
     child_view,
     nwl,
 ):
@@ -927,7 +924,7 @@ async def test_nova_prepare_node_after_reboot_timeout(
     asyncio_wait_for_timeout,
     openstack_client,
     openstackdeployment_mspec,
-    mock_osdpl,
+    mock_kube_get_osdpl,
     child_view,
     nwl,
 ):
@@ -944,7 +941,7 @@ async def test_nova_prepare_node_after_reboot_openstacksdk_exception(
     asyncio_wait_for_timeout,
     openstack_client,
     openstackdeployment_mspec,
-    mock_osdpl,
+    mock_kube_get_osdpl,
     child_view,
     nwl,
 ):
@@ -961,7 +958,7 @@ async def test_nova_prepare_node_after_reboot_openstacksdk_exception(
 async def test_nova_add_node_to_scheduling(
     openstack_client,
     openstackdeployment_mspec,
-    mock_osdpl,
+    mock_kube_get_osdpl,
     child_view,
     nwl,
 ):
@@ -984,7 +981,11 @@ async def test_nova_add_node_to_scheduling(
 
 @pytest.mark.asyncio
 async def test_nova_add_node_to_scheduling_not_compute(
-    openstack_client, openstackdeployment_mspec, mock_osdpl, child_view, nwl
+    openstack_client,
+    openstackdeployment_mspec,
+    mock_kube_get_osdpl,
+    child_view,
+    nwl,
 ):
     node_obj = copy.deepcopy(_get_node())
     node_obj["metadata"]["labels"] = {}
@@ -998,7 +999,11 @@ async def test_nova_add_node_to_scheduling_not_compute(
 
 @pytest.mark.asyncio
 async def test_nova_add_node_to_scheduling_cannot_enable_service(
-    openstack_client, openstackdeployment_mspec, mock_osdpl, child_view, nwl
+    openstack_client,
+    openstackdeployment_mspec,
+    mock_kube_get_osdpl,
+    child_view,
+    nwl,
 ):
     openstack_client.side_effect = openstack.exceptions.SDKException("foo")
     node = kube.Node(mock.Mock, copy.deepcopy(_get_node()))
@@ -1011,7 +1016,11 @@ async def test_nova_add_node_to_scheduling_cannot_enable_service(
 
 @pytest.mark.asyncio
 async def test_nova_remove_node_from_scheduling(
-    openstack_client, openstackdeployment_mspec, mock_osdpl, child_view, nwl
+    openstack_client,
+    openstackdeployment_mspec,
+    mock_kube_get_osdpl,
+    child_view,
+    nwl,
 ):
     node = kube.Node(mock.Mock, copy.deepcopy(_get_node()))
     osdplstmock = mock.Mock()
@@ -1024,7 +1033,11 @@ async def test_nova_remove_node_from_scheduling(
 
 @pytest.mark.asyncio
 async def test_nova_remove_node_from_scheduling_not_compute(
-    openstack_client, openstackdeployment_mspec, mock_osdpl, child_view, nwl
+    openstack_client,
+    openstackdeployment_mspec,
+    mock_kube_get_osdpl,
+    child_view,
+    nwl,
 ):
     node_obj = copy.deepcopy(_get_node())
     node_obj["metadata"]["labels"] = {}
@@ -1038,7 +1051,11 @@ async def test_nova_remove_node_from_scheduling_not_compute(
 
 @pytest.mark.asyncio
 async def test_nova_remove_node_from_scheduling_cannot_disable_service(
-    openstack_client, openstackdeployment_mspec, mock_osdpl, child_view, nwl
+    openstack_client,
+    openstackdeployment_mspec,
+    mock_kube_get_osdpl,
+    child_view,
+    nwl,
 ):
     node = kube.Node(mock.Mock, copy.deepcopy(_get_node()))
     osdplstmock = mock.Mock()
@@ -1057,7 +1074,7 @@ async def test_nova_prepare_node_for_reboot(
     openstack_client,
     node_maintenance_config,
     openstackdeployment_mspec,
-    mock_osdpl,
+    mock_kube_get_osdpl,
     child_view,
     nwl,
 ):
@@ -1078,7 +1095,7 @@ async def test_nova_prepare_node_for_reboot_not_compute(
     openstack_client,
     node_maintenance_config,
     openstackdeployment_mspec,
-    mock_osdpl,
+    mock_kube_get_osdpl,
     child_view,
     nwl,
 ):
@@ -1100,7 +1117,7 @@ async def test_nova_prepare_node_for_reboot_sdk_exception(
     openstack_client,
     node_maintenance_config,
     openstackdeployment_mspec,
-    mock_osdpl,
+    mock_kube_get_osdpl,
     child_view,
     nwl,
 ):
@@ -1121,7 +1138,7 @@ async def test_nova_migrate_servers_no_instances(
     openstack_client,
     node_maintenance_config,
     openstackdeployment_mspec,
-    mock_osdpl,
+    mock_kube_get_osdpl,
     child_view,
     nwl,
 ):
@@ -1145,7 +1162,7 @@ async def test_nova_migrate_servers_skip(
     openstack_client,
     node_maintenance_config,
     openstackdeployment_mspec,
-    mock_osdpl,
+    mock_kube_get_osdpl,
     child_view,
     nwl,
 ):
@@ -1215,7 +1232,7 @@ async def test_nova_migrate_servers_manual_one_server(
     openstack_client,
     node_maintenance_config,
     openstackdeployment_mspec,
-    mock_osdpl,
+    mock_kube_get_osdpl,
     child_view,
     nwl,
 ):
@@ -1247,7 +1264,7 @@ async def test_nova_migrate_servers_live_one_error_server(
     openstack_client,
     node_maintenance_config,
     openstackdeployment_mspec,
-    mock_osdpl,
+    mock_kube_get_osdpl,
     child_view,
 ):
     osdplstmock = mock.Mock()
@@ -1281,7 +1298,7 @@ async def test_nova_migrate_servers_live_ignore_powered_off_server(
     openstack_client,
     node_maintenance_config,
     openstackdeployment_mspec,
-    mock_osdpl,
+    mock_kube_get_osdpl,
     child_view,
 ):
     osdplstmock = mock.Mock()
@@ -1315,7 +1332,7 @@ async def test_nova_migrate_servers_live_one_power_unknown(
     openstack_client,
     node_maintenance_config,
     openstackdeployment_mspec,
-    mock_osdpl,
+    mock_kube_get_osdpl,
     child_view,
 ):
     osdplstmock = mock.Mock()
@@ -1351,7 +1368,7 @@ async def test_nova_can_handle_nmr_controller(
     openstack_client,
     node_maintenance_config,
     openstackdeployment_mspec,
-    mock_osdpl,
+    mock_kube_get_osdpl,
     child_view,
     nwl,
 ):
@@ -1371,7 +1388,7 @@ async def test_nova_can_handle_nmr_1az_3hosts_0locks(
     openstack_client,
     node_maintenance_config,
     openstackdeployment_mspec,
-    mock_osdpl,
+    mock_kube_get_osdpl,
     child_view,
     nwl,
 ):
@@ -1402,7 +1419,7 @@ async def test_nova_can_handle_nmr_1az_3hosts_1locks_same_az(
     openstack_client,
     node_maintenance_config,
     openstackdeployment_mspec,
-    mock_osdpl,
+    mock_kube_get_osdpl,
     child_view,
     nwl,
 ):
@@ -1434,7 +1451,7 @@ async def test_nova_can_handle_nmr_1az_3hosts_1locks_different_az(
     openstack_client,
     node_maintenance_config,
     openstackdeployment_mspec,
-    mock_osdpl,
+    mock_kube_get_osdpl,
     child_view,
     nwl,
 ):
@@ -1460,7 +1477,7 @@ async def test_nova_can_handle_nmr_1az_3hosts_1locks_skip(
     openstack_client,
     node_maintenance_config,
     openstackdeployment_mspec,
-    mock_osdpl,
+    mock_kube_get_osdpl,
     child_view,
     nwl,
 ):
