@@ -407,9 +407,10 @@ class Redis(Service, MaintenanceApiMixin):
                     rfr_statefulset,
                     rfs_deployment,
                 ]:
-                    obj.reload()
-                    obj.scale(0)
-                    await obj.wait_for_replicas(0)
+                    if obj and obj.exists():
+                        obj.reload()
+                        obj.scale(0)
+                        await obj.wait_for_replicas(0)
         await super().apply(event, **kwargs)
 
     async def remove_node_from_scheduling(self, node):
