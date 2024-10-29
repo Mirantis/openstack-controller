@@ -12,7 +12,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */}}
 
-{{- define "novaComputeLivenessProbeTemplate" }}
+{{- define "novaComputeProbeTemplate" }}
+{{- $envAll := index . 0 }}
+{{- $probeType := index . 1 }}
 exec:
   command:
     - python
@@ -24,32 +26,23 @@ exec:
     - --process-name
     - nova-compute
     - --probe-type
-    - liveness
+    - {{ $probeType }}
     - --rabbitmq-rpc-timeout
-    - {{ .Values.pod.probes.rpc_timeout | quote}}
-    {{- if .Values.pod.use_fqdn.compute }}
+    - {{ $envAll.Values.pod.probes.rpc_timeout | quote}}
+    {{- if $envAll.Values.pod.use_fqdn.compute }}
     - --use-fqdn
     {{- end }}
 {{- end }}
 
-{{- define "novaComputeReadinessProbeTemplate" }}
+{{- define "novaComputeSshProbeTemplate" }}
+tcpSocket:
+  port: {{ .Values.network.ssh.port }}
+{{- end }}
+
+{{- define "novaComputeInhibitProbeTemplate" }}
 exec:
   command:
-    - python
-    - /tmp/health-probe.py
-    - --config-file
-    - /etc/nova/nova.conf
-    - --rabbitmq-queue-name
-    - compute
-    - --process-name
-    - nova-compute
-    - --probe-type
-    - readiness
-    - --rabbitmq-rpc-timeout
-    - {{ .Values.pod.probes.rpc_timeout | quote}}
-    {{- if .Values.pod.use_fqdn.compute }}
-    - --use-fqdn
-    {{- end }}
+    - "true"
 {{- end }}
 
 {{- define "nova.compute.daemonset" }}
@@ -201,8 +194,8 @@ spec:
             - name: REQUESTS_CA_BUNDLE
               value: "/etc/nova/certs/ca.crt"
 {{- end }}
-{{ dict "envAll" $envAll "component" "compute" "container" "default" "type" "liveness" "probeTemplate" (include "novaComputeLivenessProbeTemplate" $envAll | fromYaml) | include "helm-toolkit.snippets.kubernetes_probe" | indent 10 }}
-{{ dict "envAll" $envAll "component" "compute" "container" "default" "type" "readiness" "probeTemplate" (include "novaComputeReadinessProbeTemplate" $envAll | fromYaml) | include "helm-toolkit.snippets.kubernetes_probe" | indent 10 }}
+{{ dict "envAll" $envAll "component" "compute" "container" "compute" "type" "liveness" "probeTemplate" (list $envAll "liveness" | include "novaComputeProbeTemplate" | fromYaml) | include "helm-toolkit.snippets.kubernetes_probe" | indent 10 }}
+{{ dict "envAll" $envAll "component" "compute" "container" "compute" "type" "readiness" "probeTemplate" (list $envAll "liveness" | include "novaComputeProbeTemplate" | fromYaml) | include "helm-toolkit.snippets.kubernetes_probe" | indent 10 }}
           command:
             - /tmp/nova-compute.sh
           terminationMessagePath: /var/log/termination-log
@@ -329,6 +322,8 @@ spec:
 {{ tuple $envAll "nova_compute_ssh" | include "helm-toolkit.snippets.image" | indent 10 }}
 {{ tuple $envAll $envAll.Values.pod.resources.ssh | include "helm-toolkit.snippets.kubernetes_resources" | indent 10 }}
 {{ dict "envAll" $envAll "application" "nova" "container" "nova_compute_ssh" | include "helm-toolkit.snippets.kubernetes_container_security_context" | indent 10 }}
+{{ dict "envAll" $envAll "component" "compute" "container" "compute_ssh" "type" "liveness" "probeTemplate" (include "novaComputeSshProbeTemplate" $envAll | fromYaml) | include "helm-toolkit.snippets.kubernetes_probe" | indent 10 }}
+{{ dict "envAll" $envAll "component" "compute" "container" "compute_ssh" "type" "readiness" "probeTemplate" (include "novaComputeSshProbeTemplate" $envAll | fromYaml) | include "helm-toolkit.snippets.kubernetes_probe" | indent 10 }}
           env:
             - name: KEY_TYPES
               value: {{ include "helm-toolkit.utils.joinListWithComma" .Values.ssh.key_types | quote }}
@@ -368,6 +363,8 @@ spec:
 {{ tuple $envAll "nova_compute" | include "helm-toolkit.snippets.image" | indent 10 }}
 {{ tuple $envAll $envAll.Values.pod.resources.compute | include "helm-toolkit.snippets.kubernetes_resources" | indent 10 }}
 {{ dict "envAll" $envAll "application" "nova" "container" "nova_compute_inhibit_lock" | include "helm-toolkit.snippets.kubernetes_container_security_context" | indent 10 }}
+{{ dict "envAll" $envAll "component" "compute" "container" "compute_inhibit" "type" "liveness" "probeTemplate" (include "novaComputeInhibitProbeTemplate" $envAll | fromYaml) | include "helm-toolkit.snippets.kubernetes_probe" | indent 10 }}
+{{ dict "envAll" $envAll "component" "compute" "container" "compute_inhibit" "type" "readiness" "probeTemplate" (include "novaComputeInhibitProbeTemplate" $envAll | fromYaml) | include "helm-toolkit.snippets.kubernetes_probe" | indent 10 }}
           env:
 {{- include "helm-toolkit.snippets.keystone_os_cloud_vars" ( dict "osCloudName" .Values.conf.inhibit_lock.ks_user "osCloudNameSystem" (printf "%s-system" .Values.conf.inhibit_lock.ks_user)) | indent 12 }}
 {{- if .Values.manifests.certificates }}
