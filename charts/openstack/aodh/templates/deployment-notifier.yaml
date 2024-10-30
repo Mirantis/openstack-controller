@@ -14,6 +14,22 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */}}
 
+{{- define "notifierProbeTemplate" }}
+{{- $probeType := . }}
+exec:
+  command:
+    - python
+    - /tmp/health-probe.py
+    - --config-file
+    - /etc/aodh/aodh.conf
+    - --process-name
+    - aodh-notifier
+    - --probe-type
+    - {{ $probeType }}
+    - --check
+    - rabbitmq_sockets
+{{- end }}
+
 {{- if .Values.manifests.deployment_notifier }}
 {{- $envAll := . }}
 
@@ -60,6 +76,8 @@ spec:
 {{ tuple $envAll "aodh_notifier" | include "helm-toolkit.snippets.image" | indent 10 }}
 {{ tuple $envAll $envAll.Values.pod.resources.notifier | include "helm-toolkit.snippets.kubernetes_resources" | indent 10 }}
 {{ dict "envAll" $envAll "application" "aodh" "container" "aodh_notifier" | include "helm-toolkit.snippets.kubernetes_container_security_context" | indent 10 }}
+{{ dict "envAll" $envAll "component" "notifier" "container" "notifier" "type" "liveness" "probeTemplate" (include "notifierProbeTemplate" "liveness" | fromYaml) | include "helm-toolkit.snippets.kubernetes_probe" | indent 10 }}
+{{ dict "envAll" $envAll "component" "notifier" "container" "notifier" "type" "readiness" "probeTemplate" (include "notifierProbeTemplate" "readiness" | fromYaml) | include "helm-toolkit.snippets.kubernetes_probe" | indent 10 }}
           command:
             - /tmp/aodh-notifier.sh
             - start
@@ -88,6 +106,10 @@ spec:
             - name: aodh-bin
               mountPath: /tmp/aodh-notifier.sh
               subPath: aodh-notifier.sh
+              readOnly: true
+            - name: aodh-bin
+              mountPath: /tmp/health-probe.py
+              subPath: health-probe.py
               readOnly: true
 {{ if $mounts_aodh_notifier.volumeMounts }}{{ toYaml $mounts_aodh_notifier.volumeMounts | indent 12 }}{{ end }}
       volumes:

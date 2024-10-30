@@ -14,6 +14,22 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */}}
 
+{{- define "listenerProbeTemplate" }}
+{{- $probeType := . }}
+exec:
+  command:
+    - python
+    - /tmp/health-probe.py
+    - --config-file
+    - /etc/aodh/aodh.conf
+    - --process-name
+    - aodh-listener
+    - --probe-type
+    - {{ $probeType }}
+    - --check
+    - rabbitmq_sockets
+{{- end }}
+
 {{- if .Values.manifests.deployment_listener }}
 {{- $envAll := . }}
 
@@ -60,6 +76,8 @@ spec:
 {{ tuple $envAll "aodh_listener" | include "helm-toolkit.snippets.image" | indent 10 }}
 {{ tuple $envAll $envAll.Values.pod.resources.listener | include "helm-toolkit.snippets.kubernetes_resources" | indent 10 }}
 {{ dict "envAll" $envAll "application" "aodh" "container" "aodh_listener" | include "helm-toolkit.snippets.kubernetes_container_security_context" | indent 10 }}
+{{ dict "envAll" $envAll "component" "listener" "container" "listener" "type" "liveness" "probeTemplate" (include "listenerProbeTemplate" "liveness" | fromYaml) | include "helm-toolkit.snippets.kubernetes_probe" | indent 10 }}
+{{ dict "envAll" $envAll "component" "listener" "container" "listener" "type" "readiness" "probeTemplate" (include "listenerProbeTemplate" "readiness" | fromYaml) | include "helm-toolkit.snippets.kubernetes_probe" | indent 10 }}
           command:
             - /tmp/aodh-listener.sh
             - start
@@ -88,6 +106,10 @@ spec:
             - name: aodh-bin
               mountPath: /tmp/aodh-listener.sh
               subPath: aodh-listener.sh
+              readOnly: true
+            - name: aodh-bin
+              mountPath: /tmp/health-probe.py
+              subPath: health-probe.py
               readOnly: true
 {{ if $mounts_aodh_listener.volumeMounts }}{{ toYaml $mounts_aodh_listener.volumeMounts | indent 12 }}{{ end }}
       volumes:

@@ -56,4 +56,6 @@ data:
 {{- include "helm-toolkit.scripts.keystone_user" . | indent 4 }}
   rabbit-init.sh: |
 {{- include "helm-toolkit.scripts.rabbit_init" . | indent 4 }}
+  health-probe.py: |
+{{- include "helm-toolkit.scripts.generic_health_probe" . | indent 4 }}
 {{- end }}
