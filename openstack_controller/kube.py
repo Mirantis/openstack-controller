@@ -1306,7 +1306,7 @@ def safe_get_node(name):
         original_node = json.loads(
             nwl.obj["metadata"]
             .get("annotations", {})
-            .get("openstack.lcm.mirantis.com/original-node", {})
+            .get("openstack.lcm.mirantis.com/original-node", "{}")
         )
     else:
         original_node = {}
