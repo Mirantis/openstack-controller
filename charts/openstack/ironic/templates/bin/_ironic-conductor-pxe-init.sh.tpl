@@ -15,8 +15,6 @@ limitations under the License.
 */}}
 
 set -ex
-# Mask permissions to files 416 dirs 0750
-umask 0027
 
 mkdir -p /var/lib/openstack-helm/tftpboot
 mkdir -p /var/lib/openstack-helm/tftpboot/master_images

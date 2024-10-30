@@ -12,10 +12,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */}}
 {{- define "apiProbeTemplate" }}
-httpGet:
-  scheme: HTTP
-  path: /
-  port: {{ tuple "baremetal" "internal" "api" . | include "helm-toolkit.endpoints.endpoint_port_lookup" }}
+{{ dict "probe_type" "httpGet" "scheme" "HTTP" "port" (tuple "baremetal" "internal" "api" . | include "helm-toolkit.endpoints.endpoint_port_lookup") | include "helm-toolkit.snippets.probe_template" }}
 {{- end }}
 
 {{- if .Values.manifests.deployment_api }}
@@ -114,6 +111,7 @@ spec:
 {{ tuple $envAll $envAll.Values.pod.resources.api | include "helm-toolkit.snippets.kubernetes_resources" | indent 10 }}
 {{ dict "envAll" $envAll "application" "ironic_api" "container" "ironic_api" | include "helm-toolkit.snippets.kubernetes_container_security_context" | indent 10 }}
 {{ dict "envAll" . "component" "api" "container" "default" "type" "readiness" "probeTemplate" (include "apiProbeTemplate" $envAll | fromYaml) | include "helm-toolkit.snippets.kubernetes_probe" | indent 10 }}
+{{ dict "envAll" . "component" "api" "container" "default" "type" "liveness" "probeTemplate" (include "apiProbeTemplate" $envAll | fromYaml) | include "helm-toolkit.snippets.kubernetes_probe" | indent 10 }}
           command:
             - /tmp/ironic-api.sh
             - start

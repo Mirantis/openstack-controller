@@ -15,6 +15,7 @@ limitations under the License.
 */}}
 
 set -ex
+FILE_TO_CHECK=is_alive.txt
 
 function net_pxe_addr {
  ip addr | awk "/inet / && /${PROVISIONER_INTERFACE}/{print \$2; exit }"
@@ -28,6 +29,15 @@ if [ "x" == "x${PXE_IP}" ]; then
   echo "Could not find IP for pxe to bind to"
   exit 1
 fi
+
+echo "Ok" > /var/lib/openstack-helm/tftpboot/${FILE_TO_CHECK}
+
+cat <<EOF >/tmp/pxe-health-probe.sh
+#!/bin/bash
+curl --fail tftp://${PXE_IP}/${FILE_TO_CHECK}
+EOF
+
+chmod +x /tmp/pxe-health-probe.sh
 
 ln -s /var/lib/openstack-helm/tftpboot /tftpboot
 exec /usr/sbin/in.tftpd \

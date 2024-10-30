@@ -12,6 +12,28 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */}}
 
+{{- define "novaComputeProbeTemplate" }}
+{{- $envAll := index . 0 }}
+{{- $probeType := index . 1 }}
+exec:
+  command:
+    - python
+    - /tmp/health-probe.py
+    - --config-file
+    - /etc/nova/nova.conf
+    - --rabbitmq-queue-name
+    - compute
+    - --process-name
+    - nova-compute
+    - --probe-type
+    - {{ $probeType }}
+    - --rabbitmq-rpc-timeout
+    - {{ $envAll.Values.pod.probes.rpc_timeout | quote}}
+    {{- if $envAll.Values.pod.use_fqdn.compute }}
+    - --use-fqdn
+    {{- end }}
+{{- end }}
+
 {{- if .Values.manifests.statefulset_compute_ironic }}
 {{- $envAll := . }}
 
@@ -61,6 +83,8 @@ spec:
 {{ tuple $envAll "nova_compute_ironic" | include "helm-toolkit.snippets.image" | indent 10 }}
 {{ tuple $envAll $envAll.Values.pod.resources.compute_ironic | include "helm-toolkit.snippets.kubernetes_resources" | indent 10 }}
 {{ dict "envAll" $envAll "application" "nova_compute_ironic" "container" "nova_compute_ironic" | include "helm-toolkit.snippets.kubernetes_container_security_context" | indent 10 }}
+{{ dict "envAll" $envAll "component" "compute_ironic" "container" "compute_ironic" "type" "liveness" "probeTemplate" (list $envAll "liveness" | include "novaComputeProbeTemplate" | fromYaml) | include "helm-toolkit.snippets.kubernetes_probe" | indent 10 }}
+{{ dict "envAll" $envAll "component" "compute_ironic" "container" "compute_ironic" "type" "readiness" "probeTemplate" (list $envAll "readiness" | include "novaComputeProbeTemplate" | fromYaml) | include "helm-toolkit.snippets.kubernetes_probe" | indent 10 }}
           command:
             - /tmp/nova-compute-ironic.sh
           volumeMounts:
@@ -94,6 +118,10 @@ spec:
             - name: nova-etc
               mountPath: /etc/nova/vendordata.json
               subPath: vendordata.json
+              readOnly: true
+            - name: nova-bin
+              mountPath: /tmp/health-probe.py
+              subPath: health-probe.py
               readOnly: true
 {{ if $mounts_nova_compute_ironic.volumeMounts }}{{ toYaml $mounts_nova_compute_ironic.volumeMounts | indent 12 }}{{ end }}
       volumes:

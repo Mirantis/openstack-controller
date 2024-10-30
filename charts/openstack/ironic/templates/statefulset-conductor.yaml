@@ -12,6 +12,34 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */}}
 
+{{- define "conductorProbeTemplate" }}
+{{- $probeType := . }}
+exec:
+  command:
+    - python
+    - /tmp/health-probe.py
+    - --config-file
+    - /etc/ironic/ironic.conf
+    - --process-name
+    - ironic-conductor
+    - --probe-type
+    - {{ $probeType }}
+    - --check
+    - database_sockets
+{{- end }}
+
+{{- define "conductorHttpProbeTemplate" }}
+exec:
+  command:
+    - "true"
+{{- end }}
+
+{{- define "conductorPxeProbeTemplate" }}
+exec:
+  command:
+    - /tmp/pxe-health-probe.sh
+{{- end }}
+
 {{- if .Values.manifests.statefulset_conductor }}
 {{- $envAll := . }}
 
@@ -169,6 +197,8 @@ spec:
 {{ tuple $envAll "ironic_conductor" | include "helm-toolkit.snippets.image" | indent 10 }}
 {{ tuple $envAll $envAll.Values.pod.resources.conductor | include "helm-toolkit.snippets.kubernetes_resources" | indent 10 }}
 {{ dict "envAll" $envAll "application" "ironic_conductor" "container" "ironic_conductor" | include "helm-toolkit.snippets.kubernetes_container_security_context" | indent 10 }}
+{{ dict "envAll" $envAll "component" "conductor" "container" "conductor" "type" "liveness" "probeTemplate" (include "conductorProbeTemplate" "liveness" | fromYaml) | include "helm-toolkit.snippets.kubernetes_probe" | indent 10 }}
+{{ dict "envAll" $envAll "component" "conductor" "container" "conductor" "type" "readiness" "probeTemplate" (include "conductorProbeTemplate" "readiness" | fromYaml) | include "helm-toolkit.snippets.kubernetes_probe" | indent 10 }}
           env:
             - name: REQUESTS_CA_BUNDLE
               value: /certs/ca-bundle.pem
@@ -209,11 +239,17 @@ spec:
               mountPath: /sys
             - name: pod-data
               mountPath: /var/lib/openstack-helm
+            - name: ironic-bin
+              mountPath: /tmp/health-probe.py
+              subPath: health-probe.py
+              readOnly: true
 {{ if $mounts_ironic_conductor.volumeMounts }}{{ toYaml $mounts_ironic_conductor.volumeMounts | indent 12 }}{{ end }}
         - name: ironic-conductor-pxe
 {{ tuple $envAll "ironic_pxe" | include "helm-toolkit.snippets.image" | indent 10 }}
 {{ tuple $envAll $envAll.Values.pod.resources.conductor | include "helm-toolkit.snippets.kubernetes_resources" | indent 10 }}
 {{ dict "envAll" $envAll "application" "ironic_conductor" "container" "ironic_conductor_pxe" | include "helm-toolkit.snippets.kubernetes_container_security_context" | indent 10 }}
+{{ dict "envAll" $envAll "component" "conductor" "container" "conductor_pxe" "type" "liveness" "probeTemplate" (include "conductorPxeProbeTemplate" $envAll | fromYaml) | include "helm-toolkit.snippets.kubernetes_probe" | indent 10 }}
+{{ dict "envAll" $envAll "component" "conductor" "container" "conductor_pxe" "type" "readiness" "probeTemplate" (include "conductorPxeProbeTemplate" $envAll | fromYaml) | include "helm-toolkit.snippets.kubernetes_probe" | indent 10 }}
           env:
             - name: REQUESTS_CA_BUNDLE
               value: /certs/ca-bundle.pem
@@ -239,6 +275,8 @@ spec:
 {{ tuple $envAll "ironic_pxe_http" | include "helm-toolkit.snippets.image" | indent 10 }}
 {{ tuple $envAll $envAll.Values.pod.resources.conductor | include "helm-toolkit.snippets.kubernetes_resources" | indent 10 }}
 {{ dict "envAll" $envAll "application" "ironic_conductor" "container" "ironic_conductor_http" | include "helm-toolkit.snippets.kubernetes_container_security_context" | indent 10 }}
+{{ dict "envAll" $envAll "component" "conductor" "container" "conductor_http" "type" "liveness" "probeTemplate" (include "conductorHttpProbeTemplate" $envAll | fromYaml) | include "helm-toolkit.snippets.kubernetes_probe" | indent 10 }}
+{{ dict "envAll" $envAll "component" "conductor" "container" "conductor_http" "type" "readiness" "probeTemplate" (include "conductorHttpProbeTemplate" $envAll | fromYaml) | include "helm-toolkit.snippets.kubernetes_probe" | indent 10 }}
           env:
             - name: REQUESTS_CA_BUNDLE
               value: /certs/ca-bundle.pem

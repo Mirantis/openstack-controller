@@ -72,4 +72,6 @@ data:
 {{- include "helm-toolkit.scripts.rabbit_init" . | indent 4 }}
   update-nodes-metadata.py: |
 {{ tuple "bin/_update-nodes-metadata.py.tpl" . | include "helm-toolkit.utils.template" | indent 4 }}
+  health-probe.py: |
+{{- include "helm-toolkit.scripts.generic_health_probe" . | indent 4 }}
 {{- end }}

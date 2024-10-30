@@ -830,6 +830,52 @@ pod:
             initialDelaySeconds: 0
             periodSeconds: 10
             timeoutSeconds: 5
+        liveness:
+          enabled: true
+          params:
+            initialDelaySeconds: 0
+            periodSeconds: 30
+            timeoutSeconds: 5
+    conductor:
+      conductor:
+        readiness:
+          enabled: true
+          params:
+            initialDelaySeconds: 0
+            periodSeconds: 10
+            timeoutSeconds: 5
+        liveness:
+          enabled: true
+          params:
+            initialDelaySeconds: 0
+            periodSeconds: 30
+            timeoutSeconds: 5
+      conductor_pxe:
+        readiness:
+          enabled: true
+          params:
+            initialDelaySeconds: 0
+            periodSeconds: 30
+            timeoutSeconds: 5
+        liveness:
+          enabled: true
+          params:
+            initialDelaySeconds: 0
+            periodSeconds: 90
+            timeoutSeconds: 5
+      conductor_http:
+        readiness:
+          enabled: true
+          params:
+            initialDelaySeconds: 0
+            periodSeconds: 30
+            timeoutSeconds: 5
+        liveness:
+          enabled: true
+          params:
+            initialDelaySeconds: 0
+            periodSeconds: 3600
+            timeoutSeconds: 5
   replicas:
     api: 1
     conductor: 1

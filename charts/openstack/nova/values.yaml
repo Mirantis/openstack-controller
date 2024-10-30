@@ -2160,6 +2160,20 @@ pod:
           enabled: True
           params:
             periodSeconds: 20
+    compute_ironic:
+      compute_ironic:
+        liveness:
+          enabled: True
+          params:
+            initialDelaySeconds: 120
+            periodSeconds: 90
+            timeoutSeconds: 70
+        readiness:
+          enabled: True
+          params:
+            initialDelaySeconds: 80
+            periodSeconds: 90
+            timeoutSeconds: 70
     api-metadata:
       default:
         liveness:
