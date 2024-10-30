@@ -73,6 +73,8 @@ def recover_stopped_domains():
             LOG.info("Recovering stopped instance %s", instance)
             try:
                 oc.compute.start_server(instance)
+            except openstack.exceptions.ResourceNotFound:
+                LOG.warning("Instance %s no longer exists, skipping", instance)
             except openstack.exceptions.ConflictException as e:
                 LOG.warning(
                     "Failed to start instance %s with exception: %s", instance, str(e)
