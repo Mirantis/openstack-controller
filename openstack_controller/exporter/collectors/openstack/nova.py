@@ -29,7 +29,12 @@ class OsdplNovaMetricCollector(base.OpenStackBaseMetricCollector):
     _os_service_types = ["compute"]
 
     def __init__(self):
-        self.hypervisor_resource_classes = ["vcpu", "disk_gb", "memory_mb"]
+        self.hypervisor_resource_classes = [
+            "vcpu",
+            "disk_gb",
+            "memory_mb",
+            "pcpu",
+        ]
         self.hypervisor_metrics = ["used", "free", "allocation_ratio"]
         self.host_group_types = ["aggregate", "availability_zone"]
         self.host_group_types_labels = {
