@@ -624,6 +624,34 @@ class BaseFunctionalTestCase(TestCase):
     def delete_flavor(cls, flavor_id):
         cls.ocm.oc.compute.delete_flavor(flavor_id)
 
+    @classmethod
+    def baremetal_node_create(cls, name=None, driver="fake-hardware"):
+        if name is None:
+            name = data_utils.rand_name()
+        node = cls.ocm.oc.baremetal.create_node(name=name, driver=driver)
+        cls.addClassCleanup(cls.delete_baremetal_node, node["uuid"])
+        return node
+
+    @classmethod
+    def baremetal_node_maintenance_set(cls, node_uuid):
+        cls.ocm.oc.baremetal.set_node_maintenance(node_uuid)
+
+    @classmethod
+    def baremetal_node_set_provision_state(cls, node_uuid, state):
+        cls.ocm.oc.baremetal.set_node_provision_state(node_uuid, state)
+
+    @classmethod
+    @suppress404
+    def delete_baremetal_node(cls, node_uuid, wait=False):
+        cls.ocm.oc.baremetal.delete_node(node_uuid)
+        if wait:
+            waiters.wait_resource_deleted(
+                cls.ocm.oc.baremetal.get_node,
+                node_uuid,
+                CONF.BAREMETAL_NODE_TIMEOUT,
+                5,
+            )
+
     def get_ports_by_status(self, status):
         ports = []
         for port in self.ocm.oc.network.ports():

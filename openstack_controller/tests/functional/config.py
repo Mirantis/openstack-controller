@@ -47,6 +47,9 @@ class Config(metaclass=SingletonMeta):
         # Interval in seconds to check the server status. Default is 1 second.
         self.SERVER_READY_INTERVAL = 1
 
+        # Time in seconds to wait for a baremetal node operation to complete. Default is 60 seconds.
+        self.BAREMETAL_NODE_TIMEOUT = 60
+
         # Time in seconds to wait for a volume create. Default is 30 seconds. Small volume is cirros based (up to 100Mb)
         self.VOLUME_SMALL_CREATE_TIMEOUT = 30
         # Time in seconds to wait for a volume create. Default is 30 seconds. Medium volume is Ubuntu based (up to 1Gb)
