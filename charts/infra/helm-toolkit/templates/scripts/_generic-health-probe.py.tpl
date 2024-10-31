@@ -280,7 +280,7 @@ if __name__ == "__main__":
                 args.process_name, cached_ports["rabbitmq_ports"]):
             LOG.error("Connection to rabbitmq is not established.")
             sys.exit(1)
-    if 'unix_socket' in args.check:
+    if 'unix_sockets' in args.check:
         if not args.path:
             LOG.error("Socket path is not set. Could not verify.")
             sys.exit(1)
