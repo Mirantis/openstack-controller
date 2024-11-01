@@ -140,7 +140,7 @@ spec:
               mountPath: /etc/cinder/conf/backends.conf
               subPath: {{ $backendConfName }}
               readOnly: true
-            {{- if ( eq "true" ( list $envBackend | include "cinder.utils.has_ceph_backend")) }}
+            {{- if or .Values.manifests.ceph_conf ( eq "true" ( list $envBackend | include "cinder.utils.has_ceph_backend")) }}
             - name: ceph-etc
               mountPath: /etc/ceph/ceph.conf
               subPath: ceph.conf
@@ -220,7 +220,7 @@ spec:
           configMap:
             name: cinder-internal-tenant-ids
             defaultMode: 416
-        {{- if ( eq "true" ( list $envBackend | include "cinder.utils.has_ceph_backend")) }}
+        {{- if or .Values.manifests.ceph_conf ( eq "true" ( list $envBackend | include "cinder.utils.has_ceph_backend")) }}
         - name: ceph-etc
         {{- if .Values.manifests.ceph_conf }}
           secret:

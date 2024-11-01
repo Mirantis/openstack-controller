@@ -128,7 +128,7 @@ spec:
               subPath: {{ base .Values.conf.cinder.DEFAULT.log_config_append }}
               readOnly: true
             {{- end }}
-            {{ if or (contains "cinder.backup.drivers.ceph" .Values.conf.cinder.DEFAULT.backup_driver) (eq "true" (list $envBackend | include "cinder.utils.has_ceph_backend")) }}
+            {{ if or .Values.manifests.ceph_conf (contains "cinder.backup.drivers.ceph" .Values.conf.cinder.DEFAULT.backup_driver) (eq "true" (list $envBackend | include "cinder.utils.has_ceph_backend")) }}
             - name: ceph-etc
               mountPath: /etc/ceph/ceph.conf
               subPath: ceph.conf
@@ -191,7 +191,7 @@ spec:
           configMap:
             name: cinder-bin
             defaultMode: 504
-        {{ if or (contains "cinder.backup.drivers.ceph" .Values.conf.cinder.DEFAULT.backup_driver) (eq "true" (list $envBackend | include "cinder.utils.has_ceph_backend")) }}
+        {{ if or .Values.manifests.ceph_conf (contains "cinder.backup.drivers.ceph" .Values.conf.cinder.DEFAULT.backup_driver) (eq "true" (list $envBackend | include "cinder.utils.has_ceph_backend")) }}
         - name: ceph-etc
         {{- if .Values.manifests.ceph_conf }}
           secret:
