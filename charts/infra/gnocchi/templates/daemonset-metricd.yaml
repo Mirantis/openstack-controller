@@ -12,6 +12,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */}}
 
+{{- define "gnocchiProbeTemplate" }}
+exec:
+  command:
+    - "true"
+{{- end }}
+
 {{- if .Values.manifests.daemonset_metricd }}
 {{- $envAll := . }}
 
@@ -54,6 +60,8 @@ spec:
 {{ tuple $envAll "gnocchi_metricd" | include "helm-toolkit.snippets.image" | indent 10 }}
 {{ tuple $envAll $envAll.Values.pod.resources.metricd | include "helm-toolkit.snippets.kubernetes_resources" | indent 10 }}
 {{ dict "envAll" $envAll "application" "gnocchi_metricd" "container" "gnocchi_metricd" | include "helm-toolkit.snippets.kubernetes_container_security_context" | indent 10 }}
+{{ dict "envAll" $envAll "component" "metricd" "container" "metricd" "type" "liveness" "probeTemplate" (include "gnocchiProbeTemplate" $envAll | fromYaml) | include "helm-toolkit.snippets.kubernetes_probe" | indent 10 }}
+{{ dict "envAll" $envAll "component" "metricd" "container" "metricd" "type" "readiness" "probeTemplate" (include "gnocchiProbeTemplate" $envAll | fromYaml) | include "helm-toolkit.snippets.kubernetes_probe" | indent 10 }}
           command:
             - /tmp/gnocchi-metricd.sh
           volumeMounts:
@@ -70,6 +78,10 @@ spec:
             - name: gnocchi-bin
               mountPath: /tmp/gnocchi-metricd.sh
               subPath: gnocchi-metricd.sh
+              readOnly: true
+            - name: gnocchi-bin
+              mountPath: /tmp/health-probe-metricd.py
+              subPath: health-probe-metricd.py
               readOnly: true
 {{- if eq $storageDriver "ceph" }}
             - name: ceph-etc
