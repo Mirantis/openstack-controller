@@ -19,6 +19,11 @@
   tags:
     - dns
 
+- name: Run systemd resolve exists
+  stat:
+    path:  /var/run/systemd/resolve/
+  register: systemd_resolve
+
 - name: Symlink run/systemd/resolv.conf to /etc/resolv.conf
   ansible.builtin.file:
     src: /etc/resolv.conf
@@ -29,6 +34,7 @@
     force: yes
   tags:
     - dns
+  when: systemd_resolve.stat.exists
 
 - name: Restart kube-system coredns
   kubernetes.core.k8s:

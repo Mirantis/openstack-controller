@@ -11,7 +11,7 @@ oc_k8s_objects_path: /src/k8s
 oc_ca_certs_path: /src/ca
 oc_dns_coredns: /src/coredns
 oc_images_base_url: docker-dev-kaas-virtual.mcp.mirantis.com
-oc_binary_base_url: binary-dev-kaas-virtual.mcp.mirantis.com
+oc_binary_base_url: https://binary-dev-kaas-virtual.mcp.mirantis.com
 oc_clients_helm_release: v3.16.1
 oc_clients_kubectl_release: v1.31.0
 oc_osdpl_live_migration_interface: ens3

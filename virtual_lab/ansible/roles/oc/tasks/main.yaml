@@ -33,6 +33,13 @@
   - oc_lvp
   delegate_to: initial_controller
 
+- name: Include metallb tasks
+  ansible.builtin.include_tasks:
+    file: metallb.yaml
+  tags:
+  - oc_metallb
+  delegate_to: initial_controller
+
 - name: Deploy openstack-controller
   ansible.builtin.include_tasks:
     file: openstack_controller.yaml

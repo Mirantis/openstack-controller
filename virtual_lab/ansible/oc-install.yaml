@@ -49,6 +49,10 @@
     include_role:
       name: oc
       tasks_from: lvp
+  - name: Setup Metallb
+    include_role:
+      name: oc
+      tasks_from: metallb
   - name: Setup openstack controller
     include_role:
       name: oc
