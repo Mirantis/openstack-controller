@@ -14,12 +14,25 @@ from openstack_controller.exporter import constants
 from openstack_controller.tests.functional import config
 from openstack_controller.tests.functional import data_utils, waiters
 
+CONF = config.Config()
+
 LOGGING_CONFIG = {
     "version": 1,
     "disable_existing_loggers": False,
+    "formatters": {
+        "context": {
+            "format": "%(asctime)s %(levelname)s %(testMethodName)s %(name)s (%(filename)s:%(lineno)s) %(message)s",
+            "datefmt": "%Y-%m-%d %H:%M:%S",
+        },
+    },
     "handlers": {
         "default": {
             "class": "logging.StreamHandler",
+        },
+        "file": {
+            "class": "logging.FileHandler",
+            "filename": CONF.LOG_PATH,
+            "formatter": "context",
         },
     },
     "loggers": {
@@ -34,7 +47,7 @@ LOGGING_CONFIG = {
         },
     },
     "root": {
-        "handlers": ["default"],
+        "handlers": ["default", "file"],
         "level": "DEBUG",
     },
 }
@@ -42,8 +55,6 @@ LOGGING_CONFIG = {
 logging.config.dictConfig(LOGGING_CONFIG)
 logging_old_factory = logging.getLogRecordFactory()
 LOG = logging.getLogger(__name__)
-
-CONF = config.Config()
 
 
 def suppress404(func):
