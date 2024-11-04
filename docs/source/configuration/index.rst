@@ -1,5 +1,0 @@
-=======================
-Configuration Reference
-=======================
-
-Configuration Reference
