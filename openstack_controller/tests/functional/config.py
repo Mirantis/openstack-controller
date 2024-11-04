@@ -1,6 +1,7 @@
 from openstack_controller import constants
 from openstack_controller import kube
 import json
+import os
 import pykube
 
 
@@ -18,6 +19,9 @@ class Config(metaclass=SingletonMeta):
     def __init__(self):
         self._osdpl = kube.get_osdpl()
 
+        self.LOG_PATH = os.getenv(
+            "LOG_PATH", "/var/lib/tests/parallel/pytest.log"
+        )
         self.CIRROS_TEST_IMAGE_NAME = self.get_cirros_image()
         self.UBUNTU_TEST_IMAGE_NAME = "Ubuntu-18.04"
         self.TEST_FLAVOR_SMALL_NAME = "m1.small"
