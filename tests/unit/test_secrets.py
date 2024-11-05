@@ -343,6 +343,7 @@ def test_galera_secret(mock_name, mock_password, mock_secret_data, mock_save):
         "sst": creds_b64,
         "exporter": creds_b64,
         "audit": creds_b64,
+        "openssl_kek": "b3BlbnNzbGtlaw==",
     }
     galera_secret = secrets.GaleraSecret("ns")
     galera_secret.ensure()
@@ -355,10 +356,11 @@ def test_galera_secret(mock_name, mock_password, mock_secret_data, mock_save):
         exporter=system_creds,
         audit=system_creds,
         backup=system_creds,
+        openssl_kek="opensslkek",
     )
 
     mock_name.assert_called_with(prefix="backup", length=8)
-    mock_password.assert_called_with(length=32)
+    mock_password.assert_called_with(length=64)
     mock_secret_data.assert_called_with("ns", galera_secret.secret_name)
 
     assert mock_save.call_args[0][0] == expected
@@ -384,6 +386,7 @@ def test_galera_secret_new_password(
         "exporter": creds_b64,
         "audit": creds_b64,
         "backup": creds_b64,
+        "openssl_kek": "b3BlbnNzbGtlaw==",
     }
     galera_secret = secrets.GaleraSecret("ns")
     actual = galera_secret.get()
@@ -404,6 +407,7 @@ def test_galera_secret_new_password(
         exporter=new_creds,
         audit=old_creds,
         backup=old_creds,
+        openssl_kek="opensslkek",
     )
 
     mock_secret_data.assert_called_once_with("ns", galera_secret.secret_name)
@@ -431,6 +435,7 @@ def test_galera_secret_new_credentials(
         "exporter": creds_b64,
         "audit": creds_b64,
         "backup": creds_b64,
+        "openssl_kek": "b3BlbnNzbGtlaw==",
     }
     galera_secret = secrets.GaleraSecret("ns")
     actual = galera_secret.secret_class.to_json(galera_secret.get())
@@ -448,6 +453,7 @@ def test_galera_secret_new_credentials(
         exporter=new_creds,
         audit=old_creds,
         backup=old_creds,
+        openssl_kek="opensslkek",
     )
 
     mock_secret_data.assert_called_once_with("ns", galera_secret.secret_name)

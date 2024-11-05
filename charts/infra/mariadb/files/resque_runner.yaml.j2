@@ -75,6 +75,10 @@ spec:
           readOnly: true
         - mountPath: /var/lib/mysql
           name: mysql-data
+        - mountPath: /etc/mysql/backup-kek
+          name: mariadb-secrets
+          subPath: openssl_kek
+          readOnly: true
   restartPolicy: Never
   serviceAccount: {{ runner_service_account }}
   serviceAccountName: {{ runner_service_account }}

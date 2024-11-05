@@ -546,6 +546,14 @@ properties:
                           conf: <rclone opts dictionary>
                       Currently configuration of only 1 remote is allowed.
                     additionalProperties: true
+              encryption:
+                type: object
+                additionalProperties: false
+                properties:
+                  enabled:
+                    type: boolean
+                    description: Whether to encrypt backup content.
+
       telemetry:
         type: object
         additionalProperties: false

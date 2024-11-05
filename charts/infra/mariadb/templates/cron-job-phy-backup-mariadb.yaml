@@ -151,6 +151,8 @@ spec:
                 - {{ printf "%s:%s" .Values.conf.phy_backup.sync_remote.remote .Values.conf.phy_backup.sync_remote.path }}
                 {{- end }}
               env:
+                - name: MARIADB_OPENSSL_ENCRYPTION
+                  value: {{ .Values.conf.phy_backup.openssl_encryption | quote }}
                 - name: MARIADB_BACKUPS_TO_KEEP
                   value: {{ .Values.conf.phy_backup.backups_to_keep | quote }}
                 - name: MARIADB_FULL_BACKUP_CYCLE
@@ -223,6 +225,10 @@ spec:
                   name: mysql-data
                 - mountPath: /var/backup
                   name: mysql-backup
+                - mountPath: /etc/mysql/backup-kek
+                  name: mariadb-secrets
+                  subPath: openssl_kek
+                  readOnly: true
           restartPolicy: Never
           serviceAccount: {{ $serviceAccountName }}
           serviceAccountName: {{ $serviceAccountName }}

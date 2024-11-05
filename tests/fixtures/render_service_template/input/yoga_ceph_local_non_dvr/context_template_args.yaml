@@ -134,6 +134,7 @@ database:
     sst:
       password: RbLblzhS7yNE8WQ4nY829uRQpvTegI87
       username: sstybw
+    openssl_kek: opensslkek
 dns:
   credentials: &credentials_dns
   - database:

@@ -27,6 +27,8 @@ spec:
             enabled: true
             remote: ceph_mariadb
             path: "cephbucket/backups"
+          openssl_encryption: false
+          openssl_kek: "opensslkek"
       endpoints:
         cluster_domain_suffix: cluster.local
         oslo_db:

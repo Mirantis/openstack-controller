@@ -16,6 +16,8 @@ spec:
         phy_backup:
           backup_type: incremental
           backend: pv_nfs
+          openssl_encryption: false
+          openssl_kek: "opensslkek"
       endpoints:
         cluster_domain_suffix: cluster.local
         oslo_db:
