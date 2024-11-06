@@ -1,8 +1,8 @@
 import logging
+import unittest
 
 from openstack_controller.tests.functional import base, config
-from openstack_controller import settings
-from openstack_controller import kube
+from openstack_controller import settings, kube, constants
 
 from parameterized import parameterized
 
@@ -36,6 +36,18 @@ def health_check_custom_name_func(testcase_func, param_num, param):
 
 
 class HealthFunctionalTestCase(base.BaseFunctionalTestCase):
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        openstack_version = cls.osdpl.obj["spec"]["openstack_version"]
+        if (
+            constants.OpenStackVersion[openstack_version]
+            < constants.OpenStackVersion["yoga"]
+        ):
+            raise unittest.SkipTest(
+                "Skip health probe checking for releases lower than Yoga"
+            )
 
     @parameterized.expand(
         get_objects_for_test,
