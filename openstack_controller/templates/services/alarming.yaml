@@ -142,4 +142,26 @@ spec:
         db_purge:
           enabled: {{ aodh_db_cleanup.enabled }}
           cron: {{ aodh_db_cleanup.get('schedule', '1 6 * * 1') }}
+  {%- if OSVer[spec.openstack_version] < OSVer.yoga %}
+      pod:
+        probes:
+          evaluator:
+            evaluator:
+              readiness:
+                enabled: false
+              liveness:
+                enabled: false
+          listener:
+            listener:
+              readiness:
+                enabled: false
+              liveness:
+                enabled: false
+          notifier:
+            notifier:
+              readiness:
+                enabled: false
+              liveness:
+                enabled: false
+  {%- endif %}
 {%- endif %}
