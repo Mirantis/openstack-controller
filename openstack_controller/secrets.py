@@ -143,6 +143,8 @@ class GaleraCredentials(Serializer):
     exporter: OSSytemCreds
     audit: OSSytemCreds
     backup: OSSytemCreds
+    # NOTE(vsaienko): the rotation is not yet implemented
+    openssl_kek: str
 
 
 @dataclass
@@ -795,6 +797,7 @@ class GaleraSecret(Secret):
             exporter=generate_credentials("exporter", 8),
             audit=generate_credentials("audit", 8),
             backup=generate_credentials("backup", 8),
+            openssl_kek=generate_password(length=64),
         )
 
 

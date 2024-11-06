@@ -22,24 +22,25 @@ cat << EOF
     |       |-- 2020-07-30_10-03-37
 
     Usage:
-      backup [--mariadb-host=<host>]           - ip address or host name of mariadb server (default localhost)
-             [--required-space-ratio=<number>] - is a multiplier (floating number e.g 1.2) for predicting space needed
-                                                 to create backup and then to do a restore keeping uncompressed backup files
-                                                 on the same filesystem as compressed ones. To estimate how big REQUIRED_SPACE_RATIO the next
-                                                 formula can be used:
-                                                   size of (1 uncompressed full backup + all related incremental uncompressed backups + 1
-                                                   full compressed backup) in KB =< (DB_SIZE * REQUIRED_SPACE_RATIO) in KB
-                                                 (default 1.2)
+      backup [--mariadb-host=<host>]             - ip address or host name of mariadb server (default localhost)
+             [--required-space-ratio=<number>]   - is a multiplier (floating number e.g 1.2) for predicting space needed
+                                                   to create backup and then to do a restore keeping uncompressed backup files
+                                                   on the same filesystem as compressed ones. To estimate how big REQUIRED_SPACE_RATIO the next
+                                                   formula can be used:
+                                                     size of (1 uncompressed full backup + all related incremental uncompressed backups + 1
+                                                     full compressed backup) in KB =< (DB_SIZE * REQUIRED_SPACE_RATIO) in KB
+                                                   (default 1.2)
 
-             [--target-dir=<path>]             - directory where to save backup e.g base/2020-07-30_10-00-07 or incr/2020-07-30_10-00-17/2020-07-30_10-00-36
+             [--target-dir=<path>]               - directory where to save backup e.g base/2020-07-30_10-00-07 or incr/2020-07-30_10-00-17/2020-07-30_10-00-36
 
 
-             [--incremental-base-dir=<path>]   - directory to take info about base backup, used only in case of incremental backup e.g base/2020-07-30_10-00-07
-                                                 or incr/2020-07-30_10-00-17/2020-07-30_10-00-36
+             [--incremental-base-dir=<path>]     - directory to take info about base backup, used only in case of incremental backup e.g base/2020-07-30_10-00-07
+                                                   or incr/2020-07-30_10-00-17/2020-07-30_10-00-36
 
-             [--mariadb-client-conf=<path>]    - path on file system to file with mysql client settings (user, password) (default /etc/mysql/mariabackup_user.cnf)
+             [--mariadb-client-conf=<path>]      - path on file system to file with mysql client settings (user, password) (default /etc/mysql/mariabackup_user.cnf)
 
-             [--validate=(True|False)]         - Whether to run just validation or make a backup
+             [--validate=(True|False)]           - Whether to run just validation or make a backup
+             [--openssl-encryption=(True|False)] - Whether to encrypt backup stream with openssl encryption
 
       restore --backup-name=<name>                      - (required) name of directory with full backup to restore e.g 2020-07-29_10-31-52, all
                                                           related incremental backups also have full backup name in the path. In order to restore
@@ -194,6 +195,11 @@ case $OPERATION in
             check_optional_arg "${VALIDATE}" "(^True$|^False$)"
             shift
             ;;
+            --openssl-encryption=*)
+            OPENSSL_ENCRYPTION="${i#*=}"
+            check_optional_arg "${OPENSSL_ENCRYPTION}" "(^True$|^False$)"
+            shift
+            ;;
             *)
             help
             die $LINENO "Unsupported backup option"
@@ -253,6 +259,10 @@ function set_global_variables(){
     BASEBACKDIR="${BACKDIR}/base"
     INCRBACKDIR="${BACKDIR}/incr"
     START=$(date +%s)
+    OPENSSL_ENCRYPTION=${OPENSSL_ENCRYPTION:-"False"}
+    OPENSSL_KEK_FILE=${OPENSSL_KEK_FILE:-"/etc/mysql/backup-kek"}
+    OPENSSL_DEK_FILE_NAME="dek.enc"
+    BACKUP_STREAM_FILENAME="backup.stream.gz"
 
     if [[ $OPERATION == 'backup' ]]; then
         MARIADB_HOST=${MARIADB_HOST:-localhost}
@@ -275,7 +285,7 @@ function set_global_variables(){
             local incr_dirs
             local incr_parent_path="${INCRBACKDIR}/${TARGET_BASE_BACKUP_NAME}"
             [[ -d "${incr_parent_path}" ]] || die $LINENO "Incremental backups parent directory ${incr_parent_path} not found"
-            incr_dirs=$(find ${incr_parent_path} -name backup.stream.gz | xargs dirname | sort -n)
+            incr_dirs=$(find ${incr_parent_path} -name ${BACKUP_STREAM_FILENAME} | xargs dirname | sort -n)
             local target_incr_backup_path="${incr_parent_path}/${TARGET_INCR_BACKUP_NAME}"
             local num
 
@@ -320,7 +330,14 @@ function run_backup() {
 
     mkdir -p "${TARGET_PATH}"
 
-    $BACKCMD $BACKUP_OPTIONS | gzip > "${TARGET_PATH}/backup.stream.gz"
+    if [[ "${OPENSSL_ENCRYPTION}" == "True" ]]; then
+        openssl rand -hex 32 > ${TARGET_PATH}/${OPENSSL_DEK_FILE_NAME}.plain
+        $BACKCMD $BACKUP_OPTIONS | gzip |openssl enc -aes-256-cbc -pbkdf2 -pass file:${TARGET_PATH}/${OPENSSL_DEK_FILE_NAME}.plain > "${TARGET_PATH}/${BACKUP_STREAM_FILENAME}"
+        openssl enc -aes-256-cbc -pbkdf2 -pass file:${OPENSSL_KEK_FILE} -in ${TARGET_PATH}/${OPENSSL_DEK_FILE_NAME}.plain -out ${TARGET_PATH}/${OPENSSL_DEK_FILE_NAME}
+        rm -f ${TARGET_PATH}/${OPENSSL_DEK_FILE_NAME}.plain
+    else
+        $BACKCMD $BACKUP_OPTIONS | gzip > "${TARGET_PATH}/${BACKUP_STREAM_FILENAME}"
+    fi
     # backup original grastate.dat to make sure that restore will be done correctly,
     # xtrabackup_galera_info doesn't contain all fields from grastate.dat
     cp /var/lib/mysql/grastate.dat "${TARGET_PATH}/"
@@ -329,26 +346,29 @@ function run_backup() {
 
 function decompress() {
     local dst="${1}/unarchieved"
-    mkdir "${dst}"
-    zcat "${1}/backup.stream.gz" | mbstream -x -C "${dst}"
+    if [[ -d ${dst} ]]; then
+        echo "Unarchive directory ${dst} exist. Wiping it."
+        rm -rf ${dst}/*
+    fi
+    mkdir -p "${dst}"
+    if file "${1}/${BACKUP_STREAM_FILENAME}" |grep openssl; then
+        openssl enc -d -aes-256-cbc -pbkdf2 -pass file:${OPENSSL_KEK_FILE} -in "$1/${OPENSSL_DEK_FILE_NAME}" > "$1/${OPENSSL_DEK_FILE_NAME}.plain"
+        openssl enc -d -aes-256-cbc -pbkdf2 -pass file:"$1/${OPENSSL_DEK_FILE_NAME}.plain" -in "${1}/${BACKUP_STREAM_FILENAME}" |gzip -d| mbstream -x -C "${dst}"
+        rm -f "$1/${OPENSSL_DEK_FILE_NAME}.plain"
+    else
+        zcat "${1}/${BACKUP_STREAM_FILENAME}" | mbstream -x -C "${dst}"
+    fi
 }
 
 function unarchieve_backups() {
-    local threads
-    local dirs
-    threads="1"
-    dirs="${TARGET_BASE_BACKUP_DIR}"
-    # only parallelism up to 8 is allowed for decompressing, to avoid risk of extra high load during
-    # decompress
-    export -f decompress
-    if [[ "${TARGET_INCR_BACKUP_DIRS}" ]]; then
-        threads=$(( threads + $(echo "${TARGET_INCR_BACKUP_DIRS}" | wc -l) ))
-        if [[ $threads -gt 8 ]]; then
-            threads=8
-        fi
-        dirs="${dirs}\n${TARGET_INCR_BACKUP_DIRS}"
+    for dir in ${TARGET_BASE_BACKUP_DIR}; do
+        decompress $dir
+    done
+    if [[ -n "${TARGET_INCR_BACKUP_DIRS}" ]]; then
+        for dir in ${TARGET_INCR_BACKUP_DIRS}; do
+            decompress $dir
+        done
     fi
-    echo -e "${dirs}" | xargs -n 1 -P ${threads} -I {} bash -c 'set -ex; decompress "$@"' _ {}
 }
 
 function prepare_backup_for_restore(){

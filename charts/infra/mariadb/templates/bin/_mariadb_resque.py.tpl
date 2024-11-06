@@ -169,9 +169,11 @@ def login():
     return client
 
 
-def get_env_var(env_var):
+def get_env_var(env_var, default=None):
     if env_var in os.environ:
         return os.environ[env_var]
+    if default is not None:
+        return default
 
     logger.critical(f"environment variable {env_var} not set")
     raise RuntimeError("FATAL")
@@ -266,6 +268,7 @@ class Settings:
         self.incr_back_path = f"{self.back_path}/incr"
         self.backup_hash_configmap = get_env_var("MARIADB_BACKUP_HASH_CONFIGMAP")
         self.backup_hash_algo = "md5"
+        self.openssl_encryption = get_env_var("MARIADB_OPENSSL_ENCRYPTION", "False").lower() == "true"
 
         # backup settings
         if operation == "backup":
@@ -678,7 +681,8 @@ def get_operation_cmd_args(operation, **kwargs):
             "incremental_base_dir",
             "mariadb_host",
             "required_space_ratio",
-            "validate"
+            "validate",
+            "openssl_encryption"
         ],
         "restore": ["backup_name", "validate"],
         "cleanup": ["cleanup_unarchieved_data", "cleanup_mysql_data"]
@@ -773,6 +777,7 @@ def run_mariadb_operation(operation, timeout, **kwargs):
             runner_node_selector=kwargs["runner_node_selector"],
             runner_service_account=kwargs["runner_service_account"],
             runner_image=kwargs["runner_image"],
+            openssl_encryption=kwargs["openssl_encryption"],
         )
         data = yaml.safe_load(text)
         Pod(K8S_API, data).create()

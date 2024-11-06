@@ -508,6 +508,8 @@ conf:
       enabled: false
       # remote: remote1
       # path: testbucket/path/to/dir
+    openssl_encryption: false
+    openssl_kek: '45dcb3a162b5929f2778d130cc0abf57e8f7c1e7d847ce22d50d34460c00274d'
   phy_restore:
     enabled: true
     backup_name: ""

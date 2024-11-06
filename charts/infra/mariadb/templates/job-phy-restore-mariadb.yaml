@@ -229,6 +229,10 @@ spec:
               name: mysql-data
             - mountPath: /var/backup
               name: mysql-backup
+            - mountPath: /etc/mysql/backup-kek
+              name: mariadb-secrets
+              subPath: openssl_kek
+              readOnly: true
       restartPolicy: Never
       serviceAccount: {{ $serviceAccountName }}
       serviceAccountName: {{ $serviceAccountName }}
