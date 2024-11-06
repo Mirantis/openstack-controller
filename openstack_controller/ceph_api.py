@@ -55,18 +55,9 @@ class OSPoolCreds:
     creds: PoolCreds
 
 
-class DeviceClass(Enum):
-    hdd = auto()
-    hdd_large = auto()
-    ssd = auto()
-    ssd_large = auto()
-    nvme = auto()
-    any = auto()
-
-
 @dataclass
 class PoolDescription:
-    device_class: DeviceClass
+    device_class: str
     role: PoolRole
     name: str
 
@@ -132,9 +123,7 @@ def _os_ceph_params_to_secret(params: OSCephParams) -> Dict[str, str]:
     for service in params.services:
         pools: List[str] = [service.key_name, service.key]
         for pool in service.pools:
-            pools.append(
-                f"{pool.name}:{pool.role.name}:{pool.device_class.name}"
-            )
+            pools.append(f"{pool.name}:{pool.role.name}:{pool.device_class}")
         data[service.user.name] = to_base64(";".join(pools))
 
     return data
@@ -171,7 +160,7 @@ def _os_ceph_params_from_secret(secret: Dict[str, str]) -> OSCephParams:
                 PoolDescription(
                     name=name,
                     role=PoolRole[role],
-                    device_class=DeviceClass[dev_cls],
+                    device_class=dev_cls,
                 )
             )
 
