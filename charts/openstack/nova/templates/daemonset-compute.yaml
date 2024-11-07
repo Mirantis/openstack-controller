@@ -195,7 +195,7 @@ spec:
               value: "/etc/nova/certs/ca.crt"
 {{- end }}
 {{ dict "envAll" $envAll "component" "compute" "container" "compute" "type" "liveness" "probeTemplate" (list $envAll "liveness" | include "novaComputeProbeTemplate" | fromYaml) | include "helm-toolkit.snippets.kubernetes_probe" | indent 10 }}
-{{ dict "envAll" $envAll "component" "compute" "container" "compute" "type" "readiness" "probeTemplate" (list $envAll "liveness" | include "novaComputeProbeTemplate" | fromYaml) | include "helm-toolkit.snippets.kubernetes_probe" | indent 10 }}
+{{ dict "envAll" $envAll "component" "compute" "container" "compute" "type" "readiness" "probeTemplate" (list $envAll "readiness" | include "novaComputeProbeTemplate" | fromYaml) | include "helm-toolkit.snippets.kubernetes_probe" | indent 10 }}
           command:
             - /tmp/nova-compute.sh
           terminationMessagePath: /var/log/termination-log
