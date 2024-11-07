@@ -1,5 +1,0 @@
-==================
-Installation Guide
-==================
-
-Installation Guide
