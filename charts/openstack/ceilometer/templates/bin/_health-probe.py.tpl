@@ -36,6 +36,7 @@ import glob
 import hashlib
 import json
 import logging
+import libvirt
 import os
 import psutil
 import socket
@@ -43,16 +44,25 @@ import sys
 
 from six.moves.urllib import parse as urlparse
 
-rpc_timeout = int(os.getenv('RPC_PROBE_TIMEOUT', '60'))
-rpc_retries = int(os.getenv('RPC_PROBE_RETRIES', '2'))
 rabbit_port = 5672
-mysql_port = 3306
+etcd_port = 2379
 tcp_established = "ESTABLISHED"
 tcp_syn = "SYN_SENT"
 OSLO_CONF_OBJECT = None
 
 logging.basicConfig(level=logging.INFO, stream=sys.stdout)
 LOG = logging.getLogger(__file__)
+
+
+def virt_domains_defined(uri=None):
+    try:
+        conn = libvirt.openReadOnly(uri)
+    except Exception as ex:
+        LOG.info(f"Failed to connect to libvirt due to {ex}.")
+        return False
+
+    if conn.listDomainsID():
+       return True
 
 
 def get_rabbitmq_ports():
@@ -71,64 +81,20 @@ def get_rabbitmq_ports():
                  "RabbitMQ ports: %s", message)
     return list(rabbitmq_ports)
 
-def get_jobboard_ports():
+
+def get_coordination_port():
+    "Get coordintation port or etcd default port"
     from oslo_config import cfg
 
-    grp = cfg.OptGroup("task_flow")
-    opts = [cfg.IntOpt("jobboard_backend_port"),
-            cfg.StrOpt("jobboard_backend_driver"),
-            cfg.ListOpt("jobboard_backend_hosts"),
-            cfg.StrOpt("jobboard_redis_sentinel")]
-    OSLO_CONF_OBJECT.register_group(grp)
-    OSLO_CONF_OBJECT.register_opts(opts, group=grp)
-    task_flow_cfg = OSLO_CONF_OBJECT.task_flow
-    jobboard_ports = []
-    jobboard_port = task_flow_cfg.jobboard_backend_port
-    jobboard_host = task_flow_cfg.jobboard_backend_hosts[0]
-    jobboard_ports.append(jobboard_port)
-
-    if task_flow_cfg.jobboard_backend_driver == "redis_taskflow_driver":
-        from redis.sentinel import Sentinel
-        sentinel_redis_master = OSLO_CONF_OBJECT.task_flow.jobboard_redis_sentinel
-        # by default socket timeout is none, to avoid indefinite hanging, set it to 5 seconds
-        sentinel = Sentinel([(jobboard_host, jobboard_port)], socket_timeout=5)
-        redis_port = sentinel.discover_master(sentinel_redis_master)[1]
-        jobboard_ports.append(redis_port)
-
-    return jobboard_ports
-
-def get_database_ports():
-    "Get Database ports"
-    from oslo_db import options as db_opts
-
-    db_opts.set_defaults(OSLO_CONF_OBJECT)
-    connection = urlparse.urlparse(OSLO_CONF_OBJECT.database.connection)
-    if not connection:
-        LOG.info("Skipping probe, can't find database ports")
-        return True
-    host = connection.netloc.split('@')[1]
-    split_host = host.split(':')
-    port = split_host[1] if len(split_host) > 1 else 3306
-    return [int(port)]
-
-
-def get_libvirt_ports():
-    "Get Libvirt ports"
-    from oslo_config import cfg
-
-    grp = cfg.OptGroup('libvirt')
-    opts = [cfg.StrOpt('connection_uri')]
+    grp = cfg.OptGroup('coordination')
+    opts = [cfg.StrOpt('backend_url')]
     OSLO_CONF_OBJECT.register_group(grp)
     OSLO_CONF_OBJECT.register_opts(opts, group=grp)
 
-    connection_uri = OSLO_CONF_OBJECT.libvirt.connection_uri
+    connection_uri = OSLO_CONF_OBJECT.coordination.backend_url
     connection = urlparse.urlparse(connection_uri)
 
-    default_port = 16509
-    if "qemu+tls" in connection.scheme:
-        default_port = 16514
-
-    return [int(connection.port or default_port)]
+    return [int(connection.port or etcd_port)]
 
 
 def is_connected_to(process_name, ports):
@@ -145,9 +111,7 @@ def is_connected_to(process_name, ports):
                         continue
                     if port in ports and status in [tcp_established, tcp_syn]:
                         return True
-        # NOTE(vsaienko): when running with hostpids and under root we see processes from
-        # other containers but do not have access to them. Ignore AccessDenied error.
-        except (psutil.NoSuchProcess, psutil.AccessDenied):
+        except psutil.NoSuchProcess:
             continue
 
 
@@ -165,26 +129,6 @@ def hash_config_dirs(hasher, args):
                 hasher.update(f.read())
 
 
-def check_connect(path):
-    connections = psutil.net_connections('unix')
-    addrs = [i.laddr for i in connections]
-    return all(i in addrs for i in path)
-
-def check_path_extsts(path):
-    for p in path:
-        if not os.path.exists(p):
-            return False
-    return True
-
-def is_k8s_svc_ip_changed(k8s_svcs):
-    for svc in k8s_svcs:
-        env_prefix = svc.split('.')[0].replace('-', '_')
-        svc_env = (env_prefix + "_SERVICE_HOST").upper()
-        old_ip=os.environ.get(svc_env)
-        new_ip = socket.gethostbyname(svc)
-        if old_ip != new_ip:
-            return True
-
 def parse_args():
     parser = argparse.ArgumentParser(description="Generic health probe")
     parser.add_argument(
@@ -194,10 +138,7 @@ def parse_args():
         "--process-name", required=True,
         help="The name of the process to check.")
     parser.add_argument(
-        "--check", choices=["database_sockets", "jobboard_sockets",
-                            "rabbitmq_sockets", "unix_sockets",
-                            "libvirt_connection", "tcp_sockets",
-                            "k8s_svc_ip_change"],
+        "--check", choices=["rabbitmq_sockets"],
         help="The type of checks to perform.", action="append")
     parser.add_argument(
         "--config-file", help="Path to the service configfile(s).",
@@ -207,12 +148,6 @@ def parse_args():
         action="append", default=[])
     parser.add_argument(
         "--path", help="Path to the service socket file.",
-        action="append", default=[])
-    parser.add_argument(
-        "--tcp-ports", help="TCP ports check for established sockets.",
-        action="append", type=int, default=[])
-    parser.add_argument(
-        "--k8s-svcs", help="Names of K8s SVC to check for IP changes.",
         action="append", default=[])
     return parser.parse_args()
 
@@ -253,57 +188,21 @@ if __name__ == "__main__":
     except Exception:
         pass
 
-    if 'database_sockets' in args.check:
-        if not cached_ports.get("database_ports"):
-            set_oslo_conf_object(args)
-            cached_ports["conf_hash"] = None
-            cached_ports["database_ports"] = get_database_ports()
-        if not is_connected_to(
-                args.process_name, cached_ports["database_ports"]):
-            LOG.error("Connection to database is not established.")
-            sys.exit(1)
-    if 'jobboard_sockets' in args.check:
-        if not cached_ports.get("jobboard_ports"):
-            set_oslo_conf_object(args)
-            cached_ports["conf_hash"] = None
-            cached_ports["jobboard_ports"] = get_jobboard_ports()
-        for port in cached_ports["jobboard_ports"]:
-            if not is_connected_to(args.process_name, [port]):
-                LOG.error("Connection to jobboard port %s is not established.", port)
-                sys.exit(1)
-    if 'rabbitmq_sockets' in args.check:
+    if 'rabbitmq_sockets' in args.check and virt_domains_defined():
+        set_oslo_conf_object(args)
         if not cached_ports.get("rabbitmq_ports"):
-            set_oslo_conf_object(args)
             cached_ports["conf_hash"] = None
             cached_ports["rabbitmq_ports"] = get_rabbitmq_ports()
+        if not cached_ports.get("coordination_port"):
+            cached_ports["conf_hash"] = None
+            cached_ports["coordination_port"] = get_coordination_port()
         if not is_connected_to(
                 args.process_name, cached_ports["rabbitmq_ports"]):
             LOG.error("Connection to rabbitmq is not established.")
             sys.exit(1)
-    if 'unix_socket' in args.check:
-        if not args.path:
-            LOG.error("Socket path is not set. Could not verify.")
-            sys.exit(1)
-        if not check_connect(args.path):
-            LOG.error("Socket %s is not connected.", args.path)
-            sys.exit(1)
-    if 'tcp_sockets' in args.check:
-         if not is_connected_to(
-                args.process_name, args.tcp_ports):
-            LOG.error("Socket %s is not connected.", args.path)
-            sys.exit(1)
-    if 'libvirt_connection' in args.check:
-        if not cached_ports.get("libvirt_port"):
-            set_oslo_conf_object(args)
-            cached_ports["conf_hash"] = None
-            cached_ports["libvirt_port"] = get_libvirt_ports()
         if not is_connected_to(
-                args.process_name, cached_ports["libvirt_port"]):
-            LOG.error("Connection to libvirt is not established.")
-            sys.exit(1)
-    if 'k8s_svc_ip_change' in args.check:
-        if is_k8s_svc_ip_changed(args.k8s_svcs):
-            LOG.error("K8S SVC IP was changed.")
+                args.process_name, cached_ports["coordination_port"]):
+            LOG.error("Connection to coordination service is not established.")
             sys.exit(1)
     if not cached_ports.get("conf_hash"):
         cached_ports["conf_hash"] = conf_hash

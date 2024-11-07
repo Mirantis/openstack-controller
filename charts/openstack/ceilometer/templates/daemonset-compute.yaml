@@ -11,23 +11,33 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */}}
-
-{{- define "ceilometerProbeTemplate" }}
-{{- $probeType := . }}
+{{- define "ceilometerHealthManagerReadynessProbeTemplate" }}
 exec:
   command:
     - python
     - /tmp/health-probe.py
     - --config-file
     - /etc/ceilometer/ceilometer.conf
+    - --probe-type
+    - readiness
     - --process-name
     - ceilometer-polling
-    - --probe-type
-    - {{ $probeType }}
     - --check
-    - unix_sockets
-    - --path
-    - /run/libvirt/libvirt-sock-ro
+    - rabbitmq_sockets
+{{- end }}
+{{- define "ceilometerHealthManagerLivenessProbeTemplate" }}
+exec:
+  command:
+    - python
+    - /tmp/health-probe.py
+    - --config-file
+    - /etc/ceilometer/ceilometer.conf
+    - --probe-type
+    - liveness
+    - --process-name
+    - ceilometer-polling
+    - --check
+    - rabbitmq_sockets
 {{- end }}
 
 {{- define "ceilometer.ceilometer-compute.daemonset" }}
@@ -82,8 +92,8 @@ spec:
 {{ dict "envAll" $envAll "application" "ceilometer_compute" "container" "ceilometer_compute" | include "helm-toolkit.snippets.kubernetes_container_security_context" | indent 10 }}
           command:
             - /tmp/ceilometer-compute.sh
-{{ dict "envAll" $envAll "component" "ceilometer_compute_agent" "container" "ceilometer_compute_agent" "type" "liveness" "probeTemplate" (include "ceilometerProbeTemplate" "liveness" | fromYaml) | include "helm-toolkit.snippets.kubernetes_probe" | indent 10 }}
-{{ dict "envAll" $envAll "component" "ceilometer_compute_agent" "container" "ceilometer_compute_agent" "type" "readiness" "probeTemplate" (include "ceilometerProbeTemplate" "readiness" | fromYaml) | include "helm-toolkit.snippets.kubernetes_probe" | indent 10 }}
+{{ dict "envAll" $envAll "component" "ceilometer_compute_agent" "container" "ceilometer_compute_agent" "type" "liveness" "probeTemplate" (include "ceilometerHealthManagerLivenessProbeTemplate" $envAll | fromYaml) | include "helm-toolkit.snippets.kubernetes_probe" | indent 10 }}
+{{ dict "envAll" $envAll "component" "ceilometer_compute_agent" "container" "ceilometer_compute_agent" "type" "readiness" "probeTemplate" (include "ceilometerHealthManagerReadynessProbeTemplate" $envAll | fromYaml) | include "helm-toolkit.snippets.kubernetes_probe" | indent 10 }}
           volumeMounts:
 {{ dict "envAll" $envAll "objectType" "mountpoint" "secretPrefix" "ceilometer" | include "helm-toolkit.snippets.kubernetes_ssl_objects" | indent 12 }}
             - name: pod-tmp

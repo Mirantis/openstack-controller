@@ -12,22 +12,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */}}
 
-{{- define "centralProbeTemplate" }}
-{{- $probeType := . }}
-exec:
-  command:
-    - python
-    - /tmp/health-probe.py
-    - --config-file
-    - /etc/ceilometer/ceilometer.conf
-    - --process-name
-    - ceilometer-polling
-    - --probe-type
-    - {{ $probeType }}
-    - --check
-    - rabbitmq_sockets
-{{- end }}
-
 {{- if .Values.manifests.deployment_central }}
 {{- $envAll := . }}
 
@@ -74,8 +58,6 @@ spec:
 {{ tuple $envAll "ceilometer_central" | include "helm-toolkit.snippets.image" | indent 10 }}
 {{ dict "envAll" $envAll "application" "ceilometer_central" "container" "ceilometer_central" | include "helm-toolkit.snippets.kubernetes_container_security_context" | indent 10 }}
 {{ tuple $envAll $envAll.Values.pod.resources.central | include "helm-toolkit.snippets.kubernetes_resources" | indent 10 }}
-{{ dict "envAll" $envAll "component" "central" "container" "central" "type" "liveness" "probeTemplate" (include "centralProbeTemplate" "liveness" | fromYaml) | include "helm-toolkit.snippets.kubernetes_probe" | indent 10 }}
-{{ dict "envAll" $envAll "component" "central" "container" "central" "type" "readiness" "probeTemplate" (include "centralProbeTemplate" "readiness" | fromYaml) | include "helm-toolkit.snippets.kubernetes_probe" | indent 10 }}
           command:
             - /tmp/ceilometer-central.sh
           volumeMounts:
@@ -122,10 +104,6 @@ spec:
               subPath: {{ base .Values.conf.ceilometer.DEFAULT.log_config_append }}
               readOnly: true
             {{- end }}
-            - name: ceilometer-bin
-              mountPath: /tmp/health-probe.py
-              subPath: health-probe.py
-              readOnly: true
 {{ if $mounts_ceilometer_central.volumeMounts }}{{ toYaml $mounts_ceilometer_central.volumeMounts | indent 12 }}{{ end }}
       volumes:
 {{ dict "envAll" $envAll "objectType" "volume" "secretPrefix" "ceilometer" | include "helm-toolkit.snippets.kubernetes_ssl_objects" | indent 8 }}
