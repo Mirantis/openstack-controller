@@ -13,7 +13,7 @@ and then reacts to these changes by creating, updating, or deleting appropriate 
 
 ## Getting Help
 
-* File a bug: [https://github.com/Mirantis/openstack-operator/issues](https://github.com/Mirantis/openstack-operator/issues)
+* File a bug: [https://github.com/Mirantis/openstack-controller/issues](https://github.com/Mirantis/openstack-controller/issues)
 
 ## Developer: 
 
