@@ -483,6 +483,7 @@ instance-ha:
         username: testC7BY
   keystone_creds: {}
 shared-file-system:
+  is_ceph_enabled: false
   credentials: &credentials_shared-file-system
   - database:
       user:

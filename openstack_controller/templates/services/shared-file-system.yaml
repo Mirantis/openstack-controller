@@ -16,6 +16,30 @@
 {%- from 'macros/etcd3.j2' import get_etcd3_endpoint %}
 {%- set cadf_audit = spec.get('features', {}).get('logging', {}).get('cadf', {'enabled': false}) %}
 {%- set cadf_audit_driver = spec.get('features', {}).get('logging', {}).get('cadf', {}).get('driver', 'messagingv2') %}
+{%- set share_sts = {} %}
+{%- set share_backends = spec.get('features', {}).get('manila', {}).get('share', {}).get('backends', {}) %}
+
+{%- for sts_name, sts_opts in share_backends.items() %}
+{%-   if sts_opts.get('enabled', True) %}
+{%-     for backend in sts_opts['values']['conf']['manila']['DEFAULT']['enabled_share_backends'].split(',') %}
+{%-       set sts_backend_opts = sts_opts['values']['conf']['manila'][backend] %}
+{%-       set share_driver = sts_backend_opts['share_driver'] %}
+{%-       set opts = {} %}
+{%-       if share_driver == 'manila.share.drivers.cephfs.driver.CephFSDriver' %}
+{%-         do opts.update({'cephfs_auth_id': ceph.manila.username,
+                            'cephfs_protocol_helper_type': 'CEPHFS',
+                            'driver_handles_share_servers': false
+                          }) %}
+{%-       endif %}
+          {# merge default options and user provided options #}
+{%-       do opts.update(sts_backend_opts) %}
+          {# put result back into the values #}
+{%-       do sts_backend_opts.update(opts) %}
+{%-     endfor %}
+        {# overwrite default options by user defined #}
+{%-     do share_sts.update({sts_name: {'values': sts_opts['values']}}) %}
+{%-   endif %}
+{%-   endfor %}
 
 spec:
   releases:
@@ -45,6 +69,10 @@ spec:
           {{ image }}: {{ images[image] }}
         {%- endif %}
 {%- endfor %}
+      bootstrap:
+        share_types:
+          default:
+            driver_handles_share_servers: {{ not is_ceph_enabled }}
       endpoints:
         cluster_domain_suffix: {{ spec.internal_domain_name }}
 {% include 'base/_admin_identity.yaml' %}
@@ -98,10 +126,23 @@ spec:
             default: http
             public: https
       conf:
+{%- if is_ceph_enabled %}
+        ceph:
+          keyrings:
+            {{ ceph.manila.username }}:
+              key: {{ ceph.manila.keyring }}
+          config:
+            global:
+              mon_host: {{ ceph.mon_host }}
+{%- endif %}
         policy.d:
           01-controller-default.yaml: {{ service_policy }}
           02-custom.yaml: {{ spec.get("features", {}).get("policies", {}).get("manila", {}) }}
         manila:
+{%- if is_ceph_enabled %}
+          DEFAULT:
+            enabled_share_protocols: CEPHFS
+{%- endif %}
           keystone_authtoken:
             memcache_security_strategy: ENCRYPT
             memcache_secret_key: {{ credentials[0].memcached }}
@@ -141,6 +182,7 @@ spec:
         prometheus_exporter:
           rabbit_exporters: "overview,exchange,node"
   {%- endif %}
+  {%- if not share_backends %}
         standalone_backends:
           daemonset:
             conf:
@@ -157,9 +199,15 @@ spec:
                 path_to_private_key: /etc/manila/ssh/manila
               DEFAULT:
                 enabled_share_backends: generic
+  {%- endif %}
         logging:
           logger_manila:
             level: {{ spec.get('features', {}).get('logging', {}).get('manila', {}).get('level', 'INFO') }}
+  {%- if share_sts %}
+      overrides:
+        manila_share_sts:
+          {{ share_sts | toyaml | indent(10) }}
+  {%- endif %}
       jobs:
 {% include 'base/_ks_jobs.yaml' %}
         db_purge:
@@ -186,6 +234,7 @@ spec:
       manifests:
         secret_ca_bundle: true
         cron_job_db_purge: {{ manila_db_cleanup.enabled }}
-        daemonset_share: true
+        daemonset_share: {{ not share_backends }}
         service_instance_ssh_key: true
         network_policy: {{ spec.features.network_policies.enabled }}
+        ceph_conf: {{ is_ceph_enabled }}

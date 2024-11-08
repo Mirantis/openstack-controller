@@ -410,6 +410,7 @@ baremetal:
       password: KBecvsPZsWBFzDqYnevHWArm7tFycZKr
       username: neutronLeRjiDsyT
 shared-file-system:
+  is_ceph_enabled: false
   credentials: &credentials_shared-file-system
   - database:
       user:

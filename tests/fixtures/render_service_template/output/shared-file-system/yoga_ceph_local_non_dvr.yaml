@@ -3,6 +3,10 @@ spec:
   - chart: manila
     name: openstack-manila
     values:
+      bootstrap:
+        share_types:
+          default:
+            driver_handles_share_servers: true
       conf:
         aux_conf:
           policies:
@@ -242,6 +246,8 @@ spec:
         daemonset_share: True
         network_policy: True
         service_instance_ssh_key: True
+        ceph_conf: False
+        daemonset_share: True
       secrets:
         service_instance_ssh_key:
           private: 'MANILA TEST SSH PRIVATE KEY

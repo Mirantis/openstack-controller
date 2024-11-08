@@ -2204,12 +2204,37 @@ class Masakari(OpenStackService):
     available_releases = ["openstack-masakari-rabbitmq", "openstack-masakari"]
 
 
-class Manila(OpenStackService):
+class Manila(OpenStackServiceWithCeph):
     service = "shared-file-system"
     openstack_chart = "manila"
     available_releases = [
         "openstack-manila",
     ]
+
+    @property
+    def is_ceph_enabled(self):
+        manila_backends = utils.get_in(
+            self.mspec, ["features", "manila", "share", "backends"], {}
+        )
+        for opts in manila_backends.values():
+            if opts.get("enabled", True):
+                enabled_backends = utils.get_in(
+                    opts["values"],
+                    ["conf", "manila", "DEFAULT", "enabled_share_backends"],
+                    "",
+                ).split(",")
+                for backend in enabled_backends:
+                    driver = utils.get_in(
+                        opts["values"],
+                        ["conf", "manila", backend, "share_driver"],
+                        "",
+                    )
+                    if (
+                        driver
+                        == "manila.share.drivers.cephfs.driver.CephFSDriver"
+                    ):
+                        return True
+        return False
 
     def template_args(self):
         template_args = super().template_args()
