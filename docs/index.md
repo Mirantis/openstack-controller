@@ -15,7 +15,7 @@ and then reacts to these changes by creating, updating, or deleting appropriate 
 
 * File a bug: [https://github.com/Mirantis/openstack-controller/issues](https://github.com/Mirantis/openstack-controller/issues)
 
-## Developer: 
+## Developer
 
 * Contributing: [https://TODO]()
-* Reference Architecture:  [https://TODO]()
+* Reference Architecture:  [https://mirantis.github.io/openstack-controller](https://mirantis.github.io/openstack-controller)
