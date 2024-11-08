@@ -436,6 +436,47 @@ spec:
             - name: openstack-controller-etc
               mountPath: /etc/openstack-controller/logging.conf
               subPath: logging.conf
+        - name: configmaps
+          image: {{ tuple . .Values.image | include "getImageUrl" }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command:
+            - kopf
+            - run
+            - '-n'
+            - {{ .Values.osdpl.namespace }}
+            - '--standalone'
+            - '-m'
+            - openstack_controller.controllers.configmaps
+            - '-m'
+            - openstack_controller.controllers.probe
+            - '-L'
+            - 'http://0.0.0.0:32778/healthz'
+          env:
+            - name: OSCTL_HEARTBEAT_PEERING_OBJECT_NAME
+              value: openstack-controller.configmaps
+            {{- range $optionName, $optionValue := .Values.osdpl.settings.raw }}
+            - name: {{ $optionName }}
+              value: "{{ $optionValue }}"
+            {{- end }}
+{{ tuple . | include "openstack-controller.common_env" | indent 12 }}
+          livenessProbe:
+            exec:
+              command:
+                - curl
+                - http://127.0.0.1:32778/healthz
+            {{- toYaml .Values.osdpl.pod.controller.configmaps.liveness.params | nindent 12}}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          securityContext:
+            {{- toYaml .Values.osdpl.pod.controller.configmaps.security_context | nindent 12 }}
+          volumeMounts:
+            - name: os-clouds
+              mountPath: /etc/openstack/
+            - name: openstack-controller-config
+              mountPath: /etc/openstack-controller/conf.d/
+            - name: openstack-controller-etc
+              mountPath: /etc/openstack-controller/logging.conf
+              subPath: logging.conf
       volumes:
         - name: openstack-controller-config
           configMap:
