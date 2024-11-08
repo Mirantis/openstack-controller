@@ -282,6 +282,26 @@ pod:
             initialDelaySeconds: 0
             periodSeconds: 10
             timeoutSeconds: 5
+        liveness:
+          enabled: true
+          params:
+            initialDelaySeconds: 0
+            periodSeconds: 15
+            timeoutSeconds: 5
+    metricd:
+      metricd:
+        readiness:
+          enabled: true
+          params:
+            initialDelaySeconds: 0
+            periodSeconds: 30
+            timeoutSeconds: 5
+        liveness:
+          enabled: true
+          params:
+            initialDelaySeconds: 0
+            periodSeconds: 3600
+            timeoutSeconds: 5
   replicas:
     api: 1
   lifecycle:
