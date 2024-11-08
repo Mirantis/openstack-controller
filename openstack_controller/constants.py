@@ -192,6 +192,9 @@ class NodeRole(enum.Enum):
 OSCTL_SECRET_LABEL = ("openstack.lcm.mirantis.com/osdpl_secret", "true")
 TF_OST_DATA_LABEL = ("operator.tf.mirantis.com/ost_data_secret", "true")
 
+# The label we want to use on all resources that should trigger osdpl reload
+OSDPL_WATCH_LABEL = ("openstack.lcm.mirantis.com/watch", "true")
+
 KINDS_FOR_MANUAL_UPDATE = [
     "PersistentVolume",
     "PersistentVolumeClaim",

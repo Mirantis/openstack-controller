@@ -61,6 +61,10 @@ spec:
                     is watching for. Changin fields of this object will trigger update of
                     all children.
                   properties:
+                    configmaps:
+                      type: object
+                      x-kubernetes-preserve-unknown-fields: true
+                      description: Contains hash value of configmap for which we are watching for.
                     value_from:
                       type: object
                       properties:
