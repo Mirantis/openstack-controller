@@ -18,4 +18,4 @@ and then reacts to these changes by creating, updating, or deleting appropriate 
 ## Developer: 
 
 * Contributing: [https://TODO]()
-* Reference Architecture:  [https://TODO]()
+* Reference Architecture:  [https://mirantis.github.io/openstack-controller](https://mirantis.github.io/openstack-controller)
